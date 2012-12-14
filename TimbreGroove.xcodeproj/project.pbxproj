@@ -7,46 +7,96 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		572EB1FD16786C630062F290 /* Alex.png in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1E316786C630062F290 /* Alex.png */; };
+		572EB1FE16786C630062F290 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1E416786C630062F290 /* Default-568h@2x.png */; };
+		572EB1FF16786C630062F290 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1E516786C630062F290 /* Default.png */; };
+		572EB20016786C630062F290 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1E616786C630062F290 /* Default@2x.png */; };
+		572EB20116786C630062F290 /* faded.png in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1E716786C630062F290 /* faded.png */; };
+		572EB20216786C630062F290 /* audioProp.png in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1E916786C630062F290 /* audioProp.png */; };
+		572EB20316786C630062F290 /* mood.png in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1EA16786C630062F290 /* mood.png */; };
+		572EB20416786C630062F290 /* newModel.png in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1EB16786C630062F290 /* newModel.png */; };
+		572EB20516786C630062F290 /* photo.png in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1EC16786C630062F290 /* photo.png */; };
+		572EB20616786C630062F290 /* text.png in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1ED16786C630062F290 /* text.png */; };
+		572EB20716786C630062F290 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1EF16786C630062F290 /* InfoPlist.strings */; };
+		572EB20816786C630062F290 /* MainStoryboard_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1F016786C630062F290 /* MainStoryboard_iPad.storyboard */; };
+		572EB20916786C630062F290 /* MainStoryboard_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1F116786C630062F290 /* MainStoryboard_iPhone.storyboard */; };
+		572EB20F16786C630062F290 /* TGAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 572EB1FA16786C630062F290 /* TGAppDelegate.m */; };
+		572EB21016786C630062F290 /* TGViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 572EB1FC16786C630062F290 /* TGViewController.m */; };
+		572EB213167878FD0062F290 /* TGGraphNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 572EB212167878FD0062F290 /* TGGraphNode.m */; };
+		572EB21A16787AFF0062F290 /* TGShader.m in Sources */ = {isa = PBXBuildFile; fileRef = 572EB21916787AFF0062F290 /* TGShader.m */; };
+		572EB21F16788D170062F290 /* TGVertexBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = 572EB21E16788D170062F290 /* TGVertexBuffer.m */; };
+		572EB2261678BBCA0062F290 /* TGElement.m in Sources */ = {isa = PBXBuildFile; fileRef = 572EB2251678BBCA0062F290 /* TGElement.m */; };
+		572EB2291678BF740062F290 /* TGCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = 572EB2281678BF740062F290 /* TGCamera.m */; };
+		572EB2351679EAE40062F290 /* TGVariables.m in Sources */ = {isa = PBXBuildFile; fileRef = 572EB2341679EAE40062F290 /* TGVariables.m */; };
+		572EB27F167A9B160062F290 /* menus.plist in Resources */ = {isa = PBXBuildFile; fileRef = 572EB27E167A9B160062F290 /* menus.plist */; };
+		572EB286167AAC210062F290 /* BlueSquare.m in Sources */ = {isa = PBXBuildFile; fileRef = 572EB285167AAC210062F290 /* BlueSquare.m */; };
+		572EB28E167AB48D0062F290 /* Vanilla.m in Sources */ = {isa = PBXBuildFile; fileRef = 572EB28D167AB48C0062F290 /* Vanilla.m */; };
+		572EB290167AC0020062F290 /* fountain.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1F416786C630062F290 /* fountain.fsh */; };
+		572EB291167AC0020062F290 /* fountain.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1F516786C630062F290 /* fountain.vsh */; };
+		572EB292167AC0020062F290 /* hump.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1F616786C630062F290 /* hump.fsh */; };
+		572EB293167AC0020062F290 /* hump.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1F716786C630062F290 /* hump.vsh */; };
+		572EB294167AC0020062F290 /* vanilla.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 572EB282167AA9EC0062F290 /* vanilla.fsh */; };
+		572EB295167AC0020062F290 /* vanilla.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 572EB280167AA9D20062F290 /* vanilla.vsh */; };
 		57E874F816782894008243B2 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57E874F716782894008243B2 /* UIKit.framework */; };
 		57E874FA16782894008243B2 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57E874F916782894008243B2 /* Foundation.framework */; };
 		57E874FC16782894008243B2 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57E874FB16782894008243B2 /* CoreGraphics.framework */; };
 		57E874FE16782894008243B2 /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57E874FD16782894008243B2 /* GLKit.framework */; };
 		57E8750016782894008243B2 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57E874FF16782894008243B2 /* OpenGLES.framework */; };
-		57E8750616782894008243B2 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 57E8750416782894008243B2 /* InfoPlist.strings */; };
 		57E8750816782894008243B2 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E8750716782894008243B2 /* main.m */; };
-		57E8750C16782894008243B2 /* TGAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E8750B16782894008243B2 /* TGAppDelegate.m */; };
-		57E8750E16782894008243B2 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 57E8750D16782894008243B2 /* Default.png */; };
-		57E8751016782894008243B2 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 57E8750F16782894008243B2 /* Default@2x.png */; };
-		57E8751216782894008243B2 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 57E8751116782894008243B2 /* Default-568h@2x.png */; };
-		57E8751516782894008243B2 /* MainStoryboard_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 57E8751316782894008243B2 /* MainStoryboard_iPhone.storyboard */; };
-		57E8751816782894008243B2 /* MainStoryboard_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 57E8751616782894008243B2 /* MainStoryboard_iPad.storyboard */; };
-		57E8751A16782894008243B2 /* Shader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 57E8751916782894008243B2 /* Shader.fsh */; };
-		57E8751C16782894008243B2 /* Shader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 57E8751B16782894008243B2 /* Shader.vsh */; };
-		57E8751F16782894008243B2 /* TGViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E8751E16782894008243B2 /* TGViewController.m */; };
+		57E87526167829BB008243B2 /* Alex-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 57E87525167829BB008243B2 /* Alex-icon.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		572EB1E316786C630062F290 /* Alex.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Alex.png; sourceTree = "<group>"; };
+		572EB1E416786C630062F290 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
+		572EB1E516786C630062F290 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
+		572EB1E616786C630062F290 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
+		572EB1E716786C630062F290 /* faded.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = faded.png; sourceTree = "<group>"; };
+		572EB1E916786C630062F290 /* audioProp.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = audioProp.png; sourceTree = "<group>"; };
+		572EB1EA16786C630062F290 /* mood.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = mood.png; sourceTree = "<group>"; };
+		572EB1EB16786C630062F290 /* newModel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = newModel.png; sourceTree = "<group>"; };
+		572EB1EC16786C630062F290 /* photo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = photo.png; sourceTree = "<group>"; };
+		572EB1ED16786C630062F290 /* text.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = text.png; sourceTree = "<group>"; };
+		572EB1EF16786C630062F290 /* InfoPlist.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = InfoPlist.strings; sourceTree = "<group>"; };
+		572EB1F016786C630062F290 /* MainStoryboard_iPad.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = MainStoryboard_iPad.storyboard; sourceTree = "<group>"; };
+		572EB1F116786C630062F290 /* MainStoryboard_iPhone.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = MainStoryboard_iPhone.storyboard; sourceTree = "<group>"; };
+		572EB1F416786C630062F290 /* fountain.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = fountain.fsh; sourceTree = "<group>"; };
+		572EB1F516786C630062F290 /* fountain.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = fountain.vsh; sourceTree = "<group>"; };
+		572EB1F616786C630062F290 /* hump.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = hump.fsh; sourceTree = "<group>"; };
+		572EB1F716786C630062F290 /* hump.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; lineEnding = 0; path = hump.vsh; sourceTree = "<group>"; };
+		572EB1F916786C630062F290 /* TGAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TGAppDelegate.h; sourceTree = "<group>"; };
+		572EB1FA16786C630062F290 /* TGAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TGAppDelegate.m; sourceTree = "<group>"; };
+		572EB1FB16786C630062F290 /* TGViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TGViewController.h; sourceTree = "<group>"; };
+		572EB1FC16786C630062F290 /* TGViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TGViewController.m; sourceTree = "<group>"; };
+		572EB211167878FD0062F290 /* TGGraphNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TGGraphNode.h; sourceTree = "<group>"; };
+		572EB212167878FD0062F290 /* TGGraphNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TGGraphNode.m; sourceTree = "<group>"; };
+		572EB21816787AFF0062F290 /* TGShader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TGShader.h; sourceTree = "<group>"; };
+		572EB21916787AFF0062F290 /* TGShader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TGShader.m; sourceTree = "<group>"; };
+		572EB21B16788C060062F290 /* TimbreGroove-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "TimbreGroove-Info.plist"; path = "TimbreGroove/TimbreGroove-Info.plist"; sourceTree = SOURCE_ROOT; };
+		572EB21D16788D170062F290 /* TGVertexBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TGVertexBuffer.h; sourceTree = "<group>"; };
+		572EB21E16788D170062F290 /* TGVertexBuffer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TGVertexBuffer.m; sourceTree = "<group>"; };
+		572EB2241678BBCA0062F290 /* TGElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TGElement.h; sourceTree = "<group>"; };
+		572EB2251678BBCA0062F290 /* TGElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TGElement.m; sourceTree = "<group>"; };
+		572EB2271678BF740062F290 /* TGCamera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TGCamera.h; sourceTree = "<group>"; };
+		572EB2281678BF740062F290 /* TGCamera.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TGCamera.m; sourceTree = "<group>"; };
+		572EB2331679EAE40062F290 /* TGVariables.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TGVariables.h; sourceTree = "<group>"; };
+		572EB2341679EAE40062F290 /* TGVariables.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TGVariables.m; sourceTree = "<group>"; };
+		572EB27E167A9B160062F290 /* menus.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = menus.plist; sourceTree = "<group>"; };
+		572EB280167AA9D20062F290 /* vanilla.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; lineEnding = 0; path = vanilla.vsh; sourceTree = "<group>"; };
+		572EB282167AA9EC0062F290 /* vanilla.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = vanilla.fsh; sourceTree = "<group>"; };
+		572EB284167AAC200062F290 /* BlueSquare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BlueSquare.h; path = elements/BlueSquare.h; sourceTree = "<group>"; };
+		572EB285167AAC210062F290 /* BlueSquare.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BlueSquare.m; path = elements/BlueSquare.m; sourceTree = "<group>"; };
+		572EB28C167AB48C0062F290 /* Vanilla.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vanilla.h; path = shaders/Vanilla.h; sourceTree = "<group>"; };
+		572EB28D167AB48C0062F290 /* Vanilla.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = Vanilla.m; path = shaders/Vanilla.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		57E874F316782894008243B2 /* TimbreGroove.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TimbreGroove.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		57E874F716782894008243B2 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		57E874F916782894008243B2 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		57E874FB16782894008243B2 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		57E874FD16782894008243B2 /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
 		57E874FF16782894008243B2 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
-		57E8750316782894008243B2 /* TimbreGroove-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "TimbreGroove-Info.plist"; sourceTree = "<group>"; };
-		57E8750516782894008243B2 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		57E8750716782894008243B2 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		57E8750916782894008243B2 /* TimbreGroove-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TimbreGroove-Prefix.pch"; sourceTree = "<group>"; };
-		57E8750A16782894008243B2 /* TGAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TGAppDelegate.h; sourceTree = "<group>"; };
-		57E8750B16782894008243B2 /* TGAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TGAppDelegate.m; sourceTree = "<group>"; };
-		57E8750D16782894008243B2 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
-		57E8750F16782894008243B2 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
-		57E8751116782894008243B2 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
-		57E8751416782894008243B2 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard_iPhone.storyboard; sourceTree = "<group>"; };
-		57E8751716782894008243B2 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard_iPad.storyboard; sourceTree = "<group>"; };
-		57E8751916782894008243B2 /* Shader.fsh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; name = Shader.fsh; path = Shaders/Shader.fsh; sourceTree = "<group>"; };
-		57E8751B16782894008243B2 /* Shader.vsh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; name = Shader.vsh; path = Shaders/Shader.vsh; sourceTree = "<group>"; };
-		57E8751D16782894008243B2 /* TGViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TGViewController.h; sourceTree = "<group>"; };
-		57E8751E16782894008243B2 /* TGViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TGViewController.m; sourceTree = "<group>"; };
+		57E87525167829BB008243B2 /* Alex-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Alex-icon.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,9 +115,111 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		572EB1E116786C630062F290 /* media */ = {
+			isa = PBXGroup;
+			children = (
+				572EB1E216786C630062F290 /* images */,
+			);
+			path = media;
+			sourceTree = "<group>";
+		};
+		572EB1E216786C630062F290 /* images */ = {
+			isa = PBXGroup;
+			children = (
+				572EB1E316786C630062F290 /* Alex.png */,
+				572EB1E416786C630062F290 /* Default-568h@2x.png */,
+				572EB1E516786C630062F290 /* Default.png */,
+				572EB1E616786C630062F290 /* Default@2x.png */,
+				572EB1E716786C630062F290 /* faded.png */,
+				572EB1E816786C630062F290 /* menu */,
+			);
+			path = images;
+			sourceTree = "<group>";
+		};
+		572EB1E816786C630062F290 /* menu */ = {
+			isa = PBXGroup;
+			children = (
+				572EB1E916786C630062F290 /* audioProp.png */,
+				572EB1EA16786C630062F290 /* mood.png */,
+				572EB1EB16786C630062F290 /* newModel.png */,
+				572EB1EC16786C630062F290 /* photo.png */,
+				572EB1ED16786C630062F290 /* text.png */,
+			);
+			path = menu;
+			sourceTree = "<group>";
+		};
+		572EB1EE16786C630062F290 /* resources */ = {
+			isa = PBXGroup;
+			children = (
+				572EB27E167A9B160062F290 /* menus.plist */,
+				572EB21B16788C060062F290 /* TimbreGroove-Info.plist */,
+				572EB1EF16786C630062F290 /* InfoPlist.strings */,
+				572EB1F016786C630062F290 /* MainStoryboard_iPad.storyboard */,
+				572EB1F116786C630062F290 /* MainStoryboard_iPhone.storyboard */,
+			);
+			path = resources;
+			sourceTree = "<group>";
+		};
+		572EB1F316786C630062F290 /* shaders */ = {
+			isa = PBXGroup;
+			children = (
+				572EB1F416786C630062F290 /* fountain.fsh */,
+				572EB1F516786C630062F290 /* fountain.vsh */,
+				572EB1F616786C630062F290 /* hump.fsh */,
+				572EB1F716786C630062F290 /* hump.vsh */,
+				572EB282167AA9EC0062F290 /* vanilla.fsh */,
+				572EB280167AA9D20062F290 /* vanilla.vsh */,
+			);
+			path = shaders;
+			sourceTree = "<group>";
+		};
+		572EB1F816786C630062F290 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				572EB28F167AB4930062F290 /* shaders */,
+				572EB287167AAD1C0062F290 /* elements */,
+				572EB1F916786C630062F290 /* TGAppDelegate.h */,
+				572EB1FA16786C630062F290 /* TGAppDelegate.m */,
+				572EB2271678BF740062F290 /* TGCamera.h */,
+				572EB2281678BF740062F290 /* TGCamera.m */,
+				572EB2241678BBCA0062F290 /* TGElement.h */,
+				572EB2251678BBCA0062F290 /* TGElement.m */,
+				572EB211167878FD0062F290 /* TGGraphNode.h */,
+				572EB212167878FD0062F290 /* TGGraphNode.m */,
+				572EB21816787AFF0062F290 /* TGShader.h */,
+				572EB21916787AFF0062F290 /* TGShader.m */,
+				572EB2331679EAE40062F290 /* TGVariables.h */,
+				572EB2341679EAE40062F290 /* TGVariables.m */,
+				572EB21D16788D170062F290 /* TGVertexBuffer.h */,
+				572EB21E16788D170062F290 /* TGVertexBuffer.m */,
+				572EB1FB16786C630062F290 /* TGViewController.h */,
+				572EB1FC16786C630062F290 /* TGViewController.m */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		572EB287167AAD1C0062F290 /* elements */ = {
+			isa = PBXGroup;
+			children = (
+				572EB284167AAC200062F290 /* BlueSquare.h */,
+				572EB285167AAC210062F290 /* BlueSquare.m */,
+			);
+			name = elements;
+			sourceTree = "<group>";
+		};
+		572EB28F167AB4930062F290 /* shaders */ = {
+			isa = PBXGroup;
+			children = (
+				572EB28C167AB48C0062F290 /* Vanilla.h */,
+				572EB28D167AB48C0062F290 /* Vanilla.m */,
+			);
+			name = shaders;
+			sourceTree = "<group>";
+		};
 		57E874E816782894008243B2 = {
 			isa = PBXGroup;
 			children = (
+				57E87525167829BB008243B2 /* Alex-icon.png */,
 				57E8750116782894008243B2 /* TimbreGroove */,
 				57E874F616782894008243B2 /* Frameworks */,
 				57E874F416782894008243B2 /* Products */,
@@ -97,14 +249,10 @@
 		57E8750116782894008243B2 /* TimbreGroove */ = {
 			isa = PBXGroup;
 			children = (
-				57E8750A16782894008243B2 /* TGAppDelegate.h */,
-				57E8750B16782894008243B2 /* TGAppDelegate.m */,
-				57E8751316782894008243B2 /* MainStoryboard_iPhone.storyboard */,
-				57E8751616782894008243B2 /* MainStoryboard_iPad.storyboard */,
-				57E8751916782894008243B2 /* Shader.fsh */,
-				57E8751B16782894008243B2 /* Shader.vsh */,
-				57E8751D16782894008243B2 /* TGViewController.h */,
-				57E8751E16782894008243B2 /* TGViewController.m */,
+				572EB1F816786C630062F290 /* src */,
+				572EB1F316786C630062F290 /* shaders */,
+				572EB1E116786C630062F290 /* media */,
+				572EB1EE16786C630062F290 /* resources */,
 				57E8750216782894008243B2 /* Supporting Files */,
 			);
 			path = TimbreGroove;
@@ -113,13 +261,8 @@
 		57E8750216782894008243B2 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				57E8750316782894008243B2 /* TimbreGroove-Info.plist */,
-				57E8750416782894008243B2 /* InfoPlist.strings */,
 				57E8750716782894008243B2 /* main.m */,
 				57E8750916782894008243B2 /* TimbreGroove-Prefix.pch */,
-				57E8750D16782894008243B2 /* Default.png */,
-				57E8750F16782894008243B2 /* Default@2x.png */,
-				57E8751116782894008243B2 /* Default-568h@2x.png */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -176,14 +319,27 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				57E8750616782894008243B2 /* InfoPlist.strings in Resources */,
-				57E8750E16782894008243B2 /* Default.png in Resources */,
-				57E8751016782894008243B2 /* Default@2x.png in Resources */,
-				57E8751216782894008243B2 /* Default-568h@2x.png in Resources */,
-				57E8751516782894008243B2 /* MainStoryboard_iPhone.storyboard in Resources */,
-				57E8751816782894008243B2 /* MainStoryboard_iPad.storyboard in Resources */,
-				57E8751A16782894008243B2 /* Shader.fsh in Resources */,
-				57E8751C16782894008243B2 /* Shader.vsh in Resources */,
+				572EB290167AC0020062F290 /* fountain.fsh in Resources */,
+				572EB291167AC0020062F290 /* fountain.vsh in Resources */,
+				572EB292167AC0020062F290 /* hump.fsh in Resources */,
+				572EB293167AC0020062F290 /* hump.vsh in Resources */,
+				572EB294167AC0020062F290 /* vanilla.fsh in Resources */,
+				572EB295167AC0020062F290 /* vanilla.vsh in Resources */,
+				57E87526167829BB008243B2 /* Alex-icon.png in Resources */,
+				572EB1FD16786C630062F290 /* Alex.png in Resources */,
+				572EB1FE16786C630062F290 /* Default-568h@2x.png in Resources */,
+				572EB1FF16786C630062F290 /* Default.png in Resources */,
+				572EB20016786C630062F290 /* Default@2x.png in Resources */,
+				572EB20116786C630062F290 /* faded.png in Resources */,
+				572EB20216786C630062F290 /* audioProp.png in Resources */,
+				572EB20316786C630062F290 /* mood.png in Resources */,
+				572EB20416786C630062F290 /* newModel.png in Resources */,
+				572EB20516786C630062F290 /* photo.png in Resources */,
+				572EB20616786C630062F290 /* text.png in Resources */,
+				572EB20716786C630062F290 /* InfoPlist.strings in Resources */,
+				572EB20816786C630062F290 /* MainStoryboard_iPad.storyboard in Resources */,
+				572EB20916786C630062F290 /* MainStoryboard_iPhone.storyboard in Resources */,
+				572EB27F167A9B160062F290 /* menus.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -195,39 +351,20 @@
 			buildActionMask = 2147483647;
 			files = (
 				57E8750816782894008243B2 /* main.m in Sources */,
-				57E8750C16782894008243B2 /* TGAppDelegate.m in Sources */,
-				57E8751F16782894008243B2 /* TGViewController.m in Sources */,
+				572EB20F16786C630062F290 /* TGAppDelegate.m in Sources */,
+				572EB21016786C630062F290 /* TGViewController.m in Sources */,
+				572EB213167878FD0062F290 /* TGGraphNode.m in Sources */,
+				572EB21A16787AFF0062F290 /* TGShader.m in Sources */,
+				572EB21F16788D170062F290 /* TGVertexBuffer.m in Sources */,
+				572EB2261678BBCA0062F290 /* TGElement.m in Sources */,
+				572EB2291678BF740062F290 /* TGCamera.m in Sources */,
+				572EB2351679EAE40062F290 /* TGVariables.m in Sources */,
+				572EB286167AAC210062F290 /* BlueSquare.m in Sources */,
+				572EB28E167AB48D0062F290 /* Vanilla.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXVariantGroup section */
-		57E8750416782894008243B2 /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				57E8750516782894008243B2 /* en */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		57E8751316782894008243B2 /* MainStoryboard_iPhone.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				57E8751416782894008243B2 /* en */,
-			);
-			name = MainStoryboard_iPhone.storyboard;
-			sourceTree = "<group>";
-		};
-		57E8751616782894008243B2 /* MainStoryboard_iPad.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				57E8751716782894008243B2 /* en */,
-			);
-			name = MainStoryboard_iPad.storyboard;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		57E8752016782894008243B2 /* Debug */ = {
@@ -323,6 +460,7 @@
 				57E8752416782894008243B2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
