@@ -58,8 +58,8 @@
     }
 }
 
-- (GLint) glNameForName:(NSString *)name program:(GLuint)program {
-    
+- (GLint) glNameForName:(NSString *)name program:(GLuint)program
+{
 	NSNumber * index = _d[name];
     GLint location;
 	if (index) {

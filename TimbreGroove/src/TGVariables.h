@@ -26,5 +26,6 @@ typedef enum {
 -(TGVariables *)initWithShader:(TGShader *)shader;
 
 -(void)write:(NSString *)name type:(TGUniformType)type data:(void*)data;
+- (GLint) glNameForName:(NSString *)name program:(GLuint)program;
 
 @end

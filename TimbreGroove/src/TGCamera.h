@@ -13,7 +13,7 @@
 #define CAMERA_DEFAULT_NEAR           1.0f
 #define CAMERA_DEFAULT_FAR            1000.0f
 #define CAMERA_DEFAULT_frustum_ANGLE  45.0f
-#define CAMERA_DEFAULT_Z              -10.0f
+#define CAMERA_DEFAULT_Z              -100.0f
 
 @property (nonatomic) GLKVector3 position;
 @property (nonatomic) GLKVector3 rotation;

@@ -22,27 +22,20 @@
 
 -(void)update:(TGViewController *)vc
 {
-    // update ModelView (position,rotation) here
+    // update Camera and ModelView (position,rotation) here
+    
 }
 
 -(void)render:(TGViewController *)vc
 {
     TGShader * shader = self.shader;
+    TGCamera * camera = self.camera;
     
-    /*
-    GLKMatrix4 mx = self.camera.projectionMatrix;
-    GLKMatrix4 mv = self.modelView;
-    shader.pvm = GLKMatrix4Multiply(mv, mx);
-     */
+    GLKMatrix4 projection = camera.projectionMatrix;
+    GLKMatrix4 modelView  = self.modelView;
 
-    
-    float aspect = fabsf(vc.view.bounds.size.width / vc.view.bounds.size.height);
-    float rads = GLKMathDegreesToRadians(65.0f);
-    GLKMatrix4 pM      = GLKMatrix4MakePerspective(rads, aspect, 0.1f, 100.0f);
-    GLKMatrix4 mvM     = GLKMatrix4MakeTranslation(0.0f, 0.0f, -4.0f);
-    
-    shader.pvm = GLKMatrix4Multiply(pM, mvM);
-    
+    shader.pvm = GLKMatrix4Multiply(projection, modelView);
+
     [shader use];
     
     unsigned int numPhases = _phases ? _phases : 1;

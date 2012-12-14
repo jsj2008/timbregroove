@@ -6,9 +6,9 @@
 //  Copyright (c) 2012 Ass Over Tea Kettle. All rights reserved.
 //
 
-varying lowp vec4 v_color;
+uniform lowp vec4 u_color;
 
 void main()
 {
-    gl_FragColor = v_color;
+    gl_FragColor = u_color;
 }

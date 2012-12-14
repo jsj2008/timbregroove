@@ -8,7 +8,13 @@
 
 #import "TGShader.h"
 #import "TGVariables.h"
+#import "TGTexture.h"
 
+@interface TGShader() {
+    NSMutableDictionary * _textures;
+}
+
+@end
 @implementation TGShader
 
 - (TGShader *)initWithVertex:(NSString *)vname andFragment:(NSString *)fname
@@ -36,9 +42,26 @@
     [self.uniforms write:name type:TG_MATRIX4 data:_pvm.m];
 }
 
+- (void)addSampler:(NSString *)samplerUniformName texture:(TGTexture *)texture
+{
+    if( !_textures )
+        _textures = [NSMutableDictionary new];
+
+    GLint samplerLocation = [self.uniforms glNameForName:samplerUniformName program:_program];
+    
+    _textures[@(samplerLocation)] = texture;
+}
+
 - (void)preRender:(unsigned int)phase
 {
-    
+    int i = 0;
+    for( NSNumber * samplerName in _textures )
+    {
+        TGTexture * texture = _textures[samplerName];
+        glActiveTexture(GL_TEXTURE0 + i); 
+        glBindTexture(GL_TEXTURE_2D, texture.glName);
+        glUniform1i([samplerName intValue], i++);
+    }
 }
 
 - (BOOL)load:(NSString *)vname withFragment:(NSString *)fname

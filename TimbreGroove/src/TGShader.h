@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 
 @class TGVariables;
+@class TGTexture;
 
 @interface TGShader : NSObject
 
@@ -23,5 +24,6 @@
 - (void)use;
 - (void)preRender:(unsigned int)phase;
 - (void)writePVM:(NSString *)name;
+- (void)addSampler:(NSString *)samplerUniformName texture:(TGTexture *)texture;
 
 @end

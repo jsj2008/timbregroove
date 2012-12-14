@@ -36,6 +36,26 @@ static inline TGVertexStride * StrideInit3fv(TGVertexStride * s, const char * at
     return s;
 }
 
+static inline TGVertexStride * StrideInit4fv(TGVertexStride * s, const char * attrName)
+{
+    s->glType = GL_FLOAT;
+    s->numSize = sizeof(float);
+    s->numbersPerElement = 4;
+    s->shaderAttr = -1;
+    s->shaderAttrName = attrName;
+    return s;
+}
+
+static inline TGVertexStride * StrideInit2fUV(TGVertexStride * s, const char * attrName)
+{
+    s->glType = GL_FLOAT;
+    s->numSize = sizeof(float);
+    s->numbersPerElement = 2;
+    s->shaderAttr = -1;
+    s->shaderAttrName = attrName;
+    return s;
+}
+
 @class TGShader;
 
 /*

@@ -30,6 +30,7 @@
 
 -(void)preRender:(unsigned int)phase
 {
+    [super preRender:phase];
     [self writePVM:@"u_mvpMatrix"];
 }
 @end
