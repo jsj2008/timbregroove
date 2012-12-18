@@ -7,15 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "TGTypes.h"
 
-typedef enum {
-    TG_FLOAT,
-    TG_VECTOR2,
-    TG_VECTOR3,
-    TG_VECTOR4,
-    TG_MATRIX4,
-    TG_BOOL
-} TGUniformType;
 
 @class TGShader;
 

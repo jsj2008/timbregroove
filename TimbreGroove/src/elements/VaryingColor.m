@@ -7,64 +7,65 @@
 //
 
 #import "VaryingColor.h"
-#import "TGShader.h" 
-#import "TGVertexBuffer.h"  
-#import "TGVariables.h"
 #import "TGViewController.h"
+
+static TGGenericElementParams * initParams()
+{
+#define NUM_POINTS 6
+
+    static float v[NUM_POINTS*(3+4)] = {
+    //   x   y  z    r    g   b,  a,
+        -1, -1, 0,   0,   0,  1,  1,
+        -1,  1, 0,   0,   1,  0,  1,
+         1, -1, 0,   1,   0,  0,  1,
+        
+        -1,  1, 0,   1,   1,  0,  1,
+         1,  1, 0,   1,   0,  1,  1,
+         1, -1, 0,   1,   1,  1,  1
+    };
+    
+    static TGVertexStride stride[2];
+    StrideInit3f(stride,   sv_pos);
+    StrideInit4f(stride+1, sv_acolor);
+
+    static GLKVector4 none = { -1.0f, -1.0f,-1.0f,-1.0f, };
+    
+    
+    static TGGenericElementParams p;
+    p.bufferData = v;
+    p.color = none;
+    p.numElements = NUM_POINTS;
+    p.numStrides = sizeof(stride)/sizeof(stride[0]);
+    p.opacity = 1.0;
+    p.strides = stride;
+    p.texture = NULL;
+    
+    return &p;
+}
 
 @implementation VaryingColor
 
 -(VaryingColor *)init
 {
-    if( (self = [super init]) )
+    if( (self = [super initWithParams:initParams()]) )
     {
-#define NUM_POINTS 6
-        
-        float v[NUM_POINTS*(3+4)] = {
-        //   x   y  z    r    g   b,  a,
-            -1, -1, 0,   0,   0,  1,  1,
-            -1,  1, 0,   0,   1,  0,  1,
-             1, -1, 0,   1,   0,  0,  1,
-            
-            -1,  1, 0,   1,   1,  0,  1,
-             1,  1, 0,   1,   0,  1,  1,
-             1, -1, 0,   1,   1,  1,  1
-        };
 
-        TGShader * shader = [[TGShader alloc] initWithName:@"color"];
-        
-        self.shader = shader;
-        
-        TGVertexBuffer * buffer = [[TGVertexBuffer alloc] init];
-        
-        TGVertexStride s[2];
-        StrideInit3fv(s,   "a_position");
-        StrideInit4fv(s+1, "a_color");
-        
-        [buffer setData:v strides:s countStrides:2 numElem:NUM_POINTS shader:shader];
-        
-        [self addBuffer:buffer];
 
     }
     
     return self;
 }
 
--(void)update:(TGViewController *)vc
+-(void)update:(NSTimeInterval)dt
 {
-    static NSTimeInterval dt;
+    static NSTimeInterval __dt;
     
-    dt += (vc.timeSinceLastUpdate * 50.0f);
+    __dt += (dt * 50.0f);
     
-    GLfloat r = GLKMathDegreesToRadians(dt);
+    GLfloat r = GLKMathDegreesToRadians(__dt);
     
-    GLKVector3 rot = { 0, r, 0 };
+    GLKVector3 rot = { r, 0, 0 };
     self.rotation = rot;
-    
-    GLfloat red[4] = { 1, 0, 0, 1 };
-    [self.shader.uniforms write:@"u_color" type:TG_VECTOR4 data:red];
-    
-    [self.shader writePVM:@"u_mvpMatrix"];
 }
 
 @end

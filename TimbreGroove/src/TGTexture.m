@@ -23,13 +23,27 @@
 
 -(bool)loadFromFile:(NSString *)fileName
 {
+    /*
+     
+     NSString *const GLKTextureLoaderApplyPremultiplication;
+     NSString *const GLKTextureLoaderGenerateMipmaps;
+     NSString *const GLKTextureLoaderOriginBottomLeft;
+     NSString *const GLKTextureLoaderGrayscaleAsAlpha;
+*/     
     bool ok = true;
+    NSNumber * nyes = [NSNumber numberWithBool:YES];
     CGImageRef imageRef = [[UIImage imageNamed:fileName] CGImage];
-    GLKTextureInfo *textureInfo = [GLKTextureLoader textureWithCGImage:imageRef options:nil error:nil];
+    GLKTextureInfo *textureInfo = [GLKTextureLoader textureWithCGImage:imageRef
+                                                               options: @{
+                                GLKTextureLoaderApplyPremultiplication: nyes,
+                                      GLKTextureLoaderOriginBottomLeft: nyes
+                                   }
+                                                                 error: nil];
     if( textureInfo )
     {
-        _glName = textureInfo.name;
+        _glName   = textureInfo.name;
         _glTarget = textureInfo.target;
+        _origin   = textureInfo.textureOrigin;
     }
     else
     {
@@ -39,38 +53,5 @@
     
 }
 
-- (bool)xloadFromFile:(NSString *)fileName
-{    
-    CGImageRef spriteImage = [UIImage imageNamed:fileName].CGImage;
-    if (!spriteImage) {
-        NSLog(@"Failed to load image %@", fileName);
-        exit(1);
-    }
-    
-    size_t width = CGImageGetWidth(spriteImage);
-    size_t height = CGImageGetHeight(spriteImage);
-    
-    GLubyte * spriteData = (GLubyte *) calloc(width*height*4, sizeof(GLubyte));
-    
-    CGContextRef spriteContext = CGBitmapContextCreate(spriteData, width, height, 8, width*4,
-                                                       CGImageGetColorSpace(spriteImage),
-                                                       kCGImageAlphaPremultipliedLast);
-    
-    CGContextDrawImage(spriteContext, CGRectMake(0, 0, width, height), spriteImage);
-    CGContextRelease(spriteContext);
-    
-    GLuint texName;
-    glGenTextures(1, &texName);
-    glBindTexture(GL_TEXTURE_2D, texName);
-    
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, spriteData);
-    
-    free(spriteData);
-    _glName = texName;
-    _glTarget = GL_TEXTURE0;
-    return true;
-}
 
 @end

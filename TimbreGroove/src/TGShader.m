@@ -10,59 +10,48 @@
 #import "TGVariables.h"
 #import "TGTexture.h"
 
-@interface TGShader() {
-    NSMutableDictionary * _textures;
-}
-
-@end
 @implementation TGShader
 
-- (TGShader *)initWithVertex:(NSString *)vname andFragment:(NSString *)fname
++ (TGShader *)shader:(NSString *)name
+{
+    return [[TGShader alloc] initWithName:name];
+}
+
+- (TGShader *)initWithName:(NSString *)name
 {
     if( (self = [super init]))
     {
-        [self load:vname withFragment:fname];
+        [self load:name withFragment:name];
         _uniforms = [[TGVariables alloc] initWithShader:self];
     }
     return self;
 }
 
-- (TGShader *)initWithName:(NSString *)name
-{
-    return [self initWithVertex:name andFragment:name];
-}
+#pragma mark - public
 
 - (void)use
 {
     glUseProgram(_program);
 }
 
-- (void)writePVM:(NSString *)name
+#pragma mark - derived classes implement these
+
+- (NSString *)processShaderSrc:(NSString *)src type:(GLenum)type
 {
-    [self.uniforms write:name type:TG_MATRIX4 data:_pvm.m];
+    return src;
 }
 
-- (void)addSampler:(NSString *)samplerUniformName texture:(TGTexture *)texture
+- (GLint)location:(SVariables)type
 {
-    if( !_textures )
-        _textures = [NSMutableDictionary new];
-
-    GLint samplerLocation = [self.uniforms glNameForName:samplerUniformName program:_program];
-    
-    _textures[@(samplerLocation)] = texture;
+#if DEBUG
+    NSLog(@"Don't know how to translate uniform name");
+    exit(1);
+#endif
+    return SV_ERROR;
 }
 
-- (void)preRender:(unsigned int)phase
-{
-    int i = 0;
-    for( NSNumber * samplerName in _textures )
-    {
-        TGTexture * texture = _textures[samplerName];
-        glActiveTexture(GL_TEXTURE0 + i); 
-        glBindTexture(GL_TEXTURE_2D, texture.glName);
-        glUniform1i([samplerName intValue], i++);
-    }
-}
+
+#pragma mark - internal stuff
 
 - (BOOL)load:(NSString *)vname withFragment:(NSString *)fname
 {
@@ -89,7 +78,6 @@
     
     glAttachShader(_program, vertShader);
     glAttachShader(_program, fragShader);
-    glBindAttribLocation(_program, GLKVertexAttribPosition, "a_position");
     
     if (![self link:_program]) {
         NSLog(@"Failed to link program: %d", _program);
@@ -125,15 +113,19 @@
 
 - (BOOL)compileShader:(GLuint *)shader type:(GLenum)type file:(NSString *)file
 {
-    GLint status;
-    const GLchar *source;
     
-    source = (GLchar *)[[NSString stringWithContentsOfFile:file encoding:NSUTF8StringEncoding error:nil] UTF8String];
-    if (!source) {
-        NSLog(@"Failed to load vertex shader");
+    NSString * src = [NSString stringWithContentsOfFile:file
+                                                  encoding:NSUTF8StringEncoding
+                                                     error:nil] ;
+    if (!src) {
+        NSLog(@"Failed to load vertex shader %@",file);
         return NO;
     }
+
+    src = [self processShaderSrc:src type:type];
     
+    const GLchar *source = [src UTF8String];
+
     *shader = glCreateShader(type);
     glShaderSource(*shader, 1, &source, NULL);
     glCompileShader(*shader);
@@ -149,6 +141,7 @@
     }
 #endif
     
+    GLint status;
     glGetShaderiv(*shader, GL_COMPILE_STATUS, &status);
     if (status == 0) {
         glDeleteShader(*shader);

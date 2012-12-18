@@ -8,21 +8,27 @@
 
 #import "TGGraphNode.h"
 
-@implementation TGGraphNode {
-@protected
-    TGGraphNode    * _parent;
-    NSMutableArray * _kids;
-}
+@implementation TGGraphNode
 
 -(NSArray *)children
 {
     return _kids;
 }
 
+// Unfortunately this method is un-debuggable
+
 -(bool)traverse:(SEL)selector userObj:(id)userObj
 {
     for( TGGraphNode * node in _kids )
     {
+        
+        if ( ![node respondsToSelector:selector] )
+        {
+            NSLog(@"%s can’t be placed\n",
+                    [NSStringFromClass([node class]) UTF8String]);
+            exit(1);
+        }
+        
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
         [node performSelector:selector withObject:userObj];

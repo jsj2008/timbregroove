@@ -7,10 +7,15 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "TGTypes.h"
 
-@interface TGGraphNode : NSObject
+@interface TGGraphNode : NSObject {
+@protected
+    __weak TGGraphNode  * _parent;
+    NSMutableArray      * _kids;
+}
 
-@property (nonatomic,strong) TGGraphNode * parent;
+@property (nonatomic,weak)   TGGraphNode * parent;
 @property (nonatomic,strong) NSArray * children;
 
 -(void)appendChild:(TGGraphNode *)child;

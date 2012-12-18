@@ -63,14 +63,22 @@
 -(GLKMatrix4)projectionMatrix
 {
     GLKMatrix4 mx = GLKMatrix4MakeTranslation( _position.x, _position.y, _position.z );
-
-    mx = GLKMatrix4Rotate(mx, _rotation.x, 1.0f, 0.0f, 0.0f);
-    mx = GLKMatrix4Rotate(mx, _rotation.y, 0.0f, 1.0f, 0.0f);
-    mx = GLKMatrix4Rotate(mx, _rotation.z, 0.0f, 0.0f, 1.0f);
+    
+    if( _rotation.x )
+        mx = GLKMatrix4Rotate(mx, _rotation.x, 1.0f, 0.0f, 0.0f);
+    if( _rotation.y )
+        mx = GLKMatrix4Rotate(mx, _rotation.y, 0.0f, 1.0f, 0.0f);
+    if( _rotation.z )
+        mx = GLKMatrix4Rotate(mx, _rotation.z, 0.0f, 0.0f, 1.0f);
 
     mx = GLKMatrix4Multiply(_projection, mx);
     
     return mx;
  
+}
+
+-(void)setZ:(float)z
+{
+    _position.z = z;
 }
 @end

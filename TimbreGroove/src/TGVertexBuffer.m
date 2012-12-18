@@ -9,11 +9,14 @@
 #import "TGVertexBuffer.h"
 #import "TGShader.h"
 
+#define MAX_STRIDES      4
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
 @interface TGVertexBuffer()
 {
-    unsigned int _numElem;
+    unsigned int   _numElem;
+    TGVertexStride _strides[MAX_STRIDES];
+    unsigned int   _numStrides;
 }
 @end;
 
@@ -31,25 +34,33 @@
 
 -(void)draw
 {
-    glDrawArrays(self.drawType, 0, _numElem);
+    glDrawArrays(_drawType, 0, _numElem);
 }
 
 -(void)setData: (float *)data
        strides: (TGVertexStride *)strides
   countStrides: (unsigned int)countStrides
        numElem: (unsigned int)numElem
-        shader: (TGShader*)shader;
+        shader: (TGShader*)shader
 {
-    _numElem = numElem;
     
-    int i;
+#if DEBUG
+    if( countStrides > MAX_STRIDES )
+    {
+        NSLog(@"Too many strides");
+        exit(1);
+    }
+#endif
+    
     GLsizei strideSize = 0;
-    for( i = 0; i < countStrides; i++ )
+    for( int i = 0; i < countStrides; i++ )
     {
         TGVertexStride * stride = strides + i;
         strideSize += (stride->numSize * stride->numbersPerElement);
-        if( stride->shaderAttr == -1 && stride->shaderAttrName != NULL )
-             stride->shaderAttr = glGetAttribLocation(shader.program, stride->shaderAttrName);
+        if( !stride->shaderAttrName )
+            stride->shaderAttr = [shader location:stride->tgVarType];
+        else
+            stride->shaderAttr = glGetAttribLocation(shader.program, stride->shaderAttrName);
     }
 
     GLsizei bufferSize = strideSize * numElem;
@@ -58,13 +69,31 @@
     glBindBuffer(GL_ARRAY_BUFFER, _glindex);
     glBufferData(GL_ARRAY_BUFFER, bufferSize, data, GL_STATIC_DRAW);
     
+    _numElem = numElem;
+    memcpy(_strides, strides, countStrides * sizeof(TGVertexStride));
+    _numStrides = countStrides;
+    
+  //  [self setBuffer:shader];
+}
+
+-(void)setBuffer:(TGShader *)shader
+{
     unsigned int strideOffset = 0;
     
     [shader use];
+    glBindBuffer(GL_ARRAY_BUFFER, _glindex);
     
-    for( i = 0; i < countStrides; i++ )
+    GLsizei strideSize = 0;
+    for( int i = 0; i < _numStrides; i++ )
     {
-        TGVertexStride * stride = strides + i;
+        TGVertexStride * stride = _strides + i;
+        strideSize += (stride->numSize * stride->numbersPerElement);
+    }
+    
+    
+    for( int i = 0; i < _numStrides; i++ )
+    {
+        TGVertexStride * stride = _strides + i;
         glEnableVertexAttribArray(stride->shaderAttr);
         glVertexAttribPointer( stride->shaderAttr,
                                stride->numbersPerElement,

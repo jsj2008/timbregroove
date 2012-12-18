@@ -7,7 +7,7 @@
 		<key>new_element</key>
 		<dict>
 			<key>renderClass</key>
-			<string>TGMenuItem</string>
+			<string>MenuItem</string>
 			<key>icon</key>
 			<string>newModel.png</string>
 			<key>items</key>
@@ -15,7 +15,7 @@
 				<key>photo_element</key>
 				<dict>
 					<key>renderClass</key>
-					<string>TGMenuItem</string>
+					<string>MenuItem</string>
 					<key>handler</key>
 					<string>TGPhotoFactory</string>
 					<key>icon</key>
@@ -24,7 +24,7 @@
 				<key>text_element</key>
 				<dict>
 					<key>renderClass</key>
-					<string>TGMenuItem</string>
+					<string>MenuItem</string>
 					<key>handler</key>
 					<string>TGSpinningTextFactory</string>
 					<key>icon</key>
@@ -35,7 +35,7 @@
 		<key>mood</key>
 		<dict>
 			<key>renderClass</key>
-			<string>TGMenuItem</string>
+			<string>MenuItem</string>
 			<key>handler</key>
 			<string>TGMoodSwing</string>
 			<key>icon</key>
@@ -44,7 +44,7 @@
 		<key>audio_tweak</key>
 		<dict>
 			<key>renderClass</key>
-			<string>TGMenuItem</string>
+			<string>MenuItem</string>
 			<key>handler</key>
 			<string>TGAudioTweak</string>
 			<key>icon</key>

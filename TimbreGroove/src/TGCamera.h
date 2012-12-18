@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "TGTypes.h"
 
 @interface TGCamera : NSObject
 
@@ -18,6 +19,7 @@
 @property (nonatomic) GLKVector3 position;
 @property (nonatomic) GLKVector3 rotation;
 
+@property (nonatomic) float z;
 
 -(void)setPerspective: (float)near far:(float)far frustumAngle:(float)degrees viewWidth:(float)viewWidth viewHeight:(float)viewHeight;
 -(void)setPerspectiveForViewWidth:(float)viewWidth andHeight:(float)viewHeight;

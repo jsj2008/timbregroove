@@ -7,9 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		571ECF92167BA79E00727A30 /* color.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 571ECF8E167BA63C00727A30 /* color.fsh */; };
-		571ECF93167BA79E00727A30 /* color.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 571ECF90167BA64800727A30 /* color.vsh */; };
-		571ECF96167BB68200727A30 /* AOTK.m in Sources */ = {isa = PBXBuildFile; fileRef = 571ECF95167BB68200727A30 /* AOTK.m */; };
+		570665F4167F3D3F0081B8C3 /* squareTest.tif in Resources */ = {isa = PBXBuildFile; fileRef = 570665F3167F3D3F0081B8C3 /* squareTest.tif */; };
+		570665F8167F3F340081B8C3 /* TestSq.m in Sources */ = {isa = PBXBuildFile; fileRef = 570665F7167F3F340081B8C3 /* TestSq.m */; };
+		570665FE167F89640081B8C3 /* MenuView.m in Sources */ = {isa = PBXBuildFile; fileRef = 570665FD167F89640081B8C3 /* MenuView.m */; };
+		5717F94B167EBFAC00D8054B /* Plane.m in Sources */ = {isa = PBXBuildFile; fileRef = 571ECFCA167BF31D00727A30 /* Plane.m */; };
+		571A42FE167C315700CD7E8F /* TGElementGraph.m in Sources */ = {isa = PBXBuildFile; fileRef = 571A42FD167C315600CD7E8F /* TGElementGraph.m */; };
+		571ECF9D167BE2CE00727A30 /* TGiTween.m in Sources */ = {isa = PBXBuildFile; fileRef = 571ECF9A167BE2CE00727A30 /* TGiTween.m */; };
+		571ECF9E167BE2CE00727A30 /* TGiTweener.m in Sources */ = {isa = PBXBuildFile; fileRef = 571ECF9C167BE2CE00727A30 /* TGiTweener.m */; };
+		571ECFC2167BEA5E00727A30 /* aotk-ass-outline-512.tif in Resources */ = {isa = PBXBuildFile; fileRef = 571ECFC1167BEA5E00727A30 /* aotk-ass-outline-512.tif */; };
+		571ECFC4167BEC3B00727A30 /* aotk-ass-bare-512.tif in Resources */ = {isa = PBXBuildFile; fileRef = 571ECFC3167BEC3B00727A30 /* aotk-ass-bare-512.tif */; };
 		572EB1FD16786C630062F290 /* Alex.png in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1E316786C630062F290 /* Alex.png */; };
 		572EB1FE16786C630062F290 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1E416786C630062F290 /* Default-568h@2x.png */; };
 		572EB1FF16786C630062F290 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1E516786C630062F290 /* Default.png */; };
@@ -32,21 +38,18 @@
 		572EB2291678BF740062F290 /* TGCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = 572EB2281678BF740062F290 /* TGCamera.m */; };
 		572EB2351679EAE40062F290 /* TGVariables.m in Sources */ = {isa = PBXBuildFile; fileRef = 572EB2341679EAE40062F290 /* TGVariables.m */; };
 		572EB27F167A9B160062F290 /* menus.plist in Resources */ = {isa = PBXBuildFile; fileRef = 572EB27E167A9B160062F290 /* menus.plist */; };
-		572EB286167AAC210062F290 /* BlueTriangle.m in Sources */ = {isa = PBXBuildFile; fileRef = 572EB285167AAC210062F290 /* BlueTriangle.m */; };
-		572EB28E167AB48D0062F290 /* Vanilla.m in Sources */ = {isa = PBXBuildFile; fileRef = 572EB28D167AB48C0062F290 /* Vanilla.m */; };
 		572EB290167AC0020062F290 /* fountain.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1F416786C630062F290 /* fountain.fsh */; };
 		572EB291167AC0020062F290 /* fountain.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1F516786C630062F290 /* fountain.vsh */; };
 		572EB292167AC0020062F290 /* hump.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1F616786C630062F290 /* hump.fsh */; };
 		572EB293167AC0020062F290 /* hump.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1F716786C630062F290 /* hump.vsh */; };
-		572EB294167AC0020062F290 /* vanilla.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 572EB282167AA9EC0062F290 /* vanilla.fsh */; };
-		572EB295167AC0020062F290 /* vanilla.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 572EB280167AA9D20062F290 /* vanilla.vsh */; };
+		5764756C167D5E8C00D5A431 /* TGGenericShader.m in Sources */ = {isa = PBXBuildFile; fileRef = 5764756B167D5E8C00D5A431 /* TGGenericShader.m */; };
+		57647571167D619800D5A431 /* TGGenericElement.m in Sources */ = {isa = PBXBuildFile; fileRef = 57647570167D619800D5A431 /* TGGenericElement.m */; };
+		57647577167D97EC00D5A431 /* generic.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 57647574167D7C4A00D5A431 /* generic.fsh */; };
+		57647578167D97EC00D5A431 /* generic.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 57647572167D7C3C00D5A431 /* generic.vsh */; };
+		57647579167DA29300D5A431 /* BlueTriangle.m in Sources */ = {isa = PBXBuildFile; fileRef = 572EB285167AAC210062F290 /* BlueTriangle.m */; };
+		576F8AC7167E92C000DF208E /* VaryingColor.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A66EF5167B374500B9EA75 /* VaryingColor.m */; };
 		57A66EED167B1D1C00B9EA75 /* TGTexture.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A66EEC167B1D1C00B9EA75 /* TGTexture.m */; };
 		57A66EEF167B293E00B9EA75 /* aotk_tex_64.png in Resources */ = {isa = PBXBuildFile; fileRef = 57A66EEE167B293E00B9EA75 /* aotk_tex_64.png */; };
-		57A66EF6167B374500B9EA75 /* VaryingColor.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A66EF5167B374500B9EA75 /* VaryingColor.m */; };
-		57A66EF9167B38FB00B9EA75 /* Texture.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A66EF8167B38FB00B9EA75 /* Texture.m */; };
-		57A66EFA167B3F3B00B9EA75 /* texture.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 57A66EF0167B29EB00B9EA75 /* texture.fsh */; };
-		57A66EFB167B3F3B00B9EA75 /* texture.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 57A66EF2167B29FF00B9EA75 /* texture.vsh */; };
-		57A66EFE167B44A000B9EA75 /* BlueSquare.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A66EFD167B44A000B9EA75 /* BlueSquare.m */; };
 		57E874F816782894008243B2 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57E874F716782894008243B2 /* UIKit.framework */; };
 		57E874FA16782894008243B2 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57E874F916782894008243B2 /* Foundation.framework */; };
 		57E874FC16782894008243B2 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57E874FB16782894008243B2 /* CoreGraphics.framework */; };
@@ -54,13 +57,34 @@
 		57E8750016782894008243B2 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57E874FF16782894008243B2 /* OpenGLES.framework */; };
 		57E8750816782894008243B2 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E8750716782894008243B2 /* main.m */; };
 		57E87526167829BB008243B2 /* Alex-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 57E87525167829BB008243B2 /* Alex-icon.png */; };
+		57F118BD167F21AE0037C993 /* gluProject.c in Sources */ = {isa = PBXBuildFile; fileRef = 57F118BC167F21AE0037C993 /* gluProject.c */; };
+		57F118C2167F246C0037C993 /* OGLPos.m in Sources */ = {isa = PBXBuildFile; fileRef = 57F118C1167F246C0037C993 /* OGLPos.m */; };
+		57F855E0167ED84100FF244C /* Menu.m in Sources */ = {isa = PBXBuildFile; fileRef = 571ECFD0167BF86600727A30 /* Menu.m */; };
+		57F855E1167ED84100FF244C /* MenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 571ECFCD167BF53200727A30 /* MenuItem.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		571ECF8E167BA63C00727A30 /* color.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = color.fsh; sourceTree = "<group>"; };
-		571ECF90167BA64800727A30 /* color.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = color.vsh; sourceTree = "<group>"; };
+		570665F3167F3D3F0081B8C3 /* squareTest.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = squareTest.tif; sourceTree = "<group>"; };
+		570665F6167F3F340081B8C3 /* TestSq.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestSq.h; path = elements/TestSq.h; sourceTree = "<group>"; };
+		570665F7167F3F340081B8C3 /* TestSq.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestSq.m; path = elements/TestSq.m; sourceTree = "<group>"; };
+		570665FC167F89640081B8C3 /* MenuView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MenuView.h; path = elements/MenuView.h; sourceTree = "<group>"; };
+		570665FD167F89640081B8C3 /* MenuView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MenuView.m; path = elements/MenuView.m; sourceTree = "<group>"; };
+		571A42FC167C315600CD7E8F /* TGElementGraph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TGElementGraph.h; sourceTree = "<group>"; };
+		571A42FD167C315600CD7E8F /* TGElementGraph.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TGElementGraph.m; sourceTree = "<group>"; };
 		571ECF94167BB66E00727A30 /* AOTK.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AOTK.h; path = elements/AOTK.h; sourceTree = "<group>"; };
 		571ECF95167BB68200727A30 /* AOTK.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AOTK.m; path = elements/AOTK.m; sourceTree = "<group>"; };
+		571ECF99167BE2CE00727A30 /* TGiTween.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TGiTween.h; sourceTree = "<group>"; };
+		571ECF9A167BE2CE00727A30 /* TGiTween.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TGiTween.m; sourceTree = "<group>"; };
+		571ECF9B167BE2CE00727A30 /* TGiTweener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TGiTweener.h; sourceTree = "<group>"; };
+		571ECF9C167BE2CE00727A30 /* TGiTweener.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TGiTweener.m; sourceTree = "<group>"; };
+		571ECFC1167BEA5E00727A30 /* aotk-ass-outline-512.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = "aotk-ass-outline-512.tif"; sourceTree = "<group>"; };
+		571ECFC3167BEC3B00727A30 /* aotk-ass-bare-512.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = "aotk-ass-bare-512.tif"; sourceTree = "<group>"; };
+		571ECFC9167BF31D00727A30 /* Plane.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; name = Plane.h; path = elements/Plane.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; wrapsLines = 0; };
+		571ECFCA167BF31D00727A30 /* Plane.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; name = Plane.m; path = elements/Plane.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; wrapsLines = 0; };
+		571ECFCC167BF53200727A30 /* MenuItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MenuItem.h; path = elements/MenuItem.h; sourceTree = "<group>"; };
+		571ECFCD167BF53200727A30 /* MenuItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MenuItem.m; path = elements/MenuItem.m; sourceTree = "<group>"; };
+		571ECFCF167BF86600727A30 /* Menu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Menu.h; path = elements/Menu.h; sourceTree = "<group>"; };
+		571ECFD0167BF86600727A30 /* Menu.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Menu.m; path = elements/Menu.m; sourceTree = "<group>"; };
 		572EB1E316786C630062F290 /* Alex.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Alex.png; sourceTree = "<group>"; };
 		572EB1E416786C630062F290 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		572EB1E516786C630062F290 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
@@ -96,23 +120,20 @@
 		572EB2331679EAE40062F290 /* TGVariables.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TGVariables.h; sourceTree = "<group>"; };
 		572EB2341679EAE40062F290 /* TGVariables.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TGVariables.m; sourceTree = "<group>"; };
 		572EB27E167A9B160062F290 /* menus.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = menus.plist; sourceTree = "<group>"; };
-		572EB280167AA9D20062F290 /* vanilla.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; lineEnding = 0; path = vanilla.vsh; sourceTree = "<group>"; };
-		572EB282167AA9EC0062F290 /* vanilla.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = vanilla.fsh; sourceTree = "<group>"; };
 		572EB284167AAC200062F290 /* BlueTriangle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BlueTriangle.h; path = elements/BlueTriangle.h; sourceTree = "<group>"; };
 		572EB285167AAC210062F290 /* BlueTriangle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BlueTriangle.m; path = elements/BlueTriangle.m; sourceTree = "<group>"; };
-		572EB28C167AB48C0062F290 /* Vanilla.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vanilla.h; path = shaders/Vanilla.h; sourceTree = "<group>"; };
-		572EB28D167AB48C0062F290 /* Vanilla.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = Vanilla.m; path = shaders/Vanilla.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		5764756A167D5E8C00D5A431 /* TGGenericShader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TGGenericShader.h; path = shaders/TGGenericShader.h; sourceTree = "<group>"; };
+		5764756B167D5E8C00D5A431 /* TGGenericShader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TGGenericShader.m; path = shaders/TGGenericShader.m; sourceTree = "<group>"; };
+		5764756F167D619800D5A431 /* TGGenericElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TGGenericElement.h; sourceTree = "<group>"; };
+		57647570167D619800D5A431 /* TGGenericElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TGGenericElement.m; sourceTree = "<group>"; };
+		57647572167D7C3C00D5A431 /* generic.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = generic.vsh; sourceTree = "<group>"; };
+		57647574167D7C4A00D5A431 /* generic.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = generic.fsh; sourceTree = "<group>"; };
+		57647576167D8AC100D5A431 /* TGTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TGTypes.h; sourceTree = "<group>"; };
 		57A66EEB167B1D1B00B9EA75 /* TGTexture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TGTexture.h; sourceTree = "<group>"; };
 		57A66EEC167B1D1C00B9EA75 /* TGTexture.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TGTexture.m; sourceTree = "<group>"; };
 		57A66EEE167B293E00B9EA75 /* aotk_tex_64.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = aotk_tex_64.png; sourceTree = "<group>"; };
-		57A66EF0167B29EB00B9EA75 /* texture.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = texture.fsh; sourceTree = "<group>"; };
-		57A66EF2167B29FF00B9EA75 /* texture.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = texture.vsh; sourceTree = "<group>"; };
 		57A66EF4167B374500B9EA75 /* VaryingColor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VaryingColor.h; path = elements/VaryingColor.h; sourceTree = "<group>"; };
 		57A66EF5167B374500B9EA75 /* VaryingColor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = VaryingColor.m; path = elements/VaryingColor.m; sourceTree = "<group>"; };
-		57A66EF7167B38FB00B9EA75 /* Texture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Texture.h; path = shaders/Texture.h; sourceTree = "<group>"; };
-		57A66EF8167B38FB00B9EA75 /* Texture.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Texture.m; path = shaders/Texture.m; sourceTree = "<group>"; };
-		57A66EFC167B448700B9EA75 /* BlueSquare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BlueSquare.h; path = elements/BlueSquare.h; sourceTree = "<group>"; };
-		57A66EFD167B44A000B9EA75 /* BlueSquare.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BlueSquare.m; path = elements/BlueSquare.m; sourceTree = "<group>"; };
 		57E874F316782894008243B2 /* TimbreGroove.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TimbreGroove.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		57E874F716782894008243B2 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		57E874F916782894008243B2 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -122,6 +143,10 @@
 		57E8750716782894008243B2 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		57E8750916782894008243B2 /* TimbreGroove-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TimbreGroove-Prefix.pch"; sourceTree = "<group>"; };
 		57E87525167829BB008243B2 /* Alex-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Alex-icon.png"; sourceTree = "<group>"; };
+		57F118BC167F21AE0037C993 /* gluProject.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = gluProject.c; sourceTree = "<group>"; };
+		57F118BF167F221B0037C993 /* gluProject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = gluProject.h; sourceTree = "<group>"; };
+		57F118C0167F246C0037C993 /* OGLPos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OGLPos.h; sourceTree = "<group>"; };
+		57F118C1167F246C0037C993 /* OGLPos.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OGLPos.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -140,6 +165,27 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		571ECF97167BE2CE00727A30 /* contrib */ = {
+			isa = PBXGroup;
+			children = (
+				571ECF98167BE2CE00727A30 /* tweener */,
+				57F118C3167F24D60037C993 /* OGLPos */,
+			);
+			name = contrib;
+			path = src/contrib;
+			sourceTree = "<group>";
+		};
+		571ECF98167BE2CE00727A30 /* tweener */ = {
+			isa = PBXGroup;
+			children = (
+				571ECF99167BE2CE00727A30 /* TGiTween.h */,
+				571ECF9A167BE2CE00727A30 /* TGiTween.m */,
+				571ECF9B167BE2CE00727A30 /* TGiTweener.h */,
+				571ECF9C167BE2CE00727A30 /* TGiTweener.m */,
+			);
+			path = tweener;
+			sourceTree = "<group>";
+		};
 		572EB1E116786C630062F290 /* media */ = {
 			isa = PBXGroup;
 			children = (
@@ -151,6 +197,9 @@
 		572EB1E216786C630062F290 /* images */ = {
 			isa = PBXGroup;
 			children = (
+				570665F3167F3D3F0081B8C3 /* squareTest.tif */,
+				571ECFC3167BEC3B00727A30 /* aotk-ass-bare-512.tif */,
+				571ECFC1167BEA5E00727A30 /* aotk-ass-outline-512.tif */,
 				57A66EEE167B293E00B9EA75 /* aotk_tex_64.png */,
 				572EB1E316786C630062F290 /* Alex.png */,
 				572EB1E416786C630062F290 /* Default-568h@2x.png */,
@@ -191,14 +240,10 @@
 			children = (
 				572EB1F416786C630062F290 /* fountain.fsh */,
 				572EB1F516786C630062F290 /* fountain.vsh */,
+				57647574167D7C4A00D5A431 /* generic.fsh */,
+				57647572167D7C3C00D5A431 /* generic.vsh */,
 				572EB1F616786C630062F290 /* hump.fsh */,
 				572EB1F716786C630062F290 /* hump.vsh */,
-				57A66EF0167B29EB00B9EA75 /* texture.fsh */,
-				57A66EF2167B29FF00B9EA75 /* texture.vsh */,
-				572EB282167AA9EC0062F290 /* vanilla.fsh */,
-				572EB280167AA9D20062F290 /* vanilla.vsh */,
-				571ECF8E167BA63C00727A30 /* color.fsh */,
-				571ECF90167BA64800727A30 /* color.vsh */,
 			);
 			path = shaders;
 			sourceTree = "<group>";
@@ -206,7 +251,7 @@
 		572EB1F816786C630062F290 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				572EB28F167AB4930062F290 /* shaders */,
+				5764756E167D616100D5A431 /* shaders */,
 				572EB287167AAD1C0062F290 /* elements */,
 				572EB1F916786C630062F290 /* TGAppDelegate.h */,
 				572EB1FA16786C630062F290 /* TGAppDelegate.m */,
@@ -214,12 +259,17 @@
 				572EB2281678BF740062F290 /* TGCamera.m */,
 				572EB2241678BBCA0062F290 /* TGElement.h */,
 				572EB2251678BBCA0062F290 /* TGElement.m */,
+				571A42FC167C315600CD7E8F /* TGElementGraph.h */,
+				571A42FD167C315600CD7E8F /* TGElementGraph.m */,
+				5764756F167D619800D5A431 /* TGGenericElement.h */,
+				57647570167D619800D5A431 /* TGGenericElement.m */,
 				572EB211167878FD0062F290 /* TGGraphNode.h */,
 				572EB212167878FD0062F290 /* TGGraphNode.m */,
 				572EB21816787AFF0062F290 /* TGShader.h */,
 				572EB21916787AFF0062F290 /* TGShader.m */,
 				57A66EEB167B1D1B00B9EA75 /* TGTexture.h */,
 				57A66EEC167B1D1C00B9EA75 /* TGTexture.m */,
+				57647576167D8AC100D5A431 /* TGTypes.h */,
 				572EB2331679EAE40062F290 /* TGVariables.h */,
 				572EB2341679EAE40062F290 /* TGVariables.m */,
 				572EB21D16788D170062F290 /* TGVertexBuffer.h */,
@@ -233,25 +283,31 @@
 		572EB287167AAD1C0062F290 /* elements */ = {
 			isa = PBXGroup;
 			children = (
-				57A66EFC167B448700B9EA75 /* BlueSquare.h */,
-				57A66EFD167B44A000B9EA75 /* BlueSquare.m */,
+				571ECF94167BB66E00727A30 /* AOTK.h */,
+				571ECF95167BB68200727A30 /* AOTK.m */,
 				572EB284167AAC200062F290 /* BlueTriangle.h */,
 				572EB285167AAC210062F290 /* BlueTriangle.m */,
 				57A66EF4167B374500B9EA75 /* VaryingColor.h */,
 				57A66EF5167B374500B9EA75 /* VaryingColor.m */,
-				571ECF94167BB66E00727A30 /* AOTK.h */,
-				571ECF95167BB68200727A30 /* AOTK.m */,
+				571ECFCF167BF86600727A30 /* Menu.h */,
+				571ECFD0167BF86600727A30 /* Menu.m */,
+				571ECFCC167BF53200727A30 /* MenuItem.h */,
+				571ECFCD167BF53200727A30 /* MenuItem.m */,
+				570665FC167F89640081B8C3 /* MenuView.h */,
+				570665FD167F89640081B8C3 /* MenuView.m */,
+				571ECFC9167BF31D00727A30 /* Plane.h */,
+				571ECFCA167BF31D00727A30 /* Plane.m */,
+				570665F6167F3F340081B8C3 /* TestSq.h */,
+				570665F7167F3F340081B8C3 /* TestSq.m */,
 			);
 			name = elements;
 			sourceTree = "<group>";
 		};
-		572EB28F167AB4930062F290 /* shaders */ = {
+		5764756E167D616100D5A431 /* shaders */ = {
 			isa = PBXGroup;
 			children = (
-				57A66EF7167B38FB00B9EA75 /* Texture.h */,
-				57A66EF8167B38FB00B9EA75 /* Texture.m */,
-				572EB28C167AB48C0062F290 /* Vanilla.h */,
-				572EB28D167AB48C0062F290 /* Vanilla.m */,
+				5764756A167D5E8C00D5A431 /* TGGenericShader.h */,
+				5764756B167D5E8C00D5A431 /* TGGenericShader.m */,
 			);
 			name = shaders;
 			sourceTree = "<group>";
@@ -290,6 +346,7 @@
 			isa = PBXGroup;
 			children = (
 				572EB1F816786C630062F290 /* src */,
+				571ECF97167BE2CE00727A30 /* contrib */,
 				572EB1F316786C630062F290 /* shaders */,
 				572EB1E116786C630062F290 /* media */,
 				572EB1EE16786C630062F290 /* resources */,
@@ -305,6 +362,17 @@
 				57E8750916782894008243B2 /* TimbreGroove-Prefix.pch */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		57F118C3167F24D60037C993 /* OGLPos */ = {
+			isa = PBXGroup;
+			children = (
+				57F118BC167F21AE0037C993 /* gluProject.c */,
+				57F118BF167F221B0037C993 /* gluProject.h */,
+				57F118C0167F246C0037C993 /* OGLPos.h */,
+				57F118C1167F246C0037C993 /* OGLPos.m */,
+			);
+			name = OGLPos;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -359,16 +427,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				571ECF92167BA79E00727A30 /* color.fsh in Resources */,
-				571ECF93167BA79E00727A30 /* color.vsh in Resources */,
-				57A66EFA167B3F3B00B9EA75 /* texture.fsh in Resources */,
-				57A66EFB167B3F3B00B9EA75 /* texture.vsh in Resources */,
+				57647577167D97EC00D5A431 /* generic.fsh in Resources */,
+				57647578167D97EC00D5A431 /* generic.vsh in Resources */,
 				572EB290167AC0020062F290 /* fountain.fsh in Resources */,
 				572EB291167AC0020062F290 /* fountain.vsh in Resources */,
 				572EB292167AC0020062F290 /* hump.fsh in Resources */,
 				572EB293167AC0020062F290 /* hump.vsh in Resources */,
-				572EB294167AC0020062F290 /* vanilla.fsh in Resources */,
-				572EB295167AC0020062F290 /* vanilla.vsh in Resources */,
 				57E87526167829BB008243B2 /* Alex-icon.png in Resources */,
 				572EB1FD16786C630062F290 /* Alex.png in Resources */,
 				572EB1FE16786C630062F290 /* Default-568h@2x.png in Resources */,
@@ -385,6 +449,9 @@
 				572EB20916786C630062F290 /* MainStoryboard_iPhone.storyboard in Resources */,
 				572EB27F167A9B160062F290 /* menus.plist in Resources */,
 				57A66EEF167B293E00B9EA75 /* aotk_tex_64.png in Resources */,
+				571ECFC2167BEA5E00727A30 /* aotk-ass-outline-512.tif in Resources */,
+				571ECFC4167BEC3B00727A30 /* aotk-ass-bare-512.tif in Resources */,
+				570665F4167F3D3F0081B8C3 /* squareTest.tif in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -395,6 +462,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				57F855E0167ED84100FF244C /* Menu.m in Sources */,
+				57F855E1167ED84100FF244C /* MenuItem.m in Sources */,
+				5717F94B167EBFAC00D8054B /* Plane.m in Sources */,
+				576F8AC7167E92C000DF208E /* VaryingColor.m in Sources */,
+				57647579167DA29300D5A431 /* BlueTriangle.m in Sources */,
 				57E8750816782894008243B2 /* main.m in Sources */,
 				572EB20F16786C630062F290 /* TGAppDelegate.m in Sources */,
 				572EB21016786C630062F290 /* TGViewController.m in Sources */,
@@ -404,13 +476,16 @@
 				572EB2261678BBCA0062F290 /* TGElement.m in Sources */,
 				572EB2291678BF740062F290 /* TGCamera.m in Sources */,
 				572EB2351679EAE40062F290 /* TGVariables.m in Sources */,
-				572EB286167AAC210062F290 /* BlueTriangle.m in Sources */,
-				572EB28E167AB48D0062F290 /* Vanilla.m in Sources */,
 				57A66EED167B1D1C00B9EA75 /* TGTexture.m in Sources */,
-				57A66EF6167B374500B9EA75 /* VaryingColor.m in Sources */,
-				57A66EF9167B38FB00B9EA75 /* Texture.m in Sources */,
-				57A66EFE167B44A000B9EA75 /* BlueSquare.m in Sources */,
-				571ECF96167BB68200727A30 /* AOTK.m in Sources */,
+				571ECF9D167BE2CE00727A30 /* TGiTween.m in Sources */,
+				571ECF9E167BE2CE00727A30 /* TGiTweener.m in Sources */,
+				571A42FE167C315700CD7E8F /* TGElementGraph.m in Sources */,
+				5764756C167D5E8C00D5A431 /* TGGenericShader.m in Sources */,
+				57647571167D619800D5A431 /* TGGenericElement.m in Sources */,
+				57F118BD167F21AE0037C993 /* gluProject.c in Sources */,
+				57F118C2167F246C0037C993 /* OGLPos.m in Sources */,
+				570665F8167F3F340081B8C3 /* TestSq.m in Sources */,
+				570665FE167F89640081B8C3 /* MenuView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

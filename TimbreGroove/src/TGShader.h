@@ -7,23 +7,58 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "TGTypes.h"
 
-@class TGVariables;
-@class TGTexture;
+#import "TGVariables.h"
 
-@interface TGShader : NSObject
+/*
+ 
+ Two conflicting scenarios:
+ 
+ In one case you have a mesh (perhaps animation, textures, etc.) that just needs
+ to be ouput with a generic shader. 
+
+ Services needed:
+ - buffers*
+ - textures*
+ - matrix operations*
+ - shader generate
+ - hide all uniforms, assuming the following
+ --- position/mesh
+ --- sampler/texture
+ --- normals
+ --- lighting
+ - lighting
+ 
+ In another case you have a very specific special fx shader with very specific
+ uniforms and attribute names. 
+ 
+ Services needed:
+ - buffers*
+ - textures*
+ - matrix operations*
+ - shader reading/compiling
+ - random uniform access
+
+ */
+@interface TGShader : NSObject {
+@protected
+    GLuint _program;
+}
+
++ (TGShader *)shader:(NSString *)name;
 
 - (TGShader *)initWithName:(NSString *)name;
-- (TGShader *)initWithVertex:(NSString *)vname andFragment:(NSString *)fname;
-
 
 @property (nonatomic, strong) TGVariables * uniforms;
 @property (nonatomic)         GLuint        program;
-@property (nonatomic)         GLKMatrix4    pvm;
 
 - (void)use;
-- (void)preRender:(unsigned int)phase;
-- (void)writePVM:(NSString *)name;
-- (void)addSampler:(NSString *)samplerUniformName texture:(TGTexture *)texture;
+
+// for derived classes (delegate?)
+- (NSString *)processShaderSrc:(NSString *)src type:(GLenum)type;
+- (GLint)location:(SVariables)type;
+
+- (BOOL)load:(NSString *)vname withFragment:(NSString *)fname;
 
 @end

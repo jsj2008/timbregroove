@@ -7,11 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "TGTypes.h"
 
 @interface TGTexture : NSObject
 
-@property (nonatomic) GLuint glName;
-@property (nonatomic) GLenum glTarget;
+@property (nonatomic) GLuint               glName;
+@property (nonatomic) GLenum               glTarget;
+@property (nonatomic) GLKTextureInfoOrigin origin;
 
 -(TGTexture *)initWithFileName:(NSString *)fileName;
 -(bool)loadFromFile:(NSString *)fileName;

@@ -9,42 +9,33 @@
 #import "TGElement.h"
 #import "TGCamera.h"
 #import "TGShader.h"
+#import "TGTexture.h"
 #import "TGVertexBuffer.h"
 #import "TGViewController.h"
 
-@interface TGElement() {
-    NSMutableArray * _buffers;
-}
 
-@end
 
 @implementation TGElement
 
--(void)update:(TGViewController *)vc
+-(void)update:(NSTimeInterval)dt
 {
-    // update Camera and ModelView (position,rotation) here
-    
+    // update model and camera matrix here
+    // so children can adjust accordingly
 }
 
--(void)render:(TGViewController *)vc
+-(void)render:(NSUInteger)w h:(NSUInteger)h
 {
-    TGShader * shader = self.shader;
-    TGCamera * camera = self.camera;
-    
-    GLKMatrix4 projection = camera.projectionMatrix;
-    GLKMatrix4 modelView  = self.modelView;
+}
 
-    shader.pvm = GLKMatrix4Multiply(projection, modelView);
-
-    [shader use];
-    
-    unsigned int numPhases = _phases ? _phases : 1;
-    for( int i = 0; i < numPhases; i++ )
+- (void)attachTextures:(unsigned int)phase
+{
+    int i = 0;
+    for( NSNumber * samplerName in _textures )
     {
-        [self writeUniforms:i];
-        [shader preRender:i];
-        for( TGVertexBuffer * b in _buffers )
-            [b draw];
+        TGTexture * texture = _textures[samplerName];
+        glActiveTexture(GL_TEXTURE0 + i);
+        glBindTexture(GL_TEXTURE_2D, texture.glName);
+        glUniform1i([samplerName intValue], i++);
     }
 }
 
@@ -55,19 +46,36 @@
     [_buffers addObject:buffer];
 }
 
--(void)writeUniforms:(unsigned int)phase
+-(void)addTexture:(TGTexture *)texture
 {
+    
+}
+
+-(void)setScaleXYZ:(float)scaleXYZ
+{
+    _scale.x = _scale.y = _scale.z = scaleXYZ;
 }
 
 -(GLKMatrix4)modelView
 {
     GLKMatrix4 mx = GLKMatrix4MakeTranslation( _position.x, _position.y, _position.z );
     
-    mx = GLKMatrix4Rotate(mx, _rotation.x, 1.0f, 0.0f, 0.0f);
-    mx = GLKMatrix4Rotate(mx, _rotation.y, 0.0f, 1.0f, 0.0f);
-    mx = GLKMatrix4Rotate(mx, _rotation.z, 0.0f, 0.0f, 1.0f);
+    if( _scale.x || _scale.y || _scale.z )
+        mx = GLKMatrix4Scale(mx, _scale.x, _scale.y, _scale.z);
+    
+    if( _rotation.x )
+        mx = GLKMatrix4Rotate(mx, _rotation.x, 1.0f, 0.0f, 0.0f);
+    if( _rotation.y )
+        mx = GLKMatrix4Rotate(mx, _rotation.y, 0.0f, 1.0f, 0.0f);
+    if( _rotation.z )
+        mx = GLKMatrix4Rotate(mx, _rotation.z, 0.0f, 0.0f, 1.0f);
     
     return mx;    
+}
+
+- (GLKMatrix4)calcPVM
+{
+    return GLKMatrix4Multiply(self.camera.projectionMatrix, self.modelView);
 }
 
 -(TGShader *)shader
