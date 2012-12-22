@@ -6,8 +6,8 @@
 //  Copyright (c) 2012 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "TGGenericElement.h"
+#import "Generic.h"
 
-@interface VaryingColor : TGGenericElement
+@interface VaryingColor : Generic
 
 @end

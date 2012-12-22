@@ -6,19 +6,13 @@
 //  Copyright (c) 2012 Ass Over Tea Kettle. All rights reserved.
 //
 
+#import "Camera.h"
 #import "Menu.h"
 #import "MenuItem.h"
-#import "Plane.h"
-#import "TGCamera.h"
-#import "TGViewController.h"
-
-#define MENU_CAMERA 1
+#import "MenuView.h"
 
 @interface Menu() {
-    NSDictionary * _meta;
-    
-    TGElement * _background;
-    
+
     Menu * _showingSubmenu;
     Menu * _subMenuOf;
 }
@@ -27,27 +21,11 @@
 
 @implementation Menu
 
--(Menu *)init
+-(id)initWithMeta:(NSDictionary *)meta
 {
     if( (self = [super init]) )
     {
-#ifdef MENU_CAMERA
-        TGCamera * camera = [[TGCamera alloc] init];
-        
-        GLKVector3 cpos = { 0, 0, MENU_CAMERA_Z };
-        camera.position = cpos;
-        self.camera = camera;
-#endif
-#if 0
-        static GLKVector4 bgColor = { 0.7, 0.7, 0.7, 0.1 };
-        _background = [[Plane alloc] initWithColor:bgColor];
-        GLKVector3 pos = _background.position;
-        pos.z = -0.1;
-        _background.position = pos;
-        [self appendChild:_background];
-#endif
-        _background = self;
-        
+        _meta = meta;
         [self getMenuItems];
     }
     
@@ -65,15 +43,6 @@
     return _meta;
 }
 
--(void)render:(NSUInteger)w h:(NSUInteger)h
-{
-#ifdef MENU_CAMERA
-    [self.camera setPerspectiveForViewWidth:w andHeight:h];
-#endif
-    
-    [super render:w h:h];
-}
-
 - (void)getMenuItems
 {
     if( !_meta )
@@ -83,29 +52,23 @@
     int numItems = 0;
     for( NSString *key in _meta )
     {
-        NSDictionary * menuItem = [_meta objectForKey:key];
-        NSString * imageName    = [menuItem objectForKey:@"icon"];
-        NSString * renderClass  = [menuItem objectForKey:@"renderClass"];
-        Class klass = NSClassFromString(renderClass);
+        NSDictionary * menuItem = _meta[key];
+        NSString * imageName    = menuItem[@"icon"];
+        NSString * renderClass  = menuItem[@"renderClass"];
+        Class klass             = NSClassFromString(renderClass);
         
-        TGElement <MenuItemAPI> * mi = [[klass alloc] initWithIcon:imageName];
+        TG3dObject <MenuItemRender> * mi = [[klass alloc] initWithIcon:imageName];
 
         GLKVector3 position = { 0, y, 0 };
         
         mi.position     = position;
         mi.meta         = menuItem;
-        mi.subMenuMeta  = menuItem[@"items"];
 
-        [_background appendChild:mi];
+        [self appendChild:mi];
         
         y -= 2.1;
         ++numItems;
     }
-    
-    numItems = 0.1;
-    GLKVector3 bgScale = { 1.0, numItems, 1.0 };
-    _background.scale = bgScale;
-    
 }
 
 @end

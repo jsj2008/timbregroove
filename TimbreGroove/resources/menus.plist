@@ -14,19 +14,29 @@
 			<dict>
 				<key>photo_element</key>
 				<dict>
+					<key>userData</key>
+					<dict>
+						<key>instanceClass</key>
+						<string>Photo</string>
+					</dict>
 					<key>renderClass</key>
 					<string>MenuItem</string>
 					<key>handler</key>
-					<string>TGPhotoFactory</string>
+					<string>Factory</string>
 					<key>icon</key>
 					<string>photo.png</string>
 				</dict>
 				<key>text_element</key>
 				<dict>
+					<key>userData</key>
+					<dict>
+						<key>instanceClass</key>
+						<string>Text</string>
+					</dict>
 					<key>renderClass</key>
 					<string>MenuItem</string>
 					<key>handler</key>
-					<string>TGSpinningTextFactory</string>
+					<string>Factory</string>
 					<key>icon</key>
 					<string>text.png</string>
 				</dict>

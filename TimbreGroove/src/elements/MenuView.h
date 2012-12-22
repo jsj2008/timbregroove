@@ -7,12 +7,15 @@
 //
 
 #import <GLKit/GLKit.h>
+#import "View.h"
 
-@interface MenuView : GLKView
-@property bool visible;
-- (void)setupGL;
-- (void)update:(NSTimeInterval)dt;
+@class Menu;
+
+@interface MenuView : View
+@property (nonatomic) unsigned int level;
+@property (nonatomic,readonly) Menu * menu;
+
+- (Menu *)createMenu:(NSDictionary *)meta;
 - (void)show;
 - (void)hide;
-- (void)onTap:(UITapGestureRecognizer *)tgr;
 @end

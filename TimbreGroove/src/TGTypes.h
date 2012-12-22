@@ -25,6 +25,7 @@ typedef enum {
     sv_pvm,
     sv_sampler,
     sv_ucolor,
+    sv_useLighting,
     
     NUM_SVARIABLES,
     sv_custom,
@@ -52,28 +53,36 @@ typedef enum {
     TG_TRIANGLE_FAN
 } TGDrawType;
 
-typedef struct {
+typedef struct TGVertexStride {
     unsigned int glType; // e.g. GL_FLOAT
     unsigned int numSize; // e.g. sizeof(float)
     unsigned int numbersPerElement;
     SVariables   tgVarType;
     const char * shaderAttrName;
-    GLuint       shaderAttr;
+    GLuint       location;
 } TGVertexStride;
 
-typedef struct
+typedef struct TGGenericElementParams
 {
-    void *           bufferData;
-    unsigned int     numElements;
     TGVertexStride * strides;
     unsigned int     numStrides;
-    float            opacity;
-    const char *     texture;
-    GLKVector4       color;
+    void *           vertexData;
+    unsigned int     numVertices;
+    unsigned int *   indexData;
+    unsigned int     numIndices;
     
 } TGGenericElementParams;
 
 
-#define GL_ERROR_C { GLenum __e = glGetError(); if(__e) { NSLog(@"glError(%d) %s:%d",__e,__FILE__,__LINE__); }}
+#define GL_ERROR_C { GLenum __e = glGetError(); if(__e) { NSLog(@"glError(%d/%04X) %s:%d",__e,__e,__FILE__,__LINE__); }}
+#define GL_CALL(f) { NSLog(@"calling: %s", f); }
+static inline NSMutableDictionary * d( NSDictionary * a )
+{
+    return [[NSMutableDictionary alloc] initWithDictionary:a];
+}
 
+static inline NSMutableArray * a(NSArray *a)
+{
+    return [[NSMutableArray alloc] initWithArray:a];
+}
 #endif

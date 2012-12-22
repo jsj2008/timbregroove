@@ -7,44 +7,38 @@
 //
 
 #import "Plane.h"
+#import "MeshBuffer.h"
 
-static TGGenericElementParams gep;
+static MeshBuffer * __sharedBuffer;
 
-#define NUM_POINTS 6
+@implementation Plane
 
-static TGGenericElementParams * initTexture(const char *textureFileName)
+
+-(Plane *)initWithColor:(GLKVector4)color
 {
-    static float v[NUM_POINTS*(3+2)] = {
-        //   x   y  z    u    v
-        -1, -1, 0,   0,   0,
-        -1,  1, 0,   0,   1,
-        1, -1, 0,   1,   0,
-        
-        -1,  1, 0,   0,   1,
-        1,  1, 0,   1,   1,
-        1, -1, 0,   1,   0
-    };
-    
-    static TGVertexStride stride[2];
-    StrideInit3f(stride,   sv_pos);
-    StrideInit2f(stride+1, sv_uv);
-    
-    GLKVector4 none = { -1.0, -1.0,-1.0,-1.0 };
-    gep.bufferData = v;
-    gep.color = none;
-    gep.numElements = NUM_POINTS;
-    gep.numStrides = sizeof(stride)/sizeof(stride[0]);
-    gep.opacity = 0.6;
-    gep.strides = stride;
-    gep.texture = textureFileName;
-    
-    return &gep;
+    return [super initWithColor:color];
 }
 
-
-static TGGenericElementParams * initColor(GLKVector4 color)
+-(void)createBuffer
 {
-    static float v[NUM_POINTS*3] = {
+    if( __sharedBuffer == nil )
+    {
+        [self createBufferDataByType:@[@(sv_pos)] numVertices:6 numIndices:0];
+        __sharedBuffer = _buffers[0];
+    }
+    else
+    {
+        if( !_buffers )
+            _buffers = [NSMutableArray new];
+        [_buffers addObject:__sharedBuffer];
+        NSLog(@"reusing vertext buffer %d",__sharedBuffer.glVBuffer);
+    }
+}
+
+-(void)getBufferData:(void *)vertextData
+           indexData:(unsigned *)indexData
+{
+    static float v[6*3] = {
         //   x   y  z
         -1, -1, 0,
         -1,  1, 0,
@@ -54,38 +48,8 @@ static TGGenericElementParams * initColor(GLKVector4 color)
         1,  1, 0,
         1, -1, 0
     };
-
-    static TGVertexStride stride[1];
-    StrideInit3f(stride,   sv_pos);
     
-    gep.bufferData = v;
-    gep.color = color;
-    gep.numElements = NUM_POINTS;
-    gep.numStrides = sizeof(stride)/sizeof(stride[0]);
-    gep.opacity = 1.0;
-    gep.strides = stride;
-    gep.texture = NULL;
-    
-    return &gep;
-}
-
-@implementation Plane
-
-
--(Plane *)initWithColor:(GLKVector4)color
-{
-    if( (self = [super initWithParams:initColor(color)]) )
-    {
-    }
-    return self;
-}
-
--(Plane *)initWithFileName:(const char *)fileName
-{
-    if( (self = [self initWithParams:initTexture(fileName)]) )
-    {
-    }
-    return self;
+    memcpy(vertextData, v, sizeof(v));
 }
 
 @end

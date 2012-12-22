@@ -6,10 +6,8 @@
 //
 //
 
-#import "TGGenericElement.h"
+#import "Generic.h"
 
-@interface Plane : TGGenericElement
-
+@interface Plane : Generic
 -(Plane *)initWithColor:(GLKVector4)color;
--(Plane *)initWithFileName:(const char *)fileName;
 @end

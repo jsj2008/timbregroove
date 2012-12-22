@@ -9,12 +9,19 @@
 #import "VaryingColor.h"
 #import "TGViewController.h"
 
-static TGGenericElementParams * initParams()
-{
-#define NUM_POINTS 6
 
-    static float v[NUM_POINTS*(3+4)] = {
-    //   x   y  z    r    g   b,  a,
+@implementation VaryingColor
+
+-(void)createBuffer
+{
+    [self createBufferDataByType:@[@(sv_pos),@(sv_acolor)] numVertices:6 numIndices:0];
+}
+
+-(void)getBufferData:(void *)vertextData
+           indexData:(unsigned *)indexData
+{
+    static float v[6*(3+4)] = {
+   //   x   y  z    r    g   b,  a,
         -1, -1, 0,   0,   0,  1,  1,
         -1,  1, 0,   0,   1,  0,  1,
          1, -1, 0,   1,   0,  0,  1,
@@ -24,36 +31,7 @@ static TGGenericElementParams * initParams()
          1, -1, 0,   1,   1,  1,  1
     };
     
-    static TGVertexStride stride[2];
-    StrideInit3f(stride,   sv_pos);
-    StrideInit4f(stride+1, sv_acolor);
-
-    static GLKVector4 none = { -1.0f, -1.0f,-1.0f,-1.0f, };
-    
-    
-    static TGGenericElementParams p;
-    p.bufferData = v;
-    p.color = none;
-    p.numElements = NUM_POINTS;
-    p.numStrides = sizeof(stride)/sizeof(stride[0]);
-    p.opacity = 1.0;
-    p.strides = stride;
-    p.texture = NULL;
-    
-    return &p;
-}
-
-@implementation VaryingColor
-
--(VaryingColor *)init
-{
-    if( (self = [super initWithParams:initParams()]) )
-    {
-
-
-    }
-    
-    return self;
+    memcpy(vertextData, v, sizeof(v));
 }
 
 -(void)update:(NSTimeInterval)dt

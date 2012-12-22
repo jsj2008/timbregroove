@@ -6,24 +6,18 @@
 //  Copyright (c) 2012 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "Plane.h"
+#import "SimpleImage.h"
+#import "Menu.h"
+#import "Interactive.h"
 
-@protocol MenuItemAPI <NSObject>
+@class MenuView;
 
-@property (nonatomic,weak) NSDictionary * meta;
-@property (nonatomic,weak) NSDictionary * subMenuMeta;
+@interface MenuItem : SimpleImage<MenuItemRender, Interactive>
 
--(id)initWithIcon:(NSString *)fileName;
--(void)handleSelect;
-
-@end
-
-@interface MenuItem : Plane<MenuItemAPI>
-
-@property (nonatomic,weak) NSDictionary * meta;
-@property (nonatomic,weak) NSDictionary * subMenuMeta;
+@property (nonatomic,strong) NSDictionary * meta;
 
 -(id)initWithIcon:(NSString *)fileName;
--(void)handleSelect;
+
+-(void)onTap:(UITapGestureRecognizer *)tgr;
 
 @end
