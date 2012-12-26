@@ -1,0 +1,11 @@
+//
+//  Debug.xcconfig
+//  TimbreGroove
+//
+//  Created by victor on 12/26/12.
+//  Copyright (c) 2012 Ass Over Tea Kettle. All rights reserved.
+//
+
+#include "common.xcconfig"
+
+OTHER_LDFLAGS                   = -lfmodexL_$PLATFORM_NAME

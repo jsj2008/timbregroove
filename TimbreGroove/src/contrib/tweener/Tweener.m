@@ -23,18 +23,18 @@
  *
  */
 
-#import "TGiTweener.h"
-#import "TGiTween.h"
+#import "Tweener.h"
+#import "Tween.h"
 
-@interface TGiTweener (PrivateMethods)
+@interface Tweener (PrivateMethods)
 - (void) addTweenToInstance:(id)object withParameters:(NSDictionary *)parameters;
 - (void) startAnimation;
 - (void) stopAnimation;
 @end
 
-@implementation TGiTweener
+@implementation Tweener
 
-static TGiTweener * _instance;
+static Tweener * _instance;
 
 - (id)init {
 	if ((self = [super init])) {
@@ -56,7 +56,7 @@ static TGiTweener * _instance;
 
 + (void) addTween:(id)object withParameters:(NSDictionary *)parameters {
 	if (_instance == nil) {
-		_instance = [[TGiTweener alloc] init];
+		_instance = [[Tweener alloc] init];
 	}
 	
 	[_instance addTweenToInstance:object withParameters:parameters];
@@ -71,12 +71,12 @@ static TGiTweener * _instance;
 
 - (void) addTweenToInstance:(id)object withParameters:(NSDictionary *)parameters {
 	
-	TGiTween * newTween = [[TGiTween alloc] initWithObject:object forParameters:parameters];
+	Tween * newTween = [[Tween alloc] initWithObject:object forParameters:parameters];
 	
 	NSMutableArray * tweensToRemove = [[NSMutableArray alloc] init];
 	
 	// See if a tween already exists for this object, and check that properties don't clash
-	for (TGiTween * tween in _activeTweens) {
+	for (Tween * tween in _activeTweens) {
 		if (tween.object == object) {
 			
 			NSArray * newProperties = newTween.properties;
@@ -96,7 +96,7 @@ static TGiTweener * _instance;
 	}
 
 	// Remove tweens if necessary
-	for (TGiTween * tween in tweensToRemove) {
+	for (Tween * tween in tweensToRemove) {
 		[_activeTweens removeObject:tween];
 	}
 	
@@ -114,7 +114,7 @@ static TGiTweener * _instance;
 	NSDate * currentTime = [NSDate date];
 	
 	// Update all tweens
-	for (TGiTween * tween in _activeTweens) {
+	for (Tween * tween in _activeTweens) {
 		[tween update:currentTime];
 		
 		// Store all completed tweens
@@ -124,7 +124,7 @@ static TGiTweener * _instance;
 	}
 	
 	// Remove all completed tweens
-	for (TGiTween * tween in completedTweens) {
+	for (Tween * tween in completedTweens) {
 		[_activeTweens removeObject:tween];
 	}
 		
@@ -134,7 +134,7 @@ static TGiTweener * _instance;
 	}
 
 	// Handle any onCompeletion selectors and release completed tween
-	for (TGiTween * tween in completedTweens) {
+	for (Tween * tween in completedTweens) {
 		[tween onComplete];
 	}	
 	

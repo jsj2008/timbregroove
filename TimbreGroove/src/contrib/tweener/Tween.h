@@ -85,7 +85,7 @@
  * is removed from the other tweens.
  * 
  */
-@interface TGiTween : NSObject {
+@interface Tween : NSObject {
 	
 @private
 	NSDate * _startTime;

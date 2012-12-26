@@ -23,18 +23,18 @@
  *
  */
 
-#import "TGiTween.h"
+#import "Tween.h"
 #import <objc/runtime.h>
 
 
-@interface TGiTween (PrivateMethods)
+@interface Tween (PrivateMethods)
 - (void) handleParameters:(NSDictionary *)parameters;
 - (float) tweenFunc:(float)progression;
 - (float) easeOutBounce:(float)progression;
 - (float) easeOutThrow:(float)progression;
 @end
 
-@implementation TGiTween
+@implementation Tween
 
 @synthesize object = _object;
 

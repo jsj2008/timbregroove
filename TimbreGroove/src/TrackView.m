@@ -9,8 +9,8 @@
 #import "TrackView.h"
 #import "Graph.h"
 #import "Camera.h"
-#import "TGiTweener.h"
-#import "TGiTween.h"
+#import "Tweener.h"
+#import "Tween.h"
 
 @implementation TrackView
 
@@ -34,7 +34,7 @@
                                             @"x": @(0)
     };
     
-    [TGiTweener addTween:self withParameters:params];
+    [Tweener addTween:self withParameters:params];
 }
 
 - (void)hideToDir:(int)dir
@@ -47,7 +47,7 @@
                       TWEEN_ON_COMPLETE_TARGET: self
     };
     
-    [TGiTweener addTween:self withParameters:params];
+    [Tweener addTween:self withParameters:params];
 }
 
 -(void)drawRect:(CGRect)rect

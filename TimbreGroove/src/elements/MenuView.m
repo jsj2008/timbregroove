@@ -11,8 +11,8 @@
 #import "Camera.h"
 #import "EventCapture.h"
 
-#import "TGiTween.h"
-#import "TGiTweener.h"
+#import "Tween.h"
+#import "Tweener.h"
 
 #import "Menu.h"
 #import "MenuItem.h"
@@ -54,7 +54,7 @@
                                           @"x": @(targetX)
                             };
     
-    [TGiTweener addTween:self withParameters:params];
+    [Tweener addTween:self withParameters:params];
 }
 
 - (void)markHidden
@@ -73,7 +73,7 @@
                       TWEEN_ON_COMPLETE_TARGET: self
                 };
     
-    [TGiTweener addTween:self withParameters:params];    
+    [Tweener addTween:self withParameters:params];    
 }
 
 - (void)onTap:(UITapGestureRecognizer *)tgr

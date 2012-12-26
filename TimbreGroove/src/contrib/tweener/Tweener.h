@@ -37,7 +37,7 @@
  * Access to tween creation is through a static method: only a single Isgl3dTweener exists for the whole application. 
  * 
  */
-@interface TGiTweener : NSObject {
+@interface Tweener : NSObject {
 	
 @private
 	BOOL _animating;

@@ -8,8 +8,8 @@
 
 #import "View.h"
 #import "Camera.h"
-#import "TGiTween.h"
-#import "TGiTweener.h"
+#import "Tween.h"
+#import "Tweener.h"
 
 @implementation View
 
@@ -82,7 +82,7 @@
         [params setObject:self         forKey:TWEEN_ON_COMPLETE_TARGET];
     }
     
-    [TGiTweener addTween:self withParameters:params];
+    [Tweener addTween:self withParameters:params];
 }
 
 
