@@ -9,7 +9,7 @@
 #import "Factory.h"
 #import "Graph.h"
 #import "Photo.h"
-#import "__GenericShader.h"
+#import "GenericShader.h"
 
 static Factory * __f;
 
@@ -48,18 +48,24 @@ static Factory * __f;
     
     NSString * klassName = ud[@"instanceClass"];
 
-    if( !klassName )
+    if( klassName )
     {
-#if DEBUG
-        NSLog(@"Missing 'instanceClass' in menus.plist for this menu item");
-        exit(1);
-#endif
-        return;
+        NSDictionary * options = [_delegate Factory:self willCreateNode:klassName options:ud];
+        Class klass = NSClassFromString(klassName);
+        Node * node;
+        if( options )
+            node = [[klass alloc] initWithObject:options];
+        else
+            node = [klass new];
+        [_delegate Factory:self onNodeCreated:node];
     }
-    
-    Class klass = NSClassFromString(klassName);
-    Node * node = [klass new];
-    [_delegate Factory:self onNodeCreated:node];
+    else
+    {
+        NSString * segue = ud[@"segueTo"];
+        
+        [_delegate Factory:self segueTo:segue];
+        
+    }
 }
 
 @end

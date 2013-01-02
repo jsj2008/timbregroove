@@ -12,7 +12,7 @@
 #define CAMERA_DEFAULT_NEAR           1.0f
 #define CAMERA_DEFAULT_FAR            1000.0f
 #define CAMERA_DEFAULT_frustum_ANGLE  45.0f
-#define CAMERA_DEFAULT_Z              -100.0f
+#define CAMERA_DEFAULT_Z              -5.0f
 
 
 @interface Camera : NSObject
@@ -28,5 +28,9 @@
 -(void)setPerspectiveForViewWidth:(float)viewWidth andHeight:(float)viewHeight;
 
 -(GLKMatrix4) projectionMatrix;
+
+@end
+
+@interface IdentityCamera : Camera // full screen/FBO friendly
 
 @end

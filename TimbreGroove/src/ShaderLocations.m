@@ -7,7 +7,7 @@
 //
 
 #import "ShaderLocations.h"
-#import "__Shader.h"
+#import "Shader.h"
 
 @interface ShaderLocations() {
     NSMutableDictionary * _d;
@@ -17,7 +17,7 @@
 
 @implementation ShaderLocations
 
--(ShaderLocations *)initWithShader:(__Shader *)shader
+-(ShaderLocations *)initWithShader:(Shader *)shader
 {
     if( (self = [super init]) )
         _shader = shader;
@@ -58,7 +58,11 @@
             
         case TG_BOOL:
             glUniform1i(location, *(GLint *)data);
-            break;        
+            break;
+            
+        case TG_TEXTURE:
+            NSLog(@"can't use TG_TEXTURE here");
+            exit(1);
     }
 }
 

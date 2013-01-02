@@ -19,12 +19,12 @@
 
 @implementation Sound
 
--(id)initWithFile:(const char *)fileName soundMan:(SoundMan*)soundMan
+-(id)initWithFile:(const char *)fileName
 {
     if( (self = [super init]) )
     {
         FMOD_RESULT   result;
-        FMOD_SYSTEM * system = (FMOD_SYSTEM *)[soundMan getSystem];
+        FMOD_SYSTEM * system = [[SoundMan sharedInstance] getSystem];
         bool loop = true;
         
         NSString * path = [[NSBundle mainBundle] resourcePath];
@@ -106,15 +106,22 @@
 -(void)sync:(int)delay
 {
     FMOD_RESULT result;
-    unsigned int delayhi, delaylo;
-    result = FMOD_Channel_GetDelay(_channel, FMOD_DELAYTYPE_DSPCLOCK_START, &delayhi, &delaylo);
-    ERRCHECK(result);
-    NSLog(@"Delay hi: %d / lo: %d",delayhi, delaylo);
-    /*
-    FMOD_64BIT_ADD( delayhi, delaylo, 0, delay );
-    result = FMOD_Channel_SetDelay(_channel, FMOD_DELAYTYPE_DSPCLOCK_START, delayhi, delaylo);
-    ERRCHECK(result);
-     */
     
+    [self setPaused:true];
+    [self rewind];
+    FMOD_SYSTEM * system = [[SoundMan sharedInstance] getSystem];
+    unsigned int sysHi, sysLo;
+    result = FMOD_System_GetDSPClock(system, &sysHi, &sysLo);
+    ERRCHECK(result);
+
+    NSLog(@"Delay hi: %d / lo: %d",sysHi,sysLo);
+
+    // Set start offset to a couple of "mixes" in the future, 2048 samples is far
+    // enough in the future to avoid issues with mixer timings
+    FMOD_64BIT_ADD(sysHi, sysLo, 0, 2048);
+    result = FMOD_Channel_SetDelay(_channel, FMOD_DELAYTYPE_DSPCLOCK_START, sysHi, sysLo);
+    ERRCHECK(result);
+    
+    [self setPaused:false];
 }
 @end

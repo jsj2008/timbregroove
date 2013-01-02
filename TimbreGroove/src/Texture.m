@@ -7,7 +7,7 @@
 //
 
 #import "Texture.h"
-#import "__Shader.h"
+#import "Shader.h"
 
 @interface Texture() {
     GLuint               _glTexture;
@@ -56,7 +56,10 @@
         CGImageRef imageRef = [UIGraphicsGetImageFromCurrentImageContext() CGImage];
         
         NSNumber * nyes = [NSNumber numberWithBool:YES];
-        
+
+        // see http://stackoverflow.com/questions/8611063/glktextureloader-fails-when-loading-a-certain-texture-the-first-time-but-succee
+        glGetError();
+       
         NSError * err;
         GLKTextureInfo *textureInfo = [GLKTextureLoader textureWithCGImage:imageRef
                                                                    options: @{
@@ -84,13 +87,6 @@
 
 -(bool)loadFromFile:(NSString *)fileName
 {
-    /*
-     
-     NSString *const GLKTextureLoaderApplyPremultiplication;
-     NSString *const GLKTextureLoaderGenerateMipmaps;
-     NSString *const GLKTextureLoaderOriginBottomLeft;
-     NSString *const GLKTextureLoaderGrayscaleAsAlpha;
-*/     
     bool ok = true;
     NSNumber * nyes = [NSNumber numberWithBool:YES];
     CGImageRef imageRef = [[UIImage imageNamed:fileName] CGImage];
@@ -119,11 +115,22 @@
     
 }
 
--(void)bind:(__Shader *)shader target:(int)i
+-(void)bindTarget:(int)i
 {
     glActiveTexture(GL_TEXTURE0 + i);
     glBindTexture(GL_TEXTURE_2D, _glTexture);
     glUniform1i(_uLocation, i);
+    _target = i;
 }
 
+-(void)bind:(Shader *)shader target:(int)i
+{
+    [self bindTarget:i];
+}
+
+-(void)unbind
+{
+    glActiveTexture(GL_TEXTURE0 + _target);
+    glBindTexture(GL_TEXTURE_2D, 0); // 0 is reserved for unbind
+}
 @end

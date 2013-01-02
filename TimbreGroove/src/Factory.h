@@ -14,7 +14,9 @@
 
 @protocol FactoryDelegate <NSObject>
 
+-(NSDictionary *)Factory:(Factory *)factory willCreateNode:(NSString *)name options:(NSDictionary *)options;
 -(void)Factory:(Factory *)factory onNodeCreated:(Node*)node;
+-(void)Factory:(Factory *)factory segueTo:(NSString *)segueName;
 
 @end
 

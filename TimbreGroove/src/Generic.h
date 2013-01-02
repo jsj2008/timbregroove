@@ -10,15 +10,14 @@
 
 @class MeshBuffer;
 @class Texture;
-@class __Shader;
+@class Shader;
 
 @interface Generic : TG3dObject {
 @protected
     NSMutableArray * _buffers;
-    NSMutableArray * _textures;
 }
 
-
+@property (nonatomic, strong) Texture * texture;
 @property (nonatomic) GLKVector4 color;
 @property (nonatomic) float      opacity;
 
@@ -48,12 +47,15 @@
 
 // that calls this:
 -(void)addTexture:(const char *)fileName;
+// or this ( or property setter)
+-(void)addTextureObject:(Texture *)texture;
+
 
 -(void)configureLighting;
 
 // default behavoirs of these should be fine:
--(__Shader *)createShader;
+-(Shader *)createShader;
 -(void)getBufferLocations;
 -(void)getTextureLocations;
-
+-(Texture *)getTextureObject:(int)index;
 @end

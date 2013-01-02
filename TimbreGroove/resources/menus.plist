@@ -12,6 +12,34 @@
 			<string>newModel.png</string>
 			<key>items</key>
 			<dict>
+				<key>test_element</key>
+				<dict>
+					<key>userData</key>
+					<dict>
+						<key>instanceClass</key>
+						<string>TestElement</string>
+					</dict>
+					<key>icon</key>
+					<string>test.png</string>
+					<key>handler</key>
+					<string>Factory</string>
+					<key>renderClass</key>
+					<string>MenuItem</string>
+				</dict>
+				<key>fluid_element</key>
+				<dict>
+					<key>userData</key>
+					<dict>
+						<key>instanceClass</key>
+						<string>Fluid</string>
+					</dict>
+					<key>icon</key>
+					<string>fluid.png</string>
+					<key>handler</key>
+					<string>Factory</string>
+					<key>renderClass</key>
+					<string>MenuItem</string>
+				</dict>
 				<key>photo_element</key>
 				<dict>
 					<key>userData</key>
@@ -53,10 +81,15 @@
 		</dict>
 		<key>audio_tweak</key>
 		<dict>
+			<key>userData</key>
+			<dict>
+				<key>segueTo</key>
+				<string>segueToSettings</string>
+			</dict>
 			<key>renderClass</key>
 			<string>MenuItem</string>
 			<key>handler</key>
-			<string>TGAudioTweak</string>
+			<string>Factory</string>
 			<key>icon</key>
 			<string>audioProp.png</string>
 		</dict>

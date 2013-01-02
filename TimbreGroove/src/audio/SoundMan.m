@@ -10,29 +10,38 @@
 #import "Sound.h"
 #import "fmod_helper.h"
 
+
 @interface SoundMan () {
     FMOD_SYSTEM   *_system;
     
     //FMOD::ChannelGroup * m_bandGroup;
     
     NSMutableArray * _sounds;
-    
-    
 }
 
 @end
+
+static SoundMan * _singletonSoundMan;
+
 @implementation SoundMan
+
++(SoundMan *)sharedInstance
+{
+    if( !_singletonSoundMan )
+        _singletonSoundMan = [[SoundMan alloc] init];
+    return _singletonSoundMan;
+}
 
 -(Sound *)getSound:(const char *)fileName
 {
-    Sound * sound = [[Sound alloc] initWithFile:fileName soundMan:self];
+    Sound * sound = [[Sound alloc] initWithFile:fileName];
     if( !_sounds )
         _sounds = [NSMutableArray new];
     [_sounds addObject:sound];
     return sound;
 }
 
--(void *)getSystem
+-(FMOD_SYSTEM *)getSystem
 {
     return _system;
 }
@@ -84,5 +93,12 @@
         [s releaseResource];
     }
     FMOD_System_Release(_system);
+}
+
+-(void)dumpTime
+{
+    unsigned int hi, lo;
+    FMOD_System_GetDSPClock(_system, &hi, &lo);
+    NSLog(@"DspClock: %u - %u ", hi, lo);
 }
 @end

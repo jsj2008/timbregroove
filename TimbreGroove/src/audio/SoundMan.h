@@ -8,15 +8,19 @@
 
 #import <Foundation/Foundation.h>
 #import "Sound.h"
+#import "fmod.h" // sigh, for FMOD_SYSTEM
 
 @interface SoundMan : NSObject
+
++(SoundMan *)sharedInstance;
 
 -(void)wakeup;
 -(void)goAway;
 -(void)update:(NSTimeInterval)dt;
-
+//-(void)syncAll:(FMOD_TIMEUNIT)tu;
 -(Sound*)getSound:(const char *)fileName;
 
--(void *)getSystem;
+-(FMOD_SYSTEM *)getSystem;
+-(void)dumpTime;
 
 @end

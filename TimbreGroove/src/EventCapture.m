@@ -8,7 +8,7 @@
 
 #import "EventCapture.h"
 #import "TG3dObject.h"
-#import "__GenericShader.h"
+#import "GenericShader.h"
 #import "MeshBuffer.h"
 #import "Interactive.h"
 
@@ -28,13 +28,13 @@
 -(id)childElementOf:(TG3dObject *)graph
           fromScreenPt:(CGPoint)pt
 {
-    __GenericShader * shader;
+    GenericShader * shader;
 	uint8_t pix[4];
     int backingHeight;
 
     _currentColor    = 1;
     _objDict         = [NSMutableDictionary new];
-    shader           = [ShaderFactory getShader:@"generic" klass:[__GenericShader class] header:@""];
+    shader           = [ShaderFactory getShader:@"generic" klass:[GenericShader class] header:@""];
     shader.opacity   = 1; // how is this not default? ugh.
     _posLocation     = [shader location:sv_pos];
     
@@ -57,7 +57,7 @@
 }
 
 
--(void)recursive_render:(NSArray *)children shader:(__GenericShader *)shader
+-(void)recursive_render:(NSArray *)children shader:(GenericShader *)shader
 {
     for( TG3dObject * child in children )
     {
@@ -66,7 +66,7 @@
             GLKVector4 color = NTC(_currentColor);
             shader.color = color;
             shader.pvm = [child calcPVM];
-            [child drawBufferToShader:shader atLocation:_posLocation];
+            [child renderToCapture:shader atLocation:_posLocation];
             _objDict[@(_currentColor)] = child;
             ++_currentColor;
         }

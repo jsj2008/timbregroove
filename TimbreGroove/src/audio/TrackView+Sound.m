@@ -9,10 +9,16 @@
 #import "TrackView+Sound.h"
 #import "TG3dObject+Sound.h"
 #import "Sound.h"
+#import "SoundMan.h"
 #import "Tweener.h"
 #import "Tween.h"
 
 @implementation TrackView (Sound)
+
+-(void)debugDump
+{
+    [[SoundMan sharedInstance] dumpTime];
+}
 
 -(void)showAndPlay:(int)side
 {

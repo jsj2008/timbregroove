@@ -9,11 +9,11 @@
 #import <Foundation/Foundation.h>
 #import "TGTypes.h"
 
-@class __Shader;
+@class Shader;
 
 @interface Texture : NSObject
 
-@property (nonatomic) GLint uLocation;
+@property (nonatomic) GLint uLocation; // frag. shader sampler uniform location
 
 -(id)initWithFileName:(NSString *)fileName;
 -(id)initWithGlTextureId:(GLuint)glTextureId;
@@ -21,6 +21,10 @@
 
 -(bool)loadFromFile:(NSString *)fileName;
 
--(void)bind:(__Shader *)shader target:(int)i;
+-(void)bindTarget:(int)i;
+-(void)unbind;
+
+// er, instant obsolesence
+-(void)bind:(Shader *)shader target:(int)i;
 
 @end

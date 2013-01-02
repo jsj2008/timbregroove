@@ -8,12 +8,17 @@
 
 #import "TG3dObject.h"
 #import "Camera.h"
-#import "__Shader.h"
+#import "Shader.h"
 #import "MeshBuffer.h"
-
+#import "FBO.h"
 
 
 @implementation TG3dObject
+
+-(id)initWithObject:(id)object
+{
+    return [self init];
+}
 
 -(void)update:(NSTimeInterval)dt
 {
@@ -25,9 +30,21 @@
 {
 }
 
+-(void)renderToFBO
+{
+    Camera * saveCamera = _camera;
+    _camera = [IdentityCamera new];
+    [_fbo bindToRender];
+    glViewport(0, 0, _fbo.width, _fbo.height);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    [self render:_fbo.width h:_fbo.height];
+    [_fbo unbindFromRender];
+    _camera = saveCamera;
+}
 // capture hack
 // TODO: don't hack so much
--(void)drawBufferToShader:(__Shader *)shader atLocation:(GLint)location
+-(void)renderToCapture:(Shader *)shader atLocation:(GLint)location
 {
     
 }
@@ -61,10 +78,13 @@
 
 - (GLKMatrix4)calcPVM
 {
-    return GLKMatrix4Multiply(self.camera.projectionMatrix, self.modelView);
+    if( _fbo )
+        return GLKMatrix4Multiply(GLKMatrix4Identity, self.modelView);
+    else
+        return GLKMatrix4Multiply(self.camera.projectionMatrix, self.modelView);
 }
 
--(__Shader *)shader
+-(Shader *)shader
 {
     TG3dObject * e = self;
     
@@ -97,6 +117,11 @@
     }
 #endif
     return e ? e->_camera : nil;
+}
+
+-(Camera *)ownCamera
+{
+    return _camera;
 }
 
 -(GLKView *)view

@@ -49,8 +49,6 @@
 
 - (void)update:(NSTimeInterval)dt
 {
-    if( !_visible )
-        return;
     [_graph update:dt];
     [self setNeedsDisplay];
 }

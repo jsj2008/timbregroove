@@ -40,7 +40,8 @@ typedef enum {
     TG_VECTOR3,
     TG_VECTOR4,
     TG_MATRIX4,
-    TG_BOOL
+    TG_BOOL,
+    TG_TEXTURE
 } TGUniformType;
 
 typedef enum {

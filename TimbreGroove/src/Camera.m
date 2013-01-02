@@ -9,7 +9,7 @@
 #import "Camera.h"
 
 @interface Camera() {
-
+@protected
     float      _near;
     float      _far;
     float      _frustumAngle;
@@ -94,4 +94,30 @@
 {
     _position.z = z;
 }
+@end
+
+@implementation IdentityCamera
+
+-(id)init
+{
+    if( (self = [super init]) )
+    {
+        _projection = GLKMatrix4Identity;
+        self.position = GLKVector3Make(0, 0, 0);
+    }
+    return self;
+}
+
+#if DEBUG
+-(void)setPerspective: (float)near
+                  far:(float)far
+         frustumAngle:(float)degrees
+            viewWidth:(float)viewWidth
+           viewHeight:(float)viewHeight
+{
+    NSLog(@"Wups - set perspective on Identify Camera");
+    exit(1);
+}
+#endif
+
 @end

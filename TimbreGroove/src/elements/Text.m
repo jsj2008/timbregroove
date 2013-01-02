@@ -8,16 +8,29 @@
 
 #import "Text.h"
 #import "Texture.h"
+#import "Camera.h"
 
+@interface Text()
+{
+    NSTimeInterval _time;
+}
+
+@end
 @implementation Text
 
 -(void)createTexture
 {
-    Texture * t = [[Texture alloc] initWithString:@"Ass Over Teakettle"];
-    if( !_textures )
-        _textures = [NSMutableArray new];
-    [_textures addObject:t];
+    self.texture = [[Texture alloc] initWithString:@"Ass Over Teakettle"];
 }
 
-
+-(void)render:(NSUInteger)w h:(NSUInteger)h
+{
+    [super render:w h:h];
+}
+-(void)update:(NSTimeInterval)dt
+{
+    _time += (dt*15);
+    GLKVector3 rot = { 0, GLKMathDegreesToRadians(_time), 0 };
+    self.rotation = rot;
+}
 @end

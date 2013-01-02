@@ -8,15 +8,13 @@
 
 #import <Foundation/Foundation.h>
 
-@class SoundMan;
-
 @interface Sound : NSObject
 
 @property (nonatomic) bool  paused;
 @property (nonatomic) float volume;
 @property (nonatomic) float prevVolume;
 
--(id)initWithFile:(const char *)fileName soundMan:(SoundMan*)soundMan;
+-(id)initWithFile:(const char *)fileName;
 -(void)play;
 -(void)pause;
 -(void)mute;

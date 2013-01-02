@@ -7,7 +7,7 @@
 //
 
 #import "MeshBuffer.h"
-#import "__Shader.h"
+#import "Shader.h"
 
 #define MAX_STRIDES      4
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
@@ -70,7 +70,7 @@
     return size;
 }
 
--(void)getLocations:(__Shader*)shader
+-(void)getLocations:(Shader*)shader
 {
     for( int i = 0; i < _numStrides; i++ )
     {
@@ -126,7 +126,7 @@
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof(unsigned int), data, GL_STATIC_DRAW);
 }
 
--(void)bind:(__Shader *)shader
+-(void)bind:(Shader *)shader
 {
     glBindBuffer(GL_ARRAY_BUFFER, _glVBuffer);
     
@@ -151,7 +151,7 @@
 }
 
 // TODO: this probably belongs somewhere else
--(bool)assignMeshToShader:(__Shader *)shader atLocation:(GLuint)location
+-(bool)assignMeshToShader:(Shader *)shader atLocation:(GLuint)location
 {
     unsigned int     strideOffset = 0;
     TGVertexStride * stride;

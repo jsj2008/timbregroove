@@ -7,13 +7,15 @@
 //
 
 #import "Generic.h"
-#import "__GenericShader.h"
+#import "GenericShader.h"
 #import "MeshBuffer.h"
 #import "Camera.h"
 #import "Texture.h"
 
 @interface Generic() {
     const char * _initTextureName;
+    Texture * _texture;
+    NSMutableArray * _textures;
 }
 @end
 
@@ -162,20 +164,64 @@
 
 -(void)addTexture:(const char *)fileName
 {
-    NSString * ns = @(fileName);
-    Texture * t = [[Texture alloc] initWithFileName:ns];
-    if( !_textures )
-        _textures = [NSMutableArray new];
-    [_textures addObject:t];
+    self.texture = [[Texture alloc] initWithFileName:@(fileName)];
 }
 
-
--(__Shader *)createShader
+-(void)addTextureObject:(Texture *)texture
 {
+#if DEBUG
+    if( _texture != nil )
+    {
+        NSLog(@"Policy danger: switching from singleton model of texture to array not allowed");
+        exit(1);
+    }
+#endif
+    if( !_textures )
+        _textures = [NSMutableArray new];
+    [_textures addObject:texture];
+}
+
+-(Texture *)texture
+{
+#if DEBUG
+    if( _textures != nil )
+    {
+        NSLog(@"Policy danger: switching from singleton model of texture to array not allowed");
+        exit(1);
+    }
+#endif
+    return _texture;
+}
+
+-(void)setTexture:(Texture *)texture
+{
+#if DEBUG
+    if( _textures != nil )
+    {
+        NSLog(@"Policy danger: switching from singleton model of texture to array not allowed");
+        exit(1);
+    }
+#endif
+    _texture = texture;
+}
+
+-(Texture *)getTextureObject:(int)index
+{
+#if DEBUG
+    if( _texture != nil )
+    {
+        NSLog(@"Policy danger: switching from singleton model of texture to array not allowed");
+        exit(1);
+    }
+#endif
+    return _textures[index];
+}
+
+-(Shader *)createShader
+{
+    Shader * shader;
     
-    __Shader * shader;
-    
-    self.shader = shader = [ShaderFactory getShader:@"generic" klass:[__GenericShader class] header:[self getShaderHeader]];
+    self.shader = shader = [ShaderFactory getShader:@"generic" klass:[GenericShader class] header:[self getShaderHeader]];
     
     return shader;
 }
@@ -233,8 +279,12 @@
 
 -(void)getTextureLocations
 {
-    __Shader * shader = self.shader;
-    for(Texture * texture in _textures )
+    Shader * shader = self.shader;
+    if( _texture )
+    {
+        _texture.uLocation = [shader location:sv_sampler];
+    }
+    else for(Texture * texture in _textures )
     {
         texture.uLocation = [shader location:sv_sampler];
     }
@@ -246,13 +296,13 @@
 
 -(void)setColor:(GLKVector4)color
 {
-    ((__GenericShader *)self.shader).color = color;
+    ((GenericShader *)self.shader).color = color;
     _color = color;
 }
 
 -(void)setOpacity:(float)opacity
 {
-    ((__GenericShader *)self.shader).opacity = opacity;
+    ((GenericShader *)self.shader).opacity = opacity;
     _opacity = opacity;
 }
 
@@ -268,14 +318,18 @@
 
 -(void)render:(NSUInteger)w h:(NSUInteger)h
 {
-    __GenericShader * genShader = (__GenericShader *)self.shader;
+    GenericShader * genShader = (GenericShader *)self.shader;
 
     [genShader use];
 
     genShader.pvm = [self calcPVM];
 
     int target = 0;
-    for( Texture * t in _textures )
+    if( _texture )
+    {
+        [_texture bind:genShader target:target];
+    }
+    else for( Texture * t in _textures )
     {
         [t bind:genShader target:target];
         ++target;
@@ -285,12 +339,21 @@
     {
         [b bind:genShader];
         [b draw];
-    }    
+    }
+    
+    if( _texture )
+    {
+        [_texture unbind];
+    }
+    else for( Texture * t in _textures )
+    {
+        [t unbind];
+    }
 }
 
 
 // capture hack
--(void)drawBufferToShader:(__Shader *)shader atLocation:(GLint)location
+-(void)renderToCapture:(Shader *)shader atLocation:(GLint)location
 {
     for( MeshBuffer * buffer in _buffers )
     {

@@ -35,7 +35,7 @@ static inline TGVertexStride * StrideInit4f(TGVertexStride * s, SVariables type)
     return s;
 }
 
-@class __Shader;
+@class Shader;
 
 /*
   supports interlaced buffers
@@ -61,13 +61,13 @@ static inline TGVertexStride * StrideInit4f(TGVertexStride * s, SVariables type)
 -(void)setIndexData:(unsigned int *)data
             numIndices:(unsigned int)numIndices;
 
--(void)getLocations:(__Shader*)shader;
+-(void)getLocations:(Shader*)shader;
 
--(void)bind:(__Shader *)shader;
+-(void)bind:(Shader *)shader;
 
 -(void)draw;
 
 // TODO: this probably belongs somewhere else
--(bool)assignMeshToShader:(__Shader *)shader atLocation:(GLuint)location;
+-(bool)assignMeshToShader:(Shader *)shader atLocation:(GLuint)location;
 
 @end

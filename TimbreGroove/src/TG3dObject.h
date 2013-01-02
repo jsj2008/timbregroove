@@ -20,21 +20,22 @@
  
  */
 @class Camera;
-@class __Shader;
+@class Shader;
 @class MeshBuffer;
 @class GLKView;
+@class FBO;
 
 @interface TG3dObject : Node
 
 -(void)update:(NSTimeInterval)dt;
 -(void)render:(NSUInteger)w h:(NSUInteger)h;
+-(void)renderToFBO;
+-(void)renderToCapture:(Shader *)shader atLocation:(GLint)location;
 
-// called by capture for interactive objects
--(void)drawBufferToShader:(__Shader *)shader atLocation:(GLint)location;
-
-@property (nonatomic,strong) Camera * camera;
-@property (nonatomic,strong) __Shader * shader;
+@property (nonatomic,strong) Camera   * camera;
+@property (nonatomic,strong) Shader   * shader;
 @property (nonatomic,strong) GLKView  * view;
+@property (nonatomic,strong) FBO      * fbo;
 
 @property (nonatomic)        GLKVector3 position;
 @property (nonatomic)        GLKVector3 rotation;
@@ -45,5 +46,6 @@
 -(GLKMatrix4) calcPVM;
 
 - (NSString *)getShaderHeader;
+- (Camera *)ownCamera; // hmmm
 
 @end
