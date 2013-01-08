@@ -12,8 +12,10 @@
 #import "TrackView.h"
 #import "Graph.h"
 #import "SoundMan.h"
+#import "SoundPool.h"
 #import "TG3dObject+Sound.h"
 #import "TrackView+Sound.h"
+#import "SettingsVC.h"
 
 #if 1
 #define CMSG(s) NSLog(@s)
@@ -25,7 +27,7 @@
     MenuView  * _menuView;
     bool _dawView;
     TrackView * _showingTrackView;
-    SoundMan * _sound;
+    SoundMan * _soundMan;
     int _passCount;
 }
 
@@ -55,10 +57,13 @@
     Factory * globalFactory = [Factory sharedInstance];
     globalFactory.delegate = self;
     
-    _sound = [SoundMan sharedInstance];
+    if( !_soundMan )
+    {
+        _soundMan = [SoundMan sharedInstance];
+        [_soundMan wakeup];
+    }
     
     self.preferredFramesPerSecond = 60;
-    
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -66,7 +71,7 @@
     CMSG("viewWillAppear");
     
     [super viewWillAppear:animated];
-    [_sound wakeup];
+//    [_soundMan wakeup];
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -74,7 +79,7 @@
     CMSG("viewWillDisappear");
     
     [super viewWillDisappear:animated];
-    [_sound goAway];
+  //  [_sound goAway];
 }
 
 
@@ -103,7 +108,6 @@
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    
 }
 
 - (void)tearDownGL
@@ -117,7 +121,6 @@
 
 - (void)update
 {
-    
     NSTimeInterval dt = self.timeSinceLastUpdate;
     for (View * view in self.view.subviews )
     {
@@ -126,16 +129,14 @@
     }
 
     [self.view setNeedsDisplay];
-    
 }
 
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
 {
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    [_sound update:self.timeSinceLastDraw];
+    [_soundMan update:self.timeSinceLastDraw];
    // [_sound dumpTime];
-    
 }
 
 
@@ -148,7 +149,11 @@
     CGRect rc = view.frame;
     rc.size.width *= 0.20;
     rc.origin.x = -rc.size.width;
-    EAGLContext * context = view.context; // [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+//  EAGLContext * context = self.context;
+
+    EAGLContext * context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2
+                                                  sharegroup:self.context.sharegroup];
+    
     MenuView * mview = [[MenuView alloc] initWithFrame:rc context:context];
     mview.drawableDepthFormat = view.drawableDepthFormat;
     mview.backgroundColor = [UIColor clearColor];
@@ -191,52 +196,40 @@
     return arr;
 }
 
-- (void)Factory:(Factory *)factory onNodeCreated:(Node *)node
-{
-    static int currSound;
-    static const char * sounds[3] = {
-        "TG1Band-perc-24k.aif",
-        "TG1Band-pitched-24k.aif",
-        "TGAmb3-32k.aif"
-    };
-    TG3dObject * obj  =(TG3dObject *)node;
-    obj.sound = [_sound getSound:sounds[currSound]];
-    currSound = (currSound + 1) % 3;
-    [_showingTrackView.graph appendChild:obj];
-}
-
-- (NSDictionary *)Factory:(Factory *)factory willCreateNode:(NSString *)name options:(NSDictionary *)options
+-(void)Factory:(Factory *)factory
+    createNode:(NSDictionary *)options
 {
     [self closeAllMenus];
     
-    TrackView * tv = [self makeTrackView:nil];
+    NSString * klassName = options[@"instanceView"];
+    Class klass;
+    if( klassName )
+        klass = NSClassFromString(klassName);
+    else
+        klass = [TrackView class];
+    
+    TrackView * tv = [self makeTrackView:klass];
+    
+    [tv createNode:options];
+    
     [tv showAndPlay:SHOW_DIR_RIGHT];
     if( _showingTrackView )
         [_showingTrackView hideAndFade:SHOW_DIR_LEFT];
     _showingTrackView = tv;
-    GLKView * view = (GLKView *)self.view;
-    NSDictionary * dict = @{@"drawableWidth" : @(view.drawableWidth),
-                            @"drawableHeight": @(view.drawableHeight),
-                                      @"view": view };
-    
-    return dict;
 }
 
-- (id)makeTrackView:(Node *)starterObj
+- (id)makeTrackView:(Class)klass
 {
     GLKView *view = (GLKView *)self.view;
     CGRect rc = view.frame;
-    EAGLContext * context = [EAGLContext currentContext];
-    EAGLSharegroup * sg = context.sharegroup;
-    EAGLContext * newCtx = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2 sharegroup:sg];
-    TrackView * tview = [[TrackView alloc] initWithFrame:rc context:newCtx];
+
+    EAGLContext * context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2 sharegroup:self.context.sharegroup];
+    TrackView * tview = [[klass alloc] initWithFrame:rc context:context];
     tview.drawableDepthFormat = view.drawableDepthFormat;
-    tview.backgroundColor = [UIColor clearColor];
+
     [view addSubview:tview];
     [view sendSubviewToBack:tview];
     [tview setupGL];
-    if( starterObj )
-        [tview.graph appendChild:starterObj];
     return tview;
 }
 
@@ -338,16 +331,25 @@
 
 #pragma mark - Segue
 
--(void)Factory:(Factory *)factory segueTo:(NSString *)segueName
+-(void)Factory:(Factory *)factory
+       segueTo:(NSString *)segueName
 {
     [self performSegueWithIdentifier:segueName sender:nil];
 }
 
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+- (void)prepareForSegue:(UIStoryboardSegue *)segue
+                 sender:(id)sender
 {
     CMSG("prepareForSegue");
     
+    [self closeAllMenus];
+    
     [super prepareForSegue:segue sender:sender];
+    
+    NSArray * settings = [_showingTrackView getSettings];
+    SettingsVC * svc = (SettingsVC *)segue.destinationViewController;
+    svc.settings = settings;
+    
 }
 
 #pragma mark - Gestures

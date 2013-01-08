@@ -46,7 +46,7 @@
 -(id)initWithName:(NSString *)name andHeader:(NSString *)header;
 @end
 
-@interface ShaderFactory : NSObject
+@interface ShaderPool : NSObject
 +(id)getShader:(NSString *)name klass:(Class)klass header:(NSString *)header;
 @end
 

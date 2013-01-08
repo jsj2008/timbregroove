@@ -13,7 +13,7 @@
 
 @interface Texture : NSObject
 
-@property (nonatomic) GLint uLocation; // frag. shader sampler uniform location
+@property (nonatomic) GLint      uLocation;    // frag. shader sampler uniform location
 
 -(id)initWithFileName:(NSString *)fileName;
 -(id)initWithGlTextureId:(GLuint)glTextureId;

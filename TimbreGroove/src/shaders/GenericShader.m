@@ -10,8 +10,22 @@
 
 #define SHADER_FILE @"generic"
 
-static bool         __namesInit = false;
-static const char * __names[NUM_SVARIABLES];
+static const char * __names[NUM_SVARIABLES] = {
+    "a_color",
+    "a_normal",
+    "a_position",
+    "a_uv",
+    
+    "u_pvm",
+    "u_sampler",
+    "u_color",
+    
+    "u_normalMat",
+    "u_lightDir",
+    "u_dirColor",
+    "u_ambient"
+};
+
 
 @interface GenericShader() {
     GLint     _vars[NUM_SVARIABLES];
@@ -25,37 +39,14 @@ static const char * __names[NUM_SVARIABLES];
 {
     if( (self = [super initWithName:name andHeader:header]) )
     {
-        [self __initStatics];
+        for( int i = 0; i < sizeof(_vars)/sizeof(_vars[0]); i++ )
+        {
+            _vars[i] = SV_NONE;
+        }
         [self use];
-  //    self.useLighting = false;
     }
     
     return self;
-}
-
-- (void)__initStatics
-{
-    for( int i = 0; i < sizeof(_vars)/sizeof(_vars[0]); i++ )
-    {
-        _vars[i] = SV_NONE;
-    }
-    
-    if( !__namesInit )
-    {
-        __names[sv_acolor]  = "a_color";
-        __names[sv_normal]  = "a_normal";
-        __names[sv_pos]     = "a_position";
-        __names[sv_uv]      = "a_uv";
-        
-        __names[sv_opacity] = "u_opacity";
-        __names[sv_pvm]     = "u_pvm";
-        __names[sv_sampler] = "u_sampler";
-        __names[sv_ucolor]  = "u_color";
-        __names[sv_useLighting]= "u_useLighting";
-        
-        __namesInit = true;
-    }
-    
 }
 
 - (GLint)location:(SVariables)type
@@ -84,23 +75,34 @@ static const char * __names[NUM_SVARIABLES];
     _pvm = pvm;
 }
 
+-(void)setNormalMat:(GLKMatrix3)normalMat
+{
+    [self.locations writeToLocation:[self location:sv_normalMat] type:TG_MATRIX3 data:normalMat.m];
+    _normalMat = normalMat;
+}
+
+-(void)setLightDir:(GLKVector3)lightDir
+{
+    [self.locations writeToLocation:[self location:sv_lightDir] type:TG_VECTOR3 data:lightDir.v];
+    _lightDir = lightDir;
+}
+
+-(void)setDirColor:(GLKVector3)dirColor
+{
+    [self.locations writeToLocation:[self location:sv_dirColor] type:TG_VECTOR3 data:dirColor.v];
+    _dirColor = dirColor;
+}
+
 -(void)setColor:(GLKVector4)color
 {
     [self.locations writeToLocation:[self location:sv_ucolor] type:TG_VECTOR4 data:color.v];
     _color = color;
 }
 
--(void)setOpacity:(float)opacity
+-(void)setAmbient:(GLKVector3)ambient
 {
-    [self.locations writeToLocation:[self location:sv_opacity] type:TG_FLOAT data:&opacity];
-    _opacity = opacity;
+    [self.locations writeToLocation:[self location:sv_ambient] type:TG_VECTOR3 data:ambient.v];
+    _ambient = ambient;
 }
-
--(void)setUseLighting:(bool)useLighting
-{
-    [self.locations writeToLocation:[self location:sv_useLighting] type:TG_BOOL data:&useLighting];
-    _useLighting = useLighting;
-}
-
 
 @end

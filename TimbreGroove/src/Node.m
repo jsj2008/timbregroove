@@ -15,7 +15,7 @@
 {
     if( (self = [super init]))
     {
-        NSLog(@"created node of type: %@", NSStringFromClass([self class]));
+        NSLog(@"created node of type: %@ (%@)", NSStringFromClass([self class]),self.description);
     }
     return self;
 }
@@ -24,6 +24,11 @@
 -(NSArray *)children
 {
     return _kids;
+}
+
+-(id)firstChild
+{
+    return _kids[0];
 }
 
 // Unfortunately this method is un-debuggable

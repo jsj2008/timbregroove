@@ -16,6 +16,7 @@
     const char * _initTextureName;
     Texture * _texture;
     NSMutableArray * _textures;
+    bool _useColor;
 }
 @end
 
@@ -48,8 +49,7 @@
         [self createShader];
         [self getBufferLocations];
         [self getTextureLocations];
-        
-        self.opacity = 1.0;
+        [self configureLighting];
         
         _initTextureName = NULL;
     }
@@ -92,6 +92,15 @@
                   numVertices:(unsigned int)numVerticies
                    numIndices:(unsigned int)numIndices
 {
+    [self createBufferDataByType:svar numVertices:numVerticies numIndices:numIndices uniforms:nil];
+}
+
+-(void)createBufferDataByType:(NSArray *)svar
+                  numVertices:(unsigned int)numVerticies
+                   numIndices:(unsigned int)numIndices
+                     uniforms:(NSDictionary*)uniformNames
+
+{
     TGGenericElementParams params;
 
     memset(&params, 0, sizeof(params));
@@ -106,6 +115,8 @@
         SVariables type = [svar[i] intValue];
         switch (type) {
             case sv_normal:
+                self.lighting = true;
+                // fall thru
             case sv_pos:
                 StrideInit3f(stride, type);
                 break;
@@ -121,6 +132,12 @@
                 exit(1);
                 break;
 #endif
+        }
+        if( uniformNames )
+        {
+            NSString * name = uniformNames[@(type)];
+            if( name )
+                stride->shaderAttrName = [name UTF8String];
         }
     }
     
@@ -159,10 +176,15 @@
 -(void)createTexture
 {
     if( _initTextureName )
-        [self addTexture:_initTextureName];
+        [self setTextureWithFile:_initTextureName];
 }
 
--(void)addTexture:(const char *)fileName
+-(void)replaceTextures:(NSArray *)textures
+{
+    _textures = [textures mutableCopy];
+}
+
+-(void)setTextureWithFile:(const char *)fileName
 {
     self.texture = [[Texture alloc] initWithFileName:@(fileName)];
 }
@@ -217,13 +239,9 @@
     return _textures[index];
 }
 
--(Shader *)createShader
+-(void)createShader
 {
-    Shader * shader;
-    
-    self.shader = shader = [ShaderFactory getShader:@"generic" klass:[GenericShader class] header:[self getShaderHeader]];
-    
-    return shader;
+    self.shader = [ShaderPool getShader:@"generic" klass:[GenericShader class] header:[self getShaderHeader]];
 }
 
 - (NSString *)getShaderHeader
@@ -265,8 +283,8 @@
 
 -(void)configureLighting
 {
-    self.color = GLKVector4Make(1, 1, 1, 1);
-    self.opacity = 1.0;
+    self.lightDir = GLKVector3Make(0, 0.5, 0);
+    self.dirColor = GLKVector3Make(1, 1, 1);
 }
 
 -(void)getBufferLocations
@@ -296,14 +314,8 @@
 
 -(void)setColor:(GLKVector4)color
 {
-    ((GenericShader *)self.shader).color = color;
     _color = color;
-}
-
--(void)setOpacity:(float)opacity
-{
-    ((GenericShader *)self.shader).opacity = opacity;
-    _opacity = opacity;
+    _useColor = true;
 }
 
 #pragma mark -
@@ -322,8 +334,20 @@
 
     [genShader use];
 
-    genShader.pvm = [self calcPVM];
+    GLKMatrix4 pvm = [self calcPVM];
+    genShader.pvm = pvm;
+    
+    if( _lighting )
+    {
+        genShader.normalMat = GLKMatrix3InvertAndTranspose(GLKMatrix4GetMatrix3(pvm), NULL);
+        genShader.lightDir  = _lightDir;
+        genShader.dirColor  = _dirColor;
+        genShader.ambient   = _ambient;
+    }
 
+    if( _useColor )
+        genShader.color = _color;
+    
     int target = 0;
     if( _texture )
     {

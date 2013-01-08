@@ -27,9 +27,7 @@
 
 -(void)write:(NSString *)name type:(TGUniformType)type data:(void*)data
 {
-    GLuint program = self.shader.program;    
-    GLint  glname  = [self locationForName:name program:program];
-    [self writeToLocation:glname type:type data:data];
+    [self writeToLocation:[self locationForName:name] type:type data:data];
 }
 
 -(void)writeToLocation:(GLint)location type:(TGUniformType)type data:(void*)data
@@ -52,29 +50,29 @@
             glUniform4fv(location, 1, data);
             break;
             
+        case TG_MATRIX3:
+            glUniformMatrix3fv(location, 1, 0, data);
+            break;
+            
         case TG_MATRIX4:
             glUniformMatrix4fv(location, 1, 0, data);
             break;
-            
+
+        case TG_TEXTURE:
         case TG_BOOL:
             glUniform1i(location, *(GLint *)data);
             break;
-            
-        case TG_TEXTURE:
-            NSLog(@"can't use TG_TEXTURE here");
-            exit(1);
     }
 }
 
-- (GLint) locationForName:(NSString *)name program:(GLuint)program
+- (GLint) locationForName:(NSString *)name
 {
 	NSNumber * index = _d[name];
     GLint location;
 	if (index) {
-		location = (GLint)[index intValue];
-        
+		location = (GLint)[index intValue];        
 	} else {
-        location = glGetUniformLocation(program, [name UTF8String]);
+        location = glGetUniformLocation(_shader.program, [name UTF8String]);
         if( !_d )
             _d = [NSMutableDictionary new];
         _d[name] = @(location);

@@ -7,6 +7,7 @@
 //
 
 #import "TrackView.h"
+@class Sound;
 
 @interface TrackView (Sound)
 - (void)showAndPlay:(int)side;

@@ -30,20 +30,30 @@
 {
 }
 
+
 -(void)renderToFBO
+{
+    [self renderToFBOWithClear:true];
+}
+
+-(void)renderToFBOWithClear:(bool)clear
 {
     Camera * saveCamera = _camera;
     _camera = [IdentityCamera new];
     [_fbo bindToRender];
     glViewport(0, 0, _fbo.width, _fbo.height);
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if( clear )
+    {
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
     [self render:_fbo.width h:_fbo.height];
     [_fbo unbindFromRender];
     _camera = saveCamera;
 }
+
 // capture hack
-// TODO: don't hack so much
+// TODO: in the future: not so much with the hacking
 -(void)renderToCapture:(Shader *)shader atLocation:(GLint)location
 {
     
@@ -78,10 +88,7 @@
 
 - (GLKMatrix4)calcPVM
 {
-    if( _fbo )
-        return GLKMatrix4Multiply(GLKMatrix4Identity, self.modelView);
-    else
-        return GLKMatrix4Multiply(self.camera.projectionMatrix, self.modelView);
+    return GLKMatrix4Multiply(self.camera.projectionMatrix, self.modelView);
 }
 
 -(Shader *)shader

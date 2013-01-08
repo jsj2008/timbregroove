@@ -19,16 +19,19 @@
 
 @property (nonatomic, strong) Texture * texture;
 @property (nonatomic) GLKVector4 color;
-@property (nonatomic) float      opacity;
+
+@property (nonatomic) bool       lighting;
+@property (nonatomic) GLKVector3 lightDir;
+@property (nonatomic) GLKVector3 dirColor;
+@property (nonatomic) GLKVector3 ambient;
+
 
 -(id)init;
 -(id)initWithColor:(GLKVector4)color;
 -(id)initWithTextureFile:(const char *)fileName;
 
-// For derived classes (w/some default impl.)
 // these are order dependant
 //==============================================
-// create buffer
 
 // write your own version of this:
 -(void)createBuffer;
@@ -38,6 +41,12 @@
                   numVertices:(unsigned int)numVerticies
                    numIndices:(unsigned int)numIndices;
 
+// or this
+-(void)createBufferDataByType:(NSArray *)svar
+                  numVertices:(unsigned int)numVerticies
+                   numIndices:(unsigned int)numIndices
+                     uniforms:(NSDictionary*)uniformNames;
+
 // which will call you back here:
 -(void)getBufferData:(void *)vertextData
            indexData:(unsigned *)indexData;
@@ -46,15 +55,16 @@
 -(void)createTexture;
 
 // that calls this:
--(void)addTexture:(const char *)fileName;
-// or this ( or property setter)
+-(void)setTextureWithFile:(const char *)fileName;
+// or these ( or property setter)
 -(void)addTextureObject:(Texture *)texture;
+-(void)replaceTextures:(NSArray *)textures;
 
 
 -(void)configureLighting;
 
 // default behavoirs of these should be fine:
--(Shader *)createShader;
+-(void)createShader;
 -(void)getBufferLocations;
 -(void)getTextureLocations;
 -(Texture *)getTextureObject:(int)index;

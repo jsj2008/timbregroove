@@ -11,10 +11,12 @@
 		57019F721685C086007FA38F /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57019F711685C086007FA38F /* AudioToolbox.framework */; };
 		57019F751685C152007FA38F /* SoundMan.m in Sources */ = {isa = PBXBuildFile; fileRef = 57019F741685C152007FA38F /* SoundMan.m */; };
 		57019F7A1685CCC7007FA38F /* Sound.m in Sources */ = {isa = PBXBuildFile; fileRef = 57019F791685CCC7007FA38F /* Sound.m */; };
+		570220D9169B8E7F0028FE33 /* UIView+TGViewExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 570220D8169B8E7F0028FE33 /* UIView+TGViewExtensions.m */; };
 		570665F4167F3D3F0081B8C3 /* squareTest.tif in Resources */ = {isa = PBXBuildFile; fileRef = 570665F3167F3D3F0081B8C3 /* squareTest.tif */; };
 		570665FE167F89640081B8C3 /* MenuView.m in Sources */ = {isa = PBXBuildFile; fileRef = 570665FD167F89640081B8C3 /* MenuView.m */; };
 		5717F94B167EBFAC00D8054B /* Plane.m in Sources */ = {isa = PBXBuildFile; fileRef = 571ECFCA167BF31D00727A30 /* Plane.m */; };
 		571A42FE167C315700CD7E8F /* Graph.m in Sources */ = {isa = PBXBuildFile; fileRef = 571A42FD167C315600CD7E8F /* Graph.m */; };
+		571A472F16954234002231C5 /* Fluid.m in Sources */ = {isa = PBXBuildFile; fileRef = 575DA0081694366C00A50C41 /* Fluid.m */; };
 		571ECF9D167BE2CE00727A30 /* Tween.m in Sources */ = {isa = PBXBuildFile; fileRef = 571ECF9A167BE2CE00727A30 /* Tween.m */; };
 		571ECF9E167BE2CE00727A30 /* Tweener.m in Sources */ = {isa = PBXBuildFile; fileRef = 571ECF9C167BE2CE00727A30 /* Tweener.m */; };
 		571ECFC2167BEA5E00727A30 /* aotk-ass-outline-512.tif in Resources */ = {isa = PBXBuildFile; fileRef = 571ECFC1167BEA5E00727A30 /* aotk-ass-outline-512.tif */; };
@@ -49,12 +51,8 @@
 		572EB292167AC0020062F290 /* hump.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1F616786C630062F290 /* hump.fsh */; };
 		572EB293167AC0020062F290 /* hump.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1F716786C630062F290 /* hump.vsh */; };
 		5737C4A3169277B700C12F2D /* fluid.png in Resources */ = {isa = PBXBuildFile; fileRef = 5737C4A2169277B700C12F2D /* fluid.png */; };
-		5737C4A91692ADF000C12F2D /* test.png in Resources */ = {isa = PBXBuildFile; fileRef = 5737C4A81692ADF000C12F2D /* test.png */; };
-		5737C4AC1692D5C000C12F2D /* TestFBOTexture.m in Sources */ = {isa = PBXBuildFile; fileRef = 5737C4AB1692D5BD00C12F2D /* TestFBOTexture.m */; };
-		5737C4B316930BD500C12F2D /* TestElement.m in Sources */ = {isa = PBXBuildFile; fileRef = 5737C4B216930BD500C12F2D /* TestElement.m */; };
-		5737C4B41693206D00C12F2D /* ripple.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 5737C4AF1693090D00C12F2D /* ripple.fsh */; };
-		5737C4B51693206D00C12F2D /* ripple.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 5737C4AD169308DF00C12F2D /* ripple.vsh */; };
-		574B5FF6168CE2CA008367D1 /* Fluid.m in Sources */ = {isa = PBXBuildFile; fileRef = 574B5FF5168CE2CA008367D1 /* Fluid.m */; };
+		5737C4B41693206D00C12F2D /* imageBaker.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 5737C4AF1693090D00C12F2D /* imageBaker.fsh */; };
+		5737C4B51693206D00C12F2D /* imageBaker.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 5737C4AD169308DF00C12F2D /* imageBaker.vsh */; };
 		574B5FF9168D20BD008367D1 /* FBO.m in Sources */ = {isa = PBXBuildFile; fileRef = 574B5FF8168D20BD008367D1 /* FBO.m */; };
 		574B5FFA168D2BB4008367D1 /* addForce.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 574B5FDD168CE148008367D1 /* addForce.fsh */; };
 		574B5FFB168D2BB4008367D1 /* advect.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 574B5FDE168CE148008367D1 /* advect.fsh */; };
@@ -67,13 +65,22 @@
 		574B6002168D2BB4008367D1 /* subtractPressureGradient.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 574B5FE5168CE148008367D1 /* subtractPressureGradient.fsh */; };
 		574B6003168D2BB4008367D1 /* velocityBoundary.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 574B5FE6168CE148008367D1 /* velocityBoundary.fsh */; };
 		574B6004168D2BB4008367D1 /* visualize.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 574B5FE7168CE148008367D1 /* visualize.fsh */; };
+		575C8EED1695FB4C00AB565B /* fractalSphere.png in Resources */ = {isa = PBXBuildFile; fileRef = 575C8EEC1695FB4C00AB565B /* fractalSphere.png */; };
 		575DA0021693C90400A50C41 /* SettingsVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 575DA0011693C90400A50C41 /* SettingsVC.m */; };
+		575DA0041693E35A00A50C41 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 575DA0031693E35A00A50C41 /* MobileCoreServices.framework */; };
+		575DA0061693E43300A50C41 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 575DA0051693E43300A50C41 /* AssetsLibrary.framework */; };
+		575DA00A169437AC00A50C41 /* FractalSphere.m in Sources */ = {isa = PBXBuildFile; fileRef = 5737C4B216930BD500C12F2D /* FractalSphere.m */; };
 		5764756C167D5E8C00D5A431 /* GenericShader.m in Sources */ = {isa = PBXBuildFile; fileRef = 5764756B167D5E8C00D5A431 /* GenericShader.m */; };
 		57647571167D619800D5A431 /* Generic.m in Sources */ = {isa = PBXBuildFile; fileRef = 57647570167D619800D5A431 /* Generic.m */; };
 		57647577167D97EC00D5A431 /* generic.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 57647574167D7C4A00D5A431 /* generic.fsh */; };
 		57647578167D97EC00D5A431 /* generic.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 57647572167D7C3C00D5A431 /* generic.vsh */; };
 		576F8AC7167E92C000DF208E /* VaryingColor.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A66EF5167B374500B9EA75 /* VaryingColor.m */; };
-		57718EF816838D75001D7D35 /* CustomPlane.m in Sources */ = {isa = PBXBuildFile; fileRef = 57718EF716838D75001D7D35 /* CustomPlane.m */; };
+		578292C3169861D20053ADCD /* esShapes.c in Sources */ = {isa = PBXBuildFile; fileRef = 578292C2169861D20053ADCD /* esShapes.c */; };
+		578292C7169879930053ADCD /* ImageBaker.m in Sources */ = {isa = PBXBuildFile; fileRef = 578292C6169879930053ADCD /* ImageBaker.m */; };
+		578292C9169A87B10053ADCD /* test.png in Resources */ = {isa = PBXBuildFile; fileRef = 578292C8169A87B00053ADCD /* test.png */; };
+		578292CB169A8B660053ADCD /* imageBaker.png in Resources */ = {isa = PBXBuildFile; fileRef = 578292CA169A8B650053ADCD /* imageBaker.png */; };
+		578292CE169A8C230053ADCD /* ImageBakerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 578292CD169A8C230053ADCD /* ImageBakerView.m */; };
+		578292D4169AB2CE0053ADCD /* SoundPool.m in Sources */ = {isa = PBXBuildFile; fileRef = 578292D3169AB2CD0053ADCD /* SoundPool.m */; };
 		57900684168411660068659F /* Factory.m in Sources */ = {isa = PBXBuildFile; fileRef = 57900683168411650068659F /* Factory.m */; };
 		57A10E9A1685E0BE00B80314 /* TG1Band-perc-24k.aif in Resources */ = {isa = PBXBuildFile; fileRef = 57A10E981685E0BE00B80314 /* TG1Band-perc-24k.aif */; };
 		57A10E9B1685E0BE00B80314 /* TG1Band-pitched-24k.aif in Resources */ = {isa = PBXBuildFile; fileRef = 57A10E991685E0BE00B80314 /* TG1Band-pitched-24k.aif */; };
@@ -93,6 +100,9 @@
 		57E8750016782894008243B2 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57E874FF16782894008243B2 /* OpenGLES.framework */; };
 		57E8750816782894008243B2 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E8750716782894008243B2 /* main.m */; };
 		57E87526167829BB008243B2 /* Alex-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 57E87525167829BB008243B2 /* Alex-icon.png */; };
+		57F290F9169578C700293B0E /* Fractal.m in Sources */ = {isa = PBXBuildFile; fileRef = 57F290F8169578C700293B0E /* Fractal.m */; };
+		57F290FA16957F5D00293B0E /* fractal.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 57F290F21695775400293B0E /* fractal.fsh */; };
+		57F290FB16957F5D00293B0E /* fractal.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 57F290F51695776400293B0E /* fractal.vsh */; };
 		57F412F3168167F700D9DC67 /* Sphere.m in Sources */ = {isa = PBXBuildFile; fileRef = 57F412F2168167F700D9DC67 /* Sphere.m */; };
 		57F7E49C16881356001156FF /* TG3dObject+Sound.m in Sources */ = {isa = PBXBuildFile; fileRef = 57F7E49B16881356001156FF /* TG3dObject+Sound.m */; };
 		57F7E49F1688288A001156FF /* TrackView+Sound.m in Sources */ = {isa = PBXBuildFile; fileRef = 57F7E49E16882889001156FF /* TrackView+Sound.m */; };
@@ -116,6 +126,8 @@
 		57019F781685CCC7007FA38F /* Sound.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Sound.h; path = audio/Sound.h; sourceTree = "<group>"; };
 		57019F791685CCC7007FA38F /* Sound.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Sound.m; path = audio/Sound.m; sourceTree = "<group>"; };
 		57019F7C1685D254007FA38F /* fmod_helper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = fmod_helper.h; path = audio/fmod_helper.h; sourceTree = "<group>"; };
+		570220D7169B8E7F0028FE33 /* UIView+TGViewExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+TGViewExtensions.h"; sourceTree = "<group>"; };
+		570220D8169B8E7F0028FE33 /* UIView+TGViewExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+TGViewExtensions.m"; sourceTree = "<group>"; };
 		570665F3167F3D3F0081B8C3 /* squareTest.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = squareTest.tif; sourceTree = "<group>"; };
 		570665FC167F89640081B8C3 /* MenuView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MenuView.h; path = elements/MenuView.h; sourceTree = "<group>"; };
 		570665FD167F89640081B8C3 /* MenuView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MenuView.m; path = elements/MenuView.m; sourceTree = "<group>"; };
@@ -175,13 +187,12 @@
 		572EB2341679EAE40062F290 /* ShaderLocations.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ShaderLocations.m; sourceTree = "<group>"; };
 		572EB27E167A9B160062F290 /* menus.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = menus.plist; sourceTree = "<group>"; };
 		5737C4A2169277B700C12F2D /* fluid.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fluid.png; sourceTree = "<group>"; };
-		5737C4A81692ADF000C12F2D /* test.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = test.png; sourceTree = "<group>"; };
 		5737C4AA1692D5BC00C12F2D /* TestFBOTexture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestFBOTexture.h; sourceTree = "<group>"; };
 		5737C4AB1692D5BD00C12F2D /* TestFBOTexture.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestFBOTexture.m; sourceTree = "<group>"; };
-		5737C4AD169308DF00C12F2D /* ripple.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = ripple.vsh; sourceTree = "<group>"; };
-		5737C4AF1693090D00C12F2D /* ripple.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = ripple.fsh; sourceTree = "<group>"; };
-		5737C4B116930BD400C12F2D /* TestElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestElement.h; sourceTree = "<group>"; };
-		5737C4B216930BD500C12F2D /* TestElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestElement.m; sourceTree = "<group>"; };
+		5737C4AD169308DF00C12F2D /* imageBaker.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = imageBaker.vsh; sourceTree = "<group>"; };
+		5737C4AF1693090D00C12F2D /* imageBaker.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = imageBaker.fsh; sourceTree = "<group>"; };
+		5737C4B116930BD400C12F2D /* FractalSphere.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FractalSphere.h; sourceTree = "<group>"; };
+		5737C4B216930BD500C12F2D /* FractalSphere.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FractalSphere.m; sourceTree = "<group>"; };
 		574B5FDD168CE148008367D1 /* addForce.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = addForce.fsh; sourceTree = "<group>"; };
 		574B5FDE168CE148008367D1 /* advect.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = advect.fsh; sourceTree = "<group>"; };
 		574B5FDF168CE148008367D1 /* boundary.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = boundary.vsh; sourceTree = "<group>"; };
@@ -193,12 +204,17 @@
 		574B5FE5168CE148008367D1 /* subtractPressureGradient.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = subtractPressureGradient.fsh; sourceTree = "<group>"; };
 		574B5FE6168CE148008367D1 /* velocityBoundary.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = velocityBoundary.fsh; sourceTree = "<group>"; };
 		574B5FE7168CE148008367D1 /* visualize.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = visualize.fsh; sourceTree = "<group>"; };
-		574B5FF4168CE2CA008367D1 /* Fluid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Fluid.h; sourceTree = "<group>"; };
-		574B5FF5168CE2CA008367D1 /* Fluid.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = Fluid.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		574B5FF4168CE2CA008367D1 /* FluidEx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FluidEx.h; sourceTree = "<group>"; };
+		574B5FF5168CE2CA008367D1 /* FluidEx.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = FluidEx.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		574B5FF7168D20BD008367D1 /* FBO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FBO.h; sourceTree = "<group>"; };
 		574B5FF8168D20BD008367D1 /* FBO.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FBO.m; sourceTree = "<group>"; };
+		575C8EEC1695FB4C00AB565B /* fractalSphere.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fractalSphere.png; sourceTree = "<group>"; };
 		575DA0001693C90400A50C41 /* SettingsVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingsVC.h; sourceTree = "<group>"; };
 		575DA0011693C90400A50C41 /* SettingsVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SettingsVC.m; sourceTree = "<group>"; };
+		575DA0031693E35A00A50C41 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
+		575DA0051693E43300A50C41 /* AssetsLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AssetsLibrary.framework; path = System/Library/Frameworks/AssetsLibrary.framework; sourceTree = SDKROOT; };
+		575DA0071694366C00A50C41 /* Fluid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Fluid.h; sourceTree = "<group>"; };
+		575DA0081694366C00A50C41 /* Fluid.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Fluid.m; sourceTree = "<group>"; };
 		5764756A167D5E8C00D5A431 /* GenericShader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GenericShader.h; path = ../shaders/GenericShader.h; sourceTree = "<group>"; };
 		5764756B167D5E8C00D5A431 /* GenericShader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = GenericShader.m; path = ../shaders/GenericShader.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		5764756F167D619800D5A431 /* Generic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Generic.h; path = ../Generic.h; sourceTree = "<group>"; };
@@ -208,6 +224,15 @@
 		57647576167D8AC100D5A431 /* TGTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = TGTypes.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		57718EF616838D75001D7D35 /* CustomPlane.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomPlane.h; sourceTree = "<group>"; };
 		57718EF716838D75001D7D35 /* CustomPlane.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomPlane.m; sourceTree = "<group>"; };
+		578292C2169861D20053ADCD /* esShapes.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = esShapes.c; sourceTree = "<group>"; };
+		578292C5169879930053ADCD /* ImageBaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageBaker.h; sourceTree = "<group>"; };
+		578292C6169879930053ADCD /* ImageBaker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageBaker.m; sourceTree = "<group>"; };
+		578292C8169A87B00053ADCD /* test.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = test.png; sourceTree = "<group>"; };
+		578292CA169A8B650053ADCD /* imageBaker.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = imageBaker.png; sourceTree = "<group>"; };
+		578292CC169A8C220053ADCD /* ImageBakerView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageBakerView.h; sourceTree = "<group>"; };
+		578292CD169A8C230053ADCD /* ImageBakerView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageBakerView.m; sourceTree = "<group>"; };
+		578292D2169AB2CD0053ADCD /* SoundPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoundPool.h; path = audio/SoundPool.h; sourceTree = "<group>"; };
+		578292D3169AB2CD0053ADCD /* SoundPool.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SoundPool.m; path = audio/SoundPool.m; sourceTree = "<group>"; };
 		57900682168411640068659F /* Factory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Factory.h; sourceTree = "<group>"; };
 		57900683168411650068659F /* Factory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Factory.m; sourceTree = "<group>"; };
 		5790068616841F3B0068659F /* Interactive.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Interactive.h; sourceTree = "<group>"; };
@@ -242,6 +267,10 @@
 		57E8750716782894008243B2 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		57E8750916782894008243B2 /* TimbreGroove-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TimbreGroove-Prefix.pch"; sourceTree = "<group>"; };
 		57E87525167829BB008243B2 /* Alex-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Alex-icon.png"; sourceTree = "<group>"; };
+		57F290F21695775400293B0E /* fractal.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = fractal.fsh; sourceTree = "<group>"; };
+		57F290F51695776400293B0E /* fractal.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = fractal.vsh; sourceTree = "<group>"; };
+		57F290F7169578C700293B0E /* Fractal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Fractal.h; sourceTree = "<group>"; };
+		57F290F8169578C700293B0E /* Fractal.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Fractal.m; sourceTree = "<group>"; };
 		57F412F1168167F700D9DC67 /* Sphere.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sphere.h; sourceTree = "<group>"; };
 		57F412F2168167F700D9DC67 /* Sphere.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Sphere.m; sourceTree = "<group>"; };
 		57F412FB1681E7D200D9DC67 /* js_import.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; name = js_import.html; path = TimbreGroove/shaders/js_import.html; sourceTree = SOURCE_ROOT; };
@@ -256,6 +285,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				575DA0061693E43300A50C41 /* AssetsLibrary.framework in Frameworks */,
+				575DA0041693E35A00A50C41 /* MobileCoreServices.framework in Frameworks */,
 				57CAF78516891EDB00459353 /* libc++.dylib in Frameworks */,
 				57019F721685C086007FA38F /* AudioToolbox.framework in Frameworks */,
 				57019F701685C042007FA38F /* QuartzCore.framework in Frameworks */,
@@ -307,6 +338,8 @@
 				57F7E49B16881356001156FF /* TG3dObject+Sound.m */,
 				57F7E49D16882889001156FF /* TrackView+Sound.h */,
 				57F7E49E16882889001156FF /* TrackView+Sound.m */,
+				578292D2169AB2CD0053ADCD /* SoundPool.h */,
+				578292D3169AB2CD0053ADCD /* SoundPool.m */,
 			);
 			name = audio;
 			sourceTree = "<group>";
@@ -346,6 +379,8 @@
 				572198911685381C0062C36F /* TrackView.m */,
 				5721989416853F9D0062C36F /* View.h */,
 				5721989516853F9D0062C36F /* View.m */,
+				570220D7169B8E7F0028FE33 /* UIView+TGViewExtensions.h */,
+				570220D8169B8E7F0028FE33 /* UIView+TGViewExtensions.m */,
 			);
 			name = UI;
 			sourceTree = "<group>";
@@ -353,6 +388,7 @@
 		571ECF97167BE2CE00727A30 /* contrib */ = {
 			isa = PBXGroup;
 			children = (
+				578292C2169861D20053ADCD /* esShapes.c */,
 				57019F511685B582007FA38F /* fmod (api) */,
 				57F412FB1681E7D200D9DC67 /* js_import.html */,
 				571ECF98167BE2CE00727A30 /* tweener */,
@@ -395,6 +431,7 @@
 		572EB1E216786C630062F290 /* images */ = {
 			isa = PBXGroup;
 			children = (
+				572EB1E816786C630062F290 /* menu */,
 				570665F3167F3D3F0081B8C3 /* squareTest.tif */,
 				571ECFC3167BEC3B00727A30 /* aotk-ass-bare-512.tif */,
 				571ECFC1167BEA5E00727A30 /* aotk-ass-outline-512.tif */,
@@ -404,7 +441,6 @@
 				572EB1E516786C630062F290 /* Default.png */,
 				572EB1E616786C630062F290 /* Default@2x.png */,
 				572EB1E716786C630062F290 /* faded.png */,
-				572EB1E816786C630062F290 /* menu */,
 			);
 			path = images;
 			sourceTree = "<group>";
@@ -412,6 +448,9 @@
 		572EB1E816786C630062F290 /* menu */ = {
 			isa = PBXGroup;
 			children = (
+				578292CA169A8B650053ADCD /* imageBaker.png */,
+				578292C8169A87B00053ADCD /* test.png */,
+				575C8EEC1695FB4C00AB565B /* fractalSphere.png */,
 				5737C4A2169277B700C12F2D /* fluid.png */,
 				572EB1E916786C630062F290 /* audioProp.png */,
 				572EB1EA16786C630062F290 /* mood.png */,
@@ -426,7 +465,6 @@
 			isa = PBXGroup;
 			children = (
 				572EB27E167A9B160062F290 /* menus.plist */,
-				5737C4A81692ADF000C12F2D /* test.png */,
 				572EB21B16788C060062F290 /* TimbreGroove-Info.plist */,
 				572EB1EF16786C630062F290 /* InfoPlist.strings */,
 				572EB1F016786C630062F290 /* MainStoryboard_iPad.storyboard */,
@@ -441,10 +479,12 @@
 				574B5FDB168CE023008367D1 /* fluid */,
 				572EB1F416786C630062F290 /* fountain.fsh */,
 				572EB1F516786C630062F290 /* fountain.vsh */,
+				57F290F21695775400293B0E /* fractal.fsh */,
+				57F290F51695776400293B0E /* fractal.vsh */,
 				57647574167D7C4A00D5A431 /* generic.fsh */,
 				57647572167D7C3C00D5A431 /* generic.vsh */,
-				5737C4AF1693090D00C12F2D /* ripple.fsh */,
-				5737C4AD169308DF00C12F2D /* ripple.vsh */,
+				5737C4AF1693090D00C12F2D /* imageBaker.fsh */,
+				5737C4AD169308DF00C12F2D /* imageBaker.vsh */,
 				572EB1F616786C630062F290 /* hump.fsh */,
 				572EB1F716786C630062F290 /* hump.vsh */,
 			);
@@ -454,7 +494,6 @@
 		572EB1F816786C630062F290 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				57F412F016814EBB00D9DC67 /* menu */,
 				572EB287167AAD1C0062F290 /* elements */,
 				57019F761685C15B007FA38F /* audio */,
 				57019F771685C318007FA38F /* UI */,
@@ -465,8 +504,11 @@
 		572EB287167AAD1C0062F290 /* elements */ = {
 			isa = PBXGroup;
 			children = (
-				5737C4B116930BD400C12F2D /* TestElement.h */,
-				5737C4B216930BD500C12F2D /* TestElement.m */,
+				57F412F016814EBB00D9DC67 /* menu */,
+				57F290F7169578C700293B0E /* Fractal.h */,
+				57F290F8169578C700293B0E /* Fractal.m */,
+				5737C4B116930BD400C12F2D /* FractalSphere.h */,
+				5737C4B216930BD500C12F2D /* FractalSphere.m */,
 				5737C4AA1692D5BC00C12F2D /* TestFBOTexture.h */,
 				5737C4AB1692D5BD00C12F2D /* TestFBOTexture.m */,
 				574B5FF3168CE294008367D1 /* fluid */,
@@ -485,6 +527,10 @@
 				57CCFFC116849336003B4A19 /* Text.m */,
 				57A66EF4167B374500B9EA75 /* VaryingColor.h */,
 				57A66EF5167B374500B9EA75 /* VaryingColor.m */,
+				578292C5169879930053ADCD /* ImageBaker.h */,
+				578292C6169879930053ADCD /* ImageBaker.m */,
+				578292CC169A8C220053ADCD /* ImageBakerView.h */,
+				578292CD169A8C230053ADCD /* ImageBakerView.m */,
 			);
 			path = elements;
 			sourceTree = "<group>";
@@ -510,8 +556,10 @@
 		574B5FF3168CE294008367D1 /* fluid */ = {
 			isa = PBXGroup;
 			children = (
-				574B5FF4168CE2CA008367D1 /* Fluid.h */,
-				574B5FF5168CE2CA008367D1 /* Fluid.m */,
+				575DA0071694366C00A50C41 /* Fluid.h */,
+				575DA0081694366C00A50C41 /* Fluid.m */,
+				574B5FF4168CE2CA008367D1 /* FluidEx.h */,
+				574B5FF5168CE2CA008367D1 /* FluidEx.m */,
 			);
 			path = fluid;
 			sourceTree = "<group>";
@@ -567,7 +615,9 @@
 		57E874F616782894008243B2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				575DA0051693E43300A50C41 /* AssetsLibrary.framework */,
 				57CAF78416891EDA00459353 /* libc++.dylib */,
+				575DA0031693E35A00A50C41 /* MobileCoreServices.framework */,
 				57019F711685C086007FA38F /* AudioToolbox.framework */,
 				57019F6F1685C042007FA38F /* QuartzCore.framework */,
 				57E874F716782894008243B2 /* UIKit.framework */,
@@ -616,6 +666,7 @@
 				570665FD167F89640081B8C3 /* MenuView.m */,
 			);
 			name = menu;
+			path = ..;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -670,8 +721,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5737C4B41693206D00C12F2D /* ripple.fsh in Resources */,
-				5737C4B51693206D00C12F2D /* ripple.vsh in Resources */,
+				57F290FA16957F5D00293B0E /* fractal.fsh in Resources */,
+				57F290FB16957F5D00293B0E /* fractal.vsh in Resources */,
+				5737C4B41693206D00C12F2D /* imageBaker.fsh in Resources */,
+				5737C4B51693206D00C12F2D /* imageBaker.vsh in Resources */,
 				574B5FFA168D2BB4008367D1 /* addForce.fsh in Resources */,
 				574B5FFB168D2BB4008367D1 /* advect.fsh in Resources */,
 				574B5FFC168D2BB4008367D1 /* boundary.vsh in Resources */,
@@ -714,7 +767,9 @@
 				57DDE234168841680066A754 /* TGAmb2-32k.aif in Resources */,
 				57DDE237168842C00066A754 /* TGAmb3-32k.aif in Resources */,
 				5737C4A3169277B700C12F2D /* fluid.png in Resources */,
-				5737C4A91692ADF000C12F2D /* test.png in Resources */,
+				575C8EED1695FB4C00AB565B /* fractalSphere.png in Resources */,
+				578292C9169A87B10053ADCD /* test.png in Resources */,
+				578292CB169A8B660053ADCD /* imageBaker.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -725,6 +780,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				571A472F16954234002231C5 /* Fluid.m in Sources */,
+				575DA00A169437AC00A50C41 /* FractalSphere.m in Sources */,
 				57F855E0167ED84100FF244C /* Menu.m in Sources */,
 				57F855E1167ED84100FF244C /* MenuItem.m in Sources */,
 				5717F94B167EBFAC00D8054B /* Plane.m in Sources */,
@@ -748,7 +805,6 @@
 				57E7465E1680438300C1D4FF /* EventCapture.m in Sources */,
 				57F412F3168167F700D9DC67 /* Sphere.m in Sources */,
 				572D7F2E16832749006D48BF /* SimpleImage.m in Sources */,
-				57718EF816838D75001D7D35 /* CustomPlane.m in Sources */,
 				57900684168411660068659F /* Factory.m in Sources */,
 				57E62E67168433100030908E /* Photo.m in Sources */,
 				57CCFFC216849337003B4A19 /* Text.m in Sources */,
@@ -758,11 +814,14 @@
 				57019F7A1685CCC7007FA38F /* Sound.m in Sources */,
 				57F7E49C16881356001156FF /* TG3dObject+Sound.m in Sources */,
 				57F7E49F1688288A001156FF /* TrackView+Sound.m in Sources */,
-				574B5FF6168CE2CA008367D1 /* Fluid.m in Sources */,
 				574B5FF9168D20BD008367D1 /* FBO.m in Sources */,
-				5737C4AC1692D5C000C12F2D /* TestFBOTexture.m in Sources */,
-				5737C4B316930BD500C12F2D /* TestElement.m in Sources */,
 				575DA0021693C90400A50C41 /* SettingsVC.m in Sources */,
+				57F290F9169578C700293B0E /* Fractal.m in Sources */,
+				578292C3169861D20053ADCD /* esShapes.c in Sources */,
+				578292C7169879930053ADCD /* ImageBaker.m in Sources */,
+				578292CE169A8C230053ADCD /* ImageBakerView.m in Sources */,
+				578292D4169AB2CE0053ADCD /* SoundPool.m in Sources */,
+				570220D9169B8E7F0028FE33 /* UIView+TGViewExtensions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

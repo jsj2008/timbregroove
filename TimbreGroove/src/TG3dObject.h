@@ -30,6 +30,7 @@
 -(void)update:(NSTimeInterval)dt;
 -(void)render:(NSUInteger)w h:(NSUInteger)h;
 -(void)renderToFBO;
+-(void)renderToFBOWithClear:(bool)clear;
 -(void)renderToCapture:(Shader *)shader atLocation:(GLint)location;
 
 @property (nonatomic,strong) Camera   * camera;

@@ -12,6 +12,36 @@
 			<string>newModel.png</string>
 			<key>items</key>
 			<dict>
+				<key>imageBaker_element</key>
+				<dict>
+					<key>userData</key>
+					<dict>
+						<key>instanceView</key>
+						<string>ImageBakerView</string>
+						<key>instanceClass</key>
+						<string>ImageBaker</string>
+					</dict>
+					<key>icon</key>
+					<string>imageBaker.png</string>
+					<key>handler</key>
+					<string>Factory</string>
+					<key>renderClass</key>
+					<string>MenuItem</string>
+				</dict>
+				<key>fractalSphere_element</key>
+				<dict>
+					<key>userData</key>
+					<dict>
+						<key>instanceClass</key>
+						<string>FractalSphere</string>
+					</dict>
+					<key>icon</key>
+					<string>fractalSphere.png</string>
+					<key>handler</key>
+					<string>Factory</string>
+					<key>renderClass</key>
+					<string>MenuItem</string>
+				</dict>
 				<key>test_element</key>
 				<dict>
 					<key>userData</key>

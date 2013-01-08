@@ -12,7 +12,7 @@
 
 static NSMutableDictionary * __shaders;
 
-@implementation ShaderFactory
+@implementation ShaderPool
 
 +(id)getShader:(NSString *)name klass:(Class)klass header:(NSString *)header;
 {
@@ -134,13 +134,13 @@ static NSMutableDictionary * __shaders;
     NSString * path = [[NSBundle mainBundle] pathForResource:vname ofType:@"vsh"];
     if (![self compileShader:&vertShader type:GL_VERTEX_SHADER file:path]) {
         NSLog(@"Failed to compile vertex shader");
-        return NO;
+        exit(1);
     }
     
     path = [[NSBundle mainBundle] pathForResource:fname ofType:@"fsh"];
     if (![self compileShader:&fragShader type:GL_FRAGMENT_SHADER file:path]) {
         NSLog(@"Failed to compile fragment shader");
-        return NO;
+        exit(1);
     }
     
     glAttachShader(_program, vertShader);
@@ -148,6 +148,7 @@ static NSMutableDictionary * __shaders;
     
     if (![self link:_program]) {
         NSLog(@"Failed to link program: %d", _program);
+        exit(1);
         
         if (vertShader) {
             glDeleteShader(vertShader);
@@ -188,7 +189,7 @@ static NSMutableDictionary * __shaders;
                                                      error:nil] ;
     if (!src) {
         NSLog(@"Failed to load vertex shader %@",file);
-        return NO;
+        exit(1);
     }
 
     if( _header )
@@ -206,7 +207,7 @@ static NSMutableDictionary * __shaders;
     if (logLength > 0) {
         GLchar *log = (GLchar *)malloc(logLength);
         glGetShaderInfoLog(*shader, logLength, &logLength, log);
-        NSLog(@"Shader compile log:\n%s", log);
+        NSLog(@"Shader %@ compile log:\n%s", file, log);
         free(log);
     }
 #endif
@@ -215,7 +216,8 @@ static NSMutableDictionary * __shaders;
     glGetShaderiv(*shader, GL_COMPILE_STATUS, &status);
     if (status == 0) {
         glDeleteShader(*shader);
-        return NO;
+        NSLog(@"Bad compile status: %d",status);
+        exit(1);
     }
     
     return YES;
@@ -239,7 +241,8 @@ static NSMutableDictionary * __shaders;
     
     glGetProgramiv(prog, GL_LINK_STATUS, &status);
     if (status == 0) {
-        return NO;
+        NSLog(@"Bad link status: %d",status);
+        exit(1);
     }
     
     return YES;

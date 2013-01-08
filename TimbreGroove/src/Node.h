@@ -17,6 +17,7 @@
 
 @property (nonatomic,weak)   Node * parent;
 @property (nonatomic,strong) NSArray * children;
+@property (nonatomic,readonly) id firstChild;
 
 -(void)appendChild:(Node *)child;
 

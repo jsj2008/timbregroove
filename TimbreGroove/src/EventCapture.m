@@ -34,8 +34,7 @@
 
     _currentColor    = 1;
     _objDict         = [NSMutableDictionary new];
-    shader           = [ShaderFactory getShader:@"generic" klass:[GenericShader class] header:@""];
-    shader.opacity   = 1; // how is this not default? ugh.
+    shader           = [ShaderPool getShader:@"generic" klass:[GenericShader class] header:@""];
     _posLocation     = [shader location:sv_pos];
     
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);

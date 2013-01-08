@@ -8,11 +8,18 @@
 
 #import "TG3dObject+Sound.h"
 #import "Sound.h"
+#import "SoundPool.h"
+
 #import "objc/runtime.h"
 
 static Sound * _objSound;
 
 @implementation TG3dObject (Sound)
+
+-(void)assignSound:(NSDictionary *)params
+{
+    self.sound = [[SoundPool sharedInstance] getSound:params];
+}
 
 -(Sound *)sound
 {

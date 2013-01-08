@@ -9,13 +9,16 @@
 #import <GLKit/GLKit.h>
 #import "Graph.h"
 
+
 @interface View : GLKView {
     @protected
     Graph * _graph;
     bool _visible;
     GLKVector4 _backcolor;
 }
+@property (nonatomic,readonly) id firstNode;
 @property (nonatomic,readonly) bool visible;
+@property (nonatomic) bool clearOnRender;
 @property (nonatomic) float x;
 @property (nonatomic) float y;
 @property (nonatomic) float width;

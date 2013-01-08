@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "TGElement.h"
+#import "TGGenericElement.h"
 
 @interface BlueSquare : TGElement
 

@@ -13,28 +13,44 @@
 
 @implementation View
 
-- (id)initWithFrame:(CGRect)frame
+- (id)initWithFrame:(CGRect)frame context:(EAGLContext *)context;
 {
-    self = [super initWithFrame:frame];
+    self = [super initWithFrame:frame context:context];
     if (self) {
         _backcolor = GLKVector4Make(0, 0, 0, 1);
+        _clearOnRender = true;
     }
     return self;
 }
 
+
 - (void)setupGL
 {
-/*
-    [EAGLContext setCurrentContext:self.context];
+    if( [EAGLContext currentContext] != self.context )
+    {
+        [EAGLContext setCurrentContext:self.context];
+        NSLog(@"Set context %@",self.context);
+    }
+    else
+    {
+        NSLog(@"Did NOT Set context %@",self.context);
+    }
     
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-*/    
-    _graph = [[Graph alloc] init];
-    _graph.camera = [[Camera alloc] init];
-    _graph.view = self;
-    
+   
+    if( !_graph )
+    {
+        _graph = [[Graph alloc] init];
+        _graph.camera = [[Camera alloc] init];
+        _graph.view = self;
+    }
+}
+
+- (id)firstNode
+{
+    return _graph.firstChild;
 }
 
 - (void)showScene
@@ -49,8 +65,11 @@
 
 - (void)update:(NSTimeInterval)dt
 {
-    [_graph update:dt];
-    [self setNeedsDisplay];
+    //if( !_visible )
+    {
+        [_graph update:dt];
+        [self setNeedsDisplay];
+    }
 }
 
 - (void)drawRect:(CGRect)rect
@@ -59,8 +78,11 @@
     NSUInteger h = self.drawableHeight;
     [_graph.camera setPerspectiveForViewWidth:w andHeight:h];
     
-    glClearColor(_backcolor.r,_backcolor.g,_backcolor.b,_backcolor.a);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if( _clearOnRender )
+    {
+        glClearColor(_backcolor.r,_backcolor.g,_backcolor.b,_backcolor.a);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
     [_graph render:w h:h];
 }
 

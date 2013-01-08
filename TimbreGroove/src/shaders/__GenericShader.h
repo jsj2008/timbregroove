@@ -7,9 +7,9 @@
 //
 
 #import "TGTypes.h"
-#import "__Shader.h"
+#import "Shader.h"
 
-@interface __GenericShader : __Shader
+@interface __GenericShader : Shader
 
 -(id)initWithName:(NSString *)name andHeader:(NSString *)header;
 

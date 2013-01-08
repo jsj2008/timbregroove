@@ -11,6 +11,7 @@
 #import "Photo.h"
 #import "GenericShader.h"
 
+
 static Factory * __f;
 
 @implementation Factory
@@ -32,9 +33,8 @@ static Factory * __f;
     return self;
 }
 
--(void)handleSelect:(id<MenuItemRender>) menuItem
+-(void)handleSelect:(NSDictionary *) meta
 {
-    NSDictionary * meta = menuItem.meta;
     NSDictionary * ud   = meta[@"userData"];
     
     if( !ud )
@@ -50,14 +50,7 @@ static Factory * __f;
 
     if( klassName )
     {
-        NSDictionary * options = [_delegate Factory:self willCreateNode:klassName options:ud];
-        Class klass = NSClassFromString(klassName);
-        Node * node;
-        if( options )
-            node = [[klass alloc] initWithObject:options];
-        else
-            node = [klass new];
-        [_delegate Factory:self onNodeCreated:node];
+        [_delegate Factory:self createNode:ud];
     }
     else
     {

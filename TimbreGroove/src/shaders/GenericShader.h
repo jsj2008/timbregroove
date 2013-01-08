@@ -14,8 +14,10 @@
 -(id)initWithName:(NSString *)name andHeader:(NSString *)header;
 
 @property (nonatomic) GLKVector4 color;
-@property (nonatomic) float      opacity;
 @property (nonatomic) GLKMatrix4 pvm;
-@property (nonatomic) bool       useLighting;
+@property (nonatomic) GLKMatrix3 normalMat;
+@property (nonatomic) GLKVector3 lightDir;
+@property (nonatomic) GLKVector3 dirColor;
+@property (nonatomic) GLKVector3 ambient;
 
 @end

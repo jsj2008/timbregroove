@@ -18,7 +18,6 @@ static void genSphere(TGGenericElementParams *p, float radius,
         sz += (sizeof(float)*3);
     if( wUV )
         sz += (sizeof(float)*2);
-    
 }
 
 
@@ -27,14 +26,17 @@ static void genSphere(TGGenericElementParams *p, float radius,
     float _longs;
     float _lats;
     bool  _hasTexture;
+    float _lightRot;
+    Texture * _initTexture;
 }
 @end
 @implementation Sphere
 
 -(id)init
 {
-    return [self initWithRadius:1 longs:10 lats:10];
+    return [self initWithRadius:1 longs:30 lats:30];
 }
+
 -(id)initWithRadius:(float)radius longs:(float)longs lats:(float)lats
 {
     _radius = radius;
@@ -59,27 +61,59 @@ static void genSphere(TGGenericElementParams *p, float radius,
     return [super initWithTextureFile:fileName];
 }
 
+-(id)initWithTexture:(Texture *)texture
+{
+    _radius = 1;
+    _lats = 30;
+    _longs = 30;
+    _hasTexture = true;
+    _initTexture = texture;
+    return [super init];
+}
+
+-(void)createTexture
+{
+    if(_initTexture )
+    {
+        self.texture = _initTexture;
+        _initTexture = nil;
+    }
+}
+
+-(void)update:(NSTimeInterval)dt
+{
+    _lightRot += 0.03;
+    GLKVector3 lDir = self.lightDir;
+    GLKMatrix4 mx = GLKMatrix4MakeTranslation( lDir.x, lDir.y, lDir.z );
+    
+    mx = GLKMatrix4Rotate(mx, _lightRot, 1.0f, 0.0f, 0.0f);
+    self.lightDir = GLKMatrix4MultiplyVector3(mx,GLKVector3Make(1, 0, -1));
+}
+
 -(void)createBuffer
 {
-    unsigned int numV = _longs * _lats;
     NSArray * types;
+
     if( _hasTexture )
-        types = @[@(sv_pos),@(sv_uv)];
+        types = @[@(sv_pos),@(sv_uv),@(sv_normal)];
     else
-        types = @[@(sv_pos)];
+        types = @[@(sv_pos),@(sv_normal)];
     
-    [self createBufferDataByType:types numVertices:numV numIndices:numV*6];
+    [self createBufferDataByType:types
+                     numVertices:((_longs+1) * (_lats+1))
+                      numIndices:_longs*_lats*6];
 }
 
 -(void)getBufferData:(void *)vertextData
-           indexData:(unsigned *)indexData
+           indexData:(unsigned int *)indexData
 {
     float * data = vertextData;
-    bool wNormals = false;
+    bool wNormals = true;
     bool wUV = _hasTexture;
     
 	for (int latNumber = 0; latNumber <= _lats; ++latNumber) {
 		for (int longNumber = 0; longNumber <= _longs; ++longNumber) {
+
 			float theta = latNumber * M_PI / _lats;
 			float phi = longNumber * 2 * M_PI / _longs;
 			

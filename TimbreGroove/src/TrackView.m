@@ -11,13 +11,27 @@
 #import "Camera.h"
 #import "Tweener.h"
 #import "Tween.h"
+#import "TG3dObject+Sound.h"
+#import "Sound.h"
+#import "SettingsVC.h"
+
+static NSString * _str_volumeSlider = @"_volumeSlider";
+
 
 @implementation TrackView
+
+-(void)createNode:(NSDictionary *)params;
+{
+    Class klass = NSClassFromString(params[@"instanceClass"]);
+    TG3dObject * node = [[klass alloc] initWithObject:self];
+    [node assignSound:params];
+    [self.graph appendChild:node];
+}
 
 -(void)setupGL
 {
     [super setupGL];
-    GLKVector3 pos = { 0, 0, -5 }; //CAMERA_DEFAULT_Z };
+    GLKVector3 pos = { 0, 0, CAMERA_DEFAULT_Z };
     _graph.camera.position = pos;
     _backcolor = GLKVector4Make(0.1, 0.1, 0.1, 1);
 }
@@ -31,6 +45,8 @@
     self.frame = rc;
     NSDictionary * params = @{  TWEEN_DURATION: @0.7f,
                                 TWEEN_TRANSITION: TWEEN_FUNC_EASEOUTSINE,
+                        TWEEN_ON_COMPLETE_SELECTOR: @"setupGL",
+                        TWEEN_ON_COMPLETE_TARGET: self,
                                             @"x": @(0)
     };
     
@@ -59,4 +75,33 @@
 {
     _visible = false;
 }
+
+-(NSArray *)getSettings
+{
+    return [self getSoundSettings];
+}
+
+-(NSArray *)getSoundSettings
+{
+    TG3dObject * obj = self.firstNode;
+    SettingsDescriptor * sd = [[SettingsDescriptor alloc] initWithControlType: SC_Slider
+                                                                   memberName: _str_volumeSlider
+                                                                    labelText: @"Volume"
+                                                                      options: @{@"low":@0.0f,@"high":@1.0f}
+                                                                     selected: @(obj.sound.volume)
+                                                                     delegate: self
+                                                                     priority: AUDIO_SETTINGS];
+
+    return @[sd];
+}
+
+-(void)sliderValueChanged:(UISlider *)slider
+{
+    if( slider.memberName == _str_volumeSlider)
+    {
+        TG3dObject * obj = self.firstNode;
+        obj.sound.volume = slider.value;
+    }
+}
+
 @end

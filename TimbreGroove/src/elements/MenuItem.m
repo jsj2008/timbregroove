@@ -58,7 +58,7 @@
         {
             Class klass = NSClassFromString(handlerClass);
             id<MenuItemHandler> mh = [[klass alloc] init];
-            [mh handleSelect:self];                
+            [mh handleSelect:_meta];
         }
     }
 }

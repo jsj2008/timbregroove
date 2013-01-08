@@ -12,4 +12,7 @@
 
 @interface TG3dObject (Sound)
 @property (nonatomic,strong) Sound * sound;
+
+-(void)assignSound:(NSDictionary *)params;
+
 @end

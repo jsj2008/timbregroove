@@ -21,11 +21,13 @@ typedef enum {
     
     SV_LAST_ATTR = sv_uv,
     
-    sv_opacity,
     sv_pvm,
     sv_sampler,
     sv_ucolor,
-    sv_useLighting,
+    sv_normalMat,
+    sv_lightDir,
+    sv_dirColor,
+    sv_ambient,
     
     NUM_SVARIABLES,
     sv_custom,
@@ -39,6 +41,7 @@ typedef enum {
     TG_VECTOR2,
     TG_VECTOR3,
     TG_VECTOR4,
+    TG_MATRIX3,
     TG_MATRIX4,
     TG_BOOL,
     TG_TEXTURE
@@ -86,4 +89,10 @@ static inline NSMutableArray * a(NSArray *a)
 {
     return [[NSMutableArray alloc] initWithArray:a];
 }
+
+// see esShapes.c
+int esGenSphere ( int numSlices, float radius, GLfloat **vertices, GLfloat **normals,
+                            GLfloat **texCoords, GLushort **indices );
+int esGenCube ( float scale, GLfloat **vertices, GLfloat **normals,
+               GLfloat **texCoords, GLushort **indices );
 #endif

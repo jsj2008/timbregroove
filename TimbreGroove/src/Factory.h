@@ -8,14 +8,15 @@
 
 #import <Foundation/Foundation.h>
 
-#import "Menu.h"
+#import "Menu.h" // for menuitemHandler protocol
+
+@class Node;
 
 @class Factory;
 
 @protocol FactoryDelegate <NSObject>
 
--(NSDictionary *)Factory:(Factory *)factory willCreateNode:(NSString *)name options:(NSDictionary *)options;
--(void)Factory:(Factory *)factory onNodeCreated:(Node*)node;
+-(void)Factory:(Factory *)factory createNode:(NSDictionary *)options;
 -(void)Factory:(Factory *)factory segueTo:(NSString *)segueName;
 
 @end

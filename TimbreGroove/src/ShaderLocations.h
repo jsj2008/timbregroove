@@ -21,6 +21,6 @@
 -(void)write:(NSString *)name type:(TGUniformType)type data:(void*)data;
 -(void)writeToLocation:(GLint)location type:(TGUniformType)type data:(void*)data;
 
-- (GLint) locationForName:(NSString *)name program:(GLuint)program;
+- (GLint) locationForName:(NSString *)name;
 
 @end

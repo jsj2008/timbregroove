@@ -25,6 +25,7 @@
     {
         if( ![self loadFromFile:fileName] )
             return nil;
+        _uLocation = -1;
     }
     
     return self;
@@ -35,6 +36,7 @@
     if( (self = [super init]) )
     {
         _glTexture = glTextureId;
+        _uLocation = -1;
     }
     
     return self;
@@ -80,6 +82,7 @@
         }
         
         UIGraphicsEndImageContext();
+        _uLocation = -1;
     }
 
     return self;

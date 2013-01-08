@@ -12,8 +12,9 @@
 #import "SoundMan.h"
 #import "Tweener.h"
 #import "Tween.h"
-
+#import "SettingsVC.h"
 @implementation TrackView (Sound)
+
 
 -(void)debugDump
 {

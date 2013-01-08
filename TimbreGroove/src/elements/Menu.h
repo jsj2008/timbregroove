@@ -28,7 +28,7 @@
 
 @protocol MenuItemHandler <NSObject>
 
--(void)handleSelect:(id<MenuItemRender>) menuItem;
+-(void)handleSelect:(NSDictionary *) menuItemMeta;
 
 @end
 

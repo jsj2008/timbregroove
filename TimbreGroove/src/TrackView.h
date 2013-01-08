@@ -14,7 +14,12 @@
 #define SHOW_DIR_LEFT -1
 
 @interface TrackView : View
-@property (nonatomic) unsigned int trackNumber;
+
+-(void)createNode:(NSDictionary *)params;
+
 -(void)showFromDir:(int)dir;
 -(void)hideToDir:(int)dir;
+
+-(NSArray *)getSettings; // array of SettingsDescriptor
+
 @end
