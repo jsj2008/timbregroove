@@ -16,8 +16,6 @@
 				<dict>
 					<key>userData</key>
 					<dict>
-						<key>instanceView</key>
-						<string>ImageBakerView</string>
 						<key>instanceClass</key>
 						<string>ImageBaker</string>
 					</dict>

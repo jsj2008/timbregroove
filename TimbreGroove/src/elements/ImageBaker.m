@@ -11,6 +11,21 @@
 #import "Camera.h"
 #import "FBO.h"
 #import "TrackView.h"
+#import "SettingsVC.h"
+
+static NSString * const _str_bakerShaderPicker = @"bakerShader";
+
+static const char * __bakerShakerModes[] = {
+    "BLUR_DOWN", "SOLARIZE", "BLEED_UP"
+};
+
+static const char *__bakeShakerNames[] = {
+    "Blur me down", "Heat me up", "Burn me out"
+};
+
+static const float __bakeShakerTimes[] = {
+    8.5f,           4.2f,         12.0f
+};
 
 @interface ImageBaker() {
     Texture * _picture;
@@ -33,13 +48,21 @@
 @end
 @implementation ImageBaker
 
--(id)initWithObject:(id)view
++(NSDictionary *)getShaderModes
 {
-    self = [super init];
-    if( !self )
-        return nil;
-    
-    GLKView * glview = (GLKView *)(((TrackView *)view).superview);
+    return @{@(0):@(__bakeShakerNames[0]), @(1):@(__bakeShakerNames[1]),@(2):@(__bakeShakerNames[2])};
+}
+
+-(void)setMode:(int)mode
+{
+    _mode = mode;
+    self.needsRewire = true;
+}
+
+-(id)wireUp
+{
+    [super wireUp];
+    GLKView * glview = (GLKView *)(self.view.superview);
     GLint w = glview.drawableWidth;
     GLint h = glview.drawableHeight;
     _px = 1.0f / w;
@@ -47,8 +70,8 @@
     GLKVector2 pixelSize = { _px, _py };
     [self.shader.locations write:@"u_pixelSize" type:TG_VECTOR2 data:&pixelSize];
 
-    _uSampler1 = [self.shader.locations locationForName:@"u_sampler"];
-    _uSampler2 = [self.shader.locations locationForName:@"u_samplerSnap"];
+    _uSampler2 = [self.shader.locations locationForName:@"u_sampSnap"];
+    _uSampler1 = [self.shader.locations locationForName:@"u_sampXPix"];
     
     self.camera = [IdentityCamera new];
 
@@ -56,15 +79,10 @@
     _fbo1 = [[FBO alloc] initWithWidth:w height:h];
     _fbo2 = [[FBO alloc] initWithWidth:w height:h];
     _fbo3 = [[FBO alloc] initWithWidth:w height:h];
-    
-    [self setRefreshing:true];
-    self.fbo = _fbo1;
-    /*
-    [self wireTexturesOne:_picture Two:_fbo3 fbo:_fbo1];
-    [self renderToFBO];
-    */
 
-    
+    [self setRefreshing:false];
+    [self setRefreshing:true];
+
     return self;
 }
 
@@ -72,6 +90,17 @@
 {
     _refreshing = value;
     [self.shader.locations write:@"u_refreshing" type:TG_BOOL data:&_refreshing];
+    if( _refreshing )
+    {
+        _picture.uLocation = _uSampler1;
+        self.fbo.uLocation = _uSampler2;
+        [self replaceTextures:@[_picture,self.fbo]];
+    }
+    else
+    {
+        [self wireTexturesOne:_picture Two:_fbo2 fbo:_fbo1];
+        [self renderToFBO];
+    }
 }
 
 -(void)wireTexturesOne:(Texture *)one Two:(Texture *)two fbo:(FBO *)fbo
@@ -84,7 +113,8 @@
 
 -(void)createShader
 {
-    self.shader = [[GenericShader alloc] initWithName:@"imageBaker" andHeader:@"#define BLEED_UP"];
+    NSString * header = [(@"#define ") stringByAppendingString:@(__bakerShakerModes[_mode])];
+    self.shader = [[GenericShader alloc] initWithName:@"imageBaker" andHeader:header];
 }
 
 -(void)createBuffer
@@ -116,57 +146,65 @@
 
 -(void)update:(NSTimeInterval)dt
 {
-    _time += dt;
-    _time2 += dt;
-    NSTimeInterval check = 0;
-    if( _time > 0.1 )
+    _time += dt;    // frame rate
+    _time2 += dt;   // fx duration
+    
+    if( _refreshing )
     {
-        if( _refreshing )
+        if( _time2 > 0.5 )
         {
-            
-            if( self.fbo == _fbo1 || self.fbo == _fbo3 )
-            {
-                [self wireTexturesOne:_fbo1 Two:_picture fbo:_fbo2];
-            }
-            else
-            {
-                [self wireTexturesOne:_fbo2 Two:_picture fbo:_fbo1];
-            }
-
-            check = 3.5;
-            
-            float timeDiff = check - (_time2*1.2);
-            if( timeDiff < 0 )
-                timeDiff = 0;
-            [self.shader.locations write:@"u_timeDiff" type:TG_FLOAT data:&timeDiff];            
-        }
-        else
-        {
-            if( self.fbo == _fbo1 )
-            {
-                [self wireTexturesOne:_fbo1 Two:_fbo2 fbo:_fbo3];
-            }
-            else if ( self.fbo == _fbo2 )
-            {
-                [self wireTexturesOne:_fbo2 Two:_fbo3 fbo:_fbo1];
-            }
-            else
-            {
-                [self wireTexturesOne:_fbo3 Two:_fbo1 fbo:_fbo2];
-            }
-            
-            check = 10.0;
-        }
-        [self renderToFBO];
-        
-        if( _time2 > check  )
-        {
-            [self setRefreshing:!_refreshing];
+            [self setRefreshing:false];
             _time2 = 0.0;
         }
-        
-
-        _time = 0;
+        float f = _time2;
+        [self.shader.locations write:@"u_timeDiff" type:TG_FLOAT data:&f];
+    }
+    else
+    {
+        if( _time > 0.1 )
+        {
+            if( _time2 > __bakeShakerTimes[_mode] )
+            {
+                [self setRefreshing:true];
+                _time2 = 0.0;
+            }
+            else
+            {
+                if( self.fbo == _fbo1 )
+                {
+                    [self wireTexturesOne:_fbo1 Two:_fbo2 fbo:_fbo3];
+                }
+                else if ( self.fbo == _fbo2 )
+                {
+                    [self wireTexturesOne:_fbo2 Two:_fbo3 fbo:_fbo1];
+                }
+                else
+                {
+                    [self wireTexturesOne:_fbo3 Two:_fbo1 fbo:_fbo2];
+                }
+                [self renderToFBO];
+            }
+            _time = 0.0;
+        }
     }
 }
+
+-(NSArray *)getSettings
+{
+    NSArray * arr = [super getSettings];
+    NSDictionary * shaders = [ImageBaker getShaderModes];
+    
+    SettingsDescriptor * sd;
+    sd = [[SettingsDescriptor alloc]  initWithControlType: SC_Picker
+                                               memberName: _str_bakerShaderPicker
+                                                labelText: @"Effect"
+                                                  options: @{@"values":shaders,
+                                                          @"target":self, @"key":@"mode"}
+                                             initialValue: @(_mode)
+                                                 priority: SHADER_SETTINGS];
+    
+    return [arr arrayByAddingObject:sd];
+    
+}
+
 @end

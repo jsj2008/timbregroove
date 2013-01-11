@@ -16,8 +16,6 @@
 
 @property (nonatomic,strong) NSDictionary * meta;
 
--(id)initWithIcon:(NSString *)fileName;
-
 -(void)onTap:(UITapGestureRecognizer *)tgr;
 
 @end

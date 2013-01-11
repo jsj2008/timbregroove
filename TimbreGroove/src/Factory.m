@@ -18,8 +18,10 @@ static Factory * __f;
 
 +(id)sharedInstance
 {
-    if( !__f )
-        __f = [Factory new];
+	@synchronized (self) {
+        if( !__f )
+            __f = [Factory new];
+    }
     return __f;
 }
 

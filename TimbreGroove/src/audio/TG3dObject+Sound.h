@@ -8,6 +8,8 @@
 
 #import "TG3dObject.h"
 
+#define DEFAULT_INITIAL_VOLUME 0.5f
+
 @class Sound;
 
 @interface TG3dObject (Sound)

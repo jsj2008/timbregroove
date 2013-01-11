@@ -11,21 +11,25 @@
 #import "Camera.h"
 #import "Tweener.h"
 #import "Tween.h"
-#import "TG3dObject+Sound.h"
 #import "Sound.h"
+#import "TG3dObject+Sound.h"
+#import "TrackView+Sound.h"
 #import "SettingsVC.h"
 
 static NSString * _str_volumeSlider = @"_volumeSlider";
-
+static NSString * _str_userMuteSwitch = @"_userMuteSwitch";
 
 @implementation TrackView
 
 -(void)createNode:(NSDictionary *)params;
 {
     Class klass = NSClassFromString(params[@"instanceClass"]);
-    TG3dObject * node = [[klass alloc] initWithObject:self];
-    [node assignSound:params];
+    TG3dObject * node = [[klass alloc] init];
+    node.view = self;
     [self.graph appendChild:node];
+    [node assignSound:params];
+    [node setValuesForKeysWithDictionary:params];
+    [node wireUp];
 }
 
 -(void)setupGL
@@ -54,53 +58,58 @@ static NSString * _str_volumeSlider = @"_volumeSlider";
 }
 
 - (void)hideToDir:(int)dir
-{
+{    
     CGRect rc = self.frame;
     NSDictionary * params = @{  TWEEN_DURATION: @0.7f,
                               TWEEN_TRANSITION: TWEEN_FUNC_EASEOUTSINE,
                                           @"x": @(rc.size.width*dir),
-                    TWEEN_ON_COMPLETE_SELECTOR: @"markHidden",
+                    TWEEN_ON_COMPLETE_SELECTOR: @"hideAnimationComplete",
                       TWEEN_ON_COMPLETE_TARGET: self
     };
     
     [Tweener addTween:self withParameters:params];
 }
 
+#if DEBUG
 -(void)drawRect:(CGRect)rect
 {
-    [super drawRect:rect];
+    [super drawRect:rect]; // for breakpoint setting
 }
+#endif
 
--(void)markHidden
-{
-    _visible = false;
-}
 
 -(NSArray *)getSettings
 {
-    return [self getSoundSettings];
+   return [[self getSoundSettings] arrayByAddingObjectsFromArray:[[self.graph firstChild] getSettings]];
 }
 
 -(NSArray *)getSoundSettings
 {
     TG3dObject * obj = self.firstNode;
-    SettingsDescriptor * sd = [[SettingsDescriptor alloc] initWithControlType: SC_Slider
+    SettingsDescriptor * sdv= [[SettingsDescriptor alloc] initWithControlType: SC_Slider
                                                                    memberName: _str_volumeSlider
                                                                     labelText: @"Volume"
-                                                                      options: @{@"low":@0.0f,@"high":@1.0f}
-                                                                     selected: @(obj.sound.volume)
-                                                                     delegate: self
+                                                                      options: @{@"low":@0.0f,@"high":@1.0f,
+                                                                                 @"target":obj.sound,@"key":@"volume"}
+                                                                initialValue:@(obj.sound.volume)
                                                                      priority: AUDIO_SETTINGS];
 
-    return @[sd];
+    SettingsDescriptor * sdm= [[SettingsDescriptor alloc] initWithControlType: SC_Switch
+                                                                   memberName: _str_userMuteSwitch
+                                                                    labelText: @"Mute"
+                                                                      options: @{ @"target":self, @"key":@"userMuted"}
+                                                                 initialValue: @(self.userMuted)
+                                                                     priority: AUDIO_SETTINGS+1];
+
+    return @[sdv,sdm];
 }
 
--(void)sliderValueChanged:(UISlider *)slider
+-(void)settingsGoingAway:(SettingsVC *)vc;
 {
-    if( slider.memberName == _str_volumeSlider)
+    for( TG3dObject *obj in self.graph.children )
     {
-        TG3dObject * obj = self.firstNode;
-        obj.sound.volume = slider.value;
+        if( obj.needsRewire )
+            [obj rewire];
     }
 }
 

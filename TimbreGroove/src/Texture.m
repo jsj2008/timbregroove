@@ -36,6 +36,7 @@
     if( (self = [super init]) )
     {
         _glTexture = glTextureId;
+        NSLog(@"assigned texture for (%d)",_glTexture);        
         _uLocation = -1;
     }
     
@@ -46,6 +47,7 @@
 {
     if( (self = [super init]) )
     {
+        NSNumber * nyes = [NSNumber numberWithBool:YES];
         UIFont *font = [UIFont fontWithName:@"Arial" size:50];
         CGSize size  = [text sizeWithFont:font];
         
@@ -56,18 +58,17 @@
         [text drawAtPoint:CGPointMake(0.0, 0.0) withFont:font];
         // TODO: Am I supposed to Release() something here?
         CGImageRef imageRef = [UIGraphicsGetImageFromCurrentImageContext() CGImage];
-        
-        NSNumber * nyes = [NSNumber numberWithBool:YES];
 
         // see http://stackoverflow.com/questions/8611063/glktextureloader-fails-when-loading-a-certain-texture-the-first-time-but-succee
         glGetError();
        
-        NSError * err;
+        NSError * err = nil;
         GLKTextureInfo *textureInfo = [GLKTextureLoader textureWithCGImage:imageRef
                                                                    options: @{
                    //                 GLKTextureLoaderApplyPremultiplication: nyes,
                                           GLKTextureLoaderOriginBottomLeft: nyes }
                                                                      error: &err];
+        
         if( textureInfo )
         {
              _glTexture  = textureInfo.name;
@@ -92,28 +93,33 @@
 {
     bool ok = true;
     NSNumber * nyes = [NSNumber numberWithBool:YES];
-    CGImageRef imageRef = [[UIImage imageNamed:fileName] CGImage];
+    NSString * path = [[NSBundle mainBundle] pathForResource:[fileName stringByDeletingPathExtension] ofType:[fileName pathExtension]];
+    UIImage * image = [UIImage imageWithContentsOfFile:path];
+    CGImageRef imageRef = [image CGImage];
     
     // see http://stackoverflow.com/questions/8611063/glktextureloader-fails-when-loading-a-certain-texture-the-first-time-but-succee
     glGetError();
-    
-    NSError * err;
+
+    NSError * err = nil;
     GLKTextureInfo *textureInfo = [GLKTextureLoader textureWithCGImage:imageRef
                                                                options: @{
                                 GLKTextureLoaderApplyPremultiplication: nyes,
                                       GLKTextureLoaderOriginBottomLeft: nyes }
                                                                  error: &err];
+    
     if( textureInfo )
     {
         _glTexture  = textureInfo.name;
         _target     = textureInfo.target;
         _origin     = textureInfo.textureOrigin;
+        NSLog(@"created texture for %@ (%d) ImageRef: %@",fileName,_glTexture,imageRef);
     }
     else
     {
         NSLog(@"FAILURE: %@\nDESCRIPTION: %@", [err localizedFailureReason], [err localizedDescription]);
         ok = false;
     }
+    
     return ok;
     
 }
@@ -135,5 +141,12 @@
 {
     glActiveTexture(GL_TEXTURE0 + _target);
     glBindTexture(GL_TEXTURE_2D, 0); // 0 is reserved for unbind
+}
+
+-(void)dealloc
+{
+    glDeleteTextures(1, &_glTexture);
+    NSLog(@"Deleted texture: %d",_glTexture);
+    _glTexture = 0;
 }
 @end

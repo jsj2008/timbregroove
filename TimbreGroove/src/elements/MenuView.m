@@ -31,15 +31,18 @@
 
 - (Menu *)createMenu:(NSDictionary *)meta
 {
-    Menu * e = [[Menu alloc] initWithMeta:meta];
+    Menu * e = [[Menu alloc] init];
+    e.meta = meta;
+    e.view = self;
     [_graph appendChild:e];
+    [e wireUp];
     
     return e;
 }
 
 - (Menu *)menu
 {
-    return (Menu *)([_graph children][0]);
+    return [_graph firstChild];
 }
 
 
@@ -57,19 +60,13 @@
     [Tweener addTween:self withParameters:params];
 }
 
-- (void)markHidden
-{
-    _visible = false;
-    [self deleteDrawable];
-}
-
 - (void)hide
 {
     CGRect rc = self.frame;
     NSDictionary * params = @{  TWEEN_DURATION: @0.5f,
                               TWEEN_TRANSITION: TWEEN_FUNC_EASEOUTTHROW,
                                           @"x": @(-rc.size.width),
-                    TWEEN_ON_COMPLETE_SELECTOR: @"markHidden",
+                    TWEEN_ON_COMPLETE_SELECTOR: @"hideAnimationComplete",
                       TWEEN_ON_COMPLETE_TARGET: self
                 };
     

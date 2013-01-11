@@ -13,30 +13,26 @@
 @interface FractalSphere() {
     Fractal * _texRenderer;
     float _myRot;
+    FBO *_fbo;
 }
 @end
 
 @implementation FractalSphere
 
--(id)init
+-(id)wireUp
 {
-    FBO * fbo = [[FBO alloc] initWithWidth:256 height:256];
+    _fbo = [[FBO alloc] initWithWidth:256 height:256];
     _texRenderer = [[Fractal alloc] init];
-    _texRenderer.fbo = fbo;
+    _texRenderer.fbo = _fbo;
     _texRenderer.backColor = GLKVector4Make(0.3, 0.3, 0.6, 1);
-    self = [super initWithTexture:fbo];
-    if( !self )
-    {
-        _texRenderer.fbo = nil;
-        _texRenderer = nil;
-        fbo = nil;
-    }
-    else
-    {
-        self.ambient = GLKVector3Make(0, 0.5, 1);
-        
-    }
-    return self;
+    [_texRenderer wireUp];
+    self.ambient = GLKVector3Make(0, 0.5, 1);
+    return [super wireUp];
+}
+
+-(void)createTexture
+{
+    self.texture = _fbo;
 }
 
 -(void)update:(NSTimeInterval)dt

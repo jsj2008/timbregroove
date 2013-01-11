@@ -15,6 +15,4 @@
 @property (nonatomic) float py;
 @property (nonatomic) CGSize viewSize;
 @property (nonatomic,strong) FluidShader * fshader;
-
--(void)setupWorldWithWidth:(unsigned int)width andHeight:(unsigned int)height;
 @end

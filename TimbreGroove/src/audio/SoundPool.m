@@ -15,8 +15,6 @@
 static SoundPool *__spf;
 
 @interface SoundPool() {
-    SoundMan * _soundMan;
-    
 }
 @end
 
@@ -24,24 +22,23 @@ static SoundPool *__spf;
 
 +(id)sharedInstance
 {
-    if( !__spf )
-        __spf = [SoundPool new];
+	@synchronized (self) {
+        if( !__spf )
+            __spf = [SoundPool new];
+    }
     return __spf;
 }
 
 -(Sound*)getSound:(NSDictionary *)params
 {
-    if( !_soundMan )
-        _soundMan = [SoundMan sharedInstance];
-    
     static int currSound;
     static const char * sounds[3] = {
+        "TGAmb3-32k.aif",
         "TG1Band-perc-24k.aif",
-        "TG1Band-pitched-24k.aif",
-        "TGAmb3-32k.aif"
+        "TG1Band-pitched-24k.aif"
     };
     
-    Sound * sound = [_soundMan getSound:sounds[currSound]];
+    Sound * sound = [[SoundMan sharedInstance] getSound:sounds[currSound]];
     currSound = (currSound + 1) % 3;
     return sound;
 }

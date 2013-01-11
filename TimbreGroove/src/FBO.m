@@ -10,6 +10,7 @@
 
 @interface FBO() { 
     GLuint _fbo;
+    GLuint _render;
 }
 @end
 @implementation FBO
@@ -29,7 +30,6 @@
     _height = height;
     
     GLuint texture;
-    GLuint render;
     
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -49,14 +49,14 @@
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     
     
-    glGenRenderbuffers(1, &render);
-    glBindRenderbuffer(GL_RENDERBUFFER, render);
+    glGenRenderbuffers(1, &_render);
+    glBindRenderbuffer(GL_RENDERBUFFER, _render);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);
     
     glGenFramebuffers(1, &_fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, render);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _render);
     
 #if DEBUG
     GLint fbs = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -74,6 +74,8 @@
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     
+    NSLog(@"created frame/render buffers %d/%d",_fbo,_render);
+    
     return [super initWithGlTextureId:texture];
 }
 
@@ -87,6 +89,13 @@
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+-(void)dealloc
+{
+    glDeleteFramebuffers(1, &_fbo);
+    glDeleteRenderbuffers(1, &_render);
+    NSLog(@"Delete fbo %d and render %d buffers",_fbo,_render);
+    _fbo = _render = 0;
+}
 @end
 
 

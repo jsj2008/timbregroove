@@ -14,11 +14,6 @@ static MeshBuffer * __sharedBuffer;
 @implementation Plane
 
 
--(Plane *)initWithColor:(GLKVector4)color
-{
-    return [super initWithColor:color];
-}
-
 -(void)createBuffer
 {
     if( __sharedBuffer == nil )

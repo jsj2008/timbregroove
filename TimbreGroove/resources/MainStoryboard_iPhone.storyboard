@@ -97,9 +97,9 @@
                         <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="f4r-cQ-03G" firstAttribute="top" secondItem="BKI-PZ-die" secondAttribute="top" constant="12" id="191-dP-eKx"/>
+                            <constraint firstItem="0Tf-wy-qWh" firstAttribute="leading" secondItem="BKI-PZ-die" secondAttribute="leading" constant="25" id="H4b-La-fbT"/>
                             <constraint firstItem="0Tf-wy-qWh" firstAttribute="top" secondItem="BKI-PZ-die" secondAttribute="top" constant="69" id="NDg-3c-kEz"/>
-                            <constraint firstItem="0Tf-wy-qWh" firstAttribute="leading" secondItem="BKI-PZ-die" secondAttribute="leading" constant="25" id="Zty-x8-zC2"/>
-                            <constraint firstItem="f4r-cQ-03G" firstAttribute="top" secondItem="VTr-8j-V3S" secondAttribute="top" type="default" id="cLh-qk-XDM"/>
+                            <constraint firstItem="VTr-8j-V3S" firstAttribute="top" secondItem="BKI-PZ-die" secondAttribute="top" constant="11" id="YoF-OH-LtY"/>
                             <constraint firstItem="f4r-cQ-03G" firstAttribute="centerX" secondItem="0Tf-wy-qWh" secondAttribute="centerX" type="default" id="cp8-jH-zQg"/>
                             <constraint firstAttribute="trailing" secondItem="VTr-8j-V3S" secondAttribute="trailing" constant="7" id="l16-rH-2a9"/>
                         </constraints>

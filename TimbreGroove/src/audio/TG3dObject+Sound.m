@@ -19,6 +19,7 @@ static Sound * _objSound;
 -(void)assignSound:(NSDictionary *)params
 {
     self.sound = [[SoundPool sharedInstance] getSound:params];
+    self.sound.volume = DEFAULT_INITIAL_VOLUME;
 }
 
 -(Sound *)sound

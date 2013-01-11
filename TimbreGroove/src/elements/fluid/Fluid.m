@@ -14,24 +14,16 @@
 #import "Camera.h"
 #import "View.h"
 
+//#define TEST_OUTPUT
+
 #pragma mark -
 #pragma mark Test object to peeking into FBOs
 #pragma mark -
 
+#ifdef TEST_OUTPUT
 @interface TestFBO : Generic
 @end
 @implementation TestFBO
-
--(id)initWithTexture:(Texture *)FBO
-{
-    if( (self = [super init]) )
-    {
-        self.texture = FBO;
-        [self getTextureLocations];
-        self.camera = [IdentityCamera new];
-    }
-    return self;
-}
 
 -(void)createBuffer
 {
@@ -56,6 +48,7 @@
 }
 
 @end
+#endif
 
 #pragma mark -
 #pragma mark Options settings
@@ -194,19 +187,37 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
 @interface FluidMesh : Generic {
     const char * _vShader;
     const char * _fShader;
-    NSDictionary * _textures; // key=uSamplerName value=FBO*
+    NSMutableDictionary * _keyedTextures; // key=uSamplerName value=FBO*
+@protected
+    float _x;
+    float _y;
 }
 @property (nonatomic) bool blend;
 @end
+
+
 @implementation FluidMesh
 
--(id)initWithV:(const char *)vShader f:(const char *)fShader textures:(NSDictionary *) textures
+-(void)setV:(const char *)vShader
+        f:(const char *)fShader
+ textures:(NSDictionary *) textures
 {
     _fShader = fShader;
     _vShader = vShader;
-    _textures = textures;
-    //_blend = true;
-    return [super init];
+    _keyedTextures = [textures mutableCopy];
+}
+
+-(void)setX:(float)x
+        Y:(float)y
+  vShader:(const char *)vShader
+  fShader:(const char *)fShader
+ textures:(NSDictionary *)textures
+{
+    _x = x;
+    _y = y;
+    _fShader = fShader;
+    _vShader = vShader;
+    _keyedTextures = [textures mutableCopy];;
 }
 
 -(void)createShader
@@ -217,7 +228,12 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
 
 -(void)setTextures:(NSDictionary *)dict
 {
-    _textures = dict;
+    _keyedTextures = [dict mutableCopy];
+}
+
+-(void)setTexture:(Texture *)texture withKey:(FluidVariableName)key
+{
+    _keyedTextures[@(key)] = texture;
 }
 
 -(void)setFloat:(FluidVariableName)fname value:(float)value
@@ -237,9 +253,9 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     [shader use];
     
     int target = 0;
-    for( id key in _textures )
+    for( id key in _keyedTextures )
     {
-        Texture * t = _textures[key];
+        Texture * t = _keyedTextures[key];
         FluidVariable * var = [shader var:[key intValue]];
         t.uLocation = var->location;
         [t bindTarget:target];
@@ -264,9 +280,9 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
         [b draw];
     }
     
-    for( id key in _textures )
+    for( id key in _keyedTextures )
     {
-        Texture * t = _textures[key];
+        Texture * t = _keyedTextures[key];
         [t unbind];
     }
 }
@@ -277,28 +293,17 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
 #pragma mark Kernel based on Mesh
 #pragma mark -
 
-@interface QuadMesh : FluidMesh {
-    float _x;
-    float _y;
-}
+@interface QuadMesh : FluidMesh 
 @end
 
 @implementation QuadMesh
 
--(id)initWithX:(float)x
-             Y:(float)y
-       vShader:(const char *)vShader
-       fShader:(const char *)fShader
-      textures:(NSDictionary *)texutures
-{
-    _x = x;
-    _y = y;
-    return [super initWithV:vShader f:fShader textures:texutures];
-}
-
 -(void)createBuffer
 {
-    [self createBufferDataByType:@[@(sv_pos)] numVertices:18 numIndices:0 uniforms:@{@(sv_pos) : @"position"}];
+    [self createBufferDataByType:@[@(sv_pos)]
+                     numVertices:18
+                      numIndices:0
+                        uniforms:@{@(sv_pos) : @"position"}];
 }
 
 -(void)getBufferData:(void *)vertextData indexData:(unsigned int *)indexData
@@ -323,59 +328,19 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
 #pragma mark Kernel based on Boundary
 #pragma mark -
 
-@interface BoundaryMesh : FluidMesh {
-    float _x;
-    float _y;
-}
+@interface BoundaryMesh : FluidMesh
 @end
 
 @implementation BoundaryMesh
 
--(id)initWithX:(float)x
-             Y:(float)y
-       vShader:(const char *)vShader
-       fShader:(const char *)fShader
-      textures:(NSDictionary *)texutures
-{
-    _x = x;
-    _y = y;
-    return [super initWithV:vShader f:fShader textures:texutures];
-}
-
 -(void)createBuffer
 {
-    TGGenericElementParams params;
+    [self createBufferDataByType:@[@(sv_pos2f),@(sv_customAttr2f)]
+                     numVertices:8
+                      numIndices:0
+                        uniforms:@{@(sv_pos2f) : @"position",@(sv_customAttr2f) : @"offset"}];
     
-    memset(&params, 0, sizeof(params));
-    
-    params.numStrides = 2;
-    
-    params.strides = malloc(sizeof(TGVertexStride)*params.numStrides);
-    
-    TGVertexStride strides[2];
-    StrideInit2f(&strides[0], sv_pos);
-    strides[0].shaderAttrName = "position";
-    StrideInit2f(&strides[1], sv_custom);
-    strides[1].shaderAttrName = "offset";
-    
-    GLsizei sz = [MeshBuffer calcDataSize:strides countStrides:2 numVertices:8];
-    void * vertexData = malloc(sz);
-    [self getBufferData:vertexData indexData:NULL];
-    
-    MeshBuffer * buffer = [[MeshBuffer alloc] init];
-    
-    [buffer setData:vertexData
-            strides:strides
-       countStrides:2
-        numVertices:8];
-    
-    buffer.drawType = GL_LINES;
-    
-    if( !_buffers )
-        _buffers = [NSMutableArray new];
-    [_buffers addObject:buffer];
-    
-    free(params.vertexData);
+    ((MeshBuffer *)_buffers[0]).drawType = GL_LINES;
 }
 
 -(void)getBufferData:(void *)vertextData indexData:(unsigned int *)indexData
@@ -428,6 +393,8 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     FBO * _velocity0;
     FBO * _velocity1;
     FBO * _divergence;
+    FBO * _pressure0;
+    FBO * _pressure1;
     
     float _input_x;
     float _input_y;
@@ -438,29 +405,237 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     FluidMesh * _addForceKernel;
     FluidMesh * _velocityBoundaryKernel;
     FluidMesh * _divergenceKernel;
+    FluidMesh * _jacobiKernel;
+    FluidMesh * _pressureBoundaryKernel;
+    FluidMesh * _subtractPressureGradientKernel;
+    FluidMesh * _subtractPressureGradientBoundaryKernel;
+    FluidMesh * _drawKernel;
+    
+    bool _gestureRegistered;
 }
 @end
 
 @implementation Fluid
 
--(id)initWithObject:(id)view
+-(id)wireUp
 {
-    self = [super init];
-    if( !self )
-        return nil;
-
-    GLKView * glview = (GLKView *)(((GLKView *)view).superview);
-    GLint width = glview.drawableWidth;
-    GLint height = glview.drawableHeight;
+    GLKView * view = self.view;
     
-    [self setupWorldWithWidth:width andHeight:height];
+    if( !_gestureRegistered )
+    {
+        // For now just do a two fingered drag to move the center
+        // in the simulator you hold down SHIFT-ALT key, then mouse click,
+        // then drag around
+        // be careful not to pinch or rotate
+        // TODO: manually handle UITouch events for more control over this stuff
+        UIPanGestureRecognizer * pgr = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(onDrag:)];
+        pgr.minimumNumberOfTouches = 2;
+        [view addGestureRecognizer:pgr];
+        _gestureRegistered = true;
+    }
+    
+    // yea, yea reusing variable. Sue me later.
+    view = (GLKView *)view.superview;
+    _viewSize = CGSizeMake(view.drawableWidth,view.drawableHeight);
+    CGFloat width = _viewSize.width;
+    CGFloat height = _viewSize.height;
+    _px = 1.0/width;
+    _py = 1.0/height;
+  
+    GLKVector2 px = { _px, _py };
+    GLKVector2 px1 = { 1.0, width/height };
+    
+    _velocity0 = [[FBO alloc] initWithWidth:width height:height];
+    _velocity1 = [[FBO alloc] initWithWidth:width height:height];
+    
+    float twoPixelsX = _px * 2.0;
+    float twoPixelsY = _py * 2.0;
+    
+    // =================================    
+    _advectVelocity = [[QuadMesh alloc] init];
+    [_advectVelocity setX:1.0 - twoPixelsX
+                        Y:1.0 - twoPixelsY
+                  vShader:"kernel"
+                  fShader:"advect"
+                 textures:@{@(fl_velocity):_velocity0,@(fl_source):_velocity0}];
+    [_advectVelocity wireUp];
+    [_advectVelocity setVector2:fl_px value:&px];
+    [_advectVelocity setVector2:fl_px1 value:&px1];
+    [_advectVelocity setFloat:fl_scale_f value:1.0];
+    [_advectVelocity setFloat:fl_dt value:options.step];
+    
+    _advectVelocity.fbo = _velocity1;
+    // =================================
+    _addForceKernel = [[QuadMesh alloc] init];
+    [_addForceKernel setX: twoPixelsX * options.cursor_size
+                        Y: twoPixelsY * options.cursor_size
+                  vShader:"cursor"
+                  fShader:"addForce"
+                 textures:nil];
+    [_addForceKernel wireUp];
+    _addForceKernel.blend = true;
+    
+    GLKVector2 scalev = { options.cursor_size*_px, options.cursor_size*_py };
+    
+    [_addForceKernel setVector2:fl_px value:&px];
+    [_addForceKernel setVector2:fl_scale_v2 value:&scalev];
+    _addForceKernel.fbo = _velocity1;
+    //=====================================
+    _velocityBoundaryKernel = [[BoundaryMesh alloc] init];
+    [_velocityBoundaryKernel setX:_px
+                                Y:_py
+                          vShader:"boundary"
+                          fShader:"advect"
+                         textures:@{@(fl_velocity):_velocity0,@(fl_source):_velocity0}];
+    [_velocityBoundaryKernel wireUp];
+    [_velocityBoundaryKernel setVector2:fl_px value:&px];
+    [_velocityBoundaryKernel setFloat:fl_scale_f value:-1.0];
+    [_velocityBoundaryKernel setFloat:fl_dt value:1.0f/60.0f];
+    _velocityBoundaryKernel.fbo = _velocity1;
+    //=========================================
+    _divergence = [[FBO alloc] initWithWidth:width height:height];
+    
+    _divergenceKernel = [[QuadMesh alloc] init];
+    [_divergenceKernel setX:1
+                          Y:1
+                    vShader:"kernel"
+                    fShader:"divergence"
+                   textures:@{@(fl_velocity):_velocity1}];
+    [_divergenceKernel wireUp];
+    [_divergenceKernel setVector2:fl_px value:&px];
+    _divergenceKernel.fbo = _divergence;    
+    //=========================================
+#ifdef TEST_OUTPUT
+    [self testFBO:_divergence];
+#endif
+    //=========================================
+    _pressure0 = [[FBO alloc] initWithWidth:width height:height];
+    _pressure1 = [[FBO alloc] initWithWidth:width height:height];
+    
+    _jacobiKernel = [[QuadMesh alloc] init];
+    [_jacobiKernel setX:1
+                      Y:1
+                vShader:"kernel"
+                fShader:"jacobi"
+               textures: @{@(fl_pressure):_pressure0,@(fl_divergence):_divergence}];
+    [_jacobiKernel wireUp];
 
-    UIPanGestureRecognizer * pgr = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(onDrag:)];
-    pgr.minimumNumberOfTouches = 2;
-    [glview addGestureRecognizer:pgr];
+    [_jacobiKernel setFloat:fl_alpha value:-1.0];
+    [_jacobiKernel setFloat:fl_beta value:0.25];
+    [_jacobiKernel setVector2:fl_px value:&px];
+    _jacobiKernel.fbo = _pressure1;
+
+    //=========================================
+    _pressureBoundaryKernel = [[BoundaryMesh alloc]init];
+    [_pressureBoundaryKernel setX:_px
+                                Y:_py
+                          vShader:"boundary"
+                          fShader:"jacobi"
+                         textures: @{@(fl_pressure):_pressure0,@(fl_divergence):_divergence}];
+    [_pressureBoundaryKernel wireUp];
+    
+    [_pressureBoundaryKernel setFloat:fl_alpha value:-1.0];
+    [_pressureBoundaryKernel setFloat:fl_beta value:0.25];
+    [_pressureBoundaryKernel setVector2:fl_px value:&px];
+    _pressureBoundaryKernel.fbo = _pressure1;
+    //=========================================
+    _subtractPressureGradientKernel = [[QuadMesh alloc]init];
+    [_subtractPressureGradientKernel setX:1
+                                        Y:1
+                                  vShader:"kernel"
+                                  fShader:"subtractPressureGradient"
+                                 textures: @{@(fl_pressure):_pressure0,@(fl_velocity):_velocity1}];
+    [_subtractPressureGradientKernel wireUp];
+    
+    [_subtractPressureGradientKernel setFloat:fl_scale_f value:1];
+    [_subtractPressureGradientKernel setVector2:fl_px value:&px];
+    _subtractPressureGradientKernel.fbo = _velocity0;
+    //=========================================
+    _subtractPressureGradientBoundaryKernel = [[BoundaryMesh alloc]init];
+    [_subtractPressureGradientBoundaryKernel setX:_px
+                                                Y:_py
+                                          vShader:"boundary"
+                                          fShader:"subtractPressureGradient"
+                                         textures: @{@(fl_pressure):_pressure0,@(fl_velocity):_velocity1}];
+    [_subtractPressureGradientBoundaryKernel wireUp];
+    [_subtractPressureGradientBoundaryKernel setFloat:fl_scale_f value:-1];
+    [_subtractPressureGradientBoundaryKernel setVector2:fl_px value:&px];
+    _subtractPressureGradientBoundaryKernel.fbo = _velocity0;
+    //=========================================
+    _drawKernel = [[QuadMesh alloc]init];
+    [_drawKernel setX:1
+                    Y:1
+              vShader:"kernel"
+              fShader:"visualize"
+             textures: @{@(fl_pressure):_pressure0,@(fl_velocity):_velocity0}];
+    [_drawKernel wireUp];
+    [_drawKernel setVector2:fl_px value:&px];
     
     return self;
 }
+
+-(void)update:(NSTimeInterval)dt
+{
+    bool doClear = true;
+    
+    //=====================================================
+    [_advectVelocity renderToFBOWithClear:doClear];
+
+    //=====================================================
+    GLKVector2 force = GLKVector2Make( _delta_x * _px * options.cursor_size * options.mouse_force,
+                                      -_delta_y * _py * options.cursor_size * options.mouse_force);
+    
+    GLKVector2 center = GLKVector2Make(  _input_x * _px * 2 - 1.0f,
+                                       -(_input_y * _py * 2 - 1.0f) );
+    
+    [_addForceKernel setVector2:fl_force value:&force];
+    [_addForceKernel setVector2:fl_center value:&center];
+    [_addForceKernel renderToFBOWithClear:doClear];
+    
+    //=====================================================
+    [_velocityBoundaryKernel renderToFBOWithClear:false];
+        
+    //=====================================================
+    [_divergenceKernel renderToFBOWithClear:doClear];
+    
+    //=====================================================
+    FBO * p0 = _pressure0;
+    FBO * p1 = _pressure1;
+    FBO * swap = p0;
+    for(int i = 0; i < options.iterations; i++)
+    {
+        [_jacobiKernel           setTexture:p0 withKey:fl_pressure];
+        [_pressureBoundaryKernel setTexture:p0 withKey:fl_pressure];
+        _jacobiKernel.fbo = p1;
+        _pressureBoundaryKernel.fbo = p1;
+        [_jacobiKernel           renderToFBOWithClear:doClear andBindFlags:FBOBF_SkipUnbind];
+        [_pressureBoundaryKernel renderToFBOWithClear:doClear andBindFlags:FBOBF_SkipBind|FBOBF_SkipUnbind];
+
+        swap = p0;
+        p0 = p1;
+        p1 = swap;
+    }
+    
+    //=====================================================
+    [_subtractPressureGradientKernel renderToFBOWithClear:doClear];
+    [_subtractPressureGradientBoundaryKernel renderToFBOWithClear:doClear];
+}
+
+-(void)render:(NSUInteger)w h:(NSUInteger)h
+{
+    [_drawKernel render:w h:h];
+}
+
+#ifdef TEST_OUTPUT
+-(void)testFBO:(FBO *)fbo
+{
+    TestFBO * test = [[TestFBO alloc] init];
+    test.fbo = fbo;
+    test.camera = [IdentityCamera new];
+    [self appendChild:test];
+    [test wireUp];
+}
+#endif
 
 -(void)onDrag:(UIPanGestureRecognizer *)pgr
 {
@@ -477,123 +652,9 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
         _input_x = newX;
         _input_y = newY;
         
-       // NSLog(@"drag at: %f, %f", _input_x, _input_y);
+        // NSLog(@"drag at: %f, %f", _input_x, _input_y);
     }
 }
 
--(void)setupWorldWithWidth:(unsigned int)width andHeight:(unsigned int)height;
-{
-    _px = 1.0/width;
-    _py = 1.0/height;
-    CGSize sz = { width, height };
-    _viewSize = sz;
-  
-    GLKVector2 px = { _px, _py };
-    GLKVector2 px1 = { 1.0, width/(float)height };
-    
-    _velocity0 = [[FBO alloc] initWithWidth:width height:height];
-    _velocity1 = [[FBO alloc] initWithWidth:width height:height];
-    
-    float twoPixelsX = _px * 2.0;
-    float twoPixelsY = _py * 2.0;
-    
-    // =================================    
-    _advectVelocity = [[QuadMesh alloc] initWithX:1.0 - twoPixelsX
-                                                Y:1.0 - twoPixelsY
-                                          vShader:"kernel"
-                                          fShader:"advect"
-                                         textures:@{@(fl_velocity):_velocity0,@(fl_source):_velocity0}];
-    
-    [_advectVelocity setVector2:fl_px value:&px];
-    [_advectVelocity setVector2:fl_px1 value:&px1];
-    [_advectVelocity setFloat:fl_scale_f value:1.0];
-    [_advectVelocity setFloat:fl_dt value:options.step];
-    
-    _advectVelocity.fbo = _velocity1;
-    // =================================
-    _addForceKernel = [[QuadMesh alloc] initWithX: twoPixelsX * options.cursor_size
-                                                Y: twoPixelsY * options.cursor_size
-                                          vShader:"cursor"
-                                          fShader:"addForce"
-                                         textures:nil];
-    _addForceKernel.blend = true;
-    
-    GLKVector2 scalev = { options.cursor_size*_px, options.cursor_size*_py };
-    
-    [_addForceKernel setVector2:fl_px value:&px];
-    [_addForceKernel setVector2:fl_scale_v2 value:&scalev];
-    _addForceKernel.fbo = _velocity1;
-    //=====================================
-    _velocityBoundaryKernel = [[BoundaryMesh alloc] initWithX:_px
-                                                            Y:_py
-                                                      vShader:"boundary"
-                                                      fShader:"advect"
-                                                     textures:@{@(fl_velocity):_velocity0,@(fl_source):_velocity0}];
-    
-    [_velocityBoundaryKernel setVector2:fl_px value:&px];
-    [_velocityBoundaryKernel setFloat:fl_scale_f value:-1.0];
-    [_velocityBoundaryKernel setFloat:fl_dt value:1.0f/60.0f];
-    _velocityBoundaryKernel.fbo = _velocity1;
-        
-    //=========================================
-    
-    _divergence = [[FBO alloc] initWithWidth:width height:height];
-    
-    _divergenceKernel = [[QuadMesh alloc] initWithX:1
-                                                  Y:1
-                                            vShader:"kernel"
-                                            fShader:"divergence"
-                                           textures:@{@(fl_velocity):_velocity1}];
-    
-    [_divergenceKernel setVector2:fl_px value:&px];
-    _divergenceKernel.fbo = _divergence;
-    
-    //=========================================
-    
-    [self testFBO:_divergence];
-}
 
--(void)update:(NSTimeInterval)dt
-{
-    bool doClear = true;
-    
-    // Use velocity0 as texture
-    // Render to velocity1 using Quad (kernel/advect)
-    //=====================================================
-    [_advectVelocity renderToFBOWithClear:doClear];
-
-    // Render to velocity1 using Quad (cursor/adforce)
-    //=====================================================
-    GLKVector2 force = GLKVector2Make( _delta_x * _px * options.cursor_size * options.mouse_force,
-                                      -_delta_y * _py * options.cursor_size * options.mouse_force);
-    
-    GLKVector2 center = GLKVector2Make(  _input_x * _px * 2 - 1.0f,
-                                       -(_input_y * _py * 2 - 1.0f) );
-    
-    [_addForceKernel setVector2:fl_force value:&force];
-    [_addForceKernel setVector2:fl_center value:&center];
-    [_addForceKernel renderToFBOWithClear:doClear];
-    
-    // Use velocity0 as texture
-    // Render to velocity1 using Boundary (boudry/advect)
-    //=====================================================
-    [_velocityBoundaryKernel renderToFBOWithClear:false];
-    
-    
-    // Use velocity1 as texture
-    // Render to divergence using Quad (kernal/divergence)
-    //=====================================================
-    [_divergenceKernel renderToFBOWithClear:doClear];
-    
-}
-
--(void)render:(NSUInteger)w h:(NSUInteger)h
-{
-    //[_addForceKernel render:w h:h];
-}
-
--(void)testFBO:(FBO *)fbo
-{
-    [self appendChild:[[TestFBO alloc] initWithTexture:fbo]];
-}
 @end

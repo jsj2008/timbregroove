@@ -18,7 +18,6 @@
     self = [super initWithFrame:frame context:context];
     if (self) {
         _backcolor = GLKVector4Make(0, 0, 0, 1);
-        _clearOnRender = true;
     }
     return self;
 }
@@ -48,24 +47,20 @@
     }
 }
 
+-(bool)isInFullView
+{
+    CGRect rc = self.frame;
+    return rc.origin.x == 0;
+}
+
 - (id)firstNode
 {
     return _graph.firstChild;
 }
 
-- (void)showScene
-{
-    _visible = true;
-}
-
-- (void)hideScene
-{
-    _visible = false;
-}
-
 - (void)update:(NSTimeInterval)dt
 {
-    //if( !_visible )
+    if( self.inFullView )
     {
         [_graph update:dt];
         [self setNeedsDisplay];
@@ -78,14 +73,17 @@
     NSUInteger h = self.drawableHeight;
     [_graph.camera setPerspectiveForViewWidth:w andHeight:h];
     
-    if( _clearOnRender )
-    {
-        glClearColor(_backcolor.r,_backcolor.g,_backcolor.b,_backcolor.a);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    }
+    glClearColor(_backcolor.r,_backcolor.g,_backcolor.b,_backcolor.a);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     [_graph render:w h:h];
 }
 
+-(void)hideAnimationComplete
+{
+    _visible = false;
+    [self deleteDrawable];
+}
 
 - (void)animateProp: (const char *)prop
           targetVal: (CGFloat)targetVal
@@ -98,8 +96,8 @@
     
     if( hideOnComplete )
     {
-        [params setObject:@"hideScene" forKey:TWEEN_ON_COMPLETE_SELECTOR];
-        [params setObject:self         forKey:TWEEN_ON_COMPLETE_TARGET];
+        [params setObject:@"hideAnimationComplete" forKey:TWEEN_ON_COMPLETE_SELECTOR];
+        [params setObject:self                     forKey:TWEEN_ON_COMPLETE_TARGET];
     }
     
     [Tweener addTween:self withParameters:params];

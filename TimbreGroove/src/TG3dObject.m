@@ -15,10 +15,38 @@
 
 @implementation TG3dObject
 
--(id)initWithObject:(id)object
+#pragma mark -
+#pragma mark Lifetime
+
+-(id)wireUp
 {
-    return [self init];
+    return self;
 }
+
+
+-(void)clean
+{
+    
+}
+
+-(id)rewire
+{
+    self.needsRewire = false;
+    [self cleanChildren];
+    [self clean];
+    return [self wireUp];
+}
+
+#pragma mark inialize
+
+- (NSString *)getShaderHeader
+{
+    // #define for shaders go here (in derivations)
+    return @"";
+}
+
+
+#pragma mark update render
 
 -(void)update:(NSTimeInterval)dt
 {
@@ -33,14 +61,20 @@
 
 -(void)renderToFBO
 {
-    [self renderToFBOWithClear:true];
+    [self renderToFBOWithClear:true andBindFlags:FBOBF_None];
 }
 
 -(void)renderToFBOWithClear:(bool)clear
 {
+    [self renderToFBOWithClear:clear andBindFlags:FBOBF_None];
+}
+
+-(void)renderToFBOWithClear:(bool)clear andBindFlags:(FBO_BindFlags)flags;
+{
     Camera * saveCamera = _camera;
     _camera = [IdentityCamera new];
-    [_fbo bindToRender];
+    if( (flags & FBOBF_SkipBind) == 0 )
+        [_fbo bindToRender];
     glViewport(0, 0, _fbo.width, _fbo.height);
     if( clear )
     {
@@ -48,7 +82,8 @@
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
     [self render:_fbo.width h:_fbo.height];
-    [_fbo unbindFromRender];
+    if( (flags & FBOBF_SkipUnbind) == 0 )
+        [_fbo unbindFromRender];
     _camera = saveCamera;
 }
 
@@ -59,10 +94,7 @@
     
 }
 
-- (NSString *)getShaderHeader
-{
-    return @"";
-}
+#pragma mark Perspective
 
 -(void)setScaleXYZ:(float)scaleXYZ
 {
@@ -90,6 +122,8 @@
 {
     return GLKMatrix4Multiply(self.camera.projectionMatrix, self.modelView);
 }
+
+#pragma mark Upward traversing accessors
 
 -(Shader *)shader
 {
@@ -146,6 +180,13 @@
     }
 #endif
     return e ? e->_view : nil;
+}
+
+#pragma mark Options settings
+
+-(NSArray *)getSettings
+{
+    return @[];
 }
 
 @end

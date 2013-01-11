@@ -13,8 +13,27 @@
 #import "Tweener.h"
 #import "Tween.h"
 #import "SettingsVC.h"
+#import "objc/runtime.h"
+
+static NSNumber * _userMuted;
+
 @implementation TrackView (Sound)
 
+-(void)setUserMuted:(bool)userMuted
+{
+    if( userMuted )
+        [self fade];
+    
+    objc_setAssociatedObject(self, &_userMuted, @(userMuted), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    
+    if( !userMuted )
+        [self play];
+}
+
+-(bool)userMuted
+{
+    return (bool)[objc_getAssociatedObject(self,&_userMuted) intValue];
+}
 
 -(void)debugDump
 {
@@ -29,27 +48,20 @@
 
 -(void)hideAndFade:(int)side
 {
-    [self hideToDir:side];
+    if( !side )
+        _visible = false;
+    else
+        [self hideToDir:side];
     [self fade];
 }
 
-- (void)showSceneAndPlay
-{
-    [self showScene];
-    [self play];
-}
 
-- (void)showSceneAndSync:(unsigned int)delay
+- (void)showAndSync:(unsigned int)delay
 {
-    [self showScene];
+    _visible = true;
     [self sync:delay];
 }
 
-- (void)hideSceneAndFade
-{
-    [self hideScene];
-    [self fade];
-}
 
 - (void)sync:(unsigned int)delay
 {
@@ -61,11 +73,14 @@
 
 -(void)play
 {
-    TG3dObject * obj = _graph.children[0];
-    float prevVol = obj.sound.prevVolume;
-    if( prevVol )
-        obj.sound.volume = prevVol;
-    [obj.sound play];
+    if( !self.userMuted )
+    {
+        TG3dObject * obj = [_graph firstChild];
+        float prevVol = obj.sound.prevVolume;
+        if( prevVol )
+            obj.sound.volume = prevVol;
+        [obj.sound play];
+    }
 }
 
 -(void)fade

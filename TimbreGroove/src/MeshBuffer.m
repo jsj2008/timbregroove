@@ -178,4 +178,14 @@
     return true;
 }
 
+-(void)dealloc
+{
+    if( glIsBuffer(_glVBuffer))
+        glDeleteBuffers(1, &_glVBuffer);
+    if( glIsBuffer(_glIBuffer))
+        glDeleteBuffers(1, &_glIBuffer);
+    NSLog(@"Deleted buffers %d/%d",_glIBuffer,_glVBuffer);
+    _glIBuffer = -1;
+    _glVBuffer = 0;
+}
 @end

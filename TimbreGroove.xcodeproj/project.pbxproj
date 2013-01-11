@@ -79,7 +79,6 @@
 		578292C7169879930053ADCD /* ImageBaker.m in Sources */ = {isa = PBXBuildFile; fileRef = 578292C6169879930053ADCD /* ImageBaker.m */; };
 		578292C9169A87B10053ADCD /* test.png in Resources */ = {isa = PBXBuildFile; fileRef = 578292C8169A87B00053ADCD /* test.png */; };
 		578292CB169A8B660053ADCD /* imageBaker.png in Resources */ = {isa = PBXBuildFile; fileRef = 578292CA169A8B650053ADCD /* imageBaker.png */; };
-		578292CE169A8C230053ADCD /* ImageBakerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 578292CD169A8C230053ADCD /* ImageBakerView.m */; };
 		578292D4169AB2CE0053ADCD /* SoundPool.m in Sources */ = {isa = PBXBuildFile; fileRef = 578292D3169AB2CD0053ADCD /* SoundPool.m */; };
 		57900684168411660068659F /* Factory.m in Sources */ = {isa = PBXBuildFile; fileRef = 57900683168411650068659F /* Factory.m */; };
 		57A10E9A1685E0BE00B80314 /* TG1Band-perc-24k.aif in Resources */ = {isa = PBXBuildFile; fileRef = 57A10E981685E0BE00B80314 /* TG1Band-perc-24k.aif */; };
@@ -187,8 +186,6 @@
 		572EB2341679EAE40062F290 /* ShaderLocations.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ShaderLocations.m; sourceTree = "<group>"; };
 		572EB27E167A9B160062F290 /* menus.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = menus.plist; sourceTree = "<group>"; };
 		5737C4A2169277B700C12F2D /* fluid.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fluid.png; sourceTree = "<group>"; };
-		5737C4AA1692D5BC00C12F2D /* TestFBOTexture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestFBOTexture.h; sourceTree = "<group>"; };
-		5737C4AB1692D5BD00C12F2D /* TestFBOTexture.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestFBOTexture.m; sourceTree = "<group>"; };
 		5737C4AD169308DF00C12F2D /* imageBaker.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = imageBaker.vsh; sourceTree = "<group>"; };
 		5737C4AF1693090D00C12F2D /* imageBaker.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = imageBaker.fsh; sourceTree = "<group>"; };
 		5737C4B116930BD400C12F2D /* FractalSphere.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FractalSphere.h; sourceTree = "<group>"; };
@@ -204,8 +201,6 @@
 		574B5FE5168CE148008367D1 /* subtractPressureGradient.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = subtractPressureGradient.fsh; sourceTree = "<group>"; };
 		574B5FE6168CE148008367D1 /* velocityBoundary.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = velocityBoundary.fsh; sourceTree = "<group>"; };
 		574B5FE7168CE148008367D1 /* visualize.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = visualize.fsh; sourceTree = "<group>"; };
-		574B5FF4168CE2CA008367D1 /* FluidEx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FluidEx.h; sourceTree = "<group>"; };
-		574B5FF5168CE2CA008367D1 /* FluidEx.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = FluidEx.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		574B5FF7168D20BD008367D1 /* FBO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FBO.h; sourceTree = "<group>"; };
 		574B5FF8168D20BD008367D1 /* FBO.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FBO.m; sourceTree = "<group>"; };
 		575C8EEC1695FB4C00AB565B /* fractalSphere.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fractalSphere.png; sourceTree = "<group>"; };
@@ -229,8 +224,6 @@
 		578292C6169879930053ADCD /* ImageBaker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageBaker.m; sourceTree = "<group>"; };
 		578292C8169A87B00053ADCD /* test.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = test.png; sourceTree = "<group>"; };
 		578292CA169A8B650053ADCD /* imageBaker.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = imageBaker.png; sourceTree = "<group>"; };
-		578292CC169A8C220053ADCD /* ImageBakerView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageBakerView.h; sourceTree = "<group>"; };
-		578292CD169A8C230053ADCD /* ImageBakerView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageBakerView.m; sourceTree = "<group>"; };
 		578292D2169AB2CD0053ADCD /* SoundPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoundPool.h; path = audio/SoundPool.h; sourceTree = "<group>"; };
 		578292D3169AB2CD0053ADCD /* SoundPool.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SoundPool.m; path = audio/SoundPool.m; sourceTree = "<group>"; };
 		57900682168411640068659F /* Factory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Factory.h; sourceTree = "<group>"; };
@@ -411,10 +404,10 @@
 		572D7F2B1683033D006D48BF /* generic */ = {
 			isa = PBXGroup;
 			children = (
-				5764756A167D5E8C00D5A431 /* GenericShader.h */,
-				5764756B167D5E8C00D5A431 /* GenericShader.m */,
 				5764756F167D619800D5A431 /* Generic.h */,
 				57647570167D619800D5A431 /* Generic.m */,
+				5764756A167D5E8C00D5A431 /* GenericShader.h */,
+				5764756B167D5E8C00D5A431 /* GenericShader.m */,
 			);
 			name = generic;
 			sourceTree = "<group>";
@@ -505,14 +498,12 @@
 			isa = PBXGroup;
 			children = (
 				57F412F016814EBB00D9DC67 /* menu */,
+				574B5FF3168CE294008367D1 /* fluid */,
+				572D7F2B1683033D006D48BF /* generic */,
 				57F290F7169578C700293B0E /* Fractal.h */,
 				57F290F8169578C700293B0E /* Fractal.m */,
 				5737C4B116930BD400C12F2D /* FractalSphere.h */,
 				5737C4B216930BD500C12F2D /* FractalSphere.m */,
-				5737C4AA1692D5BC00C12F2D /* TestFBOTexture.h */,
-				5737C4AB1692D5BD00C12F2D /* TestFBOTexture.m */,
-				574B5FF3168CE294008367D1 /* fluid */,
-				572D7F2B1683033D006D48BF /* generic */,
 				57718EF616838D75001D7D35 /* CustomPlane.h */,
 				57718EF716838D75001D7D35 /* CustomPlane.m */,
 				57E62E65168433100030908E /* Photo.h */,
@@ -529,8 +520,6 @@
 				57A66EF5167B374500B9EA75 /* VaryingColor.m */,
 				578292C5169879930053ADCD /* ImageBaker.h */,
 				578292C6169879930053ADCD /* ImageBaker.m */,
-				578292CC169A8C220053ADCD /* ImageBakerView.h */,
-				578292CD169A8C230053ADCD /* ImageBakerView.m */,
 			);
 			path = elements;
 			sourceTree = "<group>";
@@ -558,8 +547,6 @@
 			children = (
 				575DA0071694366C00A50C41 /* Fluid.h */,
 				575DA0081694366C00A50C41 /* Fluid.m */,
-				574B5FF4168CE2CA008367D1 /* FluidEx.h */,
-				574B5FF5168CE2CA008367D1 /* FluidEx.m */,
 			);
 			path = fluid;
 			sourceTree = "<group>";
@@ -819,7 +806,6 @@
 				57F290F9169578C700293B0E /* Fractal.m in Sources */,
 				578292C3169861D20053ADCD /* esShapes.c in Sources */,
 				578292C7169879930053ADCD /* ImageBaker.m in Sources */,
-				578292CE169A8C230053ADCD /* ImageBakerView.m in Sources */,
 				578292D4169AB2CE0053ADCD /* SoundPool.m in Sources */,
 				570220D9169B8E7F0028FE33 /* UIView+TGViewExtensions.m in Sources */,
 			);

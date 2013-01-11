@@ -56,6 +56,8 @@ static NSMutableDictionary * __shaders;
 
 @interface Shader() {
     NSString * _header;
+    GLuint _vshader;
+    GLuint _fshader;
 }
 @end
 
@@ -90,6 +92,7 @@ static NSMutableDictionary * __shaders;
         _locations = [[ShaderLocations alloc] initWithShader:self];
     return _locations;
 }
+
 - (void)use
 {
 #ifdef CACHE_PROGRAM
@@ -121,9 +124,7 @@ static NSMutableDictionary * __shaders;
 #pragma mark - internal stuff
 
 - (BOOL)load:(NSString *)vname withFragment:(NSString *)fname
-{
-    GLuint vertShader, fragShader;
-    
+{    
     if (_program) {
         glDeleteProgram(_program);
         _program = 0;
@@ -132,31 +133,31 @@ static NSMutableDictionary * __shaders;
     _program = glCreateProgram();
     
     NSString * path = [[NSBundle mainBundle] pathForResource:vname ofType:@"vsh"];
-    if (![self compileShader:&vertShader type:GL_VERTEX_SHADER file:path]) {
+    if (![self compileShader:&_vshader type:GL_VERTEX_SHADER file:path]) {
         NSLog(@"Failed to compile vertex shader");
         exit(1);
     }
     
     path = [[NSBundle mainBundle] pathForResource:fname ofType:@"fsh"];
-    if (![self compileShader:&fragShader type:GL_FRAGMENT_SHADER file:path]) {
+    if (![self compileShader:&_fshader type:GL_FRAGMENT_SHADER file:path]) {
         NSLog(@"Failed to compile fragment shader");
         exit(1);
     }
     
-    glAttachShader(_program, vertShader);
-    glAttachShader(_program, fragShader);
+    glAttachShader(_program, _vshader);
+    glAttachShader(_program, _fshader);
     
     if (![self link:_program]) {
         NSLog(@"Failed to link program: %d", _program);
         exit(1);
         
-        if (vertShader) {
-            glDeleteShader(vertShader);
-            vertShader = 0;
+        if (_vshader) {
+            glDeleteShader(_vshader);
+            _vshader = 0;
         }
-        if (fragShader) {
-            glDeleteShader(fragShader);
-            fragShader = 0;
+        if (_fshader) {
+            glDeleteShader(_fshader);
+            _fshader = 0;
         }
         if (_program) {
             glDeleteProgram(_program);
@@ -167,13 +168,15 @@ static NSMutableDictionary * __shaders;
     }
     
     // Release vertex and fragment shaders.
-    if (vertShader) {
-        glDetachShader(_program, vertShader);
-        glDeleteShader(vertShader);
+    if (_vshader) {
+        glDetachShader(_program, _vshader);
+        glDeleteShader(_vshader);
+        _vshader = 0;
     }
-    if (fragShader) {
-        glDetachShader(_program, fragShader);
-        glDeleteShader(fragShader);
+    if (_fshader) {
+        glDetachShader(_program, _fshader);
+        glDeleteShader(_fshader);
+        _fshader = 0;
     }
 #if DEBUG
     NSLog(@"shader program: %d", _program);
@@ -269,4 +272,28 @@ static NSMutableDictionary * __shaders;
     return YES;
 }
 
+-(void)dealloc
+{
+    if (_vshader) {
+        glDeleteShader(_vshader);
+        _vshader = 0;
+    }
+    if (_fshader) {
+        glDeleteShader(_fshader);
+        _fshader = 0;
+    }
+    
+    /*
+     If a program object to be deleted has shader objects attached to it, those shader 
+     objects will be automatically detached but not deleted unless they have already 
+     been flagged for deletion by a previous call to glDeleteShader.
+    */
+    
+    if( _program )
+    {
+        NSLog(@"Deleting program: %d",_program);
+        glDeleteProgram(_program);
+        _program = 0;
+    }
+}
 @end

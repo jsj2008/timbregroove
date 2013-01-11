@@ -27,8 +27,10 @@ static SoundMan * _singletonSoundMan;
 
 +(SoundMan *)sharedInstance
 {
-    if( !_singletonSoundMan )
-        _singletonSoundMan = [[SoundMan alloc] init];
+	@synchronized (self) {
+        if( !_singletonSoundMan )
+            _singletonSoundMan = [[SoundMan alloc] init];
+    }
     return _singletonSoundMan;
 }
 
@@ -72,7 +74,10 @@ static SoundMan * _singletonSoundMan;
      */
     result = FMOD_System_Create(&_system);
     ERRCHECK(result);
-    
+
+    result = FMOD_Debug_SetLevel(FMOD_DEBUG_LEVEL_ERROR);
+    ERRCHECK(result);
+
     result = FMOD_System_GetVersion(_system, &version);
     ERRCHECK(result);
     
@@ -93,6 +98,11 @@ static SoundMan * _singletonSoundMan;
         [s releaseResource];
     }
     FMOD_System_Release(_system);
+}
+
+-(void)dealloc
+{
+    [self goAway];
 }
 
 -(void)dumpTime

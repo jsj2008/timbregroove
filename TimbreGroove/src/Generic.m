@@ -13,7 +13,6 @@
 #import "Texture.h"
 
 @interface Generic() {
-    const char * _initTextureName;
     Texture * _texture;
     NSMutableArray * _textures;
     bool _useColor;
@@ -22,40 +21,23 @@
 
 @implementation Generic
 
--(id)init
+-(void)clean
 {
-    return [self initWithTextureFile:NULL];
+    _buffers = nil;
+    _texture = nil;
+    _textures = nil;
 }
 
--(id)initWithColor:(GLKVector4)color
+-(id)wireUp
 {
-    if( self = [self initWithTextureFile:NULL] )
-    {
-        self.color = color;
-    }
-    
-    return self;
-}
-
--(id)initWithTextureFile:(const char *)fileName
-{
-    if( (self = [super init]) )
-    {
-        _initTextureName = fileName;
-        // Init steps (order dependent)
-        
-        [self createBuffer];
-        [self createTexture];
-        [self createShader];
-        [self getBufferLocations];
-        [self getTextureLocations];
-        [self configureLighting];
-        
-        _initTextureName = NULL;
-    }
-    
-    return self;
-    
+    [super wireUp];
+    [self createTexture];
+    [self createBuffer];
+    [self createShader];
+    [self getBufferLocations];
+    [self getTextureLocations];
+    [self configureLighting];
+    return self;    
 }
 
 #pragma mark -
@@ -114,17 +96,23 @@
         TGVertexStride * stride = params.strides + i;
         SVariables type = [svar[i] intValue];
         switch (type) {
+            case sv_pos2f:
+                StrideInit2f(stride, sv_pos); // hmmm
+                break;                
+            case sv_customAttr2f:
+            case sv_uv:
+                StrideInit2f(stride, type);
+                break;
             case sv_normal:
                 self.lighting = true;
                 // fall thru
+            case sv_customAttr3f:
             case sv_pos:
                 StrideInit3f(stride, type);
                 break;
+            case sv_customAttr4f:
             case sv_acolor:
-                StrideInit4f(stride, sv_acolor);
-                break;
-            case sv_uv:
-                StrideInit2f(stride, sv_uv);
+                StrideInit4f(stride, type);
                 break;
 #if DEBUG
             default:
@@ -175,8 +163,8 @@
 
 -(void)createTexture
 {
-    if( _initTextureName )
-        [self setTextureWithFile:_initTextureName];
+    if( _textureFileName )
+        [self setTextureWithFile:[_textureFileName UTF8String]];
 }
 
 -(void)replaceTextures:(NSArray *)textures
@@ -237,6 +225,11 @@
     }
 #endif
     return _textures[index];
+}
+
+-(bool)hasTexture
+{
+    return _texture || _textures || _textureFileName;
 }
 
 -(void)createShader

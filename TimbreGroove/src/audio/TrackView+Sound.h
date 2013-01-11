@@ -10,9 +10,10 @@
 @class Sound;
 
 @interface TrackView (Sound)
+@property (nonatomic) bool userMuted;
+
 - (void)showAndPlay:(int)side;
 - (void)hideAndFade:(int)side;
-- (void)showSceneAndPlay;
-- (void)showSceneAndSync:(unsigned int)delay;
-- (void)hideSceneAndFade;
+
+- (void)showAndSync:(unsigned int)delay;
 @end

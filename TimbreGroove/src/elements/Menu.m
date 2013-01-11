@@ -21,14 +21,10 @@
 
 @implementation Menu
 
--(id)initWithMeta:(NSDictionary *)meta
+-(id)wireUp
 {
-    if( (self = [super init]) )
-    {
-        _meta = meta;
-        [self getMenuItems];
-    }
-    
+    [super wireUp];
+    [self getMenuItems];
     return self;
 }
 
@@ -57,13 +53,15 @@
         NSString * renderClass  = menuItem[@"renderClass"];
         Class klass             = NSClassFromString(renderClass);
         
-        TG3dObject <MenuItemRender> * mi = [[klass alloc] initWithIcon:imageName];
+        MenuItem * mi = [[klass alloc] init];
 
         GLKVector3 position = { 0, y, 0 };
         
+        mi.textureFileName = imageName;
         mi.position     = position;
         mi.meta         = menuItem;
 
+        [mi wireUp];
         [self appendChild:mi];
         
         y -= 2.1;

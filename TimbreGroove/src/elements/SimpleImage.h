@@ -9,5 +9,4 @@
 #import "Generic.h"
 
 @interface SimpleImage : Generic
--(id)initWithTextureFile:(const char *)fileName;
 @end

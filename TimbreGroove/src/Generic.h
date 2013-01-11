@@ -17,7 +17,10 @@
     NSMutableArray * _buffers;
 }
 
+@property (nonatomic, strong) NSString * textureFileName;
+
 @property (nonatomic, strong) Texture * texture;
+@property (nonatomic, readonly) bool hasTexture;
 @property (nonatomic) GLKVector4 color;
 
 @property (nonatomic) bool       lighting;
@@ -25,10 +28,6 @@
 @property (nonatomic) GLKVector3 dirColor;
 @property (nonatomic) GLKVector3 ambient;
 
-
--(id)init;
--(id)initWithColor:(GLKVector4)color;
--(id)initWithTextureFile:(const char *)fileName;
 
 // these are order dependant
 //==============================================

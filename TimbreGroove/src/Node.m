@@ -31,6 +31,11 @@
     return _kids[0];
 }
 
+-(void)cleanChildren
+{
+    _kids = nil;
+}
+
 // Unfortunately this method is un-debuggable
 
 -(bool)traverse:(SEL)selector userObj:(id)userObj
@@ -67,5 +72,18 @@
     
     [_kids addObject:child];
     child->_parent = self;
+}
+
+-(void)setValue:(id)value forUndefinedKey:(NSString *)key
+{
+    if( !_dynamicVars )
+        _dynamicVars = [NSMutableDictionary new];
+    _dynamicVars[key] = value;
+    
+}
+
+-(id)valueForUndefinedKey:(NSString *)key
+{
+    return _dynamicVars[key];
 }
 @end

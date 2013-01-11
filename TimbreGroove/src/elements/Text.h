@@ -10,4 +10,5 @@
 
 @interface Text : SimpleImage
 
+@property (nonatomic,strong) NSString * text;
 @end

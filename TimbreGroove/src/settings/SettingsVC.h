@@ -9,9 +9,6 @@
 #import <UIKit/UIKit.h>
 #import "UIView+TGViewExtensions.h"
 
-@class Sound;
-@class TrackView;
-
 // for SettingsDescriptor.priority
 #define SHADER_SETTINGS    0
 #define TEXTURE_SETTINGS 100
@@ -34,26 +31,30 @@ typedef enum SettingControl
 -(id)initWithControlType:(SettingControl)cType
               memberName:(NSString *)memberName
                labelText:(NSString *)text
-                  options:(NSDictionary *)values
-                selected:(id)selected
-                delegate:(id)delegate
+                 options:(NSDictionary *)values
+                initialValue:(id)initialValue
                 priority:(int)priority;
 
 @property (nonatomic) SettingControl controlType;
 @property (nonatomic,strong) NSString * memberName; // used for obj-c member name, layoutID, etc.
 @property (nonatomic,strong) NSString * labelText;
 @property (nonatomic,strong) NSDictionary * options;
-@property (nonatomic,strong) id initialValue; // aka selected
-@property (nonatomic,strong) id delegate; // used for pickViewDelegates, on clicks, valueChanged, etc.
-@property (nonatomic,strong) id result;
+@property (nonatomic,strong) id initialValue;       // aka selected
 @property (nonatomic) int priority;
 
 @end
 
+@class SettingsVC;
+
+@protocol CaresDeeply <NSObject>
+-(void)settingsGoingAway:(SettingsVC *)vc;
+@end
+
 @interface SettingsVC : UIViewController <UIPickerViewDataSource, UIPickerViewDelegate>
 
-
+@property (nonatomic,strong) id<CaresDeeply> caresDeeply;
 @property (nonatomic,strong) NSArray * settings;
+@property (nonatomic,strong) NSArray * options;
 
 -(IBAction)backToHome:(id)sender;
 @property (weak, nonatomic) IBOutlet UILabel *componentTitleLabel;

@@ -10,11 +10,11 @@
 
 @implementation Photo
 
--(id) init
+-(id)wireUp
 {
-    Photo * p = [super initWithTextureFile:"Alex.png"];
-    
-    return p;
+    if( !self.textureFileName )
+        self.textureFileName = @"Alex.png";
+    return [super wireUp];
 }
 
 #if DEBUG

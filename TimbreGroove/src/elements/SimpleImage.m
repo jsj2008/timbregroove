@@ -13,11 +13,6 @@ static MeshBuffer * __sharedBuffer;
 
 @implementation SimpleImage
 
--(id)initWithTextureFile:(const char *)fileName
-{
-    return [super initWithTextureFile:fileName];
-}
-
 -(void)createBuffer
 {
     if( __sharedBuffer == nil )

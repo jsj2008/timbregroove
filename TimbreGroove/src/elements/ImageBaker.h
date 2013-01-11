@@ -7,7 +7,10 @@
 //
 
 #import "Generic.h"
-
+@class TrackView;
 @interface ImageBaker : Generic
 
++(NSDictionary *)getShaderModes;
+
+@property (nonatomic) int mode;
 @end

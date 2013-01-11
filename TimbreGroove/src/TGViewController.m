@@ -28,13 +28,9 @@
     bool _dawView;
     TrackView * _showingTrackView;
     SoundMan * _soundMan;
-    int _passCount;
 }
 
 @property (strong, nonatomic) EAGLContext *context;
-
-- (void)setupGL;
-- (void)tearDownGL;
 
 @end
 
@@ -71,7 +67,6 @@
     CMSG("viewWillAppear");
     
     [super viewWillAppear:animated];
-//    [_soundMan wakeup];
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -79,7 +74,6 @@
     CMSG("viewWillDisappear");
     
     [super viewWillDisappear:animated];
-  //  [_sound goAway];
 }
 
 
@@ -91,14 +85,7 @@
         self.view = nil;
         
         [self tearDownGL];
-        
-        if ([EAGLContext currentContext] == self.context) {
-            [EAGLContext setCurrentContext:nil];
-        }
-        self.context = nil;
     }
-
-    // Dispose of any resources that can be recreated.
 }
 
 - (void)setupGL
@@ -112,9 +99,21 @@
 
 - (void)tearDownGL
 {
-    // ?
-    //[EAGLContext setCurrentContext:self.context];
-    
+    if ([EAGLContext currentContext] == self.context) {
+        [EAGLContext setCurrentContext:nil];
+    }
+    self.context = nil;    
+}
+
+- (void)viewDidUnload
+{
+    _menuView = nil;
+    _showingTrackView = nil;
+}
+
+-(void)dealloc
+{
+    _soundMan = nil;
 }
 
 #pragma mark - GLKView and GLKViewController delegate methods
@@ -136,7 +135,6 @@
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     [_soundMan update:self.timeSinceLastDraw];
-   // [_sound dumpTime];
 }
 
 
@@ -252,7 +250,7 @@
     for (unsigned int q = 0; q < dim && vcount < count; q++) {
         for( unsigned int r = 0; r < dim && vcount < count; r++ ) {
             TrackView * view = trackViews[vcount++];
-            [view showSceneAndSync:400];
+            [view showAndSync:400];
             view.frame = rc;
             [view animateProp:"x"      targetVal:q*w hide:false];
             [view animateProp:"y"      targetVal:r*h hide:false];
@@ -280,7 +278,7 @@
         else
         {
             view.frame = rc;
-            [view hideSceneAndFade];
+            [view hideAndFade:HIDE_NOW];
         }
     }
 }
@@ -349,6 +347,7 @@
     NSArray * settings = [_showingTrackView getSettings];
     SettingsVC * svc = (SettingsVC *)segue.destinationViewController;
     svc.settings = settings;
+    svc.caresDeeply = _showingTrackView;
     
 }
 

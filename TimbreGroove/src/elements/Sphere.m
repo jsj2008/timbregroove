@@ -25,59 +25,43 @@ static void genSphere(TGGenericElementParams *p, float radius,
     float _radius;
     float _longs;
     float _lats;
-    bool  _hasTexture;
     float _lightRot;
-    Texture * _initTexture;
 }
 @end
+
 @implementation Sphere
 
--(id)init
+-(id)wireUp
 {
-    return [self initWithRadius:1 longs:30 lats:30];
-}
-
--(id)initWithRadius:(float)radius longs:(float)longs lats:(float)lats
-{
-    _radius = radius;
-    _lats = lats;
-    _longs = longs;
-    
-    if( (self = [super init]) )
-    {
+    if( !_radius )
+        _radius = 1;
+    if( !_longs )
+        _longs = 30;
+    if( !_lats )
+        _lats = _longs;
+    [super wireUp];
+    if( !self.hasTexture )
         self.color = GLKVector4Make(0, 1, 0, 1);
-    }
-    
     return self;
 }
 
--(id)initWithRadius:(float)radius longs:(float)longs lats:(float)lats textureFile:(const char *)fileName;
+-(Sphere *)setRadius:(float)radius longs:(float)longs lats:(float)lats
 {
     _radius = radius;
     _lats = lats;
     _longs = longs;
-    _hasTexture = true;
     
-    return [super initWithTextureFile:fileName];
+    self.color = GLKVector4Make(0, 1, 0, 1);
+    return self;
 }
 
--(id)initWithTexture:(Texture *)texture
+-(Sphere *)setRadius:(float)radius longs:(float)longs lats:(float)lats textureFile:(const char *)fileName;
 {
-    _radius = 1;
-    _lats = 30;
-    _longs = 30;
-    _hasTexture = true;
-    _initTexture = texture;
-    return [super init];
-}
-
--(void)createTexture
-{
-    if(_initTexture )
-    {
-        self.texture = _initTexture;
-        _initTexture = nil;
-    }
+    _radius = radius;
+    _lats = lats;
+    _longs = longs;
+    self.textureFileName = @(fileName);
+    return self;
 }
 
 -(void)update:(NSTimeInterval)dt
@@ -94,7 +78,7 @@ static void genSphere(TGGenericElementParams *p, float radius,
 {
     NSArray * types;
 
-    if( _hasTexture )
+    if( self.hasTexture )
         types = @[@(sv_pos),@(sv_uv),@(sv_normal)];
     else
         types = @[@(sv_pos),@(sv_normal)];
@@ -109,7 +93,7 @@ static void genSphere(TGGenericElementParams *p, float radius,
 {
     float * data = vertextData;
     bool wNormals = true;
-    bool wUV = _hasTexture;
+    bool wUV = self.hasTexture;
     
 	for (int latNumber = 0; latNumber <= _lats; ++latNumber) {
 		for (int longNumber = 0; longNumber <= _longs; ++longNumber) {

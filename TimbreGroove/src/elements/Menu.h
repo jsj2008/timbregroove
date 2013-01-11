@@ -23,7 +23,6 @@
 
 @property (nonatomic,strong) NSDictionary * meta;
 
--(id)initWithIcon:(NSString *)fileName;
 @end
 
 @protocol MenuItemHandler <NSObject>
@@ -38,7 +37,4 @@
 
 @property (nonatomic,strong) MenuView *        menuView;
 @property (nonatomic,strong) id<MenuViewMaker> viewMaker;
-
--(id)initWithMeta:(NSDictionary *)meta;
-
 @end

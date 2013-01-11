@@ -103,6 +103,12 @@
 {
     FMOD_Sound_Release(_sound);
 }
+
+-(void)dealloc
+{
+    [self releaseResource];
+}
+
 -(void)sync:(int)delay
 {
     FMOD_RESULT result;

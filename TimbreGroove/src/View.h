@@ -17,16 +17,17 @@
     GLKVector4 _backcolor;
 }
 @property (nonatomic,readonly) id firstNode;
-@property (nonatomic,readonly) bool visible;
-@property (nonatomic) bool clearOnRender;
+@property (nonatomic) bool visible;
+@property (nonatomic,readonly,getter = isInFullView) bool inFullView;
+
 @property (nonatomic) float x;
 @property (nonatomic) float y;
 @property (nonatomic) float width;
 @property (nonatomic) float height;
 @property (nonatomic,strong) Graph * graph;
+
 -(void)animateProp:(const char *)propName targetVal:(float)targetVal hide:(bool)hide;
--(void)showScene;
--(void)hideScene;
+
 -(void)update:(NSTimeInterval)dt;
 -(void)drawRect:(CGRect)rect;
 -(void)setupGL;

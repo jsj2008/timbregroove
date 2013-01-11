@@ -15,12 +15,8 @@
     bool _testedForSubMenu;
 }
 @end
-@implementation MenuItem
 
--(id)initWithIcon:(NSString *)fileName;
-{
-    return [super initWithTextureFile:[fileName UTF8String]];
-}
+@implementation MenuItem
 
 #if DEBUG
 -(void)render:(NSUInteger)w h:(NSUInteger)h

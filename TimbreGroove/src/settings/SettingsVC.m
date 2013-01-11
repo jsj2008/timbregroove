@@ -15,8 +15,7 @@
               memberName:(NSString *)memberName
                labelText:(NSString *)text
                   options:(NSDictionary *)values
-                selected:(id)selected
-                delegate:(id)delegate
+                initialValue:(id)initialValue
                 priority:(int)priority
 {
     if( (self = [super init]) )
@@ -25,8 +24,7 @@
         _memberName = memberName;
         _labelText = text;
         _options = values;
-        _initialValue = selected;
-        _delegate = delegate;
+        _initialValue = initialValue;
         _priority = priority;
     }
     
@@ -43,6 +41,7 @@
 @implementation SettingsVC
 
 -(IBAction)backToHome:(id)sender {
+    [self.caresDeeply settingsGoingAway:self];
     [self.navigationController popToRootViewControllerAnimated:YES];
 }
 
@@ -66,6 +65,7 @@
     // Dispose of any resources that can be recreated.
 }
 
+
 -(UIView *)createControl:(SettingsDescriptor *)sd
 {
     UIView * control = nil;
@@ -81,6 +81,11 @@
             
         case SC_Text:
             control = [self createText:sd];
+            break;
+            
+        case SC_Switch:
+            control = [self createSwitch:sd];
+            break;
             
         default:
             break;
@@ -93,16 +98,18 @@
                           label:(UILabel *)label
                            prev:(UIView *)prevControl
 {
+    NSDictionary *viewsDictionary = @{
+                    prevControl.memberName: prevControl,
+                    label.memberName: label,
+                    control.memberName: control};
+    
     // V:[prevControl]-[label]
+    // V:[prevControl]-[control]
     // H:!-[label(==100)]-[control]-|
     NSString * VFL1 = [NSString stringWithFormat:@"V:[%@]-[%@]",prevControl.memberName,label.memberName];
-    NSString * VFL2 = [NSString stringWithFormat:@"H:|-[%@(==100)]-[%@]-|",label.memberName,control.memberName];
+    NSString * VFL2 = [NSString stringWithFormat:@"V:[%@]-[%@]",prevControl.memberName,control.memberName];
+    NSString * VFL3 = [NSString stringWithFormat:@"H:|-[%@(==100)]-[%@]-|",label.memberName,control.memberName];
 
-    NSDictionary *viewsDictionary = @{
-            prevControl.memberName: prevControl,
-                  label.memberName: label,
-                control.memberName: control};
-    
     NSArray * c1 = [NSLayoutConstraint constraintsWithVisualFormat:VFL1
                                                            options:0
                                                            metrics:nil
@@ -112,19 +119,31 @@
                                                            options:0
                                                            metrics:nil
                                                              views:viewsDictionary];
-    
+
+    NSArray * c3 = [NSLayoutConstraint constraintsWithVisualFormat:VFL3
+                                                           options:0
+                                                           metrics:nil
+                                                             views:viewsDictionary];
+
     NSMutableArray * arr = [[NSMutableArray alloc] initWithArray:c1];
     [arr addObjectsFromArray:c2];
+    [arr addObjectsFromArray:c3];
     return arr;
 }
 
--(UILabel *)labelForControl:(SettingsDescriptor *)sd
+-(UILabel *)labelForControl:(SettingsDescriptor *)sd example:(UILabel *)example
 {
-    UILabel * label = [UILabel new];
+    UILabel * label = [[UILabel alloc] initWithFrame:CGRectZero];
     label.translatesAutoresizingMaskIntoConstraints = NO;
     [label setText:sd.labelText];
     label.memberName = [sd.memberName stringByAppendingString:@"_label"];
-    //[self setValue:label forKey:label.memberName];
+    [self.view addSubview:label];
+    
+    label.textAlignment = NSTextAlignmentRight;
+    label.opaque = example.opaque;
+    label.textColor = example.textColor;
+    label.backgroundColor = example.backgroundColor;
+
     return label;
 }
 
@@ -144,62 +163,73 @@
     {
         _settingsDict[sd.memberName] = sd;
         UIView * control = [self createControl:sd];
-        UILabel * label = [self labelForControl:sd];
+        UILabel * label = [self labelForControl:sd example:_componentTitleLabel];
         [constraints addObjectsFromArray:[self setupConstraintsFor:control label:label prev:prevControl]];
+        prevControl = control;
     }
+    [self.view addConstraints:constraints];
     _settings = nil; // don't need this anymore
+}
+
+- (UIView *)createSwitch:(SettingsDescriptor *)sd
+{
+    UISwitch * sw = [[UISwitch alloc] initWithFrame:CGRectZero];
+    sw.translatesAutoresizingMaskIntoConstraints = NO;
+    sw.on = [sd.initialValue intValue];;
+    [sw addTarget:self action:@selector(switchThrown:) forControlEvents:UIControlEventValueChanged];
+    sw.memberName = sd.memberName;
+    [self.view addSubview:sw];
+    return sw;
+}
+
+-(void)switchThrown:(UISwitch *)sw
+{
+    NSString           * name   = sw.memberName;
+    SettingsDescriptor * sd     = _settingsDict[name];
+    
+    [sd.options[@"target"] setValue:@(sw.on) forKey:sd.options[@"key"]];
 }
 
 - (UIControl *)createSlider:(SettingsDescriptor *)sd
 {
-    UISlider * slider = [[UISlider alloc] init];
+    UISlider * slider = [[UISlider alloc] initWithFrame:CGRectZero];
     slider.translatesAutoresizingMaskIntoConstraints = NO;
     slider.minimumValue = [sd.options[@"low"] floatValue];
     slider.maximumValue = [sd.options[@"high"] floatValue];
     slider.value = [sd.initialValue floatValue];
-#if DEBUG
-    if( ![sd.delegate canPerformAction:@selector(sliderValueChanged:) withSender:slider] )
-    {
-        NSLog(@"request for slider when SettingsDescriptor.delegate does not implement 'slidverValueChanged:' message");
-        exit(1);
-    }
-#endif
-    [slider addTarget:sd.delegate action:@selector(sliderValueChanged:) forControlEvents:UIControlEventValueChanged];
+    [slider addTarget:self action:@selector(sliderValueChanged:) forControlEvents:UIControlEventValueChanged];
     slider.memberName = sd.memberName;
     [self.view addSubview:slider];
-    //[self setValue:slider forKey:sd.memberName];
     return slider;
+}
+
+-(void)sliderValueChanged:(UISlider *)slider
+{
+    NSString           * name   = slider.memberName;
+    SettingsDescriptor * sd     = _settingsDict[name];
+    
+    [sd.options[@"target"] setValue:@(slider.value) forKey:sd.options[@"key"]];
 }
 
 -(UIControl *)createText:(SettingsDescriptor *)sd
 {
-    UITextField * textField = [UITextField new];
+    UITextField * textField = [[UITextField alloc] initWithFrame:CGRectZero];
     textField.translatesAutoresizingMaskIntoConstraints = NO;
     [textField setText:sd.initialValue];
     textField.memberName = sd.memberName;
     [self.view addSubview:textField];
-    //[self setValue:textField forKey:textField.memberName];
-#if DEBUG
-    if( ![sd.delegate canPerformAction:@selector(textEditingEnded:) withSender:textField] )
-    {
-        NSLog(@"request for textEdit when SettingsDescriptor.delegate does not implement 'textEditingEnded:' message");
-        exit(1);
-    }
-#endif
-    [textField addTarget:sd.delegate action:@selector(textEditValueChanged:) forControlEvents:UIControlEventEditingDidEnd];
+    [textField addTarget:self action:@selector(textEditingDidEnd:) forControlEvents:UIControlEventEditingDidEnd];
     
     return textField;    
 }
 
-// return the picker frame based on its size, positioned at the bottom of the page
-- (CGRect)pickerFrameWithSize:(CGSize)size
+-(void)textEditingDidEnd:(UITextField *)tfield
 {
-	CGRect screenRect = [[UIScreen mainScreen] applicationFrame];
-	CGRect pickerRect = CGRectMake(	0.0,
-                                   screenRect.size.height - 42.0 - size.height,
-                                   size.width,
-                                   size.height);
-	return pickerRect;
+    NSString           * name   = tfield.memberName;
+    SettingsDescriptor * sd     = _settingsDict[name];
+    
+    [sd.options[@"target"] setValue:tfield.text forKey:sd.options[@"key"]];
+    
 }
 
 - (UIControl *)createPicker:(SettingsDescriptor *)sd
@@ -210,24 +240,27 @@
 	//
 	// position the picker at the bottom
 	UIPickerView * picker = [[UIPickerView alloc] initWithFrame:CGRectZero];
-    picker.memberName = sd.memberName;
-
 	picker.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
-	CGSize pickerSize = [picker sizeThatFits:CGSizeZero];
-	picker.frame = [self pickerFrameWithSize:pickerSize];
+	CGSize size       = [picker sizeThatFits:CGSizeZero];
+	CGRect screenRect = [[UIScreen mainScreen] applicationFrame];
+	picker.frame      = CGRectMake(	0.0,
+                                   screenRect.size.height - 42.0 - size.height,
+                                   size.width,
+                                   size.height);
     
-	picker.showsSelectionIndicator = YES;	// note this is default to NO
-	
+    picker.memberName = sd.memberName;
 	picker.delegate = self;
 	picker.dataSource = self; // really?
-	
+	picker.showsSelectionIndicator = YES;	// note this is default to NO
 	picker.hidden = YES;
+    
+    [picker selectRow:[self getKeyIndex:sd] inComponent:0 animated:NO];
+    
 	[self.view addSubview:picker];
-    //[self setValue:picker forKey:sd.memberName];
     
     UIButton * button = [UIButton buttonWithType:UIButtonTypeRoundedRect];
     button.translatesAutoresizingMaskIntoConstraints = NO;
-    NSString * selectedValue = sd.options[sd.initialValue];
+    NSString * selectedValue = sd.options[@"values"][sd.initialValue];
     [button setTitle:selectedValue forState:UIControlStateNormal];
     [self.view addSubview:button];
     button.memberName = [sd.memberName stringByAppendingString:@"_button"];
@@ -235,6 +268,29 @@
     return button;
 }
 
+-(int)getKeyIndex:(SettingsDescriptor *)sd
+{
+    int count = 0;
+    for( id key in sd.options[@"values"] )
+    {
+        if( [key isKindOfClass:[NSString class]] == YES )
+        {
+            if( [((NSString *)key) isEqualToString:sd.initialValue] )
+                return count;
+        }
+        else
+        {
+            if( key == sd.initialValue )
+                return count;
+        }
+        ++count;
+    }
+#if DEBUG
+    NSLog(@"Can't find key %@ in values array",sd.initialValue);
+    exit(1);
+#endif
+    return 0;
+}
 -(IBAction)onPickerButton:(UIButton *)sender
 {
     NSString * pickerName = [sender.memberName componentsSeparatedByString:@"_"][0];
@@ -249,22 +305,15 @@
       didSelectRow:(NSInteger)row
        inComponent:(NSInteger)component
 {
-    NSString * name = pickerView.memberName;
-    UIButton * button = [self valueForKey:[name stringByAppendingString:@"_button"]];
-    SettingsDescriptor * sd = _settingsDict[name];
-    NSString * selectedValue = [sd.options allValues][row];
-    [button setTitle:selectedValue forState:UIControlStateNormal];
-
-/* something like this (without forcing conforming to UIViewPickDelegate
-    if( ![sd.delegate canPerformAction:@selector(textEditingEnded:) withSender:textField] )
-    {
-        NSLog(@"request for textEdit when SettingsDescriptor.delegate does not implement 'textEditingEnded:' message");
-        exit(1);
-    }
-*/
+    NSString           * name   = pickerView.memberName;
+    SettingsDescriptor * sd     = _settingsDict[name];
+    NSDictionary       * values = sd.options[@"values"];
     
-    id<UIPickerViewDelegate> proxy = sd.delegate;
-    return [proxy pickerView:pickerView didSelectRow:row inComponent:component];
+    UIButton * button = [self valueForKey:[name stringByAppendingString:@"_button"]];
+    [button setTitle:[values allValues][row] forState:UIControlStateNormal];
+    
+    [sd.options[@"target"] setValue:[values allKeys][row] forKey:sd.options[@"key"]];
+    
 }
 
 - (NSString *)pickerView:(UIPickerView *)pickerView
@@ -272,14 +321,14 @@
             forComponent:(NSInteger)component
 {
     SettingsDescriptor * sd = _settingsDict[pickerView.memberName];
-    return [sd.options allValues][row];
+    return [sd.options[@"values"] allValues][row];
 }
 
 
 - (NSInteger)pickerView:(UIPickerView *)pickerView numberOfRowsInComponent:(NSInteger)component
 {
     SettingsDescriptor * sd = _settingsDict[pickerView.memberName];
-    return [sd.options count];
+    return [sd.options[@"values"] count];
 }
 
 - (NSInteger)numberOfComponentsInPickerView:(UIPickerView *)pickerView
@@ -289,16 +338,11 @@
 
 -(id)valueForUndefinedKey:(NSString *)key
 {
-    NSArray * controls = self.view.subviews;
-    NSIndexSet * index = [controls indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
-        bool match = ((UIView *)obj).memberName == key;
-        *stop = match;
-        return match;
-    }];
-    
-    if( [index count] )
-        return controls[[index firstIndex]];
-    
+    for( UIView * view in self.view.subviews )
+    {
+        if( [key isEqualToString:view.memberName] )
+            return view;
+    }
     return nil;
 }
 

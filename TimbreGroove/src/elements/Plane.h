@@ -9,5 +9,4 @@
 #import "Generic.h"
 
 @interface Plane : Generic
--(Plane *)initWithColor:(GLKVector4)color;
 @end
