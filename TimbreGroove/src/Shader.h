@@ -55,6 +55,7 @@
 @protected
     GLuint _program;
 }
+-(id)initWithVertex:(const char *)vert andFragment:(const char *)frag;
 
 @property (nonatomic, strong, getter = getLocations) ShaderLocations * locations;
 @property (nonatomic) GLuint program;

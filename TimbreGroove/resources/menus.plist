@@ -45,7 +45,7 @@
 					<key>userData</key>
 					<dict>
 						<key>instanceClass</key>
-						<string>TestElement</string>
+						<string>CustomPlane</string>
 					</dict>
 					<key>icon</key>
 					<string>test.png</string>

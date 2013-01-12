@@ -85,6 +85,7 @@
 		57A10E9B1685E0BE00B80314 /* TG1Band-pitched-24k.aif in Resources */ = {isa = PBXBuildFile; fileRef = 57A10E991685E0BE00B80314 /* TG1Band-pitched-24k.aif */; };
 		57A66EED167B1D1C00B9EA75 /* Texture.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A66EEC167B1D1C00B9EA75 /* Texture.m */; };
 		57A66EEF167B293E00B9EA75 /* aotk_tex_64.png in Resources */ = {isa = PBXBuildFile; fileRef = 57A66EEE167B293E00B9EA75 /* aotk_tex_64.png */; };
+		57BFCB8E16A21841008903BA /* CustomPlane.m in Sources */ = {isa = PBXBuildFile; fileRef = 57718EF716838D75001D7D35 /* CustomPlane.m */; };
 		57CAF78516891EDB00459353 /* libc++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 57CAF78416891EDA00459353 /* libc++.dylib */; };
 		57CCFFC216849337003B4A19 /* Text.m in Sources */ = {isa = PBXBuildFile; fileRef = 57CCFFC116849336003B4A19 /* Text.m */; };
 		57DDE233168841680066A754 /* TGAmb1-32k.aif in Resources */ = {isa = PBXBuildFile; fileRef = 57DDE231168841680066A754 /* TGAmb1-32k.aif */; };
@@ -500,12 +501,12 @@
 				57F412F016814EBB00D9DC67 /* menu */,
 				574B5FF3168CE294008367D1 /* fluid */,
 				572D7F2B1683033D006D48BF /* generic */,
+				57718EF616838D75001D7D35 /* CustomPlane.h */,
+				57718EF716838D75001D7D35 /* CustomPlane.m */,
 				57F290F7169578C700293B0E /* Fractal.h */,
 				57F290F8169578C700293B0E /* Fractal.m */,
 				5737C4B116930BD400C12F2D /* FractalSphere.h */,
 				5737C4B216930BD500C12F2D /* FractalSphere.m */,
-				57718EF616838D75001D7D35 /* CustomPlane.h */,
-				57718EF716838D75001D7D35 /* CustomPlane.m */,
 				57E62E65168433100030908E /* Photo.h */,
 				57E62E66168433100030908E /* Photo.m */,
 				571ECFC9167BF31D00727A30 /* Plane.h */,
@@ -767,6 +768,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				57BFCB8E16A21841008903BA /* CustomPlane.m in Sources */,
 				571A472F16954234002231C5 /* Fluid.m in Sources */,
 				575DA00A169437AC00A50C41 /* FractalSphere.m in Sources */,
 				57F855E0167ED84100FF244C /* Menu.m in Sources */,

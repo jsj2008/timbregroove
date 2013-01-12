@@ -21,7 +21,7 @@
 @end
 @implementation CustomPlane
 
--(id)init
+-(id)wireUp
 {
     static float v[6*3] = {
         //   x   y  z
@@ -34,18 +34,15 @@
         1, -1, 0
     };
     
-    if( (self = [super init]) )
-    {
-        glGenBuffers(1, &_vbuffer);
-        glBindBuffer(GL_ARRAY_BUFFER, _vbuffer);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(v), v, GL_STATIC_DRAW);
-        self.shader = [ShaderFactory getShader:@"generic" klass:[Shader class] header:nil];
-        [self.shader use];
-        GLKVector4 c = { 1, 0, 0, 1 };
-        [self.shader.locations write:@"u_color" type:TG_VECTOR4 data:c.v];
-        _posAttrLoc = glGetAttribLocation(self.shader.program, "a_position");
-        
-    }
+    [super wireUp];
+    glGenBuffers(1, &_vbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, _vbuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(v), v, GL_STATIC_DRAW);
+    self.shader = [[Shader alloc] initWithVertex:"generic" andFragment:"generic"];
+    [self.shader use];
+    GLKVector4 c = { 1, 0, 0, 1 };
+    [self.shader.locations write:@"u_color" type:TG_VECTOR4 data:c.v];
+    _posAttrLoc = glGetAttribLocation(self.shader.program, "a_position");
     
     return self;
 }

@@ -83,6 +83,16 @@ static NSMutableDictionary * __shaders;
     return self;
 }
 
+-(id)initWithVertex:(const char *)vert andFragment:(const char *)frag
+{
+    if( (self = [super init]))
+    {
+        _header = nil;
+        [self load:@(vert) withFragment:@(frag)];
+    }
+    return self;
+}
+
 
 #pragma mark - public
 

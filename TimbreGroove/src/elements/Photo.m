@@ -7,6 +7,9 @@
 //
 
 #import "Photo.h"
+#import "SettingsVC.h"
+
+static NSString * __str_pictureFieldName = @"picturePicker";
 
 @implementation Photo
 
@@ -17,10 +20,17 @@
     return [super wireUp];
 }
 
-#if DEBUG
--(void)render:(NSUInteger)w h:(NSUInteger)h
+-(NSArray *)getSettings
 {
-    [super render:w h:h];
+    SettingsDescriptor * sd;
+    sd = [[SettingsDescriptor alloc]  initWithControlType: SC_Picture
+                                               memberName: __str_pictureFieldName
+                                                labelText: @"Picture"
+                                                  options: @{@"target":self, @"key":@"textureFileName"}
+                                             initialValue: self.textureFileName
+                                                 priority: SHADER_SETTINGS];
+    
+    return @[sd];
+    
 }
-#endif
 @end
