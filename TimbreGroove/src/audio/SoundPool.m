@@ -32,14 +32,16 @@ static SoundPool *__spf;
 -(Sound*)getSound:(NSDictionary *)params
 {
     static int currSound;
-    static const char * sounds[3] = {
+    static const char * sounds[] = {
+        "TGAmb1-32k.aif",
+        "TGAmb2-32k.aif",
         "TGAmb3-32k.aif",
-        "TG1Band-perc-24k.aif",
-        "TG1Band-pitched-24k.aif"
+        "TG1Band-pitched-24k.aif",
+        "TG1Band-perc-24k.aif"
     };
     
     Sound * sound = [[SoundMan sharedInstance] getSound:sounds[currSound]];
-    currSound = (currSound + 1) % 3;
+    currSound = (currSound + 1) % 5;
     return sound;
 }
 
