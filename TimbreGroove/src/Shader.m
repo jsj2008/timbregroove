@@ -8,7 +8,6 @@
 
 #import "Shader.h"
 #import "ShaderLocations.h"
-#import "Texture.h"
 
 static NSMutableDictionary * __shaders;
 

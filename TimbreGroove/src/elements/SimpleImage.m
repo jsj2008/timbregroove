@@ -17,8 +17,7 @@ static MeshBuffer * __sharedBuffer;
 {
     if( __sharedBuffer == nil )
     {
-        [self createBufferDataByType:@[@(sv_pos),@(sv_uv)] numVertices:6 numIndices:0];
-        __sharedBuffer = _buffers[0];
+        __sharedBuffer =[self createBufferDataByType:@[@(sv_pos),@(sv_uv)] numVertices:6 numIndices:0];
     }
     else
     {

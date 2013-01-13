@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 #import "UIView+TGViewExtensions.h"
+#import <AssetsLibrary/AssetsLibrary.h>
+#import <MobileCoreServices/MobileCoreServices.h>
 
 // for SettingsDescriptor.priority
 #define SHADER_SETTINGS    0
@@ -50,7 +52,10 @@ typedef enum SettingControl
 -(void)settingsGoingAway:(SettingsVC *)vc;
 @end
 
-@interface SettingsVC : UIViewController <UIPickerViewDataSource, UIPickerViewDelegate>
+@interface SettingsVC : UIViewController <UIPickerViewDataSource,
+                                          UIPickerViewDelegate,
+                                          UINavigationControllerDelegate,
+                                          UIImagePickerControllerDelegate>
 
 @property (nonatomic,strong) id<CaresDeeply> caresDeeply;
 @property (nonatomic,strong) NSArray * settings;

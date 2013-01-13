@@ -12,53 +12,37 @@
 @class Texture;
 @class Shader;
 
-@interface Generic : TG3dObject {
+@interface GenericBase : TG3dObject {
 @protected
     NSMutableArray * _buffers;
 }
 
-@property (nonatomic, strong) NSString * textureFileName;
-
-@property (nonatomic, strong) Texture * texture;
 @property (nonatomic, readonly) bool hasTexture;
+
 @property (nonatomic) GLKVector4 color;
 
 @property (nonatomic) bool       lighting;
 @property (nonatomic) GLKVector3 lightDir;
 @property (nonatomic) GLKVector3 dirColor;
 @property (nonatomic) GLKVector3 ambient;
-
-
 // these are order dependant
 //==============================================
-
 // write your own version of this:
 -(void)createBuffer;
-
 // that calls this:
--(void)createBufferDataByType:(NSArray *)svars
-                  numVertices:(unsigned int)numVerticies
-                   numIndices:(unsigned int)numIndices;
+-(MeshBuffer *)createBufferDataByType:(NSArray *)svars
+                          numVertices:(unsigned int)numVerticies
+                           numIndices:(unsigned int)numIndices;
 
 // or this
--(void)createBufferDataByType:(NSArray *)svar
-                  numVertices:(unsigned int)numVerticies
-                   numIndices:(unsigned int)numIndices
-                     uniforms:(NSDictionary*)uniformNames;
+-(MeshBuffer *)createBufferDataByType:(NSArray *)svars
+                          numVertices:(unsigned int)numVerticies
+                           numIndices:(unsigned int)numIndices
+                             uniforms:(NSDictionary*)uniformNames;
 
 // which will call you back here:
 -(void)getBufferData:(void *)vertextData
            indexData:(unsigned *)indexData;
-
-// write your own version this:
--(void)createTexture;
-
-// that calls this:
--(void)setTextureWithFile:(const char *)fileName;
-// or these ( or property setter)
--(void)addTextureObject:(Texture *)texture;
--(void)replaceTextures:(NSArray *)textures;
-
 
 -(void)configureLighting;
 
@@ -66,5 +50,26 @@
 -(void)createShader;
 -(void)getBufferLocations;
 -(void)getTextureLocations;
--(Texture *)getTextureObject:(int)index;
+@end
+
+
+/*
+  Simple single texture shader support
+*/
+@interface Generic : GenericBase 
+// NSString * or NSURL * to asset-library
+@property (nonatomic, strong)   id        textureFileName;
+@property (nonatomic, strong)   Texture * texture;
+-(void)createTexture;
+@end
+
+/*
+   Support for multiple textures.
+   N.B. Generic shaders do NOT support this
+*/
+@interface GenericMultiTextures : Generic
+-(void)createTextures;
+-(void)addTextureObject:(Texture *)texture;
+-(void)replaceTextures:(NSArray *)textures;
+
 @end

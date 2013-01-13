@@ -335,12 +335,13 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
 
 -(void)createBuffer
 {
+    MeshBuffer * buffer =
     [self createBufferDataByType:@[@(sv_pos2f),@(sv_customAttr2f)]
                      numVertices:8
                       numIndices:0
                         uniforms:@{@(sv_pos2f) : @"position",@(sv_customAttr2f) : @"offset"}];
     
-    ((MeshBuffer *)_buffers[0]).drawType = GL_LINES;
+    buffer.drawType = GL_LINES;
 }
 
 -(void)getBufferData:(void *)vertextData indexData:(unsigned int *)indexData

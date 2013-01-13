@@ -9,6 +9,5 @@
 #import <UIKit/UIKit.h>
 
 @interface UIView (TGViewExtensions)
-
 @property (nonatomic,strong) NSString * memberName;
 @end

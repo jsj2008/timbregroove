@@ -8,7 +8,7 @@
 
 #import "Generic.h"
 @class TrackView;
-@interface ImageBaker : Generic
+@interface ImageBaker : GenericMultiTextures
 
 +(NSDictionary *)getShaderModes;
 

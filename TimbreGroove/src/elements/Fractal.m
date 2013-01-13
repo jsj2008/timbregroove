@@ -27,10 +27,10 @@
 // write your own version of this:
 -(void)createBuffer
 {
+    MeshBuffer * b =
     [self createBufferDataByType:@[@(sv_pos)]
                      numVertices:4
                       numIndices:0];
-    MeshBuffer * b = _buffers[0];
     b.drawType = GL_TRIANGLE_FAN;
 }
 

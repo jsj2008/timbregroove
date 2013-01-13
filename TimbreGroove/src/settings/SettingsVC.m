@@ -35,15 +35,12 @@
 
 @interface SettingsVC () {
     NSMutableDictionary * _settingsDict;
+    NSMutableDictionary * _dynamicProps;
 }
 @end
 
 @implementation SettingsVC
 
--(IBAction)backToHome:(id)sender {
-    [self.caresDeeply settingsGoingAway:self];
-    [self.navigationController popToRootViewControllerAnimated:YES];
-}
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -65,6 +62,10 @@
     // Dispose of any resources that can be recreated.
 }
 
+-(IBAction)backToHome:(id)sender {
+    [self.caresDeeply settingsGoingAway:self];
+    [self.navigationController popToRootViewControllerAnimated:YES];
+}
 
 -(UIView *)createControl:(SettingsDescriptor *)sd
 {
@@ -85,6 +86,10 @@
             
         case SC_Switch:
             control = [self createSwitch:sd];
+            break;
+
+        case SC_Picture:
+            control = [self createPicturePicker:sd];
             break;
             
         default:
@@ -169,6 +174,43 @@
     }
     [self.view addConstraints:constraints];
     _settings = nil; // don't need this anymore
+}
+
+- (UIView *)createPicturePicker:(SettingsDescriptor *)sd
+{
+    UIImagePickerController *controller = [[UIImagePickerController alloc] init];
+    controller.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+    controller.mediaTypes = @[(__bridge NSString *)kUTTypeImage];
+    controller.allowsEditing = YES;
+    controller.delegate = self;
+    [self addDynoProp:controller forKey:sd.memberName];
+    
+    
+    UIButton * button = [self createButtonHelper:sd title:sd.initialValue];
+    [button addTarget:self action:@selector(onPicturePickerButton:) forControlEvents:UIControlEventTouchUpInside];
+    return button;
+}
+
+-(void)onPicturePickerButton:(UIButton *)sender
+{
+    NSString * pickerName = [sender.memberName componentsSeparatedByString:@"_"][0];    
+    UIImagePickerController * controller = [self valueForKey:pickerName];
+    [self presentViewController:controller animated:YES completion:NULL];
+}
+
+- (void)imagePickerController:(UIImagePickerController *)picker
+didFinishPickingMediaWithInfo:(NSDictionary *)info
+{
+    // UIImagePickerControllerReferenceURL
+    // UIImagePickerControllerReferenceURL
+    NSURL * url = info[UIImagePickerControllerReferenceURL];
+    NSLog(@"Got media url %@",url);
+    [picker dismissViewControllerAnimated:YES completion:NULL];
+}
+
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
+{
+    [picker dismissViewControllerAnimated:YES completion:NULL];
 }
 
 - (UIView *)createSwitch:(SettingsDescriptor *)sd
@@ -258,12 +300,7 @@
     
 	[self.view addSubview:picker];
     
-    UIButton * button = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-    button.translatesAutoresizingMaskIntoConstraints = NO;
-    NSString * selectedValue = sd.options[@"values"][sd.initialValue];
-    [button setTitle:selectedValue forState:UIControlStateNormal];
-    [self.view addSubview:button];
-    button.memberName = [sd.memberName stringByAppendingString:@"_button"];
+    UIButton * button = [self createButtonHelper:sd title:sd.options[@"values"][sd.initialValue]];
     [button addTarget:self action:@selector(onPickerButton:) forControlEvents:UIControlEventTouchUpInside];
     return button;
 }
@@ -273,15 +310,8 @@
     int count = 0;
     for( id key in sd.options[@"values"] )
     {
-        if( [key isKindOfClass:[NSString class]] == YES )
-        {
-            if( [((NSString *)key) isEqualToString:sd.initialValue] )
-                return count;
-        }
-        else
-        {
-            if( key == sd.initialValue )
-                return count;
+        if ([key isEqual:sd.initialValue]) {
+            return count;
         }
         ++count;
     }
@@ -336,12 +366,34 @@
 	return 1;
 }
 
+-(UIButton *)createButtonHelper:(SettingsDescriptor *)sd title:(NSString *)title
+{
+    UIButton * button = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    button.translatesAutoresizingMaskIntoConstraints = NO;
+    [button setTitle:title forState:UIControlStateNormal];
+    [self.view addSubview:button];
+    button.memberName = [sd.memberName stringByAppendingString:@"_button"];
+    return button;
+}
+
+-(void)addDynoProp:(id)value forKey:(NSString *)key
+{
+    if( !_dynamicProps )
+        _dynamicProps = [NSMutableDictionary new];
+    _dynamicProps[key] = value;
+}
+
 -(id)valueForUndefinedKey:(NSString *)key
 {
     for( UIView * view in self.view.subviews )
     {
         if( [key isEqualToString:view.memberName] )
             return view;
+    }
+    for( NSString * dkey in _dynamicProps )
+    {
+        if( [dkey isEqualToString:key] )
+            return _dynamicProps[dkey];
     }
     return nil;
 }

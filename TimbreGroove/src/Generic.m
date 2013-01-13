@@ -12,45 +12,45 @@
 #import "Camera.h"
 #import "Texture.h"
 
-@interface Generic() {
-    Texture * _texture;
-    NSMutableArray * _textures;
+@interface GenericBase () {
+@protected
+    bool _enableMultipleTextures;
     bool _useColor;
 }
+
 @end
 
-@implementation Generic
-
--(void)clean
-{
-    _buffers = nil;
-    _texture = nil;
-    _textures = nil;
-}
-
--(id)wireUp
-{
-    [super wireUp];
-    [self createTexture];
-    [self createBuffer];
-    [self createShader];
-    [self getBufferLocations];
-    [self getTextureLocations];
-    [self configureLighting];
-    return self;    
-}
-
-#pragma mark -
-#pragma mark Initialization sequence
-#pragma mark -
-
-
+@implementation GenericBase
 -(void)createBuffer
 {
     NSLog(@"You should customize (void)createBuffer in your derivation");
     
     [self createBufferDataByType:@[@(sv_pos), @(sv_acolor)] numVertices:4 numIndices:6];
 }
+
+-(void)clean
+{
+    _buffers = nil;
+}
+
+-(id)wireUp
+{
+    [super wireUp];
+    if( _enableMultipleTextures )
+        [self createTextures];
+    else
+        [self createTexture];
+    [self createBuffer];
+    [self createShader];
+    [self getBufferLocations];
+    [self getTextureLocations];
+    [self configureLighting];
+    return self;
+}
+
+#pragma mark -
+#pragma mark Initialization sequence
+#pragma mark -
 
 -(void)getBufferData:(void *)vertextData
            indexData:(unsigned *)indexData
@@ -70,25 +70,25 @@
 }
 
 
--(void)createBufferDataByType:(NSArray *)svar
+-(MeshBuffer *)createBufferDataByType:(NSArray *)svar
                   numVertices:(unsigned int)numVerticies
                    numIndices:(unsigned int)numIndices
 {
-    [self createBufferDataByType:svar numVertices:numVerticies numIndices:numIndices uniforms:nil];
+    return [self createBufferDataByType:svar numVertices:numVerticies numIndices:numIndices uniforms:nil];
 }
 
--(void)createBufferDataByType:(NSArray *)svar
+-(MeshBuffer *)createBufferDataByType:(NSArray *)svar
                   numVertices:(unsigned int)numVerticies
                    numIndices:(unsigned int)numIndices
                      uniforms:(NSDictionary*)uniformNames
 
 {
     TGGenericElementParams params;
-
+    
     memset(&params, 0, sizeof(params));
     
     params.numStrides = [svar count];
-
+    
     params.strides = malloc(sizeof(TGVertexStride)*params.numStrides);
     
     for( int i = 0; i < params.numStrides; i++ )
@@ -98,7 +98,7 @@
         switch (type) {
             case sv_pos2f:
                 StrideInit2f(stride, sv_pos); // hmmm
-                break;                
+                break;
             case sv_customAttr2f:
             case sv_uv:
                 StrideInit2f(stride, type);
@@ -137,9 +137,9 @@
         params.indexData = malloc( sizeof(unsigned int) * params.numIndices );
     
     [self getBufferData:params.vertexData indexData:params.indexData];
-
+    
     MeshBuffer * buffer = [[MeshBuffer alloc] init];
-
+    
     [buffer setData:params.vertexData
             strides:params.strides
        countStrides:params.numStrides
@@ -159,78 +159,18 @@
     free(params.vertexData);
     if( params.indexData )
         free(params.indexData);
+    
+    return buffer;
 }
 
 -(void)createTexture
 {
-    if( _textureFileName )
-        [self setTextureWithFile:[_textureFileName UTF8String]];
 }
 
--(void)replaceTextures:(NSArray *)textures
+-(void)createTextures
 {
-    _textures = [textures mutableCopy];
 }
 
--(void)setTextureWithFile:(const char *)fileName
-{
-    self.texture = [[Texture alloc] initWithFileName:@(fileName)];
-}
-
--(void)addTextureObject:(Texture *)texture
-{
-#if DEBUG
-    if( _texture != nil )
-    {
-        NSLog(@"Policy danger: switching from singleton model of texture to array not allowed");
-        exit(1);
-    }
-#endif
-    if( !_textures )
-        _textures = [NSMutableArray new];
-    [_textures addObject:texture];
-}
-
--(Texture *)texture
-{
-#if DEBUG
-    if( _textures != nil )
-    {
-        NSLog(@"Policy danger: switching from singleton model of texture to array not allowed");
-        exit(1);
-    }
-#endif
-    return _texture;
-}
-
--(void)setTexture:(Texture *)texture
-{
-#if DEBUG
-    if( _textures != nil )
-    {
-        NSLog(@"Policy danger: switching from singleton model of texture to array not allowed");
-        exit(1);
-    }
-#endif
-    _texture = texture;
-}
-
--(Texture *)getTextureObject:(int)index
-{
-#if DEBUG
-    if( _texture != nil )
-    {
-        NSLog(@"Policy danger: switching from singleton model of texture to array not allowed");
-        exit(1);
-    }
-#endif
-    return _textures[index];
-}
-
--(bool)hasTexture
-{
-    return _texture || _textures || _textureFileName;
-}
 
 -(void)createShader
 {
@@ -280,6 +220,15 @@
     self.dirColor = GLKVector3Make(1, 1, 1);
 }
 
+#pragma mark -
+#pragma mark Uniform properties
+#pragma mark -
+
+-(void)getTextureLocations
+{
+}
+
+
 -(void)getBufferLocations
 {
     for( MeshBuffer * buffer in _buffers )
@@ -287,23 +236,6 @@
         [buffer getLocations:self.shader];
     }
 }
-
--(void)getTextureLocations
-{
-    Shader * shader = self.shader;
-    if( _texture )
-    {
-        _texture.uLocation = [shader location:sv_sampler];
-    }
-    else for(Texture * texture in _textures )
-    {
-        texture.uLocation = [shader location:sv_sampler];
-    }
-}
-
-#pragma mark -
-#pragma mark Uniform properties
-#pragma mark -
 
 -(void)setColor:(GLKVector4)color
 {
@@ -324,9 +256,9 @@
 -(void)render:(NSUInteger)w h:(NSUInteger)h
 {
     GenericShader * genShader = (GenericShader *)self.shader;
-
+    
     [genShader use];
-
+    
     GLKMatrix4 pvm = [self calcPVM];
     genShader.pvm = pvm;
     
@@ -337,20 +269,11 @@
         genShader.dirColor  = _dirColor;
         genShader.ambient   = _ambient;
     }
-
+    
     if( _useColor )
         genShader.color = _color;
-    
-    int target = 0;
-    if( _texture )
-    {
-        [_texture bind:genShader target:target];
-    }
-    else for( Texture * t in _textures )
-    {
-        [t bind:genShader target:target];
-        ++target;
-    }
+
+    [self bindTextures:genShader bind:true];
     
     for( MeshBuffer * b in _buffers )
     {
@@ -358,16 +281,12 @@
         [b draw];
     }
     
-    if( _texture )
-    {
-        [_texture unbind];
-    }
-    else for( Texture * t in _textures )
-    {
-        [t unbind];
-    }
+    [self bindTextures:genShader bind:false];
 }
 
+-(void)bindTextures:(GenericShader *)genShader bind:(bool)bind
+{
+}
 
 // capture hack
 -(void)renderToCapture:(Shader *)shader atLocation:(GLint)location
@@ -377,9 +296,135 @@
         if( [buffer assignMeshToShader:shader atLocation:location] )
         {
             [buffer draw];
-            break; // we assume there is only one 'position' buffer. 
+            break; // we assume there is only one 'position' buffer.
         }
     }
     
 }
+
+@end
+
+@interface Generic() {
+    Texture * _texture;
+}
+@end
+
+@implementation Generic
+
+-(void)clean
+{
+    [super clean];
+    _texture = nil;
+}
+
+-(void)createTexture
+{
+    
+}
+
+-(void)getTextureLocations
+{
+    if( _texture )
+    {
+        Shader * shader = self.shader;
+        _texture.uLocation = [shader location:sv_sampler];
+    }
+}
+
+-(void)bindTextures:(GenericShader *)genShader bind:(bool)bind
+{
+    if( _texture )
+    {
+        if( bind )
+            [_texture bind:genShader target:0];
+        else
+            [_texture unbind];
+    }
+    
+}
+
+-(void)setTextureFileName:(id)textureFileName
+{
+    _textureFileName = textureFileName;
+    self.texture = [[Texture alloc] initWithFileName:_textureFileName];
+}
+
+-(Texture *)texture
+{
+    return _texture;
+}
+
+-(void)setTexture:(Texture *)texture
+{
+    _texture = texture;
+}
+
+-(bool)hasTexture
+{
+    return _texture != nil;
+}
+
+
+@end
+
+
+@interface GenericMultiTextures () {
+    NSMutableArray * _textures;
+}
+@end
+
+@implementation GenericMultiTextures
+
+-(void)clean
+{
+    [super clean];
+    _textures = nil;
+}
+
+-(id)wireUp
+{
+    _enableMultipleTextures = true;
+    return [super wireUp];
+}
+
+-(void)createTextures
+{
+    
+}
+
+-(void)bindTextures:(GenericShader *)genShader bind:(bool)bind
+{
+    int target = 0;
+    for( Texture * t in _textures )
+    {
+        if( bind )
+        {
+            [t bind:genShader target:target];
+            ++target;
+        }
+        else
+        {
+            [t unbind];
+        }
+    }
+}
+
+-(void)replaceTextures:(NSArray *)textures
+{
+    _textures = [textures mutableCopy];
+    [self getTextureLocations];
+}
+
+-(void)addTextureObject:(Texture *)texture
+{
+    if( !_textures )
+        _textures = [NSMutableArray new];
+    [_textures addObject:texture];
+}
+
+-(bool)hasTexture
+{
+    return [_textures count];
+}
+
 @end
