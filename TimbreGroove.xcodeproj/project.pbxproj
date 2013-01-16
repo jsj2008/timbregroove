@@ -253,14 +253,6 @@
 		5700236816A556F8006F0E8E /* body.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = body.png; sourceTree = "<group>"; };
 		5700236916A556F8006F0E8E /* legs.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = legs.png; sourceTree = "<group>"; };
 		5700236F16A58D45006F0E8E /* meshImporter.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = meshImporter.png; sourceTree = "<group>"; };
-		57019F531685B582007FA38F /* fmod.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fmod.h; sourceTree = "<group>"; };
-		57019F541685B582007FA38F /* fmod.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = fmod.hpp; sourceTree = "<group>"; };
-		57019F551685B582007FA38F /* fmod_codec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fmod_codec.h; sourceTree = "<group>"; };
-		57019F561685B582007FA38F /* fmod_dsp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fmod_dsp.h; sourceTree = "<group>"; };
-		57019F571685B582007FA38F /* fmod_errors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fmod_errors.h; sourceTree = "<group>"; };
-		57019F581685B582007FA38F /* fmod_memoryinfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fmod_memoryinfo.h; sourceTree = "<group>"; };
-		57019F591685B582007FA38F /* fmod_output.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fmod_output.h; sourceTree = "<group>"; };
-		57019F5A1685B582007FA38F /* fmodiphone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fmodiphone.h; sourceTree = "<group>"; };
 		57019F6F1685C042007FA38F /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		57019F711685C086007FA38F /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		57019F731685C152007FA38F /* SoundMan.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoundMan.h; path = audio/SoundMan.h; sourceTree = "<group>"; };
@@ -369,6 +361,14 @@
 		578292CA169A8B650053ADCD /* imageBaker.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = imageBaker.png; sourceTree = "<group>"; };
 		578292D2169AB2CD0053ADCD /* SoundPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoundPool.h; path = audio/SoundPool.h; sourceTree = "<group>"; };
 		578292D3169AB2CD0053ADCD /* SoundPool.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SoundPool.m; path = audio/SoundPool.m; sourceTree = "<group>"; };
+		578CB90A16A63C0000088BA2 /* fmod.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fmod.h; sourceTree = "<group>"; };
+		578CB90B16A63C0000088BA2 /* fmod.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = fmod.hpp; sourceTree = "<group>"; };
+		578CB90C16A63C0000088BA2 /* fmod_codec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fmod_codec.h; sourceTree = "<group>"; };
+		578CB90D16A63C0000088BA2 /* fmod_dsp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fmod_dsp.h; sourceTree = "<group>"; };
+		578CB90E16A63C0000088BA2 /* fmod_errors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fmod_errors.h; sourceTree = "<group>"; };
+		578CB90F16A63C0000088BA2 /* fmod_memoryinfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fmod_memoryinfo.h; sourceTree = "<group>"; };
+		578CB91016A63C0000088BA2 /* fmod_output.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fmod_output.h; sourceTree = "<group>"; };
+		578CB91116A63C0000088BA2 /* fmodiphone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fmodiphone.h; sourceTree = "<group>"; };
 		57900682168411640068659F /* Factory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Factory.h; sourceTree = "<group>"; };
 		57900683168411650068659F /* Factory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Factory.m; sourceTree = "<group>"; };
 		5790068616841F3B0068659F /* Interactive.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Interactive.h; sourceTree = "<group>"; };
@@ -520,30 +520,6 @@
 			path = skinned;
 			sourceTree = "<group>";
 		};
-		57019F511685B582007FA38F /* fmod (api) */ = {
-			isa = PBXGroup;
-			children = (
-				57019F521685B582007FA38F /* inc */,
-			);
-			name = "fmod (api)";
-			path = api;
-			sourceTree = "<group>";
-		};
-		57019F521685B582007FA38F /* inc */ = {
-			isa = PBXGroup;
-			children = (
-				57019F531685B582007FA38F /* fmod.h */,
-				57019F541685B582007FA38F /* fmod.hpp */,
-				57019F551685B582007FA38F /* fmod_codec.h */,
-				57019F561685B582007FA38F /* fmod_dsp.h */,
-				57019F571685B582007FA38F /* fmod_errors.h */,
-				57019F581685B582007FA38F /* fmod_memoryinfo.h */,
-				57019F591685B582007FA38F /* fmod_output.h */,
-				57019F5A1685B582007FA38F /* fmodiphone.h */,
-			);
-			path = inc;
-			sourceTree = "<group>";
-		};
 		57019F761685C15B007FA38F /* audio */ = {
 			isa = PBXGroup;
 			children = (
@@ -576,7 +552,7 @@
 		571ECF97167BE2CE00727A30 /* contrib */ = {
 			isa = PBXGroup;
 			children = (
-				57019F511685B582007FA38F /* fmod (api) */,
+				578CB90816A63C0000088BA2 /* fmod */,
 				57AFB3C416A3281F008192FB /* PVR */,
 				571ECF98167BE2CE00727A30 /* tweener */,
 				578292C2169861D20053ADCD /* esShapes.c */,
@@ -821,6 +797,29 @@
 				578292C6169879930053ADCD /* ImageBaker.m */,
 			);
 			name = misc;
+			sourceTree = "<group>";
+		};
+		578CB90816A63C0000088BA2 /* fmod */ = {
+			isa = PBXGroup;
+			children = (
+				578CB90916A63C0000088BA2 /* inc */,
+			);
+			path = fmod;
+			sourceTree = "<group>";
+		};
+		578CB90916A63C0000088BA2 /* inc */ = {
+			isa = PBXGroup;
+			children = (
+				578CB90A16A63C0000088BA2 /* fmod.h */,
+				578CB90B16A63C0000088BA2 /* fmod.hpp */,
+				578CB90C16A63C0000088BA2 /* fmod_codec.h */,
+				578CB90D16A63C0000088BA2 /* fmod_dsp.h */,
+				578CB90E16A63C0000088BA2 /* fmod_errors.h */,
+				578CB90F16A63C0000088BA2 /* fmod_memoryinfo.h */,
+				578CB91016A63C0000088BA2 /* fmod_output.h */,
+				578CB91116A63C0000088BA2 /* fmodiphone.h */,
+			);
+			path = inc;
 			sourceTree = "<group>";
 		};
 		579DC7FE168BE6C300ECAB86 /* examples */ = {
@@ -1266,6 +1265,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TimbreGroove/TimbreGroove-Prefix.pch";
 				INFOPLIST_FILE = "TimbreGroove/TimbreGroove-Info.plist";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/TimbreGroove/src/contrib/fmod/lib\"",
+				);
 				OTHER_CFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
@@ -1279,6 +1282,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TimbreGroove/TimbreGroove-Prefix.pch";
 				INFOPLIST_FILE = "TimbreGroove/TimbreGroove-Info.plist";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/TimbreGroove/src/contrib/fmod/lib\"",
+				);
 				OTHER_CFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
