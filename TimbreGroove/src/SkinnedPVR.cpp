@@ -8,14 +8,7 @@
 
 #include "SkinnedPVR.h"
 #include <string.h>
-//#include <OpenGLES/ES2/gl.h>
-
-//#include "PVRShell.h"
 #include "OGLES2Tools.h"
-
-/******************************************************************************
- Constants
- ******************************************************************************/
 
 // Camera constants used to generate the projection matrix
 const float g_fCameraNear	= 4.0f;
@@ -23,10 +16,6 @@ const float g_fCameraFar	= 5000.0f;
 
 const float g_fDemoFrameRate = 0.015f;
 
-/******************************************************************************
- shader attributes
- ******************************************************************************/
-// vertex attributes
 enum EVertexAttrib {
 	VERTEX_ARRAY, NORMAL_ARRAY, TEXCOORD_ARRAY, BONEWEIGHT_ARRAY, BONEINDEX_ARRAY, eNumAttribs };
 const char* g_aszAttribNames[] = {
@@ -38,45 +27,23 @@ enum EUniform {
 const char* g_aszUniformNames[] = {
 	"MVPMatrix", "ViewProjMatrix", "LightDirModel", "LightDirWorld", "BoneCount", "BoneMatrixArray[0]", "BoneMatrixArrayIT[0]" };
 
-/******************************************************************************
- Content file names
- ******************************************************************************/
-
-/*
-// Source and binary shaders
-const char m_psFragShaderSrcFile[]	= "skinner.fsh";
-char * m_psFragShaderBinFile	= NULL; // "FragShader.fsc";
-const char m_psVertShaderSrcFile[]	= "VertShader.vsh";
-char * m_psVertShaderBinFile	= NULL; // "VertShader.vsc";
-
-// PVR texture files
-const char m_psBodyTexFile[]		= "Body.pvr";
-const char m_psLegTexFile[]			= "Legs.pvr";
-const char m_psBeltTexFile[]		= "Belt.pvr";
-
-// POD scene files
-const char m_psSceneFile[]			= "man.pod";
-*/
-
-typedef CPVRTString * PVRSTRINGPTR;
 
 class OGLES2Skinning
 {
 	// 3D Model
 	CPVRTModelPOD	m_Scene;
+    // POD scene file name
+    CPVRTString m_psSceneFile;
     
 	// Model transformation variables
 	PVRTMat4	m_Transform;
 	float		m_fAngle;
 	float		m_fDistance;
     
-	// OpenGL handles for shaders, textures and VBOs
 	GLuint	m_uiVertShader;
 	GLuint	m_uiFragShader;
 	GLuint*	m_puiVbo;
 	GLuint*	m_puiIndexVbo;
-    
-	GLuint	*m_uiTextures;
     
 	// Group shader programs and their uniform locations together
 	struct
@@ -86,33 +53,21 @@ class OGLES2Skinning
 	}
 	m_ShaderProgram;
     
-	// Array to lookup the textures for each material in the scene
-	GLuint*	m_puiTextures;
     
-	// Variables to handle the animation in a time-based manner
 	unsigned long m_iTimePrev;
 	float	m_fFrame;
     
-    // used to be globals
-    // Source and binary shaders
     CPVRTString  m_psFragShaderSrcFile;
-    char * m_psFragShaderBinFile;
     CPVRTString m_psVertShaderSrcFile;
-    char * m_psVertShaderBinFile;
     
-    // PVR texture files
+	GLuint * m_puiTextures;
+	GLuint * m_uiTextures;
     CPVRTString * m_ppTextureFiles;
     CPVRTString * m_ppTextureNames;
-    int m_numTextures;
+    int m_numTextures;    
     
-    // POD scene files
-    CPVRTString m_psSceneFile;
-    
-	virtual bool InitApplication();
-	virtual bool InitView();
-	virtual bool ReleaseView();
-
-    
+	bool InitApplication();
+	bool ReleaseView();
 	bool LoadTextures(CPVRTString* pErrorStr);
 	bool LoadShaders(CPVRTString* pErrorStr);
 	void LoadVbos();
@@ -178,12 +133,8 @@ OGLES2Skinning::OGLES2Skinning( char *psSceneFile, char **ppTextureFiles, char *
         m_uiTextures = NULL;
         m_ppTextureFiles = NULL;
     }
-    
-    m_psFragShaderBinFile = NULL;
-    m_psVertShaderBinFile = NULL;
-    
+
     InitApplication();
-    InitView();
 }
 
 OGLES2Skinning::~OGLES2Skinning()
@@ -201,12 +152,6 @@ OGLES2Skinning::~OGLES2Skinning()
 }
 
 
-/*!****************************************************************************
- @Function		LoadTextures
- @Output		pErrorStr		A string describing the error on failure
- @Return		bool			true if no error occured
- @Description	Loads the textures required for this training course
- ******************************************************************************/
 bool OGLES2Skinning::LoadTextures(CPVRTString* const pErrorStr)
 {
     for( int i = 0; i < m_numTextures; i++)
@@ -223,21 +168,9 @@ bool OGLES2Skinning::LoadTextures(CPVRTString* const pErrorStr)
 	return true;
 }
 
-/*!****************************************************************************
- @Function		LoadShaders
- @Output		pErrorStr		A string describing the error on failure
- @Return		bool			true if no error occured
- @Description	Loads and compiles the shaders and links the shader programs
- required for this training course
- ******************************************************************************/
 bool OGLES2Skinning::LoadShaders(CPVRTString* pErrorStr)
 {
-	/*
-     Load and compile the shaders from files.
-     Binary shaders are tried first, source shaders
-     are used as fallback.
-     */
-	if (PVRTShaderLoadFromFile(m_psVertShaderBinFile,
+	if (PVRTShaderLoadFromFile(NULL, // no support for bin shaders on iOS
                                m_psVertShaderSrcFile.c_str(),
                                GL_VERTEX_SHADER,
                                GL_SGX_BINARY_IMG,
@@ -247,7 +180,7 @@ bool OGLES2Skinning::LoadShaders(CPVRTString* pErrorStr)
 		return false;
 	}
     
-	if (PVRTShaderLoadFromFile(m_psFragShaderBinFile,
+	if (PVRTShaderLoadFromFile(NULL,
                                m_psFragShaderSrcFile.c_str(),
                                GL_FRAGMENT_SHADER,
                                GL_SGX_BINARY_IMG,
@@ -257,31 +190,20 @@ bool OGLES2Skinning::LoadShaders(CPVRTString* pErrorStr)
 		return false;
 	}
     
-	/*
-     Set up and link the shader program
-     */
-    
 	if (PVRTCreateProgram(&m_ShaderProgram.uiId, m_uiVertShader, m_uiFragShader, g_aszAttribNames, eNumAttribs, pErrorStr) != PVR_SUCCESS)
 	{
 		EnvExitMsg(  pErrorStr->c_str());
 		return false;
 	}
     
-	// Store the location of uniforms for later use
 	for (int i = 0; i < eNumUniforms; ++i)
 	{
 		m_ShaderProgram.auiLoc[i] = glGetUniformLocation(m_ShaderProgram.uiId, g_aszUniformNames[i]);
 	}
     
-    
 	return true;
 }
 
-/*!****************************************************************************
- @Function		LoadVbos
- @Description	Loads the mesh data required for this training course into
- vertex buffer objects
- ******************************************************************************/
 void OGLES2Skinning::LoadVbos()
 {
 	if (!m_puiVbo)      m_puiVbo = new GLuint[m_Scene.nNumMesh];
@@ -323,30 +245,16 @@ void OGLES2Skinning::LoadVbos()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-/*!****************************************************************************
- @Function		InitApplication
- @Return		bool		true if no error occured
- @Description	Code in InitApplication() will be called by PVRShell once per
- run, before the rendering context is created.
- Used to initialize variables that are not dependant on it
- (e.g. external modules, loading meshes, etc.)
- If the rendering context is lost, InitApplication() will
- not be called again.
- ******************************************************************************/
 bool OGLES2Skinning::InitApplication()
 {
+    CPVRTString ErrorStr;
+    
 	m_puiVbo = 0;
 	m_puiIndexVbo = 0;
     
-	// Get and set the read path for content files
 	CPVRTResourceFile::SetReadPath((char*)EnvGet(prefReadPath));
+	CPVRTResourceFile::SetLoadReleaseFunctions(NULL,NULL);
     
-	// Get and set the load/release functions for loading external files.
-	// In the majority of cases the PVRShell will return NULL function pointers implying that
-	// nothing special is required to load external files.
-	CPVRTResourceFile::SetLoadReleaseFunctions(NULL,NULL); // EnvGet(prefLoadFileFunc), EnvGet(prefReleaseFileFunc));
-    
-	// Load the scene
 	if (m_Scene.ReadFromFile(m_psSceneFile.c_str()) != PVR_SUCCESS)
 	{
 		EnvExitMsg(  "ERROR: Couldn't load the .pod file\n");
@@ -354,6 +262,7 @@ bool OGLES2Skinning::InitApplication()
 	}
     
 	// The cameras are stored in the file. We check it contains at least one.
+#ifdef DEBUG
 	if (m_Scene.nNumCamera == 0)
 	{
 		EnvExitMsg(  "ERROR: The scene does not contain a camera\n");
@@ -366,54 +275,32 @@ bool OGLES2Skinning::InitApplication()
 		EnvExitMsg(  "ERROR: The scene does not contain a light\n");
 		return false;
 	}
+#endif
     
-	// Initialise variables used for the animation
 	m_fFrame = 0;
 	m_iTimePrev = EnvGetTime();
 	m_Transform = PVRTMat4::Identity();
 	m_fAngle = 0.0f;
 	m_fDistance = 0.0f;
     
-	return true;
-}
-
-
-/*!****************************************************************************
- @Function		InitView
- @Return		bool		true if no error occured
- @Description	Code in InitView() will be called by PVRShell upon
- initialization or after a change in the rendering context.
- Used to initialize variables that are dependant on the rendering
- context (e.g. textures, vertex buffers, etc.)
- ******************************************************************************/
-bool OGLES2Skinning::InitView()
-{
-	CPVRTString ErrorStr;
+    // the rest of this method was
+    // moved from per-context-switch InitView() to
+    // one-time only per instance.
     
-	/*
-     Initialize VBO data
-     */
 	LoadVbos();
-    
-	/*
-     Load textures
-     */
+
 	if (!LoadTextures(&ErrorStr))
 	{
 		EnvExitMsg(  ErrorStr.c_str());
 		return false;
 	}
-    
-	/*
-     Load and compile the shaders & link programs
-     */
+
 	if (!LoadShaders(&ErrorStr))
 	{
 		EnvExitMsg(  ErrorStr.c_str());
 		return false;
 	}
     
-	// Set the sampler2D uniforms to corresponding texture units
 	glUniform1i(glGetUniformLocation(m_ShaderProgram.uiId, "sTexture"), 0);
     
 	/*
@@ -438,40 +325,19 @@ bool OGLES2Skinning::InitView()
 	return true;
 }
 
-/*!****************************************************************************
- @Function		ReleaseView
- @Return		bool		true if no error occured
- @Description	Code in ReleaseView() will be called by PVRShell when the
- application quits or before a change in the rendering context.
- ******************************************************************************/
 bool OGLES2Skinning::ReleaseView()
 {
-	// Free the texture lookup array
-	delete[] m_puiTextures;
-    
     glDeleteTextures(m_numTextures, m_puiTextures);
 	glDeleteProgram(m_ShaderProgram.uiId);
-    
 	glDeleteShader(m_uiVertShader);
 	glDeleteShader(m_uiFragShader);
-    
-	// Delete buffer objects
 	glDeleteBuffers(m_Scene.nNumMesh, m_puiVbo);
 	glDeleteBuffers(m_Scene.nNumMesh, m_puiIndexVbo);
-    
+	delete[] m_puiTextures;
+        
 	return true;
 }
 
-/*!****************************************************************************
- @Function		RenderScene
- @Return		bool		true if no error occured
- @Description	Main rendering loop function of the program. The shell will
- call this function every frame.
- eglSwapBuffers() will be performed by PVRShell automatically.
- PVRShell will also manage important OS events.
- Will also manage relevent OS events. The user has access to
- these events through an abstraction layer provided by PVRShell.
- ******************************************************************************/
 bool OGLES2Skinning::RenderScene()
 {
     if( m_paused )
@@ -481,15 +347,9 @@ bool OGLES2Skinning::RenderScene()
 	glCullFace(GL_BACK);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
-    
-	// Use a nice bright blue as clear colour
 	glClearColor(0.6f, 0.8f, 0.6f, 1.0f);
-    
-    
-	// Clear the color and depth buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-	// Use shader program
+
 	glUseProgram(m_ShaderProgram.uiId);
 	glActiveTexture(GL_TEXTURE0);
     
@@ -499,12 +359,16 @@ bool OGLES2Skinning::RenderScene()
      */
 	unsigned long iTime = EnvGetTime();
     
+    // This is all lame and coming out RSN
+    // The model matrix will come from the
+    // obj-c framework though (yet another)
+    // C helper function:
+    
 	if(iTime > m_iTimePrev)
 	{
 		float fDelta = (float) (iTime - m_iTimePrev);
 		m_fFrame += fDelta * g_fDemoFrameRate;
         
-		// Modify the transformation matrix if it is needed
 		bool bRebuildTransformation = false;
         
 		if(EnvDidTouchHappen(EnvDirectionRIGHT))
@@ -636,28 +500,16 @@ bool OGLES2Skinning::RenderScene()
 	return true;
 }
 
-/*!****************************************************************************
- @Function		DrawMesh
- @Input			i32NodeIndex		Node index of the mesh to draw
- @Description	Draws a SPODMesh after the model view matrix has been set and
- the meterial prepared.
- ******************************************************************************/
 void OGLES2Skinning::DrawMesh(int i32NodeIndex)
 {
 	SPODNode& Node = m_Scene.pNode[i32NodeIndex];
 	SPODMesh& Mesh = m_Scene.pMesh[Node.nIdx];
     
-	// bind the VBO for the mesh
 	glBindBuffer(GL_ARRAY_BUFFER, m_puiVbo[Node.nIdx]);
-	// bind the index buffer, won't hurt if the handle is 0
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_puiIndexVbo[Node.nIdx]);
-    
-	// Enable the vertex attribute arrays
 	glEnableVertexAttribArray(VERTEX_ARRAY);
 	glEnableVertexAttribArray(NORMAL_ARRAY);
 	glEnableVertexAttribArray(TEXCOORD_ARRAY);
-    
-	// Set the vertex attribute offsets
 	glVertexAttribPointer(VERTEX_ARRAY, 3, GL_FLOAT, GL_FALSE, Mesh.sVertex.nStride,  Mesh.sVertex.pData);
 	glVertexAttribPointer(NORMAL_ARRAY, 3, GL_FLOAT, GL_FALSE, Mesh.sNormals.nStride, Mesh.sNormals.pData);
 	glVertexAttribPointer(TEXCOORD_ARRAY, 2, GL_FLOAT, GL_FALSE, Mesh.psUVW[0].nStride, Mesh.psUVW[0].pData);
@@ -695,14 +547,8 @@ void OGLES2Skinning::DrawMesh(int i32NodeIndex)
             
 			for(int i = 0; i < i32Count; ++i)
 			{
-				// Get the Node of the bone
 				int i32NodeID = Mesh.sBoneBatches.pnBatches[i32Batch * Mesh.sBoneBatches.nBatchBoneMax + i];
-                
-				// Get the World transformation matrix for this bone and combine it with our app defined
-				// transformation matrix
 				amBoneWorld[i] = m_Transform * m_Scene.GetBoneWorldMatrix(Node, m_Scene.pNode[i32NodeID]);
-                
-				// Calculate the inverse transpose of the 3x3 rotation/scale part for correct lighting
 				afBoneWorldIT[i] = PVRTMat3(amBoneWorld[i]).inverse().transpose();
 			}
             
@@ -721,7 +567,6 @@ void OGLES2Skinning::DrawMesh(int i32NodeIndex)
 			else
 				i32Tris = Mesh.nNumFaces - Mesh.sBoneBatches.pnBatchOffset[i32Batch];
             
-			// Draw the mesh
 			size_t offset = sizeof(GLushort) * 3 * Mesh.sBoneBatches.pnBatchOffset[i32Batch];
 			glDrawElements(GL_TRIANGLES, i32Tris * 3, GL_UNSIGNED_SHORT, (void*) offset);
 		}
@@ -735,7 +580,6 @@ void OGLES2Skinning::DrawMesh(int i32NodeIndex)
 		glDrawElements(GL_TRIANGLES, Mesh.nNumFaces*3, GL_UNSIGNED_SHORT, 0);
 	}
     
-	// Safely disable the vertex attribute arrays
 	glDisableVertexAttribArray(VERTEX_ARRAY);
 	glDisableVertexAttribArray(NORMAL_ARRAY);
 	glDisableVertexAttribArray(TEXCOORD_ARRAY);
@@ -743,8 +587,4 @@ void OGLES2Skinning::DrawMesh(int i32NodeIndex)
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
-
-/******************************************************************************
- End of file (OGLES2Skinning.cpp)
- ******************************************************************************/
 
