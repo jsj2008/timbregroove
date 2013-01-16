@@ -50,6 +50,8 @@
 {    
     _visible = true;
     
+    [self setupGL]; // is this right?
+    
     unsigned int targetX = self.frame.size.width * _level;
     
     NSDictionary * params = @{  TWEEN_DURATION: @0.5f,

@@ -4,9 +4,9 @@
 
  @Title        PVRTPFXParser
 
- @Version      
+ @Version       @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     Windows + Linux
 
@@ -30,6 +30,41 @@
 #include "PVRTResourceFile.h"
 #include "PVRTString.h"
 #include "PVRTMisc.h"		// Used for POT functions
+
+/****************************************************************************
+** Constants
+****************************************************************************/
+const char* c_pszLinear   = "LINEAR";
+const char* c_pszNearest  = "NEAREST";
+const char* c_pszNone	  = "NONE";
+const char* c_pszClamp    = "CLAMP";
+const char* c_pszRepeat	  = "REPEAT";
+const char* c_pszCurrentView = "PFX_CURRENTVIEW";
+
+const unsigned int CPVRTPFXParser::VIEWPORT_SIZE = 0xAAAA;
+
+const char* c_ppszFilters[eFilter_Size] = 
+{ 
+	c_pszNearest,		// eFilter_Nearest
+	c_pszLinear,		// eFilter_Linear
+	c_pszNone,			// eFilter_None
+};
+const char* c_ppszWraps[eWrap_Size] = 
+{ 
+	c_pszClamp,			// eWrap_Clamp
+	c_pszRepeat			// eWrap_Repeat
+};
+
+#define NEWLINE_TOKENS "\r\n"
+#define DELIM_TOKENS " \t"
+
+#define DEFAULT_EFFECT_NUM_TEX		100
+#define DEFAULT_EFFECT_NUM_UNIFORM	100
+#define DEFAULT_EFFECT_NUM_ATTRIB	100
+
+/****************************************************************************
+** Data tables
+****************************************************************************/
 
 /****************************************************************************
 ** CPVRTPFXParserReadContext Class
@@ -73,14 +108,13 @@ CPVRTPFXParserReadContext::~CPVRTPFXParserReadContext()
 	delete [] pnFileLineNumber;
 }
 
-
 /*!***************************************************************************
  @Function			IgnoreWhitespace
  @Input				pszString
  @Output			pszString
  @Description		Skips space, tab, new-line and return characters.
 *****************************************************************************/
-void IgnoreWhitespace(char **pszString)
+static void IgnoreWhitespace(char **pszString)
 {
 	while(	*pszString[0] == '\t' ||
 			*pszString[0] == '\n' ||
@@ -89,6 +123,27 @@ void IgnoreWhitespace(char **pszString)
 	{
 		(*pszString)++;
 	}
+}
+
+/*!***************************************************************************
+ @Function			ReadEOLToken
+ @Input				pToken
+ @Output			char*
+ @Description		Reads next strings to the end of the line and interperts as
+					a token.
+*****************************************************************************/
+static char* ReadEOLToken(char* pToken)
+{
+	char* pReturn = NULL;
+
+	char szDelim[2] = {'\n', 0};				// try newline
+	pReturn = strtok(pToken, szDelim);			
+	if(pReturn == NULL)
+	{
+		szDelim[0] = '\r';
+		pReturn = strtok (pToken, szDelim);		// try linefeed
+	}
+	return pReturn;
 }
 
 /*!***************************************************************************
@@ -101,7 +156,7 @@ void IgnoreWhitespace(char **pszString)
  @Description		Extracts the semantic data from the string and stores it
 					in the output SPVRTSemanticDefaultData parameter.
 *****************************************************************************/
-bool GetSemanticDataFromString(SPVRTSemanticDefaultData *pDataItem, const char * const pszArgumentString, ESemanticDefaultDataType eType, CPVRTString *pError)
+static bool GetSemanticDataFromString(SPVRTSemanticDefaultData *pDataItem, const char * const pszArgumentString, ESemanticDefaultDataType eType, CPVRTString *pError)
 {
 	char *pszString = (char *)pszArgumentString;
 	char *pszTmp;
@@ -261,7 +316,7 @@ bool GetSemanticDataFromString(SPVRTSemanticDefaultData *pDataItem, const char *
  @Description		Outputs a block of text starting from nLine and ending
 					when the string pszEnd is found.
 *****************************************************************************/
-static bool ConcatenateLinesUntil(char *&pszOut, int &nLine, const char * const * const ppszLines, const unsigned int nLimit, const char * const pszEnd)
+static bool ConcatenateLinesUntil(CPVRTString& Out, int &nLine, const char * const * const ppszLines, const unsigned int nLimit, const char * const pszEnd)
 {
 	unsigned int	i, j;
 	size_t			nLen;
@@ -282,53 +337,164 @@ static bool ConcatenateLinesUntil(char *&pszOut, int &nLine, const char * const 
 	{
 		++nLen;
 
-		pszOut = (char*)malloc(nLen * sizeof(*pszOut));
-		*pszOut = 0;
+		Out.reserve(nLen);
 
 		for(j = nLine; j < i; ++j)
 		{
-			strcat(pszOut, ppszLines[j]);
-			strcat(pszOut, "\n");
+			Out.append(ppszLines[j]);
+			Out.append("\n");
 		}
-	}
-	else
-	{
-		pszOut = 0;
 	}
 
 	nLine = i;
 	return true;
 }
 
+/****************************************************************************
+** SPVRTPFXParserEffect Struct
+****************************************************************************/
+SPVRTPFXParserEffect::SPVRTPFXParserEffect() :  
+	Uniforms(DEFAULT_EFFECT_NUM_UNIFORM),
+	Attributes(DEFAULT_EFFECT_NUM_ATTRIB),
+	Textures(DEFAULT_EFFECT_NUM_TEX)
+{
+}
+
+/****************************************************************************
+** SPVRTPFXRenderPass Class
+****************************************************************************/
+SPVRTPFXRenderPass::SPVRTPFXRenderPass() :
+	eRenderPassType(eNULL_PASS),
+	eViewType(eVIEW_NONE),
+	uiFormatFlags(0),
+	pEffect(NULL),
+	pTexture(NULL)
+{
+}
+
+/****************************************************************************
+** SPVRTPFXParserShader Class
+****************************************************************************/
+SPVRTPFXParserShader::SPVRTPFXParserShader()
+	:
+	pszGLSLfile(NULL),
+	pszGLSLBinaryFile(NULL),
+	pszGLSLcode(NULL),
+	pbGLSLBinary(NULL)
+{
+}
+
+SPVRTPFXParserShader::~SPVRTPFXParserShader()
+{
+	FREE(pszGLSLfile);
+	FREE(pszGLSLcode);
+	FREE(pszGLSLBinaryFile);
+	FREE(pbGLSLBinary);
+}
+
+SPVRTPFXParserShader::SPVRTPFXParserShader(const SPVRTPFXParserShader& rhs)
+{
+	Copy(rhs);
+}
+
+SPVRTPFXParserShader& SPVRTPFXParserShader::operator=(const SPVRTPFXParserShader& rhs)
+{
+	if(&rhs != this)
+		Copy(rhs);
+
+	return *this;
+}
+
+void SPVRTPFXParserShader::Copy(const SPVRTPFXParserShader& rhs)
+{
+	Name = rhs.Name;
+
+	PVRTPFXCreateStringCopy(&pszGLSLfile, rhs.pszGLSLfile);
+	PVRTPFXCreateStringCopy(&pszGLSLBinaryFile, rhs.pszGLSLBinaryFile);
+	PVRTPFXCreateStringCopy(&pszGLSLcode, rhs.pszGLSLcode);
+	PVRTPFXCreateStringCopy(&pbGLSLBinary, rhs.pbGLSLBinary);
+
+	bUseFileName	= rhs.bUseFileName;
+	nGLSLBinarySize = rhs.nGLSLBinarySize;
+	nFirstLineNumber= rhs.nFirstLineNumber;
+}
+
+/****************************************************************************
+** SPVRTSemanticDefaultData Struct
+****************************************************************************/
+SPVRTSemanticDefaultData::SPVRTSemanticDefaultData() 
+	: 
+	eType(eDataTypeNone)
+{
+}
+
+SPVRTSemanticDefaultData::SPVRTSemanticDefaultData(const SPVRTSemanticDefaultData& rhs)	
+{	
+	Copy(rhs); 
+}
+
+SPVRTSemanticDefaultData& SPVRTSemanticDefaultData::operator=(const SPVRTSemanticDefaultData& rhs)
+{
+	if(&rhs != this)
+		Copy(rhs);
+	return *this;
+}
+
+void SPVRTSemanticDefaultData::Copy(const SPVRTSemanticDefaultData& rhs)
+{
+	memcpy(pfData, rhs.pfData, sizeof(pfData));
+	memcpy(pnData, rhs.pnData, sizeof(pnData));
+	memcpy(pbData, rhs.pbData, sizeof(pbData));
+	eType = rhs.eType;
+}
+
+/****************************************************************************
+** SPVRTPFXParserSemantic Struct
+****************************************************************************/
+SPVRTPFXParserSemantic::SPVRTPFXParserSemantic() 
+	: 
+	pszName(NULL), 
+	pszValue(NULL)
+{
+}
+
+SPVRTPFXParserSemantic::~SPVRTPFXParserSemantic()
+{
+	FREE(pszName);
+	FREE(pszValue);
+}
+
+SPVRTPFXParserSemantic::SPVRTPFXParserSemantic(const SPVRTPFXParserSemantic& rhs)
+{
+	Copy(rhs);
+}
+
+SPVRTPFXParserSemantic& SPVRTPFXParserSemantic::operator=(const SPVRTPFXParserSemantic& rhs)
+{
+	if(&rhs != this)
+		Copy(rhs);
+
+	return *this;
+}
+
+void SPVRTPFXParserSemantic::Copy(const SPVRTPFXParserSemantic& rhs)
+{
+	PVRTPFXCreateStringCopy(&pszName, rhs.pszName);
+	PVRTPFXCreateStringCopy(&pszValue, rhs.pszValue);
+	nIdx			= rhs.nIdx;
+	sDefaultValue   = rhs.sDefaultValue;
+}
+
+/****************************************************************************
+** CPVRTPFXParser Class
+****************************************************************************/
 /*!***************************************************************************
  @Function			CPVRTPFXParser
  @Description		Sets initial values.
 *****************************************************************************/
 CPVRTPFXParser::CPVRTPFXParser()
 {
-	m_sHeader.pszVersion = NULL;
-	m_sHeader.pszDescription = NULL;
-	m_sHeader.pszCopyright = NULL;
-
-	m_nMaxTextures = 20;
-	m_nNumTextures = 0;
-	m_psTexture = new SPVRTPFXParserTexture[m_nMaxTextures];
-
-	m_nMaxVertShaders = 20;
-	m_nNumVertShaders = 0;
-	m_psVertexShader = new SPVRTPFXParserShader[m_nMaxVertShaders];
-
-	m_nMaxFragShaders = 20;
-	m_nNumFragShaders = 0;
-	m_psFragmentShader = new SPVRTPFXParserShader[m_nMaxFragShaders];
-
-	m_nMaxEffects = 20;
-	m_nNumEffects = 0;
-	m_psEffect = new SPVRTPFXParserEffect[m_nMaxEffects];
-
-	m_nMaxRenders = 1;		// Although more could be stored, Shaman only currently supports one additional render pass
-	m_nNumRenderPasses = 0;
-	m_psRenderPasses = new SPVRTPFXRenderPass[m_nMaxRenders];
+	m_szFileName.assign("");
 
 	// NOTE: Temp hardcode viewport size
 	m_uiViewportWidth = 640;
@@ -341,83 +507,6 @@ CPVRTPFXParser::CPVRTPFXParser()
 *****************************************************************************/
 CPVRTPFXParser::~CPVRTPFXParser()
 {
-	unsigned int i;
-
-	// FREE header strings
-	FREE(m_sHeader.pszVersion);
-	FREE(m_sHeader.pszDescription);
-	FREE(m_sHeader.pszCopyright);
-
-	// free texture info
-	for(i = 0; i < m_nNumTextures; ++i)
-	{
-		FREE(m_psTexture[i].pszName);
-		FREE(m_psTexture[i].pszFile);
-	}
-	delete [] m_psTexture;
-
-	// free shader strings
-	for(i = 0; i < m_nNumFragShaders; ++i)
-	{
-		FREE(m_psFragmentShader[i].pszName);
-		FREE(m_psFragmentShader[i].pszGLSLfile);
-		FREE(m_psFragmentShader[i].pszGLSLcode);
-		FREE(m_psFragmentShader[i].pszGLSLBinaryFile);
-		FREE(m_psFragmentShader[i].pbGLSLBinary);
-	}
-	delete [] m_psFragmentShader;
-
-	for(i = 0; i < m_nNumVertShaders; ++i)
-	{
-		FREE(m_psVertexShader[i].pszName);
-		FREE(m_psVertexShader[i].pszGLSLfile);
-		FREE(m_psVertexShader[i].pszGLSLcode);
-		FREE(m_psVertexShader[i].pszGLSLBinaryFile);
-		FREE(m_psVertexShader[i].pbGLSLBinary);
-	}
-	delete [] m_psVertexShader;
-
-	// Free render pass info
-	for(i=0; i < m_nNumRenderPasses; ++i)
-	{
-		delete[] m_psRenderPasses[i].pszSemanticName;
-		m_psRenderPasses[i].pszSemanticName = NULL;
-		delete[] m_psRenderPasses[i].pszNodeName;
-		m_psRenderPasses[i].pszNodeName = NULL;
-	}
-	delete [] m_psRenderPasses;
-
-	for(unsigned int nEffect = 0; nEffect < m_nNumEffects; ++nEffect)
-	{
-		// free uniform strings
-		for(i=0; i < m_psEffect[nEffect].nNumUniforms; ++i)
-		{
-			FREE(m_psEffect[nEffect].psUniform[i].pszName);
-			FREE(m_psEffect[nEffect].psUniform[i].pszValue);
-		}
-		delete [] m_psEffect[nEffect].psUniform;
-
-		// free uniform strings
-		for(i=0; i < m_psEffect[nEffect].nNumAttributes; ++i)
-		{
-			FREE(m_psEffect[nEffect].psAttribute[i].pszName);
-			FREE(m_psEffect[nEffect].psAttribute[i].pszValue);
-		}
-		delete [] m_psEffect[nEffect].psAttribute;
-
-		for(i=0; i < m_psEffect[nEffect].nNumTextures; ++i)
-		{
-			FREE(m_psEffect[nEffect].psTextures[i].pszName);
-		}
-		delete [] m_psEffect[nEffect].psTextures;
-
-		FREE(m_psEffect[nEffect].pszFragmentShaderName);
-		FREE(m_psEffect[nEffect].pszVertexShaderName);
-
-		FREE(m_psEffect[nEffect].pszAnnotation);
-		FREE(m_psEffect[nEffect].pszName);
-	}
-	delete [] m_psEffect;
 }
 
 /*!***************************************************************************
@@ -428,12 +517,34 @@ CPVRTPFXParser::~CPVRTPFXParser()
 *****************************************************************************/
 bool CPVRTPFXParser::Parse(CPVRTString * const pReturnError)
 {
+	enum eCmd
+	{
+		eCmds_Header,
+		eCmds_Texture,
+		eCmds_Target,
+		eCmds_Textures,
+		eCmds_VertexShader,
+		eCmds_FragmentShader,
+		eCmds_Effect,
+
+		eCmds_Size,
+	};
+
+	const CPVRTHash ParserCommands[] =
+	{
+		"[HEADER]",				// eCmds_Header
+		"[TEXTURE]",			// eCmds_Texture
+		"[TARGET]",				// eCmds_Target
+		"[TEXTURES]",			// eCmds_Textures
+		"[VERTEXSHADER]",		// eCmds_VertexShader
+		"[FRAGMENTSHADER]",		// eCmds_FragmentShader
+		"[EFFECT]",				// eCmds_Effect
+	};
+	PVRTCOMPILEASSERT(ParserCommands, sizeof(ParserCommands) / sizeof(ParserCommands[0]) == eCmds_Size);
+
 	int nEndLine = 0;
 	int nHeaderCounter = 0, nTexturesCounter = 0;
 	unsigned int i,j,k;
-	m_nNumVertShaders	= 0;
-	m_nNumFragShaders	= 0;
-	m_nNumEffects		= 0;
 
 	// Loop through the file
 	for(unsigned int nLine=0; nLine < m_psContext->nNumLines; nLine++)
@@ -442,7 +553,8 @@ bool CPVRTPFXParser::Parse(CPVRTString * const pReturnError)
 		if(!*m_psContext->ppszEffectFile[nLine])
 			continue;
 
-		if(strcmp("[HEADER]", m_psContext->ppszEffectFile[nLine]) == 0)
+		CPVRTHash Cmd(m_psContext->ppszEffectFile[nLine]);
+		if(Cmd == ParserCommands[eCmds_Header])
 		{
 			if(nHeaderCounter>0)
 			{
@@ -463,7 +575,35 @@ bool CPVRTPFXParser::Parse(CPVRTString * const pReturnError)
 			}
 			nLine = nEndLine;
 		}
-		else if(strcmp("[TEXTURES]", m_psContext->ppszEffectFile[nLine]) == 0)
+		else if(Cmd == ParserCommands[eCmds_Texture])
+		{
+			if(GetEndTag("TEXTURE", nLine, &nEndLine))
+			{
+				if(!ParseTexture(nLine, nEndLine, pReturnError))
+					return false;
+			}
+			else
+			{
+				*pReturnError = PVRTStringFromFormattedStr("Missing [/TEXTURE] tag after [TEXTURE] on line %d\n", m_psContext->pnFileLineNumber[nLine]);
+				return false;
+			}
+			nLine = nEndLine;
+		}
+		else if(Cmd == ParserCommands[eCmds_Target])
+		{
+			if(GetEndTag("TARGET", nLine, &nEndLine))
+			{
+				if(!ParseTarget(nLine, nEndLine, pReturnError))
+					return false;
+			}
+			else
+			{
+				*pReturnError = PVRTStringFromFormattedStr("Missing [/TARGET] tag after [TARGET] on line %d\n", m_psContext->pnFileLineNumber[nLine]);
+				return false;
+			}
+			nLine = nEndLine;
+		}
+		else if(Cmd == ParserCommands[eCmds_Textures])
 		{
 			if(nTexturesCounter>0)
 			{
@@ -484,25 +624,15 @@ bool CPVRTPFXParser::Parse(CPVRTString * const pReturnError)
 			}
 			nLine = nEndLine;
 		}
-		else if(strcmp("[VERTEXSHADER]", m_psContext->ppszEffectFile[nLine]) == 0)
+		else if(Cmd == ParserCommands[eCmds_VertexShader])
 		{
 			if(GetEndTag("VERTEXSHADER", nLine, &nEndLine))
 			{
-				if(m_nNumVertShaders >= m_nMaxVertShaders)
-				{
-					*pReturnError = PVRTStringFromFormattedStr("%d vertex shaders read, can't store any more, on line %d\n", m_nNumVertShaders, m_psContext->pnFileLineNumber[nLine]);
-					return false;
-				}
-				if(ParseShader(nLine, nEndLine, pReturnError, m_psVertexShader[m_nNumVertShaders], "VERTEXSHADER"))
-					m_nNumVertShaders++;
+				SPVRTPFXParserShader VertexShader;
+				if(ParseShader(nLine, nEndLine, pReturnError, VertexShader, "VERTEXSHADER"))
+					m_psVertexShader.Append(VertexShader);
 				else
-				{
-					FREE(m_psVertexShader[m_nNumVertShaders].pszName);
-					FREE(m_psVertexShader[m_nNumVertShaders].pszGLSLfile);
-					FREE(m_psVertexShader[m_nNumVertShaders].pszGLSLcode);
-					FREE(m_psVertexShader[m_nNumVertShaders].pszGLSLBinaryFile);
 					return false;
-				}
 			}
 			else
 			{
@@ -511,25 +641,15 @@ bool CPVRTPFXParser::Parse(CPVRTString * const pReturnError)
 			}
 			nLine = nEndLine;
 		}
-		else if(strcmp("[FRAGMENTSHADER]", m_psContext->ppszEffectFile[nLine]) == 0)
+		else if(Cmd == ParserCommands[eCmds_FragmentShader])
 		{
 			if(GetEndTag("FRAGMENTSHADER", nLine, &nEndLine))
 			{
-				if(m_nNumFragShaders >= m_nMaxFragShaders)
-				{
-					*pReturnError = PVRTStringFromFormattedStr("%d fragment shaders read, can't store any more, on line %d\n", m_nNumFragShaders, m_psContext->pnFileLineNumber[nLine]);
-					return false;
-				}
-				if(ParseShader(nLine, nEndLine, pReturnError, m_psFragmentShader[m_nNumFragShaders], "FRAGMENTSHADER"))
-					m_nNumFragShaders++;
+				SPVRTPFXParserShader FragShader;
+				if(ParseShader(nLine, nEndLine, pReturnError, FragShader, "FRAGMENTSHADER"))
+					m_psFragmentShader.Append(FragShader);
 				else
-				{
-					FREE(m_psFragmentShader[m_nNumFragShaders].pszName);
-					FREE(m_psFragmentShader[m_nNumFragShaders].pszGLSLfile);
-					FREE(m_psFragmentShader[m_nNumFragShaders].pszGLSLcode);
-					FREE(m_psFragmentShader[m_nNumFragShaders].pszGLSLBinaryFile);
 					return false;
-				}
 			}
 			else
 			{
@@ -538,47 +658,15 @@ bool CPVRTPFXParser::Parse(CPVRTString * const pReturnError)
 			}
 			nLine = nEndLine;
 		}
-		else if(strcmp("[EFFECT]", m_psContext->ppszEffectFile[nLine]) == 0)
+		else if(Cmd == ParserCommands[eCmds_Effect])
 		{
 			if(GetEndTag("EFFECT", nLine, &nEndLine))
 			{
-				if(m_nNumEffects >= m_nMaxEffects)
-				{
-					*pReturnError = PVRTStringFromFormattedStr("%d effects read, can't store any more, on line %d\n", m_nNumEffects, m_psContext->pnFileLineNumber[nLine]);
-					return false;
-				}
-				if(ParseEffect(m_psEffect[m_nNumEffects], nLine, nEndLine, pReturnError))
-					m_nNumEffects++;
+				SPVRTPFXParserEffect Effect;
+				if(ParseEffect(Effect, nLine, nEndLine, pReturnError))
+					m_psEffect.Append(Effect);
 				else
-				{
-					for(i=0; i < m_psEffect[m_nNumEffects].nNumUniforms; ++i)
-					{
-						FREE(m_psEffect[m_nNumEffects].psUniform[i].pszName);
-						FREE(m_psEffect[m_nNumEffects].psUniform[i].pszValue);
-					}
-					delete [] m_psEffect[m_nNumEffects].psUniform;
-
-					for(i=0; i < m_psEffect[m_nNumEffects].nNumAttributes; ++i)
-					{
-						FREE(m_psEffect[m_nNumEffects].psAttribute[i].pszName);
-						FREE(m_psEffect[m_nNumEffects].psAttribute[i].pszValue);
-					}
-					delete [] m_psEffect[m_nNumEffects].psAttribute;
-
-					for(i=0; i < m_psEffect[m_nNumEffects].nNumTextures; ++i)
-					{
-						FREE(m_psEffect[m_nNumEffects].psTextures[i].pszName);
-					}
-					delete [] m_psEffect[m_nNumEffects].psTextures;
-
-					FREE(m_psEffect[m_nNumEffects].pszFragmentShaderName);
-					FREE(m_psEffect[m_nNumEffects].pszVertexShaderName);
-
-					FREE(m_psEffect[m_nNumEffects].pszAnnotation);
-					FREE(m_psEffect[m_nNumEffects].pszName);
-
 					return false;
-				}
 			}
 			else
 			{
@@ -594,40 +682,51 @@ bool CPVRTPFXParser::Parse(CPVRTString * const pReturnError)
 		}
 	}
 
-	if(m_nNumEffects < 1)
+	if(m_psEffect.GetSize() < 1)
 	{
 		*pReturnError = CPVRTString("No [EFFECT] found. PFX file must have at least one defined.\n");
 		return false;
 	}
 
-	if(m_nNumFragShaders < 1)
+	if(m_psFragmentShader.GetSize() < 1)
 	{
 		*pReturnError = CPVRTString("No [FRAGMENTSHADER] found. PFX file must have at least one defined.\n");;
 		return false;
 	}
 
-	if(m_nNumVertShaders < 1)
+	if(m_psVertexShader.GetSize() < 1)
 	{
 		*pReturnError = CPVRTString("No [VERTEXSHADER] found. PFX file must have at least one defined.\n");
 		return false;
 	}
 
-	for(i = 0; i < m_nNumEffects; ++i)
+	// Loop Effects
+	for(i = 0; i < m_psEffect.GetSize(); ++i)
 	{
-		for(j = 0; j < m_psEffect[i].nNumTextures; ++j)
+		// Loop Textures in Effects
+		for(j = 0; j < m_psEffect[i].Textures.GetSize(); ++j)
 		{
-			for(k = 0; k < m_nNumTextures; ++k)
+			// Loop Textures in whole PFX
+			unsigned int uiTexSize = m_psTexture.GetSize();
+			for(k = 0; k < uiTexSize; ++k)
 			{
-				if(strcmp(m_psEffect[i].psTextures[j].pszName, m_psTexture[k].pszName) == 0)
+				if(m_psTexture[k]->Name == m_psEffect[i].Textures[j].Name)
 					break;
 			}
 
-			if(!m_nNumTextures || k == m_nNumTextures)
+			// Texture mismatch. Report error.
+			if(!uiTexSize || k == uiTexSize)
 			{
-				*pReturnError = PVRTStringFromFormattedStr("Error: TEXTURE '%s' is not defined in [TEXTURES].\n", m_psEffect[i].psTextures[j].pszName);
+				*pReturnError = "Error: TEXTURE '" + m_psEffect[i].Textures[j].Name.String() + "' is not defined in [TEXTURES].\n";
 				return false;
 			}
 		}
+	}
+
+	DetermineRenderPassDependencies(pReturnError);
+	if(pReturnError->compare(""))
+	{
+		return false;
 	}
 
 	return true;
@@ -736,7 +835,21 @@ EPVRTError CPVRTPFXParser::ParseFromFile(const char * const pszFileName, CPVRTSt
 		*pReturnError = CPVRTString("Unable to open file ") + pszFileName;
 		return PVR_FAIL;
 	}
-	return ParseFromMemory(PfxFile.StringPtr(), pReturnError);
+
+	CPVRTString PfxFileString;
+	const char* pPfxData = (const char*) PfxFile.DataPtr();
+
+	// Is our shader resource file data null terminated?
+	if(pPfxData[PfxFile.Size()-1] != '\0')
+	{
+		// If not create a temporary null-terminated string
+		PfxFileString.assign(pPfxData, PfxFile.Size());
+		pPfxData = PfxFileString.c_str();
+	}
+
+	m_szFileName.assign(pszFileName);
+
+	return ParseFromMemory(pPfxData, pReturnError);
 }
 
 /*!***************************************************************************
@@ -760,7 +873,86 @@ bool CPVRTPFXParser::SetViewportSize(unsigned int uiWidth, unsigned int uiHeight
 		return false;
 	}
 }
+/*!***************************************************************************
+@Function		RetrieveRenderPassDependencies
+@Output			aRequiredRenderPasses
+@Output			aszActiveEffectStrings
+@Return			bool	
+@Description	Returns a list of dependencies associated with the pass.
+*****************************************************************************/
+bool CPVRTPFXParser::RetrieveRenderPassDependencies(CPVRTArray<SPVRTPFXRenderPass*> &aRequiredRenderPasses, CPVRTArray<CPVRTStringHash> &aszActiveEffectStrings)
+{
+	unsigned int ui(0), uj(0), uk(0), ul(0);
+	const SPVRTPFXParserEffect* pTempEffect(NULL);
+	
+	if(aRequiredRenderPasses.GetSize() > 0)
+	{
+		/* aRequiredRenderPasses should be empty when it is passed in */
+		return false;
+	}
 
+	for(ui = 0; ui < (unsigned int)aszActiveEffectStrings.GetSize(); ++ui)
+	{
+		if(aszActiveEffectStrings[ui].String().empty())
+		{
+			// Empty strings are not valid
+			return false;
+		}
+
+		// Find the specified effect
+		for(uj = 0, pTempEffect = NULL; uj < (unsigned int)m_psEffect.GetSize(); ++uj)
+		{
+			if(aszActiveEffectStrings[ui] == m_psEffect[uj].Name)
+			{
+				// Effect found
+				pTempEffect = &m_psEffect[uj];
+				break;
+			}
+		}
+
+		if(pTempEffect == NULL)
+		{
+			// Effect not found
+			return false;
+		}
+		
+		for(uj = 0; uj < m_renderPassSkipGraph.GetNumNodes(); ++uj)
+		{
+			if(m_renderPassSkipGraph[uj]->pEffect == pTempEffect)
+			{
+				m_renderPassSkipGraph.RetreiveSortedDependencyList(aRequiredRenderPasses, uj);
+				return true;
+			}
+		}
+
+		/*
+			The effect wasn't a post-process. Check to see if it has any non-post-process dependencies,
+			e.g. RENDER CAMERA textures.
+		*/
+		// Loop Effects
+		for(uj = 0; uj < (unsigned int)m_psEffect.GetSize(); ++uj)
+		{
+			if(aszActiveEffectStrings[ui] != m_psEffect[uj].Name)
+				continue;
+
+			// Loop Textures in Effect
+			for(uk = 0; uk < m_psEffect[uj].Textures.GetSize();++uk)
+			{
+				// Loop Render Passes for whole PFX
+				for(ul = 0; ul < m_RenderPasses.GetSize(); ++ul)
+				{
+					// Check that the name of this render pass output texture matches a provided texture in an Effect
+					if(m_RenderPasses[ul].pTexture->Name == m_psEffect[uj].Textures[uk].Name)
+						aRequiredRenderPasses.Append(&m_RenderPasses[ul]);
+				}
+			}
+			
+			return true;
+		}
+	}
+
+	return false;
+}
 /*!***************************************************************************
  @Function			GetEndTag
  @Input				pszTagName		tag name
@@ -771,7 +963,7 @@ bool CPVRTPFXParser::SetViewportSize(unsigned int uiWidth, unsigned int uiHeight
 					Returns true and outputs the line number of the end tag if
 					found, otherwise returning false.
 *****************************************************************************/
-bool CPVRTPFXParser::GetEndTag(const char *pszTagName, int nStartLine, int *pnEndLine)
+bool CPVRTPFXParser::GetEndTag(const char* pszTagName, int nStartLine, int *pnEndLine)
 {
 	char pszEndTag[100];
 	strcpy(pszEndTag, "[/");
@@ -799,8 +991,6 @@ bool CPVRTPFXParser::GetEndTag(const char *pszTagName, int nStartLine, int *pnEn
 *****************************************************************************/
 void CPVRTPFXParser::ReduceWhitespace(char *line)
 {
-
-
 	// convert tabs and newlines to ' '
 	char *tmp = strpbrk (line, "\t\n");
 	while(tmp != NULL)
@@ -847,6 +1037,10 @@ void CPVRTPFXParser::ReduceWhitespace(char *line)
 		}
 	}
 
+	// If there is no string then do not remove terminating white symbols
+	if(!strlen(line))
+	    return;
+
 	// remove all whitespace from end
 	while(line[strlen(line)-1] == ' ')
 	{
@@ -889,84 +1083,51 @@ CPVRTString CPVRTPFXParser::FindParameter(char *aszSourceString, const CPVRTStri
 }
 
 /*!***************************************************************************
- @Function			ProcessKeywordParam
- @Output
- @Input
- @Description		Processes the node name or vector position parameters that
-					can be assigned to render pass keywords (e.g. ENVMAPCUBE=(11.0, 22.0, 0.0))
-
-	*****************************************************************************/
-bool CPVRTPFXParser::ProcessKeywordParam(const CPVRTString &parameterString)
+@Function		ReadStringToken
+@Input			pszSource			Parameter string to process
+@Output			output				Processed string
+@Output			ErrorStr			String containing errors
+@Return								Returns true on success
+@Description	Processes the null terminated char array as if it's a
+				formatted string array. Quote marks are determined to be
+				start and end of strings. If no quote marks are found the
+				string is delimited by whitespace.
+*****************************************************************************/
+bool CPVRTPFXParser::ReadStringToken(char* pszSource, CPVRTString& output, CPVRTString &ErrorStr, int i, const char* pCaller)
 {
-	if(parameterString.compare("") == 0)
+	if(*pszSource == '\"')		// Quote marks. Continue parsing until end mark or NULL
+	{	
+		pszSource++;		// Skip past first quote
+		while(*pszSource != '\"')
+		{
+			if(*pszSource == '\0')
+			{
+				ErrorStr = PVRTStringFromFormattedStr("Incomplete argument in [%s] on line %d: %s\n", pCaller,m_psContext->pnFileLineNumber[i],  m_psContext->ppszEffectFile[i]);
+				return false;
+			}
+
+			output.push_back(*pszSource);
+			pszSource++;
+		}
+
+		pszSource++;		// Skip past final quote.
+	}
+	else		// No quotes. Read until space
 	{
+		pszSource = strtok(pszSource, DELIM_TOKENS NEWLINE_TOKENS);
+		output = pszSource;
+
+		pszSource += strlen(pszSource);
+	}
+
+	// Check that there's nothing left on this line
+	pszSource = strtok(pszSource, NEWLINE_TOKENS);
+	if(pszSource)
+	{
+		ErrorStr = PVRTStringFromFormattedStr("Unknown keyword '%s' in [%s] on line %d: %s\n", pszSource, pCaller, m_psContext->pnFileLineNumber[i],  m_psContext->ppszEffectFile[i]);
 		return false;
 	}
 
-	if(parameterString[0] == '"')
-	{
-		CPVRTString stringParam("");
-
-		/*
-			Start from the character after the first ".
-			Create a string from this point until the next occurance of
-			a " character.
-		*/
-
-		for(int keywordElement = 1; keywordElement < (int)parameterString.length(); ++keywordElement)
-		{
-			if(parameterString[keywordElement] == '"')
-			{
-				// Reached the " delimiter, so break out of the loop
-				break;
-			}
-			stringParam.append(parameterString[keywordElement]);
-		}
-		// Assign the node name and set the vector to (0,0,0)
-		delete[]	m_psRenderPasses[m_nNumRenderPasses].pszNodeName;
-		m_psRenderPasses[m_nNumRenderPasses].pszNodeName = new char[(stringParam.length()+1)];
-		strcpy(m_psRenderPasses[m_nNumRenderPasses].pszNodeName, stringParam.c_str());
-
-		m_psRenderPasses[m_nNumRenderPasses].vecPos = PVRTVec3(0,0,0);
-		m_psRenderPasses[m_nNumRenderPasses].eCameraPosition = eFromNode;
-
-	}else if(parameterString[0] == '(')
-	{
-		// Create a string for each vector element (x,y,z)
-		CPVRTString vectorParamString[3];
-		int vecId(0);
-		for(int keywordElement = 1; keywordElement < (int)parameterString.length() && vecId < 3; ++keywordElement)
-		{
-			if(parameterString[keywordElement] == ',')
-			{
-				// Comma found, so increment vecId and continue to next char
-				vecId++;
-				continue;
-			}
-			else if(parameterString[keywordElement] == ')')
-			{
-				break;
-			}
-
-			// Append the current char to the current vector string
-			vectorParamString[vecId].append(parameterString[keywordElement]);
-		}
-
-		// Store the retrieved values and set the node name to NULL
-		m_psRenderPasses[m_nNumRenderPasses].vecPos = PVRTVec3(	(float)atof(vectorParamString[0].c_str()),
-																(float)atof(vectorParamString[1].c_str()),
-																(float)atof(vectorParamString[2].c_str()));
-
-		delete[]	m_psRenderPasses[m_nNumRenderPasses].pszNodeName;
-		m_psRenderPasses[m_nNumRenderPasses].pszNodeName = NULL;
-		m_psRenderPasses[m_nNumRenderPasses].eCameraPosition = eFromExplicitPositon;
-	}
-	else
-	{
-		// Unrecognised data has been supplied
-		m_psRenderPasses[m_nNumRenderPasses].eCameraPosition = eFromActiveCamera;
-		return false;
-	}
 	return true;
 }
 
@@ -980,6 +1141,23 @@ bool CPVRTPFXParser::ProcessKeywordParam(const CPVRTString &parameterString)
 *****************************************************************************/
 bool CPVRTPFXParser::ParseHeader(int nStartLine, int nEndLine, CPVRTString * const pReturnError)
 {
+	enum eCmd
+	{
+		eCmds_Version,
+		eCmds_Description,
+		eCmds_Copyright,
+
+		eCmds_Size,
+	};
+
+	const CPVRTHash HeaderCommands[] =
+	{
+		"VERSION",			// eCmds_Version
+		"DESCRIPTION",		// eCmds_Description
+		"COPYRIGHT",		// eCmds_Copyright
+	};
+	PVRTCOMPILEASSERT(HeaderCommands, sizeof(HeaderCommands) / sizeof(HeaderCommands[0]) == eCmds_Size);
+
 	for(int i = nStartLine+1; i < nEndLine; i++)
 	{
 		// Skip blank lines
@@ -989,23 +1167,21 @@ bool CPVRTPFXParser::ParseHeader(int nStartLine, int nEndLine, CPVRTString * con
 		char *str = strtok (m_psContext->ppszEffectFile[i]," ");
 		if(str != NULL)
 		{
-			if(strcmp(str, "VERSION") == 0)
+			CPVRTHash Cmd(str);
+			if(Cmd == HeaderCommands[eCmds_Version])
 			{
 				str += (strlen(str)+1);
-				m_sHeader.pszVersion = (char *)malloc((strlen(str) + 1) * sizeof(char));
-				strcpy(m_sHeader.pszVersion, str);
+				m_sHeader.Version = str;
 			}
-			else if(strcmp(str, "DESCRIPTION") == 0)
+			else if(Cmd == HeaderCommands[eCmds_Description])
 			{
 				str += (strlen(str)+1);
-				m_sHeader.pszDescription = (char *)malloc((strlen(str) + 1) * sizeof(char));
-				strcpy(m_sHeader.pszDescription, str);
+				m_sHeader.Description = str;
 			}
-			else if(strcmp(str, "COPYRIGHT") == 0)
+			else if(Cmd == HeaderCommands[eCmds_Copyright])
 			{
 				str += (strlen(str)+1);
-				m_sHeader.pszCopyright = (char *)malloc((strlen(str) + 1) * sizeof(char));
-				strcpy(m_sHeader.pszCopyright, str);
+				m_sHeader.Copyright = str;
 			}
 			else
 			{
@@ -1020,28 +1196,594 @@ bool CPVRTPFXParser::ParseHeader(int nStartLine, int nEndLine, CPVRTString * con
 		}
 	}
 
-	// initialise empty strings
-	if(m_sHeader.pszVersion == NULL)
+	return true;
+}
+
+/*!***************************************************************************
+@Function			ParseGenericSurface
+@Input				nStartLine		start line number
+@Input				nEndLine		end line number
+@Output				uiWrapS			
+@Output				uiWrapT			
+@Output				uiWrapR			
+@Output				uiMin			
+@Output				uiMag			
+@Output				uiMip			
+@Output				pReturnError	error string
+@Return				bool			true if parse is successful
+@Description		Parses generic data from TARGET and TEXTURE blocks. Namely
+					wrapping and filter commands.
+*****************************************************************************/
+bool CPVRTPFXParser::ParseGenericSurface(int nStartLine, int nEndLine, SPVRTPFXParserTexture& Params, CPVRTArray<CPVRTHash>& KnownCmds, 
+										 const char* pCaller, CPVRTString * const pReturnError)
+{
+	const unsigned int INVALID_TYPE = 0xAC1DBEEF;
+	
+	enum eCmd
 	{
-		m_sHeader.pszVersion = (char *)malloc(sizeof(char));
-		strcpy(m_sHeader.pszVersion, "");
-	}
-	if(m_sHeader.pszDescription == NULL)
+		eCmds_Min,
+		eCmds_Mag,
+		eCmds_Mip,
+		eCmds_WrapS,
+		eCmds_WrapT,
+		eCmds_WrapR,
+		eCmds_Filter,
+		eCmds_Wrap,
+		eCmds_Resolution,
+		eCmds_Surface,
+
+		eCmds_Size
+	};
+
+	const CPVRTHash GenericSurfCommands[] =
 	{
-		m_sHeader.pszDescription = (char *)malloc(sizeof(char));
-		strcpy(m_sHeader.pszDescription, "");
-	}
-	if(m_sHeader.pszCopyright == NULL)
+		"MINIFICATION",			// eCmds_Min
+		"MAGNIFICATION",		// eCmds_Mag
+		"MIPMAP",				// eCmds_Mip
+		"WRAP_S",				// eCmds_WrapS
+		"WRAP_T",				// eCmds_WrapT
+		"WRAP_R",				// eCmds_WrapR
+		"FILTER",				// eCmds_Filter
+		"WRAP",					// eCmds_Wrap
+		"RESOLUTION",			// eCmds_Resolution
+		"SURFACETYPE",			// eCmds_Surface
+	};
+	PVRTCOMPILEASSERT(GenericSurfCommands, sizeof(GenericSurfCommands) / sizeof(GenericSurfCommands[0]) == eCmds_Size);
+
+	struct SSurfacePair
 	{
-		m_sHeader.pszCopyright = (char *)malloc(sizeof(char));
-		strcpy(m_sHeader.pszCopyright, "");
+		CPVRTHash Name;
+		PVRTPixelType eType;
+		unsigned int BufferType;
+	};
+
+	const SSurfacePair SurfacePairs[] = 
+	{
+		{ "RGBA8888",	OGL_RGBA_8888,	PVRPFXTEX_COLOUR },
+		{ "RGBA4444",	OGL_RGBA_4444,	PVRPFXTEX_COLOUR },
+		{ "RGB888",		OGL_RGB_888,	PVRPFXTEX_COLOUR },
+		{ "RGB565",		OGL_RGB_565,	PVRPFXTEX_COLOUR },		
+		{ "INTENSITY8",	OGL_I_8,		PVRPFXTEX_COLOUR },
+		{ "DEPTH24",	OGL_RGB_888,	PVRPFXTEX_DEPTH },
+		{ "DEPTH16",	OGL_RGB_565,	PVRPFXTEX_DEPTH },
+		{ "DEPTH8",		OGL_I_8,		PVRPFXTEX_DEPTH },
+	};
+	const unsigned int uiNumSurfTypes = sizeof(SurfacePairs) / sizeof(SurfacePairs[0]);
+
+	for(int i = nStartLine+1; i < nEndLine; i++)
+	{
+		// Skip blank lines
+		if(!*m_psContext->ppszEffectFile[i])
+			continue;
+
+		// Need to make a copy so we can use strtok and not affect subsequent parsing
+		size_t lineLen = strlen(m_psContext->ppszEffectFile[i]);
+		char* pBlockCopy = new char[lineLen+1];
+		strcpy(pBlockCopy, m_psContext->ppszEffectFile[i]);
+
+		char *str = strtok (pBlockCopy, NEWLINE_TOKENS DELIM_TOKENS);
+		if(!str)
+		{
+			delete[] pBlockCopy;
+			return false;		
+		}
+
+		CPVRTHash Cmd(str);
+		const char** ppFilters  = NULL;
+		bool bKnown = false;
+
+		// --- Verbose filtering flags
+		if(Cmd == GenericSurfCommands[eCmds_Min] || Cmd == GenericSurfCommands[eCmds_Mag] || Cmd == GenericSurfCommands[eCmds_Mip])
+		{
+			ppFilters = c_ppszFilters;
+			bKnown     = true;
+		}
+		// --- Verbose wrapping flags
+		else if(Cmd == GenericSurfCommands[eCmds_WrapS] || Cmd == GenericSurfCommands[eCmds_WrapT] || Cmd == GenericSurfCommands[eCmds_WrapR])
+		{
+			ppFilters = c_ppszWraps;
+			bKnown     = true;
+		}
+		// --- Inline filtering flags
+		else if(Cmd == GenericSurfCommands[eCmds_Filter])
+		{
+			char* pszRemaining = strtok(NULL, NEWLINE_TOKENS DELIM_TOKENS);
+			if(!pszRemaining)
+			{
+				*pReturnError = PVRTStringFromFormattedStr("Missing FILTER arguments in [%s] on line %d: %s\n", pCaller, m_psContext->pnFileLineNumber[i],  m_psContext->ppszEffectFile[i]);
+				delete[] pBlockCopy;
+				return false;
+			}
+
+			unsigned int* pFlags[3] =
+			{
+				&Params.nMin,
+				&Params.nMag,
+				&Params.nMIP,
+			};
+
+			if(!ParseTextureFlags(pszRemaining, pFlags, 3, c_ppszFilters, eFilter_Size, pReturnError, i))
+			{
+				delete[] pBlockCopy;
+				return false;
+			}
+
+			bKnown     = true;
+		}
+		// --- Inline wrapping flags
+		else if(Cmd == GenericSurfCommands[eCmds_Wrap])
+		{
+			char* pszRemaining = strtok(NULL, NEWLINE_TOKENS DELIM_TOKENS);
+			if(!pszRemaining)
+			{
+				*pReturnError = PVRTStringFromFormattedStr("Missing WRAP arguments in [%s] on line %d: %s\n", pCaller, m_psContext->pnFileLineNumber[i],  m_psContext->ppszEffectFile[i]);
+				delete[] pBlockCopy;
+				return false;
+			}
+
+			unsigned int* pFlags[3] =
+			{
+				&Params.nWrapS,
+				&Params.nWrapT,
+				&Params.nWrapR,
+			};
+
+			if(!ParseTextureFlags(pszRemaining, pFlags, 3, c_ppszWraps, eWrap_Size, pReturnError, i))
+			{
+				delete[] pBlockCopy;
+				return false;
+			}
+
+			bKnown     = true;
+		}
+		// --- Resolution
+		else if(Cmd == GenericSurfCommands[eCmds_Resolution])
+		{
+			char* pszRemaining;
+
+			unsigned int* uiVals[2] = { &Params.uiWidth, &Params.uiHeight };
+
+			// There should be precisely TWO arguments for resolution (width and height)
+			for(unsigned int uiIndex = 0; uiIndex < 2; ++uiIndex)
+			{
+				pszRemaining = strtok(NULL, DELIM_TOKENS NEWLINE_TOKENS);
+				if(!pszRemaining)
+				{
+					*pReturnError = PVRTStringFromFormattedStr("Missing RESOLUTION argument(s) (requires width AND height) in [TARGET] on line %d\n", m_psContext->pnFileLineNumber[i]);
+					delete[] pBlockCopy;
+					return false;
+				}
+
+				int val = atoi(pszRemaining);
+
+				if( (val == 0 && *pszRemaining != '0')			// Make sure they haven't explicitly set the value to be 0 as this might be a valid use-case.
+					||  (val < 0))
+				{
+					*pReturnError = PVRTStringFromFormattedStr("Invalid RESOLUTION argument \"%s\" in [TEXTURE] on line %d\n", pszRemaining, m_psContext->pnFileLineNumber[i]);
+					delete[] pBlockCopy;
+					return false;
+				}
+
+				*(uiVals[uiIndex]) = (unsigned int)val;
+			}
+
+			bKnown     = true;
+		}
+		// --- Surface type
+		else if(Cmd == GenericSurfCommands[eCmds_Surface])
+		{
+			char* pszRemaining = strtok(NULL, NEWLINE_TOKENS DELIM_TOKENS);
+			if(!pszRemaining)
+			{
+				*pReturnError = PVRTStringFromFormattedStr("Missing SURFACETYPE arguments in [TARGET] on line %d\n", m_psContext->pnFileLineNumber[i]);
+				delete[] pBlockCopy;
+				return false;
+			}
+
+			CPVRTHash hashType(pszRemaining);
+			for(unsigned int uiIndex = 0; uiIndex < uiNumSurfTypes; ++uiIndex)
+			{
+				if(hashType == SurfacePairs[uiIndex].Name)
+				{
+					Params.uiFlags =  SurfacePairs[uiIndex].eType | SurfacePairs[uiIndex].BufferType;
+					break;
+				}
+			}
+
+			bKnown     = true;
+		}
+
+		// Valid Verbose command
+		if(ppFilters)
+		{
+			char* pszRemaining = strtok(NULL, NEWLINE_TOKENS DELIM_TOKENS);
+			if(!pszRemaining)
+			{
+				*pReturnError = PVRTStringFromFormattedStr("Missing arguments in [%s] on line %d: %s\n", pCaller, m_psContext->pnFileLineNumber[i],  m_psContext->ppszEffectFile[i]);
+				delete[] pBlockCopy;
+				return false;
+			}
+
+			unsigned int Type = INVALID_TYPE;
+			for(unsigned int uiIndex = 0; uiIndex < 3; ++uiIndex)
+			{
+				if(strcmp(pszRemaining, ppFilters[uiIndex]) == 0)	
+				{
+					Type = uiIndex;			// Yup, it's valid.
+					break;
+				}
+			}
+
+			// Tell the user it's invalid.
+			if(Type == INVALID_TYPE)
+			{
+				*pReturnError = PVRTStringFromFormattedStr("Unknown keyword '%s' in [%s] on line %d: %s\n", pszRemaining, pCaller, m_psContext->pnFileLineNumber[i], m_psContext->ppszEffectFile[i]);
+				delete[] pBlockCopy;
+				return false;
+			}
+
+			if(Cmd == GenericSurfCommands[eCmds_Min])			Params.nMin = Type;		
+			else if(Cmd == GenericSurfCommands[eCmds_Mag])		Params.nMag = Type;	
+			else if(Cmd == GenericSurfCommands[eCmds_Mip])		Params.nMIP = Type;	
+			else if(Cmd == GenericSurfCommands[eCmds_WrapR])	Params.nWrapR = Type;	
+			else if(Cmd == GenericSurfCommands[eCmds_WrapS])	Params.nWrapS = Type;	
+			else if(Cmd == GenericSurfCommands[eCmds_WrapT])	Params.nWrapT = Type;
+		}
+
+		if(bKnown)
+		{
+			KnownCmds.Append(Cmd);
+
+			// Make sure nothing else exists on the line that hasn't been parsed.
+			char* pszRemaining = strtok(NULL, NEWLINE_TOKENS);
+			if(pszRemaining)
+			{
+				*pReturnError = PVRTStringFromFormattedStr("Unexpected keyword '%s' in [%s] on line %d: %s\n", pszRemaining, pCaller, m_psContext->pnFileLineNumber[i],  m_psContext->ppszEffectFile[i]);
+				delete[] pBlockCopy;
+				return false;
+			}
+		}	
+
+		delete [] pBlockCopy;
 	}
 
 	return true;
 }
 
 /*!***************************************************************************
- @Function			ParseTextures
+@Function			ParseTexture
+@Input				nStartLine		start line number
+@Input				nEndLine		end line number
+@Output				pReturnError	error string
+@Return				bool			true if parse is successful
+@Description		Parses the TEXTURE section of the PFX file.
+*****************************************************************************/
+bool CPVRTPFXParser::ParseTexture(int nStartLine, int nEndLine, CPVRTString * const pReturnError)
+{
+	enum eCmd
+	{
+		eCmds_Name,
+		eCmds_Path,
+		eCmds_View,
+		eCmds_Camera,
+
+		eCmds_Size
+	};
+
+	const CPVRTHash TextureCmds[] =
+	{
+		"NAME",				// eTextureCmds_Name
+		"PATH",				// eTextureCmds_Path
+		"VIEW",				// eTextureCmds_View
+		"CAMERA",			// eTextureCmds_Camera
+	};
+	PVRTCOMPILEASSERT(TextureCmds, sizeof(TextureCmds) / sizeof(TextureCmds[0]) == eCmds_Size);
+
+	SPVRTPFXParserTexture TexDesc;
+	TexDesc.nMin = eFilter_Default;
+	TexDesc.nMag = eFilter_Default;
+	TexDesc.nMIP = eFilter_MipDefault;
+	TexDesc.nWrapS = eWrap_Default;
+	TexDesc.nWrapT = eWrap_Default;
+	TexDesc.nWrapR = eWrap_Default;
+	TexDesc.uiWidth  = VIEWPORT_SIZE;
+	TexDesc.uiHeight = VIEWPORT_SIZE;
+	TexDesc.uiFlags  = OGL_RGBA_8888 | PVRPFXTEX_COLOUR;
+
+	CPVRTArray<CPVRTHash> KnownCmds;
+	if(!ParseGenericSurface(nStartLine, nEndLine, TexDesc, KnownCmds, "TEXTURE", pReturnError))
+		return false;
+
+	CPVRTString texName, filePath, viewName;
+	for(int i = nStartLine+1; i < nEndLine; i++)
+	{
+		// Skip blank lines
+		if(!*m_psContext->ppszEffectFile[i])
+			continue;
+
+		char *str = strtok (m_psContext->ppszEffectFile[i], NEWLINE_TOKENS DELIM_TOKENS);
+		if(!str)
+		{
+			*pReturnError = PVRTStringFromFormattedStr("Missing arguments in [TEXTURE] on line %d: %s\n", m_psContext->pnFileLineNumber[i],  m_psContext->ppszEffectFile[i]);
+			return false;
+		}
+
+		CPVRTHash texCmd(str);
+		// --- Texture Name
+		if(texCmd == TextureCmds[eCmds_Name])
+		{
+			char* pszRemaining = strtok(NULL, NEWLINE_TOKENS DELIM_TOKENS);
+			if(!pszRemaining)
+			{
+				*pReturnError = PVRTStringFromFormattedStr("Missing NAME arguments in [TEXTURE] on line %d: %s\n", m_psContext->pnFileLineNumber[i],  m_psContext->ppszEffectFile[i]);
+				return false;
+			}
+
+			texName = pszRemaining;
+		}
+		// --- Texture Path
+		else if(texCmd == TextureCmds[eCmds_Path])
+		{
+			char* pszRemaining = strtok(NULL, NEWLINE_TOKENS);
+			if(!pszRemaining)
+			{
+				*pReturnError = PVRTStringFromFormattedStr("Missing PATH arguments in [TEXTURE] on line %d: %s\n", m_psContext->pnFileLineNumber[i],  m_psContext->ppszEffectFile[i]);
+				return false;
+			}
+
+			if(!ReadStringToken(pszRemaining, filePath, *pReturnError, i, "TEXTURE"))
+			{
+				return false;
+			}
+		}
+		// --- View/Camera Name
+		else if(texCmd == TextureCmds[eCmds_View] || texCmd == TextureCmds[eCmds_Camera])
+		{
+			char* pszRemaining = strtok(NULL, NEWLINE_TOKENS);		// String component. Get the rest of the line.
+			if(!pszRemaining || strlen(pszRemaining) == 0)
+			{
+				*pReturnError = PVRTStringFromFormattedStr("Missing VIEW argument in [TEXTURE] on line %d: %s\n", m_psContext->pnFileLineNumber[i],  m_psContext->ppszEffectFile[i]);
+				return false;
+			}
+
+			if(!ReadStringToken(pszRemaining, viewName, *pReturnError, i, "TEXTURE"))
+			{
+				return false;
+			}
+		}
+		else if(KnownCmds.Contains(texCmd))
+		{
+			// Remove from 'unknown' list.
+			for(unsigned int uiIndex = 0; uiIndex < KnownCmds.GetSize(); ++uiIndex)
+			{
+				if(KnownCmds[uiIndex] == texCmd)
+				{
+					KnownCmds.Remove(uiIndex);
+					break;
+				}
+			}
+
+			continue;		// This line has already been processed.
+		}
+		else
+		{
+			*pReturnError = PVRTStringFromFormattedStr("Unknown keyword '%s' in [TEXTURE] on line %d: %s\n", str, m_psContext->pnFileLineNumber[i],  m_psContext->ppszEffectFile[i]);
+			return false;
+		}
+
+		char* pszRemaining = strtok(NULL, NEWLINE_TOKENS);
+		if(pszRemaining)
+		{
+			*pReturnError = PVRTStringFromFormattedStr("Unexpected keyword '%s' in [TEXTURE] on line %d: %s\n", pszRemaining, m_psContext->pnFileLineNumber[i],  m_psContext->ppszEffectFile[i]);
+			return false;
+		}
+	}
+
+	if(texName.empty())
+	{
+		*pReturnError = PVRTStringFromFormattedStr("No NAME tag specified in [TEXTURE] on line %d\n", m_psContext->pnFileLineNumber[nStartLine]);
+		return false;
+	}
+	if(!filePath.empty() && !viewName.empty())
+	{
+		*pReturnError = PVRTStringFromFormattedStr("Both PATH and VIEW tags specified in [TEXTURE] on line %d\n", m_psContext->pnFileLineNumber[nStartLine]);
+		return false;
+	}
+	if(filePath.empty() && viewName.empty())
+	{
+		*pReturnError = PVRTStringFromFormattedStr("No PATH or VIEW tag specified in [TEXTURE] on line %d\n", m_psContext->pnFileLineNumber[nStartLine]);
+		return false;
+	}
+
+	bool bRTT = (viewName.empty() ? false : true);
+	if(bRTT)
+	{
+		filePath = texName;									// RTT doesn't have a physical file.
+	}
+
+	// Create a new texture and copy over the vals.
+	SPVRTPFXParserTexture* pTex = new SPVRTPFXParserTexture();
+	pTex->Name				= CPVRTStringHash(texName);
+	pTex->FileName			= CPVRTStringHash(filePath);
+	pTex->bRenderToTexture	= bRTT;
+	pTex->nMin				= TexDesc.nMin;
+	pTex->nMag				= TexDesc.nMag;
+	pTex->nMIP				= TexDesc.nMIP;
+	pTex->nWrapS			= TexDesc.nWrapS;
+	pTex->nWrapT			= TexDesc.nWrapT;
+	pTex->nWrapR			= TexDesc.nWrapR;
+	pTex->uiWidth			= TexDesc.uiWidth;
+	pTex->uiHeight			= TexDesc.uiHeight;
+	pTex->uiFlags			= TexDesc.uiFlags;
+	m_psTexture.Append(pTex);
+
+	if(bRTT)
+	{
+		unsigned int uiPassIdx = m_RenderPasses.Append();
+		m_RenderPasses[uiPassIdx].SemanticName = texName;
+
+		if(viewName == c_pszCurrentView)
+		{
+			m_RenderPasses[uiPassIdx].eViewType	 = eVIEW_CURRENT;
+		}
+		else
+		{
+			m_RenderPasses[uiPassIdx].eViewType	 = eVIEW_POD_CAMERA;
+			m_RenderPasses[uiPassIdx].NodeName	 = viewName;
+		}
+
+		m_RenderPasses[uiPassIdx].eRenderPassType = eCAMERA_PASS;			// Textures are always 'camera' passes
+
+		// Set render pass texture to the newly created texture.
+		m_RenderPasses[uiPassIdx].pTexture		 = pTex;
+		m_RenderPasses[uiPassIdx].uiFormatFlags  = TexDesc.uiFlags;
+	}
+	
+	return true;
+}
+
+/*!***************************************************************************
+@Function			ParseTarget
+@Input				nStartLine		start line number
+@Input				nEndLine		end line number
+@Output				pReturnError	error string
+@Return				bool			true if parse is successful
+@Description		Parses the TARGET section of the PFX file.
+*****************************************************************************/
+bool CPVRTPFXParser::ParseTarget(int nStartLine, int nEndLine, CPVRTString * const pReturnError)
+{
+	enum eCmd
+	{
+		eCmds_Name,
+
+		eCmds_Size
+	};
+
+	const CPVRTHash TargetCommands[] =
+	{
+		"NAME",				// eCmds_Name
+	};
+	PVRTCOMPILEASSERT(TargetCommands, sizeof(TargetCommands) / sizeof(TargetCommands[0]) == eCmds_Size);
+	
+	CPVRTString targetName;
+	SPVRTPFXParserTexture TexDesc;
+	TexDesc.nMin = eFilter_Default;
+	TexDesc.nMag = eFilter_Default;
+	TexDesc.nMIP = eFilter_MipDefault;
+	TexDesc.nWrapS = eWrap_Default;
+	TexDesc.nWrapT = eWrap_Default;
+	TexDesc.nWrapR = eWrap_Default;
+	TexDesc.uiWidth  = VIEWPORT_SIZE;
+	TexDesc.uiHeight = VIEWPORT_SIZE;
+	TexDesc.uiFlags  = OGL_RGBA_8888 | PVRPFXTEX_COLOUR;
+
+	CPVRTArray<CPVRTHash> KnownCmds;
+	if(!ParseGenericSurface(nStartLine, nEndLine, TexDesc, KnownCmds, "TARGET", pReturnError))
+		return false;
+	
+	for(int i = nStartLine+1; i < nEndLine; i++)
+	{
+		// Skip blank lines
+		if(!*m_psContext->ppszEffectFile[i])
+			continue;
+
+		char *str = strtok (m_psContext->ppszEffectFile[i], NEWLINE_TOKENS DELIM_TOKENS);
+		if(!str)
+		{
+			*pReturnError = PVRTStringFromFormattedStr("Missing arguments in [TARGET] on line %d\n", m_psContext->pnFileLineNumber[i]);
+			return false;
+		}
+
+		CPVRTHash texCmd(str);
+		// --- Target Name
+		if(texCmd == TargetCommands[eCmds_Name])
+		{
+			char* pszRemaining = strtok(NULL, NEWLINE_TOKENS DELIM_TOKENS);
+			if(!pszRemaining)
+			{
+				*pReturnError = PVRTStringFromFormattedStr("Missing NAME arguments in [TARGET] on line %d\n", m_psContext->pnFileLineNumber[i]);
+				return false;
+			}
+
+			targetName = pszRemaining;
+		}
+		else if(KnownCmds.Contains(texCmd))
+		{
+			// Remove from 'unknown' list.
+			for(unsigned int uiIndex = 0; uiIndex < KnownCmds.GetSize(); ++uiIndex)
+			{
+				if(KnownCmds[uiIndex] == texCmd)
+				{
+					KnownCmds.Remove(uiIndex);
+					break;
+				}
+			}
+
+			continue;		// This line has already been processed.
+		}
+		else
+		{
+			*pReturnError = PVRTStringFromFormattedStr("Unknown keyword '%s' in [TARGET] on line %d\n", str, m_psContext->pnFileLineNumber[i]);
+			return false;
+		}
+
+		char* pszRemaining = strtok(NULL, NEWLINE_TOKENS);
+		if(pszRemaining)
+		{
+			*pReturnError = PVRTStringFromFormattedStr("Unexpected keyword '%s' in [TARGET] on line %d\n", pszRemaining, m_psContext->pnFileLineNumber[i]);
+			return false;
+		}
+	}
+
+	// Create a new texture and copy over the vals.
+	SPVRTPFXParserTexture* pTex = new SPVRTPFXParserTexture();
+	pTex->Name				= CPVRTStringHash(targetName);
+	pTex->FileName			= CPVRTStringHash(targetName);
+	pTex->bRenderToTexture	= true;
+	pTex->nMin				= TexDesc.nMin;
+	pTex->nMag				= TexDesc.nMag;
+	pTex->nMIP				= TexDesc.nMIP;
+	pTex->nWrapS			= TexDesc.nWrapS;
+	pTex->nWrapT			= TexDesc.nWrapT;
+	pTex->nWrapR			= TexDesc.nWrapR;
+	pTex->uiWidth			= TexDesc.uiWidth;
+	pTex->uiHeight			= TexDesc.uiHeight;
+	pTex->uiFlags			= TexDesc.uiFlags;
+	m_psTexture.Append(pTex);
+
+	// Copy to render pass struct
+	unsigned int uiPassIdx = m_RenderPasses.Append();
+	m_RenderPasses[uiPassIdx].SemanticName		= targetName;
+	m_RenderPasses[uiPassIdx].eViewType			= eVIEW_NONE;
+	m_RenderPasses[uiPassIdx].eRenderPassType	= ePOSTPROCESS_PASS;			// Targets are always post-process passes.
+	m_RenderPasses[uiPassIdx].pTexture			= pTex;
+	m_RenderPasses[uiPassIdx].uiFormatFlags		= TexDesc.uiFlags;
+
+	return true;
+}
+
+/*!***************************************************************************
+ @Function			ParseTextures		** DEPRECATED **
  @Input				nStartLine		start line number
  @Input				nEndLine		end line number
  @Output			pReturnError	error string
@@ -1050,20 +1792,12 @@ bool CPVRTPFXParser::ParseHeader(int nStartLine, int nEndLine, CPVRTString * con
 *****************************************************************************/
 bool CPVRTPFXParser::ParseTextures(int nStartLine, int nEndLine, CPVRTString * const pReturnError)
 {
-	m_nNumTextures = 0;
 	char *pszName(NULL), *pszFile(NULL), *pszKeyword(NULL);
 	char *pszRemaining(NULL), *pszTemp(NULL);
 	bool bReturnVal(false);
 
 	for(int i = nStartLine+1; i < nEndLine; i++)
 	{
-		// Check there are available slots for textures
-		if(m_nNumTextures >= m_nMaxTextures)
-		{
-			*pReturnError = PVRTStringFromFormattedStr("Too many textures in [TEXTURES] on line %d\n", m_psContext->pnFileLineNumber[i]);
-			goto fail_release_return;
-		}
-
 		// Skip blank lines
 		if(!*m_psContext->ppszEffectFile[i])
 			continue;
@@ -1071,11 +1805,13 @@ bool CPVRTPFXParser::ParseTextures(int nStartLine, int nEndLine, CPVRTString * c
 		char *str = strtok (m_psContext->ppszEffectFile[i]," ");
 		if(str != NULL)
 		{
-			bool			bRenderToTexture(false);
-			unsigned int	nMin(0), nMag(0), nMIP(0);
-			unsigned int	nWrapS(0), nWrapT(0), nWrapR(0);
-			unsigned int	uiWidth(m_uiViewportWidth), uiHeight(m_uiViewportHeight);	// NOTE: Change/remove default values?
-			unsigned int	uiFlags(0);
+			// Set defaults
+			unsigned int	uiMin(eFilter_Default), uiMag(eFilter_Default), uiMip(eFilter_MipDefault);
+			unsigned int	uiWrapS(eWrap_Default), uiWrapT(eWrap_Default), uiWrapR(eWrap_Default);
+			unsigned int	uiFlags = 0;
+
+			unsigned int uiWidth	= CPVRTPFXParser::VIEWPORT_SIZE;
+			unsigned int uiHeight	= CPVRTPFXParser::VIEWPORT_SIZE;
 
 			// Reset variables
 			FREE(pszName)		pszName = NULL;
@@ -1091,11 +1827,13 @@ bool CPVRTPFXParser::ParseTextures(int nStartLine, int nEndLine, CPVRTString * c
 				goto fail_release_return;
 			}
 
-			if((strcmp(str, "RENDER") == 0) && m_nNumRenderPasses == m_nMaxRenders)
+#if 1
+			if((strcmp(str, "RENDER") == 0))
 			{
-				*pReturnError = PVRTStringFromFormattedStr("Maximum number of render passes has been exceeded on line %d: %s\n", m_psContext->pnFileLineNumber[i], m_psContext->ppszEffectFile[i]);
+				*pReturnError = PVRTStringFromFormattedStr("RENDER tag no longer supported in [TEXTURES] block. Use new [TARGET] block instead\n");
 				goto fail_release_return;
 			}
+#endif
 
 			pszKeyword = (char *)malloc( ((int)strlen(str)+1) * sizeof(char));
 			strcpy(pszKeyword, str);
@@ -1105,9 +1843,6 @@ bool CPVRTPFXParser::ParseTextures(int nStartLine, int nEndLine, CPVRTString * c
 			{
 				pszName = (char *)malloc( ((int)strlen(str)+1) * sizeof(char));
 				strcpy(pszName, str);
-				delete[]	m_psRenderPasses[m_nNumRenderPasses].pszSemanticName;	// Delete existing string
-				m_psRenderPasses[m_nNumRenderPasses].pszSemanticName = new char[strlen(str)+1];
-				strcpy(m_psRenderPasses[m_nNumRenderPasses].pszSemanticName, str);
 			}
 			else
 			{
@@ -1146,492 +1881,49 @@ bool CPVRTPFXParser::ParseTextures(int nStartLine, int nEndLine, CPVRTString * c
 					goto fail_release_return;
 				}
 			}
-			else if(strcmp(pszKeyword, "RENDER") == 0)
+
+			if(strcmp(pszKeyword, "FILE") == 0)
 			{
-				/*
-					TODO: When the parameters of the render texture have changed (such as format or resolution)
-					the previous texture should be destroyed and replaced with the updated one.
-					The texture ID may also need updating after this.
-				*/
-				// Use shader name instead of file name, as a file name doesn't exist
-				pszFile = (char *)malloc( ((int)strlen(pszName)+1) * sizeof(char));
-				strcpy(pszFile, pszName);
-				bRenderToTexture = true;
-
-				// Check for known keywords
-				if(strstr(pszRemaining, "CAMERA") != NULL)
+				// --- Filter flags
 				{
-					CPVRTString paramString(FindParameter(pszRemaining, "CAMERA", "="));
+					unsigned int* pFlags[3] =
+					{
+						&uiMin,
+						&uiMag,
+						&uiMip,
+					};
 
-					if(paramString.compare("") != 0)
-					{
-						if(!ProcessKeywordParam(paramString))
-						{
-							*pReturnError = PVRTStringFromFormattedStr("Unknown or incorrectly formatted parameter has been given after CAMERA in [TEXTURES] on line %d: %s\n", m_psContext->pnFileLineNumber[i], m_psContext->ppszEffectFile[i]);
-							goto fail_release_return;
-						}
-					}
-
-					uiWidth = m_uiViewportWidth;
-					uiHeight = m_uiViewportHeight;
-
-					m_psRenderPasses[m_nNumRenderPasses].eRenderPassType = eCameraRender;
-					m_psRenderPasses[m_nNumRenderPasses].eCameraPosition = eFromNode;
-				}
-//#endif /* POST_PROCESS_ENABLE */
-				else
-				{
-					// Default
-					*pReturnError = PVRTStringFromFormattedStr("An unknown render pass type was specified in [TEXTURES] on line %d: %s\n", m_psContext->pnFileLineNumber[i], m_psContext->ppszEffectFile[i]);
-					goto fail_release_return;
-				}
-				m_psRenderPasses[m_nNumRenderPasses].i32TextureNumber = m_nNumTextures;
-
-
-				// ----------------Texture format----------------//
-				// Find a FORMAT tag and isolate it's parameter string
-				CPVRTString formatParamString = FindParameter(pszRemaining, "FORMAT", "=");
-
-				// Check that a parameter string was found
-				if(formatParamString.compare("") != 0)
-				{
-					// NOTE: Add more formats as required
-					if(formatParamString.compare("RGBA_4444") == 0)
-					{
-						m_psRenderPasses[m_nNumRenderPasses].eFormat = OGL_RGBA_4444;
-					}
-					else if(formatParamString.compare("RGBA_5551") == 0)
-					{
-						m_psRenderPasses[m_nNumRenderPasses].eFormat = OGL_RGBA_5551;
-					}
-					else if(formatParamString.compare("RGBA_8888") == 0)
-					{
-						m_psRenderPasses[m_nNumRenderPasses].eFormat = OGL_RGBA_8888;
-					}
-					else if(formatParamString.compare("RGB_565") == 0)
-					{
-						m_psRenderPasses[m_nNumRenderPasses].eFormat = OGL_RGB_565;
-					}
-					else if(formatParamString.compare("RGB_555") == 0)
-					{
-						m_psRenderPasses[m_nNumRenderPasses].eFormat = OGL_RGB_555;
-					}
-					else if(formatParamString.compare("RGB_888") == 0)
-					{
-						m_psRenderPasses[m_nNumRenderPasses].eFormat = OGL_RGB_888;
-					}
-					else if(formatParamString.compare("I_8") == 0)
-					{
-						m_psRenderPasses[m_nNumRenderPasses].eFormat = OGL_I_8;
-					}
-					else if(formatParamString.compare("AI_88") == 0)
-					{
-						m_psRenderPasses[m_nNumRenderPasses].eFormat = OGL_AI_88;
-					}
-					else
-					{
-						*pReturnError = PVRTStringFromFormattedStr("Unrecognised texture format in [TEXTURES] on line %d\n", m_psContext->pnFileLineNumber[i]);
+					if(!ParseTextureFlags(pszRemaining, pFlags, 3, c_ppszFilters, eFilter_Size, pReturnError, i))
 						goto fail_release_return;
-					}
-					uiFlags &= m_psRenderPasses[m_nNumRenderPasses].eFormat;
 				}
 
-				// ----------------Texture resolution----------------//
-				// Search for the RES tag
-				CPVRTString resParamString = FindParameter(pszRemaining, "RES", "=");
-
-				// First, check for known keywords
-				if(resParamString.compare("") != 0)
+				// --- Wrap flags
 				{
-					if(strstr(resParamString.c_str(), "SCREENRES") != NULL)
+					unsigned int* pFlags[3] =
 					{
-						uiWidth = m_uiViewportWidth;
-						uiHeight = m_uiViewportHeight;
-					}
-					else if(strstr(resParamString.c_str(), "SRESPOTLSQ") != NULL)
-					{
-						int i32StringLength((int)strlen("SRESPOTLSQ"));
-						// String is larger than param name, so extra info is appended
-						if((int)resParamString.length() > i32StringLength)
-						{
-							// Get a pointer to the start of the exponent
-							char *aszExponent = &resParamString[i32StringLength];
+						&uiWrapS,
+						&uiWrapT,
+						&uiWrapR,
+					};
 
-							int i32Exponent = atoi(aszExponent);
-
-							uiWidth = GetPOTLower(m_uiViewportWidth, i32Exponent);
-							uiHeight = GetPOTLower(m_uiViewportHeight, i32Exponent);
-						}
-						else
-						{
-							// Set to next lowest POT res
-							uiWidth = GetPOTLower(m_uiViewportWidth, 0);
-							uiHeight = GetPOTLower(m_uiViewportHeight, 0);
-						}
-
-						/*
-							Make a square POT texture.
-							After calculating the POT of the width and height,
-							use the lowest value
-						*/
-						if(uiWidth > uiHeight)
-						{
-							uiWidth = uiHeight;
-						}
-						else
-						{
-							uiHeight = uiWidth;
-						}
-					}
-					else if(strstr(resParamString.c_str(), "SRESPOTHSQ") != NULL)
-					{
-						int i32StringLength((int)strlen("SRESPOTHSQ"));
-						// String is larger than param name, so extra info is appended
-						if((int)resParamString.length() > i32StringLength)
-						{
-							// Get a pointer to the start of the exponent
-							char *aszExponent = &resParamString[i32StringLength];
-
-							int i32Exponent = atoi(aszExponent);
-
-							uiWidth = GetPOTHigher(m_uiViewportWidth, i32Exponent);
-							uiHeight = GetPOTHigher(m_uiViewportHeight, i32Exponent);
-						}
-						else
-						{
-							// Set to next higher POT res
-							uiWidth = GetPOTHigher(m_uiViewportWidth, 0);
-							uiHeight = GetPOTHigher(m_uiViewportHeight, 0);
-						}
-						/*
-							Make a square POT texture.
-							After calculating the POT of the width and height,
-							use the lowest value
-						*/
-						if(uiWidth > uiHeight)
-						{
-							uiWidth = uiHeight;
-						}
-						else
-						{
-							uiHeight = uiWidth;
-						}
-					}
-					else if(strstr(resParamString.c_str(), "SRESPOTL") != NULL)
-					{
-						int i32StringLength((int)strlen("SRESPOTL"));
-						// String is larger than param name, so extra info is appended
-						if((int)resParamString.length() > i32StringLength)
-						{
-							// Get a pointer to the start of the exponent
-							char *aszExponent = &resParamString[i32StringLength];
-
-							int i32Exponent = atoi(aszExponent);
-
-							uiWidth = GetPOTLower(m_uiViewportWidth, i32Exponent);
-							uiHeight = GetPOTLower(m_uiViewportHeight, i32Exponent);
-						}
-						else
-						{
-							// Set to next lowest POT res
-							uiWidth = GetPOTLower(m_uiViewportWidth, 0);
-							uiHeight = GetPOTLower(m_uiViewportHeight, 0);
-						}
-					}
-					else if(strstr(resParamString.c_str(), "SRESPOTH") != NULL)
-					{
-						int i32StringLength((int)strlen("SRESPOTH"));
-						// String is larger than param name, so extra info is appended
-						if((int)resParamString.length() > i32StringLength)
-						{
-							// Get a pointer to the start of the exponent
-							char *aszExponent = &resParamString[i32StringLength];
-
-							int i32Exponent = atoi(aszExponent);
-
-							uiWidth = GetPOTHigher(m_uiViewportWidth, i32Exponent);
-							uiHeight = GetPOTHigher(m_uiViewportHeight, i32Exponent);
-						}
-						else
-						{
-							// Set to next higher POT res
-							uiWidth = GetPOTHigher(m_uiViewportWidth, 0);
-							uiHeight = GetPOTHigher(m_uiViewportHeight, 0);
-						}
-					}
-					else if(strstr(resParamString.c_str(), "SRESL") != NULL)
-					{
-						int i32StringLength((int)strlen("SRESL"));
-						int i32Divider(2);
-
-						// String is longer than param name, so divider has been provided
-						if((int)resParamString.length() > i32StringLength)
-						{
-							// Get a pointer to the start of the divider
-							char *aszDivider = &resParamString[i32StringLength];
-
-							i32Divider = atoi(aszDivider);
-
-							if(i32Divider <= 0)
-							{
-								*pReturnError = PVRTStringFromFormattedStr("Invalid divide value has been provided after SRESL in [TEXTURES] on line %d\n", m_psContext->pnFileLineNumber[i]);
-								goto fail_release_return;
-							}
-						}
-
-						uiWidth = m_uiViewportWidth / i32Divider;
-						uiHeight = m_uiViewportHeight / i32Divider;
-					}
-					else if(strstr(resParamString.c_str(), "SRESH") != NULL)
-					{
-						int i32StringLength((int)strlen("SRESH"));
-						int i32Multiplier(2);
-
-						// String is longer than param name, so divider has been provided
-						if((int)resParamString.length() > i32StringLength)
-						{
-							// Get a pointer to the start of the divider
-							char *aszMultiplier = &resParamString[i32StringLength];
-
-							i32Multiplier = atoi(aszMultiplier);
-
-							if(i32Multiplier <= 0)
-							{
-								*pReturnError = PVRTStringFromFormattedStr("Invalid multiply value has been provided after SRESH in [TEXTURES] on line %d\n", m_psContext->pnFileLineNumber[i]);
-								goto fail_release_return;
-							}
-						}
-
-						uiWidth = m_uiViewportWidth * i32Multiplier;
-						uiHeight = m_uiViewportHeight * i32Multiplier;
-					}
-					// Secondly, check for explicit resolutions
-					else if(strstr(resParamString.c_str(), "x") != NULL)
-					{
-						size_t spanToX(strcspn(resParamString.c_str(), "x"));
-						char *aszWidth = (char*) malloc((spanToX+1) * sizeof(char));
-						strncpy(aszWidth, resParamString.c_str(), spanToX);
-						int iWidth(atoi(aszWidth));
-						FREE(aszWidth);
-						int iHeight(atoi(&resParamString[++spanToX]));
-
-						if(iWidth <= 0 || iHeight <= 0)
-						{
-							*pReturnError = PVRTStringFromFormattedStr("Invalid explicit resolution specified in [TEXTURES] on line %d\n", m_psContext->pnFileLineNumber[i]);
-							goto fail_release_return;
-						}
-						else
-						{
-							uiWidth = (unsigned int)iWidth;
-							uiHeight = (unsigned int)iHeight;
-						}
-					}
-					else
-					{
-						*pReturnError = PVRTStringFromFormattedStr("Unrecognised resolution in [TEXTURES] on line %d\n", m_psContext->pnFileLineNumber[i]);
+					if(!ParseTextureFlags(pszRemaining, pFlags, 3, c_ppszWraps, eWrap_Size, pReturnError, i))
 						goto fail_release_return;
-					}
 				}
-			}
-
-			if((strcmp(pszKeyword, "RENDER") == 0) || strcmp(pszKeyword, "FILE") == 0)
-			{
-				// ----------------Texture filtering----------------//
-
-				/*
-					Search the remaining string for the first occurance of LINEAR & NEAREST.
-					Make sure the pointer points to the first filtering parameter
-				*/
-				char *pszLinear  = strstr(pszRemaining, "LINEAR-");
-				char *pszNearest = strstr(pszRemaining, "NEAREST-");
-				char *pszFilterParams(NULL);
-				bool bLinearFirst(false);
-
-				if(pszNearest || pszLinear)
-				{
-					if((pszLinear < pszNearest) || !pszNearest)
-					{
-						pszFilterParams = pszLinear;
-						bLinearFirst = true;
-					}
-					else
-					{
-						pszFilterParams = pszNearest;
-						bLinearFirst = false;
-					}
-				}
-
-				if(bLinearFirst)
-				{
-					// LINEAR was found. Set minification value accordingly
-					nMin = 1;
-				}
-				else
-				{
-					nMin = 0;	// Default to NEAREST
-
-					// Search for NEAREST to find the start of filtering flags
-					pszFilterParams = strstr(pszRemaining, "NEAREST-");
-				}
-
-				// Either LINEAR or NEAREST has been found in the remaining string
-				if(pszFilterParams)
-				{
-					// Move to the next param
-					pszFilterParams = strchr(pszFilterParams, '-');
-					if(pszFilterParams) pszFilterParams++;
-
-					if(pszFilterParams)
-					{
-						CPVRTString linearString("LINEAR-");
-						if(strncmp(pszFilterParams, linearString.c_str(), linearString.length()) == 0)
-						{
-							// LINEAR was found at the start of the string
-							nMag = 1;
-						}
-						else
-						{
-							nMag = 0;
-						}
-
-						// Move to the last param
-						pszFilterParams = strchr(pszFilterParams, '-');
-						if(pszFilterParams) pszFilterParams++;
-
-						if(pszFilterParams)
-						{
-							linearString = CPVRTString("LINEAR");
-							CPVRTString nearestString("NEAREST");
-							if(strncmp(pszFilterParams, linearString.c_str(), linearString.length()) == 0)
-							{
-								// LINEAR was found at the start of the string
-								nMIP = 2;
-							}
-							else if(strncmp(pszFilterParams, nearestString.c_str(), nearestString.length()) == 0)
-							{
-								nMIP = 1;
-							}
-							else
-							{
-								nMIP = 0;
-							}
-						}
-					}
-				}
-
-				// ----------------Wrap mode----------------//
-				nWrapS = 1;
-				nWrapT = 1;
-				nWrapR = 1;
-
-				/*
-					Search the remaining string for the first occurance of CLAMP & REPEAT.
-					Make sure the pointer points to the first wrap parameter
-				*/
-				char *pszClamp = strstr(pszRemaining, "CLAMP-");
-				char *pszRepeat = strstr(pszRemaining, "REPEAT-");
-				char *pszWrapParams(NULL);
-				bool bClampFirst(false);
-
-				if(pszClamp || pszRepeat)
-				{
-					if((pszClamp < pszRepeat) || !pszRepeat)
-					{
-						// CLAMP occurs first
-						pszWrapParams = pszClamp;
-						bClampFirst = true;
-					}
-					else
-					{
-						// REPEAT occurs first
-						pszWrapParams = pszRepeat;
-						bClampFirst = false;
-					}
-				}
-
-				if(bClampFirst)
-				{
-					// CLAMP was found. Set minification value accordingly
-					nWrapS = 0;
-				}
-				else
-				{
-					nWrapS = 1;	// Default to REPEAT
-
-					// Search for NEAREST to find the start of filtering flags
-					//pszWrapParams = strstr(pszRemaining, "REPEAT-");
-				}
-
-				if(pszWrapParams)
-				{
-					// Move to the next param
-					pszWrapParams = strchr(pszWrapParams, '-');
-					if(pszWrapParams) pszWrapParams++;
-
-					if(pszWrapParams)
-					{
-						CPVRTString clampString("CLAMP");
-						if(strncmp(pszWrapParams, clampString.c_str(), clampString.length()) == 0)
-						{
-							nWrapT = 0;
-						}
-						else
-						{
-							nWrapT = 1;	// Default to REPEAT
-						}
-
-						// Move to the last param
-						pszWrapParams = strchr(pszWrapParams, '-');
-						if(pszWrapParams) pszWrapParams++;
-
-						if(pszWrapParams)
-						{
-							if(strncmp(pszWrapParams, clampString.c_str(), clampString.length()) == 0)
-							{
-								nWrapR = 0;
-							}
-							else
-							{
-								nWrapR = 1;	// Default to REPEAT
-							}
-						}
-					}
-				}
-
-				FREE(m_psTexture[m_nNumTextures].pszName);
-				m_psTexture[m_nNumTextures].pszName = (char *)malloc( ((int)strlen(pszName)+1) * sizeof(char));
-				strcpy(m_psTexture[m_nNumTextures].pszName, pszName);
-				FREE(pszName);
-
-				FREE(m_psTexture[m_nNumTextures].pszFile);
-				m_psTexture[m_nNumTextures].pszFile = (char *)malloc( ((int)strlen(pszFile)+1) * sizeof(char));
-				strcpy(m_psTexture[m_nNumTextures].pszFile, pszFile);
-				FREE(pszFile);
-
-				m_psTexture[m_nNumTextures].bRenderToTexture	= bRenderToTexture;
-				m_psTexture[m_nNumTextures].nMin				= nMin;
-				m_psTexture[m_nNumTextures].nMag				= nMag;
-				m_psTexture[m_nNumTextures].nMIP				= nMIP;
-				m_psTexture[m_nNumTextures].nWrapS				= nWrapS;
-				m_psTexture[m_nNumTextures].nWrapT				= nWrapT;
-				m_psTexture[m_nNumTextures].nWrapR				= nWrapR;
-				m_psTexture[m_nNumTextures].uiWidth				= uiWidth;
-				m_psTexture[m_nNumTextures].uiHeight			= uiHeight;
-				m_psTexture[m_nNumTextures].uiFlags				= uiFlags;
-				++m_nNumTextures;
-
-				if(strcmp(pszKeyword, "RENDER") == 0)
-				{
-					if(m_nNumRenderPasses < m_nMaxRenders)
-					{
-						m_nNumRenderPasses++;
-					}
-					else
-					{
-						*pReturnError = PVRTStringFromFormattedStr("Max number of render passes has been reached in [TEXTURES] on line %d: %s\n", m_psContext->pnFileLineNumber[i], m_psContext->ppszEffectFile[i]);
-						goto fail_release_return;
-					}
-				}
+	
+				SPVRTPFXParserTexture* pTex = new SPVRTPFXParserTexture();
+				pTex->Name				= CPVRTStringHash(pszName);
+				pTex->FileName			= CPVRTStringHash(pszFile);
+				pTex->bRenderToTexture	= false;
+				pTex->nMin				= uiMin;
+				pTex->nMag				= uiMag;
+				pTex->nMIP				= uiMip;
+				pTex->nWrapS			= uiWrapS;
+				pTex->nWrapT			= uiWrapT;
+				pTex->nWrapR			= uiWrapR;
+				pTex->uiWidth			= uiWidth;
+				pTex->uiHeight			= uiHeight;
+				pTex->uiFlags			= uiFlags;
+				m_psTexture.Append(pTex);
 			}
 			else
 			{
@@ -1643,9 +1935,9 @@ bool CPVRTPFXParser::ParseTextures(int nStartLine, int nEndLine, CPVRTString * c
 		{
 			*pReturnError = PVRTStringFromFormattedStr("Missing arguments in [TEXTURES] on line %d: %s\n", m_psContext->pnFileLineNumber[i],  m_psContext->ppszEffectFile[i]);
 			goto fail_release_return;
-			//return false;
 		}
 	}
+
 	/*
 		Should only reach here if there have been no issues
 	*/
@@ -1663,6 +1955,96 @@ release_return:
 }
 
 /*!***************************************************************************
+@Function		ParseTextureFlags
+@Input			c_pszCursor
+@Output			pFlagsOut
+@Input			uiNumFlags
+@Input			ppszFlagNames
+@Input			uiNumFlagNames
+@Input			pReturnError
+@Input			iLineNum
+@Return			bool	
+@Description	Parses the texture flag sections.
+*****************************************************************************/
+bool CPVRTPFXParser::ParseTextureFlags(	const char* c_pszRemainingLine, unsigned int** ppFlagsOut, unsigned int uiNumFlags, const char** c_ppszFlagNames, unsigned int uiNumFlagNames, 
+										CPVRTString * const pReturnError, int iLineNum)
+{
+	const unsigned int INVALID_TYPE = 0xAC1DBEEF;
+	unsigned int uiIndex;
+	const char* c_pszCursor;
+	const char* c_pszResult;
+
+	// --- Find the first flag
+	uiIndex = 0;
+	c_pszCursor = strstr(c_pszRemainingLine, c_ppszFlagNames[uiIndex++]);
+	while(uiIndex < uiNumFlagNames)
+	{
+		c_pszResult = strstr(c_pszRemainingLine, c_ppszFlagNames[uiIndex++]);
+		if(((c_pszResult < c_pszCursor) || !c_pszCursor) && c_pszResult)
+			c_pszCursor = c_pszResult;
+	}
+
+	if(!c_pszCursor)
+		return true;		// No error, but just return as no flags specified.
+
+	// Quick error check - make sure that the first flag found is valid.
+	if(c_pszCursor != c_pszRemainingLine)
+	{
+		if(*(c_pszCursor-1) == '-')		// Yeah this shouldn't be there. Must be invalid first tag.
+		{
+			char szBuffer[128];		// Find out the tag.
+			memset(szBuffer, 0, sizeof(szBuffer));
+			const char* pszStart = c_pszCursor-1;
+			while(pszStart != c_pszRemainingLine && *pszStart != ' ')		pszStart--;
+			pszStart++;	// Escape the space.
+			unsigned int uiNumChars = (unsigned int) ((c_pszCursor-1) - pszStart);
+			strncpy(szBuffer, pszStart, uiNumChars);
+
+			*pReturnError = PVRTStringFromFormattedStr("Unknown keyword '%s' in [TEXTURES] on line %d: %s\n", szBuffer, m_psContext->pnFileLineNumber[iLineNum], m_psContext->ppszEffectFile[iLineNum]);
+			return false;
+		}
+	}
+
+	unsigned int uiFlagsFound = 0;
+	unsigned int uiBufferIdx;
+	char szBuffer[128];		// Buffer to hold the token
+
+	while(*c_pszCursor != ' ' && *c_pszCursor != 0 && uiFlagsFound < uiNumFlags)
+	{
+		memset(szBuffer, 0, sizeof(szBuffer));		// Clear the buffer
+		uiBufferIdx = 0;
+
+		while(*c_pszCursor != '-' && *c_pszCursor != 0 && *c_pszCursor != ' ' && uiBufferIdx < 128)		// - = delim. token
+			szBuffer[uiBufferIdx++] = *c_pszCursor++;
+
+		// Check if the buffer content is a valid flag name.
+		unsigned int Type = INVALID_TYPE;
+		for(unsigned int uiIndex = 0; uiIndex < uiNumFlagNames; ++uiIndex)
+		{
+			if(strcmp(szBuffer, c_ppszFlagNames[uiIndex]) == 0)	
+			{
+				Type = uiIndex;			// Yup, it's valid. uiIndex here would translate to one of the enums that matches the string array of flag names passed in.
+				break;
+			}
+		}
+
+		// Tell the user it's invalid.
+		if(Type == INVALID_TYPE)
+		{
+			*pReturnError = PVRTStringFromFormattedStr("Unknown keyword '%s' in [TEXTURES] on line %d: %s\n", szBuffer, m_psContext->pnFileLineNumber[iLineNum], m_psContext->ppszEffectFile[iLineNum]);
+			return false;
+		}
+
+		// Set the flag to the enum type.
+		*ppFlagsOut[uiFlagsFound++] = Type;
+
+		if(*c_pszCursor == '-')	c_pszCursor++;
+	}
+
+	return true;
+}
+
+/*!***************************************************************************
  @Function			ParseShader
  @Input				nStartLine		start line number
  @Input				nEndLine		end line number
@@ -1675,9 +2057,27 @@ release_return:
 *****************************************************************************/
 bool CPVRTPFXParser::ParseShader(int nStartLine, int nEndLine, CPVRTString * const pReturnError, SPVRTPFXParserShader &shader, const char * const pszBlockName)
 {
+	enum eCmd
+	{
+		eCmds_GLSLCode,
+		eCmds_Name,
+		eCmds_File,
+		eCmds_BinaryFile,
+
+		eCmds_Size,
+	};
+
+	const CPVRTHash ShaderCommands[] = 
+	{
+		"[GLSL_CODE]",
+		"NAME",
+		"FILE",
+		"BINARYFILE",
+	};
+	PVRTCOMPILEASSERT(ShaderCommands, sizeof(ShaderCommands) / sizeof(ShaderCommands[0]) == eCmds_Size);
+
 	bool glslcode=0, glslfile=0, bName=0;
 
-	shader.pszName			= NULL;
 	shader.bUseFileName		= false;
 	shader.pszGLSLfile		= NULL;
 	shader.pszGLSLcode		= NULL;
@@ -1694,8 +2094,10 @@ bool CPVRTPFXParser::ParseShader(int nStartLine, int nEndLine, CPVRTString * con
 		char *str = strtok (m_psContext->ppszEffectFile[i]," ");
 		if(str != NULL)
 		{
+			CPVRTHash Cmd(str);
+
 			// Check for [GLSL_CODE] tags first and remove those lines from loop.
-			if(strcmp(str, "[GLSL_CODE]") == 0)
+			if(Cmd == ShaderCommands[eCmds_GLSLCode])
 			{
 				if(glslcode)
 				{
@@ -1713,8 +2115,9 @@ bool CPVRTPFXParser::ParseShader(int nStartLine, int nEndLine, CPVRTString * con
 				// Skip the block-start
 				i++;
 
+				CPVRTString GLSLCode;
 				if(!ConcatenateLinesUntil(
-					shader.pszGLSLcode,
+					GLSLCode,
 					i,
 					m_psContext->ppszEffectFile,
 					m_psContext->nNumLines,
@@ -1723,10 +2126,13 @@ bool CPVRTPFXParser::ParseShader(int nStartLine, int nEndLine, CPVRTString * con
 					return false;
 				}
 
+				shader.pszGLSLcode = (char*)malloc((GLSLCode.size()+1) * sizeof(char));
+				strcpy(shader.pszGLSLcode, GLSLCode.c_str());
+
 				shader.bUseFileName = false;
 				glslcode = 1;
 			}
-			else if(strcmp(str, "NAME") == 0)
+			else if(Cmd == ShaderCommands[eCmds_Name])
 			{
 				if(bName)
 				{
@@ -1734,18 +2140,18 @@ bool CPVRTPFXParser::ParseShader(int nStartLine, int nEndLine, CPVRTString * con
 					return false;
 				}
 
-				str = strtok (NULL, " ");
+				str = ReadEOLToken(NULL);
+
 				if(str == NULL)
 				{
 					*pReturnError = PVRTStringFromFormattedStr("NAME missing value in [%s] on line %d\n", pszBlockName, m_psContext->pnFileLineNumber[i]);
 					return false;
 				}
 
-				shader.pszName = (char*)malloc((strlen(str)+1) * sizeof(char));
-				strcpy(shader.pszName, str);
+				shader.Name.assign(str);
 				bName = true;
 			}
-			else if(strcmp(str, "FILE") == 0)
+			else if(Cmd == ShaderCommands[eCmds_File])
 			{
 				if(glslfile)
 				{
@@ -1758,7 +2164,8 @@ bool CPVRTPFXParser::ParseShader(int nStartLine, int nEndLine, CPVRTString * con
 					return false;
 				}
 
-				str = strtok (NULL, " ");
+				str = ReadEOLToken(NULL);
+
 				if(str == NULL)
 				{
 					*pReturnError = PVRTStringFromFormattedStr("FILE missing value in [%s] on line %d\n", pszBlockName, m_psContext->pnFileLineNumber[i]);
@@ -1776,14 +2183,18 @@ bool CPVRTPFXParser::ParseShader(int nStartLine, int nEndLine, CPVRTString * con
 					return false;
 				}
 				shader.pszGLSLcode = new char[GLSLFile.Size() + 1];
-				strcpy(shader.pszGLSLcode, GLSLFile.StringPtr());
+				memcpy(shader.pszGLSLcode, (const char*) GLSLFile.DataPtr(), GLSLFile.Size());
+				shader.pszGLSLcode[GLSLFile.Size()] = '\0';
+
+				shader.nFirstLineNumber = m_psContext->pnFileLineNumber[i];		// Mark position where GLSL file is defined.
 
 				shader.bUseFileName = true;
 				glslfile = 1;
 			}
-			else if(strcmp(str, "BINARYFILE") == 0)
+			else if(Cmd == ShaderCommands[eCmds_BinaryFile])
 			{
-				str = strtok (NULL, " ");
+				str = ReadEOLToken(NULL);
+
 				if(str == NULL)
 				{
 					*pReturnError = PVRTStringFromFormattedStr("BINARYFILE missing value in [%s] on line %d\n", pszBlockName, m_psContext->pnFileLineNumber[i]);
@@ -1800,9 +2211,9 @@ bool CPVRTPFXParser::ParseShader(int nStartLine, int nEndLine, CPVRTString * con
 					*pReturnError = PVRTStringFromFormattedStr("Error loading file '%s' in [%s] on line %d\n", str, pszBlockName, m_psContext->pnFileLineNumber[i]);
 					return false;
 				}
-				shader.pbGLSLBinary = new char[GLSLFile.Size() + 1];
+				shader.pbGLSLBinary = new char[GLSLFile.Size()];
 				shader.nGLSLBinarySize = (unsigned int)GLSLFile.Size();
-				memcpy(shader.pbGLSLBinary, GLSLFile.StringPtr(), GLSLFile.Size());
+				memcpy(shader.pbGLSLBinary, GLSLFile.DataPtr(), GLSLFile.Size());
 
 				shader.bUseFileName = true;
 				glslfile = 1;
@@ -1988,26 +2399,36 @@ bool CPVRTPFXParser::ParseSemantic(SPVRTPFXParserSemantic &semantic, const int n
 *****************************************************************************/
 bool CPVRTPFXParser::ParseEffect(SPVRTPFXParserEffect &effect, const int nStartLine, const int nEndLine, CPVRTString * const pReturnError)
 {
+	enum eCmds
+	{
+		eCmds_Annotation,
+		eCmds_VertexShader,
+		eCmds_FragmentShader,
+		eCmds_Texture,
+		eCmds_Uniform,
+		eCmds_Attribute,
+		eCmds_Name,
+		eCmds_Target,
+
+		eCmds_Size,
+	};
+
+	const CPVRTHash EffectCommands[] = 
+	{
+		"[ANNOTATION]",
+		"VERTEXSHADER",
+		"FRAGMENTSHADER",
+		"TEXTURE",
+		"UNIFORM",
+		"ATTRIBUTE",
+		"NAME",
+		"TARGET",
+	};
+	PVRTCOMPILEASSERT(EffectCommands, sizeof(EffectCommands) / sizeof(EffectCommands[0]) == eCmds_Size);
+
 	bool bName = false;
 	bool bVertShader = false;
 	bool bFragShader = false;
-
-	effect.pszName					= NULL;
-	effect.pszAnnotation			= NULL;
-	effect.pszVertexShaderName		= NULL;
-	effect.pszFragmentShaderName	= NULL;
-
-	effect.nMaxTextures				= 100;
-	effect.nNumTextures				= 0;
-	effect.psTextures				= new SPVRTPFXParserEffectTexture[effect.nMaxTextures];
-
-	effect.nMaxUniforms				= 100;
-	effect.nNumUniforms				= 0;
-	effect.psUniform				= new SPVRTPFXParserSemantic[effect.nMaxUniforms];
-
-	effect.nMaxAttributes			= 100;
-	effect.nNumAttributes			= 0;
-	effect.psAttribute				= new SPVRTPFXParserSemantic[effect.nMaxAttributes];
 
 	for(int i = nStartLine+1; i < nEndLine; i++)
 	{
@@ -2018,9 +2439,11 @@ bool CPVRTPFXParser::ParseEffect(SPVRTPFXParserEffect &effect, const int nStartL
 		char *str = strtok (m_psContext->ppszEffectFile[i]," ");
 		if(str != NULL)
 		{
-			if(strcmp(str, "[ANNOTATION]") == 0)
+			CPVRTHash Cmd(str);
+
+			if(Cmd == EffectCommands[eCmds_Annotation])
 			{
-				if(effect.pszAnnotation)
+				if(!effect.Annotation.empty())
 				{
 					*pReturnError = PVRTStringFromFormattedStr("ANNOTATION redefined in [EFFECT] on line %d: \n", m_psContext->pnFileLineNumber[i]);
 					return false;
@@ -2028,7 +2451,7 @@ bool CPVRTPFXParser::ParseEffect(SPVRTPFXParserEffect &effect, const int nStartL
 
 				i++;		// Skip the block-start
 				if(!ConcatenateLinesUntil(
-					effect.pszAnnotation,
+					effect.Annotation,
 					i,
 					m_psContext->ppszEffectFile,
 					m_psContext->nNumLines,
@@ -2037,7 +2460,7 @@ bool CPVRTPFXParser::ParseEffect(SPVRTPFXParserEffect &effect, const int nStartL
 					return false;
 				}
 			}
-			else if(strcmp(str, "VERTEXSHADER") == 0)
+			else if(Cmd == EffectCommands[eCmds_VertexShader])
 			{
 				if(bVertShader)
 				{
@@ -2045,18 +2468,18 @@ bool CPVRTPFXParser::ParseEffect(SPVRTPFXParserEffect &effect, const int nStartL
 					return false;
 				}
 
-				str = strtok(NULL, " ");
+				str = ReadEOLToken(NULL);
+
 				if(str == NULL)
 				{
 					*pReturnError = PVRTStringFromFormattedStr("VERTEXSHADER missing value in [EFFECT] on line %d\n", m_psContext->pnFileLineNumber[i]);
 					return false;
 				}
-				effect.pszVertexShaderName = (char*)malloc((strlen(str)+1) * sizeof(char));
-				strcpy(effect.pszVertexShaderName, str);
+				effect.VertexShaderName.assign(str);
 
 				bVertShader = true;
 			}
-			else if(strcmp(str, "FRAGMENTSHADER") == 0)
+			else if(Cmd == EffectCommands[eCmds_FragmentShader])
 			{
 				if(bFragShader)
 				{
@@ -2064,81 +2487,56 @@ bool CPVRTPFXParser::ParseEffect(SPVRTPFXParserEffect &effect, const int nStartL
 					return false;
 				}
 
-				str = strtok(NULL, " ");
+				str = ReadEOLToken(NULL);
+
 				if(str == NULL)
 				{
 					*pReturnError = PVRTStringFromFormattedStr("FRAGMENTSHADER missing value in [EFFECT] on line %d\n", m_psContext->pnFileLineNumber[i]);
 					return false;
 				}
-				effect.pszFragmentShaderName = (char*)malloc((strlen(str)+1) * sizeof(char));
-				strcpy(effect.pszFragmentShaderName, str);
+				effect.FragmentShaderName.assign(str);
 
 				bFragShader = true;
 			}
-			else if(strcmp(str, "TEXTURE") == 0)
+			else if(Cmd == EffectCommands[eCmds_Texture])
 			{
-				if(effect.nNumTextures < effect.nMaxTextures)
+				unsigned int uiTexIdx = effect.Textures.Append();
+				// texture number
+				str = strtok(NULL, " ");
+				if(str != NULL)
+					effect.Textures[uiTexIdx].nNumber = atoi(str);
+				else
 				{
-					// texture number
-					str = strtok(NULL, " ");
-					if(str != NULL)
-						effect.psTextures[effect.nNumTextures].nNumber = atoi(str);
-					else
-					{
-						*pReturnError = PVRTStringFromFormattedStr("TEXTURE missing value in [EFFECT] on line %d\n", m_psContext->pnFileLineNumber[i]);
-						return false;
-					}
+					*pReturnError = PVRTStringFromFormattedStr("TEXTURE missing value in [EFFECT] on line %d\n", m_psContext->pnFileLineNumber[i]);
+					return false;
+				}
 
-					// texture name
-					str = strtok(NULL, " ");
-					if(str != NULL)
-					{
-						effect.psTextures[effect.nNumTextures].pszName = (char*)malloc(strlen(str) + 1);
-						strcpy(effect.psTextures[effect.nNumTextures].pszName, str);
-					}
-					else
-					{
-						*pReturnError = PVRTStringFromFormattedStr("TEXTURE missing value in [EFFECT] on line %d\n", m_psContext->pnFileLineNumber[i]);
-						return false;
-					}
+				// texture name
+				str = strtok(NULL, " ");
+				if(str != NULL)
+				{
+					effect.Textures[uiTexIdx].Name = CPVRTStringHash(str);
+				}
+				else
+				{
+					*pReturnError = PVRTStringFromFormattedStr("TEXTURE missing value in [EFFECT] on line %d\n", m_psContext->pnFileLineNumber[i]);
+					return false;
+				}
+			}
+			else if(Cmd == EffectCommands[eCmds_Uniform])
+			{
+				unsigned int uiUniformIdx = effect.Uniforms.Append();
+				if(!ParseSemantic(effect.Uniforms[uiUniformIdx], i, pReturnError))
+					return false;
 
-					++effect.nNumTextures;
-				}
-				else
-				{
-					*pReturnError = PVRTStringFromFormattedStr("Too many textures in [EFFECT] on line %d\n", m_psContext->pnFileLineNumber[i]);
-					return false;
-				}
 			}
-			else if(strcmp(str, "UNIFORM") == 0)
+			else if(Cmd == EffectCommands[eCmds_Attribute])
 			{
-				if(effect.nNumUniforms < effect.nMaxUniforms)
-				{
-					if(!ParseSemantic(effect.psUniform[effect.nNumUniforms], i, pReturnError))
-						return false;
-					effect.nNumUniforms++;
-				}
-				else
-				{
-					*pReturnError = PVRTStringFromFormattedStr("Too many uniforms in [EFFECT] on line %d\n", m_psContext->pnFileLineNumber[i]);
+				unsigned int uiAttribIdx = effect.Attributes.Append();
+				if(!ParseSemantic(effect.Attributes[uiAttribIdx], i, pReturnError))
 					return false;
-				}
 			}
-			else if(strcmp(str, "ATTRIBUTE") == 0)
-			{
-				if(effect.nNumAttributes < effect.nMaxAttributes)
-				{
-					if(!ParseSemantic(effect.psAttribute[effect.nNumAttributes], i, pReturnError))
-						return false;
-					effect.nNumAttributes++;
-				}
-				else
-				{
-					*pReturnError = PVRTStringFromFormattedStr("Too many attributes in [EFFECT] on line %d\n", m_psContext->pnFileLineNumber[i]);
-					return false;
-				}
-			}
-			else if(strcmp(str, "NAME") == 0)
+			else if(Cmd == EffectCommands[eCmds_Name])
 			{
 				if(bName)
 				{
@@ -2153,9 +2551,27 @@ bool CPVRTPFXParser::ParseEffect(SPVRTPFXParserEffect &effect, const int nStartL
 					return false;
 				}
 
-				effect.pszName = (char *)malloc((strlen(str)+1) * sizeof(char));
-				strcpy(effect.pszName, str);
+				effect.Name.assign(str);
 				bName = true;
+			}
+			else if(Cmd == EffectCommands[eCmds_Target])
+			{
+				unsigned int uiIndex = effect.Targets.Append();
+
+				// Target requires 2 components
+				CPVRTString* pVals[] = { &effect.Targets[uiIndex].BufferType, &effect.Targets[uiIndex].TargetName };
+
+				for(unsigned int uiVal = 0; uiVal < 2; ++uiVal)
+				{
+					str = strtok (NULL, " ");
+					if(str == NULL)
+					{
+						*pReturnError = PVRTStringFromFormattedStr("TARGET missing value(s) in [EFFECT] on line %d\n", m_psContext->pnFileLineNumber[nStartLine]);
+						return false;
+					}
+					
+					*(pVals[uiVal]) = str;
+				}
 			}
 			else
 			{
@@ -2168,8 +2584,32 @@ bool CPVRTPFXParser::ParseEffect(SPVRTPFXParserEffect &effect, const int nStartL
 			*pReturnError = PVRTStringFromFormattedStr( "Missing arguments in [EFFECT] on line %d: %s\n", m_psContext->pnFileLineNumber[i], m_psContext->ppszEffectFile[i]);
 			return false;
 		}
-
 	}
+
+	// Check that every TEXTURE has a matching UNIFORM
+	for(unsigned int uiTex = 0; uiTex < effect.Textures.GetSize(); ++uiTex)
+	{
+		unsigned int uiTexUnit			= effect.Textures[uiTex].nNumber;
+		const CPVRTStringHash& texName  = effect.Textures[uiTex].Name;
+		// Find UNIFORM associated with the TexUnit (e.g TEXTURE0).
+		bool bFound = false;
+		for(unsigned int uiUniform = 0; uiUniform < effect.Uniforms.GetSize(); ++uiUniform)
+		{
+			const SPVRTPFXParserSemantic& Sem = effect.Uniforms[uiUniform];
+			if(strcmp(Sem.pszValue, "TEXTURE") == 0 && Sem.nIdx == uiTexUnit)
+			{
+				bFound = true;
+				break;
+			}
+		}
+
+		if(!bFound)
+		{
+			*pReturnError = PVRTStringFromFormattedStr("TEXTURE %s missing matching UNIFORM in [EFFECT] on line %d\n", texName.c_str(), m_psContext->pnFileLineNumber[nStartLine]);
+			return false;
+		}
+	}
+
 
 	if(!bName)
 	{
@@ -2191,73 +2631,312 @@ bool CPVRTPFXParser::ParseEffect(SPVRTPFXParserEffect &effect, const int nStartL
 }
 
 /*!***************************************************************************
-@Function			DebugDump
-@Return				string A string containing debug information for the user
-					to handle
-@Description		Debug output.
+ @Function			DetermineRenderPassDependencies
+ @Return			True if dependency tree is valid. False if there are errors
+					in the dependency tree (e.g. recursion)
+ @Description		Looks through all of the effects in the .pfx and determines
+					the order of render passes that have been declared with
+					the RENDER tag (found in [TEXTURES]
 *****************************************************************************/
-CPVRTString CPVRTPFXParser::DebugDump() const
+bool CPVRTPFXParser::DetermineRenderPassDependencies(CPVRTString * const pReturnError)
 {
-	unsigned int i;
-	CPVRTString debug;
+	unsigned int	ui(0), uj(0), uk(0);
 
-	debug += CPVRTString("[HEADER]\n");
-	debug += PVRTStringFromFormattedStr("VERSION		%s\n", m_sHeader.pszVersion);
-	debug += PVRTStringFromFormattedStr("DESCRIPTION		%s\n", m_sHeader.pszDescription);
-	debug += PVRTStringFromFormattedStr("COPYRIGHT		%s\n", m_sHeader.pszCopyright);
-	debug += CPVRTString("[/HEADER]\n\n");
+	if(m_RenderPasses.GetSize() == 0)
+		return true;
 
-	debug += CPVRTString("[TEXTURES]\n");
-	for(i = 0; i < m_nNumTextures; ++i)
+	// --- Add all render pass nodes to the skip graph.
+	for(ui = 0; ui < m_RenderPasses.GetSize(); ++ui)
 	{
-		debug += PVRTStringFromFormattedStr("FILE		%s		%s\n", m_psTexture[i].pszName, m_psTexture[i].pszFile);
-	}
-	debug += CPVRTString("[/TEXTURES]\n\n");
+		SPVRTPFXRenderPass& Pass = m_RenderPasses[ui];
+		bool bFound = false;
 
-	debug += CPVRTString("[VERTEXSHADER]\n");
-	debug += PVRTStringFromFormattedStr("NAME		%s\n",	m_psVertexShader[0].pszName);
-	debug += PVRTStringFromFormattedStr("GLSLFILE		%s\n",	m_psVertexShader[0].pszGLSLfile);
-	debug += CPVRTString("[GLSL_CODE]\n");
-	debug += PVRTStringFromFormattedStr("%s", m_psVertexShader[0].pszGLSLcode);
-	debug += CPVRTString("[/GLSL_CODE]\n");
-	debug += CPVRTString("[/VERTEXSHADER]\n\n");
-
-	debug += CPVRTString("[FRAGMENTSHADER]\n");
-	debug += PVRTStringFromFormattedStr("NAME		%s\n",	m_psFragmentShader[0].pszName);
-	debug += PVRTStringFromFormattedStr("GLSLFILE		%s\n",	m_psFragmentShader[0].pszGLSLfile);
-	debug += CPVRTString("[GLSL_CODE]\n");
-	debug += PVRTStringFromFormattedStr("%s", m_psFragmentShader[0].pszGLSLcode);
-	debug += CPVRTString("[/GLSL_CODE]\n");
-	debug += CPVRTString("[/FRAGMENTSHADER]\n\n");
-
-	for(unsigned int nEffect = 0; nEffect < m_nNumEffects; ++nEffect)
-	{
-		debug += CPVRTString("[EFFECT]\n");
-
-		debug += PVRTStringFromFormattedStr("NAME		%s\n",	m_psEffect[nEffect].pszName);
-		debug += PVRTStringFromFormattedStr("[ANNOTATION]\n%s[/ANNOTATION]\n",	m_psEffect[nEffect].pszAnnotation);
-		debug += PVRTStringFromFormattedStr("FRAGMENTSHADER		%s\n",	m_psEffect[nEffect].pszFragmentShaderName);
-		debug += PVRTStringFromFormattedStr("VERTEXSHADER		%s\n",	m_psEffect[nEffect].pszVertexShaderName);
-
-		for(i=0; i<m_psEffect[nEffect].nNumTextures; i++)
+		// Search all EFFECT blocks for matching TARGET. This is for post-processes behavior.
+		for(unsigned int uiEffect = 0; uiEffect < m_psEffect.GetSize(); ++uiEffect)
 		{
-			debug += PVRTStringFromFormattedStr("TEXTURE		%d		%s\n", m_psEffect[nEffect].psTextures[i].nNumber, m_psEffect[nEffect].psTextures[i].pszName);
+			SPVRTPFXParserEffect& Effect = m_psEffect[uiEffect];
+
+			// Search all TARGETs in this effect
+			for(unsigned int uiTargets = 0; uiTargets < Effect.Targets.GetSize(); ++uiTargets)
+			{
+				const SPVRTTargetPair& Target = Effect.Targets[uiTargets];
+				if(Target.TargetName == Pass.SemanticName)
+				{
+					// Match. This EFFECT block matches the pass name.
+					Pass.pEffect = &Effect;
+					bFound = true;
+
+					// This is now a post-process pass. Set relevant values.
+					Pass.eRenderPassType = ePOSTPROCESS_PASS;
+					m_aszPostProcessNames.Append(Pass.SemanticName);
+
+					// Check that the surface type and output match are relevant (i.e DEPTH != RGBA8888).
+					if( (Target.BufferType.find_first_of("DEPTH") != CPVRTString::npos && !(Pass.uiFormatFlags & PVRPFXTEX_DEPTH))
+					||	(Target.BufferType.find_first_of("COLOR") != CPVRTString::npos && !(Pass.uiFormatFlags & PVRPFXTEX_COLOUR)) )
+					{
+						*pReturnError = PVRTStringFromFormattedStr("Surface type mismatch in [EFFECT]. \"%s\" has different type than \"%s\"\n", Target.TargetName.c_str(), Pass.SemanticName.c_str());
+						return false;
+					}
+					
+					break;
+				}
+			}
+
+			if(bFound)
+				break;
 		}
 
-		for(i=0; i<m_psEffect[nEffect].nNumUniforms; i++)
-		{
-			debug += PVRTStringFromFormattedStr("UNIFORM		%s		%s%d\n", m_psEffect[nEffect].psUniform[i].pszName, m_psEffect[nEffect].psUniform[i].pszValue, m_psEffect[nEffect].psUniform[i].nIdx);
-		}
-
-		for(i=0; i<m_psEffect[nEffect].nNumAttributes; i++)
-		{
-			debug += PVRTStringFromFormattedStr("ATTRIBUTE		%s		%s%d\n", m_psEffect[nEffect].psAttribute[i].pszName, m_psEffect[nEffect].psAttribute[i].pszValue, m_psEffect[nEffect].psAttribute[i].nIdx);
-		}
-
-		debug += CPVRTString("[/EFFECT]\n\n");
+		// Add a pointer to the post process
+		m_renderPassSkipGraph.AddNode(&Pass);
 	}
 
-	return debug;
+
+	// --- Loop through all created render passes in the skip graph and determine their dependencies
+	for(ui = 0; ui < m_renderPassSkipGraph.GetNumNodes(); ++ui)
+	{
+		//	Loop through all other nodes in the skip graph 
+		SPVRTPFXRenderPass* pPass			= m_renderPassSkipGraph[ui];
+		SPVRTPFXRenderPass* pTestPass       = NULL;
+
+		for(uj = 0; uj < m_RenderPasses.GetSize(); ++uj)
+		{
+			pTestPass = m_renderPassSkipGraph[uj];
+				
+			// No self compare
+			if(pPass == pTestPass)
+				continue;
+
+			// No effect associated.
+			if(!pPass->pEffect)			
+				continue;
+
+			// Is the node a render pass I rely on?
+			for(uk = 0; uk < pPass->pEffect->Textures.GetSize(); ++uk)
+			{
+				/*
+					If the texture names match, add a new node
+				*/
+				if(pTestPass->pTexture->Name == pPass->pEffect->Textures[uk].Name)
+				{
+					m_renderPassSkipGraph.AddNodeDependency(pPass, pTestPass);
+					break;
+				}
+			}
+		}
+	}
+	
+	return true;
+}
+
+/*!***************************************************************************
+@Function		FindTextureIndex
+@Input			TextureName
+@Return			unsigned int	Index in to the effect.Texture array.
+@Description	Returns the index in to the texture array within the effect 
+				block where the given texture resides.
+*****************************************************************************/
+unsigned int CPVRTPFXParser::FindTextureIndex( const CPVRTStringHash& TextureName, unsigned int uiEffect ) const
+{
+	for(unsigned int uiIndex = 0; uiIndex < m_psEffect[uiEffect].Textures.GetSize(); ++uiIndex)
+	{
+		const SPVRTPFXParserEffectTexture& Tex = m_psEffect[uiEffect].Textures[uiIndex];
+		if(Tex.Name == TextureName)
+		{
+			return uiIndex;
+		}
+	}
+
+	return 0xFFFFFFFF;
+}
+
+/*!***************************************************************************
+@Function		GetNumberRenderPasses
+@Return			unsigned int
+@Description	Returns the number of render passes within this PFX.
+*****************************************************************************/
+unsigned int CPVRTPFXParser::GetNumberRenderPasses() const
+{
+	return m_RenderPasses.GetSize();
+}
+
+/*!***************************************************************************
+@Function		GetNumberRenderPasses
+@Input			unsigned int		The render pass index.
+@Return			SPVRTPFXRenderPass*
+@Description	Returns the given render pass.
+*****************************************************************************/
+const SPVRTPFXRenderPass& CPVRTPFXParser::GetRenderPass( unsigned int uiIndex ) const
+{
+	_ASSERT(uiIndex >= 0 && uiIndex < GetNumberRenderPasses());
+	return m_RenderPasses[uiIndex];
+}
+
+/*!***************************************************************************
+@Function		GetPFXFileName
+@Return			const CPVRTString &	
+@Description	Returns the PFX file name associated with this object.
+*****************************************************************************/
+const CPVRTString& CPVRTPFXParser::GetPFXFileName() const
+{
+	return m_szFileName;
+}
+
+/*!***************************************************************************
+@Function		GetPostProcessNames
+@Return			const CPVRTArray<CPVRTString>&	
+@Description	Returns a list of prost process effect names.
+*****************************************************************************/
+const CPVRTArray<CPVRTString>& CPVRTPFXParser::GetPostProcessNames() const
+{
+	return m_aszPostProcessNames;
+}
+
+/*!***************************************************************************
+@Function		GetNumberFragmentShaders
+@Return			unsigned int	Number of fragment shaders.
+@Description	Returns the number of fragment shaders referenced in the PFX.
+*****************************************************************************/
+unsigned int CPVRTPFXParser::GetNumberFragmentShaders() const
+{
+	return m_psFragmentShader.GetSize();
+}
+
+
+/*!***************************************************************************
+@Function		GetFragmentShader
+@Input			unsigned int		The index of this shader.
+@Return			const SPVRTPFXParserShader&		The PFX fragment shader.
+@Description	Returns a given fragment shader.
+*****************************************************************************/
+SPVRTPFXParserShader& CPVRTPFXParser::GetFragmentShader( unsigned int uiIndex )
+{
+	_ASSERT(uiIndex < GetNumberFragmentShaders());
+	return m_psFragmentShader[uiIndex];
+}
+
+/*!***************************************************************************
+@Function		GetNumberVertexShaders
+@Return			unsigned int	Number of vertex shaders.
+@Description	Returns the number of vertex shaders referenced in the PFX.
+*****************************************************************************/
+unsigned int CPVRTPFXParser::GetNumberVertexShaders() const
+{
+	return m_psVertexShader.GetSize();
+}
+
+/*!***************************************************************************
+@Function		GetVertexShader
+@Input			unsigned int		The index of this shader.
+@Return			const SPVRTPFXParserShader&		The PFX vertex shader.
+@Description	Returns a given vertex shader.
+*****************************************************************************/
+SPVRTPFXParserShader& CPVRTPFXParser::GetVertexShader( unsigned int uiIndex )
+{
+	_ASSERT(uiIndex < GetNumberVertexShaders());
+	return m_psVertexShader[uiIndex];
+}
+
+/*!***************************************************************************
+@Function		GetNumberEffects
+@Return			unsigned int	Number of effects.
+@Description	Returns the number of effects referenced in the PFX.
+*****************************************************************************/
+unsigned int CPVRTPFXParser::GetNumberEffects() const
+{
+	return m_psEffect.GetSize();
+}
+
+/*!***************************************************************************
+@Function		GetEffect
+@Input			uiIndex		The index of this effect.
+@Return			The PFX effect.
+@Description	Returns a given effect.
+*****************************************************************************/
+const SPVRTPFXParserEffect& CPVRTPFXParser::GetEffect(unsigned int uiIndex) const
+{
+	_ASSERT(uiIndex < GetNumberEffects());
+	return m_psEffect[uiIndex];
+}
+
+/*!***************************************************************************
+@Function		GetNumberTextures
+@Return			unsigned int	Number of effects.
+@Description	Returns the number of textures referenced in the PFX.
+*****************************************************************************/
+unsigned int CPVRTPFXParser::GetNumberTextures() const
+{
+	return m_psTexture.GetSize();
+}
+
+/*!***************************************************************************
+@Function		GetTexture
+@Input			unsigned int		The index of this texture
+@Return			const SPVRTPFXParserEffect&		The PFX texture.
+@Description	Returns a given texture.
+*****************************************************************************/
+const SPVRTPFXParserTexture* CPVRTPFXParser::GetTexture( unsigned int uiIndex ) const
+{
+	_ASSERT(uiIndex < GetNumberTextures());
+	return m_psTexture[uiIndex];
+}
+
+/*!***************************************************************************
+@Function		FindEffectByName
+@Input			Name
+@Return			int	
+@Description	Returns the index of the given string. Returns -1 on failure.
+*****************************************************************************/
+int CPVRTPFXParser::FindEffectByName(const CPVRTStringHash& Name) const
+{
+	if(Name.Hash() == 0)
+		return -1;
+
+	for(unsigned int uiIndex = 0; uiIndex < GetNumberEffects(); ++uiIndex)
+	{
+		if(GetEffect(uiIndex).Name == Name)
+		{
+			return (int)uiIndex;
+		}
+	}
+	
+	return -1;
+}
+
+/*!***************************************************************************
+@Function		FindTextureByName
+@Input			Name		Name of the texture.
+@Return			int	
+@Description	Returns the index of the given texture. Returns -1 on failure.
+*****************************************************************************/
+int CPVRTPFXParser::FindTextureByName(const CPVRTStringHash& Name) const
+{
+	if(Name.Hash() == 0)
+		return -1;
+
+	for(unsigned int uiIndex = 0; uiIndex < GetNumberTextures(); ++uiIndex)
+	{
+		if(GetTexture(uiIndex)->Name == Name)
+		{
+			return (int)uiIndex;
+		}
+	}
+
+	return -1;
+}
+
+/*!***************************************************************************
+@Function		PVRTPFXCreateStringCopy
+@Return			void
+@Description	Safely copies a C string.
+*****************************************************************************/
+void PVRTPFXCreateStringCopy(char** ppDst, const char* pSrc)
+{
+	if(pSrc)
+	{
+		FREE(*ppDst);
+		*ppDst = (char*)malloc((strlen(pSrc)+1) * sizeof(char));
+		strcpy(*ppDst, pSrc);
+	}
 }
 
 /*****************************************************************************

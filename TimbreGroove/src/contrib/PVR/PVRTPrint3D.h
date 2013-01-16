@@ -4,9 +4,9 @@
 
  @Title        PVRTPrint3D
 
- @Version      
+ @Version       @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     ANSI compatible
 
@@ -17,46 +17,58 @@
 #define _PVRTPRINT3D_H_
 
 #include "PVRTGlobal.h"
-#include "PVRTContext.h"
 #include "PVRTError.h"
+#include "PVRTMatrix.h"
+#include "PVRTVector.h"
+#include "PVRTArray.h"
 
-/****************************************************************************
-** Defines
-****************************************************************************/
-#define PVRTPRINT3D_MAX_WINDOWS				(512)
-#define PVRTPRINT3D_MAX_RENDERABLE_LETTERS	(0xFFFF >> 2)
+struct MetaDataBlock;
+template <typename KeyType, typename DataType>
+class CPVRTMap;
 
 /****************************************************************************
 ** Enums
 ****************************************************************************/
-
-/*!***************************************************************************
- dwFlags for PVRTPrint3DSetWindowFlags
-*****************************************************************************/
-typedef enum {
-	ePVRTPrint3D_ACTIVATE_WIN		=	0x01,
-	ePVRTPrint3D_DEACTIVATE_WIN		=	0x02,
-	ePVRTPrint3D_ACTIVATE_TITLE		=	0x04,
-	ePVRTPrint3D_DEACTIVATE_TITLE	=	0x08,
-	ePVRTPrint3D_FULL_OPAQUE		=	0x10,
-	ePVRTPrint3D_FULL_TRANS			=	0x20,
-	ePVRTPrint3D_ADJUST_SIZE_ALWAYS	=	0x40,
-	ePVRTPrint3D_NO_BORDER			=	0x80
-} EPVRTPrint3DFlags;
+#define PVRTPRINT3D_MAX_RENDERABLE_LETTERS	(0xFFFF >> 2)
 
 /*!***************************************************************************
  Logo flags for DisplayDefaultTitle
 *****************************************************************************/
 typedef enum {
-	ePVRTPrint3DLogoNone  = 0x00,
-	ePVRTPrint3DLogoPVR = 0x02,
-	ePVRTPrint3DLogoIMG = 0x04,
-	ePVRTPrint3DSDKLogo = ePVRTPrint3DLogoIMG
+	ePVRTPrint3DLogoNone	= 0x00,
+	ePVRTPrint3DLogoIMG		= 0x04,
+	ePVRTPrint3DSDKLogo		= ePVRTPrint3DLogoIMG
 } EPVRTPrint3DLogo;
+
+/****************************************************************************
+** Constants
+****************************************************************************/
+const PVRTuint32 PVRTPRINT3D_HEADER			= 0xFCFC0050;
+const PVRTuint32 PVRTPRINT3D_CHARLIST		= 0xFCFC0051;
+const PVRTuint32 PVRTPRINT3D_RECTS			= 0xFCFC0052;
+const PVRTuint32 PVRTPRINT3D_METRICS		= 0xFCFC0053;
+const PVRTuint32 PVRTPRINT3D_YOFFSET		= 0xFCFC0054;
+const PVRTuint32 PVRTPRINT3D_KERNING		= 0xFCFC0055;
+
+const PVRTuint32 PVRTPRINT3D_VERSION		= 1;
 
 /****************************************************************************
 ** Structures
 ****************************************************************************/
+/*!**************************************************************************
+@Struct SPVRTPrint3DHeader
+@Brief A structure for information describing with the loaded font.
+****************************************************************************/
+struct SPVRTPrint3DHeader				// 12 bytes
+{
+	PVRTuint8	uVersion;				// Version of PVRFont.
+	PVRTuint8	uSpaceWidth;			// The width of the 'Space' character
+	PVRTint16	wNumCharacters;			// Total number of characters contained in this file
+	PVRTint16	wNumKerningPairs;		// Number of characters which kern against each other
+	PVRTint16	wAscent;				// The height of the character, in pixels, from the base line
+	PVRTint16	wLineSpace;				// The base line to base line dimension, in pixels.
+	PVRTint16	wBorderWidth;			// px Border around each character
+};
 /*!**************************************************************************
 @Struct SPVRTPrint3DAPIVertex
 @Brief A structure for Print3Ds vertex type
@@ -68,49 +80,9 @@ struct SPVRTPrint3DAPIVertex
 	VERTTYPE		tu, tv;
 };
 
-/*!**************************************************************************
-@Struct SPVRTPrint3DWIN
-@Brief A structure for Print3Ds data
-****************************************************************************/
-struct SPVRTPrint3DWIN
-{
-	unsigned int			dwFlags;
-
-	bool					bNeedUpdated;
-
-	// Text Buffer
-	char					*pTextBuffer;
-	unsigned int			dwBufferSizeX;
-	unsigned int			dwBufferSizeY;
-
-	// Title
-	float					fTitleFontSize;
-	float					fTextRMinPos;
-	unsigned int			dwTitleFontColorL;
-	unsigned int			dwTitleFontColorR;
-	unsigned int			dwTitleBaseColor;
-	char					*bTitleTextL;
-	char					*bTitleTextR;
-	unsigned int			nTitleVerticesL;
-	unsigned int			nTitleVerticesR;
-	SPVRTPrint3DAPIVertex	*pTitleVtxL;
-	SPVRTPrint3DAPIVertex	*pTitleVtxR;
-
-	// Window
-	float					fWinFontSize;
-	unsigned int			dwWinFontColor;
-	unsigned int			dwWinBaseColor;
-	float					fWinPos[2];
-	float					fWinSize[2];
-	float					fZPos;
-	unsigned int			dwSort;
-	unsigned int			nLineVertices[255]; // every line of text is allocated and drawn apart.
-	SPVRTPrint3DAPIVertex	*pLineVtx[256];
-	SPVRTPrint3DAPIVertex	*pWindowVtxTitle;
-	SPVRTPrint3DAPIVertex	*pWindowVtxText;
-};
-
+struct PVRTextureHeaderV3;
 struct SPVRTPrint3DAPI;
+struct SPVRTContext;
 
 /*!***************************************************************************
  @Class CPVRTPrint3D
@@ -131,23 +103,76 @@ public:
 	~CPVRTPrint3D();
 
 	/*!***************************************************************************
-	 @Function			PVRTPrint3DSetTextures
+	 @Function			SetTextures
 	 @Input				pContext		Context
 	 @Input				dwScreenX		Screen resolution along X
 	 @Input				dwScreenY		Screen resolution along Y
 	 @Input				bRotate			Rotate print3D by 90 degrees
+	 @Input				bMakeCopy		This instance of Print3D creates a copy
+										of it's data instead of sharing with previous
+										contexts. Set this parameter if you require
+										thread safety.										
 	 @Return			PVR_SUCCESS or PVR_FAIL
-	 @Description		Initialization and texture upload. Should be called only once
-						for a given context.
+	 @Description		Initialization and texture upload of default font data. 
+						Should be called only once for a Print3D object.
 	*****************************************************************************/
 	EPVRTError SetTextures(
 		const SPVRTContext	* const pContext,
 		const unsigned int	dwScreenX,
 		const unsigned int	dwScreenY,
-		const bool bRotate = false);
+		const bool bRotate = false,
+		const bool bMakeCopy = false);
 
 	/*!***************************************************************************
-	 @Function			PVRTPrint3D
+	 @Function			SetTextures
+	 @Input				pContext		Context
+	 @Input				pTexData		User-provided font texture
+	 @Input				dwScreenX		Screen resolution along X
+	 @Input				dwScreenY		Screen resolution along Y
+	 @Input				bRotate			Rotate print3D by 90 degrees
+	 @Input				bMakeCopy		This instance of Print3D creates a copy
+										of it's data instead of sharing with previous
+										contexts. Set this parameter if you require
+										thread safety.	
+	 @Return			PVR_SUCCESS or PVR_FAIL
+	 @Description		Initialization and texture upload of user-provided font 
+						data. Should be called only once for a Print3D object.
+	*****************************************************************************/
+	EPVRTError SetTextures(
+		const SPVRTContext	* const pContext,
+		const void * const pTexData,
+		const unsigned int	dwScreenX,
+		const unsigned int	dwScreenY,
+		const bool bRotate = false,
+		const bool bMakeCopy = false);
+
+	/*!***************************************************************************
+	 @Function			SetProjection
+	 @Input				mProj			Projection matrix
+	 @Description		Sets the projection matrix for the proceeding flush().
+	*****************************************************************************/
+	void SetProjection(const PVRTMat4& mProj);
+
+	/*!***************************************************************************
+	 @Function			SetModelView
+	 @Input				mModelView			Model View matrix
+	 @Description		Sets the model view matrix for the proceeding flush().
+	*****************************************************************************/
+	void SetModelView(const PVRTMat4& mModelView);
+
+	/*!***************************************************************************
+	 @Function			SetFiltering
+	 @Input				eMin	The method of texture filtering for minification
+	 @Input				eMag	The method of texture filtering for minification
+	 @Input				eMip	The method of texture filtering for minification
+	 @Description		Sets the method of texture filtering for the font texture.
+						Print3D will attempt to pick the best method by default
+						but this method allows the user to override this.
+	*****************************************************************************/
+	void SetFiltering(ETextureFilter eMin, ETextureFilter eMag, ETextureFilter eMip);
+
+	/*!***************************************************************************
+	 @Function			Print3D
 	 @Input				fPosX		Position of the text along X
 	 @Input				fPosY		Position of the text along Y
 	 @Input				fScale		Scale of the text
@@ -155,12 +180,27 @@ public:
 	 @Input				pszFormat	Format string for the text
 	 @Return			PVR_SUCCESS or PVR_FAIL
 	 @Description		Display 3D text on screen.
-						No window needs to be allocated to use this function.
-						However, PVRTPrint3DSetTextures(...) must have been called
+						CPVRTPrint3D::SetTextures(...) must have been called
 						beforehand.
 						This function accepts formatting in the printf way.
 	*****************************************************************************/
 	EPVRTError Print3D(float fPosX, float fPosY, const float fScale, unsigned int Colour, const char * const pszFormat, ...);
+
+
+	/*!***************************************************************************
+	 @Function			Print3D
+	 @Input				fPosX		Position of the text along X
+	 @Input				fPosY		Position of the text along Y
+	 @Input				fScale		Scale of the text
+	 @Input				Colour		Colour of the text
+	 @Input				pszFormat	Format string for the text
+	 @Return			PVR_SUCCESS or PVR_FAIL
+	 @Description		Display wide-char 3D text on screen.
+						CPVRTPrint3D::SetTextures(...) must have been called
+						beforehand.
+						This function accepts formatting in the printf way.
+	*****************************************************************************/
+	EPVRTError Print3D(float fPosX, float fPosY, const float fScale, unsigned int Colour, const wchar_t * const pszFormat, ...);
 
 	/*!***************************************************************************
 	 @Function			DisplayDefaultTitle
@@ -176,128 +216,50 @@ public:
 	*****************************************************************************/
 	 EPVRTError DisplayDefaultTitle(const char * const pszTitle, const char * const pszDescription, const unsigned int uDisplayLogo);
 
-	/*!***************************************************************************
-	 @Function			CreateDefaultWindow
-	 @Input				fPosX					Position X for the new window
-	 @Input				fPosY					Position Y for the new window
-	 @Input				nXSize_LettersPerLine
-	 @Input				sTitle					Title of the window
-	 @Input				sBody					Body text of the window
-	 @Return			Window handle
-	 @Description		Creates a default window.
-						If Title is NULL the main body will have just one line
-						(for InfoWin).
-	*****************************************************************************/
-	unsigned int CreateDefaultWindow(float fPosX, float fPosY, int nXSize_LettersPerLine, char *sTitle, char *sBody);
-
-	/*!***************************************************************************
-	 @Function			InitWindow
-	 @Input				dwBufferSizeX		Buffer width
-	 @Input				dwBufferSizeY		Buffer height
-	 @Return			Window handle
-	 @Description		Allocate a buffer for a newly-created window and return its
-						handle.
-	*****************************************************************************/
-	unsigned int InitWindow(unsigned int dwBufferSizeX, unsigned int dwBufferSizeY);
-
-	/*!***************************************************************************
-	 @Function			DeleteWindow
-	 @Input				dwWin		Window handle
-	 @Description		Delete the window referenced by dwWin.
-	*****************************************************************************/
-	void DeleteWindow(unsigned int dwWin);
-
-	/*!***************************************************************************
-	 @Function			DeleteAllWindows
-	 @Description		Delete all windows.
-	*****************************************************************************/
-	void DeleteAllWindows();
-
-	/*!***************************************************************************
-	 @Function			DisplayWindow
-	 @Input				dwWin
-	 @Return			PVR_SUCCESS or PVR_FAIL
-	 @Description		Display window.
-						This function MUST be called between a BeginScene/EndScene
-						pair as it uses D3D render primitive calls.
-						PVRTPrint3DSetTextures(...) must have been called beforehand.
-	*****************************************************************************/
-	EPVRTError DisplayWindow(unsigned int dwWin);
-
-	/*!***************************************************************************
-	 @Function			SetText
-	 @Input				dwWin		Window handle
-	 @Input				Format		Format string
-	 @Return			PVR_SUCCESS or PVR_FAIL
-	 @Description		Feed the text buffer of window referenced by dwWin.
-						This function accepts formatting in the printf way.
-	*****************************************************************************/
-	EPVRTError SetText(unsigned int dwWin, const char *Format, ...);
-
-	/*!***************************************************************************
-	 @Function			SetWindow
-	 @Input				dwWin			Window handle
-	 @Input				dwWinColor		Window colour
-	 @Input				dwFontColor		Font colour
-	 @Input				fFontSize		Font size
-	 @Input				fPosX			Window position X
-	 @Input				fPosY			Window position Y
-	 @Input				fSizeX			Window size X
-	 @Input				fSizeY			Window size Y
-	 @Description		Set attributes of window.
-						Windows position and size are referred to a virtual screen
-						of 100x100. (0,0) is the top-left corner and (100,100) the
-						bottom-right corner.
-						These values are the same for all resolutions.
-	*****************************************************************************/
-	void SetWindow(unsigned int dwWin, unsigned int dwWinColor, unsigned int dwFontColor, float fFontSize,
-							  float fPosX, float fPosY, float fSizeX, float fSizeY);
-
-	/*!***************************************************************************
-	 @Function			SetTitle
-	 @Input				dwWin				Window handle
-	 @Input				dwBackgroundColor	Background color
-	 @Input				fFontSize			Font size
-	 @Input				dwFontColorLeft
-	 @Input				sTitleLeft
-	 @Input				dwFontColorRight
-	 @Input				sTitleRight
-	 @Description		Set window title.
-	*****************************************************************************/
-	void SetTitle(unsigned int dwWin, unsigned int dwBackgroundColor, float fFontSize,
-							 unsigned int dwFontColorLeft, char *sTitleLeft,
-							 unsigned int dwFontColorRight, char *sTitleRight);
-
-	/*!***************************************************************************
-	 @Function			SetWindowFlags
-	 @Input				dwWin				Window handle
-	 @Input				dwFlags				Flags
-	 @Description		Set flags for window referenced by dwWin.
-						A list of flag can be found at the top of this header.
-	*****************************************************************************/
-	void SetWindowFlags(unsigned int dwWin, unsigned int dwFlags);
-
-	/*!***************************************************************************
-	 @Function			AdjustWindowSize
-	 @Input				dwWin				Window handle
-	 @Input				dwMode				dwMode 0 = Both, dwMode 1 = X only,  dwMode 2 = Y only
-	 @Description		Calculates window size so that all text fits in the window.
-	*****************************************************************************/
-	void AdjustWindowSize(unsigned int dwWin, unsigned int dwMode);
-
-	/*!***************************************************************************
-	 @Function			GetSize
+	 /*!***************************************************************************
+	 @Function			MeasureText
 	 @Output			pfWidth				Width of the string in pixels
 	 @Output			pfHeight			Height of the string in pixels
-	 @Input				fFontSize			Font size
-	 @Input				sString				String to take the size of
+	 @Input				fScale				A value to scale the font by
+	 @Input				pszUTF8				UTF8 string to take the size of
 	 @Description		Returns the size of a string in pixels.
 	*****************************************************************************/
-	void GetSize(
+	void MeasureText(
 		float		* const pfWidth,
 		float		* const pfHeight,
-		const float	fFontSize,
-		const char	* sString);
+		float				fScale,
+		const char	* const pszUTF8);
+
+	/*!***************************************************************************
+	 @Function			MeasureText
+	 @Output			pfWidth				Width of the string in pixels
+	 @Output			pfHeight			Height of the string in pixels
+	 @Input				fScale				A value to scale the font by
+	 @Input				pszUnicode			Wide character string to take the
+											length of.
+	 @Description		Returns the size of a string in pixels.
+	*****************************************************************************/
+	void MeasureText(
+		float		* const pfWidth,
+		float		* const pfHeight,
+		float				fScale,
+		const wchar_t* const pszUnicode);
+
+	/*!***************************************************************************
+	@Function		GetFontAscent
+	@Return			The ascent.
+	@Description	Returns the 'ascent' of the font. This is typically the 
+					height from the baseline of the larget glyph in the set.
+	*****************************************************************************/
+	unsigned int GetFontAscent();
+
+	/*!***************************************************************************
+	@Function		GetFontLineSpacing
+	@Return			The line spacing.
+	@Description	Returns the default line spacing (i.e baseline to baseline) 
+					for the font.
+	*****************************************************************************/
+	unsigned int GetFontLineSpacing();
 
 	/*!***************************************************************************
 	 @Function			GetAspectRatio
@@ -307,54 +269,166 @@ public:
 	*****************************************************************************/
 	void GetAspectRatio(unsigned int *dwScreenX, unsigned int *dwScreenY);
 
-private:
 	/*!***************************************************************************
-	 @Function			UpdateBackgroundWindow
-	 @Return			true if succesful, false otherwise.
-	 @Description		Draw a generic rectangle (with or without border).
+	 @Function			ReleaseTextures
+	 @Description		Deallocate the memory allocated in SetTextures(...)
 	*****************************************************************************/
-	bool UpdateBackgroundWindow(unsigned int dwWin, unsigned int Color, float fZPos, float fPosX, float fPosY, float fSizeX, float fSizeY, SPVRTPrint3DAPIVertex **ppVtx);
+	void ReleaseTextures();
 
 	/*!***************************************************************************
+	 @Function			Flush
+	 @Description		Flushes all the print text commands
+	*****************************************************************************/
+	int Flush();
+
+private:
+	/*!***************************************************************************
 	 @Function			UpdateLine
+	 @Input				fZPos
+	 @Input				XPos
+	 @Input				YPos
+	 @Input				fScale
+	 @Input				Colour
+	 @Input				Text
+	 @Input				pVertices
 	 @Description
 	*****************************************************************************/
-	unsigned int UpdateLine(const unsigned int dwWin, const float fZPos, float XPos, float YPos, const float fScale, const unsigned int Colour, const char * const Text, SPVRTPrint3DAPIVertex * const pVertices);
+	unsigned int UpdateLine(const float fZPos, float XPos, float YPos, const float fScale, const unsigned int Colour, const CPVRTArray<PVRTuint32>& Text, SPVRTPrint3DAPIVertex * const pVertices);
 
 	/*!***************************************************************************
 	 @Function			DrawLineUP
 	 @Return			true or false
 	 @Description		Draw a single line of text.
 	*****************************************************************************/
-	bool DrawLineUP(SPVRTPrint3DAPIVertex *pVtx, unsigned int nVertices);
+	bool DrawLine(SPVRTPrint3DAPIVertex *pVtx, unsigned int nVertices);
 
 	/*!***************************************************************************
-	 @Function			UpdateTitleVertexBuffer
-	 @Return			true or false
-	 @Description		Updates the vertex buffer used for the title
+	@Function		LoadFontData
+	@Input			texHeader
+	@Input			MetaDataMap
+	@Return			bool	true if successful.
+	@Description	Loads font data bundled with the texture file.
 	*****************************************************************************/
-	bool UpdateTitleVertexBuffer(unsigned int dwWin);
+	bool LoadFontData(const PVRTextureHeaderV3* texHeader, CPVRTMap<PVRTuint32, CPVRTMap<PVRTuint32, MetaDataBlock> >& MetaDataMap);
 
 	/*!***************************************************************************
-	 @Function			UpdateMainTextVertexBuffer
-	 @Return			true or false
-	 @Description		Updates the vertex buffer used for the main text
+	@Function		ReadMetaBlock
+	@Input			pDataCursor
+	@Return			bool	true if successful.
+	@Description	Reads a single meta data block from the data file.
 	*****************************************************************************/
-	bool UpdateMainTextVertexBuffer(unsigned int dwWin);
+	bool ReadMetaBlock(const PVRTuint8** pDataCursor);
 
 	/*!***************************************************************************
-	 @Function			GetLength
-	 @Description		calculates the size in pixels.
+	@Function		FindCharacter
+	@Input			character
+	@Return			The character index, or PVRPRINT3D_INVALID_CHAR if not found.
+	@Description	Finds a given character in the binary data and returns it's
+					index.
 	*****************************************************************************/
-	float GetLength(float fFontSize, char *sString);
+	PVRTuint32 FindCharacter(PVRTuint32 character) const;
 
 	/*!***************************************************************************
-	 @Function			Rotate
-	 @Description		Rotates the vertices to fit on screen.
+	@Function		CharacterCompareFunc
+	@Input			pA
+	@Input			pB
+	@Return			PVRTint32	
+	@Description	Compares two characters for binary search.
 	*****************************************************************************/
-	void Rotate(SPVRTPrint3DAPIVertex * const pv, const unsigned int nCnt);
+	static PVRTint32 CharacterCompareFunc(const void* pA, const void* pB);
+	
+	/*!***************************************************************************
+	@Function		KerningCompareFunc
+	@Input			pA
+	@Input			pB
+	@Return			PVRTint32	
+	@Description	Compares two kerning pairs for binary search.
+	*****************************************************************************/
+	static PVRTint32 KerningCompareFunc(const void* pA, const void* pB);
+
+	/*!***************************************************************************
+	@Function		ApplyKerning
+	@Input			cA
+	@Input			cB
+	@Output			fOffset
+	@Description	Calculates kerning offset.
+	*****************************************************************************/
+	void ApplyKerning(const PVRTuint32 cA, const PVRTuint32 cB, float& fOffset) const;
+
+	/*!***************************************************************************
+	 @Function			GetSize
+	 @Output			pfWidth				Width of the string in pixels
+	 @Output			pfHeight			Height of the string in pixels
+	 @Input				fScale				Font size
+	 @Input				utf32				UTF32 string to take the size of.
+	 @Description		Returns the size of a string in pixels.
+	*****************************************************************************/
+	void MeasureText(
+		float		* const pfWidth,
+		float		* const pfHeight,
+		float				fScale,
+		const CPVRTArray<PVRTuint32>& utf32);
+	
+	/*!***************************************************************************
+	@Function		Print3D
+	@Input			fPosX		X Position
+	@Input			fPosY		Y Position
+	@Input			fScale		Text scale
+	@Input			Colour		ARGB colour
+	@Input			UTF32		Array of UTF32 characters
+	@Input			bUpdate		Whether to update the vertices
+	@Return			EPVRTError	Success of failure
+	@Description	Takes an array of UTF32 characters and generates the required mesh.
+	*****************************************************************************/
+	EPVRTError Print3D(float fPosX, float fPosY, const float fScale, unsigned int Colour, const CPVRTArray<PVRTuint32>& UTF32, bool bUpdate);
+
+/*!***************************************************************************
+@Brief			Structures and enums for font data
+@Description	The following structures are used to provide layout
+				information for associated fonts.
+*****************************************************************************/
+private:
+	struct CharacterUV
+	{
+		float fUL;
+		float fVT;
+		float fUR;
+		float fVB;
+	};
+
+	struct Rectanglei
+	{
+		int	nX;
+		int	nY;
+		int	nW;
+		int	nH;
+	};
+
+#pragma pack(push, 4)		// Force 4byte alignment.
+	struct KerningPair
+	{
+		unsigned long long	uiPair;				// OR'd pair for 32bit characters
+		int				 	iOffset;			// Kerning offset (in pixels)
+	};
+#pragma pack(pop)
+
+	struct CharMetrics
+	{
+		short nXOff;						// Prefix offset
+		unsigned short nAdv;				// Character width
+	};
+
+	enum
+	{
+		eFilterProc_Min,
+		eFilterProc_Mag,
+		eFilterProc_Mip,
+
+		eFilterProc_Size
+	};
 
 private:
+	// Mesh parameters
 	SPVRTPrint3DAPI			*m_pAPI;
 	unsigned int			m_uLogoToDisplay;
 	unsigned short			*m_pwFacesFont;
@@ -365,21 +439,42 @@ private:
 	SPVRTPrint3DAPIVertex	*m_pVtxCache;
 	int						m_nVtxCache;
 	int						m_nVtxCacheMax;
-	SPVRTPrint3DWIN			m_pWin[PVRTPRINT3D_MAX_WINDOWS];
 	bool					m_bRotate;
 
-public:
-	/*!***************************************************************************
-	 @Function			PVRTPrint3DReleaseTextures
-	 @Description		Deallocate the memory allocated in PVRTPrint3DSetTextures(...)
-	*****************************************************************************/
-	void ReleaseTextures();
+	// Cached memory
+	CPVRTArray<PVRTuint32>	m_CachedUTF32;
+	int						m_nCachedNumVerts;
+	wchar_t*				m_pwzPreviousString;
+	char*					m_pszPreviousString;
+	float					m_fPrevScale;
+	float					m_fPrevX;
+	float					m_fPrevY;
+	unsigned int			m_uiPrevCol;
 
-	/*!***************************************************************************
-	 @Function			Flush
-	 @Description		Flushes all the print text commands
-	*****************************************************************************/
-	int Flush();
+	// Font parameters
+	CharacterUV*			m_pUVs;
+	KerningPair*			m_pKerningPairs;
+	CharMetrics*			m_pCharMatrics;
+	
+	float					m_fTexW;
+	float					m_fTexH;
+
+	Rectanglei*				m_pRects;
+	int*					m_pYOffsets;
+	int						m_uiNextLineH;
+
+	unsigned int			m_uiSpaceWidth;	
+	unsigned int			m_uiNumCharacters;
+	unsigned int			m_uiNumKerningPairs;
+	unsigned int			m_uiAscent;
+	PVRTuint32*				m_pszCharacterList;
+	bool					m_bHasMipmaps;
+	
+	// View parameters
+	PVRTMat4				m_mProj;
+	PVRTMat4				m_mModelView;
+	bool					m_bUsingProjection;
+	ETextureFilter			m_eFilterMethod[eFilterProc_Size];
 
 /*!***************************************************************************
 @Brief			API specific code
@@ -389,11 +484,13 @@ public:
 private:
 	/*!***************************************************************************
 	 @Function			APIInit
+	 @Input				pContext
+	 @Input				bMakeCopy
 	 @Return			true or false
 	 @Description		Initialization and texture upload. Should be called only once
 						for a given context.
 	*****************************************************************************/
-	bool APIInit(const SPVRTContext	* const pContext);
+	bool APIInit(const SPVRTContext	* const pContext, bool bMakeCopy);
 
 	/*!***************************************************************************
 	 @Function			APIRelease
@@ -403,36 +500,36 @@ private:
 
 	/*!***************************************************************************
 	 @Function			APIUpLoadIcons
+	 @Input				pIMG
 	 @Return			true or false
 	 @Description		Initialization and texture upload. Should be called only once
 						for a given context.
 	*****************************************************************************/
-	bool APIUpLoadIcons(
-		const PVRTuint32 * const pPVR,
-		const PVRTuint32 * const pIMG);
+	bool APIUpLoadIcons(const PVRTuint8 * const pIMG);
 
 	/*!***************************************************************************
-	 @Function			APIUpLoad4444
-	 @Return			true if succesful, false otherwise.
+	 @Function			APIUpLoadTexture
+	 @Input				pSource
+	 @Input				header
+	 @Input				MetaDataMap
+	 @Return			true if successful, false otherwise.
 	 @Description		Reads texture data from *.dat and loads it in
 						video memory.
 	*****************************************************************************/
-	bool APIUpLoad4444(unsigned int TexID, unsigned char *pSource, unsigned int nSize, unsigned int nMode);
+	bool APIUpLoadTexture(const PVRTuint8* pSource, const PVRTextureHeaderV3* header, CPVRTMap<PVRTuint32, CPVRTMap<PVRTuint32, MetaDataBlock> >& MetaDataMap);
 
-	/*!***************************************************************************
-	 @Function			DrawBackgroundWindowUP
-	 @Description
-	*****************************************************************************/
-	void DrawBackgroundWindowUP(SPVRTPrint3DAPIVertex *pVtx, const bool bIsOp, const bool bBorder);
 
 	/*!***************************************************************************
 	 @Function			APIRenderStates
+	 @Input				nAction
 	 @Description		Stores, writes and restores Render States
 	*****************************************************************************/
 	void APIRenderStates(int nAction);
 
 	/*!***************************************************************************
 	 @Function			APIDrawLogo
+	 @Input				uLogoToDisplay
+	 @Input				nPod
 	 @Description		nPos = -1 to the left
 						nPos = +1 to the right
 	*****************************************************************************/

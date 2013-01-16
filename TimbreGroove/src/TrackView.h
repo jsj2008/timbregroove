@@ -18,6 +18,8 @@
 
 @interface TrackView : View<CaresDeeply>
 
+@property (nonatomic,strong) NSNumber * menuIsOver;
+
 // Derived classes implement this
 -(void)createNode:(NSDictionary *)params;
 

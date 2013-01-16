@@ -6,7 +6,7 @@
 
  @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     ANSI compatible
 
@@ -150,7 +150,7 @@ void PVRTMatrixRotationXX(
 	int		fCosine, fSine;
 
     /* Precompute cos and sin */
-#if defined(BUILD_DX9) || defined(BUILD_D3DM) || defined(BUILD_DX10)
+#if defined(BUILD_DX9) || defined(BUILD_D3DM) || defined(BUILD_DX10) || defined(BUILD_DX11)
 	fCosine	= PVRTXCOS(-fAngle);
     fSine	= PVRTXSIN(-fAngle);
 #else
@@ -178,7 +178,7 @@ void PVRTMatrixRotationYX(
 	int		fCosine, fSine;
 
 	/* Precompute cos and sin */
-#if defined(BUILD_DX9) || defined(BUILD_D3DM) || defined(BUILD_DX10)
+#if defined(BUILD_DX9) || defined(BUILD_D3DM) || defined(BUILD_DX10) || defined(BUILD_DX11)
 	fCosine	= PVRTXCOS(-fAngle);
     fSine	= PVRTXSIN(-fAngle);
 #else
@@ -206,7 +206,7 @@ void PVRTMatrixRotationZX(
 	int		fCosine, fSine;
 
 	/* Precompute cos and sin */
-#if defined(BUILD_DX9) || defined(BUILD_D3DM) || defined(BUILD_DX10)
+#if defined(BUILD_DX9) || defined(BUILD_D3DM) || defined(BUILD_DX10) || defined(BUILD_DX11)
 	fCosine = PVRTXCOS(-fAngle);
     fSine   = PVRTXSIN(-fAngle);
 #else

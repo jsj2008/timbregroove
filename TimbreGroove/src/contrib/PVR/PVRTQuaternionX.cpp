@@ -4,9 +4,9 @@
 
  @Title        PVRTQuaternionX
 
- @Version      
+ @Version       @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     ANSI compatible
 
@@ -237,7 +237,7 @@ void PVRTMatrixRotationQuaternionX(
 {
 	const PVRTQUATERNIONx *pQ;
 
-#if defined(BUILD_DX9) || defined(BUILD_D3DM) || defined(BUILD_DX10)
+#if defined(BUILD_DX9) || defined(BUILD_D3DM) || defined(BUILD_DX10) || defined(BUILD_DX11)
 	PVRTQUATERNIONx qInv;
 
 	qInv.x = -quat.x;

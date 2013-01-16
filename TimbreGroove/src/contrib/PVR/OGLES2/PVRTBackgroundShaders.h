@@ -6,7 +6,7 @@
 
  @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     ANSI compatible
 
@@ -20,7 +20,7 @@
 
 // using 32 bit to guarantee alignment. Adds endianness dependency.
 #ifndef A32BIT
- #define A32BIT static const unsigned int
+ #define A32BIT PVRTuint32
 #endif
 
 // ******** Start: BackgroundFragShader.fsh ********
@@ -64,7 +64,7 @@ static const char _BackgroundVertShader_vsh[] =
 #endif
 
 // ******** Start: BackgroundFragShader.fsc ********
-
+#if 0
 // File data
 A32BIT _BackgroundFragShader_fsc[] = {
 0x10fab438,0xe9233faf,0x35050100,0x901,0xf121629f,0x0,0x0,0x1d020000,
@@ -113,6 +113,7 @@ A32BIT _BackgroundVertShader_vsc[] = {
 
 static int _BackgroundVertShader_vsc_size = 435;
 
+#endif
 // ******** End: BackgroundVertShader.vsc ********
 
 

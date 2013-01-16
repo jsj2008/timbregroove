@@ -4,9 +4,9 @@
 
  @Title        PVRTVector
 
- @Version      
+ @Version       @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     ANSI compatible
 
@@ -57,7 +57,7 @@ struct PVRTVec2
 		@Function			PVRTVec2
 		@Description		Blank constructor.
 		*****************************************************************************/
-	PVRTVec2() {}
+	PVRTVec2() : x(0), y(0) {}
 	/*!***************************************************************************
 		@Function			PVRTVec2
 		@Input				fX	X component of vector
@@ -352,7 +352,10 @@ struct PVRTVec3 : public PVRTVECTOR3
  @Function			PVRTVec3
  @Description		Blank constructor.
 *****************************************************************************/
-	PVRTVec3(){}
+	PVRTVec3()
+	{
+		x = y = z = 0;
+	}
 /*!***************************************************************************
  @Function			PVRTVec3
  @Input				fX	X component of vector
@@ -1916,6 +1919,16 @@ struct PVRTMat4 : public PVRTMATRIX
 	}
 
 /*!***************************************************************************
+ @Function			Scale
+ @Returns			a PVRTMat3 corresponding to the requested scaling transformation
+ @Description		Calculates a matrix corresponding to scaling of the given vector.
+*****************************************************************************/
+	static PVRTMat4 Scale(const PVRTVec3& vec)
+	{
+		return Scale(vec.x, vec.y, vec.z);
+	}
+
+/*!***************************************************************************
  @Function			Translation
  @Returns			a PVRTMat4 corresponding to the requested translation
  @Description		Calculates a 4x4 matrix corresponding to a transformation
@@ -1927,6 +1940,19 @@ struct PVRTMat4 : public PVRTMATRIX
 			0,f2vt(1),0,0,
 			0,0,f2vt(1),0,
 			tx,ty,tz,f2vt(1));
+	}
+
+/*!***************************************************************************
+ @Function			Translation
+ @Returns			a PVRTMat4 corresponding to the requested translation
+ @Description		Calculates a 4x4 matrix corresponding to a transformation
+					of tx, ty and tz distance in each axis as taken from the
+					given vector.
+*****************************************************************************/
+
+	static PVRTMat4 Translation(const PVRTVec3& vec)
+	{
+		return Translation(vec.x, vec.y, vec.z);
 	}
 
 /*!***************************************************************************
@@ -1979,7 +2005,6 @@ struct PVRTMat4 : public PVRTMATRIX
 
 		return result;
 	}
-
 
 /*!***************************************************************************
  @Function			LookAtRH
@@ -2136,9 +2161,10 @@ struct PVRTMat4 : public PVRTMATRIX
 		vForward = (bRightHanded) ? vEye - vAt : vAt - vEye;
 
 		vForward.normalize();
-		vUpNorm = vUp.normalized();
-		vSide   = vUpNorm.cross( vForward);
+		vSide   = vUp.cross( vForward);
+		vSide	= vSide.normalized();
 		vUpNorm = vForward.cross(vSide);
+		vUpNorm = vUpNorm.normalized();
 
 		result.f[0]=vSide.x;	result.f[4]=vSide.y;	result.f[8]=vSide.z;		result.f[12]=0;
 		result.f[1]=vUpNorm.x;	result.f[5]=vUpNorm.y;	result.f[9]=vUpNorm.z;		result.f[13]=0;

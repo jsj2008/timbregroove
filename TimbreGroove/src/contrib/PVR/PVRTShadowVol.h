@@ -4,9 +4,9 @@
 
  @Title        PVRTShadowVol
 
- @Version      
+ @Version       @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     ANSI compatible
 
@@ -56,7 +56,10 @@ struct PVRTShadowVolShadowMesh {
 #ifdef BUILD_DX10
 	ID3D10Buffer	*pivb;		/*!< Two copies of the vertices */
 #endif
-#if defined(BUILD_OGL) || defined(BUILD_OGLES) || defined(BUILD_OGLES2)
+#ifdef BUILD_DX11
+	ID3D11Buffer	*pivb;		/*!< Two copies of the vertices */
+#endif
+#if defined(BUILD_OGL) || defined(BUILD_OGLES) || defined(BUILD_OGLES2) || defined(BUILD_OGLES3)
 	void			*pivb;		/*!< Two copies of the vertices */
 #endif
 };
@@ -71,7 +74,10 @@ struct PVRTShadowVolShadowVol {
 #ifdef BUILD_DX10
 	ID3D10Buffer			*piib;		/*!< Indices to render the volume */
 #endif
-#if defined(BUILD_OGL) || defined(BUILD_OGLES) || defined(BUILD_OGLES2)
+#ifdef BUILD_DX11
+	ID3D11Buffer	*piib;		/*!< Two copies of the vertices */
+#endif
+#if defined(BUILD_OGL) || defined(BUILD_OGLES) || defined(BUILD_OGLES2) || defined(BUILD_OGLES3)
 	unsigned short			*piib;		/*!< Indices to render the volume */
 #endif
 	unsigned int			nIdxCnt;	/*!< Number of indices in piib */
@@ -156,6 +162,7 @@ void PVRTShadowVolMeshReleaseVol(
 @Input			psMesh	The shadow volume mesh
 @Input			pvLightModel	The light position/direction
 @Input			bPointLight		Is the light a point light
+@Input			pContext	A struct for passing in API specific data	
 @Description	Using the light set up the shadow volume so it can be extruded.
 *************************************************************************/
 void PVRTShadowVolSilhouetteProjectedBuild(
@@ -163,7 +170,8 @@ void PVRTShadowVolSilhouetteProjectedBuild(
 	const unsigned int				dwVisFlags,
 	const PVRTShadowVolShadowMesh	* const psMesh,
 	const PVRTVECTOR3		* const pvLightModel,
-	const bool				bPointLight);
+	const bool				bPointLight,
+	const SPVRTContext * const pContext = 0);
 
 /*!***********************************************************************
 @Function		PVRTShadowVolSilhouetteProjectedBuild
@@ -172,6 +180,7 @@ void PVRTShadowVolSilhouetteProjectedBuild(
 @Input			psMesh	The shadow volume mesh
 @Input			pvLightModel	The light position/direction
 @Input			bPointLight		Is the light a point light
+@Input			pContext	A struct for passing in API specific data	
 @Description	Using the light set up the shadow volume so it can be extruded.
 *************************************************************************/
 void PVRTShadowVolSilhouetteProjectedBuild(
@@ -179,7 +188,8 @@ void PVRTShadowVolSilhouetteProjectedBuild(
 	const unsigned int		dwVisFlags,
 	const PVRTShadowVolShadowMesh	* const psMesh,
 	const PVRTVec3		* const pvLightModel,
-	const bool				bPointLight);
+	const bool				bPointLight,
+	const SPVRTContext * const pContext = 0);
 
 /*!***********************************************************************
 @Function		PVRTShadowVolBoundingBoxExtrude

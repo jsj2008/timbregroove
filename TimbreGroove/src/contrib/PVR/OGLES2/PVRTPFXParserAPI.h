@@ -6,7 +6,7 @@
 
  @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     Windows + Linux
 
@@ -36,13 +36,23 @@ struct SPVRTPFXUniform
 	unsigned int	nLocation;	// GL location of the Uniform
 	unsigned int	nSemantic;	// Application-defined semantic value
 	unsigned int	nIdx;		// Index; for example two semantics might be LIGHTPOSITION0 and LIGHTPOSITION1
+	CPVRTString		sValueName;		// The name of the variable referenced in shader code
 };
 
 /*! An array of these is gained from PVRTPFX so the application can fill in the texture handles*/
 struct SPVRTPFXTexture
 {
-	const char	*p;		// texture FileName
-	GLuint		ui;		// Loaded texture handle
+	CPVRTStringHash		Name;		// texture name
+	GLuint				ui;		// Loaded texture handle
+	GLuint				unit;	// The bound texture unit
+	unsigned int		flags;	// Texture type i.e 2D, Cubemap
+};
+
+class PVRTPFXEffectDelegate
+{
+public:
+	virtual EPVRTError PVRTPFXOnLoadTexture(const CPVRTStringHash& TextureName, GLuint& uiHandle, unsigned int& uiFlags) = 0;
+	virtual ~PVRTPFXEffectDelegate() { }
 };
 
 /*!**************************************************************************
@@ -52,19 +62,9 @@ struct SPVRTPFXTexture
 class CPVRTPFXEffect
 {
 public:
-	SPVRTContext	*m_psContext;
-	CPVRTPFXParser	*m_pParser;
-	unsigned int	m_nEffect;
-
-	GLuint			m_uiProgram;		// Loaded program
-	unsigned int	*m_pnTextureIdx;	// Array of indices into the texture array
-
-	SPVRTPFXTexture	*m_psTextures;		// Array of loaded textures
-
-public:
 	/*!***************************************************************************
 	@Function			CPVRTPFXEffect Blank Constructor
-	@Description		Sets the context and initialises the member variables to zero.
+	@Description		Sets the context to NULL and initialises the member variables to zero.
 	*****************************************************************************/
 	CPVRTPFXEffect();
 
@@ -85,12 +85,15 @@ public:
 	@Input				src					PFX Parser Object
 	@Input				pszEffect			Effect name
 	@Input				pszFileName			Effect file name
+	@Input				pDelegate			A delegate which will receive callbacks
+	@Output				uiUnknownUniforms	Number of unknown uniforms found
 	@Output				pReturnError		Error string
-	@Returns			EPVRTError			PVR_SUCCESS if load succeeded
+	@Returns			PVR_SUCCESS if load succeeded
 	@Description		Loads the specified effect from the CPVRTPFXParser object.
 						Compiles and links the shaders. Initialises texture data.
 	*****************************************************************************/
-	EPVRTError Load(CPVRTPFXParser &src, const char * const pszEffect, const char * const pszFileName, CPVRTString *pReturnError);
+	EPVRTError Load(CPVRTPFXParser &src, const char * const pszEffect, const char * const pszFileName, 
+					PVRTPFXEffectDelegate* pDelegate, unsigned int& uiUnknownUniforms, CPVRTString *pReturnError);
 
 	/*!***************************************************************************
 	@Function			Destroy
@@ -100,37 +103,37 @@ public:
 
 	/*!***************************************************************************
 	@Function			Activate
-	@Returns			PVR_SUCCESS if activate succeeded
+	@Input				i32RenderTextureId		The ID of the render target of the current task
+	@Input				ui32ReplacementTexture	The ID of the texture that should be used instead
+	@Returns			EPVRTError				PVR_SUCCESS if activate succeeded
 	@Description		Selects the gl program object and binds the textures.
+						If the render target texture for the current render pass is required
+						in this effect (and therefore cannot be sampled),
+						load the replacement texture instead.
 	*****************************************************************************/
-	EPVRTError Activate();
-
-	/*!***************************************************************************
-	@Function			BuildUniformTable
-	@Output				ppsUniforms					pointer to uniform data array
-	@Output				pnUniformCount				pointer to number of uniforms
-	@Output				pnUnknownUniformCount		pointer to number of unknown uniforms
-	@Input				psUniformSemantics			pointer to uniform semantic data array
-	@Input				nSemantics					number of uniform semantics
-	@Output				pReturnError				error string
-	@Returns			EPVRTError					PVR_SUCCESS if succeeded
-	@Description		Builds the uniform table from the semantics.
-	*****************************************************************************/
-	EPVRTError BuildUniformTable(
-		SPVRTPFXUniform					** const ppsUniforms,
-		unsigned int					* const pnUniformCount,
-		unsigned int					* const pnUnknownUniformCount,
-		const SPVRTPFXUniformSemantic	* const psUniformSemantics,
-		const unsigned int				nSemantics,
-		CPVRTString					*pReturnError);
+	EPVRTError Activate(const int i32RenderTextureId=-1, const unsigned int ui32ReplacementTexture=0);
 
 	/*!***************************************************************************
 	@Function			GetTextureArray
-	@Output				nCount					number of textures
 	@Returns			SPVRTPFXTexture*		pointer to the texture data array
 	@Description		Gets the texture data array.
 	*****************************************************************************/
-	const SPVRTPFXTexture *GetTextureArray(unsigned int &nCount) const;
+	const CPVRTArray<SPVRTPFXTexture>& GetTextureArray() const;
+
+	/*!***************************************************************************
+	@Function		GetUniformArray
+	@Return			const CPVRTArray<SPVRTPFXUniform>&	
+	@Description	Returns a list of known semantics.
+	*****************************************************************************/
+	const CPVRTArray<SPVRTPFXUniform>& GetUniformArray() const;
+
+	/*!***************************************************************************
+	@Function		GetSemanticArray
+	@Return			const CPVRTArray<SPVRTPFXUniformSemantic>&	
+	@Description	Gets the array of registered semantics which will be used to
+	match PFX code.
+	*****************************************************************************/
+	const CPVRTArray<SPVRTPFXUniformSemantic>& GetSemanticArray() const;
 
 	/*!***************************************************************************
 	@Function			SetTexture
@@ -149,7 +152,95 @@ public:
 	*****************************************************************************/
 	void SetDefaultUniformValue(const char *const pszName, const SPVRTSemanticDefaultData *psDefaultValue);
 
+	/*!***************************************************************************
+	@Function		RegisterUniformSemantic
+	@Input			psUniforms			Array of semantics to register
+	@Input			uiNumUniforms		Number provided
+	@Output			pReturnError		Human-readable error if any
+	@Return			PVR_SUCCESS on success	
+	@Description	Registers a user-provided uniform semantic.
+	*****************************************************************************/
+	EPVRTError RegisterUniformSemantic(const SPVRTPFXUniformSemantic* const psUniforms, unsigned int uiNumUniforms, CPVRTString* pReturnError);
+
+	/*!***************************************************************************
+	@Function		RemoveUniformSemantic
+	@Input			uiSemanticID
+	@Output			pReturnError
+	@Return			PVR_SUCCESS on success	
+	@Description	Removes a given semantic ID from the 'known' semantic list and 
+					re-parses the effect to update the uniform table.
+	*****************************************************************************/
+	EPVRTError RemoveUniformSemantic(unsigned int uiSemanticID, CPVRTString* pReturnError);
+
+	/*!***************************************************************************
+	 @Function			SetContext
+	 @Input				pContext			context pointer
+	 @Description		Sets the context for this effect.
+	 *****************************************************************************/
+	void SetContext(SPVRTContext * const pContext);
+	
+	/*!***************************************************************************
+	@Function		GetProgramHandle
+	@Return			unsigned int	
+	@Description	Returns the OGL program handle.
+	*****************************************************************************/
+	unsigned int GetProgramHandle() const;
+
+	/*!***************************************************************************
+	@Function		GetEffectIndex
+	@Return			unsigned int	
+	@Description	Gets the active effect index within the PFX file.
+	*****************************************************************************/
+	unsigned int GetEffectIndex() const;
+
+private:
+	/*!***************************************************************************
+	@Function		LoadShadersForEffect
+	@Input			pszFileName
+	@Output			pReturnError
+	@Return			EPVRTError	
+	@Description	Loads all of the GLSL shaders for an effect.
+	*****************************************************************************/
+	EPVRTError LoadShadersForEffect(CPVRTPFXParser &src, const char * const pszFileName, CPVRTString *pReturnError);
+
+	/*!***************************************************************************
+	@Function		LoadTexturesForEffect
+	@Output			pReturnError
+	@Return			EPVRTError	
+	@Description	Loads all of the textures for this effect.
+	*****************************************************************************/
+	EPVRTError LoadTexturesForEffect(PVRTPFXEffectDelegate* pDelegate, CPVRTString *pReturnError);
+
+	/*!***************************************************************************
+	@Function		BuildUniformTable
+	@Output			uiUnknownSemantics
+	@Output			pReturnError
+	@Return			EPVRTError	
+	@Description	Builds the uniform table from a list of known semantics.
+	*****************************************************************************/
+	EPVRTError RebuildUniformTable(unsigned int& uiUnknownSemantics, CPVRTString* pReturnError);
+
+protected:
+	bool									m_bLoaded;
+	SPVRTContext*							m_psContext;
+	CPVRTPFXParser*							m_pParser;
+	unsigned int							m_nEffect;
+
+	GLuint									m_uiProgram;		// Loaded program
+
+	CPVRTArray<SPVRTPFXTexture>				m_Textures;			// Array of loaded textures
+	CPVRTArray<SPVRTPFXUniform>				m_Uniforms;			// Array of found uniforms
+
+	CPVRTArray<SPVRTPFXUniformSemantic>		m_Semantics;		// An array of registered semantics.
 };
+
+/****************************************************************************
+** Auxiliary functions
+****************************************************************************/
+inline bool operator==(const SPVRTPFXUniformSemantic& lhs, const SPVRTPFXUniformSemantic& rhs)
+{
+	return (lhs.n == rhs.n);
+}
 
 #endif /* _PVRTPFXPARSERAPI_H_ */
 

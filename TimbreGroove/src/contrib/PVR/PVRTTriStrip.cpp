@@ -4,9 +4,9 @@
 
  @Title        PVRTTriStrip
 
- @Version      
+ @Version       @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     Independent
 
@@ -26,9 +26,7 @@
 /****************************************************************************
 ** Defines
 ****************************************************************************/
-#if !defined(__BADA__) // qsort is not supported by Bada
 #define RND_TRIS_ORDER
-#endif
 
 /****************************************************************************
 ** Structures

@@ -6,7 +6,7 @@
 
  @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     ANSI compatible
 
@@ -34,6 +34,8 @@ The API specific tools contain code for displaying text and loading textures.
 This is a description of the files which compose OGLES2Tools. Not all the files might have been released for
 your platform so check the file list to know what is available.
 
+\b PVRTArray: A dynamic, resizable template class.
+
 \b PVRTBoneBatch: Group vertices per bones to allow skinning when the maximum number of bones is limited.
 
 \b PVRTDecompress: Descompress PVRTC texture format.
@@ -47,6 +49,8 @@ your platform so check the file list to know what is available.
 \b PVRTQuaternion: Quaternion functions.
 
 \b PVRTResourceFile: The tools code for loading files included using FileWrap.
+
+\b PVRTMap: A dynamic, expanding templated map class.
 
 \b PVRTMisc: Skybox, line plane intersection code, etc...
 
@@ -81,13 +85,17 @@ your platform so check the file list to know what is available.
 
 #include "PVRTContext.h"
 #include "../PVRTGlobal.h"
+#include "../PVRTArray.h"
+#include "../PVRTHash.h"
 #include "../PVRTVector.h"
 #include "../PVRTString.h"
+#include "../PVRTStringHash.h"
 #include "../PVRTFixedPoint.h"
 #include "../PVRTMatrix.h"
 #include "../PVRTQuaternion.h"
 #include "../PVRTTrans.h"
 #include "../PVRTVertex.h"
+#include "../PVRTMap.h"
 #include "../PVRTMisc.h"
 #include "../PVRTBackground.h"
 #include "PVRTgles2Ext.h"
@@ -100,6 +108,7 @@ your platform so check the file list to know what is available.
 #include "PVRTShader.h"
 #include "../PVRTPFXParser.h"
 #include "PVRTPFXParserAPI.h"
+#include "PVRTPFXSemantics.h"
 #include "../PVRTShadowVol.h"
 #include "../PVRTResourceFile.h"
 #include "../PVRTError.h"

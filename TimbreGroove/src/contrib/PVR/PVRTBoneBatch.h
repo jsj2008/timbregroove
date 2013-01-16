@@ -6,7 +6,7 @@
 
  @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     ANSI compatible
 
@@ -17,6 +17,7 @@
 #define _PVRTBONEBATCH_H_
 
 #include "PVRTVertex.h"
+#include <stdlib.h>
 
 /*!***************************************************************************
  Handles a batch of bones
@@ -73,9 +74,9 @@ public:
 	*************************************************************************/
 	void Release()
 	{
-		{ delete pnBatches;			pnBatches = 0; }
-		{ delete pnBatchBoneCnt;	pnBatchBoneCnt = 0; }
-		{ delete pnBatchOffset;		pnBatchOffset = 0; }
+		FREE(pnBatches);
+		FREE(pnBatchBoneCnt);
+		FREE(pnBatchOffset);
 		nBatchCnt = 0;
 	}
 };

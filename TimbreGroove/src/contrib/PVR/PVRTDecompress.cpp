@@ -6,7 +6,7 @@
 
  @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     ANSI compatible
 
@@ -25,451 +25,497 @@
 #include "PVRTDecompress.h"
 #include "PVRTTexture.h"
 #include "PVRTGlobal.h"
-/*****************************************************************************
- * defines and consts
- *****************************************************************************/
-#define PT_INDEX (2)	// The Punch-through index
-
-#define BLK_Y_SIZE 	(4) // always 4 for all 2D block types
-
-#define BLK_X_MAX	(8)	// Max X dimension for blocks
-
-#define BLK_X_2BPP	(8) // dimensions for the two formats
-#define BLK_X_4BPP	(4)
-
-#define WRAP_COORD(Val, Size) ((Val) & ((Size)-1))
-
-#define POWER_OF_2(X)   util_number_is_power_2(X)
-
-/*
-	Define an expression to either wrap or clamp large or small vals to the
-	legal coordinate range
-*/
-#define LIMIT_COORD(Val, Size, AssumeImageTiles) \
-      ((AssumeImageTiles)? WRAP_COORD((Val), (Size)): PVRT_CLAMP((Val), 0, (Size)-1))
-
-/*****************************************************************************
- * Useful typedefs
- *****************************************************************************/
-typedef PVRTuint32 U32;
-typedef PVRTuint8 U8;
 
 /***********************************************************
 				DECOMPRESSION ROUTINES
 ************************************************************/
-
-/*!***********************************************************************
- @Struct	AMTC_BLOCK_STRUCT
- @Brief
-*************************************************************************/
-typedef struct
+/*****************************************************************************
+ * Useful structs
+ *****************************************************************************/
+struct Pixel32
 {
-	// Uses 64 bits pre block
-	U32 PackedData[2];
-}AMTC_BLOCK_STRUCT;
+	PVRTuint8 red,green,blue,alpha;
+};
 
-
-static void Decompress(AMTC_BLOCK_STRUCT *pCompressedData,
-					   const int Do2bitMode,
-					   const int XDim,
-					   const int YDim,
-					   const int AssumeImageTiles,
-					   unsigned char* pResultImage);
-
-/*!***********************************************************************
- @Function		PVRTDecompressPVRTC
- @Input			pCompressedData The PVRTC texture data to decompress
- @Input			Do2bitMode Signifies whether the data is PVRTC2 or PVRTC4
- @Input			XDim X dimension of the texture
- @Input			YDim Y dimension of the texture
- @Modified		pResultImage The decompressed texture data
- @Description	Decompresses PVRTC to RGBA 8888
-*************************************************************************/
-void PVRTDecompressPVRTC(const void *pCompressedData,
-				const int Do2bitMode,
-				const int XDim,
-				const int YDim,
-				unsigned char* pResultImage)
+struct Pixel128S
 {
-	Decompress((AMTC_BLOCK_STRUCT*)pCompressedData,Do2bitMode,XDim,YDim,1,pResultImage);
+	PVRTint32 red,green,blue,alpha;
+};
+
+struct PVRTCWord
+{
+	PVRTuint32 u32ModulationData;
+	PVRTuint32 u32ColourData;
+};
+
+struct PVRTCWordIndices
+{
+	int P[2], Q[2], R[2], S[2];
+};	
+/********************************************************************************/
+/*!***********************************************************************
+ @Function		getColourA
+ @Input			u32ColourData	Colour information from a PVRTCWord.
+ @Return		Returns the first colour in a PVRTCWord's colour data.
+ @Description	Decodes the first colour in a PVRTCWord's colour data.
+*************************************************************************/
+static Pixel32 getColourA(PVRTuint32 u32ColourData)
+{
+	Pixel32 colour;
+
+	// Opaque Colour Mode - RGB 554
+	if ((u32ColourData & 0x8000) != 0)
+	{
+		colour.red   = (PVRTuint8)((u32ColourData & 0x7c00) >> 10); // 5->5 bits
+		colour.green = (PVRTuint8)((u32ColourData & 0x3e0)  >> 5); // 5->5 bits
+		colour.blue  = (PVRTuint8)(u32ColourData  & 0x1e) | ((u32ColourData & 0x1e) >> 4); // 4->5 bits
+		colour.alpha = (PVRTuint8)0xf;// 0->4 bits
+	}
+	// Transparent Colour Mode - ARGB 3443
+	else
+	{	
+		colour.red   = (PVRTuint8)((u32ColourData & 0xf00)  >> 7) | ((u32ColourData & 0xf00) >> 11); // 4->5 bits
+		colour.green = (PVRTuint8)((u32ColourData & 0xf0)   >> 3) | ((u32ColourData & 0xf0)  >> 7); // 4->5 bits
+		colour.blue  = (PVRTuint8)((u32ColourData & 0xe)    << 1) | ((u32ColourData & 0xe)   >> 2); // 3->5 bits
+		colour.alpha = (PVRTuint8)((u32ColourData & 0x7000) >> 11);// 3->4 bits - note 0 at right
+	}
+
+	return colour;
 }
 
+/*!***********************************************************************
+ @Function		getColourB
+ @Input			u32ColourData	Colour information from a PVRTCWord.
+ @Return		Returns the second colour in a PVRTCWord's colour data.
+ @Description	Decodes the second colour in a PVRTCWord's colour data.
+*************************************************************************/
+static Pixel32 getColourB(PVRTuint32 u32ColourData)
+{ 
+	Pixel32 colour;
+
+	// Opaque Colour Mode - RGB 555
+	if (u32ColourData & 0x80000000)
+	{	
+		colour.red   = (PVRTuint8)((u32ColourData & 0x7c000000) >> 26); // 5->5 bits 
+		colour.green = (PVRTuint8)((u32ColourData & 0x3e00000)  >> 21); // 5->5 bits
+		colour.blue  = (PVRTuint8)((u32ColourData & 0x1f0000)   >> 16); // 5->5 bits
+		colour.alpha = (PVRTuint8)0xf;// 0 bits
+	}
+	// Transparent Colour Mode - ARGB 3444
+	else
+	{	
+		colour.red   = (PVRTuint8)(((u32ColourData & 0xf000000)  >> 23) | ((u32ColourData & 0xf000000) >> 27)); // 4->5 bits
+		colour.green = (PVRTuint8)(((u32ColourData & 0xf00000)   >> 19) | ((u32ColourData & 0xf00000)  >> 23)); // 4->5 bits
+		colour.blue  = (PVRTuint8)(((u32ColourData & 0xf0000)    >> 15) | ((u32ColourData & 0xf0000)   >> 19)); // 4->5 bits
+		colour.alpha = (PVRTuint8)((u32ColourData & 0x70000000) >> 27);// 3->4 bits - note 0 at right
+	}
+
+	return colour;
+}
+
+/*!***********************************************************************
+ @Function		interpolateColours
+ @Input			P,Q,R,S				Low bit-rate colour values for each PVRTCWord.
+ @Modified		pPixel				Output array for upscaled colour values.
+ @Input			ui8Bpp				Number of bpp.
+ @Description	Bilinear upscale from 2x2 pixels to 4x4/8x4 pixels (depending on PVRTC bpp mode).
+*************************************************************************/
+static void interpolateColours(Pixel32 P, Pixel32 Q, Pixel32 R, Pixel32 S, 
+						Pixel128S *pPixel, PVRTuint8 ui8Bpp)
+{
+	PVRTuint32 ui32WordWidth=4;
+	PVRTuint32 ui32WordHeight=4;
+	if (ui8Bpp==2)
+		ui32WordWidth=8;
+
+	//Convert to int 32.
+	Pixel128S hP = {(PVRTint32)P.red,(PVRTint32)P.green,(PVRTint32)P.blue,(PVRTint32)P.alpha};
+	Pixel128S hQ = {(PVRTint32)Q.red,(PVRTint32)Q.green,(PVRTint32)Q.blue,(PVRTint32)Q.alpha};
+	Pixel128S hR = {(PVRTint32)R.red,(PVRTint32)R.green,(PVRTint32)R.blue,(PVRTint32)R.alpha};
+	Pixel128S hS = {(PVRTint32)S.red,(PVRTint32)S.green,(PVRTint32)S.blue,(PVRTint32)S.alpha};
+
+	//Get vectors.
+	Pixel128S QminusP = {hQ.red - hP.red, hQ.green - hP.green, hQ.blue - hP.blue, hQ.alpha - hP.alpha};	
+	Pixel128S SminusR = {hS.red - hR.red, hS.green - hR.green, hS.blue - hR.blue, hS.alpha - hR.alpha};	
+
+	//Multiply colours.
+	hP.red		*=	ui32WordWidth;
+	hP.green	*=	ui32WordWidth;
+	hP.blue		*=	ui32WordWidth;
+	hP.alpha	*=	ui32WordWidth;
+	hR.red		*=	ui32WordWidth;
+	hR.green	*=	ui32WordWidth;
+	hR.blue		*=	ui32WordWidth;
+	hR.alpha	*=	ui32WordWidth;
+	
+	if (ui8Bpp==2)
+	{
+		//Loop through pixels to achieve results.
+		for (unsigned int x=0; x < ui32WordWidth; x++)
+		{			
+			Pixel128S Result={4*hP.red, 4*hP.green, 4*hP.blue, 4*hP.alpha};
+			Pixel128S dY = {hR.red - hP.red, hR.green - hP.green, hR.blue - hP.blue, hR.alpha - hP.alpha};	
+
+			for (unsigned int y=0; y < ui32WordHeight; y++)				
+			{
+				pPixel[y*ui32WordWidth+x].red   = (PVRTint32)((Result.red   >> 7) + (Result.red   >> 2));
+				pPixel[y*ui32WordWidth+x].green = (PVRTint32)((Result.green >> 7) + (Result.green >> 2));
+				pPixel[y*ui32WordWidth+x].blue  = (PVRTint32)((Result.blue  >> 7) + (Result.blue  >> 2));
+				pPixel[y*ui32WordWidth+x].alpha = (PVRTint32)((Result.alpha >> 5) + (Result.alpha >> 1));				
+
+				Result.red		+= dY.red;
+				Result.green	+= dY.green;
+				Result.blue		+= dY.blue;
+				Result.alpha	+= dY.alpha;
+			}			
+
+			hP.red		+= QminusP.red;
+			hP.green	+= QminusP.green;
+			hP.blue		+= QminusP.blue;
+			hP.alpha	+= QminusP.alpha;
+
+			hR.red		+= SminusR.red;
+			hR.green	+= SminusR.green;
+			hR.blue		+= SminusR.blue;
+			hR.alpha	+= SminusR.alpha;
+		}
+	}
+	else
+	{
+		//Loop through pixels to achieve results.
+		for (unsigned int y=0; y < ui32WordHeight; y++)
+		{			
+			Pixel128S Result={4*hP.red, 4*hP.green, 4*hP.blue, 4*hP.alpha};
+			Pixel128S dY = {hR.red - hP.red, hR.green - hP.green, hR.blue - hP.blue, hR.alpha - hP.alpha};	
+
+			for (unsigned int x=0; x < ui32WordWidth; x++)				
+			{
+				pPixel[y*ui32WordWidth+x].red   = (PVRTint32)((Result.red   >> 6) + (Result.red   >> 1));
+				pPixel[y*ui32WordWidth+x].green = (PVRTint32)((Result.green >> 6) + (Result.green >> 1));
+				pPixel[y*ui32WordWidth+x].blue  = (PVRTint32)((Result.blue  >> 6) + (Result.blue  >> 1));
+				pPixel[y*ui32WordWidth+x].alpha = (PVRTint32)((Result.alpha >> 4) + (Result.alpha));				
+
+				Result.red += dY.red;
+				Result.green += dY.green;
+				Result.blue += dY.blue;
+				Result.alpha += dY.alpha;
+			}			
+
+			hP.red += QminusP.red;
+			hP.green += QminusP.green;
+			hP.blue += QminusP.blue;
+			hP.alpha += QminusP.alpha;
+
+			hR.red += SminusR.red;
+			hR.green += SminusR.green;
+			hR.blue += SminusR.blue;
+			hR.alpha += SminusR.alpha;
+		}
+	}
+}
+
+/*!***********************************************************************
+ @Function		unpackModulations
+ @Input			word				PVRTCWord to be decompressed
+ @Input			offsetX				X position within the PVRTCWord
+ @Input			offsetY				Y position within the PVRTCWord
+ @Modified		i32ModulationValues	The array of modulation values.
+ @Modified		i32ModulationModes	The array of modulation modes.
+ @Input			ui8Bpp				Number of bpp.
+ @Description	Reads out and decodes the modulation values within the a given PVRTCWord
+*************************************************************************/
+static void unpackModulations(const PVRTCWord& word, int offsetX, int offsetY, PVRTint32 i32ModulationValues[16][8], PVRTint32 i32ModulationModes[16][8], PVRTuint8 ui8Bpp)
+{	
+	PVRTuint32 WordModMode = word.u32ColourData & 0x1;
+	PVRTuint32 ModulationBits = word.u32ModulationData;
+
+	// Unpack differently depending on 2bpp or 4bpp modes.
+	if (ui8Bpp==2)
+	{
+		if(WordModMode)
+		{
+			// determine which of the three modes are in use:
+
+			// If this is the either the H-only or V-only interpolation mode...
+			if(ModulationBits & 0x1)
+			{
+				// look at the "LSB" for the "centre" (V=2,H=4) texel. Its LSB is now
+				// actually used to indicate whether it's the H-only mode or the V-only...
+
+				// The centre texel data is the at (y==2, x==4) and so its LSB is at bit 20.
+				if(ModulationBits & (0x1 << 20))
+				{
+					// This is the V-only mode
+					WordModMode = 3; 
+				}
+				else
+				{
+					// This is the H-only mode
+					WordModMode = 2; 
+				}
+
+				// Create an extra bit for the centre pixel so that it looks like
+				// we have 2 actual bits for this texel. It makes later coding much easier.
+				if(ModulationBits & (0x1 << 21))
+				{
+					// set it to produce code for 1.0
+					ModulationBits |= (0x1 << 20); 
+				}
+				else
+				{
+					// clear it to produce 0.0 code
+					ModulationBits &= ~(0x1 << 20);
+				}
+			}// end if H-Only or V-Only interpolation mode was chosen
+
+			if(ModulationBits & 0x2)
+			{
+				ModulationBits |= 0x1; /*set it*/
+			}
+			else
+			{
+				ModulationBits &= ~0x1; /*clear it*/
+			}
+
+			// run through all the pixels in the block. Note we can now treat all the
+			// "stored" values as if they have 2bits (even when they didn't!)
+			for(int y = 0; y < 4; y++)
+			{
+				for(int x = 0; x < 8; x++)
+				{
+					i32ModulationModes[x+offsetX][y+offsetY] = WordModMode;				
+
+					// if this is a stored value...
+					if(((x^y)&1) == 0)
+					{
+						i32ModulationValues[x+offsetX][y+offsetY] = ModulationBits & 3;						
+						ModulationBits >>= 2;
+					}
+				}
+			} // end for y
+		}
+		// else if direct encoded 2bit mode - i.e. 1 mode bit per pixel
+		else
+		{
+			for(int y = 0; y < 4; y++)
+			{
+				for(int x = 0; x < 8; x++)
+				{
+					i32ModulationModes[x+offsetX][y+offsetY] = WordModMode;					
+
+					/*
+					// double the bits so 0=> 00, and 1=>11
+					*/
+					if(ModulationBits & 1)
+					{
+						i32ModulationValues[x+offsetX][y+offsetY] = 0x3;						
+					}
+					else
+					{
+						i32ModulationValues[x+offsetX][y+offsetY] = 0x0;					
+					}
+					ModulationBits >>= 1;
+				}
+			}// end for y
+		}		
+	}
+	else
+	{
+		//Much simpler than the 2bpp decompression, only two modes, so the n/8 values are set directly.
+		// run through all the pixels in the word.
+		if (WordModMode)
+		{
+			for(int y = 0; y < 4; y++)
+			{
+				for(int x = 0; x < 4; x++)
+				{
+					i32ModulationValues[y+offsetY][x+offsetX] = ModulationBits & 3;
+					//if (i32ModulationValues==0) {}; don't need to check 0, 0 = 0/8.
+					if (i32ModulationValues[y+offsetY][x+offsetX]==1) { i32ModulationValues[y+offsetY][x+offsetX]=4;}
+					else if (i32ModulationValues[y+offsetY][x+offsetX]==2) { i32ModulationValues[y+offsetY][x+offsetX]=14;} //+10 tells the decompressor to punch through alpha.
+					else if (i32ModulationValues[y+offsetY][x+offsetX]==3) { i32ModulationValues[y+offsetY][x+offsetX]=8;}
+					ModulationBits >>= 2;
+				} // end for x
+			} // end for y
+		}
+		else
+		{
+			for(int y = 0; y < 4; y++)
+			{
+				for(int x = 0; x < 4; x++)
+				{
+					i32ModulationValues[y+offsetY][x+offsetX] = ModulationBits & 3;
+					i32ModulationValues[y+offsetY][x+offsetX]*=3;
+					if (i32ModulationValues[y+offsetY][x+offsetX]>3) i32ModulationValues[y+offsetY][x+offsetX]-=1;
+					ModulationBits >>= 2;
+				} // end for x
+			} // end for y
+		}
+	}
+}
+
+/*!***********************************************************************
+ @Function		getModulationValues
+ @Input			i32ModulationValues	The array of modulation values.
+ @Input			i32ModulationModes	The array of modulation modes.
+ @Input			xPos				The x Position within the current word.
+ @Input			yPos				The y Position within the current word.
+ @Input			ui8Bpp				Number of bpp.
+ @Return		Returns the modulation value.
+ @Description	Gets the effective modulation values for a given pixel.
+*************************************************************************/
+static PVRTint32 getModulationValues(PVRTint32 i32ModulationValues[16][8],PVRTint32 i32ModulationModes[16][8],PVRTuint32 xPos,PVRTuint32 yPos,PVRTuint8 ui8Bpp)
+{
+	if (ui8Bpp==2)
+	{
+		const int RepVals0[4] = {0, 3, 5, 8};				
+
+		// extract the modulation value. If a simple encoding
+		if(i32ModulationModes[xPos][yPos]==0)
+		{
+			return RepVals0[i32ModulationValues[xPos][yPos]];
+		}
+		else
+		{
+			// if this is a stored value
+			if(((xPos^yPos)&1)==0)
+			{
+				return RepVals0[i32ModulationValues[xPos][yPos]];				
+			}
+
+			// else average from the neighbours
+			// if H&V interpolation...
+			else if(i32ModulationModes[xPos][yPos] == 1)
+			{
+				return (RepVals0[i32ModulationValues[xPos][yPos-1]] + 
+					RepVals0[i32ModulationValues[xPos][yPos+1]] + 
+					RepVals0[i32ModulationValues[xPos-1][yPos]] + 
+					RepVals0[i32ModulationValues[xPos+1][yPos]] + 2) / 4;				
+			}
+			// else if H-Only
+			else if(i32ModulationModes[xPos][yPos] == 2)
+			{
+				return (RepVals0[i32ModulationValues[xPos-1][yPos]] + 
+					RepVals0[i32ModulationValues[xPos+1][yPos]] + 1) / 2;
+			}
+			// else it's V-Only
+			else
+			{
+				return (RepVals0[i32ModulationValues[xPos][yPos-1]] + 
+					RepVals0[i32ModulationValues[xPos][yPos+1]] + 1) / 2;
+			}
+		}
+	}
+	else if (ui8Bpp==4)
+		return i32ModulationValues[xPos][yPos];
+
+	return 0;
+}
+
+/*!***********************************************************************
+ @Function		pvrtcGetDecompressedPixels
+ @Input			P,Q,R,S				PVRTWords in current decompression area.
+ @Modified		pColourData			Output pixels.
+ @Input			ui8Bpp				Number of bpp.
+ @Description	Gets decompressed pixels for a given decompression area.
+*************************************************************************/
+static void pvrtcGetDecompressedPixels(const PVRTCWord& P, const PVRTCWord& Q, 
+								const PVRTCWord& R, const PVRTCWord& S, 
+								Pixel32 *pColourData,
+								PVRTuint8 ui8Bpp)
+{
+	//4bpp only needs 8*8 values, but 2bpp needs 16*8, so rather than wasting processor time we just statically allocate 16*8.
+	PVRTint32 i32ModulationValues[16][8];
+	//Only 2bpp needs this.
+	PVRTint32 i32ModulationModes[16][8];
+	//4bpp only needs 16 values, but 2bpp needs 32, so rather than wasting processor time we just statically allocate 32.
+	Pixel128S upscaledColourA[32];
+	Pixel128S upscaledColourB[32];
+
+	PVRTuint32 ui32WordWidth=4;
+	PVRTuint32 ui32WordHeight=4;
+	if (ui8Bpp==2)
+		ui32WordWidth=8;
+
+	//Get the modulations from each word.
+	unpackModulations(P, 0, 0, i32ModulationValues, i32ModulationModes, ui8Bpp);
+	unpackModulations(Q, ui32WordWidth, 0, i32ModulationValues, i32ModulationModes, ui8Bpp);
+	unpackModulations(R, 0, ui32WordHeight, i32ModulationValues, i32ModulationModes, ui8Bpp);
+	unpackModulations(S, ui32WordWidth, ui32WordHeight, i32ModulationValues, i32ModulationModes, ui8Bpp);
+
+	// Bilinear upscale image data from 2x2 -> 4x4
+	interpolateColours(getColourA(P.u32ColourData), getColourA(Q.u32ColourData), 
+		getColourA(R.u32ColourData), getColourA(S.u32ColourData), 
+		upscaledColourA, ui8Bpp);
+	interpolateColours(getColourB(P.u32ColourData), getColourB(Q.u32ColourData), 
+		getColourB(R.u32ColourData), getColourB(S.u32ColourData), 
+		upscaledColourB, ui8Bpp);
+
+	for (unsigned int y=0; y < ui32WordHeight; y++)
+	{
+		for (unsigned int x=0; x < ui32WordWidth; x++)
+		{
+			PVRTint32 mod = getModulationValues(i32ModulationValues,i32ModulationModes,x+ui32WordWidth/2,y+ui32WordHeight/2,ui8Bpp);
+			bool punchthroughAlpha=false;
+			if (mod>10) {punchthroughAlpha=true; mod-=10;}
+
+			Pixel128S result;				
+			result.red   = (upscaledColourA[y*ui32WordWidth+x].red * (8-mod) + upscaledColourB[y*ui32WordWidth+x].red * mod) / 8;
+			result.green = (upscaledColourA[y*ui32WordWidth+x].green * (8-mod) + upscaledColourB[y*ui32WordWidth+x].green * mod) / 8;
+			result.blue  = (upscaledColourA[y*ui32WordWidth+x].blue * (8-mod) + upscaledColourB[y*ui32WordWidth+x].blue * mod) / 8;
+			if (punchthroughAlpha) result.alpha = 0;
+			else result.alpha = (upscaledColourA[y*ui32WordWidth+x].alpha * (8-mod) + upscaledColourB[y*ui32WordWidth+x].alpha * mod) / 8;
+
+			//Convert the 32bit precision result to 8 bit per channel colour.
+			if (ui8Bpp==2)
+			{
+				pColourData[y*ui32WordWidth+x].red = (PVRTuint8)result.red;
+				pColourData[y*ui32WordWidth+x].green = (PVRTuint8)result.green;
+				pColourData[y*ui32WordWidth+x].blue = (PVRTuint8)result.blue;
+				pColourData[y*ui32WordWidth+x].alpha = (PVRTuint8)result.alpha;
+			}
+			else if (ui8Bpp==4)
+			{
+				pColourData[y+x*ui32WordHeight].red = (PVRTuint8)result.red;
+				pColourData[y+x*ui32WordHeight].green = (PVRTuint8)result.green;
+				pColourData[y+x*ui32WordHeight].blue = (PVRTuint8)result.blue;
+				pColourData[y+x*ui32WordHeight].alpha = (PVRTuint8)result.alpha;				
+			}
+		}
+	}	
+}
+
+/*!***********************************************************************
+ @Function		wrapWordIndex
+ @Input			numWords			Total number of PVRTCWords in the current surface.
+ @Input			word				Original index for a PVRTCWord.
+ @Return		unsigned int		Wrapped PVRTCWord index.
+ @Description	Maps decompressed data to the correct location in the output buffer.
+*************************************************************************/
+static unsigned int wrapWordIndex(unsigned int numWords, int word)
+{
+	return ((word + numWords) % numWords);
+}
+
+#if defined(_DEBUG)
  /*!***********************************************************************
-  @Function		util_number_is_power_2
-  @Input		input A number
-  @Returns		TRUE if the number is an integer power of two, else FALSE.
+  @Function		isPowerOf2
+  @Input		input	Value to be checked
+  @Returns		true if the number is an integer power of two, else false.
   @Description	Check that a number is an integer power of two, i.e.
              	1, 2, 4, 8, ... etc.
-				Returns FALSE for zero.
+				Returns false for zero.
 *************************************************************************/
-int util_number_is_power_2( unsigned  input )
+static bool isPowerOf2( unsigned int input )
 {
-  unsigned minus1;
+  unsigned int minus1;
 
   if( !input ) return 0;
 
   minus1 = input - 1;
-  return ( (input | minus1) == (input ^ minus1) ) ? 1 : 0;
+  return ( (input | minus1) == (input ^ minus1) );
 }
-
-
-/*!***********************************************************************
- @Function		Unpack5554Colour
- @Input			pBlock
- @Input			ABColours
- @Description	Given a block, extract the colour information and convert
- 				to 5554 formats
-*************************************************************************/
-static void Unpack5554Colour(const AMTC_BLOCK_STRUCT *pBlock,
-							 int   ABColours[2][4])
-{
-	U32 RawBits[2];
-
-	int i;
-
-	// Extract A and B
-	RawBits[0] = pBlock->PackedData[1] & (0xFFFE); // 15 bits (shifted up by one)
-	RawBits[1] = pBlock->PackedData[1] >> 16;	   // 16 bits
-
-	// step through both colours
-	for(i = 0; i < 2; i++)
-	{
-		// If completely opaque
-		if(RawBits[i] & (1<<15))
-		{
-			// Extract R and G (both 5 bit)
-			ABColours[i][0] = (RawBits[i] >> 10) & 0x1F;
-			ABColours[i][1] = (RawBits[i] >>  5) & 0x1F;
-
-			/*
-				The precision of Blue depends on  A or B. If A then we need to
-				replicate the top bit to get 5 bits in total
-			*/
-			ABColours[i][2] = RawBits[i] & 0x1F;
-			if(i==0)
-			{
-				ABColours[0][2] |= ABColours[0][2] >> 4;
-			}
-
-			// set 4bit alpha fully on...
-			ABColours[i][3] = 0xF;
-		}
-		else // Else if colour has variable translucency
-		{
-			/*
-				Extract R and G (both 4 bit).
-				(Leave a space on the end for the replication of bits
-			*/
-			ABColours[i][0] = (RawBits[i] >>  (8-1)) & 0x1E;
-			ABColours[i][1] = (RawBits[i] >>  (4-1)) & 0x1E;
-
-			// replicate bits to truly expand to 5 bits
-			ABColours[i][0] |= ABColours[i][0] >> 4;
-			ABColours[i][1] |= ABColours[i][1] >> 4;
-
-			// grab the 3(+padding) or 4 bits of blue and add an extra padding bit
-			ABColours[i][2] = (RawBits[i] & 0xF) << 1;
-
-			/*
-				expand from 3 to 5 bits if this is from colour A, or 4 to 5 bits if from
-				colour B
-			*/
-			if(i==0)
-			{
-				ABColours[0][2] |= ABColours[0][2] >> 3;
-			}
-			else
-			{
-				ABColours[0][2] |= ABColours[0][2] >> 4;
-			}
-
-			// Set the alpha bits to be 3 + a zero on the end
-			ABColours[i][3] = (RawBits[i] >> 11) & 0xE;
-		}
-	}
-}
-
-/*!***********************************************************************
- @Function		UnpackModulations
- @Input			pBlock
- @Input			Do2bitMode
- @Input			ModulationVals
- @Input			ModulationModes
- @Input			StartX
- @Input			StartY
- @Description	Given the block and the texture type and it's relative
- 				position in the 2x2 group of blocks, extract the bit
- 				patterns for the fully defined pixels.
-*************************************************************************/
-static void	UnpackModulations(const AMTC_BLOCK_STRUCT *pBlock,
-							  const int Do2bitMode,
-							  int ModulationVals[8][16],
-							  int ModulationModes[8][16],
-							  int StartX,
-							  int StartY)
-{
-	int BlockModMode;
-	U32 ModulationBits;
-
-	int x, y;
-
-	BlockModMode= pBlock->PackedData[1] & 1;
-	ModulationBits	= pBlock->PackedData[0];
-
-	// if it's in an interpolated mode
-	if(Do2bitMode && BlockModMode)
-	{
-		/*
-			run through all the pixels in the block. Note we can now treat all the
-			"stored" values as if they have 2bits (even when they didn't!)
-		*/
-		for(y = 0; y < BLK_Y_SIZE; y++)
-		{
-			for(x = 0; x < BLK_X_2BPP; x++)
-			{
-				ModulationModes[y+StartY][x+StartX] = BlockModMode;
-
-				// if this is a stored value...
-				if(((x^y)&1) == 0)
-				{
-					ModulationVals[y+StartY][x+StartX] = ModulationBits & 3;
-					ModulationBits >>= 2;
-				}
-			}
-		}
-	}
-	else if(Do2bitMode) // else if direct encoded 2bit mode - i.e. 1 mode bit per pixel
-	{
-		for(y = 0; y < BLK_Y_SIZE; y++)
-		{
-			for(x = 0; x < BLK_X_2BPP; x++)
-			{
-				ModulationModes[y+StartY][x+StartX] = BlockModMode;
-
-				// double the bits so 0=> 00, and 1=>11
-				if(ModulationBits & 1)
-				{
-					ModulationVals[y+StartY][x+StartX] = 0x3;
-				}
-				else
-				{
-					ModulationVals[y+StartY][x+StartX] = 0x0;
-				}
-				ModulationBits >>= 1;
-			}
-		}
-	}
-	else // else its the 4bpp mode so each value has 2 bits
-	{
-		for(y = 0; y < BLK_Y_SIZE; y++)
-		{
-			for(x = 0; x < BLK_X_4BPP; x++)
-			{
-				ModulationModes[y+StartY][x+StartX] = BlockModMode;
-
-				ModulationVals[y+StartY][x+StartX] = ModulationBits & 3;
-				ModulationBits >>= 2;
-			}
-		}
-	}
-
-	// make sure nothing is left over
-	_ASSERT(ModulationBits==0);
-}
-
-/*!***********************************************************************
- @Function		InterpolateColours
- @Input			ColourP
- @Input			ColourQ
- @Input			ColourR
- @Input			ColourS
- @Input			Do2bitMode
- @Input			x
- @Input			y
- @Modified		Result
- @Description	This performs a HW bit accurate interpolation of either the
-				A or B colours for a particular pixel.
-
-				NOTE: It is assumed that the source colours are in ARGB 5554
-				format - This means that some "preparation" of the values will
-				be necessary.
-*************************************************************************/
-static void InterpolateColours(const int ColourP[4],
-						  const int ColourQ[4],
-						  const int ColourR[4],
-						  const int ColourS[4],
-						  const int Do2bitMode,
-						  const int x,
-						  const int y,
-						  int Result[4])
-{
-	int u, v, uscale;
-	int k;
-
-	int tmp1, tmp2;
-
-	int P[4], Q[4], R[4], S[4];
-
-	// Copy the colours
-	for(k = 0; k < 4; k++)
-	{
-		P[k] = ColourP[k];
-		Q[k] = ColourQ[k];
-		R[k] = ColourR[k];
-		S[k] = ColourS[k];
-	}
-
-	// put the x and y values into the right range
-	v = (y & 0x3) | ((~y & 0x2) << 1);
-
-	if(Do2bitMode)
-		u = (x & 0x7) | ((~x & 0x4) << 1);
-	else
-		u = (x & 0x3) | ((~x & 0x2) << 1);
-
-	// get the u and v scale amounts
-	v  = v - BLK_Y_SIZE/2;
-
-	if(Do2bitMode)
-	{
-		u = u - BLK_X_2BPP/2;
-		uscale = 8;
-	}
-	else
-	{
-		u = u - BLK_X_4BPP/2;
-		uscale = 4;
-	}
-
-	for(k = 0; k < 4; k++)
-	{
-		tmp1 = P[k] * uscale + u * (Q[k] - P[k]);
-		tmp2 = R[k] * uscale + u * (S[k] - R[k]);
-
-		tmp1 = tmp1 * 4 + v * (tmp2 - tmp1);
-
-		Result[k] = tmp1;
-	}
-
-	// Lop off the appropriate number of bits to get us to 8 bit precision
-	if(Do2bitMode)
-	{
-		// do RGB
-		for(k = 0; k < 3; k++)
-		{
-			Result[k] >>= 2;
-		}
-
-		Result[3] >>= 1;
-	}
-	else
-	{
-		// do RGB  (A is ok)
-		for(k = 0; k < 3; k++)
-		{
-			Result[k] >>= 1;
-		}
-	}
-
-	// sanity check
-	for(k = 0; k < 4; k++)
-	{
-		_ASSERT(Result[k] < 256);
-	}
-
-
-	/*
-		Convert from 5554 to 8888
-
-		do RGB 5.3 => 8
-	*/
-	for(k = 0; k < 3; k++)
-	{
-		Result[k] += Result[k] >> 5;
-	}
-
-	Result[3] += Result[3] >> 4;
-
-	// 2nd sanity check
-	for(k = 0; k < 4; k++)
-	{
-		_ASSERT(Result[k] < 256);
-	}
-
-}
-
-/*!***********************************************************************
- @Function		GetModulationValue
- @Input			x
- @Input			y
- @Input			Do2bitMode
- @Input			ModulationVals
- @Input			ModulationModes
- @Input			Mod
- @Input			DoPT
- @Description	Get the modulation value as a numerator of a fraction of 8ths
-*************************************************************************/
-static void GetModulationValue(int x,
-							   int y,
-							   const int Do2bitMode,
-							   const int ModulationVals[8][16],
-							   const int ModulationModes[8][16],
-							   int *Mod,
-							   int *DoPT)
-{
-	static const int RepVals0[4] = {0, 3, 5, 8};
-	static const int RepVals1[4] = {0, 4, 4, 8};
-
-	int ModVal;
-
-	// Map X and Y into the local 2x2 block
-	y = (y & 0x3) | ((~y & 0x2) << 1);
-
-	if(Do2bitMode)
-		x = (x & 0x7) | ((~x & 0x4) << 1);
-	else
-		x = (x & 0x3) | ((~x & 0x2) << 1);
-
-	// assume no PT for now
-	*DoPT = 0;
-
-	// extract the modulation value. If a simple encoding
-	if(ModulationModes[y][x]==0)
-	{
-		ModVal = RepVals0[ModulationVals[y][x]];
-	}
-	else if(Do2bitMode)
-	{
-		// if this is a stored value
-		if(((x^y)&1)==0)
-			ModVal = RepVals0[ModulationVals[y][x]];
-		else if(ModulationModes[y][x] == 1) // else average from the neighbours if H&V interpolation..
-		{
-			ModVal = (RepVals0[ModulationVals[y-1][x]] +
-					  RepVals0[ModulationVals[y+1][x]] +
-					  RepVals0[ModulationVals[y][x-1]] +
-					  RepVals0[ModulationVals[y][x+1]] + 2) / 4;
-		}
-		else if(ModulationModes[y][x] == 2) // else if H-Only
-		{
-			ModVal = (RepVals0[ModulationVals[y][x-1]] +
-					  RepVals0[ModulationVals[y][x+1]] + 1) / 2;
-		}
-		else // else it's V-Only
-		{
-			ModVal = (RepVals0[ModulationVals[y-1][x]] +
-					  RepVals0[ModulationVals[y+1][x]] + 1) / 2;
-		}
-	}
-	else // else it's 4BPP and PT encoding
-	{
-		ModVal = RepVals1[ModulationVals[y][x]];
-
-		*DoPT = ModulationVals[y][x] == PT_INDEX;
-	}
-
-	*Mod =ModVal;
-}
+#endif
 
 /*!***********************************************************************
  @Function		TwiddleUV
@@ -478,53 +524,36 @@ static void GetModulationValue(int x,
  @Input			YPos	Pixel Y position
  @Input			XPos	Pixel X position
  @Returns		The twiddled offset of the pixel
- @Description	Given the Block (or pixel) coordinates and the dimension of
- 				the texture in blocks (or pixels) this returns the twiddled
- 				offset of the block (or pixel) from the start of the map.
+ @Description	Given the Word (or pixel) coordinates and the dimension of
+ 				the texture in words (or pixels) this returns the twiddled
+ 				offset of the word (or pixel) from the start of the map.
 
-				NOTE the dimensions of the texture must be a power of 2
+				NOTE: the dimensions of the texture must be a power of 2
 *************************************************************************/
-static int DisableTwiddlingRoutine = 0;
-
-static U32 TwiddleUV(U32 YSize, U32 XSize, U32 YPos, U32 XPos)
+static PVRTuint32 TwiddleUV(PVRTuint32 XSize, PVRTuint32 YSize, PVRTuint32 XPos, PVRTuint32 YPos)
 {
-	U32 Twiddled;
+	//Initially assume X is the larger size.
+	PVRTuint32 MinDimension=XSize;
+	PVRTuint32 MaxValue=YPos;
+	PVRTuint32 Twiddled=0;
+	PVRTuint32 SrcBitPos=1;
+	PVRTuint32 DstBitPos=1;
+	int ShiftCount=0;
 
-	U32 MinDimension;
-	U32 MaxValue;
-
-	U32 SrcBitPos;
-	U32 DstBitPos;
-
-	int ShiftCount;
-
+	//Check the sizes are valid.
 	_ASSERT(YPos < YSize);
 	_ASSERT(XPos < XSize);
+	_ASSERT(isPowerOf2(YSize));
+	_ASSERT(isPowerOf2(XSize));
 
-	_ASSERT(POWER_OF_2(YSize));
-	_ASSERT(POWER_OF_2(XSize));
-
+	//If Y is the larger dimension - switch the min/max values.
 	if(YSize < XSize)
 	{
 		MinDimension = YSize;
 		MaxValue	 = XPos;
 	}
-	else
-	{
-		MinDimension = XSize;
-		MaxValue	 = YPos;
-	}
-
-	// Nasty hack to disable twiddling
-	if(DisableTwiddlingRoutine)
-		return (YPos* XSize + XPos);
 
 	// Step through all the bits in the "minimum" dimension
-	SrcBitPos = 1;
-	DstBitPos = 1;
-	Twiddled  = 0;
-	ShiftCount = 0;
-
 	while(SrcBitPos < MinDimension)
 	{
 		if(YPos & SrcBitPos)
@@ -537,177 +566,167 @@ static U32 TwiddleUV(U32 YSize, U32 XSize, U32 YPos, U32 XPos)
 			Twiddled |= (DstBitPos << 1);
 		}
 
-
 		SrcBitPos <<= 1;
 		DstBitPos <<= 2;
 		ShiftCount += 1;
-
 	}
 
-	// prepend any unused bits
+	// Prepend any unused bits
 	MaxValue >>= ShiftCount;
-
 	Twiddled |=  (MaxValue << (2*ShiftCount));
 
 	return Twiddled;
 }
 
 /*!***********************************************************************
- @Function		Decompress
+ @Function		mapDecompressedData
+ @Modified		pOutput				The PVRTC texture data to decompress
+ @Input			width				Width of the texture surface.
+ @Input			pWord				A pointer to the decompressed PVRTCWord in pixel form.
+ @Input			&words				Indices for the PVRTCword.
+ @Input			ui8Bpp				number of bits per pixel
+ @Description	Maps decompressed data to the correct location in the output buffer.
+*************************************************************************/
+static void mapDecompressedData(Pixel32* pOutput, int width,
+						 const Pixel32 *pWord,
+						 const PVRTCWordIndices &words,
+						 const PVRTuint8 ui8Bpp)
+{
+	PVRTuint32 ui32WordWidth=4;
+	PVRTuint32 ui32WordHeight=4;
+	if (ui8Bpp==2)
+		ui32WordWidth=8;
+
+	for (unsigned int y=0; y < ui32WordHeight/2; y++)
+	{
+		for (unsigned int x=0; x < ui32WordWidth/2; x++)
+		{
+			pOutput[(((words.P[1] * ui32WordHeight) + y + ui32WordHeight/2)
+				* width + words.P[0] *ui32WordWidth + x + ui32WordWidth/2)]	= pWord[y*ui32WordWidth+x];			// map P
+
+			pOutput[(((words.Q[1] * ui32WordHeight) + y + ui32WordHeight/2)	
+				* width + words.Q[0] *ui32WordWidth + x)]					= pWord[y*ui32WordWidth+x+ui32WordWidth/2];		// map Q
+
+			pOutput[(((words.R[1] * ui32WordHeight) + y)						
+				* width + words.R[0] *ui32WordWidth + x + ui32WordWidth/2)]	= pWord[(y+ui32WordHeight/2)*ui32WordWidth+x];		// map R
+
+			pOutput[(((words.S[1] * ui32WordHeight) + y)						
+				* width + words.S[0] *ui32WordWidth + x)]					= pWord[(y+ui32WordHeight/2)*ui32WordWidth+x+ui32WordWidth/2];	// map S
+		}
+	}
+}
+/*!***********************************************************************
+ @Function		pvrtcDecompress
+ @Input			pCompressedData		The PVRTC texture data to decompress
+ @Modified		pDecompressedData	The output buffer to decompress into.
+ @Input			ui32Width			X dimension of the texture
+ @Input			ui32Height			Y dimension of the texture
+ @Input			ui8Bpp				number of bits per pixel
+ @Description	Internally decompresses PVRTC to RGBA 8888
+*************************************************************************/
+static int pvrtcDecompress(	PVRTuint8 *pCompressedData,
+							Pixel32 *pDecompressedData,
+							PVRTuint32 ui32Width,
+							PVRTuint32 ui32Height,
+							PVRTuint8 ui8Bpp)
+{
+	PVRTuint32 ui32WordWidth=4;
+	PVRTuint32 ui32WordHeight=4;
+	if (ui8Bpp==2)
+		ui32WordWidth=8;
+
+	PVRTCWord *pWords = (PVRTCWord *)pCompressedData;
+	Pixel32 *pOutData = pDecompressedData;
+
+	// Calculate number of words
+	int i32NumXWords = (int)(ui32Width / ui32WordWidth);
+	int i32NumYWords = (int)(ui32Height / ui32WordHeight);
+
+	// Structs used for decompression
+	PVRTCWordIndices indices;
+	Pixel32 *pPixels;
+	pPixels = (Pixel32*)malloc(ui32WordWidth*ui32WordHeight*sizeof(Pixel32));
+	
+	// For each row of words
+	for(int wordY=-1; wordY < i32NumYWords-1; wordY++)
+	{
+		// for each column of words
+		for(int wordX=-1; wordX < i32NumXWords-1; wordX++)
+		{
+			indices.P[0] = wrapWordIndex(i32NumXWords, wordX);
+			indices.P[1] = wrapWordIndex(i32NumYWords, wordY);
+			indices.Q[0] = wrapWordIndex(i32NumXWords, wordX + 1); 
+			indices.Q[1] = wrapWordIndex(i32NumYWords, wordY);
+			indices.R[0] = wrapWordIndex(i32NumXWords, wordX); 
+			indices.R[1] = wrapWordIndex(i32NumYWords, wordY + 1);
+			indices.S[0] = wrapWordIndex(i32NumXWords, wordX + 1);
+			indices.S[1] = wrapWordIndex(i32NumYWords, wordY + 1);
+
+			PVRTCWord P = pWords[TwiddleUV(i32NumXWords,i32NumYWords,indices.P[0], indices.P[1])];
+			PVRTCWord Q = pWords[TwiddleUV(i32NumXWords,i32NumYWords,indices.Q[0], indices.Q[1])];
+			PVRTCWord R = pWords[TwiddleUV(i32NumXWords,i32NumYWords,indices.R[0], indices.R[1])];
+			PVRTCWord S = pWords[TwiddleUV(i32NumXWords,i32NumYWords,indices.S[0], indices.S[1])];
+							
+			// assemble 4 words into struct to get decompressed pixels from
+			pvrtcGetDecompressedPixels(P,Q,R,S,pPixels,ui8Bpp);
+			mapDecompressedData(pOutData, ui32Width, pPixels, indices, ui8Bpp);
+			
+		} // for each word
+	} // for each row of words
+
+	free(pPixels);
+	//Return the data size
+	return ui32Width * ui32Height / (PVRTuint32)(ui32WordWidth/2);
+}
+
+/*!***********************************************************************
+ @Function		PVRTDecompressPVRTC
  @Input			pCompressedData The PVRTC texture data to decompress
- @Input			Do2BitMode Signifies whether the data is PVRTC2 or PVRTC4
+ @Input			Do2bitMode Signifies whether the data is PVRTC2 or PVRTC4
  @Input			XDim X dimension of the texture
  @Input			YDim Y dimension of the texture
- @Input			AssumeImageTiles Assume the texture data tiles
  @Modified		pResultImage The decompressed texture data
+ @Return		Returns the amount of data that was decompressed.
  @Description	Decompresses PVRTC to RGBA 8888
 *************************************************************************/
-static void Decompress(AMTC_BLOCK_STRUCT *pCompressedData,
+int PVRTDecompressPVRTC(const void *pCompressedData,
 				const int Do2bitMode,
 				const int XDim,
 				const int YDim,
-				const int AssumeImageTiles,
 				unsigned char* pResultImage)
 {
-	int x, y;
-	int i, j;
+	//Cast the output buffer to a Pixel32 pointer.
+	Pixel32* pDecompressedData = (Pixel32*)pResultImage;
 
-	int BlkX, BlkY;
-	int BlkXp1, BlkYp1;
-	int XBlockSize;
-	int BlkXDim, BlkYDim;
+	//Check the X and Y values are at least the minimum size.
+	int XTrueDim = PVRT_MAX(XDim,((Do2bitMode==1)?16:8));
+	int YTrueDim = PVRT_MAX(YDim,8);
 
-	int StartX, StartY;
-
-	int ModulationVals[8][16];
-	int ModulationModes[8][16];
-
-	int Mod, DoPT;
-
-	unsigned int uPosition;
-
-	// local neighbourhood of blocks
-	AMTC_BLOCK_STRUCT *pBlocks[2][2];
-
-	AMTC_BLOCK_STRUCT *pPrevious[2][2] = {{NULL, NULL}, {NULL, NULL}};
-
-	// Low precision colours extracted from the blocks
-	struct
+	//If the dimensions aren't correct, we need to create a new buffer instead of just using the provided one, as the buffer will overrun otherwise.
+	if(XTrueDim!=XDim || YTrueDim!=YDim)
 	{
-		int Reps[2][4];
-	}Colours5554[2][2];
-
-	// Interpolated A and B colours for the pixel
-	int ASig[4], BSig[4];
-
-	int Result[4];
-
-	if(Do2bitMode)
-		XBlockSize = BLK_X_2BPP;
-	else
-		XBlockSize = BLK_X_4BPP;
-
-	// For MBX don't allow the sizes to get too small
-	BlkXDim = PVRT_MAX(2, XDim / XBlockSize);
-	BlkYDim = PVRT_MAX(2, YDim / BLK_Y_SIZE);
-
-	/*
-		Step through the pixels of the image decompressing each one in turn
-
-		Note that this is a hideously inefficient way to do this!
-	*/
-	for(y = 0; y < YDim; y++)
-	{
-		for(x = 0; x < XDim; x++)
-		{
-			// map this pixel to the top left neighbourhood of blocks
-			BlkX = (x - XBlockSize/2);
-			BlkY = (y - BLK_Y_SIZE/2);
-
-			BlkX = LIMIT_COORD(BlkX, XDim, AssumeImageTiles);
-			BlkY = LIMIT_COORD(BlkY, YDim, AssumeImageTiles);
-
-
-			BlkX /= XBlockSize;
-			BlkY /= BLK_Y_SIZE;
-
-			// compute the positions of the other 3 blocks
-			BlkXp1 = LIMIT_COORD(BlkX+1, BlkXDim, AssumeImageTiles);
-			BlkYp1 = LIMIT_COORD(BlkY+1, BlkYDim, AssumeImageTiles);
-
-			// Map to block memory locations
-			pBlocks[0][0] = pCompressedData +TwiddleUV(BlkYDim, BlkXDim, BlkY, BlkX);
-			pBlocks[0][1] = pCompressedData +TwiddleUV(BlkYDim, BlkXDim, BlkY, BlkXp1);
-			pBlocks[1][0] = pCompressedData +TwiddleUV(BlkYDim, BlkXDim, BlkYp1, BlkX);
-			pBlocks[1][1] = pCompressedData +TwiddleUV(BlkYDim, BlkXDim, BlkYp1, BlkXp1);
-
-
-			/*
-				extract the colours and the modulation information IF the previous values
-				have changed.
-			*/
-			if(memcmp(pPrevious, pBlocks, 4*sizeof(void*)) != 0)
-			{
-				StartY = 0;
-				for(i = 0; i < 2; i++)
-				{
-					StartX = 0;
-					for(j = 0; j < 2; j++)
-					{
-						Unpack5554Colour(pBlocks[i][j], Colours5554[i][j].Reps);
-
-						UnpackModulations(pBlocks[i][j],
-										  Do2bitMode,
-										  ModulationVals,
-										  ModulationModes,
-										  StartX, StartY);
-
-						StartX += XBlockSize;
-					}
-
-					StartY += BLK_Y_SIZE;
-				}
-
-				// make a copy of the new pointers
-				memcpy(pPrevious, pBlocks, 4*sizeof(void*));
-			}
-
-			// decompress the pixel.  First compute the interpolated A and B signals
-			InterpolateColours(Colours5554[0][0].Reps[0],
-							   Colours5554[0][1].Reps[0],
-							   Colours5554[1][0].Reps[0],
-							   Colours5554[1][1].Reps[0],
-							   Do2bitMode, x, y,
-							   ASig);
-
-			InterpolateColours(Colours5554[0][0].Reps[1],
-							   Colours5554[0][1].Reps[1],
-							   Colours5554[1][0].Reps[1],
-							   Colours5554[1][1].Reps[1],
-							   Do2bitMode, x, y,
-							   BSig);
-
-			GetModulationValue(x,y, Do2bitMode, (const int (*)[16])ModulationVals, (const int (*)[16])ModulationModes,
-							   &Mod, &DoPT);
-
-			// compute the modulated colour
-			for(i = 0; i < 4; i++)
-			{
-				Result[i] = ASig[i] * 8 + Mod * (BSig[i] - ASig[i]);
-				Result[i] >>= 3;
-			}
-
-			if(DoPT)
-				Result[3] = 0;
-
-			// Store the result in the output image
-			uPosition = (x+y*XDim)<<2;
-			pResultImage[uPosition+0] = (U8)Result[0];
-			pResultImage[uPosition+1] = (U8)Result[1];
-			pResultImage[uPosition+2] = (U8)Result[2];
-			pResultImage[uPosition+3] = (U8)Result[3];
-		}
+		pDecompressedData=(Pixel32*)malloc(XTrueDim*YTrueDim*sizeof(Pixel32));
 	}
+		
+	//Decompress the surface.
+	int retval = pvrtcDecompress((PVRTuint8*)pCompressedData,pDecompressedData,XTrueDim,YTrueDim,(Do2bitMode==1?2:4));
+
+	//If the dimensions were too small, then copy the new buffer back into the output buffer.
+	if(XTrueDim!=XDim || YTrueDim!=YDim)
+	{
+		//Loop through all the required pixels.
+		for (int x=0; x<XDim; ++x)
+		{
+			for (int y=0; y<YDim; ++y)
+			{
+				((Pixel32*)pResultImage)[x+y*XDim]=pDecompressedData[x+y*XTrueDim];
+			}
+		}
+
+		//Free the temporary buffer.
+		free(pDecompressedData);
+	}
+	return retval;
 }
 
 /****************************
@@ -745,10 +764,10 @@ const int mod[8][4]={{2, 8,-2,-8},
  @Returns		Returns actual pixel colour
  @Description	Used by ETCTextureDecompress
 *************************************************************************/
-unsigned long modifyPixel(int red, int green, int blue, int x, int y, unsigned long modBlock, int modTable)
+static unsigned int modifyPixel(int red, int green, int blue, int x, int y, unsigned int modBlock, int modTable)
 {
 	int index = x*4+y, pixelMod;
-	unsigned long mostSig = modBlock<<1;
+	unsigned int mostSig = modBlock<<1;
 
 	if (index<8)
 		pixelMod = mod[modTable][((modBlock>>(index+24))&0x1)+((mostSig>>(index+8))&0x2)];
@@ -772,9 +791,9 @@ unsigned long modifyPixel(int red, int green, int blue, int x, int y, unsigned l
  @Returns		The number of bytes of ETC data decompressed
  @Description	Decompresses ETC to RGBA 8888
 *************************************************************************/
-int ETCTextureDecompress(const void * const pSrcData, const int &x, const int &y, const void *pDestData,const int &/*nMode*/)
+static int ETCTextureDecompress(const void * const pSrcData, const int &x, const int &y, const void *pDestData,const int &/*nMode*/)
 {
-	unsigned long blockTop, blockBot, *input = (unsigned long*)pSrcData, *output;
+	unsigned int blockTop, blockBot, *input = (unsigned int*)pSrcData, *output;
 	unsigned char red1, green1, blue1, red2, green2, blue2;
 	bool bFlip, bDiff;
 	int modtable1,modtable2;
@@ -786,7 +805,7 @@ int ETCTextureDecompress(const void * const pSrcData, const int &x, const int &y
 				blockTop = *(input++);
 				blockBot = *(input++);
 
-			output = (unsigned long*)pDestData + i*x +m;
+			output = (unsigned int*)pDestData + i*x +m;
 
 			// check flipbit
 			bFlip = (blockTop & ETC_FLIP) != 0;

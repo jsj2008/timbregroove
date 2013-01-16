@@ -126,7 +126,7 @@
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof(unsigned int), data, GL_STATIC_DRAW);
 }
 
--(void)bind:(Shader *)shader
+-(void)bind
 {
     glBindBuffer(GL_ARRAY_BUFFER, _glVBuffer);
     
@@ -148,6 +148,13 @@
     
     if( _glIBuffer != -1 )
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glIBuffer);
+}
+
+-(void)unbind
+{
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    if( _glIBuffer != -1 )
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 // TODO: this probably belongs somewhere else

@@ -4,9 +4,9 @@
 
  @Title        PVRTModelPOD
 
- @Version      
+ @Version       @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     ANSI compatible
 
@@ -33,14 +33,15 @@
 ** Enumerations
 ****************************************************************************/
 /*!****************************************************************************
- @Struct      EPODLight
+ @Struct      EPODLightType
  @Brief       Enum for the POD format light types
 ******************************************************************************/
-enum EPODLight
+enum EPODLightType
 {
 	ePODPoint=0,	 /*!< Point light */
 	ePODDirectional, /*!< Directional light */
-	ePODSpot		 /*!< Spot light */
+	ePODSpot,		 /*!< Spot light */
+	eNumPODLightTypes
 };
 
 /*!****************************************************************************
@@ -50,7 +51,7 @@ enum EPODLight
 enum EPODPrimitiveType
 {
 	ePODTriangles=0, /*!< Triangles */
-	ePODLines		 /*!< Lines*/
+	eNumPODPrimitiveTypes
 };
 
 /*!****************************************************************************
@@ -69,9 +70,9 @@ enum EPODAnimationData
  @Struct      EPODMaterialFlags
  @Brief       Enum for the material flag options
 ******************************************************************************/
-enum EPODMaterialFlags
+enum EPODMaterialFlag
 {
-	ePODEnableBlending	= 0x01,	/*!< Enable blending for this material */
+	ePODEnableBlending	= 0x01	/*!< Enable blending for this material */
 };
 
 /*!****************************************************************************
@@ -111,7 +112,7 @@ enum EPODBlendOp
 	ePODBlendOp_MIN,
 	ePODBlendOp_MAX,
 	ePODBlendOp_SUBTRACT = 0x800A,
-	ePODBlendOp_REVERSE_SUBTRACT,
+	ePODBlendOp_REVERSE_SUBTRACT
 };
 
 /****************************************************************************
@@ -131,9 +132,9 @@ public:
 
 public:
 	EPVRTDataType	eType;		/*!< Type of data stored */
-	unsigned int	n;			/*!< Number of values per vertex */
-	unsigned int	nStride;	/*!< Distance in bytes from one array entry to the next */
-	unsigned char	*pData;		/*!< Actual data (array of values); if mesh is interleaved, this is an OFFSET from pInterleaved */
+	PVRTuint32		n;			/*!< Number of values per vertex */
+	PVRTuint32		nStride;	/*!< Distance in bytes from one array entry to the next */
+	PVRTuint8		*pData;		/*!< Actual data (array of values); if mesh is interleaved, this is an OFFSET from pInterleaved */
 };
 
 /*!****************************************************************************
@@ -141,7 +142,7 @@ public:
  @Brief       Struct for storing POD camera data
 ******************************************************************************/
 struct SPODCamera {
-	int			nIdxTarget;			/*!< Index of the target object */
+	PVRTint32			nIdxTarget;			/*!< Index of the target object */
 	VERTTYPE	fFOV;				/*!< Field of view */
 	VERTTYPE	fFar;				/*!< Far clip plane */
 	VERTTYPE	fNear;				/*!< Near clip plane */
@@ -153,14 +154,14 @@ struct SPODCamera {
  @Brief       Struct for storing POD light data
 ******************************************************************************/
 struct SPODLight {
-	int			nIdxTarget;		/*!< Index of the target object */
-	VERTTYPE	pfColour[3];	/*!< Light colour (0.0f -> 1.0f for each channel) */
-	EPODLight	eType;			/*!< Light type (point, directional, spot etc.) */
-	float		fConstantAttenuation;	/*!< Constant attenuation */
-	float		fLinearAttenuation;		/*!< Linear atternuation */
-	float		fQuadraticAttenuation;	/*!< Quadratic attenuation */
-	float		fFalloffAngle;			/*!< Falloff angle (in radians) */
-	float		fFalloffExponent;		/*!< Falloff exponent */
+	PVRTint32			nIdxTarget;		/*!< Index of the target object */
+	VERTTYPE			pfColour[3];	/*!< Light colour (0.0f -> 1.0f for each channel) */
+	EPODLightType		eType;			/*!< Light type (point, directional, spot etc.) */
+	PVRTfloat32			fConstantAttenuation;	/*!< Constant attenuation */
+	PVRTfloat32			fLinearAttenuation;		/*!< Linear atternuation */
+	PVRTfloat32			fQuadraticAttenuation;	/*!< Quadratic attenuation */
+	PVRTfloat32			fFalloffAngle;			/*!< Falloff angle (in radians) */
+	PVRTfloat32			fFalloffExponent;		/*!< Falloff exponent */
 };
 
 /*!****************************************************************************
@@ -168,12 +169,12 @@ struct SPODLight {
  @Brief       Struct for storing POD mesh data
 ******************************************************************************/
 struct SPODMesh {
-	unsigned int		nNumVertex;		/*!< Number of vertices in the mesh */
-	unsigned int		nNumFaces;		/*!< Number of triangles in the mesh */
-	unsigned int		nNumUVW;		/*!< Number of texture coordinate channels per vertex */
+	PVRTuint32			nNumVertex;		/*!< Number of vertices in the mesh */
+	PVRTuint32			nNumFaces;		/*!< Number of triangles in the mesh */
+	PVRTuint32			nNumUVW;		/*!< Number of texture coordinate channels per vertex */
 	CPODData			sFaces;			/*!< List of triangle indices */
-	unsigned int		*pnStripLength;	/*!< If mesh is stripped: number of tris per strip. */
-	unsigned int		nNumStrips;		/*!< If mesh is stripped: number of strips, length of pnStripLength array. */
+	PVRTuint32			*pnStripLength;	/*!< If mesh is stripped: number of tris per strip. */
+	PVRTuint32			nNumStrips;		/*!< If mesh is stripped: number of strips, length of pnStripLength array. */
 	CPODData			sVertex;		/*!< List of vertices (x0, y0, z0, x1, y1, z1, x2, etc...) */
 	CPODData			sNormals;		/*!< List of vertex normals (Nx0, Ny0, Nz0, Nx1, Ny1, Nz1, Nx2, etc...) */
 	CPODData			sTangents;		/*!< List of vertex tangents (Tx0, Ty0, Tz0, Tx1, Ty1, Tz1, Tx2, etc...) */
@@ -183,7 +184,7 @@ struct SPODMesh {
 	CPODData			sBoneIdx;		/*!< nNumBones*nNumVertex ints (Vtx0Idx0, Vtx0Idx1, ... Vtx1Idx0, Vtx1Idx1, ...) */
 	CPODData			sBoneWeight;	/*!< nNumBones*nNumVertex floats (Vtx0Wt0, Vtx0Wt1, ... Vtx1Wt0, Vtx1Wt1, ...) */
 
-	unsigned char		*pInterleaved;	/*!< Interleaved vertex data */
+	PVRTuint8			*pInterleaved;	/*!< Interleaved vertex data */
 
 	CPVRTBoneBatches	sBoneBatches;	/*!< Bone tables */
 
@@ -197,25 +198,28 @@ struct SPODMesh {
  @Brief       Struct for storing POD node data
 ******************************************************************************/
 struct SPODNode {
-	int			 nIdx;				/*!< Index into mesh, light or camera array, depending on which object list contains this Node */
-	char		 *pszName;			/*!< Name of object */
-	int			 nIdxMaterial;		/*!< Index of material used on this mesh */
+	PVRTint32			nIdx;				/*!< Index into mesh, light or camera array, depending on which object list contains this Node */
+	PVRTchar8			*pszName;			/*!< Name of object */
+	PVRTint32			nIdxMaterial;		/*!< Index of material used on this mesh */
 
-	int			 nIdxParent;		/*!< Index into MeshInstance array; recursively apply ancestor's transforms after this instance's. */
+	PVRTint32			nIdxParent;		/*!< Index into MeshInstance array; recursively apply ancestor's transforms after this instance's. */
 
-	unsigned int nAnimFlags;		/*!< Stores which animation arrays the POD Node contains */
+	PVRTuint32			nAnimFlags;		/*!< Stores which animation arrays the POD Node contains */
 
-	unsigned int* pnAnimPositionIdx;
-	VERTTYPE	*pfAnimPosition;	/*!< 3 floats per frame of animation. */
+	PVRTuint32			*pnAnimPositionIdx;
+	VERTTYPE			*pfAnimPosition;	/*!< 3 floats per frame of animation. */
 
-	unsigned int* pnAnimRotationIdx;
-	VERTTYPE	*pfAnimRotation;	/*!< 4 floats per frame of animation. */
+	PVRTuint32			*pnAnimRotationIdx;
+	VERTTYPE			*pfAnimRotation;	/*!< 4 floats per frame of animation. */
 
-	unsigned int* pnAnimScaleIdx;
-	VERTTYPE	*pfAnimScale;		/*!< 7 floats per frame of animation. */
+	PVRTuint32			*pnAnimScaleIdx;
+	VERTTYPE			*pfAnimScale;		/*!< 7 floats per frame of animation. */
 
-	unsigned int* pnAnimMatrixIdx;
-	VERTTYPE	*pfAnimMatrix;		/*!< 16 floats per frame of animation. */
+	PVRTuint32			*pnAnimMatrixIdx;
+	VERTTYPE			*pfAnimMatrix;		/*!< 16 floats per frame of animation. */
+
+	PVRTuint32			nUserDataSize;
+	PVRTchar8			*pUserData;
 };
 
 /*!****************************************************************************
@@ -223,7 +227,7 @@ struct SPODNode {
  @Brief       Struct for storing POD texture data
 ******************************************************************************/
 struct SPODTexture {
-	char	*pszName;			/*!< File-name of texture */
+	PVRTchar8	*pszName;			/*!< File-name of texture */
 };
 
 /*!****************************************************************************
@@ -231,24 +235,24 @@ struct SPODTexture {
  @Brief       Struct for storing POD material data
 ******************************************************************************/
 struct SPODMaterial {
-	char		*pszName;				/*!< Name of material */
-	int			nIdxTexDiffuse;			/*!< Idx into pTexture for the diffuse texture */
-	int			nIdxTexAmbient;			/*!< Idx into pTexture for the ambient texture */
-	int			nIdxTexSpecularColour;	/*!< Idx into pTexture for the specular colour texture */
-	int			nIdxTexSpecularLevel;	/*!< Idx into pTexture for the specular level texture */
-	int			nIdxTexBump;			/*!< Idx into pTexture for the bump map */
-	int			nIdxTexEmissive;		/*!< Idx into pTexture for the emissive texture */
-	int			nIdxTexGlossiness;		/*!< Idx into pTexture for the glossiness texture */
-	int			nIdxTexOpacity;			/*!< Idx into pTexture for the opacity texture */
-	int			nIdxTexReflection;		/*!< Idx into pTexture for the reflection texture */
-	int			nIdxTexRefraction;		/*!< Idx into pTexture for the refraction texture */
-	VERTTYPE	fMatOpacity;			/*!< Material opacity (used with vertex alpha ?) */
-	VERTTYPE	pfMatAmbient[3];		/*!< Ambient RGB value */
-	VERTTYPE	pfMatDiffuse[3];		/*!< Diffuse RGB value */
-	VERTTYPE	pfMatSpecular[3];		/*!< Specular RGB value */
-	VERTTYPE	fMatShininess;			/*!< Material shininess */
-	char		*pszEffectFile;			/*!< Name of effect file */
-	char		*pszEffectName;			/*!< Name of effect in the effect file */
+	PVRTchar8		*pszName;				/*!< Name of material */
+	PVRTint32		nIdxTexDiffuse;			/*!< Idx into pTexture for the diffuse texture */
+	PVRTint32		nIdxTexAmbient;			/*!< Idx into pTexture for the ambient texture */
+	PVRTint32		nIdxTexSpecularColour;	/*!< Idx into pTexture for the specular colour texture */
+	PVRTint32		nIdxTexSpecularLevel;	/*!< Idx into pTexture for the specular level texture */
+	PVRTint32		nIdxTexBump;			/*!< Idx into pTexture for the bump map */
+	PVRTint32		nIdxTexEmissive;		/*!< Idx into pTexture for the emissive texture */
+	PVRTint32		nIdxTexGlossiness;		/*!< Idx into pTexture for the glossiness texture */
+	PVRTint32		nIdxTexOpacity;			/*!< Idx into pTexture for the opacity texture */
+	PVRTint32		nIdxTexReflection;		/*!< Idx into pTexture for the reflection texture */
+	PVRTint32		nIdxTexRefraction;		/*!< Idx into pTexture for the refraction texture */
+	VERTTYPE		fMatOpacity;			/*!< Material opacity (used with vertex alpha ?) */
+	VERTTYPE		pfMatAmbient[3];		/*!< Ambient RGB value */
+	VERTTYPE		pfMatDiffuse[3];		/*!< Diffuse RGB value */
+	VERTTYPE		pfMatSpecular[3];		/*!< Specular RGB value */
+	VERTTYPE		fMatShininess;			/*!< Material shininess */
+	PVRTchar8		*pszEffectFile;			/*!< Name of effect file */
+	PVRTchar8		*pszEffectName;			/*!< Name of effect in the effect file */
 
 	EPODBlendFunc	eBlendSrcRGB;		/*!< Blending RGB source value */
 	EPODBlendFunc	eBlendSrcA;			/*!< Blending alpha source value */
@@ -259,7 +263,10 @@ struct SPODMaterial {
 	VERTTYPE		pfBlendColour[4];	/*!< A RGBA colour to be used in blending */
 	VERTTYPE		pfBlendFactor[4];	/*!< An array of blend factors, one for each RGBA component */
 
-	unsigned int	nFlags;				/*!< Stores information about the material e.g. Enable blending */
+	PVRTuint32		nFlags;				/*!< Stores information about the material e.g. Enable blending */
+
+	PVRTuint32		nUserDataSize;
+	PVRTchar8		*pUserData;
 };
 
 /*!****************************************************************************
@@ -270,29 +277,32 @@ struct SPODScene {
 	VERTTYPE	pfColourBackground[3];		/*!< Background colour */
 	VERTTYPE	pfColourAmbient[3];			/*!< Ambient colour */
 
-	unsigned int	nNumCamera;				/*!< The length of the array pCamera */
+	PVRTuint32		nNumCamera;				/*!< The length of the array pCamera */
 	SPODCamera		*pCamera;				/*!< Camera nodes array */
 
-	unsigned int	nNumLight;				/*!< The length of the array pLight */
+	PVRTuint32		nNumLight;				/*!< The length of the array pLight */
 	SPODLight		*pLight;				/*!< Light nodes array */
 
-	unsigned int	nNumMesh;				/*!< The length of the array pMesh */
+	PVRTuint32		nNumMesh;				/*!< The length of the array pMesh */
 	SPODMesh		*pMesh;					/*!< Mesh array. Meshes may be instanced several times in a scene; i.e. multiple Nodes may reference any given mesh. */
 
-	unsigned int	nNumNode;		/*!< Number of items in the array pNode */
-	unsigned int	nNumMeshNode;	/*!< Number of items in the array pNode which are objects */
+	PVRTuint32		nNumNode;		/*!< Number of items in the array pNode */
+	PVRTuint32		nNumMeshNode;	/*!< Number of items in the array pNode which are objects */
 	SPODNode		*pNode;			/*!< Node array. Sorted as such: objects, lights, cameras, Everything Else (bones, helpers etc) */
 
-	unsigned int	nNumTexture;	/*!< Number of textures in the array pTexture */
+	PVRTuint32		nNumTexture;	/*!< Number of textures in the array pTexture */
 	SPODTexture		*pTexture;		/*!< Texture array */
 
-	unsigned int	nNumMaterial;	/*!< Number of materials in the array pMaterial */
+	PVRTuint32		nNumMaterial;	/*!< Number of materials in the array pMaterial */
 	SPODMaterial	*pMaterial;		/*!< Material array */
 
-	unsigned int	nNumFrame;		/*!< Number of frames of animation */
-	unsigned int	nFPS;			/*!< The frames per second the animation should be played at */
+	PVRTuint32		nNumFrame;		/*!< Number of frames of animation */
+	PVRTuint32		nFPS;			/*!< The frames per second the animation should be played at */
 
-	unsigned int	nFlags;			/*!< PVRTMODELPODSF_* bit-flags */
+	PVRTuint32		nFlags;			/*!< PVRTMODELPODSF_* bit-flags */
+
+	PVRTuint32		nUserDataSize;
+	PVRTchar8		*pUserData;
 };
 
 struct SPVRTPODImpl;	// Internal implementation data
@@ -381,7 +391,7 @@ public:
 	EPVRTError CopyFromMemory(
 		const SPODScene &scene);
 
-#if defined(WIN32) && !defined(__BADA__)
+#if defined(_WIN32)
 	/*!***************************************************************************
 	 @Function		ReadFromResource
 	 @Input			pszName			Name of the resource to load from
@@ -418,6 +428,13 @@ public:
 					edit the position or animation of a node.
 	*************************************************************************/
 	void FlushCache();
+
+	/*!***********************************************************************
+	@Function		IsLoaded
+	@Description	Boolean to check whether a POD file has been loaded.
+	*************************************************************************/
+	bool IsLoaded();
+
 	/*!***************************************************************************
 	 @Function		Destroy
 	 @Description	Frees the memory allocated to store the scene in pScene.
@@ -570,7 +587,7 @@ public:
 	/*!***************************************************************************
 	 @Function		GetBoneWorldMatrix
 	 @Output		mOut			Bone world matrix
-	 @Input			NodeMesh		Mesh to take the bone matrix from
+	 @Input			NodeMesh		Mesh to take the world matrix from
 	 @Input			NodeBone		Bone to take the matrix from
 	 @Description	Generates the world matrix for the given bone.
 	*****************************************************************************/
@@ -581,7 +598,7 @@ public:
 
 	/*!***************************************************************************
 	@Function		GetBoneWorldMatrix
-	@Input			NodeMesh		Mesh to take the bone matrix from
+	@Input			NodeMesh		Mesh to take the world matrix from
 	@Input			NodeBone		Bone to take the matrix from
 	@Returns		Bone world matrix
 	@Description	Generates the world matrix for the given bone.
@@ -695,7 +712,7 @@ private:
  @Return		Size of the data element
  @Description	Returns the size of each data element.
 *****************************************************************************/
-size_t PVRTModelPODDataTypeSize(const EPVRTDataType type);
+PVRTuint32 PVRTModelPODDataTypeSize(const EPVRTDataType type);
 
 /*!***************************************************************************
  @Function		PVRTModelPODDataTypeComponentCount
@@ -703,7 +720,7 @@ size_t PVRTModelPODDataTypeSize(const EPVRTDataType type);
  @Return		number of components in the data element
  @Description	Returns the number of components in a data element.
 *****************************************************************************/
-size_t PVRTModelPODDataTypeComponentCount(const EPVRTDataType type);
+PVRTuint32 PVRTModelPODDataTypeComponentCount(const EPVRTDataType type);
 
 /*!***************************************************************************
  @Function		PVRTModelPODDataStride
@@ -711,7 +728,7 @@ size_t PVRTModelPODDataTypeComponentCount(const EPVRTDataType type);
  @Return		Size of the vector elements
  @Description	Returns the size of the vector of data elements.
 *****************************************************************************/
-size_t PVRTModelPODDataStride(const CPODData &data);
+PVRTuint32 PVRTModelPODDataStride(const CPODData &data);
 
 /*!***************************************************************************
  @Function			PVRTModelPODGetAnimArraySize
@@ -721,7 +738,7 @@ size_t PVRTModelPODDataStride(const CPODData &data);
  @Return			Size of the animation array
  @Description		Calculates the size of an animation array
 *****************************************************************************/
-unsigned int PVRTModelPODGetAnimArraySize(unsigned int *pAnimDataIdx, unsigned int ui32Frames, unsigned int ui32Components);
+PVRTuint32 PVRTModelPODGetAnimArraySize(PVRTuint32 *pAnimDataIdx, PVRTuint32 ui32Frames, PVRTuint32 ui32Components);
 
 /*!***************************************************************************
  @Function		PVRTModelPODScaleAndConvertVtxData
@@ -797,14 +814,6 @@ void PVRTModelPODToggleStrips(SPODMesh &mesh);
  @Description	Counts the number of indices of a mesh
 *****************************************************************************/
 unsigned int PVRTModelPODCountIndices(const SPODMesh &mesh);
-
-/*!***************************************************************************
- @Function		PVRTModelPODToggleFixedPoint
- @Modified		s		Scene to modify
- @Description	Switch all non-vertex data between fixed-point and
-				floating-point.
-*****************************************************************************/
-void PVRTModelPODToggleFixedPoint(SPODScene &s);
 
 /*!***************************************************************************
  @Function			PVRTModelPODCopyCPODData

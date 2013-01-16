@@ -44,7 +44,7 @@
     if( !_meta )
         [self readMenuMeta:@"main"];
     
-    CGFloat y = 4.0;
+    CGFloat y = 6.0;
     int numItems = 0;
     for( NSString *key in _meta )
     {

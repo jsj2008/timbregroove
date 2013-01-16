@@ -6,7 +6,7 @@
 
  @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     ANSI compatible
 
@@ -18,7 +18,7 @@
 
 // The header that contains the shaders
 #include "PVRTBackgroundShaders.h"
-#include "PVRTgles2Ext.h"
+
 // Index to bind the attributes to vertex shaders
 const int VERTEX_ARRAY = 0;
 const int TEXCOORD_ARRAY = 1;
@@ -120,13 +120,14 @@ EPVRTError CPVRTBackground::Init(const SPVRTContext * const pContext, bool bRota
 		pszError = &sTmpErrStr;
 
 	/* Compiles the shaders. For a more detailed explanation, see IntroducingPVRTools */
-
+#if defined(GL_SGX_BINARY_IMG)
 	// Try binary shaders first
 	bResult = (PVRTShaderLoadBinaryFromMemory(_BackgroundFragShader_fsc, _BackgroundFragShader_fsc_size,
 					GL_FRAGMENT_SHADER, GL_SGX_BINARY_IMG, &m_pAPI->m_ui32FragShader, pszError) == PVR_SUCCESS)
 		       && (PVRTShaderLoadBinaryFromMemory(_BackgroundVertShader_vsc, _BackgroundVertShader_vsc_size,
 					GL_VERTEX_SHADER, GL_SGX_BINARY_IMG, &m_pAPI->m_ui32VertexShader, pszError) == PVR_SUCCESS);
 	if(!bResult)
+#endif
 	{
 		// if binary shaders don't work, try source shaders
 		bResult = (PVRTShaderLoadSourceFromMemory(_BackgroundFragShader_fsh, GL_FRAGMENT_SHADER, &m_pAPI->m_ui32FragShader, pszError) == PVR_SUCCESS) &&

@@ -6,7 +6,7 @@
 
  @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     Independent
 
@@ -31,16 +31,11 @@
 #include <GLES2/gl2extimg.h>
 #endif
 #else
-#if defined(__BADA__)
-#include <FGraphicsOpengl2.h>
-using namespace Osp::Graphics::Opengl;
-#else
 #if !defined(EGL_NOT_PRESENT)
 #include <EGL/egl.h>
 #endif
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
-#endif
 #include <GLES2/gl2extimg.h>
 #endif
 
@@ -50,7 +45,7 @@ using namespace Osp::Graphics::Opengl;
 #define PVRGetProcAddress(x) ::x
 #else
 
-#if defined(EGL_NOT_PRESENT) || (defined(__BADA__) && defined(_X86_)) // Bada simulator
+#if defined(EGL_NOT_PRESENT)
 
 #if defined(__PALMPDK__)
 #include "SDL.h"
@@ -80,7 +75,7 @@ class CPVRTgles2Ext
 {
 
 public:
-    /* Type definitions for pointers to functions returned by eglGetProcAddress*/
+    // Type definitions for pointers to functions returned by eglGetProcAddress
     typedef void (GL_APIENTRY *PFNGLMULTIDRAWELEMENTS) (GLenum mode, GLsizei *count, GLenum type, const GLvoid **indices, GLsizei primcount); // glvoid
     typedef void* (GL_APIENTRY *PFNGLMAPBUFFEROES)(GLenum target, GLenum access);
     typedef GLboolean (GL_APIENTRY *PFNGLUNMAPBUFFEROES)(GLenum target);
@@ -92,25 +87,42 @@ public:
 	typedef void (GL_APIENTRYP PFNGLDELETEVERTEXARRAYSOES) (GLsizei n, const GLuint *vertexarrays);
 	typedef void (GL_APIENTRYP PFNGLGENVERTEXARRAYSOES) (GLsizei n, GLuint *vertexarrays);
 	typedef GLboolean (GL_APIENTRYP PFNGLISVERTEXARRAYOES) (GLuint vertexarray);
-	
-	/* GL_EXT_multi_draw_arrays */
+
+	typedef void (GL_APIENTRYP PFNGLRENDERBUFFERSTORAGEMULTISAMPLEIMG) (GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height);
+	typedef void (GL_APIENTRYP PFNGLFRAMEBUFFERTEXTURE2DMULTISAMPLEIMG) (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level, GLsizei samples);
+
+	// GL_EXT_multi_draw_arrays
 	PFNGLMULTIDRAWELEMENTS				glMultiDrawElementsEXT;
 	PFNGLMULTIDRAWARRAYS				glMultiDrawArraysEXT;
 
-	/* GL_EXT_multi_draw_arrays */
+	// GL_EXT_multi_draw_arrays
     PFNGLMAPBUFFEROES                   glMapBufferOES;
     PFNGLUNMAPBUFFEROES                 glUnmapBufferOES;
     PFNGLGETBUFFERPOINTERVOES           glGetBufferPointervOES;
 
-	/* GL_EXT_discard_framebuffer */
+	// GL_EXT_discard_framebuffer
 	PFNGLDISCARDFRAMEBUFFEREXT			glDiscardFramebufferEXT;
 
-	/* GL_OES_vertex_array_object */
+	// GL_OES_vertex_array_object
+#if !defined(GL_OES_vertex_array_object)
 	#define GL_VERTEX_ARRAY_BINDING_OES 0x85B5
+#endif
+
 	PFNGLBINDVERTEXARRAYOES glBindVertexArrayOES;
 	PFNGLDELETEVERTEXARRAYSOES glDeleteVertexArraysOES;
 	PFNGLGENVERTEXARRAYSOES glGenVertexArraysOES;
 	PFNGLISVERTEXARRAYOES glIsVertexArrayOES;
+
+	// GL_IMG_multisampled_render_to_texture
+#if !defined(GL_IMG_multisampled_render_to_texture)
+	#define GL_RENDERBUFFER_SAMPLES_IMG                 0x9133
+	#define GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_IMG   0x9134
+	#define GL_MAX_SAMPLES_IMG                          0x9135
+	#define GL_TEXTURE_SAMPLES_IMG                      0x9136
+#endif
+
+	PFNGLRENDERBUFFERSTORAGEMULTISAMPLEIMG glRenderbufferStorageMultisampleIMG;
+	PFNGLFRAMEBUFFERTEXTURE2DMULTISAMPLEIMG glFramebufferTexture2DMultisampleIMG;
 
 public:
 	/*!***********************************************************************
@@ -125,7 +137,7 @@ public:
 	@Returns			True if the extension is supported
 	@Description		Queries for support of an extension
 	*************************************************************************/
-	static bool IsGLExtensionSupported(const char *extension);
+	static bool IsGLExtensionSupported(const char * const extension);
 };
 
 #endif /* _PVRTGLES2EXT_H_ */

@@ -4,9 +4,9 @@
 
  @Title        PVRTVertex
 
- @Version      
+ @Version       @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     ANSI compatible
 
@@ -18,7 +18,6 @@
 ** Includes
 ****************************************************************************/
 #include "PVRTGlobal.h"
-#include "PVRTContext.h"
 
 #include <stdlib.h>
 #include <string.h>

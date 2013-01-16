@@ -6,7 +6,7 @@
 
  @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     ANSI compatible
 
@@ -62,7 +62,7 @@ class CPVRTBackground
 		*****************************************************************************/
 		EPVRTError Init(const SPVRTContext * const pContext, const bool bRotate, CPVRTString *pszError = 0);
 
-#if defined(BUILD_OGL) || defined(BUILD_OGLES) || defined(BUILD_OGLES2)
+//#if defined(BUILD_OGL) || defined(BUILD_OGLES) || defined(BUILD_OGLES2) || defined(BUILD_OGLES3)
 		/*!***************************************************************************
 		 @Function		Draw
 		 @Input			ui32Texture	Texture to use
@@ -70,7 +70,8 @@ class CPVRTBackground
 		 @Description	Draws a texture on a quad covering the whole screen.
 		*****************************************************************************/
 		EPVRTError Draw(const GLuint ui32Texture);
-#elif defined(BUILD_DX10)
+#if 0
+//#elif defined(BUILD_DX10)
 		/*!***************************************************************************
 		 @Function		Draw
 		 @Input			pTexture	Texture to use
@@ -78,8 +79,24 @@ class CPVRTBackground
 		 @Description	Draws a texture on a quad covering the whole screen.
 		*****************************************************************************/
 		EPVRTError Draw(ID3D10ShaderResourceView *pTexture);
+//#elif defined(BUILD_DX11)
+		/*!***************************************************************************
+		 @Function		Draw
+		 @Input			pTexture	Texture to use
+		 @Return 		PVR_SUCCESS on success
+		 @Description	Draws a texture on a quad covering the whole screen.
+		*****************************************************************************/
+		EPVRTError Draw(ID3D11ShaderResourceView *pTexture);
+//#elif defined(BUILD_DX9)
+		/*!***************************************************************************
+		 @Function		Draw
+		 @Input			pTexture	Texture to use
+		 @Return 		PVR_SUCCESS on success
+		 @Description	Draws a texture on a quad covering the whole screen.
+		*****************************************************************************/
+		EPVRTError Draw(IDirect3DBaseTexture9* pTexture);
+//#endif
 #endif
-
 	protected:
 		bool m_bInit;
 		SPVRTBackgroundAPI *m_pAPI;

@@ -78,8 +78,9 @@
     glUniform1f(_viewportSizeLocation, (GLfloat)w);
     glUniform4fv(_backColorLocation, 1, _backColor.v);
     MeshBuffer * b = _buffers[0];
-    [b bind:shader];
+    [b bind];
     [b draw];
+    [b unbind];
     
 }
 

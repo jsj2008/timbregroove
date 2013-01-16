@@ -151,9 +151,7 @@
                   numIndices:params.numIndices];
     }
     
-    if( !_buffers )
-        _buffers = [NSMutableArray new];
-    [_buffers addObject:buffer];
+    [self addBuffer:buffer];
     
     free(params.strides);
     free(params.vertexData);
@@ -161,6 +159,13 @@
         free(params.indexData);
     
     return buffer;
+}
+
+-(void)addBuffer:(MeshBuffer *)buffer
+{
+    if( !_buffers )
+        _buffers = [NSMutableArray new];
+    [_buffers addObject:buffer];
 }
 
 -(void)createTexture
@@ -277,8 +282,9 @@
     
     for( MeshBuffer * b in _buffers )
     {
-        [b bind:genShader];
+        [b bind];
         [b draw];
+        [b unbind];
     }
     
     [self bindTextures:genShader bind:false];

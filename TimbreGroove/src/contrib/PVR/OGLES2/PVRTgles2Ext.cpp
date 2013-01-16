@@ -6,7 +6,7 @@
 
  @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     Independent
 
@@ -42,6 +42,8 @@ void CPVRTgles2Ext::LoadExtensions()
 	glDeleteVertexArraysOES = 0;
 	glGenVertexArraysOES = 0;
 	glIsVertexArrayOES = 0;
+	glRenderbufferStorageMultisampleIMG = 0;
+	glFramebufferTexture2DMultisampleIMG = 0;
 
 	// Supported extensions provide new entry points for OpenGL ES 2.0.
 
@@ -74,6 +76,13 @@ void CPVRTgles2Ext::LoadExtensions()
         glGenVertexArraysOES = (PFNGLGENVERTEXARRAYSOES) PVRGetProcAddress(glGenVertexArraysOES);
 		glIsVertexArrayOES = (PFNGLISVERTEXARRAYOES) PVRGetProcAddress(glIsVertexArrayOES);
 	}
+
+	/* GL_IMG_multisampled_render_to_texture */
+	if (strstr((char *)pszGLExtensions, "GL_IMG_multisampled_render_to_texture"))
+	{
+		glRenderbufferStorageMultisampleIMG = (PFNGLRENDERBUFFERSTORAGEMULTISAMPLEIMG)PVRGetProcAddress(glRenderbufferStorageMultisampleIMG);
+		glFramebufferTexture2DMultisampleIMG = (PFNGLFRAMEBUFFERTEXTURE2DMULTISAMPLEIMG)PVRGetProcAddress(glFramebufferTexture2DMultisampleIMG);
+	}
 #endif
 
 #if defined(GL_EXT_discard_framebuffer)
@@ -92,7 +101,7 @@ void CPVRTgles2Ext::LoadExtensions()
 @Returns			True if the extension is supported
 @Description		Queries for support of an extension
 *************************************************************************/
-bool CPVRTgles2Ext::IsGLExtensionSupported(const char *extension)
+bool CPVRTgles2Ext::IsGLExtensionSupported(const char * const extension)
 {
 	// The recommended technique for querying OpenGL extensions;
 	// from http://opengl.org/resources/features/OGLextensions/

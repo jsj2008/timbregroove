@@ -6,7 +6,7 @@
 
  @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     ANSI compatible
 
@@ -85,7 +85,7 @@ void PVRTCreateSkybox(float scale, bool adjustUV, int textureSize, VERTTYPE** Ve
 void PVRTDestroySkybox(VERTTYPE* Vertices, VERTTYPE* UVs);
 
 /*!***************************************************************************
- @Function		GetPOTHigher
+ @Function		PVRTGetPOTHigher
  @Input			uiOriginalValue	Base value
  @Input			iTimesHigher		Multiplier
  @Description	When iTimesHigher is one, this function will return the closest
@@ -93,10 +93,10 @@ void PVRTDestroySkybox(VERTTYPE* Vertices, VERTTYPE* UVs);
 				For every increment beyond one for the iTimesHigher value,
 				the next highest power-of-two value will be calculated.
 *****************************************************************************/
-unsigned int GetPOTHigher(unsigned int uiOriginalValue, int iTimesHigher);
+unsigned int PVRTGetPOTHigher(unsigned int uiOriginalValue, int iTimesHigher);
 
 /*!***************************************************************************
- @Function		GetPOTLower
+ @Function		PVRTGetPOTLower
  @Input			uiOriginalValue	Base value
  @Input			iTimesLower		Multiplier
  @Description	When iTimesLower is one, this function will return the closest
@@ -105,7 +105,7 @@ unsigned int GetPOTHigher(unsigned int uiOriginalValue, int iTimesHigher);
 				the next lowest power-of-two value will be calculated. The lowest
 				value that can be reached is 1.
 *****************************************************************************/
-unsigned int GetPOTLower(unsigned int uiOriginalValue, int iTimesLower);
+unsigned int PVRTGetPOTLower(unsigned int uiOriginalValue, int iTimesLower);
 
 #endif /* _PVRTMISC_H_ */
 

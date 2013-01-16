@@ -6,7 +6,7 @@
 
  @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     ANSI compatible
 
@@ -18,7 +18,6 @@
 
 ******************************************************************************/
 #include "PVRTGlobal.h"
-#include "PVRTContext.h"
 #include <math.h>
 #include <string.h>
 #include "PVRTFixedPoint.h"		// Only needed for trig function float lookups
@@ -150,7 +149,7 @@ void PVRTMatrixRotationXF(
 	float		fCosine, fSine;
 
     /* Precompute cos and sin */
-#if defined(BUILD_DX9) || defined(BUILD_D3DM) || defined(BUILD_DX10)
+#if defined(BUILD_DX9) || defined(BUILD_D3DM) || defined(BUILD_DX10) || defined(BUILD_DX11)
 	fCosine	= (float)PVRTFCOS(-fAngle);
     fSine	= (float)PVRTFSIN(-fAngle);
 #else
@@ -178,7 +177,7 @@ void PVRTMatrixRotationYF(
 	float		fCosine, fSine;
 
 	/* Precompute cos and sin */
-#if defined(BUILD_DX9) || defined(BUILD_D3DM) || defined(BUILD_DX10)
+#if defined(BUILD_DX9) || defined(BUILD_D3DM) || defined(BUILD_DX10) || defined(BUILD_DX11)
 	fCosine	= (float)PVRTFCOS(-fAngle);
     fSine	= (float)PVRTFSIN(-fAngle);
 #else
@@ -206,7 +205,7 @@ void PVRTMatrixRotationZF(
 	float		fCosine, fSine;
 
 	/* Precompute cos and sin */
-#if defined(BUILD_DX9) || defined(BUILD_D3DM) || defined(BUILD_DX10)
+#if defined(BUILD_DX9) || defined(BUILD_D3DM) || defined(BUILD_DX10) || defined(BUILD_DX11)
 	fCosine =	(float)PVRTFCOS(-fAngle);
     fSine =		(float)PVRTFSIN(-fAngle);
 #else
@@ -370,7 +369,7 @@ void PVRTMatrixLookAtLHF(
 	const PVRTVECTOR3f	&vAt,
 	const PVRTVECTOR3f	&vUp)
 {
-	PVRTVECTOR3f f, vUpActual, s, u;
+	PVRTVECTOR3f f, s, u;
 	PVRTMATRIXf	t;
 
 	f.x = vEye.x - vAt.x;
@@ -378,9 +377,10 @@ void PVRTMatrixLookAtLHF(
 	f.z = vEye.z - vAt.z;
 
 	PVRTMatrixVec3NormalizeF(f, f);
-	PVRTMatrixVec3NormalizeF(vUpActual, vUp);
-	PVRTMatrixVec3CrossProductF(s, f, vUpActual);
+	PVRTMatrixVec3CrossProductF(s, f, vUp);
+	PVRTMatrixVec3NormalizeF(s, s);
 	PVRTMatrixVec3CrossProductF(u, s, f);
+	PVRTMatrixVec3NormalizeF(u, u);
 
 	mOut.f[ 0] = s.x;
 	mOut.f[ 1] = u.x;
@@ -420,7 +420,7 @@ void PVRTMatrixLookAtRHF(
 	const PVRTVECTOR3f	&vAt,
 	const PVRTVECTOR3f	&vUp)
 {
-	PVRTVECTOR3f f, vUpActual, s, u;
+	PVRTVECTOR3f f, s, u;
 	PVRTMATRIXf	t;
 
 	f.x = vAt.x - vEye.x;
@@ -428,9 +428,10 @@ void PVRTMatrixLookAtRHF(
 	f.z = vAt.z - vEye.z;
 
 	PVRTMatrixVec3NormalizeF(f, f);
-	PVRTMatrixVec3NormalizeF(vUpActual, vUp);
-	PVRTMatrixVec3CrossProductF(s, f, vUpActual);
+	PVRTMatrixVec3CrossProductF(s, f, vUp);
+	PVRTMatrixVec3NormalizeF(s, s);
 	PVRTMatrixVec3CrossProductF(u, s, f);
+	PVRTMatrixVec3NormalizeF(u, u);
 
 	mOut.f[ 0] = s.x;
 	mOut.f[ 1] = u.x;

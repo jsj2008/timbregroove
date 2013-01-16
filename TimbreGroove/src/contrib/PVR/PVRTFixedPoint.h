@@ -6,7 +6,7 @@
 
  @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     Independant
 
@@ -21,7 +21,7 @@
 #if defined(BUILD_OGLES) || defined(BUILD_D3DM)
 	#include "PVRTFixedPointAPI.h"
 #else
-	#define VERTTYPE float
+	#define VERTTYPE PVRTfloat32
 	#ifdef PVRT_FIXED_POINT_ENABLE
 		#error Build option not supported: PVRT_FIXED_POINT_ENABLE
 	#endif

@@ -6,7 +6,7 @@
 
  @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     ANSI compatible
 
@@ -176,7 +176,18 @@ EPVRTError PVRTShaderLoadFromFile(	const char* const pszBinFile,
 		return PVR_FAIL;
 	}
  
-	return PVRTShaderLoadSourceFromMemory(ShaderFile.StringPtr(), Type, pObject, pReturnError, aszDefineArray, uiDefArraySize);
+	CPVRTString ShaderFileString;
+	const char* pShaderData = (const char*) ShaderFile.DataPtr();
+
+	// Is our shader resource file data null terminated?
+	if(pShaderData[ShaderFile.Size()-1] != '\0')
+	{
+		// If not create a temporary null-terminated string
+		ShaderFileString.assign(pShaderData, ShaderFile.Size());
+		pShaderData = ShaderFileString.c_str();
+	}
+
+	return PVRTShaderLoadSourceFromMemory(pShaderData, Type, pObject, pReturnError, aszDefineArray, uiDefArraySize);
 }
 
 /*!***************************************************************************

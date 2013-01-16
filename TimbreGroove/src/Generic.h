@@ -50,6 +50,7 @@
 -(void)createShader;
 -(void)getBufferLocations;
 -(void)getTextureLocations;
+-(void)addBuffer:(MeshBuffer *)buffer;
 @end
 
 

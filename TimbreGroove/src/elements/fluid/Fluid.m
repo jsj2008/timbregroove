@@ -276,8 +276,9 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     
     for( MeshBuffer * b in _buffers )
     {
-        [b bind:shader];
+        [b bind];
         [b draw];
+        [b unbind];
     }
     
     for( id key in _keyedTextures )

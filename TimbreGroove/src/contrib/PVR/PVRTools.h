@@ -4,9 +4,9 @@
 
  @Title        PVRTools
 
- @Version      
+ @Version       @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     ANSI compatible
 
@@ -16,18 +16,22 @@
 #ifndef PVRTOOLS_H
 #define PVRTOOLS_H
 
-#ifdef BUILD_OGLES2
+#if defined(BUILD_OGLES3)
+	#include "OGLES3Tools.h"
+#elif defined(BUILD_OGLES2)
 	#include "OGLES2Tools.h"
-#elif BUILD_OGLES
+#elif defined(BUILD_OGLES)
 	#include "OGLESTools.h"
-#elif BUILD_OGL
+#elif defined(BUILD_OGL)
 	#include "OGLTools.h"
-#elif BUILD_D3DM
+#elif defined(BUILD_D3DM)
 	#include "D3DMTools.h"
-#elif BUILD_DX9
+#elif defined(BUILD_DX9)
 	#include "DX9Tools.h"
-#elif BUILD_DX10
+#elif defined(BUILD_DX10)
 	#include "DX10Tools.h"
+#elif defined(BUILD_DX11)
+	#include "DX11Tools.h"
 #endif
 
 #endif /* PVRTOOLS_H*/

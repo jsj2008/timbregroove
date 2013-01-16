@@ -6,7 +6,7 @@
 
  @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     ANSI compatible
 
@@ -54,9 +54,10 @@ public:
  @Function		CBatch
  @Description	The default constructor
 *****************************************************************************/
-	CBatch()
+	CBatch() : 	m_nCapacity(0),
+				m_nCnt(0),
+				m_pnPalette(0)
 	{
-		m_pnPalette = NULL;
 	}
 
 /*!***************************************************************************
@@ -64,9 +65,8 @@ public:
  @Input			src				CBatch to copy
  @Description	Copy constructor
 *****************************************************************************/
-	CBatch(const CBatch &src)
+	CBatch(const CBatch &src) : m_pnPalette(0)
 	{
-		m_pnPalette = NULL;
 		SetSize(src.m_nCapacity);
 		*this = src;
 	}
@@ -84,11 +84,12 @@ public:
  @Function		operator=
  @Description	Operator overload for the '=' operand
 *****************************************************************************/
-	void operator= (const CBatch &src)
+	CBatch& operator= (const CBatch &src)
 	{
 		_ASSERT(m_nCapacity == src.m_nCapacity);
 		m_nCnt = src.m_nCnt;
 		memcpy(m_pnPalette, src.m_pnPalette, m_nCnt * sizeof(*m_pnPalette));
+		return *this;
 	}
 	
 /*!***************************************************************************
@@ -478,7 +479,10 @@ EPVRTError CPVRTBoneBatches::Create(
 	{
 		// Build the batch
 		if(!FillBatch(batch, &pui32Idx[i * 3], pVtx, nStride, nOffsetWeight, eTypeWeight, nOffsetIdx, eTypeIdx, nVertexBones))
+		{
+			free(pui32IdxNew);
 			return PVR_FAIL;
+		}
 
 		// Update the batch list
 		for(iBatch = lBatch.begin(); iBatch != lBatch.end(); ++iBatch)
@@ -542,7 +546,10 @@ EPVRTError CPVRTBoneBatches::Create(
 	for(i = 0; i < nTriNum; ++i)
 	{
 		if(!FillBatch(batch, &pui32Idx[i * 3], pVtx, nStride, nOffsetWeight, eTypeWeight, nOffsetIdx, eTypeIdx, nVertexBones))
+		{
+			free(pui32IdxNew);
 			return PVR_FAIL;
+		}
 
 		for(iBatch = lBatch.begin(); iBatch != lBatch.end(); ++iBatch)
 		{
@@ -558,12 +565,9 @@ EPVRTError CPVRTBoneBatches::Create(
 
 	// Now that we know how many batches there are, we can allocate the output arrays
 	CPVRTBoneBatches::nBatchBoneMax = nBatchBoneMax;
-	pnBatches		= new int[lBatch.size() * nBatchBoneMax];
-	pnBatchBoneCnt	= new int[lBatch.size()];
-	pnBatchOffset	= new int[lBatch.size()];
-	memset(pnBatches,		0, lBatch.size() * nBatchBoneMax * sizeof(int));
-	memset(pnBatchBoneCnt,	0, lBatch.size() * sizeof(int));
-	memset(pnBatchOffset,	0, lBatch.size() * sizeof(int));
+	pnBatches		= (int*) calloc(lBatch.size() * nBatchBoneMax, sizeof(*pnBatches));
+	pnBatchBoneCnt	= (int*) calloc(lBatch.size(), sizeof(*pnBatchBoneCnt));
+	pnBatchOffset	= (int*) calloc(lBatch.size(), sizeof(*pnBatchOffset));
 
 	// Create the new triangle index list, the new vertex list, and the batch information.
 	nTriCnt = 0;

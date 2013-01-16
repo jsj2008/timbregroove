@@ -4,9 +4,9 @@
 
  @Title        PVRTShadowVol
 
- @Version      
+ @Version       @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     ANSI compatible
 
@@ -335,7 +335,7 @@ void PVRTShadowVolMeshCreateMesh(
 	_ASSERT(psMesh->pE);
 	_ASSERT(psMesh->pT);
 
-#if defined(_DEBUG) && !defined(_UNICODE) && defined(WIN32)
+#if defined(_DEBUG) && !defined(_UNICODE) && defined(_WIN32)
 	/*
 		Check we have sensible model data
 	*/
@@ -358,7 +358,8 @@ void PVRTShadowVolMeshCreateMesh(
 			}
 
 			/*
-				Every edge should be referenced exactly twice
+				Every edge should be referenced exactly twice. 
+				If they aren't then the mesh isn't closed which will cause problems when rendering the shadows.
 			*/
 			_ASSERTE(nCurr == 2);
 		}
@@ -380,7 +381,7 @@ bool PVRTShadowVolMeshInitMesh(
 	const SPVRTContext		* const pContext)
 {
 	unsigned int	nCurr;
-#if defined(BUILD_DX9) || defined(BUILD_DX10)
+#if defined(BUILD_DX9) || defined(BUILD_DX10) || defined(BUILD_DX11)
 	HRESULT			hRes;
 #endif
 	SVertexShVol	*pvData;
@@ -392,7 +393,7 @@ bool PVRTShadowVolMeshInitMesh(
 		return false;
 #endif
 
-#if defined(BUILD_OGLES2) || defined(BUILD_OGLES)
+#if defined(BUILD_OGLES2) || defined(BUILD_OGLES) || defined(BUILD_OGLES3)
 	PVRT_UNREFERENCED_PARAMETER(pContext);
 #endif
 	_ASSERT(psMesh);
@@ -420,11 +421,37 @@ bool PVRTShadowVolMeshInitMesh(
 	}
 #endif
 
-#if defined(BUILD_DX10)
-	pvData = (SVertexShVol*)psMesh->pivb;
+#if defined(BUILD_DX11)
+	D3D11_BUFFER_DESC sVBBufferDesc;
+	sVBBufferDesc.ByteWidth		= psMesh->nV * 2 * 3 * sizeof(*pvData);
+	sVBBufferDesc.Usage			= D3D11_USAGE_DYNAMIC;
+	sVBBufferDesc.BindFlags		= D3D11_BIND_VERTEX_BUFFER;
+	sVBBufferDesc.CPUAccessFlags= 0;
+	sVBBufferDesc.MiscFlags		= 0;
+
+	hRes = pContext->pDev->CreateBuffer(&sVBBufferDesc, NULL, &psMesh->pivb) != S_OK;
+
+	if(FAILED(hRes)) 
+	{
+		_ASSERT(false);
+		return false;
+	}
+
+	D3D11_MAPPED_SUBRESOURCE data;
+	ID3D11DeviceContext *pDeviceContext = 0;
+	pContext->pDev->GetImmediateContext(&pDeviceContext);
+	hRes = pDeviceContext->Map(psMesh->pivb, 0, D3D11_MAP_WRITE_DISCARD, NULL, &data);
+
+	if(FAILED(hRes)) 
+	{
+		_ASSERT(false);
+		return false;
+	}
+
+	pvData = (SVertexShVol*) data.pData;
 #endif
 
-#if defined(BUILD_OGL) || defined(BUILD_OGLES) || defined(BUILD_OGLES2)
+#if defined(BUILD_OGL) || defined(BUILD_OGLES) || defined(BUILD_OGLES2) || defined(BUILD_OGLES3)
 	psMesh->pivb = malloc(psMesh->nV * 2 * sizeof(*pvData));
 	pvData = (SVertexShVol*)psMesh->pivb;
 #endif
@@ -432,7 +459,8 @@ bool PVRTShadowVolMeshInitMesh(
 	/*
 		Fill the vertex buffer with two subtly different copies of the vertices
 	*/
-	for(nCurr = 0; nCurr < psMesh->nV; ++nCurr) {
+	for(nCurr = 0; nCurr < psMesh->nV; ++nCurr) 
+	{
 		pvData[nCurr].x			= psMesh->pV[nCurr].x;
 		pvData[nCurr].y			= psMesh->pV[nCurr].y;
 		pvData[nCurr].z			= psMesh->pV[nCurr].z;
@@ -468,7 +496,9 @@ bool PVRTShadowVolMeshInitMesh(
 		return false;
 	}
 #endif
-
+#if defined(BUILD_DX11)
+	pDeviceContext->Unmap(psMesh->pivb, 0);
+#endif
 	return true;
 }
 
@@ -485,10 +515,10 @@ bool PVRTShadowVolMeshInitVol(
 	const PVRTShadowVolShadowMesh	* const psMesh,
 	const SPVRTContext		* const pContext)
 {
-#if defined(BUILD_DX9)
+#if defined(BUILD_DX9) || defined(BUILD_DX10) || defined(BUILD_DX11)
 	HRESULT hRes;
 #endif
-#if defined(BUILD_OGLES2) || defined(BUILD_OGLES) || defined(BUILD_OGL)
+#if defined(BUILD_OGLES2) || defined(BUILD_OGLES) || defined(BUILD_OGL) || defined(BUILD_OGLES3)
 	PVRT_UNREFERENCED_PARAMETER(pContext);
 #endif
 	_ASSERT(psVol);
@@ -513,7 +543,37 @@ bool PVRTShadowVolMeshInitVol(
 		return false;
 	}
 #endif
-#if defined(BUILD_OGL) || defined(BUILD_OGLES) || defined(BUILD_OGLES2)
+#if defined(BUILD_DX10)
+	D3D10_BUFFER_DESC sIdxBuferDesc;
+	sIdxBuferDesc.ByteWidth		= psMesh->nT * 2 * 3 * sizeof(unsigned short);
+	sIdxBuferDesc.Usage			= D3D10_USAGE_DYNAMIC;
+	sIdxBuferDesc.BindFlags		= D3D10_BIND_INDEX_BUFFER;
+	sIdxBuferDesc.CPUAccessFlags= 0;
+	sIdxBuferDesc.MiscFlags		= 0;
+
+	hRes = pContext->pDev->CreateBuffer(&sIdxBuferDesc, NULL, &psVol->piib) != S_OK;
+
+	if(FAILED(hRes)) {
+		_ASSERT(false);
+		return false;
+	}
+#endif
+#if defined(BUILD_DX11)
+	D3D11_BUFFER_DESC sIdxBuferDesc;
+	sIdxBuferDesc.ByteWidth		= psMesh->nT * 2 * 3 * sizeof(unsigned short);
+	sIdxBuferDesc.Usage			= D3D11_USAGE_DYNAMIC;
+	sIdxBuferDesc.BindFlags		= D3D11_BIND_INDEX_BUFFER;
+	sIdxBuferDesc.CPUAccessFlags= 0;
+	sIdxBuferDesc.MiscFlags		= 0;
+
+	hRes = pContext->pDev->CreateBuffer(&sIdxBuferDesc, NULL, &psVol->piib) != S_OK;
+
+	if(FAILED(hRes)) {
+		_ASSERT(false);
+		return false;
+	}
+#endif
+#if defined(BUILD_OGL) || defined(BUILD_OGLES) || defined(BUILD_OGLES2) || defined(BUILD_OGLES3)
 	psVol->piib = (unsigned short*)malloc(psMesh->nT * 2 * 3 * sizeof(unsigned short));
 #endif
 
@@ -544,7 +604,7 @@ void PVRTShadowVolMeshReleaseMesh(
 #if defined(BUILD_DX9)
 	RELEASE(psMesh->pivb);
 #endif
-#if defined(BUILD_OGL) || defined(BUILD_OGLES) || defined(BUILD_OGLES2)
+#if defined(BUILD_OGL) || defined(BUILD_OGLES) || defined(BUILD_OGLES2) || defined(BUILD_OGLES3)
 	FREE(psMesh->pivb);
 #endif
 }
@@ -560,7 +620,7 @@ void PVRTShadowVolMeshReleaseVol(
 #if defined(BUILD_DX9)
 	RELEASE(psVol->piib);
 #endif
-#if defined(BUILD_OGL) || defined(BUILD_OGLES) || defined(BUILD_OGLES2)
+#if defined(BUILD_OGL) || defined(BUILD_OGLES) || defined(BUILD_OGLES2) || defined(BUILD_OGLES3)
 	FREE(psVol->piib);
 #endif
 }
@@ -572,6 +632,7 @@ void PVRTShadowVolMeshReleaseVol(
 @Input			psMesh	The shadow volume mesh
 @Input			pvLightModel	The light position/direction
 @Input			bPointLight		Is the light a point light
+@Input			pContext	A struct for passing in API specific data
 @Description	Using the light set up the shadow volume so it can be extruded.
 *************************************************************************/
 void PVRTShadowVolSilhouetteProjectedBuild(
@@ -579,9 +640,10 @@ void PVRTShadowVolSilhouetteProjectedBuild(
 	const unsigned int		dwVisFlags,
 	const PVRTShadowVolShadowMesh	* const psMesh,
 	const PVRTVec3		* const pvLightModel,
-	const bool				bPointLight)
+	const bool				bPointLight,
+	const SPVRTContext * const pContext)
 {
-	PVRTShadowVolSilhouetteProjectedBuild(psVol, dwVisFlags,psMesh, (PVRTVECTOR3*) pvLightModel, bPointLight);
+	PVRTShadowVolSilhouetteProjectedBuild(psVol, dwVisFlags,psMesh, (PVRTVECTOR3*) pvLightModel, bPointLight, pContext);
 }
 
 /*!***********************************************************************
@@ -591,6 +653,7 @@ void PVRTShadowVolSilhouetteProjectedBuild(
 @Input			psMesh	The shadow volume mesh
 @Input			pvLightModel	The light position/direction
 @Input			bPointLight		Is the light a point light
+@Input			pContext	A struct for passing in API specific data
 @Description	Using the light set up the shadow volume so it can be extruded.
 *************************************************************************/
 void PVRTShadowVolSilhouetteProjectedBuild(
@@ -598,13 +661,14 @@ void PVRTShadowVolSilhouetteProjectedBuild(
 	const unsigned int		dwVisFlags,
 	const PVRTShadowVolShadowMesh	* const psMesh,
 	const PVRTVECTOR3		* const pvLightModel,
-	const bool				bPointLight)
+	const bool				bPointLight,
+	const SPVRTContext * const pContext)
 {
 	PVRTVECTOR3		v;
 	PVRTShadowVolMTriangle	*psTri;
 	PVRTShadowVolMEdge		*psEdge;
 	unsigned short	*pwIdx;
-#if defined(BUILD_DX9) || defined(BUILD_DX10)
+#if defined(BUILD_DX9) || defined(BUILD_DX10)|| defined(BUILD_DX11)
 	HRESULT			hRes;
 #endif
 	unsigned int	nCurr;
@@ -614,20 +678,36 @@ void PVRTShadowVolSilhouetteProjectedBuild(
 		Lock the index buffer; this is where we create the shadow volume
 	*/
 	_ASSERT(psVol && psVol->piib);
+#if defined(BUILD_OGL) || defined(BUILD_OGLES) || defined(BUILD_OGLES2) || defined(BUILD_OGLES3)
+	PVRT_UNREFERENCED_PARAMETER(pContext);
+#endif
 #if defined(BUILD_DX9)
 	hRes = psVol->piib->Lock(0, 0, (void**)&pwIdx, D3DLOCK_DISCARD);
 	_ASSERT(SUCCEEDED(hRes));
 #endif
-#if defined(BUILD_OGL) || defined(BUILD_OGLES) || defined(BUILD_OGLES2)
+#if defined(BUILD_DX11)
+	_ASSERT(pContext);
+
+	if(!pContext)
+		return;
+
+	D3D11_MAPPED_SUBRESOURCE data;
+	ID3D11DeviceContext *pDeviceContext = 0;
+	pContext->pDev->GetImmediateContext(&pDeviceContext);
+	hRes = pDeviceContext->Map(psVol->piib, 0, D3D11_MAP_WRITE_DISCARD, NULL, &data);
+	pwIdx = (unsigned short*) data.pData;
+
+	_ASSERT(SUCCEEDED(hRes));
+#endif
+#if defined(BUILD_OGL) || defined(BUILD_OGLES) || defined(BUILD_OGLES2) || defined(BUILD_OGLES3)
 	pwIdx = psVol->piib;
 #endif
 
 	psVol->nIdxCnt = 0;
 
-	/*
-		Run through triangles, testing which face the From point
-	*/
-	for(nCurr = 0; nCurr < psMesh->nT; nCurr++) {
+	// Run through triangles, testing which face the From point
+	for(nCurr = 0; nCurr < psMesh->nT; ++nCurr) 
+	{
 		PVRTShadowVolMEdge *pE0, *pE1, *pE2;
 		psTri = &psMesh->pT[nCurr];
 		pE0 = &psMesh->pE[psTri->wE0];
@@ -649,7 +729,8 @@ void PVRTShadowVolSilhouetteProjectedBuild(
 			pE1->nVis |= 0x01;
 			pE2->nVis |= 0x01;
 
-			if(dwVisFlags & PVRTSHADOWVOLUME_NEED_CAP_FRONT) {
+			if(dwVisFlags & PVRTSHADOWVOLUME_NEED_CAP_FRONT) 
+			{
 				// Add the triangle to the volume, unextruded.
 				pwIdx[psVol->nIdxCnt+0] = psTri->w[0];
 				pwIdx[psVol->nIdxCnt+1] = psTri->w[1];
@@ -740,8 +821,11 @@ void PVRTShadowVolSilhouetteProjectedBuild(
     D3D10_SUBRESOURCE_DATA sIdxBufferData;
     ZeroMemory(&sIdxBufferData, sizeof(D3D10_SUBRESOURCE_DATA));
     sIdxBufferData.pSysMem = pwIdx;
-    hRes = pContext->pDev->CreateBuffer(&sIdxBufferDesc, &sIdxBufferData, &psVol->piib));
+    hRes = pContext->pDev->CreateBuffer(&sIdxBufferDesc, &sIdxBufferData, &psVol->piib);
 	_ASSERT(SUCCEEDED(hRes));
+#endif
+#if defined(BUILD_DX11)
+	pDeviceContext->Unmap(psVol->piib, 0);
 #endif
 }
 
@@ -1234,7 +1318,11 @@ int PVRTShadowVolSilhouetteProjectedRender(
 	return psVol->nIdxCnt / 3;
 #endif
 
-#if defined(BUILD_OGL) || defined(BUILD_OGLES2) || defined(BUILD_OGLES)
+#if defined(BUILD_DX10) || defined(BUILD_DX11)
+	return 0; // Not implemented yet
+#endif
+
+#if defined(BUILD_OGL) || defined(BUILD_OGLES2) || defined(BUILD_OGLES) || defined(BUILD_OGLES3)
 	_ASSERT(psMesh->pivb);
 
 #if defined(_DEBUG) // To fix error in Linux
@@ -1261,7 +1349,7 @@ int PVRTShadowVolSilhouetteProjectedRender(
 
 	return psVol->nIdxCnt / 3;
 #else
-#if defined(BUILD_OGLES2)
+#if defined(BUILD_OGLES2) || defined(BUILD_OGLES3)
 	PVRT_UNREFERENCED_PARAMETER(pContext);
 	GLint i32CurrentProgram;
 	glGetIntegerv(GL_CURRENT_PROGRAM, &i32CurrentProgram);
@@ -1283,9 +1371,6 @@ int PVRTShadowVolSilhouetteProjectedRender(
 
 #else
 #if defined(BUILD_OGLES)
-#if defined(__BADA__) && defined(_WIN32)
-	return 0; // The bada simulator is missing the matrix palette defines
-#else
 	_ASSERT(pContext && pContext->pglesExt);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
@@ -1303,7 +1388,6 @@ int PVRTShadowVolSilhouetteProjectedRender(
 	glDisableClientState(GL_WEIGHT_ARRAY_OES);
 
 	return psVol->nIdxCnt / 3;
-#endif
 #endif
 #endif
 #endif

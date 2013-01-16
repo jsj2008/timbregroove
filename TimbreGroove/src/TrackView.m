@@ -70,6 +70,12 @@ static NSString * _str_userMuteSwitch = @"_userMuteSwitch";
     [Tweener addTween:self withParameters:params];
 }
 
+-(void)setMenuIsOver:(NSNumber *)menuIsOver
+{
+    [_graph traverse:@selector(setIsMenuOver:) userObj:menuIsOver];
+    _menuIsOver = menuIsOver;
+}
+
 #if DEBUG
 -(void)drawRect:(CGRect)rect
 {

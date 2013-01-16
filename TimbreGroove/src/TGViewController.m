@@ -26,7 +26,7 @@
 @interface TGViewController () {
     MenuView  * _menuView;
     bool _dawView;
-    TrackView * _showingTrackView;
+    TrackView * _currentTrackView;
     SoundMan * _soundMan;
 }
 
@@ -108,7 +108,7 @@
 - (void)viewDidUnload
 {
     _menuView = nil;
-    _showingTrackView = nil;
+    _currentTrackView = nil;
 }
 
 -(void)dealloc
@@ -178,6 +178,26 @@
     }
 }
 
+-(void)toggleMenuView
+{
+    if( !_menuView )
+        _menuView = [self makeMenuView:nil];
+    
+    if( !_menuView.visible )
+    {
+        if( _currentTrackView )
+            _currentTrackView.menuIsOver = [[NSNumber alloc] initWithBool:true];
+
+        [_menuView show];
+    }
+    else
+    {
+        [self closeAllMenus];
+        
+        if( _currentTrackView )
+            _currentTrackView.menuIsOver = [[NSNumber alloc] initWithBool:false];
+    }
+}
 
 #pragma mark -
 #pragma mark DAW view managment
@@ -211,9 +231,9 @@
     [tv createNode:options];
     
     [tv showAndPlay:SHOW_DIR_RIGHT];
-    if( _showingTrackView )
-        [_showingTrackView hideAndFade:SHOW_DIR_LEFT];
-    _showingTrackView = tv;
+    if( _currentTrackView )
+        [_currentTrackView hideAndFade:SHOW_DIR_LEFT];
+    _currentTrackView = tv;
 }
 
 - (id)makeTrackView:(Class)klass
@@ -268,7 +288,7 @@
     for( int i = 0; i < count; i++ )
     {
         TrackView * view = trackViews[i];
-        if( view == _showingTrackView )
+        if( view == _currentTrackView )
         {
             [view animateProp:"x"      targetVal:0 hide:false];
             [view animateProp:"y"      targetVal:0 hide:false];
@@ -286,19 +306,19 @@
 
 - (void)slideToPrevView
 {
-    if( !_showingTrackView )
+    if( !_currentTrackView )
         return;
     
     NSArray * trackViews = [self getTrackViews];
     int count = [trackViews count];
     for( int i = 0; i < count-1; i++ )
     {
-        if( trackViews[i] == _showingTrackView )
+        if( trackViews[i] == _currentTrackView )
         {
             TrackView * next = trackViews[i+1];
             [next showAndPlay:SHOW_DIR_LEFT];
-            [_showingTrackView hideAndFade:SHOW_DIR_RIGHT];
-            _showingTrackView = next;
+            [_currentTrackView hideAndFade:SHOW_DIR_RIGHT];
+            _currentTrackView = next;
             break;
         }
     }
@@ -306,21 +326,21 @@
 
 -(void)slideToNextView
 {
-    if( !_showingTrackView )
+    if( !_currentTrackView )
         return;
     
     NSArray * trackViews = [self getTrackViews];
     int count = [trackViews count];
     for( int i = 0; i < count; i++ )
     {
-        if( trackViews[i] == _showingTrackView )
+        if( trackViews[i] == _currentTrackView )
         {
             if( i > 0 )
             {
                 TrackView * next = trackViews[i-1];
                 [next showAndPlay:SHOW_DIR_RIGHT];
-                [_showingTrackView hideAndFade:SHOW_DIR_LEFT];
-                _showingTrackView = next;
+                [_currentTrackView hideAndFade:SHOW_DIR_LEFT];
+                _currentTrackView = next;
             }
             break;
         }
@@ -344,27 +364,18 @@
     
     [super prepareForSegue:segue sender:sender];
     
-    NSArray * settings = [_showingTrackView getSettings];
+    NSArray * settings = [_currentTrackView getSettings];
     SettingsVC * svc = (SettingsVC *)segue.destinationViewController;
     svc.settings = settings;
-    svc.caresDeeply = _showingTrackView;
+    svc.caresDeeply = _currentTrackView;
     
 }
 
 #pragma mark - Gestures
 
+
 - (IBAction)onTap:(UITapGestureRecognizer *)sender {
-    if( !_menuView )
-        _menuView = [self makeMenuView:nil];
-    
-    if( !_menuView.visible )
-    {
-        [_menuView show];
-    }
-    else
-    {
-        [self closeAllMenus];
-    }
+    [self toggleMenuView];
 }
 
 - (IBAction)rightSwipe:(UISwipeGestureRecognizer *)sgr

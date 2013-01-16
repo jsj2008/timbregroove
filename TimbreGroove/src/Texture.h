@@ -11,7 +11,14 @@
 
 @class Shader;
 
-@interface Texture : NSObject
+@interface Material : NSObject
+-(void)setAmbientColor:(float *)f;
+-(void)setDiffuseColor:(float *)f;
+-(void)setSpecularColor:(float *)f;
+-(void)setShininess:(float)f;
+@end
+
+@interface Texture : Material
 
 @property (nonatomic) GLint      uLocation;    // frag. shader sampler uniform location
 

@@ -4,9 +4,9 @@
 
  @Title        PVRTPrint3D
 
- @Version      
+ @Version       @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     ANSI compatible
 
@@ -23,16 +23,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <wchar.h>
 
 #include "PVRTGlobal.h"
 #include "PVRTFixedPoint.h"
 #include "PVRTMatrix.h"
+#include "PVRTTexture.h"
 #include "PVRTPrint3D.h"
+#include "PVRTUnicode.h"
+#include "PVRTContext.h"
+#include "PVRTMap.h"
 
 /* Print3D texture data */
 #include "PVRTPrint3DIMGLogo.h"
-#include "PVRTPrint3DPVRLogo.h"
-#include "PVRTPrint3Ddat.h"
+#include "PVRTPrint3DArialBold.h"
 
 
 /****************************************************************************
@@ -42,35 +46,89 @@
 #define MIN_CACHED_VTX			(0x1000)
 #define MAX_CACHED_VTX			(0x00100000)
 #define LINES_SPACING			(29.0f)
+#define PVRPRINT3DVERSION		(1)
 
-#define Print3D_WIN_EXIST	1
-#define Print3D_WIN_ACTIVE	2
-#define Print3D_WIN_TITLE	4
-#define Print3D_WIN_STATIC	8
-#define Print3D_FULL_OPAQUE	16
-#define Print3D_FULL_TRANS	32
-#define Print3D_ADJUST_SIZE	64
-#define Print3D_NO_BORDER	128
+inline float PVRTMakeWhole(float fVal)
+{
+	return (float)((int)fVal);
+}
 
-#if defined(_WIN32) && !defined(__BADA__)
+#if defined(_WIN32)
 #define vsnprintf _vsnprintf
 #endif
+
+const PVRTuint32 PVRFONT_HEADER			= 0xFCFC0050;
+const PVRTuint32 PVRFONT_CHARLIST		= 0xFCFC0051;
+const PVRTuint32 PVRFONT_RECTS			= 0xFCFC0052;
+const PVRTuint32 PVRFONT_METRICS		= 0xFCFC0053;
+const PVRTuint32 PVRFONT_YOFFSET		= 0xFCFC0054;
+const PVRTuint32 PVRFONT_KERNING		= 0xFCFC0055;
+
+/****************************************************************************
+** Constants
+****************************************************************************/
+static const unsigned int PVRTPRINT3D_INVALID_CHAR = 0xFDFDFDFD;
+
+/****************************************************************************
+** Auxiliary functions
+****************************************************************************/
+/*!***************************************************************************
+@Function		CharacterCompareFunc
+@Input			pA
+@Input			pB
+@Return			PVRTint32	
+@Description	Compares two characters for binary search.
+*****************************************************************************/
+PVRTint32 CPVRTPrint3D::CharacterCompareFunc(const void* pA, const void* pB)
+{
+	return (*(PVRTint32*)pA - *(PVRTint32*)pB);
+}
+
+/*!***************************************************************************
+@Function		KerningCompareFunc
+@Input			pA
+@Input			pB
+@Return			PVRTint32	
+@Description	Compares two kerning pairs for binary search.
+*****************************************************************************/
+PVRTint32 CPVRTPrint3D::KerningCompareFunc(const void* pA, const void* pB)
+{
+	KerningPair* pPairA = (KerningPair*)pA;
+	KerningPair* pPairB = (KerningPair*)pB;
+
+	if(pPairA->uiPair > pPairB->uiPair)		return 1;
+	if(pPairA->uiPair < pPairB->uiPair)		return -1;
+
+	return 0;
+}
+
 /****************************************************************************
 ** Class: CPVRTPrint3D
 ****************************************************************************/
-
 /*****************************************************************************
  @Function			CPVRTPrint3D
  @Description		Init some values.
 *****************************************************************************/
-CPVRTPrint3D::CPVRTPrint3D()
+CPVRTPrint3D::CPVRTPrint3D() :	m_pAPI(NULL), m_uLogoToDisplay(ePVRTPrint3DLogoNone), m_pwFacesFont(NULL), m_pPrint3dVtx(NULL), m_bTexturesSet(false), m_pVtxCache(NULL), m_nVtxCache(0),
+								m_nVtxCacheMax(0), m_bRotate(false), m_nCachedNumVerts(0), m_pwzPreviousString(NULL), m_pszPreviousString(NULL), m_fPrevScale(0.0f), m_fPrevX(0.0f),
+								m_fPrevY(0.0f), m_uiPrevCol(0), m_pUVs(NULL), m_pKerningPairs(NULL), m_pCharMatrics(NULL), m_fTexW(0.0f), m_fTexH(0.0f), m_pRects(NULL), m_pYOffsets(NULL), 
+								m_uiNextLineH(0), m_uiSpaceWidth(0), m_uiNumCharacters(0), m_uiNumKerningPairs(0), m_uiAscent(0), m_pszCharacterList(NULL), m_bHasMipmaps(false), 
+								m_bUsingProjection(false)
 {
-#if !defined(DISABLE_PRINT3D)
+	memset(m_fScreenScale, 0, sizeof(m_fScreenScale));
+	memset(m_ui32ScreenDim, 0, sizeof(m_ui32ScreenDim));
 
-	// Initialise all variables
-	memset(this, 0, sizeof(*this));
+	PVRTMatrixIdentity(m_mModelView);
+	PVRTMatrixIdentity(m_mProj);
 
-#endif
+	m_pwzPreviousString = new wchar_t[MAX_LETTERS + 1];
+	m_pszPreviousString = new char[MAX_LETTERS + 1];
+	m_pwzPreviousString[0] = 0;
+	m_pszPreviousString[0] = 0;
+
+	m_eFilterMethod[eFilterProc_Min] = eFilter_Default;
+	m_eFilterMethod[eFilterProc_Mag] = eFilter_Default;
+	m_eFilterMethod[eFilterProc_Mip] = eFilter_MipDefault;
 }
 
 /*****************************************************************************
@@ -79,16 +137,201 @@ CPVRTPrint3D::CPVRTPrint3D()
 *****************************************************************************/
 CPVRTPrint3D::~CPVRTPrint3D()
 {
-#if !defined (DISABLE_PRINT3D)
-#endif
+	delete [] m_pwzPreviousString;
+	delete [] m_pszPreviousString;
+
+	delete [] m_pszCharacterList;
+	delete [] m_pYOffsets;
+	delete [] m_pCharMatrics;
+	delete [] m_pKerningPairs;
+	delete [] m_pRects;
+	delete [] m_pUVs;
 }
 
 /*!***************************************************************************
- @Function			PVRTPrint3DSetTextures
+@Function		ReadMetaBlock
+@Input			pDataCursor
+@Return			bool	true if successful.
+@Description	Reads a single meta data block from the data file.
+*****************************************************************************/
+bool CPVRTPrint3D::ReadMetaBlock(const PVRTuint8** pDataCursor)
+{
+	SPVRTPrint3DHeader* header;
+
+	unsigned int uiDataSize;
+
+	MetaDataBlock block;
+	if(!block.ReadFromPtr(pDataCursor))
+	{
+		return false;		// Must have been an error.
+	}
+
+	switch(block.u32Key)
+	{
+	case PVRFONT_HEADER:
+		header = (SPVRTPrint3DHeader*)block.Data;
+		if(header->uVersion != PVRTPRINT3D_VERSION)
+		{
+			return false;
+		}
+		// Copy options
+		m_uiAscent			= header->wAscent;
+		m_uiNextLineH		= header->wLineSpace;
+		m_uiSpaceWidth		= header->uSpaceWidth;
+		m_uiNumCharacters	= header->wNumCharacters & 0xFFFF;
+		m_uiNumKerningPairs = header->wNumKerningPairs & 0xFFFF;	
+		break;
+	case PVRFONT_CHARLIST:
+		uiDataSize = sizeof(PVRTuint32) * m_uiNumCharacters;
+		_ASSERT(block.u32DataSize == uiDataSize);
+		m_pszCharacterList = new PVRTuint32[m_uiNumCharacters];
+		memcpy(m_pszCharacterList, block.Data, uiDataSize);
+		break;
+	case PVRFONT_YOFFSET:
+		uiDataSize = sizeof(PVRTint32) * m_uiNumCharacters;
+		_ASSERT(block.u32DataSize == uiDataSize);
+		m_pYOffsets	= new PVRTint32[m_uiNumCharacters];
+		memcpy(m_pYOffsets, block.Data, uiDataSize);
+		break;
+	case PVRFONT_METRICS:
+		uiDataSize = sizeof(CharMetrics) * m_uiNumCharacters;
+		_ASSERT(block.u32DataSize == uiDataSize);
+		m_pCharMatrics = new CharMetrics[m_uiNumCharacters];
+		memcpy(m_pCharMatrics, block.Data, uiDataSize);
+		break;
+	case PVRFONT_KERNING:
+		uiDataSize = sizeof(KerningPair) * m_uiNumKerningPairs;
+		_ASSERT(block.u32DataSize == uiDataSize);
+		m_pKerningPairs = new KerningPair[m_uiNumKerningPairs];
+		memcpy(m_pKerningPairs, block.Data, uiDataSize);
+		break;
+	case PVRFONT_RECTS:
+		uiDataSize = sizeof(Rectanglei) * m_uiNumCharacters;
+		_ASSERT(block.u32DataSize == uiDataSize);
+
+		m_pRects = new Rectanglei[m_uiNumCharacters];
+		memcpy(m_pRects, block.Data, uiDataSize);
+		break;
+	default:
+		_ASSERT(!"Unhandled key!");
+	}
+
+	return true;
+}
+
+/*!***************************************************************************
+@Function		LoadFontData
+@Input			texHeader
+@Input			MetaDataMap
+@Return			bool	true if successful.
+@Description	Loads font data bundled with the texture file.
+*****************************************************************************/
+bool CPVRTPrint3D::LoadFontData( const PVRTextureHeaderV3* texHeader, CPVRTMap<PVRTuint32, CPVRTMap<PVRTuint32, MetaDataBlock> >& MetaDataMap )
+{
+	m_fTexW = (float)texHeader->u32Width;
+	m_fTexH = (float)texHeader->u32Height;
+
+	// Mipmap data is stored in the texture header data.
+	m_bHasMipmaps = (texHeader->u32MIPMapCount > 1 ? true : false);
+	if(m_bHasMipmaps)
+	{
+		m_eFilterMethod[eFilterProc_Min] = eFilter_Linear;
+		m_eFilterMethod[eFilterProc_Mag] = eFilter_Linear;
+		m_eFilterMethod[eFilterProc_Mip] = eFilter_Linear;
+	}
+	else
+	{
+		m_eFilterMethod[eFilterProc_Min] = eFilter_Nearest;
+		m_eFilterMethod[eFilterProc_Mag] = eFilter_Nearest;
+		m_eFilterMethod[eFilterProc_Mip] = eFilter_None;
+	}
+
+
+	// Header
+	SPVRTPrint3DHeader* header = (SPVRTPrint3DHeader*)MetaDataMap[PVRTEX3_IDENT][PVRFONT_HEADER].Data;
+	if(header->uVersion != PVRTPRINT3D_VERSION)
+	{
+		return false;
+	}
+	// Copy options
+	m_uiAscent			= header->wAscent;
+	m_uiNextLineH		= header->wLineSpace;
+	m_uiSpaceWidth		= header->uSpaceWidth;
+	m_uiNumCharacters	= header->wNumCharacters & 0xFFFF;
+	m_uiNumKerningPairs = header->wNumKerningPairs & 0xFFFF;	
+
+	// Char list
+	m_pszCharacterList = new PVRTuint32[m_uiNumCharacters];
+	memcpy(m_pszCharacterList, MetaDataMap[PVRTEX3_IDENT][PVRFONT_CHARLIST].Data, MetaDataMap[PVRTEX3_IDENT][PVRFONT_CHARLIST].u32DataSize);
+	
+	m_pYOffsets	= new PVRTint32[m_uiNumCharacters];
+	memcpy(m_pYOffsets, MetaDataMap[PVRTEX3_IDENT][PVRFONT_YOFFSET].Data, MetaDataMap[PVRTEX3_IDENT][PVRFONT_YOFFSET].u32DataSize);
+
+	m_pCharMatrics = new CharMetrics[m_uiNumCharacters];
+	memcpy(m_pCharMatrics, MetaDataMap[PVRTEX3_IDENT][PVRFONT_METRICS].Data, MetaDataMap[PVRTEX3_IDENT][PVRFONT_METRICS].u32DataSize);
+	
+	m_pKerningPairs = new KerningPair[m_uiNumKerningPairs];
+	memcpy(m_pKerningPairs, MetaDataMap[PVRTEX3_IDENT][PVRFONT_KERNING].Data, MetaDataMap[PVRTEX3_IDENT][PVRFONT_KERNING].u32DataSize);
+
+	m_pRects = new Rectanglei[m_uiNumCharacters];
+	memcpy(m_pRects, MetaDataMap[PVRTEX3_IDENT][PVRFONT_RECTS].Data, MetaDataMap[PVRTEX3_IDENT][PVRFONT_RECTS].u32DataSize);
+	
+
+	// Build UVs
+	m_pUVs = new CharacterUV[m_uiNumCharacters];
+	for(unsigned int uiChar = 0; uiChar < m_uiNumCharacters; uiChar++)
+	{
+		m_pUVs[uiChar].fUL = m_pRects[uiChar].nX / m_fTexW;
+		m_pUVs[uiChar].fUR = m_pUVs[uiChar].fUL + m_pRects[uiChar].nW / m_fTexW;
+		m_pUVs[uiChar].fVT = m_pRects[uiChar].nY / m_fTexH;
+		m_pUVs[uiChar].fVB = m_pUVs[uiChar].fVT + m_pRects[uiChar].nH / m_fTexH;
+	}	
+
+	return true;
+}
+
+/*!***************************************************************************
+@Function		FindCharacter
+@Input			character
+@Return			The character index, or PVRPRINT3D_INVALID_CHAR if not found.
+@Description	Finds a given character in the binary data and returns it's
+				index.
+*****************************************************************************/
+PVRTuint32 CPVRTPrint3D::FindCharacter(PVRTuint32 character) const
+{
+	PVRTuint32* pItem = (PVRTuint32*)bsearch(&character, m_pszCharacterList, m_uiNumCharacters, sizeof(PVRTuint32), CharacterCompareFunc);
+	if(!pItem)
+		return PVRTPRINT3D_INVALID_CHAR;
+
+	PVRTuint32 uiIdx = (PVRTuint32) (pItem - m_pszCharacterList);
+	return uiIdx;
+}
+
+/*!***************************************************************************
+@Function		ApplyKerning
+@Input			cA
+@Input			cB
+@Output			fOffset
+@Description	Calculates kerning offset.
+*****************************************************************************/
+void CPVRTPrint3D::ApplyKerning(const PVRTuint32 cA, const PVRTuint32 cB, float& fOffset) const
+{	
+	unsigned long long uiPairToSearch = ((unsigned long long)cA << 32) | (unsigned long long)cB;
+	KerningPair* pItem = (KerningPair*)bsearch(&uiPairToSearch, m_pKerningPairs, m_uiNumKerningPairs, sizeof(KerningPair), KerningCompareFunc);
+	if(pItem)
+		fOffset += (float)pItem->iOffset;
+}
+
+/*!***************************************************************************
+ @Function			SetTextures
  @Input				pContext		Context
  @Input				dwScreenX		Screen resolution along X
  @Input				dwScreenY		Screen resolution along Y
  @Input				bRotate			Rotate print3D by 90 degrees
+ @Input				bMakeCopy		This instance of Print3D creates a copy
+									of it's data instead of sharing with previous
+									contexts. Set this parameter if you require
+									thread safety.	
  @Return			PVR_SUCCESS or PVR_FAIL
  @Description		Initialization and texture upload. Should be called only once
 					for a given context.
@@ -97,14 +340,59 @@ EPVRTError CPVRTPrint3D::SetTextures(
 	const SPVRTContext	* const pContext,
 	const unsigned int	dwScreenX,
 	const unsigned int	dwScreenY,
-	const bool bRotate)
+	const bool bRotate,
+	const bool bMakeCopy)
+{
+	// Determine which set of textures to use depending on the screen resolution.
+	const unsigned int uiShortestEdge = PVRT_MIN(dwScreenX, dwScreenY);
+	const void* pData = NULL;
+
+	if(uiShortestEdge >= 720)
+	{
+		pData = (void*)_arialbd_56_pvr;
+	}
+	else if(uiShortestEdge >= 640)
+	{
+		pData = (void*)_arialbd_46_pvr;
+	}
+	else
+	{
+		pData = (void*)_arialbd_36_pvr;
+	}
+
+	return SetTextures(pContext, pData, dwScreenX, dwScreenY, bRotate, bMakeCopy);
+}
+
+/*!***************************************************************************
+	@Function			SetTextures
+	@Input				pContext		Context
+	@Input				pTexData		User-provided font texture
+	@Input				uiDataSize		Size of the data provided
+	@Input				dwScreenX		Screen resolution along X
+	@Input				dwScreenY		Screen resolution along Y
+	@Input				bRotate			Rotate print3D by 90 degrees
+	@Input				bMakeCopy		This instance of Print3D creates a copy
+										of it's data instead of sharing with previous
+										contexts. Set this parameter if you require
+										thread safety.	
+	@Return			PVR_SUCCESS or PVR_FAIL
+	@Description		Initialization and texture upload of user-provided font 
+					data. Should be called only once for a Print3D object.
+*****************************************************************************/
+EPVRTError CPVRTPrint3D::SetTextures(
+	const SPVRTContext	* const pContext,
+	const void * const pTexData,
+	const unsigned int	dwScreenX,
+	const unsigned int	dwScreenY,
+	const bool bRotate,
+	const bool bMakeCopy)
 {
 #if !defined (DISABLE_PRINT3D)
 
 	unsigned short	i;
 	bool			bStatus;
 
-	/* Set the aspect ratio, so we can chage it without updating textures or anything else */
+	// Set the aspect ratio, so we can change it without updating textures or anything else
 	float fX, fY;
 
 	m_bRotate = bRotate;
@@ -126,46 +414,37 @@ EPVRTError CPVRTPrint3D::SetTextures(
 	m_fScreenScale[0] = (bRotate ? fY : fX) /640.0f;
 	m_fScreenScale[1] = (bRotate ? fX : fY) /480.0f;
 
-	/* Check whether textures are already set up just in case */
+	// Check whether textures are already set up just in case
 	if (m_bTexturesSet)
 		return PVR_SUCCESS;
 
-	if(!APIInit(pContext))
+	if(!APIInit(pContext, bMakeCopy))
 		return PVR_FAIL;
 
 	/*
-		This is the window background texture
-		Type 0 because the data comes in TexTool rectangular format.
+		This is the texture with the fonts.
 	*/
-	bStatus = APIUpLoad4444(1, (unsigned char *)WindowBackground, 16, 0);
-	if (!bStatus) return PVR_FAIL;
-
-	bStatus = APIUpLoad4444(2, (unsigned char *)WindowPlainBackground, 16, 0);
-	if (!bStatus) return PVR_FAIL;
-
-	bStatus = APIUpLoad4444(3, (unsigned char *)WindowBackgroundOp, 16, 0);
-	if (!bStatus) return PVR_FAIL;
-
-	bStatus = APIUpLoad4444(4, (unsigned char *)WindowPlainBackgroundOp, 16, 0);
+	PVRTextureHeaderV3 header;
+	CPVRTMap<PVRTuint32, CPVRTMap<PVRTuint32, MetaDataBlock> > MetaDataMap;
+	bStatus = APIUpLoadTexture((unsigned char *)pTexData, &header, MetaDataMap);
 	if (!bStatus) return PVR_FAIL;
 
 	/*
-		This is the texture with the fonts.
-		Type 1 because there is only alpha component (RGB are white).
+		This is the associated font data with the default font
 	*/
-	bStatus = APIUpLoad4444(0, (unsigned char *)PVRTPrint3DABC_Pixels, 256, 1);
+	bStatus = LoadFontData(&header, MetaDataMap);
 	if (!bStatus) return PVR_FAIL;
 
-	/* INDEX BUFFERS */
+	// INDEX BUFFERS
 	m_pwFacesFont = (unsigned short*)malloc(PVRTPRINT3D_MAX_RENDERABLE_LETTERS*2*3*sizeof(unsigned short));
 
 	if(!m_pwFacesFont)
 		return PVR_FAIL;
 
-	bStatus = APIUpLoadIcons((const PVRTuint32 *)PVRTPrint3DPVRLogo, (const PVRTuint32 *)PVRTPrint3DIMGLogo);
+	bStatus = APIUpLoadIcons(PVRTPrint3DIMGLogo);
 	if (!bStatus) return PVR_FAIL;
 
-	/* Vertex indices for letters */
+	// Vertex indices for letters
 	for (i=0; i < PVRTPRINT3D_MAX_RENDERABLE_LETTERS; i++)
 	{
 		m_pwFacesFont[i*6+0] = 0+i*4;
@@ -186,19 +465,135 @@ EPVRTError CPVRTPrint3D::SetTextures(
 		return PVR_FAIL;
 	}
 
-	/* Everything is OK */
+	// Everything is OK
 	m_bTexturesSet = true;
 
-	/* set all windows for an update */
-	for (i=0; i<PVRTPRINT3D_MAX_WINDOWS; i++)
-		m_pWin[i].bNeedUpdated = true;
-
-	/* Return OK */
+	// Return Success
 	return PVR_SUCCESS;
 
 #else
 	return PVR_SUCCESS;
 #endif
+}
+
+/*!***************************************************************************
+@Function		Print3D
+@Input			fPosX		X Position
+@Input			fPosY		Y Position
+@Input			fScale		Text scale
+@Input			Colour		ARGB colour
+@Input			UTF32		Array of UTF32 characters
+@Input			bUpdate		Whether to update the vertices
+@Return			EPVRTError	Success of failure
+@Description	Takes an array of UTF32 characters and generates the required mesh.
+*****************************************************************************/
+EPVRTError CPVRTPrint3D::Print3D(float fPosX, float fPosY, const float fScale, unsigned int Colour, const CPVRTArray<PVRTuint32>& UTF32, bool bUpdate)
+{
+	// No textures! so... no window
+	if (!m_bTexturesSet)
+	{
+		PVRTErrorOutputDebug("DisplayWindow : You must call CPVRTPrint3D::SetTextures(...) before using this function.\n");
+		return PVR_FAIL;
+	}
+
+	// nothing to be drawn
+	if(UTF32.GetSize() == 0)
+		return PVR_FAIL;
+
+	// Adjust input parameters
+	if(!m_bUsingProjection)
+	{
+		fPosX =  (float)((int)(fPosX * (640.0f/100.0f)));
+		fPosY = -(float)((int)(fPosY * (480.0f/100.0f)));
+	}
+
+	// Create Vertex Buffer (only if it doesn't exist)
+	if(m_pPrint3dVtx == 0)
+	{
+		m_pPrint3dVtx = (SPVRTPrint3DAPIVertex*)malloc(MAX_LETTERS*4*sizeof(SPVRTPrint3DAPIVertex));
+
+		if(!m_pPrint3dVtx)
+			return PVR_FAIL;
+	}
+
+	// Fill up our buffer
+	if(bUpdate)
+		m_nCachedNumVerts = UpdateLine(0.0f, fPosX, fPosY, fScale, Colour, UTF32, m_pPrint3dVtx);
+
+	// Draw the text
+	if(!DrawLine(m_pPrint3dVtx, m_nCachedNumVerts))
+		return PVR_FAIL;
+
+	return PVR_SUCCESS;
+}
+
+/*!***************************************************************************
+ @Function			Print3D
+ @Input				fPosX		Position of the text along X
+ @Input				fPosY		Position of the text along Y
+ @Input				fScale		Scale of the text
+ @Input				Colour		Colour of the text
+ @Input				pszFormat	Format string for the text
+ @Return			PVR_SUCCESS or PVR_FAIL
+ @Description		Display wide-char 3D text on screen.
+					CPVRTPrint3D::SetTextures(...) must have been called
+					beforehand.
+					This function accepts formatting in the printf way.
+*****************************************************************************/
+EPVRTError CPVRTPrint3D::Print3D(float fPosX, float fPosY, const float fScale, unsigned int Colour, const wchar_t * const pszFormat, ...)
+{
+#ifdef DISABLE_PRINT3D
+	return PVR_SUCCESS;
+#endif
+
+	static wchar_t s_Text[MAX_LETTERS+1] = {0};
+
+	/*
+		Unfortunately only Windows seems to properly support non-ASCII characters formatted in
+		vswprintf.
+	*/
+#ifdef _WIN32
+	va_list		args;
+	// Reading the arguments to create our Text string
+	va_start(args, pszFormat);
+	vswprintf(s_Text, MAX_LETTERS+1, pszFormat, args);
+	va_end(args);
+#else
+	wcscpy(s_Text, pszFormat);
+#endif
+
+	bool bUpdate = false;
+
+	// Optimisation to check that the strings are actually different.
+	if(wcscmp(s_Text, m_pwzPreviousString) != 0 || m_fPrevX != fPosX || m_fPrevY != fPosY || m_fPrevScale != fScale || m_uiPrevCol != Colour)
+	{
+		// Copy strings
+		wcscpy(m_pwzPreviousString, s_Text);
+		m_fPrevX = fPosX;
+		m_fPrevY = fPosY;
+		m_fPrevScale = fScale;
+		m_uiPrevCol  = Colour;
+		
+		m_CachedUTF32.Clear();
+#if PVRTSIZEOFWCHAR == 2			// 2 byte wchar.
+		PVRTUnicodeUTF16ToUTF32((PVRTuint16*)s_Text, m_CachedUTF32);
+#elif PVRTSIZEOFWCHAR == 4			// 4 byte wchar (POSIX)
+		unsigned int uiC = 0;
+		PVRTuint32* pUTF32 = (PVRTuint32*)s_Text;
+		while(*pUTF32 && uiC < MAX_LETTERS)
+		{
+			m_CachedUTF32.Append(*pUTF32++);
+			uiC++;
+		}
+#else
+		return PVR_FAIL;
+#endif
+
+		bUpdate = true;
+	}
+
+	// Print
+	return Print3D(fPosX, fPosY, fScale, Colour, m_CachedUTF32, bUpdate);
 }
 
 /*!***************************************************************************
@@ -211,79 +606,47 @@ EPVRTError CPVRTPrint3D::SetTextures(
  @Return			PVR_SUCCESS or PVR_FAIL
  @Description		Display 3D text on screen.
 					No window needs to be allocated to use this function.
-					However, PVRTPrint3DSetTextures(...) must have been called
+					However, CPVRTPrint3D::SetTextures(...) must have been called
 					beforehand.
 					This function accepts formatting in the printf way.
 *****************************************************************************/
 EPVRTError CPVRTPrint3D::Print3D(float fPosX, float fPosY, const float fScale, unsigned int Colour, const char * const pszFormat, ...)
 {
-#if !defined (DISABLE_PRINT3D)
-
-	va_list				args;
-	static char			Text[MAX_LETTERS+1], sPreviousString[MAX_LETTERS+1];
-	static float		XPosPrev, YPosPrev, fScalePrev;
-	static unsigned int	ColourPrev;
-	static unsigned int	nVertices;
-
-	/* No textures! so... no window */
-	if (!m_bTexturesSet)
-	{
-		PVRTErrorOutputDebug("DisplayWindow : You must call PVRTPrint3DSetTextures()\nbefore using this function!!!\n");
-		return PVR_FAIL;
-	}
-
-	/* Reading the arguments to create our Text string */
-	va_start(args, pszFormat);
-#if defined(__SYMBIAN32__) || defined(UITRON) || defined(_UITRON_)
-	vsprintf(Text, pszFormat, args);
-#else
-	vsnprintf(Text, MAX_LETTERS+1, pszFormat, args);
+#ifdef DISABLE_PRINT3D
+	return PVR_SUCCESS;
 #endif
+
+	va_list		args;
+	static char	s_Text[MAX_LETTERS+1] = {0};
+	
+	// Reading the arguments to create our Text string
+	va_start(args, pszFormat);
+	vsnprintf(s_Text, MAX_LETTERS+1, pszFormat, args);
 	va_end(args);
 
-	/* nothing to be drawn */
-	if(*Text == 0)
-		return PVR_FAIL;
+	bool bUpdate = false;
 
-	/* Adjust input parameters */
-	fPosX *= 640.0f/100.0f;
-	fPosY *= 480.0f/100.0f;
-
-	/* We check if the string has been changed since last time */
-	if(
-		strcmp (sPreviousString, Text) != 0 ||
-		fPosX != XPosPrev ||
-		fPosY != YPosPrev ||
-		fScale != fScalePrev ||
-		Colour != ColourPrev ||
-		m_pPrint3dVtx == NULL)
+	// Optimisation to check that the strings are actually different.
+	if(strcmp(s_Text, m_pszPreviousString) != 0 || m_fPrevX != fPosX || m_fPrevY != fPosY || m_fPrevScale != fScale || m_uiPrevCol != Colour)
 	{
-		/* copy strings */
-		strcpy (sPreviousString, Text);
-		XPosPrev = fPosX;
-		YPosPrev = fPosY;
-		fScalePrev = fScale;
-		ColourPrev = Colour;
+		// Copy strings
+		strcpy (m_pszPreviousString, s_Text);
+		m_fPrevX = fPosX;
+		m_fPrevY = fPosY;
+		m_fPrevScale = fScale;
+		m_uiPrevCol  = Colour;
 
-		/* Create Vertex Buffer (only if it doesn't exist) */
-		if(m_pPrint3dVtx == 0)
-		{
-			m_pPrint3dVtx = (SPVRTPrint3DAPIVertex*)malloc(MAX_LETTERS*4*sizeof(SPVRTPrint3DAPIVertex));
+		// Convert from UTF8 to UTF32
+		m_CachedUTF32.Clear();
+		PVRTUnicodeUTF8ToUTF32((const PVRTuint8*)s_Text, m_CachedUTF32);
 
-			if(!m_pPrint3dVtx)
-				return PVR_FAIL;
-		}
-
-		/* Fill up our buffer */
-		nVertices = UpdateLine(0, 0.0f, fPosX, fPosY, fScale, Colour, Text, m_pPrint3dVtx);
+		bUpdate = true;
 	}
 
-	// Draw the text
-	DrawLineUP(m_pPrint3dVtx, nVertices);
-#endif
-
-	return PVR_SUCCESS;
+	// Print
+	return Print3D(fPosX, fPosY, fScale, Colour, m_CachedUTF32, bUpdate);
 }
+
 /*!***************************************************************************
  @Function			DisplayDefaultTitle
  @Input				sTitle				Title to display
@@ -302,19 +665,18 @@ EPVRTError CPVRTPrint3D::DisplayDefaultTitle(const char * const pszTitle, const 
 
 #if !defined (DISABLE_PRINT3D)
 
-	/* Display Title
-	 */
+	// Display Title
 	if(pszTitle)
 	{
-		if(Print3D(0.0f, 1.0f, 1.2f,  PVRTRGBA(255, 255, 0, 255), pszTitle) != PVR_SUCCESS)
+		if(Print3D(0.0f, 0.0f, 1.0f,  PVRTRGBA(255, 255, 0, 255), pszTitle) != PVR_SUCCESS)
 			eRet = PVR_FAIL;
 	}
 
-	/* Display Description
-	 */
+	// Display Description
 	if(pszDescription)
 	{
-		if(Print3D(0.0f, 8.0f, 0.9f,  PVRTRGBA(255, 255, 255, 255), pszDescription) != PVR_SUCCESS)
+        float fY = (float)(int((m_uiNextLineH / (480.0f/100.0f)) / m_fScreenScale[1]));
+		if(Print3D(0.0f, fY, 0.8f,  PVRTRGBA(255, 255, 255, 255), pszDescription) != PVR_SUCCESS)
 			eRet = PVR_FAIL;
 	}
 
@@ -323,644 +685,6 @@ EPVRTError CPVRTPrint3D::DisplayDefaultTitle(const char * const pszTitle, const 
 #endif
 
 	return eRet;
-}
-/*!***************************************************************************
- @Function			CreateDefaultWindow
- @Input				fPosX					Position X for the new window
- @Input				fPosY					Position Y for the new window
- @Input				nXSize_LettersPerLine
- @Input				sTitle					Title of the window
- @Input				sBody					Body text of the window
- @Return			Window handle
- @Description		Creates a default window.
-					If Title is NULL the main body will have just one line
-					(for InfoWin).
-*****************************************************************************/
-unsigned int CPVRTPrint3D::CreateDefaultWindow(float fPosX, float fPosY, int nXSize_LettersPerLine, char *sTitle, char *sBody)
-{
-#if !defined (DISABLE_PRINT3D)
-
-	unsigned int dwActualWin;
-	unsigned int dwFlags = ePVRTPrint3D_ADJUST_SIZE_ALWAYS;
-	unsigned int dwBodyTextColor, dwBodyBackgroundColor;
-
-	/* If no text is specified, return an error */
-	if(!sBody && !sTitle) return 0xFFFFFFFF;
-
-	/* If no title is specified, body text colours are different */
-	if(!sTitle)
-	{
-		dwBodyTextColor			= PVRTRGBA(0xFF, 0xFF, 0x30, 0xFF);
-		dwBodyBackgroundColor	= PVRTRGBA(0x20, 0x20, 0xB0, 0xE0);
-	}
-	else
-	{
-		dwBodyTextColor			= PVRTRGBA(0xFF, 0xFF, 0xFF, 0xFF);
-		dwBodyBackgroundColor	= PVRTRGBA(0x20, 0x30, 0xFF, 0xE0);
-	}
-
-	/* Set window flags depending on title and body text were specified */
-	if(!sBody)		dwFlags |= ePVRTPrint3D_DEACTIVATE_WIN;
-	if(!sTitle)		dwFlags |= ePVRTPrint3D_DEACTIVATE_TITLE;
-
-	/* Create window */
-	dwActualWin = InitWindow(nXSize_LettersPerLine, (sTitle==NULL) ? 1:50);
-
-	/* Set window properties */
-	SetWindow(dwActualWin, dwBodyBackgroundColor, dwBodyTextColor, 0.5f, fPosX, fPosY, 20.0f, 20.0f);
-
-	/* Set title */
-	if (sTitle)
-		SetTitle(dwActualWin, PVRTRGBA(0x20, 0x20, 0xB0, 0xE0), 0.6f, PVRTRGBA(0xFF, 0xFF, 0x30, 0xFF), sTitle, PVRTRGBA(0xFF, 0xFF, 0x30, 0xFF), (char*)"");
-
-	/* Set window text */
-	if (sBody)
-		SetText(dwActualWin, sBody);
-
-	/* Set window flags */
-	SetWindowFlags(dwActualWin, dwFlags);
-
-	m_pWin[dwActualWin].bNeedUpdated = true;
-
-	/* Return window handle */
-	return dwActualWin;
-
-#else
-	return 0;
-#endif
-}
-
-/*!***************************************************************************
- @Function			InitWindow
- @Input				dwBufferSizeX		Buffer width
- @Input				dwBufferSizeY		Buffer height
- @Return			Window handle
- @Description		Allocate a buffer for a newly-created window and return its
-					handle.
-*****************************************************************************/
-unsigned int CPVRTPrint3D::InitWindow(unsigned int dwBufferSizeX, unsigned int dwBufferSizeY)
-{
-#if !defined (DISABLE_PRINT3D)
-
-	unsigned int		dwCurrentWin;
-
-	/* Find the first available window */
-	for (dwCurrentWin=1; dwCurrentWin<PVRTPRINT3D_MAX_WINDOWS; dwCurrentWin++)
-	{
-		/* If this window available? */
-		if (!(m_pWin[dwCurrentWin].dwFlags & Print3D_WIN_EXIST))
-		{
-			/* Window available, exit loop */
-			break;
-		}
-	}
-
-	/* No more windows available? */
-	if (dwCurrentWin == PVRTPRINT3D_MAX_WINDOWS)
-	{
-		_RPT0(_CRT_WARN,"\nPVRTPrint3DCreateWindow WARNING: PVRTPRINT3D_MAX_WINDOWS overflow.\n");
-		return 0;
-	}
-
-	/* Set flags */
-	m_pWin[dwCurrentWin].dwFlags = Print3D_WIN_TITLE  | Print3D_WIN_EXIST | Print3D_WIN_ACTIVE;
-
-	/* Text Buffer */
-	m_pWin[dwCurrentWin].dwBufferSizeX = dwBufferSizeX + 1;
-	m_pWin[dwCurrentWin].dwBufferSizeY = dwBufferSizeY;
-	m_pWin[dwCurrentWin].pTextBuffer  = (char *)calloc((dwBufferSizeX+2)*(dwBufferSizeY+2), sizeof(char));
-	m_pWin[dwCurrentWin].bTitleTextL  = (char *)calloc(MAX_LETTERS, sizeof(char));
-	m_pWin[dwCurrentWin].bTitleTextR  = (char *)calloc(MAX_LETTERS, sizeof(char));
-
-	/* Memory allocation failed */
-	if (!m_pWin[dwCurrentWin].pTextBuffer || !m_pWin[dwCurrentWin].bTitleTextL || !m_pWin[dwCurrentWin].bTitleTextR)
-	{
-		_RPT0(_CRT_WARN,"\nPVRTPrint3DCreateWindow : No memory enough for Text Buffer.\n");
-		return 0;
-	}
-
-	/* Title */
-	m_pWin[dwCurrentWin].fTitleFontSize	= 1.0f;
-	m_pWin[dwCurrentWin].dwTitleFontColorL = PVRTRGBA(0xFF, 0xFF, 0x00, 0xFF);
-	m_pWin[dwCurrentWin].dwTitleFontColorR = PVRTRGBA(0xFF, 0xFF, 0x00, 0xFF);
-	m_pWin[dwCurrentWin].dwTitleBaseColor  = PVRTRGBA(0x30, 0x30, 0xFF, 0xFF); /* Dark Blue */
-
-	/* Window */
-	m_pWin[dwCurrentWin].fWinFontSize		= 0.5f;
-	m_pWin[dwCurrentWin].dwWinFontColor	= PVRTRGBA(0xFF, 0xFF, 0xFF, 0xFF);
-	m_pWin[dwCurrentWin].dwWinBaseColor	= PVRTRGBA(0x80, 0x80, 0xFF, 0xFF); /* Light Blue */
-	m_pWin[dwCurrentWin].fWinPos[0]		= 0.0f;
-	m_pWin[dwCurrentWin].fWinPos[1]		= 0.0f;
-	m_pWin[dwCurrentWin].fWinSize[0]		= 20.0f;
-	m_pWin[dwCurrentWin].fWinSize[1]		= 20.0f;
-	m_pWin[dwCurrentWin].fZPos		        = 0.0f;
-	m_pWin[dwCurrentWin].dwSort		    = 0;
-
-	m_pWin[dwCurrentWin].bNeedUpdated = true;
-
-	dwCurrentWin++;
-
-	/* Returning the handle */
-	return (dwCurrentWin-1);
-
-#else
-	return 0;
-#endif
-}
-
-/*!***************************************************************************
- @Function			DeleteWindow
- @Input				dwWin		Window handle
- @Description		Delete the window referenced by dwWin.
-*****************************************************************************/
-void CPVRTPrint3D::DeleteWindow(unsigned int dwWin)
-{
-#if !defined (DISABLE_PRINT3D)
-
-	int i;
-
-	/* Release VertexBuffer */
-	FREE(m_pWin[dwWin].pTitleVtxL);
-	FREE(m_pWin[dwWin].pTitleVtxR);
-	FREE(m_pWin[dwWin].pWindowVtxTitle);
-	FREE(m_pWin[dwWin].pWindowVtxText);
-
-	for(i=0; i<255; i++)
-		FREE(m_pWin[dwWin].pLineVtx[i]);
-
-	/* Only delete window if it exists */
-	if(m_pWin[dwWin].dwFlags & Print3D_WIN_EXIST)
-	{
-		FREE(m_pWin[dwWin].pTextBuffer);
-		FREE(m_pWin[dwWin].bTitleTextL);
-		FREE(m_pWin[dwWin].bTitleTextR);
-	}
-
-	/* Reset flags */
-	m_pWin[dwWin].dwFlags = 0;
-
-#endif
-}
-
-/*!***************************************************************************
- @Function			DeleteAllWindows
- @Description		Delete all windows.
-*****************************************************************************/
-void CPVRTPrint3D::DeleteAllWindows()
-{
-#if !defined (DISABLE_PRINT3D)
-
-	int unsigned i;
-
-	for (i=0; i<PVRTPRINT3D_MAX_WINDOWS; i++)
-		DeleteWindow (i);
-
-#endif
-}
-
-/*!***************************************************************************
- @Function			DisplayWindow
- @Input				dwWin
- @Return			PVR_SUCCESS or PVR_FAIL
- @Description		Display window.
-					This function MUST be called between a BeginScene/EndScene
-					pair as it uses D3D render primitive calls.
-					PVRTPrint3DSetTextures(...) must have been called beforehand.
-*****************************************************************************/
-EPVRTError CPVRTPrint3D::DisplayWindow(unsigned int dwWin)
-{
-#if !defined (DISABLE_PRINT3D)
-
-	unsigned int	i;
-	float			fTitleSize = 0.0f;
-
-	/* No textures! so... no window */
-	if (!m_bTexturesSet)
-	{
-		_RPT0(_CRT_WARN,"DisplayWindow : You must call PVRTPrint3DSetTextures()\nbefore using this function!!!\n");
-		return PVR_FAIL;
-	}
-
-	/* Update Vertex data only when needed */
-	if(m_pWin[dwWin].bNeedUpdated)
-	{
-		/* TITLE */
-		if(m_pWin[dwWin].dwFlags & Print3D_WIN_TITLE)
-		{
-			/* Set title size */
-			if(m_pWin[dwWin].fTitleFontSize < 0.0f)
-				fTitleSize = 8.0f + 16.0f;
-			else
-				fTitleSize = m_pWin[dwWin].fTitleFontSize * 23.5f + 16.0f;
-
-			/* Title */
-			UpdateTitleVertexBuffer(dwWin);
-
-			/* Background */
-			if (!(m_pWin[dwWin].dwFlags & Print3D_FULL_TRANS))
-			{
-				/* Draw title background */
-				UpdateBackgroundWindow(
-					dwWin, m_pWin[dwWin].dwTitleBaseColor,
-					0.0f,
-					m_pWin[dwWin].fWinPos[0],
-					m_pWin[dwWin].fWinPos[1],
-					m_pWin[dwWin].fWinSize[0],
-					fTitleSize, &m_pWin[dwWin].pWindowVtxTitle);
-			}
-		}
-
-		/* Main text */
-		UpdateMainTextVertexBuffer(dwWin);
-
-		UpdateBackgroundWindow(
-			dwWin, m_pWin[dwWin].dwWinBaseColor,
-			0.0f,
-			m_pWin[dwWin].fWinPos[0],
-			(m_pWin[dwWin].fWinPos[1] + fTitleSize),
-			m_pWin[dwWin].fWinSize[0],
-			m_pWin[dwWin].fWinSize[1], &m_pWin[dwWin].pWindowVtxText);
-
-		/* Don't update until next change makes it needed */
-		m_pWin[dwWin].bNeedUpdated = false;
-	}
-
-	// Ensure any previously drawn text has been submitted before drawing the window.
-	Flush();
-
-	/* Save current render states */
-	APIRenderStates(0);
-
-	/*
-		DRAW TITLE
-	*/
-	if(m_pWin[dwWin].dwFlags & Print3D_WIN_TITLE)
-	{
-		if (!(m_pWin[dwWin].dwFlags & Print3D_FULL_TRANS))
-		{
-			DrawBackgroundWindowUP(m_pWin[dwWin].pWindowVtxTitle, (m_pWin[dwWin].dwFlags & Print3D_FULL_OPAQUE) ? true : false, (m_pWin[dwWin].dwFlags & Print3D_NO_BORDER) ? false : true);
-		}
-
-		/* Left and Right text */
-		DrawLineUP(m_pWin[dwWin].pTitleVtxL, m_pWin[dwWin].nTitleVerticesL);
-		DrawLineUP(m_pWin[dwWin].pTitleVtxR, m_pWin[dwWin].nTitleVerticesR);
-	}
-
-	/*
-		DRAW WINDOW
-	*/
-	if (m_pWin[dwWin].dwFlags & Print3D_WIN_ACTIVE)
-	{
-		/* Background */
-		if (!(m_pWin[dwWin].dwFlags & Print3D_FULL_TRANS))
-		{
-			DrawBackgroundWindowUP(m_pWin[dwWin].pWindowVtxText, (m_pWin[dwWin].dwFlags & Print3D_FULL_OPAQUE) ? true : false, (m_pWin[dwWin].dwFlags & Print3D_NO_BORDER) ? false : true);
-		}
-
-		/* Text, line by line */
-		for (i=0; i<m_pWin[dwWin].dwBufferSizeY; i++)
-		{
-			DrawLineUP(m_pWin[dwWin].pLineVtx[i], m_pWin[dwWin].nLineVertices[i]);
-		}
-	}
-
-	/* Restore render states */
-	APIRenderStates(1);
-
-#endif
-
-	return PVR_SUCCESS;
-}
-
-/*!***************************************************************************
- @Function			SetText
- @Input				dwWin		Window handle
- @Input				Format		Format string
- @Return			PVR_SUCCESS or PVR_FAIL
- @Description		Feed the text buffer of window referenced by dwWin.
-					This function accepts formatting in the printf way.
-*****************************************************************************/
-EPVRTError CPVRTPrint3D::SetText(unsigned int dwWin, const char *Format, ...)
-{
-#if !defined (DISABLE_PRINT3D)
-
-	va_list			args;
-	unsigned int			i;
-	unsigned int			dwBufferSize, dwTotalLength = 0;
-	unsigned int			dwPosBx, dwPosBy, dwSpcPos;
-	char			bChar;
-	unsigned int			dwCursorPos;
-	static char	sText[MAX_LETTERS+1];
-
-	/* If window doesn't exist then return from function straight away */
-	if (!(m_pWin[dwWin].dwFlags & Print3D_WIN_EXIST))
-		return PVR_FAIL;
-
-	// Empty the window buffer
-	memset(m_pWin[dwWin].pTextBuffer, 0, m_pWin[dwWin].dwBufferSizeX * m_pWin[dwWin].dwBufferSizeY * sizeof(char));
-
-	/* Reading the arguments to create our Text string */
-	va_start(args,Format);
-#if defined(__SYMBIAN32__) || defined(UITRON) || defined(_UITRON_)
-	vsprintf(sText, Format, args);
-#else
-	vsnprintf(sText, MAX_LETTERS+1, Format, args);
-#endif
-	va_end(args);
-
-	dwCursorPos	= 0;
-
-	m_pWin[dwWin].bNeedUpdated = true;
-
-	/* Compute buffer size */
-	dwBufferSize = (m_pWin[dwWin].dwBufferSizeX+1) * (m_pWin[dwWin].dwBufferSizeY+1);
-
-	/* Compute length */
-	while(dwTotalLength < dwBufferSize && sText[dwTotalLength] != 0)
-		dwTotalLength++;
-
-	/* X and Y pointer position */
-	dwPosBx = 0;
-	dwPosBy = 0;
-
-	/* Process each character */
-	for (i=0; i<dwTotalLength; i++)
-	{
-		/* Get current character in string */
-		bChar = sText[i];
-
-		/* Space (for word wrap only) */
-		if (bChar == ' ')
-		{
-			/* Looking for the next space (or return or end) */
-			dwSpcPos = 1;
-			do
-			{
-				bChar = sText[i + dwSpcPos++];
-			}
-			while (bChar==' ' || bChar==0x0A || bChar==0);
-			bChar = ' ';
-
-			/*
-				Humm, if this word is longer than the buffer don't move it.
-				Otherwise check if it is at the end and create a return.
-			*/
-			if (dwSpcPos<m_pWin[dwWin].dwBufferSizeX && (dwPosBx+dwSpcPos)>m_pWin[dwWin].dwBufferSizeX)
-			{
-				/* Set NULL character */
-				m_pWin[dwWin].pTextBuffer[dwCursorPos++] = 0;
-
-				dwPosBx = 0;
-				dwPosBy++;
-
-				/* Set new cursor position */
-				dwCursorPos = dwPosBy * m_pWin[dwWin].dwBufferSizeX;
-
-				/* Don't go any further */
-				continue;
-			}
-		}
-
-		/* End of line */
-		if (dwPosBx == (m_pWin[dwWin].dwBufferSizeX-1))
-		{
-			m_pWin[dwWin].pTextBuffer[dwCursorPos++] = 0;
-			dwPosBx = 0;
-			dwPosBy++;
-		}
-
-		/* Vertical Scroll */
-		if (dwPosBy >= m_pWin[dwWin].dwBufferSizeY)
-		{
-			memcpy(m_pWin[dwWin].pTextBuffer,
-				m_pWin[dwWin].pTextBuffer + m_pWin[dwWin].dwBufferSizeX,
-				(m_pWin[dwWin].dwBufferSizeX-1) * m_pWin[dwWin].dwBufferSizeY);
-
-			dwCursorPos -= m_pWin[dwWin].dwBufferSizeX;
-
-			dwPosBx = 0;
-			dwPosBy--;
-		}
-
-		/* Return */
-		if (bChar == 0x0A)
-		{
-			/* Set NULL character */
-			m_pWin[dwWin].pTextBuffer[dwCursorPos++] = 0;
-
-			dwPosBx = 0;
-			dwPosBy++;
-
-			dwCursorPos = dwPosBy * m_pWin[dwWin].dwBufferSizeX;
-
-			/* Don't go any further */
-			continue;
-		}
-
-		/* Storing our character */
-		if (dwCursorPos<dwBufferSize)
-		{
-			m_pWin[dwWin].pTextBuffer[dwCursorPos++] = bChar;
-		}
-
-		/* Increase position */
-		dwPosBx++;
-	}
-
-	/* Automatic adjust of the window size */
-	if (m_pWin[dwWin].dwFlags & Print3D_ADJUST_SIZE)
-	{
-		AdjustWindowSize(dwWin, 0);
-	}
-
-#endif
-
-	return PVR_SUCCESS;
-}
-
-/*!***************************************************************************
- @Function			SetWindow
- @Input				dwWin			Window handle
- @Input				dwWinColor		Window colour
- @Input				dwFontColor		Font colour
- @Input				fFontSize		Font size
- @Input				fPosX			Window position X
- @Input				fPosY			Window position Y
- @Input				fSizeX			Window size X
- @Input				fSizeY			Window size Y
- @Description		Set attributes of window.
-					Windows position and size are referred to a virtual screen
-					of 100x100. (0,0) is the top-left corner and (100,100) the
-					bottom-right corner.
-					These values are the same for all resolutions.
-*****************************************************************************/
-void CPVRTPrint3D::SetWindow(unsigned int dwWin, unsigned int dwWinColor, unsigned int dwFontColor, float fFontSize,
-						  float fPosX, float fPosY, float fSizeX, float fSizeY)
-{
-#if !defined (DISABLE_PRINT3D)
-
-	/* Check if there is a real change */
-	if(	m_pWin[dwWin].fWinFontSize		!= fFontSize ||
-		m_pWin[dwWin].dwWinFontColor	!= dwFontColor ||
-		m_pWin[dwWin].dwWinBaseColor	!= dwWinColor ||
-		m_pWin[dwWin].fWinPos[0]		!= fPosX  * 640.0f/100.0f ||
-		m_pWin[dwWin].fWinPos[1]		!= fPosY  * 480.0f/100.0f ||
-		m_pWin[dwWin].fWinSize[0]		!= fSizeX * 640.0f/100.0f ||
-		m_pWin[dwWin].fWinSize[1]		!= fSizeY * 480.0f/100.0f)
-	{
-		/* Set window properties */
-		m_pWin[dwWin].fWinFontSize		= fFontSize;
-		m_pWin[dwWin].dwWinFontColor	= dwFontColor;
-		m_pWin[dwWin].dwWinBaseColor	= dwWinColor;
-		m_pWin[dwWin].fWinPos[0]		= fPosX  * 640.0f/100.0f;
-		m_pWin[dwWin].fWinPos[1]		= fPosY  * 480.0f/100.0f;
-		m_pWin[dwWin].fWinSize[0]		= fSizeX * 640.0f/100.0f;
-		m_pWin[dwWin].fWinSize[1]		= fSizeY * 480.0f/100.0f;
-
-		m_pWin[dwWin].bNeedUpdated = true;
-	}
-
-#endif
-}
-
-/*!***************************************************************************
- @Function			SetTitle
- @Input				dwWin				Window handle
- @Input				dwBackgroundColor	Background color
- @Input				fFontSize			Font size
- @Input				dwFontColorLeft
- @Input				sTitleLeft
- @Input				dwFontColorRight
- @Input				sTitleRight
- @Description		Set window title.
-*****************************************************************************/
-void CPVRTPrint3D::SetTitle(unsigned int dwWin, unsigned int dwBackgroundColor, float fFontSize,
-						 unsigned int dwFontColorLeft, char *sTitleLeft,
-						 unsigned int dwFontColorRight, char *sTitleRight)
-{
-#if !defined (DISABLE_PRINT3D)
-
-	FREE(m_pWin[dwWin].pTitleVtxL);
-	FREE(m_pWin[dwWin].pTitleVtxR);
-
-	if(sTitleLeft)  memcpy(m_pWin[dwWin].bTitleTextL, sTitleLeft , PVRT_MIN((size_t)(MAX_LETTERS-1), strlen(sTitleLeft )+1));
-	if(sTitleRight) memcpy(m_pWin[dwWin].bTitleTextR, sTitleRight, PVRT_MIN((size_t)(MAX_LETTERS-1), strlen(sTitleRight)+1));
-
-	/* Set title properties */
-	m_pWin[dwWin].fTitleFontSize		= fFontSize;
-	m_pWin[dwWin].dwTitleFontColorL	= dwFontColorLeft;
-	m_pWin[dwWin].dwTitleFontColorR	= dwFontColorRight;
-	m_pWin[dwWin].dwTitleBaseColor	= dwBackgroundColor;
-	m_pWin[dwWin].fTextRMinPos		= GetLength(m_pWin[dwWin].fTitleFontSize, m_pWin[dwWin].bTitleTextL) + 10.0f;
-	m_pWin[dwWin].bNeedUpdated		= true;
-
-#endif
-}
-
-/*!***************************************************************************
- @Function			SetWindowFlags
- @Input				dwWin				Window handle
- @Input				dwFlags				Flags
- @Description		Set flags for window referenced by dwWin.
-					A list of flag can be found at the top of this header.
-*****************************************************************************/
-void CPVRTPrint3D::SetWindowFlags(unsigned int dwWin, unsigned int dwFlags)
-{
-#if !defined (DISABLE_PRINT3D)
-
-	/* Check if there is need of updating vertex buffers */
-	if(	dwFlags & ePVRTPrint3D_ACTIVATE_TITLE ||
-		dwFlags & ePVRTPrint3D_DEACTIVATE_TITLE ||
-		dwFlags & ePVRTPrint3D_ADJUST_SIZE_ALWAYS)
-		m_pWin[dwWin].bNeedUpdated = true;
-
-	/* Set window flags */
-	if (dwFlags & ePVRTPrint3D_ACTIVATE_WIN)		m_pWin[dwWin].dwFlags |= Print3D_WIN_ACTIVE;
-	if (dwFlags & ePVRTPrint3D_DEACTIVATE_WIN)	m_pWin[dwWin].dwFlags &= ~Print3D_WIN_ACTIVE;
-	if (dwFlags & ePVRTPrint3D_ACTIVATE_TITLE)	m_pWin[dwWin].dwFlags |= Print3D_WIN_TITLE;
-	if (dwFlags & ePVRTPrint3D_DEACTIVATE_TITLE) m_pWin[dwWin].dwFlags &= ~Print3D_WIN_TITLE;
-	if (dwFlags & ePVRTPrint3D_FULL_OPAQUE)		m_pWin[dwWin].dwFlags |= Print3D_FULL_OPAQUE;
-	if (dwFlags & ePVRTPrint3D_FULL_TRANS)		m_pWin[dwWin].dwFlags |= Print3D_FULL_TRANS;
-
-	if (dwFlags & ePVRTPrint3D_ADJUST_SIZE_ALWAYS)
-	{
-		m_pWin[dwWin].dwFlags |= Print3D_ADJUST_SIZE;
-		AdjustWindowSize(dwWin, 0);
-	}
-
-	if (dwFlags & ePVRTPrint3D_NO_BORDER)	m_pWin[dwWin].dwFlags |= Print3D_NO_BORDER;
-
-#endif
-}
-
-/*!***************************************************************************
- @Function			AdjustWindowSize
- @Input				dwWin				Window handle
- @Input				dwMode				dwMode 0 = Both, dwMode 1 = X only,  dwMode 2 = Y only
- @Description		Calculates window size so that all text fits in the window.
-*****************************************************************************/
-void CPVRTPrint3D::AdjustWindowSize(unsigned int dwWin, unsigned int dwMode)
-{
-#if !defined (DISABLE_PRINT3D)
-
-	int unsigned i;
-	unsigned int dwPointer = 0;
-	float fMax = 0.0f, fLength;
-
-	if (dwMode==1 || dwMode==0)
-	{
-		/* Title horizontal Size */
-		if(m_pWin[dwWin].dwFlags & Print3D_WIN_TITLE)
-		{
-			fMax = GetLength(m_pWin[dwWin].fTitleFontSize, m_pWin[dwWin].bTitleTextL);
-
-			if (m_pWin[dwWin].bTitleTextR)
-			{
-				fMax += GetLength(m_pWin[dwWin].fTitleFontSize, m_pWin[dwWin].bTitleTextR) + 12.0f;
-			}
-		}
-
-		/* Body horizontal size (line by line) */
-		for (i=0; i<m_pWin[dwWin].dwBufferSizeY; i++)
-		{
-			fLength = GetLength(m_pWin[dwWin].fWinFontSize, (m_pWin[dwWin].pTextBuffer + dwPointer));
-
-			if (fLength > fMax) fMax = fLength;
-
-			dwPointer += m_pWin[dwWin].dwBufferSizeX;
-		}
-
-		m_pWin[dwWin].fWinSize[0] = fMax - 2.0f + 16.0f;
-	}
-
-	/* Vertical Size */
-	if(dwMode==0 || dwMode==2)
-	{
-		if(m_pWin[dwWin].dwBufferSizeY < 2)
-		{
-			i = 0;
-		}
-		else
-		{
-			/* Looking for the last line */
-			i=m_pWin[dwWin].dwBufferSizeY;
-			while(i)
-			{
-				--i;
-				if (m_pWin[dwWin].pTextBuffer[m_pWin[dwWin].dwBufferSizeX * i])
-					break;
-			}
-		}
-
-		if (m_pWin[dwWin].fWinFontSize>0)
-			m_pWin[dwWin].fWinSize[1] = (float)(i+1) * LINES_SPACING * m_pWin[dwWin].fWinFontSize + 16.0f;
-		else
-			m_pWin[dwWin].fWinSize[1] = ((float)(i+1) * 12.0f) + 16.0f;
-	}
-
-	m_pWin[dwWin].bNeedUpdated = true;
-
-#endif
 }
 
 /*!***************************************************************************
@@ -971,18 +695,14 @@ void CPVRTPrint3D::AdjustWindowSize(unsigned int dwWin, unsigned int dwMode)
  @Input				sString				String to take the size of
  @Description		Returns the size of a string in pixels.
 *****************************************************************************/
-void CPVRTPrint3D::GetSize(
+void CPVRTPrint3D::MeasureText(
 	float		* const pfWidth,
 	float		* const pfHeight,
-	const float	fFontSize,
-	const char	* sString)
+	float				fScale,
+	const CPVRTArray<PVRTuint32>& utf32)
 {
 #if !defined (DISABLE_PRINT3D)
-
-	unsigned char Val;
-	float fScale, fSize;
-
-	if(sString == NULL) {
+	if(utf32.GetSize() == 0) {
 		if(pfWidth)
 			*pfWidth = 0;
 		if(pfHeight)
@@ -990,58 +710,93 @@ void CPVRTPrint3D::GetSize(
 		return;
 	}
 
-	if(fFontSize > 0.0f) /* Arial font */
+	float fLength			= 0;
+	float fMaxLength		= -1.0f;
+	float fMaxHeight		= (float)m_uiNextLineH;
+	PVRTuint32 txNextChar	= 0;
+	PVRTuint32 uiIdx;
+	for(PVRTuint32 uiIndex = 0; uiIndex < utf32.GetSize(); uiIndex++)
 	{
-		fScale = fFontSize;
-		fSize  = 0.0f;
-
-		Val = *sString++;
-		while(Val)
+		if(utf32[uiIndex] == 0x0D || utf32[uiIndex] == 0x0A)
 		{
-			if(Val==' ')
-				Val = '_';
-			else if(Val>='0' && Val <= '9')
-				Val = '0'; /* That's for fixing the number width */
+			if(fLength > fMaxLength)
+				fMaxLength = fLength;
 
-			fSize += PVRTPrint3DSize_Bold[Val] * 40.0f * fScale ;
-
-			/* these letters are too narrow due to a bug in the table */
-			if(Val=='i' || Val == 'l' || Val == 'j')
-				fSize += 0.4f* fScale;
-			Val = *sString++;
+			fLength = 0;
+			fMaxHeight += (float)m_uiNextLineH;
+		}
+		uiIdx = FindCharacter(utf32[uiIndex]);
+		if(uiIdx == PVRTPRINT3D_INVALID_CHAR)		// No character found. Add a space.
+		{
+			fLength += m_uiSpaceWidth;
+			continue;
 		}
 
-		if(pfHeight)
-			*pfHeight = m_fScreenScale[1] * fScale * 27.0f * (100.0f / 640.0f);
+		txNextChar = utf32[uiIndex + 1];
+		float fKernOffset = 0;
+		ApplyKerning(utf32[uiIndex], txNextChar, fKernOffset);
+
+		fLength += m_pCharMatrics[uiIdx].nAdv + fKernOffset;		// Add on this characters width
 	}
-	else /* System font */
-	{
-		fScale = 255.0f;
-		fSize  = 0.0f;
 
-		Val = *sString++;
-		while (Val)
-		{
-			if(Val == ' ') {
-				fSize += 5.0f;
-				continue;
-			}
-
-			if(Val>='0' && Val <= '9')
-				Val = '0'; /* That's for fixing the number width */
-
-			fSize += PVRTPrint3DSize_System[Val]  * fScale * (100.0f / 640.0f);
-			Val = *sString++;
-		}
-
-		if(pfHeight)
-			*pfHeight = m_fScreenScale[1] * 12.0f;
-	}
+	if(fMaxLength < 0.0f)		// Obviously no new line.
+		fMaxLength = fLength;
 
 	if(pfWidth)
-		*pfWidth = fSize;
-
+		*pfWidth = fMaxLength * fScale;
+	if(pfHeight)
+		*pfHeight = fMaxHeight * fScale;
 #endif
+}
+
+/*!***************************************************************************
+ @Function			GetSize
+ @Output			pfWidth				Width of the string in pixels
+ @Output			pfHeight			Height of the string in pixels
+ @Input				pszUTF8				UTF8 string to take the size of
+ @Description		Returns the size of a string in pixels.
+*****************************************************************************/
+void CPVRTPrint3D::MeasureText(
+	float		* const pfWidth,
+	float		* const pfHeight,
+	float				fScale,
+	const char	* const pszUTF8)
+{
+	m_CachedUTF32.Clear();
+	PVRTUnicodeUTF8ToUTF32((PVRTuint8*)pszUTF8, m_CachedUTF32);
+	MeasureText(pfWidth,pfHeight,fScale,m_CachedUTF32);
+}
+
+/*!***************************************************************************
+@Function			MeasureText
+@Output				pfWidth				Width of the string in pixels
+@Output				pfHeight			Height of the string in pixels
+@Input				pszUnicode			Wide character string to take the
+length of.
+@Description		Returns the size of a string in pixels.
+*****************************************************************************/
+void CPVRTPrint3D::MeasureText(
+	float		* const pfWidth,
+	float		* const pfHeight,
+	float				fScale,
+	const wchar_t* const pszUnicode)
+{
+	_ASSERT(pszUnicode);
+	m_CachedUTF32.Clear();
+
+#if PVRTSIZEOFWCHAR == 2			// 2 byte wchar.
+	PVRTUnicodeUTF16ToUTF32((PVRTuint16*)pszUnicode, m_CachedUTF32);
+#else								// 4 byte wchar (POSIX)
+	unsigned int uiC = 0;
+	PVRTuint32* pUTF32 = (PVRTuint32*)pszUnicode;
+	while(*pUTF32 && uiC < MAX_LETTERS)
+	{
+		m_CachedUTF32.Append(*pUTF32++);
+		uiC++;
+	}
+#endif
+	
+	MeasureText(pfWidth,pfHeight,fScale,m_CachedUTF32);
 }
 
 /*!***************************************************************************
@@ -1056,7 +811,6 @@ void CPVRTPrint3D::GetAspectRatio(unsigned int *dwScreenX, unsigned int *dwScree
 
 	*dwScreenX = (int)(640.0f * m_fScreenScale[0]);
 	*dwScreenY = (int)(480.0f * m_fScreenScale[1]);
-
 #endif
 }
 
@@ -1065,310 +819,101 @@ void CPVRTPrint3D::GetAspectRatio(unsigned int *dwScreenX, unsigned int *dwScree
 **************************************************************/
 
 /*!***************************************************************************
- @Function			UpdateBackgroundWindow
- @Return			true if succesful, false otherwise.
- @Description		Draw a generic rectangle (with or without border).
-*****************************************************************************/
-bool CPVRTPrint3D::UpdateBackgroundWindow(unsigned int /*dwWin*/, unsigned int Color, float fZPos, float fPosX, float fPosY, float fSizeX, float fSizeY, SPVRTPrint3DAPIVertex **ppVtx)
-{
-	int				i;
-	SPVRTPrint3DAPIVertex	*vBox;
-	float			fU[] = { 0.0f, 0.0f, 6.0f, 6.0f, 10.0f,10.0f, 16.0f,16.0f,10.0f,16.0f,10.0f,16.0f,6.0f,6.0f,0.0f,0.0f};
-	float			fV[] = { 0.0f, 6.0f, 0.0f, 6.0f, 0.0f, 6.0f, 0.0f, 6.0f, 10.0f, 10.0f, 16.0f,16.0f, 16.0f, 10.0f, 16.0f, 10.0f};
-
-	/* Create our vertex buffers */
-	if(*ppVtx==0)
-	{
-		*ppVtx = (SPVRTPrint3DAPIVertex*)malloc(16*sizeof(SPVRTPrint3DAPIVertex));
-
-		if(!*ppVtx)
-			return false;
-	}
-	vBox = *ppVtx;
-
-
-	/* Removing the border */
-	fSizeX -= 16.0f ;
-	fSizeY -= 16.0f ;
-
-	/* Set Z position, color and texture coordinates in array */
-	for (i=0; i<16; i++)
-	{
-		vBox[i].sz		= f2vt(fZPos);
-		vBox[i].rhw	    = f2vt(1.0f);
-		vBox[i].color	= Color;
-		vBox[i].tu		= f2vt(fU[i]/16.0f);
-		vBox[i].tv		= f2vt(1.0f - fV[i]/16.0f);
-	}
-
-	/* Set coordinates in array */
-	vBox[0].sx = f2vt((fPosX + fU[0]) * m_fScreenScale[0]);
-	vBox[0].sy = f2vt((fPosY + fV[0]) * m_fScreenScale[1]);
-
-	vBox[1].sx = f2vt((fPosX + fU[1]) * m_fScreenScale[0]);
-	vBox[1].sy = f2vt((fPosY + fV[1]) * m_fScreenScale[1]);
-
-	vBox[2].sx = f2vt((fPosX + fU[2]) * m_fScreenScale[0]);
-	vBox[2].sy = f2vt((fPosY + fV[2]) * m_fScreenScale[1]);
-
-	vBox[3].sx = f2vt((fPosX + fU[3]) * m_fScreenScale[0]);
-	vBox[3].sy = f2vt((fPosY + fV[3]) * m_fScreenScale[1]);
-
-	vBox[4].sx = f2vt((fPosX + fU[4] + fSizeX) * m_fScreenScale[0]);
-	vBox[4].sy = f2vt((fPosY + fV[4]) * m_fScreenScale[1]);
-
-	vBox[5].sx = f2vt((fPosX + fU[5] + fSizeX) * m_fScreenScale[0]);
-	vBox[5].sy = f2vt((fPosY + fV[5]) * m_fScreenScale[1]);
-
-	vBox[6].sx = f2vt((fPosX + fU[6] + fSizeX) * m_fScreenScale[0]);
-	vBox[6].sy = f2vt((fPosY + fV[6]) * m_fScreenScale[1]);
-
-	vBox[7].sx = f2vt((fPosX + fU[7] + fSizeX) * m_fScreenScale[0]);
-	vBox[7].sy = f2vt((fPosY + fV[7]) * m_fScreenScale[1]);
-
-	vBox[8].sx = f2vt((fPosX + fU[8] + fSizeX) * m_fScreenScale[0]);
-	vBox[8].sy = f2vt((fPosY + fV[8] + fSizeY) * m_fScreenScale[1]);
-
-	vBox[9].sx = f2vt((fPosX + fU[9] + fSizeX) * m_fScreenScale[0]);
-	vBox[9].sy = f2vt((fPosY + fV[9] + fSizeY) * m_fScreenScale[1]);
-
-	vBox[10].sx = f2vt((fPosX + fU[10] + fSizeX) * m_fScreenScale[0]);
-	vBox[10].sy = f2vt((fPosY + fV[10] + fSizeY) * m_fScreenScale[1]);
-
-	vBox[11].sx = f2vt((fPosX + fU[11] + fSizeX) * m_fScreenScale[0]);
-	vBox[11].sy = f2vt((fPosY + fV[11] + fSizeY) * m_fScreenScale[1]);
-
-	vBox[12].sx = f2vt((fPosX + fU[12]) * m_fScreenScale[0]);
-	vBox[12].sy = f2vt((fPosY + fV[12] + fSizeY) * m_fScreenScale[1]);
-
-	vBox[13].sx = f2vt((fPosX + fU[13]) * m_fScreenScale[0]);
-	vBox[13].sy = f2vt((fPosY + fV[13] + fSizeY) * m_fScreenScale[1]);
-
-	vBox[14].sx = f2vt((fPosX + fU[14]) * m_fScreenScale[0]);
-	vBox[14].sy = f2vt((fPosY + fV[14] + fSizeY) * m_fScreenScale[1]);
-
-	vBox[15].sx = f2vt((fPosX + fU[15]) * m_fScreenScale[0]);
-	vBox[15].sy = f2vt((fPosY + fV[15] + fSizeY) * m_fScreenScale[1]);
-
-	if(m_bRotate)
-		Rotate(vBox, 16);
-
-	/* No problem occured */
-	return true;
-}
-
-/*!***************************************************************************
  @Function			UpdateLine
  @Description
 *****************************************************************************/
-unsigned int CPVRTPrint3D::UpdateLine(const unsigned int dwWin, const float fZPos, float XPos, float YPos, const float fScale, const unsigned int Colour, const char * const Text, SPVRTPrint3DAPIVertex * const pVertices)
+unsigned int CPVRTPrint3D::UpdateLine(const float fZPos, float XPos, float YPos, const float fScale, const unsigned int Colour, const CPVRTArray<PVRTuint32>& Text, SPVRTPrint3DAPIVertex * const pVertices)
 {
-	unsigned	i=0, VertexCount=0;
-	unsigned	Val;
-	float		XSize = 0.0f, XFixBug,	YSize = 0;
-	float		UPos,	VPos;
-	float		USize,	VSize;
-#if 0
-	float		fWinClipX[2],fWinClipY[2];
-#endif
-	float		fScaleX, fScaleY, fPreXPos;
-
 	/* Nothing to update */
-	if (Text==NULL) return 0;
+	if (Text.GetSize() == 0) 
+		return 0;
 
-	_ASSERT(m_pWin[dwWin].dwFlags & Print3D_WIN_EXIST || !dwWin);
-
-	if (fScale>0)
+	if(!m_bUsingProjection)
 	{
-		fScaleX = m_fScreenScale[0] * fScale * 255.0f;
-		fScaleY = m_fScreenScale[1] * fScale * 27.0f;
-	}
-	else
-	{
-		fScaleX = m_fScreenScale[0] * 255.0f;
-		fScaleY = m_fScreenScale[1] * 12.0f;
+		XPos *= ((float)m_ui32ScreenDim[0] / 640.0f);
+		YPos *= ((float)m_ui32ScreenDim[1] / 480.0f);
 	}
 
-	XPos *= m_fScreenScale[0];
-	YPos *= m_fScreenScale[1];
+	YPos -= PVRTMakeWhole(m_uiAscent * fScale);
 
-	fPreXPos = XPos;
+	float fPreXPos	= XPos;		// The original offset (after screen scale modification) of the X coordinate.
 
-#if 0
-	/*
-		Calculating our margins
-	*/
-	if (dwWin)
+	float		fKernOffset;
+	float		fAOff;
+	float		fYOffset;
+	unsigned int VertexCount = 0;
+	PVRTint32 NextChar;
+
+	unsigned int uiNumCharsInString = Text.GetSize();
+	for(unsigned int uiIndex = 0; uiIndex < uiNumCharsInString; uiIndex++)
 	{
-		fWinClipX[0] = (m_pWin[dwWin].fWinPos[0] + 6.0f) * m_fScreenScale[0];
-		fWinClipX[1] = (m_pWin[dwWin].fWinPos[0] + m_pWin[dwWin].fWinSize[0] - 6.0f) * m_fScreenScale[0];
+		if(uiIndex > MAX_LETTERS) 
+			break;
 
-		fWinClipY[0] = (m_pWin[dwWin].fWinPos[1] + 6.0f) * m_fScreenScale[1];
-		fWinClipY[1] = (m_pWin[dwWin].fWinPos[1] + m_pWin[dwWin].fWinSize[1]  + 9.0f) * m_fScreenScale[1];
-
-		if(m_pWin[dwWin].dwFlags & Print3D_WIN_TITLE)
+		// Newline
+		if(Text[uiIndex] == 0x0A)
 		{
-			if (m_pWin[dwWin].fTitleFontSize>0)
-			{
-				fWinClipY[0] +=  m_pWin[dwWin].fTitleFontSize * 25.0f  * m_fScreenScale[1];
-				fWinClipY[1] +=  m_pWin[dwWin].fTitleFontSize * 25.0f *  m_fScreenScale[1];
-			}
-			else
-			{
-				fWinClipY[0] +=  10.0f * m_fScreenScale[1];
-				fWinClipY[1] +=  8.0f  * m_fScreenScale[1];
-			}
-		}
-	}
-#endif 
-
-	for(;;)
-	{
-		Val = (int)Text[i++];
-
-		/* End of the string */
-		if (Val==0 || i>MAX_LETTERS) break;
-
-		/* It is SPACE so don't draw and carry on... */
-		if (Val==' ')
-		{
-			if (fScale>0)	XPos += 10.0f/255.0f * fScaleX;
-			else			XPos += 5.0f * m_fScreenScale[0];
+			XPos = fPreXPos;
+			YPos -= PVRTMakeWhole(m_uiNextLineH * fScale);
 			continue;
 		}
 
-		/* It is HASH so don't draw and carry on... */
-		if (Val=='#')
+		// Get the character
+		PVRTuint32 uiIdx = FindCharacter(Text[uiIndex]);
+
+		// Not found. Add a space.
+		if(uiIdx == PVRTPRINT3D_INVALID_CHAR)		// No character found. Add a space.
 		{
-			if (fScale>0)	XPos += 1.0f/255.0f * fScaleX;
-			else			XPos += 5.0f * m_fScreenScale[0];
+			XPos += PVRTMakeWhole(m_uiSpaceWidth * fScale);
 			continue;
 		}
 
-		/* It is RETURN so jump a line */
-		if (Val==0x0A)
+		fKernOffset = 0;
+		fYOffset	= PVRTMakeWhole(m_pYOffsets[uiIdx] * fScale);
+		fAOff		= PVRTMakeWhole(m_pCharMatrics[uiIdx].nXOff * fScale);					// The A offset. Could include overhang or underhang.
+		if(uiIndex < uiNumCharsInString - 1)
 		{
-			XPos = fPreXPos - XSize;
-			YPos += YSize;
-			continue;
+			NextChar = Text[uiIndex + 1];
+			ApplyKerning(Text[uiIndex], NextChar, fKernOffset);
 		}
-
-		/* If fScale is negative then select the small set of letters (System) */
-		if (fScale < 0.0f)
-		{
-			XPos    += XSize;
-			UPos    =  PVRTPrint3DU_System[Val];
-			VPos    =  PVRTPrint3DV_System[Val] - 0.0001f; /* Some cards need this little bit */
-			YSize   =  fScaleY;
-			XSize   =  PVRTPrint3DSize_System[Val] * fScaleX;
-			USize	=  PVRTPrint3DSize_System[Val];
-			VSize	=  12.0f/255.0f;
-		}
-		else /* Big set of letters (Bold) */
-		{
-			XPos    += XSize;
-			UPos    =  PVRTPrint3DU_Bold[Val];
-			VPos    =  PVRTPrint3DV_Bold[Val] - 1.0f/230.0f;
-			YSize   =  fScaleY;
-			XSize   =  PVRTPrint3DSize_Bold[Val] * fScaleX;
-			USize	=  PVRTPrint3DSize_Bold[Val];
-			VSize	=  29.0f/255.0f;
-		}
-
-		/*
-			CLIPPING
-		*/
-		XFixBug = XSize;
-#if 0
-		if(dwWin) /* for dwWin==0 (screen) no clipping */
-		{
-			float TempSize;
-
-			/* Outside */
-			if (XPos>fWinClipX[1]  ||  (YPos)>fWinClipY[1])
-			{
-				continue;
-			}
-
-			/* Clip X */
-			if (XPos<fWinClipX[1] && XPos+XSize > fWinClipX[1])
-			{
-				TempSize = XSize;
-
-				XSize = fWinClipX[1] - XPos;
-
-				if (fScale < 0.0f)
-					USize	=  PVRTPrint3DSize_System[Val] * (XSize/TempSize);
-				else
-					USize	=  PVRTPrint3DSize_Bold[Val] * (XSize/TempSize);
-			}
-
-			/*
-				Clip Y
-			*/
-			if (YPos<fWinClipY[1] && YPos+YSize > fWinClipY[1])
-			{
-				TempSize = YSize;
-				YSize = fWinClipY[1] - YPos;
-
-				if(fScale < 0.0f)
-				 	VSize	=  (YSize/TempSize)*12.0f/255.0f;
-				else
-					VSize	=  (YSize/TempSize)*28.0f/255.0f;
-			}
-		}
-#endif
 
 		/* Filling vertex data */
-		pVertices[VertexCount+0].sx		= f2vt(XPos);
-		pVertices[VertexCount+0].sy		= f2vt(YPos);
+		pVertices[VertexCount+0].sx		= f2vt(XPos + fAOff + 0.0f);
+		pVertices[VertexCount+0].sy		= f2vt(YPos + fYOffset + 0.0f);
 		pVertices[VertexCount+0].sz		= f2vt(fZPos);
 		pVertices[VertexCount+0].rhw	= f2vt(1.0f);
-		pVertices[VertexCount+0].tu		= f2vt(UPos);
-		pVertices[VertexCount+0].tv		= f2vt(VPos);
+		pVertices[VertexCount+0].tu		= f2vt(m_pUVs[uiIdx].fUL);
+		pVertices[VertexCount+0].tv		= f2vt(m_pUVs[uiIdx].fVT);
 
-		pVertices[VertexCount+1].sx		= f2vt(XPos+XSize);
-		pVertices[VertexCount+1].sy		= f2vt(YPos);
+		pVertices[VertexCount+1].sx		= f2vt(XPos + fAOff + PVRTMakeWhole(m_pRects[uiIdx].nW * fScale));
+		pVertices[VertexCount+1].sy		= f2vt(YPos + fYOffset + 0.0f);
 		pVertices[VertexCount+1].sz		= f2vt(fZPos);
 		pVertices[VertexCount+1].rhw	= f2vt(1.0f);
-		pVertices[VertexCount+1].tu		= f2vt(UPos+USize);
-		pVertices[VertexCount+1].tv		= f2vt(VPos);
+		pVertices[VertexCount+1].tu		= f2vt(m_pUVs[uiIdx].fUR);
+		pVertices[VertexCount+1].tv		= f2vt(m_pUVs[uiIdx].fVT);
 
-		pVertices[VertexCount+2].sx		= f2vt(XPos);
-		pVertices[VertexCount+2].sy		= f2vt(YPos+YSize);
+		pVertices[VertexCount+2].sx		= f2vt(XPos + fAOff + 0.0f);
+		pVertices[VertexCount+2].sy		= f2vt(YPos + fYOffset - PVRTMakeWhole(m_pRects[uiIdx].nH * fScale));
 		pVertices[VertexCount+2].sz		= f2vt(fZPos);
 		pVertices[VertexCount+2].rhw	= f2vt(1.0f);
-		pVertices[VertexCount+2].tu		= f2vt(UPos);
-		pVertices[VertexCount+2].tv		= f2vt(VPos-VSize);
+		pVertices[VertexCount+2].tu		= f2vt(m_pUVs[uiIdx].fUL);
+		pVertices[VertexCount+2].tv		= f2vt(m_pUVs[uiIdx].fVB);
 
-		pVertices[VertexCount+3].sx		= f2vt(XPos+XSize);
-		pVertices[VertexCount+3].sy		= f2vt(YPos+YSize);
+		pVertices[VertexCount+3].sx		= f2vt(XPos + fAOff + PVRTMakeWhole(m_pRects[uiIdx].nW * fScale));
+		pVertices[VertexCount+3].sy		= f2vt(YPos + fYOffset - PVRTMakeWhole(m_pRects[uiIdx].nH * fScale));
 		pVertices[VertexCount+3].sz		= f2vt(fZPos);
 		pVertices[VertexCount+3].rhw	= f2vt(1.0f);
-		pVertices[VertexCount+3].tu		= f2vt(UPos+USize);
-		pVertices[VertexCount+3].tv		= f2vt(VPos-VSize);
+		pVertices[VertexCount+3].tu		= f2vt(m_pUVs[uiIdx].fUR);
+		pVertices[VertexCount+3].tv		= f2vt(m_pUVs[uiIdx].fVB);
 
 		pVertices[VertexCount+0].color	= Colour;
 		pVertices[VertexCount+1].color	= Colour;
 		pVertices[VertexCount+2].color	= Colour;
 		pVertices[VertexCount+3].color	= Colour;
 
+		XPos = XPos + PVRTMakeWhole((m_pCharMatrics[uiIdx].nAdv + fKernOffset) * fScale);		// Add on this characters width
 		VertexCount += 4;
-
-		XSize = XFixBug;
-
-		/* Fix number width */
-		if (Val >='0' && Val <='9')
-		{
-			if (fScale < 0.0f)
-				XSize = PVRTPrint3DSize_System[(int)'0'] * fScaleX;
-			else
-				XSize = PVRTPrint3DSize_Bold[(int)'0'] * fScaleX;
-		}
 	}
-
-	if(m_bRotate)
-		Rotate(pVertices, VertexCount);
 
 	return VertexCount;
 }
@@ -1378,7 +923,7 @@ unsigned int CPVRTPrint3D::UpdateLine(const unsigned int dwWin, const float fZPo
  @Return			true or false
  @Description		Draw a single line of text.
 *****************************************************************************/
-bool CPVRTPrint3D::DrawLineUP(SPVRTPrint3DAPIVertex *pVtx, unsigned int nVertices)
+bool CPVRTPrint3D::DrawLine(SPVRTPrint3DAPIVertex *pVtx, unsigned int nVertices)
 {
 	if(!nVertices)
 		return true;
@@ -1393,8 +938,18 @@ bool CPVRTPrint3D::DrawLineUP(SPVRTPrint3DAPIVertex *pVtx, unsigned int nVertice
 		}
 
 		m_nVtxCacheMax	= PVRT_MIN(m_nVtxCacheMax * 2, MAX_CACHED_VTX);
-		m_pVtxCache		= (SPVRTPrint3DAPIVertex*)realloc(m_pVtxCache, m_nVtxCacheMax * sizeof(*m_pVtxCache));
-		_ASSERT(m_pVtxCache);
+		SPVRTPrint3DAPIVertex* pTmp = (SPVRTPrint3DAPIVertex*)realloc(m_pVtxCache, m_nVtxCacheMax * sizeof(*m_pVtxCache));
+
+		_ASSERT(pTmp);
+		if(!pTmp)
+		{
+			free(m_pVtxCache);
+			m_pVtxCache = 0;
+			return false; // Failed to re-allocate data
+		}
+
+		m_pVtxCache = pTmp;
+		
 		_RPT1(_CRT_WARN, "Print3D: TextCache increased to %d vertices.\n", m_nVtxCacheMax);
 	}
 
@@ -1404,223 +959,61 @@ bool CPVRTPrint3D::DrawLineUP(SPVRTPrint3DAPIVertex *pVtx, unsigned int nVertice
 }
 
 /*!***************************************************************************
- @Function			UpdateTitleVertexBuffer
- @Return			true or false
- @Description
+ @Function			SetProjection
+ @Description		Sets projection matrix.
 *****************************************************************************/
-bool CPVRTPrint3D::UpdateTitleVertexBuffer(unsigned int dwWin)
+void CPVRTPrint3D::SetProjection(const PVRTMat4& mProj)
 {
-	float fRPos;
-	unsigned int dwLenL = 0, dwLenR = 0;
-
-	/* Doesn't exist */
-	if (!(m_pWin[dwWin].dwFlags & Print3D_WIN_EXIST) && dwWin)
-		return false;
-
-	/* Allocate our buffers if needed */
-	if(m_pWin[dwWin].pTitleVtxL==0 || m_pWin[dwWin].pTitleVtxR==0)
-	{
-		dwLenL = (unsigned int)strlen(m_pWin[dwWin].bTitleTextL);
-		FREE(m_pWin[dwWin].pTitleVtxL);
-		if(dwLenL)
-			m_pWin[dwWin].pTitleVtxL = (SPVRTPrint3DAPIVertex*)malloc(dwLenL*4*sizeof(SPVRTPrint3DAPIVertex));
-
-		dwLenR = m_pWin[dwWin].bTitleTextR ? (unsigned int)strlen(m_pWin[dwWin].bTitleTextR) : 0;
-		FREE(m_pWin[dwWin].pTitleVtxR);
-		if(dwLenR)
-			m_pWin[dwWin].pTitleVtxR = (SPVRTPrint3DAPIVertex*)malloc(dwLenR*4*sizeof(SPVRTPrint3DAPIVertex));
-	}
-
-	/* Left title */
-	if (dwLenL)
-	{
-		m_pWin[dwWin].nTitleVerticesL = UpdateLine(dwWin, 0.0f,
-			(m_pWin[dwWin].fWinPos[0] + 6.0f),
-			(m_pWin[dwWin].fWinPos[1] + 7.0f),
-			m_pWin[dwWin].fTitleFontSize,
-			m_pWin[dwWin].dwTitleFontColorL,
-			m_pWin[dwWin].bTitleTextL,
-			m_pWin[dwWin].pTitleVtxL);
-	}
-	else
-	{
-		m_pWin[dwWin].nTitleVerticesL = 0;
-		m_pWin[dwWin].pTitleVtxL = NULL;
-	}
-
-	/* Right title */
-	if (dwLenR)
-	{
-		/* Compute position */
-		fRPos = GetLength(m_pWin[dwWin].fTitleFontSize,m_pWin[dwWin].bTitleTextR);
-
-		fRPos = m_pWin[dwWin].fWinSize[0]  - fRPos - 6.0f;
-
-		/* Check that we're not under minimum position */
-		if(fRPos<m_pWin[dwWin].fTextRMinPos)
-			fRPos = m_pWin[dwWin].fTextRMinPos;
-
-		/* Add window position */
-		fRPos += m_pWin[dwWin].fWinPos[0];
-
-		/* Print text */
-		m_pWin[dwWin].nTitleVerticesR = UpdateLine(dwWin, 0.0f,
-			fRPos,
-			m_pWin[dwWin].fWinPos[1] + 7.0f,
-			m_pWin[dwWin].fTitleFontSize,
-			m_pWin[dwWin].dwTitleFontColorR,
-			m_pWin[dwWin].bTitleTextR,
-			m_pWin[dwWin].pTitleVtxR);
-	}
-	else
-	{
-		m_pWin[dwWin].nTitleVerticesR = 0;
-		m_pWin[dwWin].pTitleVtxR = NULL;
-	}
-
-	return true;
+	m_mProj				= mProj;
+	m_bUsingProjection	= true;
 }
 
 /*!***************************************************************************
- @Function			UpdateMainTextVertexBuffer
- @Return			true or false
- @Description
+ @Function			SetModelView
+ @Description		Sets model view matrix.
 *****************************************************************************/
-bool CPVRTPrint3D::UpdateMainTextVertexBuffer(unsigned int dwWin)
+void CPVRTPrint3D::SetModelView(const PVRTMat4& mModelView)
 {
-	int i;
-	float		fNewPos, fTitleSize;
-	unsigned int		dwPointer = 0, dwLen;
-
-	/* Doesn't exist */
-	if (!(m_pWin[dwWin].dwFlags & Print3D_WIN_EXIST) && dwWin) return false;
-
-	/* No text to update vertices */
-	if(m_pWin[dwWin].pTextBuffer==NULL) return true;
-
-	/* Well, once we've got our text, allocate it to draw it later */
-	/* Text, line by line */
-	for (i = 0; i < (int) m_pWin[dwWin].dwBufferSizeY; i++)
-	{
-		/* line length */
-		dwLen = (unsigned int)strlen(&m_pWin[dwWin].pTextBuffer[dwPointer]);
-		if(dwLen==0)
-		{
-			m_pWin[dwWin].nLineVertices[i] = 0;
-			m_pWin[dwWin].pLineVtx[i] = NULL;
-		}
-		else
-		{
-			/* Create Vertex Buffer (one per line) */
-			if (m_pWin[dwWin].pLineVtx[i]==0)
-			{
-				m_pWin[dwWin].pLineVtx[i] = (SPVRTPrint3DAPIVertex*)malloc(m_pWin[dwWin].dwBufferSizeX *4*sizeof(SPVRTPrint3DAPIVertex));
-
-				if(!m_pWin[dwWin].pLineVtx[i])
-					return false;
-			}
-
-			/* Compute new text position */
-			fTitleSize = 0.0f;
-			if(m_pWin[dwWin].fTitleFontSize < 0.0f)
-			{
-				/* New position for alternate font */
-				if(m_pWin[dwWin].dwFlags & Print3D_WIN_TITLE)
-					fTitleSize = 8.0f +16;
-				fNewPos = fTitleSize + (float)(i * 12.0f);
-			}
-			else
-			{
-				/* New position for normal font */
-				if(m_pWin[dwWin].dwFlags & Print3D_WIN_TITLE)
-					fTitleSize = m_pWin[dwWin].fTitleFontSize * 23.5f + 16.0f;
-				fNewPos = fTitleSize + (float)(i * m_pWin[dwWin].fWinFontSize) * LINES_SPACING;
-			}
-
-			/* Print window text */
-			m_pWin[dwWin].nLineVertices[i] = UpdateLine(dwWin, 0.0f,
-				(m_pWin[dwWin].fWinPos[0] + 6.0f),
-				(m_pWin[dwWin].fWinPos[1] + 6.0f + fNewPos),
-				m_pWin[dwWin].fWinFontSize, m_pWin[dwWin].dwWinFontColor,
-				&m_pWin[dwWin].pTextBuffer[dwPointer],
-				m_pWin[dwWin].pLineVtx[i]);
-		}
-
-		/* Increase pointer */
-		dwPointer += m_pWin[dwWin].dwBufferSizeX;
-	}
-
-	return true;
+	m_mModelView = mModelView;
 }
 
 /*!***************************************************************************
- @Function			GetLength
- @Description		calculates the size in pixels.
+	@Function			SetFiltering
+	@Input				eFilter				The method of texture filtering
+	@Description		Sets the method of texture filtering for the font texture.
+					Print3D will attempt to pick the best method by default
+					but this method allows the user to override this.
 *****************************************************************************/
-float CPVRTPrint3D::GetLength(float fFontSize, char *sString)
+void CPVRTPrint3D::SetFiltering(ETextureFilter eMin, ETextureFilter eMag, ETextureFilter eMip)
 {
-	unsigned char Val;
-	float fScale, fSize;
+	if(eMin == eFilter_None) eMin = eFilter_Default;		// Illegal value
+	if(eMag == eFilter_None) eMag = eFilter_Default;		// Illegal value
 
-	if(sString == NULL)
-		return 0.0f;
-
-	if (fFontSize>=0) /* Arial font */
-	{
-		fScale = fFontSize * 255.0f;
-		fSize  = 0.0f;
-
-		Val = *sString++;
-		while (Val)
-		{
-			if(Val==' ')
-			{
-				fSize += 10.0f * fFontSize;
-			}
-			else
-			{
-				if(Val>='0' && Val <= '9') Val = '0'; /* That's for fixing the number width */
-				fSize += PVRTPrint3DSize_Bold[Val] * fScale ;
-			}
-			Val = *sString++;
-		}
-	}
-	else /* System font */
-	{
-		fScale = 255.0f;
-		fSize  = 0.0f;
-
-		Val = *sString++;
-		while (Val)
-		{
-			if (Val==' ')
-			{
-				fSize += 5.0f;
-			}
-			else
-			{
-				if(Val>='0' && Val <= '9') Val = '0'; /* That's for fixing the number width */
-				fSize += PVRTPrint3DSize_System[Val]  * fScale;
-			}
-			Val = *sString++;
-		}
-	}
-
-	return (fSize);
+	m_eFilterMethod[eFilterProc_Min] = eMin;
+	m_eFilterMethod[eFilterProc_Mag] = eMag;
+	m_eFilterMethod[eFilterProc_Mip] = eMip;
 }
 
-void CPVRTPrint3D::Rotate(SPVRTPrint3DAPIVertex * const pv, const unsigned int nCnt)
+/*!***************************************************************************
+@Function		GetFontAscent
+@Return			unsigned int	The ascent.
+@Description	Returns the 'ascent' of the font. This is typically the 
+				height from the baseline of the larget glyph in the set.
+*****************************************************************************/
+unsigned int CPVRTPrint3D::GetFontAscent()
 {
-	unsigned int	i;
-	VERTTYPE		x, y;
+	return m_uiAscent;
+}
 
-	for(i = 0; i < nCnt; ++i)
-	{
-		x = VERTTYPEDIV((VERTTYPE&)pv[i].sx, f2vt(640.0f * m_fScreenScale[0]));
-		y = VERTTYPEDIV((VERTTYPE&)pv[i].sy, f2vt(480.0f * m_fScreenScale[1]));
-		(VERTTYPE&)pv[i].sx = VERTTYPEMUL(y, f2vt(640.0f * m_fScreenScale[0]));
-		(VERTTYPE&)pv[i].sy = VERTTYPEMUL(f2vt(1.0f) - x, f2vt(480.0f * m_fScreenScale[1]));
-	}
+/*!***************************************************************************
+@Function		GetFontLineSpacing
+@Return			unsigned int	The line spacing.
+@Description	Returns the default line spacing (i.e baseline to baseline) 
+				for the font.
+*****************************************************************************/
+unsigned int CPVRTPrint3D::GetFontLineSpacing()
+{
+	return m_uiNextLineH;
 }
 
 /****************************************************************************

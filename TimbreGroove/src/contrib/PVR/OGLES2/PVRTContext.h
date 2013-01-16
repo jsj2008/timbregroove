@@ -6,7 +6,7 @@
 
  @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     ANSI compatible
 
@@ -16,23 +16,18 @@
 #ifndef _PVRTCONTEXT_H_
 #define _PVRTCONTEXT_H_
 
-#define TARGET_OS_IPHONE
-#define BUILD_OGLES2
-
 #include <stdio.h>
+/*
+#if defined(BUILD_OGLES2)
 #if defined(__APPLE__)
 #ifdef TARGET_OS_IPHONE
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
-#else	//MacOS 
+#else	//OSX 
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #include <GLES2/gl2extimg.h>
 #endif
-#else
-#if defined(__BADA__)
-#include <FGraphicsOpengl2.h>
-using namespace Osp::Graphics::Opengl;
 #else
 #if defined(__PALMPDK__)
 #include <GLES2/gl2.h>
@@ -44,8 +39,19 @@ using namespace Osp::Graphics::Opengl;
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #endif
-#endif
 #include <GLES2/gl2extimg.h>
+#endif
+#elif defined(BUILD_OGLES3) 
+#include <GLES3/gl3.h>
+#include <GLES2/gl2ext.h>
+#include <GLES3/gl3extimg.h>
+#endif
+*/
+#import <OpenGLES/ES2/gl.h>
+#import <OpenGLES/ES2/glext.h>
+
+#ifndef BUILD_OGLES2
+#define BUILD_OGLES2
 #endif
 
 /****************************************************************************

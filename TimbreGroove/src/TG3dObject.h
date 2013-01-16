@@ -42,6 +42,8 @@ typedef enum FBO_BindFlags
 @property (nonatomic)        GLKVector3 scale;
 @property (nonatomic)             float scaleXYZ;
 
+@property (nonatomic,strong) NSNumber * isMenuOver;
+
 /*
   Do as little as humanly possible in init
   Make initialization params into properties into 2 groups:

@@ -18,6 +18,8 @@ typedef enum {
     sv_normal,
     sv_pos,
     sv_uv,
+    sv_bone,
+    sv_boneWeight,
     sv_pos2f,
     sv_customAttr2f,
     sv_customAttr3f,

@@ -6,7 +6,7 @@
 
  @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     ANSI compatible
 
@@ -28,29 +28,26 @@
 #include "PVRTShader.h"
 #include "PVRTPFXParser.h"
 #include "PVRTPFXParserAPI.h"
+#include "PVRTPFXSemantics.h"
 #include "PVRTTexture.h"
-#include "PVRTgles2Ext.h"
+#include "PVRTTextureAPI.h"
 
 /*!***************************************************************************
  @Function			CPVRTPFXEffect Constructor
  @Description		Sets the context and initialises the member variables to zero.
 *****************************************************************************/
-CPVRTPFXEffect::CPVRTPFXEffect()
+CPVRTPFXEffect::CPVRTPFXEffect():
+	m_bLoaded(false), m_psContext(NULL), m_pParser(NULL), m_nEffect(0), m_uiProgram(0), m_Semantics(PVRTPFXSemanticsGetSemanticList(), ePVRTPFX_NumSemantics)
 {
-	m_psContext = NULL;
-	m_uiProgram = 0;
-	m_pnTextureIdx = 0;
 }
 
 /*!***************************************************************************
  @Function			CPVRTPFXEffect Constructor
  @Description		Sets the context and initialises the member variables to zero.
 *****************************************************************************/
-CPVRTPFXEffect::CPVRTPFXEffect(SPVRTContext &sContext)
+CPVRTPFXEffect::CPVRTPFXEffect(SPVRTContext &sContext):
+	m_bLoaded(false), m_psContext(&sContext), m_pParser(NULL), m_nEffect(0), m_uiProgram(0), m_Semantics(PVRTPFXSemanticsGetSemanticList(), ePVRTPFX_NumSemantics)
 {
-	m_psContext = &sContext;
-	m_uiProgram = 0;
-	m_pnTextureIdx = 0;
 }
 
 /*!***************************************************************************
@@ -60,6 +57,13 @@ CPVRTPFXEffect::CPVRTPFXEffect(SPVRTContext &sContext)
 CPVRTPFXEffect::~CPVRTPFXEffect()
 {
 	Destroy();
+	
+	// Free allocated strings
+	for(unsigned int uiIndex = ePVRTPFX_NumSemantics; uiIndex < m_Semantics.GetSize(); ++uiIndex)
+	{
+		delete [] m_Semantics[uiIndex].p;
+		m_Semantics[uiIndex].p = NULL;
+	}
 }
 
 /*!***************************************************************************
@@ -72,265 +76,342 @@ CPVRTPFXEffect::~CPVRTPFXEffect()
  @Description		Loads the specified effect from the CPVRTPFXParser object.
 					Compiles and links the shaders. Initialises texture data.
 *****************************************************************************/
-EPVRTError CPVRTPFXEffect::Load(CPVRTPFXParser &src, const char * const pszEffect, const char * const pszFileName, CPVRTString *pReturnError)
+EPVRTError CPVRTPFXEffect::Load(CPVRTPFXParser &src, const char * const pszEffect, const char * const pszFileName, 
+								PVRTPFXEffectDelegate* pDelegate, unsigned int& uiUnknownUniforms, CPVRTString *pReturnError)
 {
-	GLuint				uiVertexShader = 0, uiFragShader = 0;
-	unsigned int		i, j;
+	unsigned int	 i;
 
-	if(!src.m_nNumEffects)
+	if(!src.GetNumberEffects())
 		return PVR_FAIL;
 
-	/*
-		First find the named effect from the effect file
-	*/
+	// --- First find the named effect from the effect file
 	if(pszEffect)
 	{
-		for(i = 0; i < src.m_nNumEffects; ++i)
-		{
-			if(strcmp(src.m_psEffect[i].pszName, pszEffect) == 0)
-			{
-				m_nEffect = i;
-				break;
-			}
-		}
-		if(i == src.m_nNumEffects)
-		{
+		int iEffect = src.FindEffectByName(CPVRTStringHash(pszEffect));
+		if(iEffect == -1)
 			return PVR_FAIL;
-		}
+
+		m_nEffect = (unsigned int)iEffect;
 	}
 	else
 	{
 		m_nEffect = 0;
 	}
 
-	/*
-		Now load the effect
-	*/
+	// --- Now load the effect
 	m_pParser = &src;
-	SPVRTPFXParserEffect *psParserEffect = &src.m_psEffect[m_nEffect];
+	const SPVRTPFXParserEffect &ParserEffect = src.GetEffect(m_nEffect);
 
 	// Create room for per-texture data
-	m_psTextures = new SPVRTPFXTexture[src.m_nNumTextures];
+	const CPVRTArray<SPVRTPFXParserEffectTexture>& EffectTextures = src.GetEffect(m_nEffect).Textures;
+	unsigned int uiNumTexturesForEffect = EffectTextures.GetSize();
+	m_Textures.SetCapacity(uiNumTexturesForEffect);
 
 	// Initialise each Texture
-	for(i = 0; i < src.m_nNumTextures; ++i)
+	for(i = 0; i < uiNumTexturesForEffect; ++i)
 	{
-		m_psTextures[i].p	= src.m_psTexture[i].pszFile;
-		m_psTextures[i].ui	= 0xFFFFFFFF;
+		int iTexIdx = src.FindTextureByName(EffectTextures[i].Name);
+		if(iTexIdx < 0)
+		{
+			*pReturnError += PVRTStringFromFormattedStr("ERROR: Effect '%s' requests non-existent texture: %s\n", ParserEffect.Name.c_str(), EffectTextures[i].Name.c_str());
+			return PVR_FAIL;
+		}
+
+		unsigned int uiTexIdx = m_Textures.Append();
+		m_Textures[uiTexIdx].Name	= src.GetTexture((unsigned int)iTexIdx)->Name;
+		m_Textures[uiTexIdx].ui		= 0xFFFFFFFF;
+		m_Textures[uiTexIdx].flags	= 0;
+		m_Textures[uiTexIdx].unit	= 0;
 	}
 
-	// Initialise the effect
+	// Load the shaders
+	if(LoadShadersForEffect(src, pszFileName, pReturnError) != PVR_SUCCESS)
+		return PVR_FAIL;
+
+	// Build uniform table
+	if(RebuildUniformTable(uiUnknownUniforms, pReturnError) != PVR_SUCCESS)
+		return PVR_FAIL;
+
+	// Load the requested textures
+	if(pDelegate)
 	{
-		// initialise attributes to default values
-		char *pszVertexShader = NULL;
-		char *pszFragmentShader = NULL;
-		bool bFreeVertexShader = false;
-		bool bFreeFragmentShader = false;
+		if(LoadTexturesForEffect(pDelegate, pReturnError) != PVR_SUCCESS)
+			return PVR_FAIL;
+	}
 
-		// find shaders requested
-		for(i=0; i < src.m_nNumVertShaders; ++i)
+	m_bLoaded = true;
+
+	return PVR_SUCCESS;
+}
+
+/*!***************************************************************************
+@Function		LoadTexturesForEffect
+@Output			pReturnError
+@Return			EPVRTError	
+@Description	Loads all of the textures for this effect.
+*****************************************************************************/
+EPVRTError CPVRTPFXEffect::LoadTexturesForEffect(PVRTPFXEffectDelegate* pDelegate, CPVRTString *pReturnError)
+{
+	GLuint			uiHandle;
+	unsigned int	uiFlags;
+	
+	for(unsigned int i = 0; i < m_Textures.GetSize(); ++i)
+	{
+		int iTexID = m_pParser->FindTextureByName(m_Textures[i].Name);
+		if(iTexID == -1)
 		{
-			if(strcmp(psParserEffect->pszVertexShaderName, src.m_psVertexShader[i].pszName) == 0)
-			{
-                if(src.m_psVertexShader[i].bUseFileName)
-				{
-					pszVertexShader = src.m_psVertexShader[i].pszGLSLcode;
-				}
-				else
-				{
-					// offset glsl code by nFirstLineNumber
-					pszVertexShader = (char *)malloc((strlen(src.m_psVertexShader[i].pszGLSLcode) + (src.m_psVertexShader[i].nFirstLineNumber) + 1) * sizeof(char));
-					pszVertexShader[0] = '\0';
-					for(unsigned int n = 0; n < src.m_psVertexShader[i].nFirstLineNumber; n++)
-						strcat(pszVertexShader, "\n");
-					strcat(pszVertexShader, src.m_psVertexShader[i].pszGLSLcode);
-
-					bFreeVertexShader = true;
-				}
-
-				break;
-			}
-		}
-		for(i=0; i<src.m_nNumFragShaders; ++i)
-		{
-			if(strcmp(psParserEffect->pszFragmentShaderName, src.m_psFragmentShader[i].pszName) == 0)
-			{
-                if(src.m_psFragmentShader[i].bUseFileName)
-				{
-					pszFragmentShader = src.m_psFragmentShader[i].pszGLSLcode;
-				}
-				else
-				{
-					// offset glsl code by nFirstLineNumber
-					pszFragmentShader = (char *)malloc((strlen(src.m_psFragmentShader[i].pszGLSLcode) + (src.m_psFragmentShader[i].nFirstLineNumber) + 1) * sizeof(char));
-					pszFragmentShader[0] = '\0';
-					for(unsigned int n = 0; n < src.m_psFragmentShader[i].nFirstLineNumber; n++)
-						strcat(pszFragmentShader, "\n");
-					strcat(pszFragmentShader, src.m_psFragmentShader[i].pszGLSLcode);
-
-					bFreeFragmentShader = true;
-				}
-
-				break;
-			}
+			*pReturnError += PVRTStringFromFormattedStr("ERROR: Cannot find texture '%s' in any TEXTURE block.\n", m_Textures[i].Name.c_str());
+			return PVR_FAIL;
 		}
 
-		CPVRTString error;
-		bool		bLoadSource = 1;
+		const SPVRTPFXParserTexture* pTexDesc = m_pParser->GetTexture(iTexID);
+		
+		
+		uiHandle = 0xBADF00D;
+		uiFlags  = 0;
 
-		// Try first to load from the binary block
-		if (src.m_psVertexShader[i].pbGLSLBinary!=NULL)
+		if(pDelegate->PVRTPFXOnLoadTexture(pTexDesc->FileName, uiHandle, uiFlags) != PVR_SUCCESS)
 		{
-			if (PVRTShaderLoadBinaryFromMemory(src.m_psVertexShader[i].pbGLSLBinary, src.m_psVertexShader[i].nGLSLBinarySize,
-												GL_VERTEX_SHADER, GL_SGX_BINARY_IMG, &uiVertexShader, &error) == PVR_SUCCESS)
+			*pReturnError += PVRTStringFromFormattedStr("ERROR: Failed to load texture: %s.\n", pTexDesc->FileName.c_str());
+			return PVR_FAIL;
+		}
+	
+		// Make sure uiHandle was written.
+		if(uiHandle == 0xBADF00D)
+		{
+			*pReturnError += PVRTStringFromFormattedStr("ERROR: GL handle for texture '%s' not set!\n", pTexDesc->FileName.c_str());
+			return PVR_FAIL;
+		}
+		
+		SetTexture(i, uiHandle, uiFlags);
+	}
+
+	return PVR_SUCCESS;
+}
+
+/*!***************************************************************************
+@Function		LoadShadersForEffect
+@Input			pszFileName
+@Output			pReturnError
+@Return			EPVRTError	
+@Description	Loads all of the GLSL shaders for an effect.
+*****************************************************************************/
+EPVRTError CPVRTPFXEffect::LoadShadersForEffect(CPVRTPFXParser &src, const char * const pszFileName, CPVRTString *pReturnError)
+{
+	// initialise attributes to default values
+	char *pszVertexShader		= NULL;
+	char *pszFragmentShader		= NULL;
+	bool bFreeVertexShader		= false;
+	bool bFreeFragmentShader	= false;
+	unsigned int uiVertIdx		= 0;
+	unsigned int uiFragIdx		= 0;
+	unsigned int uiVertexShader	= 0;
+	unsigned int uiFragShader	= 0;
+
+	const SPVRTPFXParserEffect &ParserEffect = src.GetEffect(m_nEffect);
+
+	// find shaders requested
+	for(uiVertIdx = 0; uiVertIdx < src.GetNumberVertexShaders(); ++uiVertIdx)
+	{
+		const SPVRTPFXParserShader& VertexShader = src.GetVertexShader(uiVertIdx);
+		if(ParserEffect.VertexShaderName == VertexShader.Name)
+		{
+			if(VertexShader.bUseFileName)
 			{
-				// success loading the binary block so we do not need to load the source
-				bLoadSource = 0;
+				pszVertexShader = VertexShader.pszGLSLcode;
 			}
 			else
 			{
-				bLoadSource = 1;
+				if(!VertexShader.pszGLSLcode)
+					continue;			// No code specified.
+#if 0
+				// offset glsl code by nFirstLineNumber
+				pszVertexShader = (char *)malloc((strlen(VertexShader.pszGLSLcode) + (VertexShader.nFirstLineNumber) + 1) * sizeof(char));
+				pszVertexShader[0] = '\0';
+			 	for(unsigned int n = 0; n < VertexShader.nFirstLineNumber; n++)
+					strcat(pszVertexShader, "\n");
+				strcat(pszVertexShader, VertexShader.pszGLSLcode);
+#else
+				pszVertexShader = (char *)malloc(strlen(VertexShader.pszGLSLcode) + 1);
+				pszVertexShader[0] = '\0';
+				strcat(pszVertexShader, VertexShader.pszGLSLcode);
+#endif
+				bFreeVertexShader = true;
 			}
+
+			break;
 		}
-
-		// If it fails, load from source
-		if (bLoadSource)
+	}
+	for(uiFragIdx = 0; uiFragIdx < src.GetNumberFragmentShaders(); ++uiFragIdx)
+	{
+		const SPVRTPFXParserShader& FragmentShader = src.GetFragmentShader(uiFragIdx);
+		if(ParserEffect.FragmentShaderName == FragmentShader.Name)
 		{
-			if(pszVertexShader)
+			if(FragmentShader.bUseFileName)
 			{
-				if (PVRTShaderLoadSourceFromMemory(pszVertexShader, GL_VERTEX_SHADER, &uiVertexShader, &error) != PVR_SUCCESS)
-				{
-					*pReturnError = CPVRTString("Vertex Shader compile error in file '") + pszFileName + "':\n" + error;
-					if(bFreeVertexShader)	FREE(pszVertexShader);
-					if(bFreeFragmentShader)	FREE(pszFragmentShader);
-					return PVR_FAIL;
-				}
+				pszFragmentShader = FragmentShader.pszGLSLcode;
 			}
-			else // Shader not found or failed binary block
+			else
 			{
-				if (src.m_psVertexShader[i].pbGLSLBinary==NULL)
-				{
-					*pReturnError = CPVRTString("Vertex shader ") + psParserEffect->pszVertexShaderName + "  not found in " + pszFileName + ".\n";
-				}
-				else
-				{
-					*pReturnError = CPVRTString("Binary vertex shader ") + psParserEffect->pszVertexShaderName + " not supported.\n";
-				}
+				if(!FragmentShader.pszGLSLcode)
+					continue;			// No code specified.
 
+#if 0
+				// offset glsl code by nFirstLineNumber
+				pszFragmentShader = (char *)malloc((strlen(FragmentShader.pszGLSLcode) + (FragmentShader.nFirstLineNumber) + 1) * sizeof(char));
+				pszFragmentShader[0] = '\0';
+				for(unsigned int n = 0; n < FragmentShader.nFirstLineNumber; n++)
+					strcat(pszFragmentShader, "\n");
+				strcat(pszFragmentShader, FragmentShader.pszGLSLcode);
+#else
+				pszFragmentShader = (char *)malloc(strlen(FragmentShader.pszGLSLcode) + 1);
+				pszFragmentShader[0] = '\0';
+				strcat(pszFragmentShader, FragmentShader.pszGLSLcode);
+#endif
+				bFreeFragmentShader = true;
+			}
+
+			break;
+		}
+	}
+
+	CPVRTString error;
+	bool		bLoadSource = 1;
+
+	// Try first to load from the binary block
+	if (src.GetVertexShader(uiVertIdx).pbGLSLBinary!=NULL)
+	{
+#if defined(GL_SGX_BINARY_IMG)
+		if (PVRTShaderLoadBinaryFromMemory(src.GetVertexShader(uiVertIdx).pbGLSLBinary, src.GetVertexShader(uiVertIdx).nGLSLBinarySize,
+			GL_VERTEX_SHADER, GL_SGX_BINARY_IMG, &uiVertexShader, &error) == PVR_SUCCESS)
+		{
+			// success loading the binary block so we do not need to load the source
+			bLoadSource = 0;
+		}
+		else
+#endif
+		{
+			bLoadSource = 1;
+		}
+	}
+
+	// If it fails, load from source
+	if (bLoadSource)
+	{
+		if(pszVertexShader)
+		{
+			if (PVRTShaderLoadSourceFromMemory(pszVertexShader, GL_VERTEX_SHADER, &uiVertexShader, &error) != PVR_SUCCESS)
+			{
+				*pReturnError = CPVRTString("ERROR: Vertex Shader compile error in file '") + pszFileName + "':\n" + error;
 				if(bFreeVertexShader)	FREE(pszVertexShader);
 				if(bFreeFragmentShader)	FREE(pszFragmentShader);
 				return PVR_FAIL;
 			}
 		}
-
-		// Try first to load from the binary block
-		if (src.m_psFragmentShader[i].pbGLSLBinary!=NULL)
+		else // Shader not found or failed binary block
 		{
-			if (PVRTShaderLoadBinaryFromMemory(src.m_psFragmentShader[i].pbGLSLBinary, src.m_psVertexShader[i].nGLSLBinarySize,
-													GL_FRAGMENT_SHADER, GL_SGX_BINARY_IMG, &uiFragShader, &error) == PVR_SUCCESS)
+			if (src.GetVertexShader(uiVertIdx).pbGLSLBinary==NULL)
 			{
-				// success loading the binary block so we do not need to load the source
-				bLoadSource = 0;
+				*pReturnError = CPVRTString("ERROR: Vertex shader ") + ParserEffect.VertexShaderName.String() + "  not found in " + pszFileName + ".\n";
 			}
 			else
 			{
-				bLoadSource = 1;
+				*pReturnError = CPVRTString("ERROR: Binary vertex shader ") + ParserEffect.VertexShaderName.String() + " not supported.\n";
 			}
+
+			if(bFreeVertexShader)	FREE(pszVertexShader);
+			if(bFreeFragmentShader)	FREE(pszFragmentShader);
+			return PVR_FAIL;
 		}
+	}
 
-		// If it fails, load from source
-		if (bLoadSource)
+	// Try first to load from the binary block
+	if (src.GetFragmentShader(uiFragIdx).pbGLSLBinary!=NULL)
+	{
+#if defined(GL_SGX_BINARY_IMG)
+		if (PVRTShaderLoadBinaryFromMemory(src.GetFragmentShader(uiFragIdx).pbGLSLBinary, src.GetFragmentShader(uiFragIdx).nGLSLBinarySize,
+			GL_FRAGMENT_SHADER, GL_SGX_BINARY_IMG, &uiFragShader, &error) == PVR_SUCCESS)
 		{
-			if(pszFragmentShader)
-			{
-				if (PVRTShaderLoadSourceFromMemory(pszFragmentShader, GL_FRAGMENT_SHADER, &uiFragShader, &error) != PVR_SUCCESS)
-				{
-					*pReturnError = CPVRTString("Fragment Shader compile error in file '") + pszFileName + "':\n" + error;
-					if(bFreeVertexShader)	FREE(pszVertexShader);
-					if(bFreeFragmentShader)	FREE(pszFragmentShader);
-					return PVR_FAIL;
-				}
-			}
-			else // Shader not found or failed binary block
-			{
-				if (src.m_psFragmentShader[i].pbGLSLBinary==NULL)
-				{
-					*pReturnError = CPVRTString("Fragment shader ") + psParserEffect->pszFragmentShaderName + "  not found in " + pszFileName + ".\n";
-				}
-				else
-				{
-					*pReturnError = CPVRTString("Binary Fragment shader ") + psParserEffect->pszFragmentShaderName + " not supported.\n";
-				}
+			// success loading the binary block so we do not need to load the source
+			bLoadSource = 0;
+		}
+		else
+#endif
+		{
+			bLoadSource = 1;
+		}
+	}
 
-				if(bFreeVertexShader)
-					FREE(pszVertexShader);
-				if(bFreeFragmentShader)
-					FREE(pszFragmentShader);
-
+	// If it fails, load from source
+	if (bLoadSource)
+	{
+		if(pszFragmentShader)
+		{
+			if (PVRTShaderLoadSourceFromMemory(pszFragmentShader, GL_FRAGMENT_SHADER, &uiFragShader, &error) != PVR_SUCCESS)
+			{
+				*pReturnError = CPVRTString("ERROR: Fragment Shader compile error in file '") + pszFileName + "':\n" + error;
+				if(bFreeVertexShader)	FREE(pszVertexShader);
+				if(bFreeFragmentShader)	FREE(pszFragmentShader);
 				return PVR_FAIL;
 			}
 		}
-
-		if(bFreeVertexShader)
-			FREE(pszVertexShader);
-
-		if(bFreeFragmentShader)
-			FREE(pszFragmentShader);
-
-		// Create the shader program
-		m_uiProgram = glCreateProgram();
-
-
-		// Attach the fragment and vertex shaders to it
-		glAttachShader(m_uiProgram, uiFragShader);
-		glAttachShader(m_uiProgram, uiVertexShader);
-
-		glDeleteShader(uiVertexShader);
-		glDeleteShader(uiFragShader);
-
-		// Bind vertex attributes
-		for(i = 0; i < psParserEffect->nNumAttributes; ++i)
+		else // Shader not found or failed binary block
 		{
-			glBindAttribLocation(m_uiProgram, i, psParserEffect->psAttribute[i].pszName);
-		}
+			if (src.GetFragmentShader(uiFragIdx).pbGLSLBinary==NULL)
+			{
+				*pReturnError = CPVRTString("ERROR: Fragment shader ") + ParserEffect.FragmentShaderName.String() + "  not found in " + pszFileName + ".\n";
+			}
+			else
+			{
+				*pReturnError = CPVRTString("ERROR: Binary Fragment shader ") + ParserEffect.FragmentShaderName.String() + " not supported.\n";
+			}
 
-		//	Link the program.
-		glLinkProgram(m_uiProgram);
-		GLint Linked;
-		glGetProgramiv(m_uiProgram, GL_LINK_STATUS, &Linked);
-		if (!Linked)
-		{
-			int i32InfoLogLength, i32CharsWritten;
-			glGetProgramiv(m_uiProgram, GL_INFO_LOG_LENGTH, &i32InfoLogLength);
-			char* pszInfoLog = new char[i32InfoLogLength];
-			glGetProgramInfoLog(m_uiProgram, i32InfoLogLength, &i32CharsWritten, pszInfoLog);
-			*pReturnError = CPVRTString("Error Linking shaders in file '") + pszFileName + "':\n\n"
-							+ CPVRTString("Failed to link: ") + pszInfoLog + "\n";
-			delete [] pszInfoLog;
+			if(bFreeVertexShader)
+				FREE(pszVertexShader);
+			if(bFreeFragmentShader)
+				FREE(pszFragmentShader);
+
 			return PVR_FAIL;
 		}
+	}
 
-		/*
-			Textures
-		*/
-		m_pnTextureIdx = new unsigned int[psParserEffect->nNumTextures];
-		for(i = 0; i < psParserEffect->nNumTextures; ++i)
-		{
-			for(j = 0; j < src.m_nNumTextures; ++j)
-			{
-				if(strcmp(psParserEffect->psTextures[i].pszName, src.m_psTexture[j].pszName) == 0)
-				{
-					m_pnTextureIdx[i] = j;
-					break;
-				}
-			}
-			if(j == src.m_nNumTextures)
-			{
-				*pReturnError = CPVRTString("Effect \"") +  psParserEffect->pszName + "\", requested non-existent texture: \""
-								+ psParserEffect->psTextures[i].pszName + "\"\n";
-				m_pnTextureIdx[i] = 0;
-			}
-		}
+	if(bFreeVertexShader)
+		FREE(pszVertexShader);
+
+	if(bFreeFragmentShader)
+		FREE(pszFragmentShader);
+
+	// Create the shader program
+	m_uiProgram = glCreateProgram();
+
+
+	// Attach the fragment and vertex shaders to it
+	glAttachShader(m_uiProgram, uiFragShader);
+	glAttachShader(m_uiProgram, uiVertexShader);
+
+	glDeleteShader(uiVertexShader);
+	glDeleteShader(uiFragShader);
+
+	// Bind vertex attributes
+	for(unsigned int i = 0; i < ParserEffect.Attributes.GetSize(); ++i)
+	{
+		glBindAttribLocation(m_uiProgram, i, ParserEffect.Attributes[i].pszName);
+	}
+
+	//	Link the program.
+	glLinkProgram(m_uiProgram);
+	GLint Linked;
+	glGetProgramiv(m_uiProgram, GL_LINK_STATUS, &Linked);
+	if (!Linked)
+	{
+		int i32InfoLogLength, i32CharsWritten;
+		glGetProgramiv(m_uiProgram, GL_INFO_LOG_LENGTH, &i32InfoLogLength);
+		char* pszInfoLog = new char[i32InfoLogLength];
+		glGetProgramInfoLog(m_uiProgram, i32InfoLogLength, &i32CharsWritten, pszInfoLog);
+		*pReturnError = CPVRTString("ERROR: Linking shaders in file '") + pszFileName + "':\n\n"
+			+ CPVRTString("Failed to link: ") + pszInfoLog + "\n";
+		delete [] pszInfoLog;
+		return PVR_FAIL;
 	}
 
 	return PVR_SUCCESS;
@@ -348,13 +429,9 @@ void CPVRTPFXEffect::Destroy()
 			glDeleteProgram(m_uiProgram);
 			m_uiProgram = 0;
 		}
-
-		delete [] m_pnTextureIdx;
-		m_pnTextureIdx = 0;
 	}
 
-	delete [] m_psTextures;
-	m_psTextures = 0;
+	m_bLoaded = false;
 }
 
 /*!***************************************************************************
@@ -362,22 +439,27 @@ void CPVRTPFXEffect::Destroy()
  @Returns			PVR_SUCCESS if activate succeeded
  @Description		Selects the gl program object and binds the textures.
 *****************************************************************************/
-EPVRTError CPVRTPFXEffect::Activate()
+EPVRTError CPVRTPFXEffect::Activate(const int i32RenderTextureId, const unsigned int ui32ReplacementTexture)
 {
-	unsigned int i;
-	SPVRTPFXParserEffect *psParserEffect = &m_pParser->m_psEffect[m_nEffect];
+	GLuint uiTextureId;
+	GLenum eTarget;
 
 	// Set the program
 	glUseProgram(m_uiProgram);
 
 	// Set the textures
-	for(i = 0; i < psParserEffect->nNumTextures; ++i)
+	for(unsigned int uiTex = 0; uiTex < m_Textures.GetSize(); ++uiTex)
 	{
-		glActiveTexture(GL_TEXTURE0 + psParserEffect->psTextures[i].nNumber);
-		if((psParserEffect->psTextures[m_pnTextureIdx[i]].u32Type&PVRTEX_CUBEMAP)!=0)
-			glBindTexture(GL_TEXTURE_CUBE_MAP, m_psTextures[m_pnTextureIdx[i]].ui);
-		else
-			glBindTexture(GL_TEXTURE_2D, m_psTextures[m_pnTextureIdx[i]].ui);
+		uiTextureId = m_Textures[uiTex].ui;
+		if(i32RenderTextureId != -1 && (uiTextureId == (unsigned int)i32RenderTextureId))
+			uiTextureId = ui32ReplacementTexture;
+
+		// Set active texture unit.
+		glActiveTexture(GL_TEXTURE0 + m_Textures[uiTex].unit);
+
+		// Bind texture
+		eTarget = (m_Textures[uiTex].flags & PVRTEX_CUBEMAP ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D);
+		glBindTexture(eTarget, uiTextureId);
 	}
 
 	return PVR_SUCCESS;
@@ -385,7 +467,7 @@ EPVRTError CPVRTPFXEffect::Activate()
 
 /*!***************************************************************************
  @Function			GetSemantics
- @Output			psUniforms				pointer to application uniform data array
+ @Output			aUniforms				an array of uniform data
  @Output			pnUnknownUniformCount	unknown uniform count
  @Input				psParams				pointer to semantic data array
  @Input				nParamCount				number of samantic items
@@ -399,15 +481,13 @@ EPVRTError CPVRTPFXEffect::Activate()
  @Description		Get the data array for the semantics.
 *****************************************************************************/
 static unsigned int GetSemantics(
-	SPVRTPFXUniform					* const psUniforms,
-	unsigned int					* const pnUnknownUniformCount,
-	const SPVRTPFXParserSemantic	* const psParams,
-	const unsigned int				nParamCount,
-	const SPVRTPFXUniformSemantic	* const psUniformSemantics,
-	const unsigned int				nUniformSemantics,
-	const GLuint					uiProgram,
-	bool							bIsAttribue,
-	CPVRTString						* const errorMsg)
+	CPVRTArray<SPVRTPFXUniform>&				aUniforms,
+	const CPVRTArray<SPVRTPFXParserSemantic>&	aParams,
+	const CPVRTArray<SPVRTPFXUniformSemantic>&	aUniformSemantics,
+	unsigned int*								const pnUnknownUniformCount,
+	const GLuint								uiProgram,
+	bool										bIsAttribue,
+	CPVRTString*								const errorMsg)
 {
 	unsigned int	i, j, nCount, nCountUnused;
 	int				nLocation;
@@ -419,11 +499,11 @@ static unsigned int GetSemantics(
 	nCount = 0;
 	nCountUnused = 0;
 
-	for(j = 0; j < nParamCount; ++j)
+	for(j = 0; j < aParams.GetSize(); ++j)
 	{
-		for(i = 0; i < nUniformSemantics; ++i)
+		for(i = 0; i < aUniformSemantics.GetSize(); ++i)
 		{
-			if(strcmp(psParams[j].pszValue, psUniformSemantics[i].p) != 0)
+			if(strcmp(aParams[j].pszValue, aUniformSemantics[i].p) != 0)
 			{
 				continue;
 			}
@@ -431,88 +511,154 @@ static unsigned int GetSemantics(
 			// Semantic found for this parameter
 			if(bIsAttribue)
 			{
-				nLocation = glGetAttribLocation(uiProgram, psParams[j].pszName);
+				nLocation = glGetAttribLocation(uiProgram, aParams[j].pszName);
 			}
 			else
 			{
-				nLocation = glGetUniformLocation(uiProgram, psParams[j].pszName);
+				nLocation = glGetUniformLocation(uiProgram, aParams[j].pszName);
 			}
 
 			if(nLocation != -1)
 			{
-				if(psUniforms)
-				{
-					psUniforms[nCount].nSemantic	= psUniformSemantics[i].n;
-					psUniforms[nCount].nLocation	= nLocation;
-					psUniforms[nCount].nIdx			= psParams[j].nIdx;
-				}
+				unsigned int uiIdx = aUniforms.Append();
+				aUniforms[uiIdx].nSemantic	= aUniformSemantics[i].n;
+				aUniforms[uiIdx].nLocation	= nLocation;
+				aUniforms[uiIdx].nIdx		= aParams[j].nIdx;
+				aUniforms[uiIdx].sValueName	= aParams[j].pszName;
 				++nCount;
 			}
 			else
 			{
 				*errorMsg += "WARNING: Variable not used by GLSL code: ";
-				*errorMsg += CPVRTString(psParams[j].pszName) + " ";
-				*errorMsg += CPVRTString(psParams[j].pszValue) + "\n";
+				*errorMsg += CPVRTString(aParams[j].pszName) + " ";
+				*errorMsg += CPVRTString(aParams[j].pszValue) + "\n";
 				++nCountUnused;
 			}
 
 			// Skip to the next parameter
 			break;
 		}
-		if(i == nUniformSemantics)
+		if(i == aUniformSemantics.GetSize())
 		{
 			*errorMsg += "WARNING: Semantic unknown to application: ";
-			*errorMsg += CPVRTString(psParams[j].pszName) + " ";
-			*errorMsg += CPVRTString(psParams[j].pszValue) + "\n";
+			*errorMsg += CPVRTString(aParams[j].pszValue) + "\n";
 		}
 	}
 
-	*pnUnknownUniformCount	= nParamCount - nCount - nCountUnused;
+	*pnUnknownUniformCount	= aParams.GetSize() - nCount - nCountUnused;
 	return nCount;
 }
 
 /*!***************************************************************************
- @Function			BuildUniformTable
- @Output			ppsUniforms					pointer to uniform data array
- @Output			pnUniformCount				pointer to number of uniforms
- @Output			pnUnknownUniformCount		pointer to number of unknown uniforms
- @Input				psUniformSemantics			pointer to uniform semantic data array
- @Input				nSemantics					number of uniform semantics
- @Output			pReturnError				error string
- @Returns			EPVRTError					PVR_SUCCESS if succeeded
- @Description		Builds the uniform table from the semantics.
+@Function		GetUniformArray
+@Return			const CPVRTArray<SPVRTPFXUniform>&	
+@Description	Returns a list of known semantics.
 *****************************************************************************/
-EPVRTError CPVRTPFXEffect::BuildUniformTable(
-	SPVRTPFXUniform					** const ppsUniforms,
-	unsigned int					* const pnUniformCount,
-	unsigned int					* const pnUnknownUniformCount,
-	const SPVRTPFXUniformSemantic	* const psUniformSemantics,
-	const unsigned int				nSemantics,
-	CPVRTString							*pReturnError)
+const CPVRTArray<SPVRTPFXUniform>& CPVRTPFXEffect::GetUniformArray() const
 {
-	unsigned int			nCount, nUnknownCount;
-	SPVRTPFXUniform			*psUniforms;
-	SPVRTPFXParserEffect	*psParserEffect			= &m_pParser->m_psEffect[m_nEffect];
+	return m_Uniforms;
+}
 
-	nCount = 0;
-	nCount += GetSemantics(NULL, &nUnknownCount, psParserEffect->psUniform, psParserEffect->nNumUniforms, psUniformSemantics, nSemantics, m_uiProgram, false, pReturnError);
-	nCount += GetSemantics(NULL, &nUnknownCount, psParserEffect->psAttribute, psParserEffect->nNumAttributes, psUniformSemantics, nSemantics, m_uiProgram, true, pReturnError);
+/*!***************************************************************************
+@Function		BuildUniformTable
+@Output			uiUnknownSemantics
+@Output			pReturnError
+@Return			EPVRTError	
+@Description	Builds the uniform table from a list of known semantics.
+*****************************************************************************/
+EPVRTError CPVRTPFXEffect::RebuildUniformTable(unsigned int& uiUnknownSemantics, CPVRTString* pReturnError)
+{
+	unsigned int			nUnknownCount;
+	const SPVRTPFXParserEffect&	ParserEffect = m_pParser->GetEffect(m_nEffect);
 
-	psUniforms = (SPVRTPFXUniform*)malloc(nCount * sizeof(*psUniforms));
-	if(!psUniforms)
+	GetSemantics(m_Uniforms, ParserEffect.Uniforms, m_Semantics, &nUnknownCount, m_uiProgram, false, pReturnError);
+	uiUnknownSemantics	= nUnknownCount;
+
+	GetSemantics(m_Uniforms, ParserEffect.Attributes, m_Semantics, &nUnknownCount, m_uiProgram, true, pReturnError);
+	uiUnknownSemantics	+= nUnknownCount;
+
+	return PVR_SUCCESS;
+}
+
+/*!***************************************************************************
+@Function		RegisterUniformSemantic
+@Input			psUniforms
+@Input			uiNumUniforms
+@Return			EPVRTError	
+@Description	Registers a user-provided uniform semantic.
+*****************************************************************************/
+EPVRTError CPVRTPFXEffect::RegisterUniformSemantic(const SPVRTPFXUniformSemantic* const psUniforms, unsigned int uiNumUniforms, CPVRTString* pReturnError)
+{
+	for(unsigned int uiIndex = 0; uiIndex < uiNumUniforms; ++uiIndex)
+	{
+		// Check that this doesn't already exist.
+		if(m_Semantics.Contains(psUniforms[uiIndex]))
+		{
+			*pReturnError += PVRTStringFromFormattedStr("ERROR: Uniform semantic with ID '%u' already exists.\n", psUniforms[uiIndex].n);
+			return PVR_FAIL;
+		}
+
+		// Make copy as we need to manage the memory.
+		char* pSemName = new char[strlen(psUniforms[uiIndex].p)+1];
+		strcpy(pSemName, psUniforms[uiIndex].p);
+
+		unsigned int uiIdx = m_Semantics.Append();
+		m_Semantics[uiIdx].n = psUniforms[uiIndex].n;
+		m_Semantics[uiIdx].p = pSemName;
+	}
+
+	// Check if the effect has already been loaded. If it hasn't, great. If it has, we need to rebuild the uniform table.
+	if(m_bLoaded)
+	{
+		// Clear the current list.
+		m_Uniforms.Clear();
+
+		unsigned int uiUnknownSemantics;
+		return RebuildUniformTable(uiUnknownSemantics, pReturnError);
+	}
+
+	return PVR_SUCCESS;
+}
+
+/*!***************************************************************************
+@Function		RemoveUniformSemantic
+@Input			uiSemanticID
+@Output			pReturnError
+@Return			PVR_SUCCESS on success	
+@Description	Removes a given semantic ID from the 'known' semantic list and 
+				re-parses the effect to update the uniform table.
+*****************************************************************************/
+EPVRTError CPVRTPFXEffect::RemoveUniformSemantic(unsigned int uiSemanticID, CPVRTString* pReturnError)
+{
+	// Make sure that the given ID isn't a PFX semantic
+	if(uiSemanticID < ePVRTPFX_NumSemantics)
+	{
+		*pReturnError += "ERROR: Cannot remove a default PFX semantic.";
 		return PVR_FAIL;
+	}
 
-	*pReturnError = "";
+	// Find the index in the array
+	unsigned int uiSemanticIndex = 0;
+	while(uiSemanticIndex < m_Semantics.GetSize() && m_Semantics[uiSemanticIndex].n != uiSemanticID) ++uiSemanticIndex;
 
-	nCount = 0;
-	nCount += GetSemantics(&psUniforms[nCount], &nUnknownCount, psParserEffect->psUniform, psParserEffect->nNumUniforms, psUniformSemantics, nSemantics, m_uiProgram, false, pReturnError);
-	*pnUnknownUniformCount	= nUnknownCount;
+	if(uiSemanticIndex == m_Semantics.GetSize())
+	{
+		*pReturnError += PVRTStringFromFormattedStr("ERROR: Semantic with ID %d does not exist.", uiSemanticID);
+		return PVR_FAIL;
+	}
 
-	nCount += GetSemantics(&psUniforms[nCount], &nUnknownCount, psParserEffect->psAttribute, psParserEffect->nNumAttributes, psUniformSemantics, nSemantics, m_uiProgram, true, pReturnError);
-	*pnUnknownUniformCount	+= nUnknownCount;
+	m_Semantics.Remove(uiSemanticIndex);
 
-	*ppsUniforms			= psUniforms;
-	*pnUniformCount			= nCount;
+	// Check if the effect has already been loaded. If it hasn't, great. If it has, we need to rebuild the uniform table.
+	if(m_bLoaded)
+	{
+		// Clear the current list.
+		m_Uniforms.Clear();
+
+		unsigned int uiUnknownSemantics;
+		return RebuildUniformTable(uiUnknownSemantics, pReturnError);
+	}
+
 	return PVR_SUCCESS;
 }
 
@@ -522,10 +668,9 @@ EPVRTError CPVRTPFXEffect::BuildUniformTable(
  @Returns			SPVRTPFXTexture*		pointer to the texture data array
  @Description		Gets the texture data array.
 *****************************************************************************/
-const SPVRTPFXTexture *CPVRTPFXEffect::GetTextureArray(unsigned int &nCount) const
+const CPVRTArray<SPVRTPFXTexture>& CPVRTPFXEffect::GetTextureArray() const
 {
-	nCount = m_pParser->m_nNumTextures;
-	return m_psTextures;
+	return m_Textures;
 }
 
 /*!***************************************************************************
@@ -537,7 +682,7 @@ const SPVRTPFXTexture *CPVRTPFXEffect::GetTextureArray(unsigned int &nCount) con
 *****************************************************************************/
 void CPVRTPFXEffect::SetTexture(const unsigned int nIdx, const GLuint ui, const unsigned int u32flags)
 {
-	if(nIdx < m_pParser->m_nNumTextures)
+	if(nIdx < (unsigned int) m_Textures.GetSize())
 	{
 		GLenum u32Target = GL_TEXTURE_2D;
 
@@ -545,90 +690,116 @@ void CPVRTPFXEffect::SetTexture(const unsigned int nIdx, const GLuint ui, const 
 		if((u32flags & PVRTEX_CUBEMAP) != 0)
 			u32Target = GL_TEXTURE_CUBE_MAP;
 
-		// Set default filter from PFX file
-		switch(m_pParser->m_psTexture[nIdx].nMIP)
+		// Get the texture details from the PFX Parser. This contains details such as mipmapping and filter modes.
+		const CPVRTStringHash& TexName = m_pParser->GetEffect(m_nEffect).Textures[nIdx].Name;
+		int iTexIdx = m_pParser->FindTextureByName(TexName);
+		if(iTexIdx == -1)
+			return;
+
+		const SPVRTPFXParserTexture* pPFXTex = m_pParser->GetTexture(iTexIdx);
+			
+		// Only change parameters if ui (handle is > 0)
+		if(ui > 0)
 		{
-		case 0:
-			switch(m_pParser->m_psTexture[nIdx].nMin)
+			glBindTexture(u32Target, ui);
+
+			// Set default filter from PFX file
+
+			// --- Mipmapping/Minification
+			switch(pPFXTex->nMIP)
 			{
-			case 0:
-				glTexParameteri(u32Target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			case eFilter_None:			// No mipmapping
+				switch(pPFXTex->nMin)
+				{
+				case eFilter_Nearest:
+					glTexParameteri(u32Target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);					// Off
+					break;
+				case eFilter_Linear:
+					glTexParameteri(u32Target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);					// Bilinear - no Mipmap
+					break;
+				}
 				break;
-			case 1:
-				glTexParameteri(u32Target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			case eFilter_Nearest:		// Standard mipmapping
+				switch(pPFXTex->nMin)
+				{
+				case eFilter_Nearest:
+					glTexParameteri(u32Target, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);		// Nearest	- std. Mipmap
+					break;
+				case eFilter_Linear:
+					glTexParameteri(u32Target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);		// Bilinear - std. Mipmap
+					break;
+				}
+				break;
+			case eFilter_Linear:		// Trilinear mipmapping
+				switch(pPFXTex->nMin)
+				{
+				case eFilter_Nearest:
+					glTexParameteri(u32Target, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);		// Nearest - Trilinear
+					break;
+				case eFilter_Linear:
+					glTexParameteri(u32Target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);			// Bilinear - Trilinear
+					break;
+				}
 				break;
 			}
-			break;
-		case 1:
-			switch(m_pParser->m_psTexture[nIdx].nMin)
+
+			// --- Magnification
+			switch(pPFXTex->nMag)
 			{
-			case 0:
-				glTexParameteri(u32Target, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+			case eFilter_Nearest:
+				glTexParameteri(u32Target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 				break;
-			case 1:
-				glTexParameteri(u32Target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+			case eFilter_Linear:
+				glTexParameteri(u32Target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 				break;
 			}
-			break;
-		case 2:
-			switch(m_pParser->m_psTexture[nIdx].nMin)
+
+			// --- Wrapping S
+			switch(pPFXTex->nWrapS)
 			{
-			case 0:
-				glTexParameteri(u32Target, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+			case eWrap_Clamp:
+				glTexParameteri(u32Target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 				break;
-			case 1:
-				glTexParameteri(u32Target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			case eWrap_Repeat:
+				glTexParameteri(u32Target, GL_TEXTURE_WRAP_S, GL_REPEAT);
 				break;
 			}
-			break;
+
+			// --- Wrapping T
+			switch(pPFXTex->nWrapT)
+			{
+			case eWrap_Clamp:
+				glTexParameteri(u32Target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				break;
+			case eWrap_Repeat:
+				glTexParameteri(u32Target, GL_TEXTURE_WRAP_T, GL_REPEAT);
+				break;
+			}
+
+			// --- Wrapping R
+	#ifdef GL_TEXTURE_WRAP_R
+			switch(pPFXTex->nWrapR)
+			{
+			case eWrap_Clamp:
+				glTexParameteri(u32Target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+				break;
+			case eWrap_Repeat:
+				glTexParameteri(u32Target, GL_TEXTURE_WRAP_R, GL_REPEAT);
+				break;
+			}
+	#endif
 		}
 
-		switch(m_pParser->m_psTexture[nIdx].nMag)
+		// Store the texture details
+		m_Textures[nIdx].ui	   = ui;
+		m_Textures[nIdx].flags = u32flags;
+
+		// Find the texture unit from the parser
+		unsigned int uiIndex = m_pParser->FindTextureIndex(pPFXTex->Name, m_nEffect);
+		if(uiIndex != 0xFFFFFFFF)
 		{
-		case 0:
-			glTexParameteri(u32Target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			break;
-		case 1:
-			glTexParameteri(u32Target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			break;
+			m_Textures[nIdx].unit = m_pParser->GetEffect(m_nEffect).Textures[uiIndex].nNumber;
 		}
-
-		switch(m_pParser->m_psTexture[nIdx].nWrapS)
-		{
-		case 0:
-			glTexParameteri(u32Target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			break;
-		case 1:
-			glTexParameteri(u32Target, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			break;
-		}
-
-		switch(m_pParser->m_psTexture[nIdx].nWrapT)
-		{
-		case 0:
-			glTexParameteri(u32Target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			break;
-		case 1:
-			glTexParameteri(u32Target, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			break;
-		}
-
-#ifdef GL_TEXTURE_WRAP_R
-		switch(m_pParser->m_psTexture[nIdx].nWrapR)
-		{
-		case 0:
-			glTexParameteri(u32Target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-			break;
-		case 1:
-			glTexParameteri(u32Target, GL_TEXTURE_WRAP_R, GL_REPEAT);
-			break;
-		}
-#endif
-
-		m_psTextures[nIdx].ui = ui;
-
-		// store flags
-		m_pParser->m_psEffect[m_nEffect].psTextures[nIdx].u32Type = u32flags;
 	}
 }
 
@@ -657,9 +828,11 @@ void CPVRTPFXEffect::SetDefaultUniformValue(const char *const pszName, const SPV
 		case eDataTypeVec2:
 			glUniform2fv(nLocation, 1, psDefaultValue->pfData);
 			break;
+		case eDataTypeRGB:
 		case eDataTypeVec3:
 			glUniform3fv(nLocation, 1, psDefaultValue->pfData);
 			break;
+		case eDataTypeRGBA:
 		case eDataTypeVec4:
 			glUniform4fv(nLocation, 1, psDefaultValue->pfData);
 			break;
@@ -696,6 +869,47 @@ void CPVRTPFXEffect::SetDefaultUniformValue(const char *const pszName, const SPV
 		default:
 			break;
 	}
+}
+
+/*!***************************************************************************
+@Function		SetContext
+@Input			pContext
+@Description	
+*****************************************************************************/
+void CPVRTPFXEffect::SetContext(SPVRTContext *const pContext)
+{
+	m_psContext = pContext;
+}
+
+/*!***************************************************************************
+@Function		GetProgramHandle
+@Return			unsigned int	
+@Description	Returns the OGL program handle.
+*****************************************************************************/
+unsigned int CPVRTPFXEffect::GetProgramHandle() const
+{
+	return m_uiProgram;
+}
+
+/*!***************************************************************************
+@Function		GetEffectIndex
+@Return			unsigned int	
+@Description	Gets the active effect index within the PFX file.
+*****************************************************************************/
+unsigned int CPVRTPFXEffect::GetEffectIndex() const
+{
+	return m_nEffect;
+}
+
+/*!***************************************************************************
+@Function		GetSemanticArray
+@Return			const CPVRTArray<SPVRTPFXUniformSemantic>&	
+@Description	Gets the array of registered semantics which will be used to
+				match PFX code.
+*****************************************************************************/
+const CPVRTArray<SPVRTPFXUniformSemantic>& CPVRTPFXEffect::GetSemanticArray() const
+{
+	return m_Semantics;
 }
 
 /*****************************************************************************

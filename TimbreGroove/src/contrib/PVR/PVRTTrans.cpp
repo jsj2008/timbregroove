@@ -4,9 +4,9 @@
 
  @Title        PVRTTrans
 
- @Version      
+ @Version       @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     ANSI compatible
 
@@ -16,7 +16,6 @@
 #include <string.h>
 
 #include "PVRTGlobal.h"
-#include "PVRTContext.h"
 #include "PVRTFixedPoint.h"
 #include "PVRTMatrix.h"
 #include "PVRTTrans.h"
@@ -428,7 +427,7 @@ void PVRTTransformBack(
 	int i;
 	const PVRTMATRIX	*pMa;
 
-#if defined(BUILD_OGL) || defined(BUILD_OGLES) || defined(BUILD_OGLES2)
+#if defined(BUILD_OGL) || defined(BUILD_OGLES) || defined(BUILD_OGLES2) || defined(BUILD_OGLES3)
 	PVRTMATRIX mT;
 	PVRTMatrixTranspose(mT, *pM);
 	pMa = &mT;

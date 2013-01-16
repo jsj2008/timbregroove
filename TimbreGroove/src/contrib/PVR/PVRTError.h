@@ -6,7 +6,7 @@
 
  @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     ANSI compatible
 
@@ -16,30 +16,25 @@
 #ifndef _PVRTERROR_H_
 #define _PVRTERROR_H_
 
-#if defined(__BADA__)
-#include <FApp.h>
-#include <stdio.h>
+#if defined(ANDROID)
+	#include <android/log.h>
 #else
-#if defined(__SYMBIAN32__)
-#include <e32debug.h>
-#elif defined(_WIN32) && !defined(UNDER_CE)
-#include <windows.h>
-#else
-#include <stdio.h>
-#endif
+	#if defined(_WIN32)
+		#include <windows.h>
+	#else
+		#include <stdio.h>
+	#endif
 #endif
 /*!***************************************************************************
  Macros
 *****************************************************************************/
 
 /*! Outputs a string to the standard error if built for debugging. */
-#ifndef PVRTERROR_OUTPUT_DEBUG
+#if !defined(PVRTERROR_OUTPUT_DEBUG)
 	#if defined(_DEBUG) || defined(DEBUG)
-		#if defined(__SYMBIAN32__)
-			#define PVRTERROR_OUTPUT_DEBUG(A) RDebug::Printf(A);
-		#elif defined(__BADA__)
-			#define PVRTERROR_OUTPUT_DEBUG(A) AppLog(A);
-		#elif defined(_WIN32) && !defined(UNDER_CE)
+		#if defined(ANDROID)
+			#define PVRTERROR_OUTPUT_DEBUG(A) __android_log_print(ANDROID_LOG_INFO, "PVRTools", A);
+		#elif defined(_WIN32)
 			#define PVRTERROR_OUTPUT_DEBUG(A) OutputDebugStringA(A);
 		#else
 			#define PVRTERROR_OUTPUT_DEBUG(A) fprintf(stderr,A);

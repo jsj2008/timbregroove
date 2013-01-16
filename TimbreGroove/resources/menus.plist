@@ -26,6 +26,32 @@
 					<key>renderClass</key>
 					<string>MenuItem</string>
 				</dict>
+				<key>meshImporter_element</key>
+				<dict>
+					<key>userData</key>
+					<dict>
+						<key>knownPODs</key>
+						<dict>
+							<key>man.pod</key>
+							<dict>
+								<key>Mat_belt</key>
+								<string>Belt.pvr</string>
+								<key>Mat_legs</key>
+								<string>Legs.pvr</string>
+								<key>Mat_body</key>
+								<string>Body.pvr</string>
+							</dict>
+						</dict>
+						<key>instanceClass</key>
+						<string>MeshImporter</string>
+					</dict>
+					<key>icon</key>
+					<string>meshImporter.png</string>
+					<key>handler</key>
+					<string>Factory</string>
+					<key>renderClass</key>
+					<string>MenuItem</string>
+				</dict>
 				<key>fractalSphere_element</key>
 				<dict>
 					<key>userData</key>

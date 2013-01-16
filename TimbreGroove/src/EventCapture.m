@@ -11,6 +11,7 @@
 #import "GenericShader.h"
 #import "MeshBuffer.h"
 #import "Interactive.h"
+#import "FBO.h"
 
 #define _NTC(n) ((n&0xFF)/255.0f)
 #define NTC(n) { _NTC((n>>16)), _NTC((n>>8)), _NTC(n), 1.0 }
@@ -30,28 +31,39 @@
 {
     GenericShader * shader;
 	uint8_t pix[4];
-    int backingHeight;
-
+    CGSize sz = [[UIScreen mainScreen] bounds].size;
+    FBO * fbo = [[FBO alloc] initWithWidth:sz.width height:sz.height];
+    
+    
     _currentColor    = 1;
     _objDict         = [NSMutableDictionary new];
     shader           = [ShaderPool getShader:@"generic" klass:[GenericShader class] header:@""];
     _posLocation     = [shader location:sv_pos];
     
+    
+/*
+    GLint orgFB;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &orgFB);
+*/
+    [fbo bindToRender];
+    glViewport(0, 0, fbo.width, fbo.height);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     [shader use];
     [self recursive_render:graph.children shader:shader];
-
-	glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &backingHeight);
+    
 	glReadPixels((GLuint)pt.x,
-                 backingHeight - (GLuint)pt.y,
+                 sz.height - (GLuint)pt.y,
                  1,
                  1,
                  GL_RGBA,
                  GL_UNSIGNED_BYTE,
                  &pix);
-    
+    [fbo unbindFromRender];
+/*
+    glBindFramebuffer(GL_FRAMEBUFFER, orgFB);
+*/    
     return _objDict[@((pix[0] << 16) | (pix[1] << 8) | pix[2])];
 }
 

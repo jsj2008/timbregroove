@@ -6,7 +6,7 @@
 
  @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     ANSI compatible
 
@@ -32,7 +32,7 @@
 #include "PVRTPrint3D.h"
 #include "PVRTString.h"
 #include "PVRTShader.h"
-#include "PVRTgles2Ext.h"
+#include "PVRTMap.h"
 
 #include "PVRTPrint3DShaders.h"
 
@@ -43,25 +43,113 @@
 #define UV_ARRAY				1
 #define COLOR_ARRAY				2
 
+#define INIT_PRINT3D_STATE		0
+#define DEINIT_PRINT3D_STATE	1
+
+#define UNDEFINED_HANDLE 0xFAFAFAFA
+
+const GLenum c_eMagTable[] =
+{
+	GL_NEAREST,
+	GL_LINEAR,
+};
+
+const GLenum c_eMinTable[] =
+{
+	GL_NEAREST_MIPMAP_NEAREST,
+	GL_LINEAR_MIPMAP_NEAREST,
+	GL_NEAREST_MIPMAP_LINEAR,
+	GL_LINEAR_MIPMAP_LINEAR,
+	GL_NEAREST,
+	GL_LINEAR,
+};
+
+/****************************************************************************
+** Enums
+****************************************************************************/
+enum eFunction
+{
+	eFunc_DelProg,
+	eFunc_DelShader,
+	eFunc_DelTex
+};
+
+/****************************************************************************
+** Auxiliary functions
+****************************************************************************/
+static void DeleteResource(eFunction eType, GLuint& handle)
+{
+	if(handle == UNDEFINED_HANDLE)
+		return;
+
+	switch(eType)
+	{
+	case eFunc_DelProg:		glDeleteProgram(handle);		break;
+	case eFunc_DelShader:	glDeleteShader(handle);			break;
+	case eFunc_DelTex:		glDeleteTextures(1, &handle);	break;
+	}
+
+	handle = UNDEFINED_HANDLE;
+}
+
 /****************************************************************************
 ** Structures
 ****************************************************************************/
 
 struct SPVRTPrint3DAPI
 {
-	GLuint						uTexture[5];
-	GLuint						uTexturePVRLogo;
-	GLuint						uTextureIMGLogo;
+	GLuint						m_uTextureFont;
+	static int					s_iRefCount;
 
-	GLuint						m_VertexShaderObject, m_FragmentShaderObject;
-	GLuint						m_ProgramObject;
+	struct SInstanceData
+	{
+		GLuint				uTextureIMGLogo;
+
+		GLuint				VertexShader; 
+		GLuint				FragmentShader;
+		GLuint				Program;
+
+		SInstanceData()
+		{
+			uTextureIMGLogo = VertexShader = FragmentShader = Program = UNDEFINED_HANDLE;
+		}
+		
+		void Release()
+		{
+			DeleteResource(eFunc_DelProg, Program);
+			DeleteResource(eFunc_DelShader, FragmentShader);
+			DeleteResource(eFunc_DelShader, VertexShader);
+			DeleteResource(eFunc_DelTex, uTextureIMGLogo);
+		}
+	};
+
+	// Optional per-instance data
+	SInstanceData*				m_pInstanceData;
+
+	// Shared data across all Print3D instances
+	static SInstanceData		s_InstanceData;
 
 /* Used to save the OpenGL state to restore them after drawing */
 	GLboolean					isCullFaceEnabled;
 	GLboolean					isBlendEnabled;
 	GLboolean					isDepthTestEnabled;
 	GLint						nArrayBufferBinding;
+	GLint						eFrontFace;
+	GLint						eCullFaceMode;
+
+	SPVRTPrint3DAPI() : m_pInstanceData(NULL) {}
+	~SPVRTPrint3DAPI()
+	{
+		if(m_pInstanceData)
+		{
+			delete m_pInstanceData;
+			m_pInstanceData = NULL;
+		}
+	}
 };
+
+int SPVRTPrint3DAPI::s_iRefCount								= 0;
+SPVRTPrint3DAPI::SInstanceData SPVRTPrint3DAPI::s_InstanceData;
 
 /****************************************************************************
 ** Class: CPVRTPrint3D
@@ -77,12 +165,25 @@ void CPVRTPrint3D::ReleaseTextures()
 
 	if(m_pAPI)
 	{
-		/* Release the shaders */
-		glDeleteProgram(m_pAPI->m_ProgramObject);
-		glDeleteShader(m_pAPI->m_VertexShaderObject);
-		glDeleteShader(m_pAPI->m_FragmentShaderObject);
-	}
-
+		// Has local copy
+		if(m_pAPI->m_pInstanceData)
+		{
+			m_pAPI->m_pInstanceData->Release();
+		}
+		else
+		{
+			if(SPVRTPrint3DAPI::s_iRefCount != 0)
+			{
+				// Just decrease the reference count
+				SPVRTPrint3DAPI::s_iRefCount--;
+			}
+			else
+			{
+				m_pAPI->s_InstanceData.Release();
+			}
+		}
+	}	
+	
 	/* Only release textures if they've been allocated */
 	if (!m_bTexturesSet) return;
 
@@ -91,10 +192,8 @@ void CPVRTPrint3D::ReleaseTextures()
 	FREE(m_pPrint3dVtx);
 
 	/* Delete textures */
-	glDeleteTextures(5, m_pAPI->uTexture);
-	glDeleteTextures(1, &m_pAPI->uTexturePVRLogo);
-	glDeleteTextures(1, &m_pAPI->uTextureIMGLogo);
-
+	glDeleteTextures(1, &m_pAPI->m_uTextureFont);
+	
 	m_bTexturesSet = false;
 
 	FREE(m_pVtxCache);
@@ -118,11 +217,15 @@ int CPVRTPrint3D::Flush()
 	_ASSERT(m_nVtxCache <= m_nVtxCacheMax);
 
 	/* Save render states */
-	APIRenderStates(0);
+	APIRenderStates(INIT_PRINT3D_STATE);
 
 	/* Set font texture */
-	glBindTexture(GL_TEXTURE_2D, m_pAPI->uTexture[0]);
+	glBindTexture(GL_TEXTURE_2D, m_pAPI->m_uTextureFont);
 
+	unsigned int uiIndex = m_eFilterMethod[eFilterProc_Min] + (m_eFilterMethod[eFilterProc_Mip]*2);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, c_eMagTable[m_eFilterMethod[eFilterProc_Mag]]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, c_eMinTable[uiIndex]);
+	
 	nTrisTot = m_nVtxCache >> 1;
 
 	/*
@@ -155,15 +258,11 @@ int CPVRTPrint3D::Flush()
 #if defined(FORCE_NO_LOGO)
 	/* Do nothing */
 
-#elif defined(FORCE_PVR_LOGO)
-    APIDrawLogo(ePVRTPrint3DLogoPVR, 1);	/* PVR to the right */
-
 #elif defined(FORCE_IMG_LOGO)
 	APIDrawLogo(ePVRTPrint3DLogoIMG, 1);	/* IMG to the right */
 
 #elif defined(FORCE_ALL_LOGOS)
 	APIDrawLogo(ePVRTPrint3DLogoIMG, -1); /* IMG to the left */
-	APIDrawLogo(ePVRTPrint3DLogoPVR, 1);	/* PVR to the right */
 
 #else
 	/* User selected logos */
@@ -172,21 +271,14 @@ int CPVRTPrint3D::Flush()
 		case ePVRTPrint3DLogoNone:
 			break;
 		default:
-		case ePVRTPrint3DLogoPVR:
-			APIDrawLogo(ePVRTPrint3DLogoPVR, 1);	/* PVR to the right */
-			break;
 		case ePVRTPrint3DLogoIMG:
 			APIDrawLogo(ePVRTPrint3DLogoIMG, 1);	/* IMG to the right */
-			break;
-		case (ePVRTPrint3DLogoPVR | ePVRTPrint3DLogoIMG):
-			APIDrawLogo(ePVRTPrint3DLogoIMG, -1); /* IMG to the left */
-			APIDrawLogo(ePVRTPrint3DLogoPVR, 1);	/* PVR to the right */
 			break;
 	}
 #endif
 
 	/* Restore render states */
-	APIRenderStates(1);
+	APIRenderStates(DEINIT_PRINT3D_STATE);
 
 	return nTrisTot;
 
@@ -204,7 +296,7 @@ int CPVRTPrint3D::Flush()
  @Description		Initialisation and texture upload. Should be called only once
 					for a given context.
 *****************************************************************************/
-bool CPVRTPrint3D::APIInit(const SPVRTContext	* const pContext)
+bool CPVRTPrint3D::APIInit(const SPVRTContext	* const pContext, bool bMakeCopy)
 {
 	PVRT_UNREFERENCED_PARAMETER(pContext);
 
@@ -212,39 +304,45 @@ bool CPVRTPrint3D::APIInit(const SPVRTContext	* const pContext)
 	if(!m_pAPI)
 		return false;
 
+	if(bMakeCopy)
+		m_pAPI->m_pInstanceData = new SPVRTPrint3DAPI::SInstanceData();
+
+	SPVRTPrint3DAPI::SInstanceData& Data = (m_pAPI->m_pInstanceData ? *m_pAPI->m_pInstanceData : SPVRTPrint3DAPI::s_InstanceData);
+
+	// Check to see if these shaders have already been loaded previously. Optimisation as we don't want to load many of the same shader!
+	if(	Data.FragmentShader != UNDEFINED_HANDLE && Data.VertexShader != UNDEFINED_HANDLE && Data.Program != UNDEFINED_HANDLE)
+	{
+		SPVRTPrint3DAPI::s_iRefCount++;
+		return true;
+	}
+
 	/* Compiles the shaders. For a more detailed explanation, see IntroducingPVRTools */
 	CPVRTString error;
-	bool bRes;
-	// Try binary shaders first
-	bRes = (PVRTShaderLoadBinaryFromMemory(_Print3DFragShader_fsc, _Print3DFragShader_fsc_size,
-				GL_FRAGMENT_SHADER, GL_SGX_BINARY_IMG, &m_pAPI->m_FragmentShaderObject, &error) == PVR_SUCCESS)
-	       && (PVRTShaderLoadBinaryFromMemory(_Print3DVertShader_vsc, _Print3DVertShader_vsc_size,
-				GL_VERTEX_SHADER, GL_SGX_BINARY_IMG, &m_pAPI->m_VertexShaderObject, &error) == PVR_SUCCESS);
-	if (!bRes)
-	{
-		// if binary shaders don't work, try source shaders
-		bRes = (PVRTShaderLoadSourceFromMemory(_Print3DFragShader_fsh, GL_FRAGMENT_SHADER, &m_pAPI->m_FragmentShaderObject, &error) == PVR_SUCCESS) &&
-			   (PVRTShaderLoadSourceFromMemory(_Print3DVertShader_vsh, GL_VERTEX_SHADER, &m_pAPI->m_VertexShaderObject, &error)  == PVR_SUCCESS);
-	}
+	GLint Linked;
+	bool bRes = true;
+
+	bRes &= (PVRTShaderLoadSourceFromMemory(_Print3DFragShader_fsh, GL_FRAGMENT_SHADER, &Data.FragmentShader, &error) == PVR_SUCCESS);
+	bRes &= (PVRTShaderLoadSourceFromMemory(_Print3DVertShader_vsh, GL_VERTEX_SHADER, &Data.VertexShader, &error)  == PVR_SUCCESS);
+
 	_ASSERT(bRes);
 
-    m_pAPI->m_ProgramObject = glCreateProgram();
-    glAttachShader(m_pAPI->m_ProgramObject, m_pAPI->m_VertexShaderObject);
-    glAttachShader(m_pAPI->m_ProgramObject, m_pAPI->m_FragmentShaderObject);
-    glBindAttribLocation(m_pAPI->m_ProgramObject, VERTEX_ARRAY, "myVertex");
-    glBindAttribLocation(m_pAPI->m_ProgramObject, UV_ARRAY, "myUV");
-    glBindAttribLocation(m_pAPI->m_ProgramObject, COLOR_ARRAY, "myColour");
+	// Create the 'text' program
+    Data.Program = glCreateProgram();
+    glAttachShader(Data.Program, Data.VertexShader);
+    glAttachShader(Data.Program, Data.FragmentShader);
+    glBindAttribLocation(Data.Program, VERTEX_ARRAY, "myVertex");
+    glBindAttribLocation(Data.Program, UV_ARRAY, "myUV");
+    glBindAttribLocation(Data.Program, COLOR_ARRAY, "myColour");
 
-	glLinkProgram(m_pAPI->m_ProgramObject);
-	GLint Linked;
-	glGetProgramiv(m_pAPI->m_ProgramObject, GL_LINK_STATUS, &Linked);
-	
+	glLinkProgram(Data.Program);
+	glGetProgramiv(Data.Program, GL_LINK_STATUS, &Linked);
+
 	if (!Linked)
 		bRes = false;
 
 	_ASSERT(bRes);
 
-	return true;
+	return bRes;
 }
 
 /*!***************************************************************************
@@ -262,175 +360,32 @@ void CPVRTPrint3D::APIRelease()
  @Description		Initialisation and texture upload. Should be called only once
 					for a given context.
 *****************************************************************************/
-bool CPVRTPrint3D::APIUpLoadIcons(
-	const PVRTuint32 * const pPVR,
-	const PVRTuint32 * const pIMG)
+bool CPVRTPrint3D::APIUpLoadIcons(const PVRTuint8 * const pIMG)
 {
-	/* Load Icon textures */
-	if(PVRTTextureLoadFromPointer((unsigned char*)pPVR, &m_pAPI->uTexturePVRLogo) != PVR_SUCCESS)
-		return false;
-	if(PVRTTextureLoadFromPointer((unsigned char*)pIMG, &m_pAPI->uTextureIMGLogo) != PVR_SUCCESS)
-		return false;
+	SPVRTPrint3DAPI::SInstanceData& Data = (m_pAPI->m_pInstanceData ? *m_pAPI->m_pInstanceData : SPVRTPrint3DAPI::s_InstanceData);
+
+	/* Load Icon texture */
+	if(Data.uTextureIMGLogo == UNDEFINED_HANDLE)		// Static, so might already be initialized.
+		if(PVRTTextureLoadFromPointer((unsigned char*)pIMG, &Data.uTextureIMGLogo) != PVR_SUCCESS)
+			return false;
 
 	return true;
 }
 
 /*!***************************************************************************
- @Function			APIUpLoad4444
- @Return			true if succesful, false otherwise.
- @Description		Reads texture data from *.dat and loads it in
-					video memory.
+@Function		APIUpLoadTexture
+@Input			pSource
+@Output			header
+@Return			bool	true if successful.
+@Description	Loads and uploads the font texture from a PVR file.
 *****************************************************************************/
-bool CPVRTPrint3D::APIUpLoad4444(unsigned int dwTexID, unsigned char *pSource, unsigned int nSize, unsigned int nMode)
+bool CPVRTPrint3D::APIUpLoadTexture( const PVRTuint8* pSource, const PVRTextureHeaderV3* header, CPVRTMap<PVRTuint32, CPVRTMap<PVRTuint32, MetaDataBlock> >& MetaDataMap)
 {
-	int				i, j;
-	int				x=256, y=256;
-	unsigned short	R, G, B, A;
-	unsigned short	*p8888,  *pDestByte;
-	unsigned char   *pSrcByte;
-
-	/* Only square textures */
-	x = nSize;
-	y = nSize;
-
-	glGenTextures(1, &m_pAPI->uTexture[dwTexID]);
-
-	/* Load texture from data */
-
-	/* Format is 4444-packed, expand it into 8888 */
-	if (nMode==0)
-	{
-		/* Allocate temporary memory */
-		p8888 = (unsigned short *)malloc(nSize*nSize*sizeof(unsigned short));
-		if(!p8888)
-		{
-			PVRTErrorOutputDebug("Not enough memory!\n");
-			return false;
-		}
-
-		pDestByte = p8888;
-
-		/* Set source pointer (after offset of 16) */
-		pSrcByte = &pSource[16];
-
-		/* Transfer data */
-		for (i=0; i<y; i++)
-		{
-			for (j=0; j<x; j++)
-			{
-				/* Get all 4 colour channels (invert A) */
-				G =   (*pSrcByte) & 0xF0;
-				R = ( (*pSrcByte++) & 0x0F ) << 4;
-				A =   (*pSrcByte) ^ 0xF0;
-				B = ( (*pSrcByte++) & 0x0F ) << 4;
-
-				/* Set them in 8888 data */
-				*pDestByte++ = ((R&0xF0)<<8) | ((G&0xF0)<<4) | (B&0xF0) | (A&0xF0)>>4;
-			}
-		}
-	}
-	else
-	{
-		/* Set source pointer */
-		pSrcByte = pSource;
-
-		/* Allocate temporary memory */
-		p8888 = (unsigned short *)malloc(nSize*nSize*sizeof(unsigned short));
-		if(!p8888)
-		{
-			PVRTErrorOutputDebug("Not enough memory!\n");
-			return false;
-		}
-
-
-		/* Set destination pointer */
-		pDestByte = p8888;
-
-		/* Transfer data */
-		for (i=0; i<y; i++)
-		{
-			for (j=0; j<x; j++)
-			{
-				/* Get alpha channel */
-				A = *pSrcByte++;
-
-				/* Set them in 8888 data */
-				R = 255;
-				G = 255;
-				B = 255;
-
-				/* Set them in 8888 data */
-				*pDestByte++ = ((R&0xF0)<<8) | ((G&0xF0)<<4) | (B&0xF0) | (A&0xF0)>>4;
-			}
-		}
-	}
-
-	/* Bind texture */
-	glBindTexture(GL_TEXTURE_2D, m_pAPI->uTexture[dwTexID]);
-
-	/* Default settings: bilinear */
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-	/* Now load texture */
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, x, y, 0, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4, p8888);
-	if (glGetError())
-	{
-		_RPT0(_CRT_WARN,"glTexImage2D() failed\n");
-		free(p8888);
+	if(PVRTTextureLoadFromPointer(pSource, &m_pAPI->m_uTextureFont, header, true, 0U, NULL, &MetaDataMap) != PVR_SUCCESS)
 		return false;
-	}
-
-	/* Destroy temporary data */
-	free(p8888);
 
 	/* Return status : OK */
 	return true;
-}
-
-/*!***************************************************************************
- @Function			DrawBackgroundWindowUP
- @Description
-*****************************************************************************/
-void CPVRTPrint3D::DrawBackgroundWindowUP(SPVRTPrint3DAPIVertex *pVtx, const bool bIsOp, const bool bBorder)
-{
-	const unsigned short c_pwFacesWindow[] =
-	{
-		0,1,2, 2,1,3, 2,3,4, 4,3,5, 4,5,6, 6,5,7, 5,8,7, 7,8,9, 8,10,9, 9,10,11, 8,12,10, 8,13,12,
-		13,14,12, 13,15,14, 13,3,15, 1,15,3, 3,13,5, 5,13,8
-	};
-
-	/* Set the texture (with or without border) */
-	if(!bBorder)
-		glBindTexture(GL_TEXTURE_2D, m_pAPI->uTexture[2 + (bIsOp*2)]);
-	else
-		glBindTexture(GL_TEXTURE_2D, m_pAPI->uTexture[1 + (bIsOp*2)]);
-
-	/* Is window opaque ? */
-	if(bIsOp)
-	{
-		glDisable(GL_BLEND);
-	}
-	else
-	{
-		/* Set blending properties */
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	}
-
-	/* Set pointers */
-	glVertexAttribPointer(VERTEX_ARRAY, 3, GL_FLOAT, GL_FALSE, sizeof(SPVRTPrint3DAPIVertex), (const void*)&pVtx[0].sx);
-	glVertexAttribPointer(COLOR_ARRAY, 3, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(SPVRTPrint3DAPIVertex), (const void*)&pVtx[0].color);
-	glVertexAttribPointer(UV_ARRAY, 2, GL_FLOAT, GL_FALSE, sizeof(SPVRTPrint3DAPIVertex), (const void*)&pVtx[0].tu);
-
-	/* Draw triangles */
-	glDrawElements(GL_TRIANGLES, 18*3, GL_UNSIGNED_SHORT, c_pwFacesWindow);
-	if (glGetError())
-	{
-		PVRTErrorOutputDebug("glDrawElements(GL_TRIANGLES, 18*3, GL_UNSIGNED_SHORT, pFaces); failed\n");
-	}
-
-	/* Restore render states (need to be translucent to draw the text) */
 }
 
 /*!***************************************************************************
@@ -439,19 +394,19 @@ void CPVRTPrint3D::DrawBackgroundWindowUP(SPVRTPrint3DAPIVertex *pVtx, const boo
 *****************************************************************************/
 void CPVRTPrint3D::APIRenderStates(int nAction)
 {
-//	static GLboolean	bVertexPointerEnabled, bColorPointerEnabled, bTexCoorPointerEnabled;
-	PVRTMATRIX			Matrix;
-	int					i;
+	SPVRTPrint3DAPI::SInstanceData& Data = (m_pAPI->m_pInstanceData ? *m_pAPI->m_pInstanceData : SPVRTPrint3DAPI::s_InstanceData);
 
 	/* Saving or restoring states ? */
 	switch (nAction)
 	{
-	case 0:
+	case INIT_PRINT3D_STATE:
 	{
 		/* Get previous render states */
 		m_pAPI->isCullFaceEnabled = glIsEnabled(GL_CULL_FACE);
 		m_pAPI->isBlendEnabled = glIsEnabled(GL_BLEND);
 		m_pAPI->isDepthTestEnabled = glIsEnabled(GL_DEPTH_TEST);
+		glGetIntegerv(GL_FRONT_FACE, &m_pAPI->eFrontFace); 
+		glGetIntegerv(GL_CULL_FACE_MODE, &m_pAPI->eCullFaceMode); 
 		glGetIntegerv(GL_ARRAY_BUFFER_BINDING,&m_pAPI->nArrayBufferBinding);
 
 		/******************************
@@ -461,32 +416,35 @@ void CPVRTPrint3D::APIRenderStates(int nAction)
 		/* Set the default GL_ARRAY_BUFFER */
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-		/* Get viewport dimensions */
-		/*glGetFloatv(GL_VIEWPORT, fViewport);*/
-
-		/* Set matrix with viewport dimensions */
-		for(i=0; i<16; i++)
+		float fW = m_fScreenScale[0]*640.0f;
+		float fH = m_fScreenScale[1]*480.0f;
+        
+		PVRTMat4 mxOrtho = PVRTMat4::Ortho(0.0f, 0.0f, fW, -fH, -1.0f, 1.0f, PVRTMat4::OGL, m_bRotate);
+		if(m_bRotate)
 		{
-			Matrix.f[i]=0;
+			PVRTMat4 mxTrans = PVRTMat4::Translation(-fH,fW,0.0f);
+			mxOrtho = mxOrtho * mxTrans;
 		}
-		Matrix.f[0] =	(2.0f/(m_fScreenScale[0]*640.0f));
-		Matrix.f[5] =	(-2.0f/(m_fScreenScale[1]*480.0f));
-		Matrix.f[10] = (1.0f);
-		Matrix.f[12] = (-1.0f);
-		Matrix.f[13] = (1.0f);
-		Matrix.f[15] = (1.0f);
 
 		/* Use the shader */
-		glUseProgram(m_pAPI->m_ProgramObject);
+		_ASSERT(Data.Program != UNDEFINED_HANDLE);
+		glUseProgram(Data.Program);
 
 		/* Bind the projection and modelview matrices to the shader */
-		int location = glGetUniformLocation(m_pAPI->m_ProgramObject, "myMVPMatrix");
-		glUniformMatrix4fv( location, 1, GL_FALSE, Matrix.f);
+		int location = glGetUniformLocation(Data.Program, "myMVPMatrix");
+		
+		PVRTMat4& mProj = (m_bUsingProjection ? m_mProj : mxOrtho);	
+		PVRTMat4 mMVP = mProj * m_mModelView;
+		glUniformMatrix4fv( location, 1, GL_FALSE, mMVP.f);
 
+		// Reset
+		m_bUsingProjection = false;
+		PVRTMatrixIdentity(m_mModelView);
+			
 		/* Culling */
+		glFrontFace(GL_CCW);
+		glCullFace(GL_BACK);
 		glEnable(GL_CULL_FACE);
-		glFrontFace(GL_CW);
-		glCullFace(GL_FRONT);
 
 		/* Set blending mode */
 		glEnable(GL_BLEND);
@@ -505,7 +463,7 @@ void CPVRTPrint3D::APIRenderStates(int nAction)
 		glActiveTexture(GL_TEXTURE0);
 		break;
 	}
-	case 1:
+	case DEINIT_PRINT3D_STATE:
 		/* Restore render states */
 		glDisableVertexAttribArray(VERTEX_ARRAY);
 		glDisableVertexAttribArray(COLOR_ARRAY);
@@ -515,6 +473,8 @@ void CPVRTPrint3D::APIRenderStates(int nAction)
 		if (!m_pAPI->isCullFaceEnabled) glDisable(GL_CULL_FACE);
 		if (!m_pAPI->isBlendEnabled) glDisable(GL_BLEND);
 		if (m_pAPI->isDepthTestEnabled) glEnable(GL_DEPTH_TEST);
+		glCullFace((GLenum)m_pAPI->eCullFaceMode);
+		glFrontFace((GLenum)m_pAPI->eFrontFace);
 		glBindBuffer(GL_ARRAY_BUFFER,m_pAPI->nArrayBufferBinding);
 
 		break;
@@ -535,10 +495,15 @@ void CPVRTPrint3D::APIRenderStates(int nAction)
 
 void CPVRTPrint3D::APIDrawLogo(unsigned int uLogoToDisplay, int nPos)
 {
+	//If the logo isn't valid, return.
+	if (uLogoToDisplay == ePVRTPrint3DLogoNone)
+		return;
+
+	SPVRTPrint3DAPI::SInstanceData& Data = (m_pAPI->m_pInstanceData ? *m_pAPI->m_pInstanceData : SPVRTPrint3DAPI::s_InstanceData);
 	const float fLogoSizeHalf = 0.15f;
 	const float fLogoShift = 0.05f;
 	const float fLogoSizeHalfShifted = fLogoSizeHalf + fLogoShift;
-	const float fLogoYScale = 50.0f / 64.0f;
+	const float fLogoYScale = 45.0f/64.0f;
 
 	static VERTTYPE	Vertices[] =
 		{
@@ -565,17 +530,8 @@ void CPVRTPrint3D::APIDrawLogo(unsigned int uLogoToDisplay, int nPos)
 	float *pVertices = ( (float*)&Vertices );
 	float *pColours  = ( (float*)&Colours );
 	float *pUV       = ( (float*)&UVs );
-	GLuint	tex;
 
-	switch(uLogoToDisplay)
-	{
-	case ePVRTPrint3DLogoIMG:
-		tex = m_pAPI->uTextureIMGLogo;
-		break;
-	default:
-		tex = m_pAPI->uTexturePVRLogo;
-		break;
-	}
+	GLuint	tex = Data.uTextureIMGLogo;
 
 	// Matrices
 	PVRTMATRIX matModelView;
@@ -598,18 +554,18 @@ void CPVRTPrint3D::APIDrawLogo(unsigned int uLogoToDisplay, int nPos)
 		PVRTMatrixMultiply(matModelView, matModelView, matTransform);
 	}
 
+	_ASSERT(Data.Program != UNDEFINED_HANDLE);
+	glUseProgram(Data.Program);
+
 	// Bind the projection and modelview matrices to the shader
-	int location = glGetUniformLocation(m_pAPI->m_ProgramObject, "myMVPMatrix");
+	int location = glGetUniformLocation(Data.Program, "myMVPMatrix");
 	glUniformMatrix4fv( location, 1, GL_FALSE, matModelView.f);
 
 	// Render states
 	glActiveTexture(GL_TEXTURE0);
+
+	_ASSERT(tex != UNDEFINED_HANDLE);
 	glBindTexture(GL_TEXTURE_2D, tex);
-
-	glDisable(GL_DEPTH_TEST);
-
-	glEnable (GL_BLEND);
-	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// Vertices
 	glEnableVertexAttribArray(VERTEX_ARRAY);
@@ -624,10 +580,6 @@ void CPVRTPrint3D::APIDrawLogo(unsigned int uLogoToDisplay, int nPos)
 	glDisableVertexAttribArray(VERTEX_ARRAY);
 	glDisableVertexAttribArray(UV_ARRAY);
 	glDisableVertexAttribArray(COLOR_ARRAY);
-
-	// Restore render states
-	glDisable (GL_BLEND);
-	glEnable(GL_DEPTH_TEST);
 }
 
 /*****************************************************************************

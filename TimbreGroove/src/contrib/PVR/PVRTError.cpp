@@ -6,7 +6,7 @@
 
  @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     ANSI compatible
 
@@ -17,15 +17,11 @@
 #include "PVRTError.h"
 #include <stdarg.h>
 
-#if defined(__BADA__)
-#include <FApp.h>
-#else
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #if defined(_WIN32)
 #define vsnprintf _vsnprintf
-#endif
 #endif
 
 /*!***************************************************************************
@@ -39,15 +35,11 @@ void PVRTErrorOutputDebug(char const * const format, ...)
 	char	pszString[1024];
 
 	va_start(arg, format);
-#if defined(__SYMBIAN32__) || defined(UITRON) || defined(_UITRON_)
-	vsprintf(pszString, format, arg);
-#else
 	vsnprintf(pszString, 1024, format, arg);
-#endif
 	va_end(arg);
 
 
-#if defined(UNICODE) && !defined(__SYMBIAN32__) && !defined(UNDER_CE)
+#if defined(UNICODE)
 	wchar_t *pswzString = (wchar_t *)malloc((strlen(pszString) + 1) * sizeof(wchar_t));
 
 	int i;
@@ -65,11 +57,7 @@ void PVRTErrorOutputDebug(char const * const format, ...)
 
 	free(pswzString);
 #else
-	#if defined(__SYMBIAN32__)
-		RDebug::Printf(pszString);
-	#elif defined(__BADA__)
-		AppLog(pszString);
-	#elif defined(_WIN32) && !defined(UNDER_CE)
+	#if defined(_WIN32)
 		OutputDebugString(pszString);
 	#else
 		fprintf(stderr, "%s", pszString);

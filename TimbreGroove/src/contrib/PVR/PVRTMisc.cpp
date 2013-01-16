@@ -6,7 +6,7 @@
 
  @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     ANSI compatible
 
@@ -245,7 +245,7 @@ int PVRTMiscCalculateInfinitePlane(
  @Input				z
  @Description		Writes a vertex in a vertex array
 *****************************************************************************/
-void SetVertex(VERTTYPE** Vertices, int index, VERTTYPE x, VERTTYPE y, VERTTYPE z)
+static void SetVertex(VERTTYPE** Vertices, int index, VERTTYPE x, VERTTYPE y, VERTTYPE z)
 {
 	(*Vertices)[index*3+0] = x;
 	(*Vertices)[index*3+1] = y;
@@ -260,7 +260,7 @@ void SetVertex(VERTTYPE** Vertices, int index, VERTTYPE x, VERTTYPE y, VERTTYPE 
  @Input				v
  @Description		Writes a texture coordinate in a texture coordinate array
 *****************************************************************************/
-void SetUV(VERTTYPE** UVs, int index, VERTTYPE u, VERTTYPE v)
+static void SetUV(VERTTYPE** UVs, int index, VERTTYPE u, VERTTYPE v)
 {
 	(*UVs)[index*2+0] = u;
 	(*UVs)[index*2+1] = v;
@@ -366,7 +366,7 @@ void PVRTDestroySkybox(VERTTYPE* Vertices, VERTTYPE* UVs)
 }
 
 /*!***************************************************************************
- @Function		GetPOTHigher
+ @Function		PVRTGetPOTHigher
  @Input			uiOriginalValue	Base value
  @Input			iTimesHigher		Multiplier
  @Description	When iTimesHigher is one, this function will return the closest
@@ -374,7 +374,7 @@ void PVRTDestroySkybox(VERTTYPE* Vertices, VERTTYPE* UVs)
 				For every increment beyond one for the iTimesHigher value,
 				the next highest power-of-two value will be calculated.
 *****************************************************************************/
-unsigned int GetPOTHigher(unsigned int uiOriginalValue, int iTimesHigher)
+unsigned int PVRTGetPOTHigher(unsigned int uiOriginalValue, int iTimesHigher)
 {
 	if(uiOriginalValue == 0 || iTimesHigher < 0)
 	{
@@ -394,7 +394,7 @@ unsigned int GetPOTHigher(unsigned int uiOriginalValue, int iTimesHigher)
 }
 
 /*!***************************************************************************
- @Function		GetPOTLower
+ @Function		PVRTGetPOTLower
  @Input			uiOriginalValue	Base value
  @Input			iTimesLower		Multiplier
  @Description	When iTimesLower is one, this function will return the closest
@@ -404,13 +404,13 @@ unsigned int GetPOTHigher(unsigned int uiOriginalValue, int iTimesHigher)
 				value that can be reached is 1.
 *****************************************************************************/
 // NOTE: This function should be optimised
-unsigned int GetPOTLower(unsigned int uiOriginalValue, int iTimesLower)
+unsigned int PVRTGetPOTLower(unsigned int uiOriginalValue, int iTimesLower)
 {
 	if(uiOriginalValue == 0 || iTimesLower < 0)
 	{
 		return 0;
 	}
-	unsigned int uiSize = GetPOTHigher(uiOriginalValue,1);
+	unsigned int uiSize = PVRTGetPOTHigher(uiOriginalValue,1);
 	uiSize >>= 1;//uiSize /=2;
 
 	for(int i = 1; i < iTimesLower; ++i)

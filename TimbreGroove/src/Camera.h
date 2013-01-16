@@ -21,6 +21,7 @@
 
 @property (nonatomic) GLKVector3 position;
 @property (nonatomic) GLKVector3 rotation;
+@property (nonatomic) GLKVector3 lookAt;
 
 @property (nonatomic) float z;
 

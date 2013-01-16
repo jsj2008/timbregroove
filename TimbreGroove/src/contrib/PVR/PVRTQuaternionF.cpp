@@ -4,9 +4,9 @@
 
  @Title        PVRTQuaternionF
 
- @Version      
+ @Version       @Version      
 
- @Copyright    Copyright (C)  Imagination Technologies Limited.
+ @Copyright    Copyright (c) Imagination Technologies Limited.
 
  @Platform     ANSI compatible
 
@@ -14,7 +14,6 @@
 
 ******************************************************************************/
 #include "PVRTGlobal.h"
-#include "PVRTContext.h"
 #include <math.h>
 #include <string.h>
 #include "PVRTFixedPoint.h"		// Only needed for trig function float lookups
@@ -228,7 +227,7 @@ void PVRTMatrixRotationQuaternionF(
 {
 	const PVRTQUATERNIONf *pQ;
 
-#if defined(BUILD_DX9) || defined(BUILD_D3DM) || defined(BUILD_DX10)
+#if defined(BUILD_DX9) || defined(BUILD_D3DM) || defined(BUILD_DX10) || defined(BUILD_DX11)
 	PVRTQUATERNIONf qInv;
 
 	qInv.x = -quat.x;

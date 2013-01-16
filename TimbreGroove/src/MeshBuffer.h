@@ -63,7 +63,8 @@ static inline TGVertexStride * StrideInit4f(TGVertexStride * s, SVariables type)
 
 -(void)getLocations:(Shader*)shader;
 
--(void)bind:(Shader *)shader;
+-(void)bind;
+-(void)unbind;
 
 -(void)draw;
 
