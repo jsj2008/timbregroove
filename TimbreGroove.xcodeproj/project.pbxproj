@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5700233216A553D3006F0E8E /* Entitlements.plist in Resources */ = {isa = PBXBuildFile; fileRef = 570022E116A553D3006F0E8E /* Entitlements.plist */; };
-		5700233316A553D3006F0E8E /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 570022E216A553D3006F0E8E /* Info.plist */; };
 		5700233416A553D3006F0E8E /* PVRTBackground.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 570022E816A553D3006F0E8E /* PVRTBackground.cpp */; };
 		5700233516A553D3006F0E8E /* PVRTgles2Ext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 570022EB16A553D3006F0E8E /* PVRTgles2Ext.cpp */; };
 		5700233616A553D3006F0E8E /* PVRTPFXParserAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 570022ED16A553D3006F0E8E /* PVRTPFXParserAPI.cpp */; };
@@ -265,6 +263,7 @@
 		570665F3167F3D3F0081B8C3 /* squareTest.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = squareTest.tif; sourceTree = "<group>"; };
 		570665FC167F89640081B8C3 /* MenuView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MenuView.h; path = elements/MenuView.h; sourceTree = "<group>"; };
 		570665FD167F89640081B8C3 /* MenuView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MenuView.m; path = elements/MenuView.m; sourceTree = "<group>"; };
+		5711F6CD16A66339001ED82D /* TimbreGroove.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = TimbreGroove.entitlements; sourceTree = "<group>"; };
 		571A42FC167C315600CD7E8F /* Graph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Graph.h; sourceTree = "<group>"; };
 		571A42FD167C315600CD7E8F /* Graph.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Graph.m; sourceTree = "<group>"; };
 		571ECF99167BE2CE00727A30 /* Tween.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tween.h; sourceTree = "<group>"; };
@@ -945,6 +944,7 @@
 		57E8750116782894008243B2 /* TimbreGroove */ = {
 			isa = PBXGroup;
 			children = (
+				5711F6CD16A66339001ED82D /* TimbreGroove.entitlements */,
 				572EB1F816786C630062F290 /* src */,
 				578CB8FC16A60F2D00088BA2 /* Cocoa */,
 				571ECF97167BE2CE00727A30 /* contrib */,
@@ -1103,8 +1103,6 @@
 				57BFCBAA16A220EB008903BA /* TGAmb1-32k.aif in Resources */,
 				57BFCBAB16A220EB008903BA /* TGAmb2-32k.aif in Resources */,
 				57BFCBAC16A220EB008903BA /* TGAmb3-32k.aif in Resources */,
-				5700233216A553D3006F0E8E /* Entitlements.plist in Resources */,
-				5700233316A553D3006F0E8E /* Info.plist in Resources */,
 				5700235B16A554D9006F0E8E /* Belt.pvr in Resources */,
 				5700235C16A554D9006F0E8E /* Body.pvr in Resources */,
 				5700235D16A554D9006F0E8E /* Legs.pvr in Resources */,

@@ -53,13 +53,14 @@
     Skinner_Render(_skinnerThingy);
 }
 
--(void)setIsMenuOver:(NSNumber *)isMenuOver
+-(void)setViewIsHidden:(NSNumber *)viewIsHidden
 {
-    if( [isMenuOver boolValue] )
+    if( [viewIsHidden boolValue] )
         Skinner_Pause(_skinnerThingy);
     else
         Skinner_Resume(_skinnerThingy);
-    [super setIsMenuOver:isMenuOver];
+    
+    [super setViewIsObscured:viewIsHidden];
 }
 
 @end

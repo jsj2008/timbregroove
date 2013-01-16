@@ -40,6 +40,12 @@ static NSString * _str_userMuteSwitch = @"_userMuteSwitch";
     _backcolor = GLKVector4Make(0.1, 0.1, 0.1, 1);
 }
 
+-(void)showAnimationComplete
+{
+    [self setupGL];
+    [_graph traverse:@selector(setViewIsHidden:) userObj:[[NSNumber alloc] initWithBool:false]];    
+}
+
 - (void)showFromDir:(int)dir
 {
     _visible = true;
@@ -49,7 +55,7 @@ static NSString * _str_userMuteSwitch = @"_userMuteSwitch";
     self.frame = rc;
     NSDictionary * params = @{  TWEEN_DURATION: @0.7f,
                                 TWEEN_TRANSITION: TWEEN_FUNC_EASEOUTSINE,
-                        TWEEN_ON_COMPLETE_SELECTOR: @"setupGL",
+                        TWEEN_ON_COMPLETE_SELECTOR: @"showAnimationComplete",
                         TWEEN_ON_COMPLETE_TARGET: self,
                                             @"x": @(0)
     };
@@ -70,9 +76,15 @@ static NSString * _str_userMuteSwitch = @"_userMuteSwitch";
     [Tweener addTween:self withParameters:params];
 }
 
+-(void)hideAnimationComplete
+{
+    [super hideAnimationComplete];
+    [_graph traverse:@selector(setViewIsHidden:) userObj:[[NSNumber alloc] initWithBool:true]];
+}
+
 -(void)setMenuIsOver:(NSNumber *)menuIsOver
 {
-    [_graph traverse:@selector(setIsMenuOver:) userObj:menuIsOver];
+    [_graph traverse:@selector(setViewIsObscured:) userObj:menuIsOver];
     _menuIsOver = menuIsOver;
 }
 

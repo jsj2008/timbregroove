@@ -42,7 +42,8 @@ typedef enum FBO_BindFlags
 @property (nonatomic)        GLKVector3 scale;
 @property (nonatomic)             float scaleXYZ;
 
-@property (nonatomic,strong) NSNumber * isMenuOver;
+@property (nonatomic,strong) NSNumber * viewIsObscured;
+@property (nonatomic,strong) NSNumber * viewIsHidden;
 
 /*
   Do as little as humanly possible in init

@@ -64,7 +64,7 @@ class OGLES2Skinning
 	GLuint * m_uiTextures;
     CPVRTString * m_ppTextureFiles;
     CPVRTString * m_ppTextureNames;
-    int m_numTextures;    
+    int m_numTextures;
     
 	bool InitApplication();
 	bool ReleaseView();
@@ -101,7 +101,7 @@ void Skinner_Destroy(PVR_SKINNER skinner)
 
 void Skinner_Pause(PVR_SKINNER skinner)
 {
-   // ((OGLES2Skinning *)skinner)->Pause();
+    ((OGLES2Skinning *)skinner)->Pause();
 }
 
 void Skinner_Resume(PVR_SKINNER skinner)
@@ -133,7 +133,7 @@ OGLES2Skinning::OGLES2Skinning( char *psSceneFile, char **ppTextureFiles, char *
         m_uiTextures = NULL;
         m_ppTextureFiles = NULL;
     }
-
+    
     InitApplication();
 }
 
@@ -164,7 +164,7 @@ bool OGLES2Skinning::LoadTextures(CPVRTString* const pErrorStr)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
-        
+    
 	return true;
 }
 
@@ -288,13 +288,13 @@ bool OGLES2Skinning::InitApplication()
     // one-time only per instance.
     
 	LoadVbos();
-
+    
 	if (!LoadTextures(&ErrorStr))
 	{
 		EnvExitMsg(  ErrorStr.c_str());
 		return false;
 	}
-
+    
 	if (!LoadShaders(&ErrorStr))
 	{
 		EnvExitMsg(  ErrorStr.c_str());
@@ -334,7 +334,7 @@ bool OGLES2Skinning::ReleaseView()
 	glDeleteBuffers(m_Scene.nNumMesh, m_puiVbo);
 	glDeleteBuffers(m_Scene.nNumMesh, m_puiIndexVbo);
 	delete[] m_puiTextures;
-        
+    
 	return true;
 }
 
@@ -349,7 +349,7 @@ bool OGLES2Skinning::RenderScene()
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(0.6f, 0.8f, 0.6f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+    
 	glUseProgram(m_ShaderProgram.uiId);
 	glActiveTexture(GL_TEXTURE0);
     
