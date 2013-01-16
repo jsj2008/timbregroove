@@ -79,7 +79,7 @@ class OGLES2Skinning
 public:
     OGLES2Skinning( char *psSceneFile, char **ppTextureFiles, char **ppTextureName, int numTextures );
     ~OGLES2Skinning();
-    bool RenderScene();
+    bool RenderScene(float *modelMatrix);
     void Pause() { m_paused = true; }
     void Resume() { m_paused = false; }
 };
@@ -89,9 +89,9 @@ PVR_SKINNER Skinner_Get(char *psSceneFile, char **ppTextureFiles, char **ppTextu
     return (PVR_SKINNER) new OGLES2Skinning(psSceneFile,ppTextureFiles,ppTextureName,numTextures);
 }
 
-void Skinner_Render(PVR_SKINNER skinner)
+void Skinner_Render(PVR_SKINNER skinner, float * modelMatrix)
 {
-    ((OGLES2Skinning *)skinner)->RenderScene();
+    ((OGLES2Skinning *)skinner)->RenderScene(modelMatrix);
 }
 
 void Skinner_Destroy(PVR_SKINNER skinner)
@@ -338,7 +338,7 @@ bool OGLES2Skinning::ReleaseView()
 	return true;
 }
 
-bool OGLES2Skinning::RenderScene()
+bool OGLES2Skinning::RenderScene(float *modelMatrix)
 {
     if( m_paused )
         return true;
@@ -359,61 +359,11 @@ bool OGLES2Skinning::RenderScene()
      */
 	unsigned long iTime = EnvGetTime();
     
-    // This is all lame and coming out RSN
-    // The model matrix will come from the
-    // obj-c framework though (yet another)
-    // C helper function:
-    
 	if(iTime > m_iTimePrev)
 	{
 		float fDelta = (float) (iTime - m_iTimePrev);
 		m_fFrame += fDelta * g_fDemoFrameRate;
-        
-		bool bRebuildTransformation = false;
-        
-		if(EnvDidTouchHappen(EnvDirectionRIGHT))
-		{
-			m_fAngle -= 0.03f;
-            
-			if(m_fAngle < PVRT_TWO_PIf)
-				m_fAngle += PVRT_TWO_PIf;
-            
-			bRebuildTransformation = true;
-		}
-        
-		if(EnvDidTouchHappen(EnvDirectionLEFT))
-		{
-			m_fAngle += 0.03f;
-            
-			if(m_fAngle > PVRT_TWO_PIf)
-				m_fAngle -= PVRT_TWO_PIf;
-            
-			bRebuildTransformation = true;
-		}
-        
-		if(EnvDidTouchHappen(EnvDirectionUP))
-		{
-			m_fDistance -= 10.0f;
-            
-			if(m_fDistance < -500.0f)
-				m_fDistance = -500.0f;
-            
-			bRebuildTransformation = true;
-		}
-        
-		if(EnvDidTouchHappen(EnvDirectionDOWN))
-		{
-			m_fDistance += 10.0f;
-            
-			if(m_fDistance > 200.0f)
-				m_fDistance = 200.0f;
-            
-			bRebuildTransformation = true;
-		}
-        
-		if(bRebuildTransformation)
-			m_Transform = PVRTMat4::Translation(0,0, m_fDistance) * PVRTMat4::RotationY(m_fAngle);
-        
+        memcpy(m_Transform.f,modelMatrix,sizeof(m_Transform.f));
 	}
     
 	m_iTimePrev	= iTime;

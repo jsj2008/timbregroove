@@ -5,6 +5,8 @@
 
 @interface MeshImporter () {
     PVR_SKINNER _skinnerThingy;
+    float _rotation;
+    NSTimeInterval _time;
 }
 @property (nonatomic,readonly,getter = getPods) NSDictionary * pods;
 @property (nonatomic,weak) NSDictionary * podInfo;
@@ -48,9 +50,20 @@
     return [super wireUp];
 }
 
+-(void)update:(NSTimeInterval)dt
+{
+    _time += dt;
+    if( _time > 0.3f )
+    {
+        _rotation += 1.0;
+        _time = 0;
+    }
+    self.rotation = GLKVector3Make(0, GLKMathDegreesToRadians(_rotation), 0);
+}
+
 -(void)render:(NSUInteger)w h:(NSUInteger)h
 {
-    Skinner_Render(_skinnerThingy);
+    Skinner_Render(_skinnerThingy,self.modelView.m);
 }
 
 -(void)setViewIsHidden:(NSNumber *)viewIsHidden
@@ -97,10 +110,5 @@ unsigned long EnvGetTime()
 	uint64_t time = mach_absolute_time();
 	uint64_t millis = (time * (_s_sTimeBaseInfo.numer/_s_sTimeBaseInfo.denom))/1000000.0;
 	return millis;
-}
-
-bool EnvDidTouchHappen(EnvDirection edir)
-{
-    return false;
 }
 

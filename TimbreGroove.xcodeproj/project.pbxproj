@@ -263,7 +263,6 @@
 		570665F3167F3D3F0081B8C3 /* squareTest.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = squareTest.tif; sourceTree = "<group>"; };
 		570665FC167F89640081B8C3 /* MenuView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MenuView.h; path = elements/MenuView.h; sourceTree = "<group>"; };
 		570665FD167F89640081B8C3 /* MenuView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MenuView.m; path = elements/MenuView.m; sourceTree = "<group>"; };
-		5711F6CD16A66339001ED82D /* TimbreGroove.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = TimbreGroove.entitlements; sourceTree = "<group>"; };
 		571A42FC167C315600CD7E8F /* Graph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Graph.h; sourceTree = "<group>"; };
 		571A42FD167C315600CD7E8F /* Graph.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Graph.m; sourceTree = "<group>"; };
 		571ECF99167BE2CE00727A30 /* Tween.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tween.h; sourceTree = "<group>"; };
@@ -278,10 +277,10 @@
 		571ECFCD167BF53200727A30 /* MenuItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MenuItem.m; path = elements/MenuItem.m; sourceTree = "<group>"; };
 		571ECFCF167BF86600727A30 /* Menu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Menu.h; path = elements/Menu.h; sourceTree = "<group>"; };
 		571ECFD0167BF86600727A30 /* Menu.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Menu.m; path = elements/Menu.m; sourceTree = "<group>"; };
-		572198901685381B0062C36F /* TrackView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TrackView.h; path = src/TrackView.h; sourceTree = "<group>"; };
-		572198911685381C0062C36F /* TrackView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TrackView.m; path = src/TrackView.m; sourceTree = "<group>"; };
-		5721989416853F9D0062C36F /* View.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = View.h; path = src/View.h; sourceTree = "<group>"; };
-		5721989516853F9D0062C36F /* View.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = View.m; path = src/View.m; sourceTree = "<group>"; };
+		572198901685381B0062C36F /* TrackView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TrackView.h; sourceTree = "<group>"; };
+		572198911685381C0062C36F /* TrackView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TrackView.m; sourceTree = "<group>"; };
+		5721989416853F9D0062C36F /* View.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = View.h; sourceTree = "<group>"; };
+		5721989516853F9D0062C36F /* View.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = View.m; sourceTree = "<group>"; };
 		572D7F2C16832749006D48BF /* SimpleImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SimpleImage.h; sourceTree = "<group>"; };
 		572D7F2D16832749006D48BF /* SimpleImage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SimpleImage.m; sourceTree = "<group>"; };
 		572EB1E316786C630062F290 /* Alex.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Alex.png; sourceTree = "<group>"; };
@@ -660,6 +659,7 @@
 		572EB1F816786C630062F290 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				578CB8FC16A60F2D00088BA2 /* Cocoa */,
 				572EB287167AAD1C0062F290 /* elements */,
 				57019F761685C15B007FA38F /* audio */,
 				57019F771685C318007FA38F /* UI */,
@@ -723,6 +723,8 @@
 				572EB212167878FD0062F290 /* Node.m */,
 				572EB2241678BBCA0062F290 /* TG3dObject.h */,
 				572EB2251678BBCA0062F290 /* TG3dObject.m */,
+				572198901685381B0062C36F /* TrackView.h */,
+				572198911685381C0062C36F /* TrackView.m */,
 			);
 			name = node;
 			sourceTree = "<group>";
@@ -732,16 +734,13 @@
 			children = (
 				572EB1F916786C630062F290 /* TGAppDelegate.h */,
 				572EB1FA16786C630062F290 /* TGAppDelegate.m */,
-				572198901685381B0062C36F /* TrackView.h */,
-				572198911685381C0062C36F /* TrackView.m */,
-				5721989416853F9D0062C36F /* View.h */,
-				5721989516853F9D0062C36F /* View.m */,
 				570220D7169B8E7F0028FE33 /* UIView+TGViewExtensions.h */,
 				570220D8169B8E7F0028FE33 /* UIView+TGViewExtensions.m */,
 				572EB1FB16786C630062F290 /* TGViewController.h */,
 				572EB1FC16786C630062F290 /* TGViewController.m */,
 			);
 			name = Cocoa;
+			path = ..;
 			sourceTree = "<group>";
 		};
 		578CB8FD16A6102C00088BA2 /* openGL */ = {
@@ -767,6 +766,8 @@
 				57A66EEB167B1D1B00B9EA75 /* Texture.h */,
 				57A66EEC167B1D1C00B9EA75 /* Texture.m */,
 				57647576167D8AC100D5A431 /* TGTypes.h */,
+				5721989416853F9D0062C36F /* View.h */,
+				5721989516853F9D0062C36F /* View.m */,
 			);
 			name = openGL;
 			sourceTree = "<group>";
@@ -944,9 +945,7 @@
 		57E8750116782894008243B2 /* TimbreGroove */ = {
 			isa = PBXGroup;
 			children = (
-				5711F6CD16A66339001ED82D /* TimbreGroove.entitlements */,
 				572EB1F816786C630062F290 /* src */,
-				578CB8FC16A60F2D00088BA2 /* Cocoa */,
 				571ECF97167BE2CE00727A30 /* contrib */,
 				572EB1F316786C630062F290 /* shaders */,
 				572EB1E116786C630062F290 /* media */,
