@@ -11,6 +11,7 @@
 #import "MeshBuffer.h"
 #import "Camera.h"
 #import "Texture.h"
+#import "AssetLoader.h"
 
 @interface GenericBase () {
 @protected
@@ -312,6 +313,7 @@
 
 @interface Generic() {
     Texture * _texture;
+    AssetLoader * _ati;
 }
 @end
 
@@ -352,7 +354,23 @@
 -(void)setTextureFileName:(id)textureFileName
 {
     _textureFileName = textureFileName;
-    self.texture = [[Texture alloc] initWithFileName:_textureFileName];
+    if( [textureFileName isKindOfClass:[NSURL class]] )
+    {
+        _ati = [[AssetToImage alloc] initWithURL:textureFileName andTarget:self andKey:@"textureImage"];
+    }
+    else
+    {
+        self.texture = [[Texture alloc] initWithFileName:_textureFileName];
+    }
+}
+
+// be careful not to call this setter while
+// another part of the code triggers the AssetToImage
+// call above
+-(void)setTextureImage:(UIImage *)image
+{
+    self.texture = [[Texture alloc] initWithImage:image];
+    _ati = nil;
 }
 
 -(Texture *)texture

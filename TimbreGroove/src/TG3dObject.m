@@ -18,6 +18,14 @@
 #pragma mark -
 #pragma mark Lifetime
 
+-(id)init
+{
+    if( (self = [super init]) )
+    {
+        self.scaleXYZ = 1.0;
+    }
+    return self;
+}
 -(id)wireUp
 {
     return self;
@@ -105,8 +113,7 @@
 {
     GLKMatrix4 mx = GLKMatrix4MakeTranslation( _position.x, _position.y, _position.z );
     
-    if( _scale.x || _scale.y || _scale.z )
-        mx = GLKMatrix4Scale(mx, _scale.x, _scale.y, _scale.z);
+    mx = GLKMatrix4Scale(mx, _scale.x, _scale.y, _scale.z);
     
     if( _rotation.x )
         mx = GLKMatrix4Rotate(mx, _rotation.x, 1.0f, 0.0f, 0.0f);

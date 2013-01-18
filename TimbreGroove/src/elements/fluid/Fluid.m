@@ -13,6 +13,7 @@
 #import "MeshBuffer.h"
 #import "Camera.h"
 #import "View.h"
+#import "Texture.h"
 
 //#define TEST_OUTPUT
 
@@ -603,7 +604,7 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     //=====================================================
     FBO * p0 = _pressure0;
     FBO * p1 = _pressure1;
-    FBO * swap = p0;
+    FBO * swap;
     for(int i = 0; i < options.iterations; i++)
     {
         [_jacobiKernel           setTexture:p0 withKey:fl_pressure];

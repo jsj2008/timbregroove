@@ -93,7 +93,7 @@ int ESUTIL_API esGenSphere ( int numSlices, float radius, GLfloat **vertices, GL
                                                cosf ( angleStep * (float)j );
          }
 
-         if ( normals )
+         if ( vertices && normals )
          {
             (*normals)[vertex + 0] = (*vertices)[vertex + 0] / radius;
             (*normals)[vertex + 1] = (*vertices)[vertex + 1] / radius;

@@ -9,18 +9,6 @@
 #import "Sphere.h"
 #import "MeshBuffer.h"
 
-static void genSphere(TGGenericElementParams *p, float radius,
-                      float lats, float longs, bool wNormals, bool wUV)
-{
-
-    size_t sz = sizeof(float) * 3 * lats * longs;
-    if( wNormals )
-        sz += (sizeof(float)*3);
-    if( wUV )
-        sz += (sizeof(float)*2);
-}
-
-
 @interface Sphere() {
     float _radius;
     float _longs;

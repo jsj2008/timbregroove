@@ -59,8 +59,8 @@
                         <subviews>
                             <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Settings" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="f4r-cQ-03G">
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="74" id="AtR-8l-BUh"/>
-                                    <constraint firstAttribute="height" constant="43" id="L8e-mv-t97"/>
+                                    <constraint firstAttribute="width" constant="74" id="sDN-45-wVR"/>
+                                    <constraint firstAttribute="height" constant="43" id="xTS-5c-2Yd"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -70,11 +70,11 @@
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="VTr-8j-V3S">
                                 <constraints>
+                                    <constraint firstAttribute="height" constant="29" id="6jE-vT-cKi"/>
                                     <constraint firstAttribute="width" constant="61" id="aJi-Cs-iLz"/>
-                                    <constraint firstAttribute="height" constant="29" id="zHb-I5-XNd"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" name="Helvetica" family="Helvetica" pointSize="14"/>
-                                <state key="normal" title="close">
+                                <state key="normal" title="back">
                                     <color key="titleColor" red="0.19607843137254902" green="0.30980392156862746" blue="0.52156862745098043" alpha="1" colorSpace="calibratedRGB"/>
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
@@ -96,12 +96,12 @@
                         </subviews>
                         <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="f4r-cQ-03G" firstAttribute="top" secondItem="BKI-PZ-die" secondAttribute="top" constant="12" id="191-dP-eKx"/>
+                            <constraint firstItem="VTr-8j-V3S" firstAttribute="leading" secondItem="BKI-PZ-die" secondAttribute="leading" constant="20" symbolic="YES" type="default" id="5ri-PK-JpB"/>
+                            <constraint firstItem="VTr-8j-V3S" firstAttribute="top" secondItem="f4r-cQ-03G" secondAttribute="top" type="default" id="8CB-kr-c6t"/>
                             <constraint firstItem="0Tf-wy-qWh" firstAttribute="leading" secondItem="BKI-PZ-die" secondAttribute="leading" constant="25" id="H4b-La-fbT"/>
                             <constraint firstItem="0Tf-wy-qWh" firstAttribute="top" secondItem="BKI-PZ-die" secondAttribute="top" constant="69" id="NDg-3c-kEz"/>
-                            <constraint firstItem="VTr-8j-V3S" firstAttribute="top" secondItem="BKI-PZ-die" secondAttribute="top" constant="11" id="YoF-OH-LtY"/>
+                            <constraint firstItem="VTr-8j-V3S" firstAttribute="top" secondItem="BKI-PZ-die" secondAttribute="top" constant="12" id="b4Q-0G-TiL"/>
                             <constraint firstItem="f4r-cQ-03G" firstAttribute="centerX" secondItem="0Tf-wy-qWh" secondAttribute="centerX" type="default" id="cp8-jH-zQg"/>
-                            <constraint firstAttribute="trailing" secondItem="VTr-8j-V3S" secondAttribute="trailing" constant="7" id="l16-rH-2a9"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="JpK-PA-Bob"/>

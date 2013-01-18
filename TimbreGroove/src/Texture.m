@@ -59,6 +59,17 @@
     return self;
 }
 
+-(id)initWithImage:(UIImage *)image
+{
+    if( (self = [super init]) )
+    {
+        if( ![self loadFromImage:image] )
+            return nil;
+        _uLocation = -1;
+    }
+    return self;
+}
+
 -(id)initWithString:(NSString *)text
 {
     if( (self = [super init]) )
@@ -107,15 +118,24 @@
 
 -(bool)loadFromFile:(NSString *)fileName
 {
-    bool ok = true;
-    NSNumber * nyes = [NSNumber numberWithBool:YES];
     NSString * path = [[NSBundle mainBundle] pathForResource:[fileName stringByDeletingPathExtension] ofType:[fileName pathExtension]];
     UIImage * image = [UIImage imageWithContentsOfFile:path];
+    bool ok = [self loadFromImage:image];
+    NSLog(@"created texture for %@ (%d)",fileName,_glTexture);
+    return ok;
+}
+
+-(bool)loadFromImage:(UIImage *)image
+{
+    bool ok = true;
+    NSNumber * nyes = [NSNumber numberWithBool:YES];
     CGImageRef imageRef = [image CGImage];
+    
+    _orgSize = [image size];
     
     // see http://stackoverflow.com/questions/8611063/glktextureloader-fails-when-loading-a-certain-texture-the-first-time-but-succee
     glGetError();
-
+    
     NSError * err = nil;
     GLKTextureInfo *textureInfo = [GLKTextureLoader textureWithCGImage:imageRef
                                                                options: @{
@@ -128,7 +148,6 @@
         _glTexture  = textureInfo.name;
         _target     = textureInfo.target;
         _origin     = textureInfo.textureOrigin;
-        NSLog(@"created texture for %@ (%d) ImageRef: %@",fileName,_glTexture,imageRef);
     }
     else
     {
@@ -137,7 +156,6 @@
     }
     
     return ok;
-    
 }
 
 -(void)bindTarget:(int)i

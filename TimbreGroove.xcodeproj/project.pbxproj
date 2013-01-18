@@ -55,6 +55,7 @@
 		570220D9169B8E7F0028FE33 /* UIView+TGViewExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 570220D8169B8E7F0028FE33 /* UIView+TGViewExtensions.m */; };
 		570665F4167F3D3F0081B8C3 /* squareTest.tif in Resources */ = {isa = PBXBuildFile; fileRef = 570665F3167F3D3F0081B8C3 /* squareTest.tif */; };
 		570665FE167F89640081B8C3 /* MenuView.m in Sources */ = {isa = PBXBuildFile; fileRef = 570665FD167F89640081B8C3 /* MenuView.m */; };
+		5716775F16A685A800F78B25 /* AssetLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 5716775E16A685A800F78B25 /* AssetLoader.m */; };
 		5717F94B167EBFAC00D8054B /* Plane.m in Sources */ = {isa = PBXBuildFile; fileRef = 571ECFCA167BF31D00727A30 /* Plane.m */; };
 		571A42FE167C315700CD7E8F /* Graph.m in Sources */ = {isa = PBXBuildFile; fileRef = 571A42FD167C315600CD7E8F /* Graph.m */; };
 		571A472F16954234002231C5 /* Fluid.m in Sources */ = {isa = PBXBuildFile; fileRef = 575DA0081694366C00A50C41 /* Fluid.m */; };
@@ -263,6 +264,8 @@
 		570665F3167F3D3F0081B8C3 /* squareTest.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = squareTest.tif; sourceTree = "<group>"; };
 		570665FC167F89640081B8C3 /* MenuView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MenuView.h; path = elements/MenuView.h; sourceTree = "<group>"; };
 		570665FD167F89640081B8C3 /* MenuView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MenuView.m; path = elements/MenuView.m; sourceTree = "<group>"; };
+		5716775D16A685A800F78B25 /* AssetLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AssetLoader.h; path = src/AssetLoader.h; sourceTree = "<group>"; };
+		5716775E16A685A800F78B25 /* AssetLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AssetLoader.m; path = src/AssetLoader.m; sourceTree = "<group>"; };
 		571A42FC167C315600CD7E8F /* Graph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Graph.h; sourceTree = "<group>"; };
 		571A42FD167C315600CD7E8F /* Graph.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Graph.m; sourceTree = "<group>"; };
 		571ECF99167BE2CE00727A30 /* Tween.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tween.h; sourceTree = "<group>"; };
@@ -738,6 +741,8 @@
 				570220D8169B8E7F0028FE33 /* UIView+TGViewExtensions.m */,
 				572EB1FB16786C630062F290 /* TGViewController.h */,
 				572EB1FC16786C630062F290 /* TGViewController.m */,
+				5716775D16A685A800F78B25 /* AssetLoader.h */,
+				5716775E16A685A800F78B25 /* AssetLoader.m */,
 			);
 			name = Cocoa;
 			path = ..;
@@ -1194,6 +1199,7 @@
 				5700235016A553D3006F0E8E /* PVRTVector.cpp in Sources */,
 				5700235116A553D3006F0E8E /* PVRTVertex.cpp in Sources */,
 				5700236616A55680006F0E8E /* SkinnedPVR.cpp in Sources */,
+				5716775F16A685A800F78B25 /* AssetLoader.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

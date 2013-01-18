@@ -8,6 +8,7 @@
 
 #import "Photo.h"
 #import "SettingsVC.h"
+#import "Texture.h"
 
 static NSString * __str_pictureFieldName = @"picturePicker";
 
@@ -20,6 +21,24 @@ static NSString * __str_pictureFieldName = @"picturePicker";
     return [super wireUp];
 }
 
+-(void)setTexture:(Texture *)texture
+{
+    [super setTexture:texture];
+    if( self.texture )
+    {
+        CGSize sz = self.texture.orgSize;
+        GLKVector3 scale = { 1, 1, 1 };
+        if( sz.height > sz.width )
+        {
+            scale.y = sz.height / sz.width;
+        }
+        else if ( sz.width > sz.height )
+        {
+            scale.x = sz.width / sz.height;
+        }
+        self.scale = scale;
+    }
+}
 -(NSArray *)getSettings
 {
     SettingsDescriptor * sd;

@@ -47,6 +47,10 @@
     }
     
     _skinnerThingy = Skinner_Get(name, textureFiles, textureNames, numTextures);
+    
+    free(textureFiles);
+    free(textureNames);
+    
     return [super wireUp];
 }
 

@@ -8,8 +8,8 @@
 
 #import <UIKit/UIKit.h>
 #import "UIView+TGViewExtensions.h"
-#import <AssetsLibrary/AssetsLibrary.h>
 #import <MobileCoreServices/MobileCoreServices.h>
+#import "AssetLoader.h"
 
 // for SettingsDescriptor.priority
 #define SHADER_SETTINGS    0
@@ -55,6 +55,7 @@ typedef enum SettingControl
 @interface SettingsVC : UIViewController <UIPickerViewDataSource,
                                           UIPickerViewDelegate,
                                           UINavigationControllerDelegate,
+                                          AssetLoaderDelegate,
                                           UIImagePickerControllerDelegate>
 
 @property (nonatomic,strong) id<CaresDeeply> caresDeeply;

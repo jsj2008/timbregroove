@@ -8,6 +8,7 @@
 
 #import "SettingsVC.h"
 #import "Sound.h"
+#import "AssetLoader.h"
 
 @implementation SettingsDescriptor
 
@@ -36,6 +37,7 @@
 @interface SettingsVC () {
     NSMutableDictionary * _settingsDict;
     NSMutableDictionary * _dynamicProps;
+    AssetToThumbnail * _ati;
 }
 @end
 
@@ -66,6 +68,8 @@
     [self.caresDeeply settingsGoingAway:self];
     [self.navigationController popToRootViewControllerAnimated:YES];
 }
+
+#pragma mark Control creation
 
 -(UIView *)createControl:(SettingsDescriptor *)sd
 {
@@ -176,6 +180,8 @@
     _settings = nil; // don't need this anymore
 }
 
+#pragma mark Picture Picker
+
 - (UIView *)createPicturePicker:(SettingsDescriptor *)sd
 {
     UIImagePickerController *controller = [[UIImagePickerController alloc] init];
@@ -183,12 +189,42 @@
     controller.mediaTypes = @[(__bridge NSString *)kUTTypeImage];
     controller.allowsEditing = YES;
     controller.delegate = self;
-    [self addDynoProp:controller forKey:sd.memberName];
+    if( !controller.view )
+    {
+        NSLog(@"wups, no view");
+    }
+    else
+    {
+        controller.view.memberName = sd.memberName;
+    }
+    [self setValue:controller forKey:sd.memberName];
     
+    UIButton * button = [UIButton buttonWithType:UIButtonTypeCustom];
+                         //buttonWithType:UIButtonTypeRoundedRect];
+    button.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.view addSubview:button];
+    button.memberName = [sd.memberName stringByAppendingString:@"_button"];
     
-    UIButton * button = [self createButtonHelper:sd title:sd.initialValue];
+    if( [sd.initialValue isKindOfClass:[NSString class]] )
+    {
+        CGSize sz = { 64, 64 };
+        UIImage * image = [self imageByScalingAndCroppingForSize:[UIImage imageNamed:sd.initialValue] size:sz];
+        [button setImage:image forState:UIControlStateNormal];
+    }
+    else
+    {
+        _ati = [[AssetToThumbnail alloc]initWithURL:sd.initialValue andDelegate:self andUserObj:button];
+        [_ati imageFromAsset];
+    }
+    
     [button addTarget:self action:@selector(onPicturePickerButton:) forControlEvents:UIControlEventTouchUpInside];
     return button;
+}
+
+-(void)thumbnailReady:(UIImage *)image userObj:(id)userObj;
+{
+    UIButton * button = userObj;
+    [button setImage:image forState:UIControlStateNormal];
 }
 
 -(void)onPicturePickerButton:(UIButton *)sender
@@ -201,10 +237,18 @@
 - (void)imagePickerController:(UIImagePickerController *)picker
 didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
-    // UIImagePickerControllerReferenceURL
-    // UIImagePickerControllerReferenceURL
+    NSString           * name   = picker.view.memberName;
+    SettingsDescriptor * sd     = _settingsDict[name];
+    
     NSURL * url = info[UIImagePickerControllerReferenceURL];
-    NSLog(@"Got media url %@",url);
+    
+    NSString * buttonName = [name stringByAppendingString:@"_button"];
+    UIButton * button = [self valueForKey:buttonName];
+    _ati = [[AssetToThumbnail alloc]initWithURL:url andDelegate:self andUserObj:button];
+    [_ati imageFromAsset];
+
+    [sd.options[@"target"] setValue:url forKey:sd.options[@"key"]];
+
     [picker dismissViewControllerAnimated:YES completion:NULL];
 }
 
@@ -212,6 +256,8 @@ didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
     [picker dismissViewControllerAnimated:YES completion:NULL];
 }
+
+#pragma mark Switch
 
 - (UIView *)createSwitch:(SettingsDescriptor *)sd
 {
@@ -231,6 +277,8 @@ didFinishPickingMediaWithInfo:(NSDictionary *)info
     
     [sd.options[@"target"] setValue:@(sw.on) forKey:sd.options[@"key"]];
 }
+
+#pragma mark Slider 
 
 - (UIControl *)createSlider:(SettingsDescriptor *)sd
 {
@@ -253,6 +301,8 @@ didFinishPickingMediaWithInfo:(NSDictionary *)info
     [sd.options[@"target"] setValue:@(slider.value) forKey:sd.options[@"key"]];
 }
 
+#pragma mark Text editor
+
 -(UIControl *)createText:(SettingsDescriptor *)sd
 {
     UITextField * textField = [[UITextField alloc] initWithFrame:CGRectZero];
@@ -273,6 +323,8 @@ didFinishPickingMediaWithInfo:(NSDictionary *)info
     [sd.options[@"target"] setValue:tfield.text forKey:sd.options[@"key"]];
     
 }
+
+#pragma mark Picker wheel
 
 - (UIControl *)createPicker:(SettingsDescriptor *)sd
 {
@@ -366,17 +418,9 @@ didFinishPickingMediaWithInfo:(NSDictionary *)info
 	return 1;
 }
 
--(UIButton *)createButtonHelper:(SettingsDescriptor *)sd title:(NSString *)title
-{
-    UIButton * button = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-    button.translatesAutoresizingMaskIntoConstraints = NO;
-    [button setTitle:title forState:UIControlStateNormal];
-    [self.view addSubview:button];
-    button.memberName = [sd.memberName stringByAppendingString:@"_button"];
-    return button;
-}
+#pragma mark Object model support
 
--(void)addDynoProp:(id)value forKey:(NSString *)key
+-(void)setValue:(id)value forUndefinedKey:(NSString *)key
 {
     if( !_dynamicProps )
         _dynamicProps = [NSMutableDictionary new];
@@ -398,4 +442,83 @@ didFinishPickingMediaWithInfo:(NSDictionary *)info
     return nil;
 }
 
+#pragma mark Misc. helpers
+
+-(UIButton *)createButtonHelper:(SettingsDescriptor *)sd title:(NSString *)title
+{
+    UIButton * button = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    button.translatesAutoresizingMaskIntoConstraints = NO;
+    [button setTitle:title forState:UIControlStateNormal];
+    [self.view addSubview:button];
+    button.memberName = [sd.memberName stringByAppendingString:@"_button"];
+    return button;
+}
+
+
+- (UIImage*)imageByScalingAndCroppingForSize:(UIImage *)sourceImage size:(CGSize)targetSize
+{
+//    UIImage *sourceImage = self;
+    UIImage *newImage = nil;
+    CGSize imageSize = sourceImage.size;
+    CGFloat width = imageSize.width;
+    CGFloat height = imageSize.height;
+    CGFloat targetWidth = targetSize.width;
+    CGFloat targetHeight = targetSize.height;
+    CGFloat scaleFactor = 0.0;
+    CGFloat scaledWidth = targetWidth;
+    CGFloat scaledHeight = targetHeight;
+    CGPoint thumbnailPoint = CGPointMake(0.0,0.0);
+    
+    if (CGSizeEqualToSize(imageSize, targetSize) == NO)
+    {
+        CGFloat widthFactor = targetWidth / width;
+        CGFloat heightFactor = targetHeight / height;
+        
+        if (widthFactor > heightFactor)
+        {
+            scaleFactor = widthFactor; // scale to fit height
+        }
+        else
+        {
+            scaleFactor = heightFactor; // scale to fit width
+        }
+        
+        scaledWidth  = width * scaleFactor;
+        scaledHeight = height * scaleFactor;
+        
+        // center the image
+        if (widthFactor > heightFactor)
+        {
+            thumbnailPoint.y = (targetHeight - scaledHeight) * 0.5;
+        }
+        else
+        {
+            if (widthFactor < heightFactor)
+            {
+                thumbnailPoint.x = (targetWidth - scaledWidth) * 0.5;
+            }
+        }
+    }
+    
+    UIGraphicsBeginImageContext(targetSize); // this will crop
+    
+    CGRect thumbnailRect = CGRectZero;
+    thumbnailRect.origin = thumbnailPoint;
+    thumbnailRect.size.width  = scaledWidth;
+    thumbnailRect.size.height = scaledHeight;
+    
+    [sourceImage drawInRect:thumbnailRect];
+    
+    newImage = UIGraphicsGetImageFromCurrentImageContext();
+    
+    if(newImage == nil)
+    {
+        NSLog(@"could not scale image");
+    }
+    
+    //pop the context to get back to the default
+    UIGraphicsEndImageContext();
+    
+    return newImage;
+}
 @end
