@@ -6,6 +6,8 @@
 	<dict>
 		<key>new_element</key>
 		<dict>
+			<key>order</key>
+			<integer>10</integer>
 			<key>renderClass</key>
 			<string>MenuItem</string>
 			<key>icon</key>
@@ -14,6 +16,8 @@
 			<dict>
 				<key>imageBaker_element</key>
 				<dict>
+					<key>order</key>
+					<integer>40</integer>
 					<key>userData</key>
 					<dict>
 						<key>instanceClass</key>
@@ -28,6 +32,8 @@
 				</dict>
 				<key>meshImporter_element</key>
 				<dict>
+					<key>order</key>
+					<integer>30</integer>
 					<key>userData</key>
 					<dict>
 						<key>knownPODs</key>
@@ -54,6 +60,8 @@
 				</dict>
 				<key>fractalSphere_element</key>
 				<dict>
+					<key>order</key>
+					<integer>20</integer>
 					<key>userData</key>
 					<dict>
 						<key>instanceClass</key>
@@ -68,6 +76,8 @@
 				</dict>
 				<key>test_element</key>
 				<dict>
+					<key>order</key>
+					<integer>100</integer>
 					<key>userData</key>
 					<dict>
 						<key>instanceClass</key>
@@ -82,6 +92,8 @@
 				</dict>
 				<key>fluid_element</key>
 				<dict>
+					<key>order</key>
+					<integer>10</integer>
 					<key>userData</key>
 					<dict>
 						<key>instanceClass</key>
@@ -96,6 +108,8 @@
 				</dict>
 				<key>photo_element</key>
 				<dict>
+					<key>order</key>
+					<integer>50</integer>
 					<key>userData</key>
 					<dict>
 						<key>instanceClass</key>
@@ -110,6 +124,8 @@
 				</dict>
 				<key>text_element</key>
 				<dict>
+					<key>order</key>
+					<integer>60</integer>
 					<key>userData</key>
 					<dict>
 						<key>instanceClass</key>
@@ -126,6 +142,8 @@
 		</dict>
 		<key>mood</key>
 		<dict>
+			<key>order</key>
+			<integer>20</integer>
 			<key>renderClass</key>
 			<string>MenuItem</string>
 			<key>handler</key>
@@ -133,8 +151,10 @@
 			<key>icon</key>
 			<string>mood.png</string>
 		</dict>
-		<key>audio_tweak</key>
+		<key>settings</key>
 		<dict>
+			<key>order</key>
+			<integer>30</integer>
 			<key>userData</key>
 			<dict>
 				<key>segueTo</key>
@@ -146,6 +166,22 @@
 			<string>Factory</string>
 			<key>icon</key>
 			<string>audioProp.png</string>
+		</dict>
+		<key>delete_view</key>
+		<dict>
+			<key>order</key>
+			<integer>40</integer>
+			<key>userData</key>
+			<dict>
+				<key>command</key>
+				<string>deleteNode</string>
+			</dict>
+			<key>renderClass</key>
+			<string>MenuItem</string>
+			<key>handler</key>
+			<string>Factory</string>
+			<key>icon</key>
+			<string>trash.png</string>
 		</dict>
 	</dict>
 </dict>

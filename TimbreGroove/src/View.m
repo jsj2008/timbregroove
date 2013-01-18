@@ -85,6 +85,43 @@
     [self deleteDrawable];
 }
 
+- (void)shrinkToNothing:(id)target notify:(NSString *)notify
+{
+    CGSize sz = self.frame.size;
+    CGFloat midX = sz.width / 2.0f;
+    CGFloat midY = sz.height / 2.0f;
+    NSDictionary * params = @{    TWEEN_DURATION: @1.2f,
+                                TWEEN_TRANSITION: TWEEN_FUNC_EASEOUTBOUNCE,
+                                TWEEN_ON_COMPLETE_SELECTOR: notify,
+                                TWEEN_ON_COMPLETE_TARGET: target,
+                                    @"x": @(midX)
+                            };
+
+    [Tweener addTween:self withParameters:params];
+
+    NSDictionary * params2 = @{    TWEEN_DURATION: @1.2f,
+                                 TWEEN_TRANSITION: TWEEN_FUNC_EASEOUTBOUNCE,
+                                             @"y": @(midY)
+                                    };
+    
+    [Tweener addTween:self withParameters:params2];
+
+    NSDictionary * params3 = @{    TWEEN_DURATION: @1.2f,
+        TWEEN_TRANSITION: TWEEN_FUNC_EASEOUTBOUNCE,
+        @"width": @(0)
+    };
+    
+    [Tweener addTween:self withParameters:params3];
+
+    NSDictionary * params4 = @{    TWEEN_DURATION: @1.2f,
+        TWEEN_TRANSITION: TWEEN_FUNC_EASEOUTBOUNCE,
+    @"height": @(0)
+    };
+    
+    [Tweener addTween:self withParameters:params4];
+
+}
+
 - (void)animateProp: (const char *)prop
           targetVal: (CGFloat)targetVal
                hide:(bool) hideOnComplete;

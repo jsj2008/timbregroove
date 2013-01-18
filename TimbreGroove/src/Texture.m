@@ -139,7 +139,7 @@
     NSError * err = nil;
     GLKTextureInfo *textureInfo = [GLKTextureLoader textureWithCGImage:imageRef
                                                                options: @{
-                                GLKTextureLoaderApplyPremultiplication: nyes,
+                            //   GLKTextureLoaderApplyPremultiplication: nyes,
                                       GLKTextureLoaderOriginBottomLeft: nyes }
                                                                  error: &err];
     

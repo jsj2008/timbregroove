@@ -455,7 +455,8 @@ EPVRTError CPVRTBoneBatches::Create(
 
 	memset(this, 0, sizeof(*this));
 
-	if(nVertexBones <= 0 || nVertexBones > 4)
+//	if(nVertexBones <= 0 || nVertexBones > 4)
+    if( nVertexBones > 0 && nVertexBones < 5 )
 	{
 		_RPT0(_CRT_WARN, "CPVRTBoneBatching() will only handle 1..4 bones per vertex.\n");
 		return PVR_FAIL;
@@ -547,6 +548,7 @@ EPVRTError CPVRTBoneBatches::Create(
 	{
 		if(!FillBatch(batch, &pui32Idx[i * 3], pVtx, nStride, nOffsetWeight, eTypeWeight, nOffsetIdx, eTypeIdx, nVertexBones))
 		{
+            FREE(ppBatch);
 			free(pui32IdxNew);
 			return PVR_FAIL;
 		}

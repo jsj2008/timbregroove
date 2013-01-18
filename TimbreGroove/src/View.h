@@ -27,6 +27,7 @@
 @property (nonatomic,strong) Graph * graph;
 
 -(void)animateProp:(const char *)propName targetVal:(float)targetVal hide:(bool)hide;
+-(void)shrinkToNothing:(id)target notify:(NSString *)notify;
 -(void)hideAnimationComplete;
 -(void)update:(NSTimeInterval)dt;
 -(void)drawRect:(CGRect)rect;

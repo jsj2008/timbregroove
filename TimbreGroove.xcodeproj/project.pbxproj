@@ -117,6 +117,7 @@
 		57647577167D97EC00D5A431 /* generic.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 57647574167D7C4A00D5A431 /* generic.fsh */; };
 		57647578167D97EC00D5A431 /* generic.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 57647572167D7C3C00D5A431 /* generic.vsh */; };
 		576F8AC7167E92C000DF208E /* VaryingColor.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A66EF5167B374500B9EA75 /* VaryingColor.m */; };
+		57811A9C16A931A2008B2B02 /* trash.png in Resources */ = {isa = PBXBuildFile; fileRef = 57811A9B16A931A2008B2B02 /* trash.png */; };
 		578292C3169861D20053ADCD /* esShapes.c in Sources */ = {isa = PBXBuildFile; fileRef = 578292C2169861D20053ADCD /* esShapes.c */; };
 		578292C7169879930053ADCD /* ImageBaker.m in Sources */ = {isa = PBXBuildFile; fileRef = 578292C6169879930053ADCD /* ImageBaker.m */; };
 		578292C9169A87B10053ADCD /* test.png in Resources */ = {isa = PBXBuildFile; fileRef = 578292C8169A87B00053ADCD /* test.png */; };
@@ -355,6 +356,7 @@
 		57647576167D8AC100D5A431 /* TGTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = TGTypes.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		57718EF616838D75001D7D35 /* CustomPlane.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomPlane.h; sourceTree = "<group>"; };
 		57718EF716838D75001D7D35 /* CustomPlane.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomPlane.m; sourceTree = "<group>"; };
+		57811A9B16A931A2008B2B02 /* trash.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = trash.png; sourceTree = "<group>"; };
 		578292C2169861D20053ADCD /* esShapes.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = esShapes.c; sourceTree = "<group>"; };
 		578292C5169879930053ADCD /* ImageBaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageBaker.h; sourceTree = "<group>"; };
 		578292C6169879930053ADCD /* ImageBaker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageBaker.m; sourceTree = "<group>"; };
@@ -614,6 +616,7 @@
 		572EB1E816786C630062F290 /* menu */ = {
 			isa = PBXGroup;
 			children = (
+				57811A9B16A931A2008B2B02 /* trash.png */,
 				5700236F16A58D45006F0E8E /* meshImporter.png */,
 				578292CA169A8B650053ADCD /* imageBaker.png */,
 				578292C8169A87B00053ADCD /* test.png */,
@@ -1115,6 +1118,7 @@
 				5700236B16A556F8006F0E8E /* body.png in Resources */,
 				5700236C16A556F8006F0E8E /* legs.png in Resources */,
 				5700237016A58D45006F0E8E /* meshImporter.png in Resources */,
+				57811A9C16A931A2008B2B02 /* trash.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

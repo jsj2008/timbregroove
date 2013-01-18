@@ -46,7 +46,12 @@
     
     CGFloat y = 6.0;
     int numItems = 0;
-    for( NSString *key in _meta )
+    NSArray *sortedKeys = [_meta
+                           keysSortedByValueUsingComparator:^NSComparisonResult(id obj1, id obj2)
+                        {
+                            return [(NSNumber *)obj1[@"order"] compare:obj2[@"order"]];
+                        }];
+    for( NSString *key in sortedKeys )
     {
         NSDictionary * menuItem = _meta[key];
         NSString * imageName    = menuItem[@"icon"];

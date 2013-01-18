@@ -251,6 +251,35 @@
     return tview;
 }
 
+-(void)Factory:(Factory *)factory deleteNode:(NSDictionary *)options
+{
+    if( !_currentTrackView )
+    {
+        // TODO: disable invalid menu items
+        return;
+    }
+
+    [_currentTrackView fade];
+    [_currentTrackView shrinkToNothing:self notify:@"viewIsGone"];
+}
+
+- (void)viewIsGone
+{
+    NSArray * trackViews = [self getTrackViews];
+    for( TrackView * view in trackViews )
+    {
+        if( view != _currentTrackView )
+        {
+            [_currentTrackView.graph cleanChildren];
+            [_currentTrackView removeFromSuperview];
+            _currentTrackView = view;
+            [_currentTrackView showAndPlay:SHOW_NOW];
+            return;
+        }
+    }
+    _currentTrackView = nil;
+}
+
 - (void)makeDawView
 {
     NSArray * trackViews = [self getTrackViews];

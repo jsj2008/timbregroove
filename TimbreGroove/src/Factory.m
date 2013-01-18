@@ -53,13 +53,25 @@ static Factory * __f;
     if( klassName )
     {
         [_delegate Factory:self createNode:ud];
+        return;
     }
-    else
+
+    NSString * segue = ud[@"segueTo"];
+
+    if( segue )
     {
-        NSString * segue = ud[@"segueTo"];
-        
         [_delegate Factory:self segueTo:segue];
-        
+        return;
+    }
+    
+    NSString * command = ud[@"command"];
+    
+    if( command )
+    {
+        if( [command isEqualToString:@"deleteNode"] )
+        {
+            [_delegate Factory:self deleteNode:ud];
+        }
     }
 }
 

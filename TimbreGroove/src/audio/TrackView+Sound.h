@@ -14,6 +14,6 @@
 
 - (void)showAndPlay:(int)side;
 - (void)hideAndFade:(int)side;
-
+- (void)fade;
 - (void)showAndSync:(unsigned int)delay;
 @end
