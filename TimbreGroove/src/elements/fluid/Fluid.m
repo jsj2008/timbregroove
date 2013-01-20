@@ -14,21 +14,46 @@
 #import "Camera.h"
 #import "View.h"
 #import "Texture.h"
+#import "VaryingColor.h"
 
 //#define TEST_OUTPUT
+
+
+#ifdef TEST_OUTPUT
+
+@interface VaryColorFBO : FBO
+@end
+@implementation VaryColorFBO
+
+-(id)initWithWidth:(GLuint)width height:(GLuint)height type:(GLenum)type format:(GLenum)format
+{
+    if( (self = [super initWithWidth:width height:height type:type format:format]))
+    {
+        VaryingColor * vc = [[VaryingColor alloc] init];
+        [vc wireUp];
+        vc.fbo = self;
+        [vc renderToFBO];
+        vc.fbo = nil;
+        vc = nil;
+    }
+    return self;
+}
+@end
 
 #pragma mark -
 #pragma mark Test object to peeking into FBOs
 #pragma mark -
 
-#ifdef TEST_OUTPUT
 @interface TestFBO : Generic
 @end
 @implementation TestFBO
 
 -(void)createBuffer
 {
-    [self createBufferDataByType:@[@(sv_pos),@(sv_uv)] numVertices:6 numIndices:0];
+    [self createBufferDataByType:@[@(st_float3),@(st_float2)]
+                     numVertices:6
+                      numIndices:0
+                indicesIntoNames:@[@(gv_pos),@(gv_uv)]];
 }
 
 -(void)getBufferData:(void *)vertextData
@@ -49,7 +74,10 @@
 }
 
 @end
+#else
+#define VaryColorFBO FBO
 #endif
+
 
 #pragma mark -
 #pragma mark Options settings
@@ -67,8 +95,10 @@ static Fluid_options options = { 32, 1, 1.0f, 100, 1.0f/60.0f };
 #pragma mark Shader doodads
 
 typedef enum FluidVariableName {
-    fl_NONE  = -2,
-    fl_ERROR = -1,
+    fl_position,
+    fl_offset,
+    
+    FL_LAST_ATTR = fl_offset,
     
     fl_px,
     fl_px1,
@@ -92,32 +122,51 @@ typedef enum FluidVariableName {
 } FluidVariableName;
 
 typedef struct FluidVariable {
-    FluidVariableName kname;
-    const char *  name;
     TGUniformType utype;
-    GLint location;
     union {
         GLKVector2 v2;
         float f;
     } data;
 } FluidVariable;
 
+static const char * __fluidShaderNames[NUM_fl_VARIABLES] = {
+    "position",
+    "offset",
+    
+    "px",
+    "px1",
+    "scale",
+    "dt",
+    "force",
+    "center",
+    "scalev",
+    "alpha",
+    "beta",
+
+    "velocity",
+    "source",
+    "pressure",
+    "divergence"
+};
+
 FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
+    { -1 },
+    { -1 },
     
-    { fl_px,         "px",         TG_VECTOR2},
-    { fl_px1,        "px1",        TG_VECTOR2},
-    { fl_scale_f,    "scale",      TG_FLOAT},
-    { fl_dt,         "dt",         TG_FLOAT},
-    { fl_force,      "force",      TG_VECTOR2 },
-    { fl_center,     "center",     TG_VECTOR2 },
-    { fl_scale_v2,   "scalev",     TG_VECTOR2 },
-    { fl_alpha,      "alpha",      TG_FLOAT },
-    { fl_beta,       "beta",       TG_FLOAT },
+    { TG_VECTOR2},
+    { TG_VECTOR2},
+    { TG_FLOAT},
+    { TG_FLOAT},
+    { TG_VECTOR2 },
+    { TG_VECTOR2 },
+    { TG_VECTOR2 },
+    { TG_FLOAT },
+    { TG_FLOAT },
     
-    { fl_velocity,   "velocity",   TG_TEXTURE },
-    { fl_source,     "source",     TG_TEXTURE },
-    { fl_pressure,   "pressure",   TG_TEXTURE },
-    { fl_divergence, "divergence", TG_TEXTURE }
+    { TG_TEXTURE },
+    { TG_TEXTURE },
+    { TG_TEXTURE },
+    { TG_TEXTURE }
 };
 
 #pragma mark -
@@ -136,20 +185,21 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     return _vars + name;
 }
 
--(id)initWithVertex:(const char *)vname andFragment:(const char * )fname
+-(id)initWithVertex:(const char *)vert andFragment:(const char * )frag
 {
-    if( (self = [super init] ) )
+    self.acceptMissingVars = true;
+    
+    self = [super initWithVertex: vert
+                      andFragment: frag
+                      andVarNames: __fluidShaderNames
+                      andNumNames: NUM_fl_VARIABLES
+                      andLastAttr: FL_LAST_ATTR
+                       andHeaders: nil];
+    
+    if( self )
     {
-        NSLog(@"Creating shader for %s/%s",vname,fname);
-        [self load:@(vname) withFragment:@(fname)];
-        memcpy(_vars,__kVariables,sizeof(_vars));
-        GLuint program = self.program;
-        for( int i = 0; i < NUM_fl_VARIABLES; i++ )
-        {
-            FluidVariable * fv = _vars + i;
-            // missing uniforms will silently fail with -1
-            fv->location = glGetUniformLocation(program, fv->name);
-        }        
+        NSLog(@"Creating shader for %s/%s",vert,frag);
+        memcpy(&_vars, &__kVariables, sizeof(__kVariables));
     }
     
     return self;
@@ -167,17 +217,11 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
 -(void)writeUValues
 {
     [self use];
-    for( FluidVariableName i = 0; i < fl_LAST_SCALAR_UNIFORM; i++ )
+    for( FluidVariableName i = FL_LAST_ATTR+1; i < fl_LAST_SCALAR_UNIFORM; i++ )
     {
         FluidVariable * fv = _vars + i;
-        if( fv->location != -1 )
-        {
-            if( fv->utype == TG_FLOAT )
-                glUniform1f(fv->location, fv->data.f);
-            else
-                glUniform2fv(fv->location, 1, fv->data.v2.v);
-        }
-    }    
+        [self writeToLocation:i type:fv->utype data:&fv->data];
+    }
 }
 @end
 
@@ -218,7 +262,7 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     _y = y;
     _fShader = fShader;
     _vShader = vShader;
-    _keyedTextures = [textures mutableCopy];;
+    _keyedTextures = [textures mutableCopy];
 }
 
 -(void)createShader
@@ -257,8 +301,7 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     for( id key in _keyedTextures )
     {
         Texture * t = _keyedTextures[key];
-        FluidVariable * var = [shader var:[key intValue]];
-        t.uLocation = var->location;
+        t.uLocation = [self.shader location:[key intValue]];
         [t bindTarget:target];
         ++target;
     }
@@ -302,10 +345,10 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
 
 -(void)createBuffer
 {
-    [self createBufferDataByType:@[@(sv_pos)]
-                     numVertices:18
+    [self createBufferDataByType:@[@(st_float3)]
+                     numVertices:6 
                       numIndices:0
-                        uniforms:@{@(sv_pos) : @"position"}];
+                indicesIntoNames:@[@(fl_position)]];
 }
 
 -(void)getBufferData:(void *)vertextData indexData:(unsigned int *)indexData
@@ -338,10 +381,10 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
 -(void)createBuffer
 {
     MeshBuffer * buffer =
-    [self createBufferDataByType:@[@(sv_pos2f),@(sv_customAttr2f)]
+    [self createBufferDataByType:@[@(st_float2),@(st_float2)]
                      numVertices:8
                       numIndices:0
-                        uniforms:@{@(sv_pos2f) : @"position",@(sv_customAttr2f) : @"offset"}];
+                indicesIntoNames:@[@(fl_position),@(fl_offset)]];
     
     buffer.drawType = GL_LINES;
 }
@@ -351,7 +394,7 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     float twoPixelsX = _x * 2.0;
     float twoPixelsY = _y * 2.0;
     
-#define OFS(x) x // ((x)*0.5+0.5)
+#define OFS(x) ((x)*0.5+0.5)
     
     float data[] = {
     // bottom
@@ -415,6 +458,10 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     FluidMesh * _drawKernel;
     
     bool _gestureRegistered;
+
+#ifdef TEST_OUTPUT
+    TestFBO * _test;
+#endif
 }
 @end
 
@@ -448,8 +495,8 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     GLKVector2 px = { _px, _py };
     GLKVector2 px1 = { 1.0, width/height };
     
-    _velocity0 = [[FBO alloc] initWithWidth:width height:height];
-    _velocity1 = [[FBO alloc] initWithWidth:width height:height];
+    _velocity0 = [[VaryColorFBO alloc] initWithWidth:width height:height];
+    _velocity1 = [[VaryColorFBO alloc] initWithWidth:width height:height];
     
     float twoPixelsX = _px * 2.0;
     float twoPixelsY = _py * 2.0;
@@ -496,7 +543,7 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     [_velocityBoundaryKernel setFloat:fl_dt value:1.0f/60.0f];
     _velocityBoundaryKernel.fbo = _velocity1;
     //=========================================
-    _divergence = [[FBO alloc] initWithWidth:width height:height];
+    _divergence = [[VaryColorFBO alloc] initWithWidth:width height:height];
     
     _divergenceKernel = [[QuadMesh alloc] init];
     [_divergenceKernel setX:1
@@ -505,22 +552,19 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
                     fShader:"divergence"
                    textures:@{@(fl_velocity):_velocity1}];
     [_divergenceKernel wireUp];
-    [_divergenceKernel setVector2:fl_px value:&px];
-    _divergenceKernel.fbo = _divergence;    
+    [_divergenceKernel setVector2:fl_px  value:&px];
+    [_divergenceKernel setVector2:fl_px1 value:&px]; // sic - send px value to px1
+    _divergenceKernel.fbo = _divergence;
     //=========================================
-#ifdef TEST_OUTPUT
-    [self testFBO:_divergence];
-#endif
-    //=========================================
-    _pressure0 = [[FBO alloc] initWithWidth:width height:height];
-    _pressure1 = [[FBO alloc] initWithWidth:width height:height];
+    _pressure0 = [[VaryColorFBO alloc] initWithWidth:width height:height];
+    _pressure1 = [[VaryColorFBO alloc] initWithWidth:width height:height];
     
     _jacobiKernel = [[QuadMesh alloc] init];
     [_jacobiKernel setX:1
                       Y:1
                 vShader:"kernel"
                 fShader:"jacobi"
-               textures: @{@(fl_pressure):_pressure0,@(fl_divergence):_divergence}];
+               textures: @{@(fl_pressure):_pressure0,@(fl_divergence):_velocity1}];//  _divergence}];
     [_jacobiKernel wireUp];
 
     [_jacobiKernel setFloat:fl_alpha value:-1.0];
@@ -534,7 +578,7 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
                                 Y:_py
                           vShader:"boundary"
                           fShader:"jacobi"
-                         textures: @{@(fl_pressure):_pressure0,@(fl_divergence):_divergence}];
+                         textures: @{@(fl_pressure):_pressure0,@(fl_divergence):_velocity1}];//  _divergence}];
     [_pressureBoundaryKernel wireUp];
     
     [_pressureBoundaryKernel setFloat:fl_alpha value:-1.0];
@@ -574,6 +618,9 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     [_drawKernel wireUp];
     [_drawKernel setVector2:fl_px value:&px];
     
+#ifdef TEST_OUTPUT
+    [self testFBO:_pressure0];
+#endif
     return self;
 }
 
@@ -583,7 +630,6 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     
     //=====================================================
     [_advectVelocity renderToFBOWithClear:doClear];
-
     //=====================================================
     GLKVector2 force = GLKVector2Make( _delta_x * _px * options.cursor_size * options.mouse_force,
                                       -_delta_y * _py * options.cursor_size * options.mouse_force);
@@ -593,11 +639,10 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     
     [_addForceKernel setVector2:fl_force value:&force];
     [_addForceKernel setVector2:fl_center value:&center];
-    [_addForceKernel renderToFBOWithClear:doClear];
+    [_addForceKernel renderToFBOWithClear:false];
     
     //=====================================================
-    [_velocityBoundaryKernel renderToFBOWithClear:false];
-        
+    [_velocityBoundaryKernel renderToFBOWithClear:doClear];
     //=====================================================
     [_divergenceKernel renderToFBOWithClear:doClear];
     
@@ -605,7 +650,7 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     FBO * p0 = _pressure0;
     FBO * p1 = _pressure1;
     FBO * swap;
-    for(int i = 0; i < options.iterations; i++)
+    for(int i = 0; i < 2; i++) // options.iterations; i++)
     {
         [_jacobiKernel           setTexture:p0 withKey:fl_pressure];
         [_pressureBoundaryKernel setTexture:p0 withKey:fl_pressure];
@@ -618,25 +663,31 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
         p0 = p1;
         p1 = swap;
     }
+#ifndef TEST_OUTPUT
     
     //=====================================================
     [_subtractPressureGradientKernel renderToFBOWithClear:doClear];
     [_subtractPressureGradientBoundaryKernel renderToFBOWithClear:doClear];
+#endif
 }
 
 -(void)render:(NSUInteger)w h:(NSUInteger)h
 {
+#ifndef TEST_OUTPUT
     [_drawKernel render:w h:h];
+#endif
+    
 }
 
 #ifdef TEST_OUTPUT
 -(void)testFBO:(FBO *)fbo
 {
-    TestFBO * test = [[TestFBO alloc] init];
-    test.fbo = fbo;
-    test.camera = [IdentityCamera new];
-    [self appendChild:test];
-    [test wireUp];
+    _test = [[TestFBO alloc] init];
+    _test.texture = fbo;
+    _test.camera = [IdentityCamera new];
+    [self cleanChildren];
+    [self appendChild:_test];
+    [_test wireUp];
 }
 #endif
 

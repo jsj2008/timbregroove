@@ -53,12 +53,60 @@
 		57019F751685C152007FA38F /* SoundMan.m in Sources */ = {isa = PBXBuildFile; fileRef = 57019F741685C152007FA38F /* SoundMan.m */; };
 		57019F7A1685CCC7007FA38F /* Sound.m in Sources */ = {isa = PBXBuildFile; fileRef = 57019F791685CCC7007FA38F /* Sound.m */; };
 		570220D9169B8E7F0028FE33 /* UIView+TGViewExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 570220D8169B8E7F0028FE33 /* UIView+TGViewExtensions.m */; };
+		57044EF616AC5D3100663B56 /* Torus.m in Sources */ = {isa = PBXBuildFile; fileRef = 57044EF516AC5D3100663B56 /* Torus.m */; };
 		570665F4167F3D3F0081B8C3 /* squareTest.tif in Resources */ = {isa = PBXBuildFile; fileRef = 570665F3167F3D3F0081B8C3 /* squareTest.tif */; };
 		570665FE167F89640081B8C3 /* MenuView.m in Sources */ = {isa = PBXBuildFile; fileRef = 570665FD167F89640081B8C3 /* MenuView.m */; };
+		570F40D616AB8BE2000FCA7B /* Fire.m in Sources */ = {isa = PBXBuildFile; fileRef = 570F40D516AB8BE2000FCA7B /* Fire.m */; };
+		570F40D916AB8EE0000FCA7B /* StockDemo.m in Sources */ = {isa = PBXBuildFile; fileRef = 570F40D816AB8EE0000FCA7B /* StockDemo.m */; };
+		570F412B16ABB084000FCA7B /* BrickShader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40DB16ABB03D000FCA7B /* BrickShader.fsh */; };
+		570F412C16ABB084000FCA7B /* BrickShader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40DC16ABB03D000FCA7B /* BrickShader.vsh */; };
+		570F412D16ABB084000FCA7B /* CloudShader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40DD16ABB03D000FCA7B /* CloudShader.fsh */; };
+		570F412E16ABB084000FCA7B /* CloudShader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40DE16ABB03D000FCA7B /* CloudShader.vsh */; };
+		570F412F16ABB084000FCA7B /* DepthShader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40DF16ABB03D000FCA7B /* DepthShader.fsh */; };
+		570F413016ABB084000FCA7B /* DepthShader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40E016ABB03D000FCA7B /* DepthShader.vsh */; };
+		570F413116ABB084000FCA7B /* EarthShader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40E116ABB03D000FCA7B /* EarthShader.fsh */; };
+		570F413216ABB084000FCA7B /* EarthShader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40E216ABB03D000FCA7B /* EarthShader.vsh */; };
+		570F413316ABB084000FCA7B /* EnvironmentMapping.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40E316ABB03D000FCA7B /* EnvironmentMapping.fsh */; };
+		570F413416ABB084000FCA7B /* EnvironmentMapping.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40E416ABB03D000FCA7B /* EnvironmentMapping.vsh */; };
+		570F413516ABB084000FCA7B /* EnvNormalShader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40E516ABB03D000FCA7B /* EnvNormalShader.fsh */; };
+		570F413616ABB084000FCA7B /* EnvNormalShader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40E616ABB03D000FCA7B /* EnvNormalShader.vsh */; };
+		570F413716ABB084000FCA7B /* FireShader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40E716ABB03D000FCA7B /* FireShader.vsh */; };
+		570F413816ABB084000FCA7B /* FullScreenTexture.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40E816ABB03D000FCA7B /* FullScreenTexture.fsh */; };
+		570F413916ABB084000FCA7B /* FullScreenTexture.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40E916ABB03D000FCA7B /* FullScreenTexture.vsh */; };
+		570F413A16ABB084000FCA7B /* FullScreenTouch.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40EA16ABB03D000FCA7B /* FullScreenTouch.fsh */; };
+		570F413B16ABB084000FCA7B /* FullScreenTouch.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40EB16ABB03D000FCA7B /* FullScreenTouch.vsh */; };
+		570F413C16ABB084000FCA7B /* HeatShader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40EC16ABB03D000FCA7B /* HeatShader.fsh */; };
+		570F413D16ABB084000FCA7B /* LiquidShader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40ED16ABB03D000FCA7B /* LiquidShader.fsh */; };
+		570F413E16ABB084000FCA7B /* LiquidShader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40EE16ABB03D000FCA7B /* LiquidShader.vsh */; };
+		570F413F16ABB084000FCA7B /* NormalMapping.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40EF16ABB03D000FCA7B /* NormalMapping.fsh */; };
+		570F414016ABB084000FCA7B /* NormalMapping.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40F016ABB03D000FCA7B /* NormalMapping.vsh */; };
+		570F414116ABB084000FCA7B /* ParticleSimple.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40F116ABB03D000FCA7B /* ParticleSimple.fsh */; };
+		570F414216ABB084000FCA7B /* ParticleSimple.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40F216ABB03D000FCA7B /* ParticleSimple.vsh */; };
+		570F414316ABB084000FCA7B /* ParticleWave.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40F316ABB03D000FCA7B /* ParticleWave.fsh */; };
+		570F414416ABB084000FCA7B /* ParticleWave.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40F416ABB03D000FCA7B /* ParticleWave.vsh */; };
+		570F414516ABB084000FCA7B /* PixelLighting.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40F516ABB03D000FCA7B /* PixelLighting.fsh */; };
+		570F414616ABB084000FCA7B /* PixelLighting.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40F616ABB03D000FCA7B /* PixelLighting.vsh */; };
+		570F414716ABB084000FCA7B /* Polkadot3D.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40F716ABB03D000FCA7B /* Polkadot3D.fsh */; };
+		570F414816ABB084000FCA7B /* Polkadot3D.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40F816ABB03D000FCA7B /* Polkadot3D.vsh */; };
+		570F414916ABB084000FCA7B /* PoolShader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40F916ABB03D000FCA7B /* PoolShader.fsh */; };
+		570F414A16ABB084000FCA7B /* RainbowShader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40FA16ABB03D000FCA7B /* RainbowShader.fsh */; };
+		570F414B16ABB084000FCA7B /* RainbowShader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40FB16ABB03D000FCA7B /* RainbowShader.vsh */; };
+		570F414C16ABB084000FCA7B /* TextureShader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40FC16ABB03D000FCA7B /* TextureShader.fsh */; };
+		570F414D16ABB084000FCA7B /* TextureShader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40FD16ABB03D000FCA7B /* TextureShader.vsh */; };
+		570F414E16ABB084000FCA7B /* TileShader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40FE16ABB03D000FCA7B /* TileShader.fsh */; };
+		570F414F16ABB084000FCA7B /* ToonShader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F40FF16ABB03D000FCA7B /* ToonShader.fsh */; };
+		570F415016ABB084000FCA7B /* ToonShader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F410016ABB03D000FCA7B /* ToonShader.vsh */; };
+		570F415116ABB084000FCA7B /* VertexLighting.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F410116ABB03D000FCA7B /* VertexLighting.fsh */; };
+		570F415216ABB084000FCA7B /* VertexLighting.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F410216ABB03D000FCA7B /* VertexLighting.vsh */; };
+		570F415916ABB646000FCA7B /* FireShader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F415316ABB5FA000FCA7B /* FireShader.fsh */; };
+		570F415A16ABB646000FCA7B /* HeatShader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F415416ABB5FA000FCA7B /* HeatShader.vsh */; };
+		570F415B16ABB646000FCA7B /* TileShader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 570F415516ABB5FB000FCA7B /* TileShader.vsh */; };
+		570F415F16ABB767000FCA7B /* Geometry.m in Sources */ = {isa = PBXBuildFile; fileRef = 570F415E16ABB767000FCA7B /* Geometry.m */; };
+		570F416216ABBA0E000FCA7B /* GridPlane.m in Sources */ = {isa = PBXBuildFile; fileRef = 570F416116ABBA0E000FCA7B /* GridPlane.m */; };
+		570F416516ABDFFD000FCA7B /* Cloud.m in Sources */ = {isa = PBXBuildFile; fileRef = 570F416416ABDFFD000FCA7B /* Cloud.m */; };
 		5716775F16A685A800F78B25 /* AssetLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 5716775E16A685A800F78B25 /* AssetLoader.m */; };
 		5717F94B167EBFAC00D8054B /* Plane.m in Sources */ = {isa = PBXBuildFile; fileRef = 571ECFCA167BF31D00727A30 /* Plane.m */; };
 		571A42FE167C315700CD7E8F /* Graph.m in Sources */ = {isa = PBXBuildFile; fileRef = 571A42FD167C315600CD7E8F /* Graph.m */; };
-		571A472F16954234002231C5 /* Fluid.m in Sources */ = {isa = PBXBuildFile; fileRef = 575DA0081694366C00A50C41 /* Fluid.m */; };
 		571ECF9D167BE2CE00727A30 /* Tween.m in Sources */ = {isa = PBXBuildFile; fileRef = 571ECF9A167BE2CE00727A30 /* Tween.m */; };
 		571ECF9E167BE2CE00727A30 /* Tweener.m in Sources */ = {isa = PBXBuildFile; fileRef = 571ECF9C167BE2CE00727A30 /* Tweener.m */; };
 		571ECFC2167BEA5E00727A30 /* aotk-ass-outline-512.tif in Resources */ = {isa = PBXBuildFile; fileRef = 571ECFC1167BEA5E00727A30 /* aotk-ass-outline-512.tif */; };
@@ -118,7 +166,6 @@
 		57647578167D97EC00D5A431 /* generic.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 57647572167D7C3C00D5A431 /* generic.vsh */; };
 		576F8AC7167E92C000DF208E /* VaryingColor.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A66EF5167B374500B9EA75 /* VaryingColor.m */; };
 		57811A9C16A931A2008B2B02 /* trash.png in Resources */ = {isa = PBXBuildFile; fileRef = 57811A9B16A931A2008B2B02 /* trash.png */; };
-		578292C3169861D20053ADCD /* esShapes.c in Sources */ = {isa = PBXBuildFile; fileRef = 578292C2169861D20053ADCD /* esShapes.c */; };
 		578292C7169879930053ADCD /* ImageBaker.m in Sources */ = {isa = PBXBuildFile; fileRef = 578292C6169879930053ADCD /* ImageBaker.m */; };
 		578292C9169A87B10053ADCD /* test.png in Resources */ = {isa = PBXBuildFile; fileRef = 578292C8169A87B00053ADCD /* test.png */; };
 		578292CB169A8B660053ADCD /* imageBaker.png in Resources */ = {isa = PBXBuildFile; fileRef = 578292CA169A8B650053ADCD /* imageBaker.png */; };
@@ -135,6 +182,8 @@
 		57BFCBAC16A220EB008903BA /* TGAmb3-32k.aif in Resources */ = {isa = PBXBuildFile; fileRef = 57BFCBA716A220EB008903BA /* TGAmb3-32k.aif */; };
 		57CAF78516891EDB00459353 /* libc++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 57CAF78416891EDA00459353 /* libc++.dylib */; };
 		57CCFFC216849337003B4A19 /* Text.m in Sources */ = {isa = PBXBuildFile; fileRef = 57CCFFC116849336003B4A19 /* Text.m */; };
+		57E1954616ABECA50099514B /* PoolShader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 57E1954516ABECA50099514B /* PoolShader.vsh */; };
+		57E1954A16ABEEBD0099514B /* SphereOid.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E1954916ABEEBD0099514B /* SphereOid.m */; };
 		57E62E67168433100030908E /* Photo.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E62E66168433100030908E /* Photo.m */; };
 		57E7465E1680438300C1D4FF /* EventCapture.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E7465D1680438300C1D4FF /* EventCapture.m */; };
 		57E874F816782894008243B2 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57E874F716782894008243B2 /* UIKit.framework */; };
@@ -247,8 +296,8 @@
 		5700235A16A554D9006F0E8E /* man.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = man.pod; sourceTree = "<group>"; };
 		5700236016A5556D006F0E8E /* skinned.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = skinned.fsh; sourceTree = "<group>"; };
 		5700236116A5556D006F0E8E /* skinned.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = skinned.vsh; sourceTree = "<group>"; };
-		5700236416A55680006F0E8E /* SkinnedPVR.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SkinnedPVR.cpp; sourceTree = "<group>"; };
-		5700236516A55680006F0E8E /* SkinnedPVR.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SkinnedPVR.h; sourceTree = "<group>"; };
+		5700236416A55680006F0E8E /* SkinnedPVR.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SkinnedPVR.cpp; path = ../SkinnedPVR.cpp; sourceTree = "<group>"; };
+		5700236516A55680006F0E8E /* SkinnedPVR.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SkinnedPVR.h; path = ../SkinnedPVR.h; sourceTree = "<group>"; };
 		5700236716A556F8006F0E8E /* belt.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = belt.png; sourceTree = "<group>"; };
 		5700236816A556F8006F0E8E /* body.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = body.png; sourceTree = "<group>"; };
 		5700236916A556F8006F0E8E /* legs.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = legs.png; sourceTree = "<group>"; };
@@ -262,9 +311,64 @@
 		57019F7C1685D254007FA38F /* fmod_helper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = fmod_helper.h; path = audio/fmod_helper.h; sourceTree = "<group>"; };
 		570220D7169B8E7F0028FE33 /* UIView+TGViewExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "UIView+TGViewExtensions.h"; path = "src/UIView+TGViewExtensions.h"; sourceTree = "<group>"; };
 		570220D8169B8E7F0028FE33 /* UIView+TGViewExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIView+TGViewExtensions.m"; path = "src/UIView+TGViewExtensions.m"; sourceTree = "<group>"; };
+		57044EF416AC5D3100663B56 /* Torus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Torus.h; sourceTree = "<group>"; };
+		57044EF516AC5D3100663B56 /* Torus.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Torus.m; sourceTree = "<group>"; };
 		570665F3167F3D3F0081B8C3 /* squareTest.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = squareTest.tif; sourceTree = "<group>"; };
 		570665FC167F89640081B8C3 /* MenuView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MenuView.h; path = elements/MenuView.h; sourceTree = "<group>"; };
 		570665FD167F89640081B8C3 /* MenuView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MenuView.m; path = elements/MenuView.m; sourceTree = "<group>"; };
+		570F40D416AB8BE2000FCA7B /* Fire.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Fire.h; sourceTree = "<group>"; };
+		570F40D516AB8BE2000FCA7B /* Fire.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Fire.m; sourceTree = "<group>"; };
+		570F40D716AB8ECD000FCA7B /* StockDemo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StockDemo.h; sourceTree = "<group>"; };
+		570F40D816AB8EE0000FCA7B /* StockDemo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StockDemo.m; sourceTree = "<group>"; };
+		570F40DB16ABB03D000FCA7B /* BrickShader.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = BrickShader.fsh; sourceTree = "<group>"; };
+		570F40DC16ABB03D000FCA7B /* BrickShader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = BrickShader.vsh; sourceTree = "<group>"; };
+		570F40DD16ABB03D000FCA7B /* CloudShader.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CloudShader.fsh; sourceTree = "<group>"; };
+		570F40DE16ABB03D000FCA7B /* CloudShader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = CloudShader.vsh; sourceTree = "<group>"; };
+		570F40DF16ABB03D000FCA7B /* DepthShader.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = DepthShader.fsh; sourceTree = "<group>"; };
+		570F40E016ABB03D000FCA7B /* DepthShader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = DepthShader.vsh; sourceTree = "<group>"; };
+		570F40E116ABB03D000FCA7B /* EarthShader.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = EarthShader.fsh; sourceTree = "<group>"; };
+		570F40E216ABB03D000FCA7B /* EarthShader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = EarthShader.vsh; sourceTree = "<group>"; };
+		570F40E316ABB03D000FCA7B /* EnvironmentMapping.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = EnvironmentMapping.fsh; sourceTree = "<group>"; };
+		570F40E416ABB03D000FCA7B /* EnvironmentMapping.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = EnvironmentMapping.vsh; sourceTree = "<group>"; };
+		570F40E516ABB03D000FCA7B /* EnvNormalShader.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = EnvNormalShader.fsh; sourceTree = "<group>"; };
+		570F40E616ABB03D000FCA7B /* EnvNormalShader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = EnvNormalShader.vsh; sourceTree = "<group>"; };
+		570F40E716ABB03D000FCA7B /* FireShader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = FireShader.vsh; sourceTree = "<group>"; };
+		570F40E816ABB03D000FCA7B /* FullScreenTexture.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = FullScreenTexture.fsh; sourceTree = "<group>"; };
+		570F40E916ABB03D000FCA7B /* FullScreenTexture.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = FullScreenTexture.vsh; sourceTree = "<group>"; };
+		570F40EA16ABB03D000FCA7B /* FullScreenTouch.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = FullScreenTouch.fsh; sourceTree = "<group>"; };
+		570F40EB16ABB03D000FCA7B /* FullScreenTouch.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = FullScreenTouch.vsh; sourceTree = "<group>"; };
+		570F40EC16ABB03D000FCA7B /* HeatShader.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = HeatShader.fsh; sourceTree = "<group>"; };
+		570F40ED16ABB03D000FCA7B /* LiquidShader.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = LiquidShader.fsh; sourceTree = "<group>"; };
+		570F40EE16ABB03D000FCA7B /* LiquidShader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = LiquidShader.vsh; sourceTree = "<group>"; };
+		570F40EF16ABB03D000FCA7B /* NormalMapping.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = NormalMapping.fsh; sourceTree = "<group>"; };
+		570F40F016ABB03D000FCA7B /* NormalMapping.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = NormalMapping.vsh; sourceTree = "<group>"; };
+		570F40F116ABB03D000FCA7B /* ParticleSimple.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = ParticleSimple.fsh; sourceTree = "<group>"; };
+		570F40F216ABB03D000FCA7B /* ParticleSimple.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = ParticleSimple.vsh; sourceTree = "<group>"; };
+		570F40F316ABB03D000FCA7B /* ParticleWave.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = ParticleWave.fsh; sourceTree = "<group>"; };
+		570F40F416ABB03D000FCA7B /* ParticleWave.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = ParticleWave.vsh; sourceTree = "<group>"; };
+		570F40F516ABB03D000FCA7B /* PixelLighting.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = PixelLighting.fsh; sourceTree = "<group>"; };
+		570F40F616ABB03D000FCA7B /* PixelLighting.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = PixelLighting.vsh; sourceTree = "<group>"; };
+		570F40F716ABB03D000FCA7B /* Polkadot3D.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Polkadot3D.fsh; sourceTree = "<group>"; };
+		570F40F816ABB03D000FCA7B /* Polkadot3D.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Polkadot3D.vsh; sourceTree = "<group>"; };
+		570F40F916ABB03D000FCA7B /* PoolShader.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = PoolShader.fsh; sourceTree = "<group>"; };
+		570F40FA16ABB03D000FCA7B /* RainbowShader.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = RainbowShader.fsh; sourceTree = "<group>"; };
+		570F40FB16ABB03D000FCA7B /* RainbowShader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = RainbowShader.vsh; sourceTree = "<group>"; };
+		570F40FC16ABB03D000FCA7B /* TextureShader.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = TextureShader.fsh; sourceTree = "<group>"; };
+		570F40FD16ABB03D000FCA7B /* TextureShader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = TextureShader.vsh; sourceTree = "<group>"; };
+		570F40FE16ABB03D000FCA7B /* TileShader.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = TileShader.fsh; sourceTree = "<group>"; };
+		570F40FF16ABB03D000FCA7B /* ToonShader.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = ToonShader.fsh; sourceTree = "<group>"; };
+		570F410016ABB03D000FCA7B /* ToonShader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = ToonShader.vsh; sourceTree = "<group>"; };
+		570F410116ABB03D000FCA7B /* VertexLighting.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = VertexLighting.fsh; sourceTree = "<group>"; };
+		570F410216ABB03D000FCA7B /* VertexLighting.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = VertexLighting.vsh; sourceTree = "<group>"; };
+		570F415316ABB5FA000FCA7B /* FireShader.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = FireShader.fsh; sourceTree = "<group>"; };
+		570F415416ABB5FA000FCA7B /* HeatShader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = HeatShader.vsh; sourceTree = "<group>"; };
+		570F415516ABB5FB000FCA7B /* TileShader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = TileShader.vsh; sourceTree = "<group>"; };
+		570F415D16ABB767000FCA7B /* Geometry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Geometry.h; sourceTree = "<group>"; };
+		570F415E16ABB767000FCA7B /* Geometry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Geometry.m; sourceTree = "<group>"; };
+		570F416016ABBA0E000FCA7B /* GridPlane.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GridPlane.h; sourceTree = "<group>"; };
+		570F416116ABBA0E000FCA7B /* GridPlane.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GridPlane.m; sourceTree = "<group>"; };
+		570F416316ABDFF2000FCA7B /* Cloud.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Cloud.h; sourceTree = "<group>"; };
+		570F416416ABDFFD000FCA7B /* Cloud.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Cloud.m; sourceTree = "<group>"; };
 		5716775D16A685A800F78B25 /* AssetLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AssetLoader.h; path = src/AssetLoader.h; sourceTree = "<group>"; };
 		5716775E16A685A800F78B25 /* AssetLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AssetLoader.m; path = src/AssetLoader.m; sourceTree = "<group>"; };
 		571A42FC167C315600CD7E8F /* Graph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Graph.h; sourceTree = "<group>"; };
@@ -357,7 +461,6 @@
 		57718EF616838D75001D7D35 /* CustomPlane.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomPlane.h; sourceTree = "<group>"; };
 		57718EF716838D75001D7D35 /* CustomPlane.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomPlane.m; sourceTree = "<group>"; };
 		57811A9B16A931A2008B2B02 /* trash.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = trash.png; sourceTree = "<group>"; };
-		578292C2169861D20053ADCD /* esShapes.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = esShapes.c; sourceTree = "<group>"; };
 		578292C5169879930053ADCD /* ImageBaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageBaker.h; sourceTree = "<group>"; };
 		578292C6169879930053ADCD /* ImageBaker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageBaker.m; sourceTree = "<group>"; };
 		578292C8169A87B00053ADCD /* test.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = test.png; sourceTree = "<group>"; };
@@ -395,6 +498,9 @@
 		57DD3CDA168A5F92005980F6 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = ../Debug.xcconfig; sourceTree = "<group>"; };
 		57DD3CDF168A5FDD005980F6 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = ../Release.xcconfig; sourceTree = "<group>"; };
 		57DD3CE0168A5FF5005980F6 /* common.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = common.xcconfig; path = ../common.xcconfig; sourceTree = "<group>"; };
+		57E1954516ABECA50099514B /* PoolShader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = PoolShader.vsh; sourceTree = "<group>"; };
+		57E1954816ABEEAC0099514B /* SphereOid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SphereOid.h; sourceTree = "<group>"; };
+		57E1954916ABEEBD0099514B /* SphereOid.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SphereOid.m; sourceTree = "<group>"; };
 		57E62E65168433100030908E /* Photo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Photo.h; sourceTree = "<group>"; };
 		57E62E66168433100030908E /* Photo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Photo.m; sourceTree = "<group>"; };
 		57E7465C1680438300C1D4FF /* EventCapture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EventCapture.h; sourceTree = "<group>"; };
@@ -552,13 +658,89 @@
 			name = UI;
 			sourceTree = "<group>";
 		};
+		570F40D316AB8B96000FCA7B /* shaders */ = {
+			isa = PBXGroup;
+			children = (
+				570F40D416AB8BE2000FCA7B /* Fire.h */,
+				570F40D516AB8BE2000FCA7B /* Fire.m */,
+				570F416316ABDFF2000FCA7B /* Cloud.h */,
+				570F416416ABDFFD000FCA7B /* Cloud.m */,
+			);
+			path = shaders;
+			sourceTree = "<group>";
+		};
+		570F40DA16ABA11F000FCA7B /* stock */ = {
+			isa = PBXGroup;
+			children = (
+				570F40DB16ABB03D000FCA7B /* BrickShader.fsh */,
+				570F40DC16ABB03D000FCA7B /* BrickShader.vsh */,
+				570F40DD16ABB03D000FCA7B /* CloudShader.fsh */,
+				570F40DE16ABB03D000FCA7B /* CloudShader.vsh */,
+				570F40DF16ABB03D000FCA7B /* DepthShader.fsh */,
+				570F40E016ABB03D000FCA7B /* DepthShader.vsh */,
+				570F40E116ABB03D000FCA7B /* EarthShader.fsh */,
+				570F40E216ABB03D000FCA7B /* EarthShader.vsh */,
+				570F40E316ABB03D000FCA7B /* EnvironmentMapping.fsh */,
+				570F40E416ABB03D000FCA7B /* EnvironmentMapping.vsh */,
+				570F40E516ABB03D000FCA7B /* EnvNormalShader.fsh */,
+				570F40E616ABB03D000FCA7B /* EnvNormalShader.vsh */,
+				570F415316ABB5FA000FCA7B /* FireShader.fsh */,
+				570F40E716ABB03D000FCA7B /* FireShader.vsh */,
+				570F40E816ABB03D000FCA7B /* FullScreenTexture.fsh */,
+				570F40E916ABB03D000FCA7B /* FullScreenTexture.vsh */,
+				570F40EA16ABB03D000FCA7B /* FullScreenTouch.fsh */,
+				570F40EB16ABB03D000FCA7B /* FullScreenTouch.vsh */,
+				570F415416ABB5FA000FCA7B /* HeatShader.vsh */,
+				570F40EC16ABB03D000FCA7B /* HeatShader.fsh */,
+				570F40ED16ABB03D000FCA7B /* LiquidShader.fsh */,
+				570F40EE16ABB03D000FCA7B /* LiquidShader.vsh */,
+				570F40EF16ABB03D000FCA7B /* NormalMapping.fsh */,
+				570F40F016ABB03D000FCA7B /* NormalMapping.vsh */,
+				570F40F116ABB03D000FCA7B /* ParticleSimple.fsh */,
+				570F40F216ABB03D000FCA7B /* ParticleSimple.vsh */,
+				570F40F316ABB03D000FCA7B /* ParticleWave.fsh */,
+				570F40F416ABB03D000FCA7B /* ParticleWave.vsh */,
+				570F40F516ABB03D000FCA7B /* PixelLighting.fsh */,
+				570F40F616ABB03D000FCA7B /* PixelLighting.vsh */,
+				570F40F716ABB03D000FCA7B /* Polkadot3D.fsh */,
+				570F40F816ABB03D000FCA7B /* Polkadot3D.vsh */,
+				57E1954516ABECA50099514B /* PoolShader.vsh */,
+				570F40F916ABB03D000FCA7B /* PoolShader.fsh */,
+				570F40FA16ABB03D000FCA7B /* RainbowShader.fsh */,
+				570F40FB16ABB03D000FCA7B /* RainbowShader.vsh */,
+				570F40FC16ABB03D000FCA7B /* TextureShader.fsh */,
+				570F40FD16ABB03D000FCA7B /* TextureShader.vsh */,
+				570F415516ABB5FB000FCA7B /* TileShader.vsh */,
+				570F40FE16ABB03D000FCA7B /* TileShader.fsh */,
+				570F40FF16ABB03D000FCA7B /* ToonShader.fsh */,
+				570F410016ABB03D000FCA7B /* ToonShader.vsh */,
+				570F410116ABB03D000FCA7B /* VertexLighting.fsh */,
+				570F410216ABB03D000FCA7B /* VertexLighting.vsh */,
+			);
+			path = stock;
+			sourceTree = "<group>";
+		};
+		570F415C16ABB736000FCA7B /* geometry */ = {
+			isa = PBXGroup;
+			children = (
+				570F415D16ABB767000FCA7B /* Geometry.h */,
+				570F415E16ABB767000FCA7B /* Geometry.m */,
+				570F416016ABBA0E000FCA7B /* GridPlane.h */,
+				570F416116ABBA0E000FCA7B /* GridPlane.m */,
+				57E1954816ABEEAC0099514B /* SphereOid.h */,
+				57E1954916ABEEBD0099514B /* SphereOid.m */,
+				57044EF416AC5D3100663B56 /* Torus.h */,
+				57044EF516AC5D3100663B56 /* Torus.m */,
+			);
+			path = geometry;
+			sourceTree = "<group>";
+		};
 		571ECF97167BE2CE00727A30 /* contrib */ = {
 			isa = PBXGroup;
 			children = (
 				578CB90816A63C0000088BA2 /* fmod */,
 				57AFB3C416A3281F008192FB /* PVR */,
 				571ECF98167BE2CE00727A30 /* tweener */,
-				578292C2169861D20053ADCD /* esShapes.c */,
 			);
 			name = contrib;
 			path = src/contrib;
@@ -646,6 +828,7 @@
 		572EB1F316786C630062F290 /* shaders */ = {
 			isa = PBXGroup;
 			children = (
+				570F40DA16ABA11F000FCA7B /* stock */,
 				574B5FDB168CE023008367D1 /* fluid */,
 				5700235F16A55528006F0E8E /* skinned */,
 				572EB1F416786C630062F290 /* fountain.fsh */,
@@ -665,6 +848,8 @@
 		572EB1F816786C630062F290 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				570F415C16ABB736000FCA7B /* geometry */,
+				570F40D316AB8B96000FCA7B /* shaders */,
 				578CB8FC16A60F2D00088BA2 /* Cocoa */,
 				572EB287167AAD1C0062F290 /* elements */,
 				57019F761685C15B007FA38F /* audio */,
@@ -765,8 +950,6 @@
 				572EB21E16788D170062F290 /* MeshBuffer.m */,
 				57AFB44216A32C59008192FB /* MeshImporter.h */,
 				57AFB44316A32C59008192FB /* MeshImporter.mm */,
-				5700236516A55680006F0E8E /* SkinnedPVR.h */,
-				5700236416A55680006F0E8E /* SkinnedPVR.cpp */,
 				572EB21816787AFF0062F290 /* Shader.h */,
 				572EB21916787AFF0062F290 /* Shader.m */,
 				572EB2331679EAE40062F290 /* ShaderLocations.h */,
@@ -793,6 +976,8 @@
 				57E62E66168433100030908E /* Photo.m */,
 				571ECFC9167BF31D00727A30 /* Plane.h */,
 				571ECFCA167BF31D00727A30 /* Plane.m */,
+				570F40D716AB8ECD000FCA7B /* StockDemo.h */,
+				570F40D816AB8EE0000FCA7B /* StockDemo.m */,
 				572D7F2C16832749006D48BF /* SimpleImage.h */,
 				572D7F2D16832749006D48BF /* SimpleImage.m */,
 				57F412F1168167F700D9DC67 /* Sphere.h */,
@@ -803,6 +988,8 @@
 				57A66EF5167B374500B9EA75 /* VaryingColor.m */,
 				578292C5169879930053ADCD /* ImageBaker.h */,
 				578292C6169879930053ADCD /* ImageBaker.m */,
+				5700236516A55680006F0E8E /* SkinnedPVR.h */,
+				5700236416A55680006F0E8E /* SkinnedPVR.cpp */,
 			);
 			name = misc;
 			sourceTree = "<group>";
@@ -1059,6 +1246,50 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				570F415916ABB646000FCA7B /* FireShader.fsh in Resources */,
+				570F415A16ABB646000FCA7B /* HeatShader.vsh in Resources */,
+				570F415B16ABB646000FCA7B /* TileShader.vsh in Resources */,
+				570F412B16ABB084000FCA7B /* BrickShader.fsh in Resources */,
+				570F412C16ABB084000FCA7B /* BrickShader.vsh in Resources */,
+				570F412D16ABB084000FCA7B /* CloudShader.fsh in Resources */,
+				57E1954616ABECA50099514B /* PoolShader.vsh in Resources */,
+				570F412E16ABB084000FCA7B /* CloudShader.vsh in Resources */,
+				570F412F16ABB084000FCA7B /* DepthShader.fsh in Resources */,
+				570F413016ABB084000FCA7B /* DepthShader.vsh in Resources */,
+				570F413116ABB084000FCA7B /* EarthShader.fsh in Resources */,
+				570F413216ABB084000FCA7B /* EarthShader.vsh in Resources */,
+				570F413316ABB084000FCA7B /* EnvironmentMapping.fsh in Resources */,
+				570F413416ABB084000FCA7B /* EnvironmentMapping.vsh in Resources */,
+				570F413516ABB084000FCA7B /* EnvNormalShader.fsh in Resources */,
+				570F413616ABB084000FCA7B /* EnvNormalShader.vsh in Resources */,
+				570F413716ABB084000FCA7B /* FireShader.vsh in Resources */,
+				570F413816ABB084000FCA7B /* FullScreenTexture.fsh in Resources */,
+				570F413916ABB084000FCA7B /* FullScreenTexture.vsh in Resources */,
+				570F413A16ABB084000FCA7B /* FullScreenTouch.fsh in Resources */,
+				570F413B16ABB084000FCA7B /* FullScreenTouch.vsh in Resources */,
+				570F413C16ABB084000FCA7B /* HeatShader.fsh in Resources */,
+				570F413D16ABB084000FCA7B /* LiquidShader.fsh in Resources */,
+				570F413E16ABB084000FCA7B /* LiquidShader.vsh in Resources */,
+				570F413F16ABB084000FCA7B /* NormalMapping.fsh in Resources */,
+				570F414016ABB084000FCA7B /* NormalMapping.vsh in Resources */,
+				570F414116ABB084000FCA7B /* ParticleSimple.fsh in Resources */,
+				570F414216ABB084000FCA7B /* ParticleSimple.vsh in Resources */,
+				570F414316ABB084000FCA7B /* ParticleWave.fsh in Resources */,
+				570F414416ABB084000FCA7B /* ParticleWave.vsh in Resources */,
+				570F414516ABB084000FCA7B /* PixelLighting.fsh in Resources */,
+				570F414616ABB084000FCA7B /* PixelLighting.vsh in Resources */,
+				570F414716ABB084000FCA7B /* Polkadot3D.fsh in Resources */,
+				570F414816ABB084000FCA7B /* Polkadot3D.vsh in Resources */,
+				570F414916ABB084000FCA7B /* PoolShader.fsh in Resources */,
+				570F414A16ABB084000FCA7B /* RainbowShader.fsh in Resources */,
+				570F414B16ABB084000FCA7B /* RainbowShader.vsh in Resources */,
+				570F414C16ABB084000FCA7B /* TextureShader.fsh in Resources */,
+				570F414D16ABB084000FCA7B /* TextureShader.vsh in Resources */,
+				570F414E16ABB084000FCA7B /* TileShader.fsh in Resources */,
+				570F414F16ABB084000FCA7B /* ToonShader.fsh in Resources */,
+				570F415016ABB084000FCA7B /* ToonShader.vsh in Resources */,
+				570F415116ABB084000FCA7B /* VertexLighting.fsh in Resources */,
+				570F415216ABB084000FCA7B /* VertexLighting.vsh in Resources */,
 				5700236D16A56C78006F0E8E /* skinned.fsh in Resources */,
 				5700236E16A56C78006F0E8E /* skinned.vsh in Resources */,
 				57F290FA16957F5D00293B0E /* fractal.fsh in Resources */,
@@ -1130,7 +1361,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				57BFCB8E16A21841008903BA /* CustomPlane.m in Sources */,
-				571A472F16954234002231C5 /* Fluid.m in Sources */,
 				575DA00A169437AC00A50C41 /* FractalSphere.m in Sources */,
 				57F855E0167ED84100FF244C /* Menu.m in Sources */,
 				57F855E1167ED84100FF244C /* MenuItem.m in Sources */,
@@ -1167,7 +1397,6 @@
 				574B5FF9168D20BD008367D1 /* FBO.m in Sources */,
 				575DA0021693C90400A50C41 /* SettingsVC.m in Sources */,
 				57F290F9169578C700293B0E /* Fractal.m in Sources */,
-				578292C3169861D20053ADCD /* esShapes.c in Sources */,
 				578292C7169879930053ADCD /* ImageBaker.m in Sources */,
 				578292D4169AB2CE0053ADCD /* SoundPool.m in Sources */,
 				570220D9169B8E7F0028FE33 /* UIView+TGViewExtensions.m in Sources */,
@@ -1204,6 +1433,13 @@
 				5700235116A553D3006F0E8E /* PVRTVertex.cpp in Sources */,
 				5700236616A55680006F0E8E /* SkinnedPVR.cpp in Sources */,
 				5716775F16A685A800F78B25 /* AssetLoader.m in Sources */,
+				570F40D616AB8BE2000FCA7B /* Fire.m in Sources */,
+				570F40D916AB8EE0000FCA7B /* StockDemo.m in Sources */,
+				570F415F16ABB767000FCA7B /* Geometry.m in Sources */,
+				570F416216ABBA0E000FCA7B /* GridPlane.m in Sources */,
+				570F416516ABDFFD000FCA7B /* Cloud.m in Sources */,
+				57E1954A16ABEEBD0099514B /* SphereOid.m in Sources */,
+				57044EF616AC5D3100663B56 /* Torus.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

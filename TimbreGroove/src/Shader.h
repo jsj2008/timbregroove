@@ -9,62 +9,53 @@
 #import <Foundation/Foundation.h>
 #import "TGTypes.h"
 
-#import "ShaderLocations.h"
+@class TG3dObject;
 
-/*
- 
- Two conflicting scenarios:
- 
- In one case you have a mesh (perhaps animation, textures, etc.) that just needs
- to be ouput with a generic shader. 
-
- Services needed:
- - buffers*
- - textures*
- - matrix operations*
- - shader generate
- - hide all uniforms, assuming the following
- --- position/mesh
- --- sampler/texture
- --- normals
- --- lighting
- - lighting
- 
- In another case you have a very specific special fx shader with very specific
- uniforms and attribute names. 
- 
- Services needed:
- - buffers*
- - textures*
- - matrix operations*
- - shader reading/compiling
- - random uniform access
-
- */
-
-@protocol ShaderInit <NSObject>
--(id)initWithName:(NSString *)name andHeader:(NSString *)header;
-@end
-
-@interface ShaderPool : NSObject
-+(id)getShader:(NSString *)name klass:(Class)klass header:(NSString *)header;
-@end
-
-
-@interface Shader : NSObject <ShaderInit> {
+@interface ShaderWrapper : NSObject {
 @protected
     GLuint _program;
 }
--(id)initWithVertex:(const char *)vert andFragment:(const char *)frag;
 
-@property (nonatomic, strong, getter = getLocations) ShaderLocations * locations;
+- (void) use;
+
+- (BOOL) loadAndCompile:(const char*)vert andFragment:(const char*)frag andHeaders:(NSString *)headers;
+
 @property (nonatomic) GLuint program;
 
-- (void)use;
+@end
 
-// for derived classes (delegate?)
-- (GLint)location:(SVariables)type;
+@interface Shader : ShaderWrapper
 
-- (BOOL)load:(NSString *)vname withFragment:(NSString *)fname;
++(id)shaderFromPoolWithVertex:(const char *)vert
+                  andFragment:(const char *)frag
+                  andVarNames:(const char **)names
+                  andNumNames:(int)numNames
+                  andLastAttr:(int)lastAttr
+                   andHeaders:(NSString *)headers;
+
++(id)shaderWithVertex:(const char *)vert
+          andFragment:(const char *)frag
+          andVarNames:(const char **)names
+          andNumNames:(int)numNames
+          andLastAttr:(int)lastAttr
+           andHeaders:(NSString *)headers;
+
+
+-(id)initWithVertex:(const char *)vert
+        andFragment:(const char *)frag
+        andVarNames:(const char **)names
+        andNumNames:(int)numNames
+        andLastAttr:(int)lastAttr
+         andHeaders:(NSString *)headers;
+
+- (void)  writeToLocation:(int)indexIntoNames type:(TGUniformType)type data:(void*)data;
+
+- (void) prepareRender:(TG3dObject *)object;
+
+// Get the gl location for a variable (uniform or attribute) if you want to call
+// glUniform* yourself:
+- (GLint) location:(int)indexIntoNames;
+
+@property (nonatomic) bool acceptMissingVars;
 
 @end

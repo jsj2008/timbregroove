@@ -9,39 +9,6 @@
 #ifndef TimbreGroove_TGTypes_h
 #define TimbreGroove_TGTypes_h
 
-
-typedef enum {
-    SV_NONE = -2,
-    SV_ERROR = -1,
-    
-    sv_acolor = 0,
-    sv_normal,
-    sv_pos,
-    sv_uv,
-    sv_bone,
-    sv_boneWeight,
-    sv_pos2f,
-    sv_customAttr2f,
-    sv_customAttr3f,
-    sv_customAttr4f,
-    
-    SV_LAST_ATTR = sv_uv,
-    
-    sv_pvm,
-    sv_sampler,
-    sv_ucolor,
-    sv_normalMat,
-    sv_lightDir,
-    sv_dirColor,
-    sv_ambient,
-    
-    NUM_SVARIABLES,
-    sv_custom,
-    sv_stride,
-    sv_buffer
-    
-} SVariables;
-
 typedef enum {
     TG_FLOAT,
     TG_VECTOR2,
@@ -63,12 +30,18 @@ typedef enum {
     TG_TRIANGLE_FAN
 } TGDrawType;
 
+typedef enum TGStrideType {
+    st_float2 = 1000,
+    st_float3,
+    st_float4
+} TGStrideType;
+
 typedef struct TGVertexStride {
     unsigned int glType; // e.g. GL_FLOAT
     unsigned int numSize; // e.g. sizeof(float)
     unsigned int numbersPerElement;
-    SVariables   tgVarType;
-    const char * shaderAttrName;
+    TGStrideType strideType;
+    int          indexIntoShaderNames;
     GLuint       location;
 } TGVertexStride;
 
@@ -95,10 +68,4 @@ static inline NSMutableArray * a(NSArray *a)
 {
     return [[NSMutableArray alloc] initWithArray:a];
 }
-
-// see esShapes.c
-int esGenSphere ( int numSlices, float radius, GLfloat **vertices, GLfloat **normals,
-                            GLfloat **texCoords, GLushort **indices );
-int esGenCube ( float scale, GLfloat **vertices, GLfloat **normals,
-               GLfloat **texCoords, GLushort **indices );
 #endif

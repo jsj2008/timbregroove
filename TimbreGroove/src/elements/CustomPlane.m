@@ -7,7 +7,7 @@
 //
 
 #import "CustomPlane.h"
-#import "Shader.h"
+#import "GenericShader.h"
 
 /*
   Example of a 3d element that uses doesn't use a lot of the
@@ -16,6 +16,9 @@
 @interface CustomPlane() {
     GLuint _vbuffer;
     GLint _posAttrLoc;
+    GLint _matLocation;
+    GLint _colorLocation;
+    ShaderWrapper *_shader;
     float _rot;
 }
 @end
@@ -38,12 +41,15 @@
     glGenBuffers(1, &_vbuffer);
     glBindBuffer(GL_ARRAY_BUFFER, _vbuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(v), v, GL_STATIC_DRAW);
-    self.shader = [[Shader alloc] initWithVertex:"generic" andFragment:"generic"];
-    [self.shader use];
-    GLKVector4 c = { 1, 0, 0, 1 };
-    [self.shader.locations write:@"u_color" type:TG_VECTOR4 data:c.v];
-    _posAttrLoc = glGetAttribLocation(self.shader.program, "a_position");
-    
+    ShaderWrapper * shader = [[ShaderWrapper alloc] init];
+    [shader loadAndCompile:"generic" andFragment:"generic" andHeaders:nil];
+    GLint program = shader.program;
+    _posAttrLoc = glGetAttribLocation(program, "a_position");
+    _matLocation = glGetUniformLocation(program, "u_pvm");
+    _colorLocation = glGetUniformLocation(program, "u_color");
+    glUseProgram(program);
+    glUniform4f(_colorLocation, 1, 0, 0, 1);
+    _shader = shader;
     return self;
 }
 
@@ -56,13 +62,17 @@
 
 -(void)render:(NSUInteger)w h:(NSUInteger)h
 {
-    [self.shader use];
+    glUseProgram(_shader.program);
     glBindBuffer(GL_ARRAY_BUFFER, _vbuffer);
     glEnableVertexAttribArray(_posAttrLoc);
     glVertexAttribPointer(_posAttrLoc, 3, GL_FLOAT, false, 0, 0);
     GLKMatrix4 pvm = [self calcPVM];
-    [self.shader.locations write:@"u_pvm" type:TG_MATRIX4 data:pvm.m];
+    glUniformMatrix4fv(_matLocation, 1, 0, pvm.m);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
+-(void)dealloc
+{
+    glDeleteBuffers(1, &(_vbuffer));
+}
 @end

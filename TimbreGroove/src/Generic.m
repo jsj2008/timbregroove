@@ -16,18 +16,13 @@
 @interface GenericBase () {
 @protected
     bool _enableMultipleTextures;
-    bool _useColor;
+    bool _supportPrepare;
+    bool _supportMeshBind;
 }
 
 @end
 
 @implementation GenericBase
--(void)createBuffer
-{
-    NSLog(@"You should customize (void)createBuffer in your derivation");
-    
-    [self createBufferDataByType:@[@(sv_pos), @(sv_acolor)] numVertices:4 numIndices:6];
-}
 
 -(void)clean
 {
@@ -42,124 +37,29 @@
     else
         [self createTexture];
     [self createBuffer];
-    [self createShader];
+    [self createShader]; // generic assumes on buffer exists
     [self getBufferLocations];
     [self getTextureLocations];
     [self configureLighting];
     return self;
 }
 
+-(void)setShader:(Shader *)shader
+{
+    [super setShader:shader];
+    
+    _supportMeshBind = [shader respondsToSelector:@selector(location:)];
+    _supportPrepare  = [shader respondsToSelector:@selector(prepareRender:)];
+}
+
 #pragma mark -
 #pragma mark Initialization sequence
 #pragma mark -
 
--(void)getBufferData:(void *)vertextData
-           indexData:(unsigned *)indexData
+
+-(void)createBuffer
 {
-    NSLog(@"You should customize (void)getBufferData: in your derivation");
     
-    float * d = vertextData;
-    //     x           y         z           r         g         b         a
-    *d++ = -1; *d++ = -1; *d++ = 0;   *d++ = 1; *d++ = 0; *d++ = 0; *d++ = 1;
-    *d++ = -1; *d++ =  1; *d++ = 0;   *d++ = 1; *d++ = 1; *d++ = 0; *d++ = 1;
-    *d++ =  1; *d++ =  1; *d++ = 0;   *d++ = 1; *d++ = 0; *d++ = 1; *d++ = 1;
-    *d++ =  1; *d++ = -1; *d++ = 0;   *d++ = 1; *d++ = 1; *d++ = 1; *d++ = 1;
-    
-    unsigned int * p = indexData;
-    
-    *p++ = 0; *p++ = 1; *p++ = 3; *p++ = 3; *p++ = 1; *p++ = 2;
-}
-
-
--(MeshBuffer *)createBufferDataByType:(NSArray *)svar
-                  numVertices:(unsigned int)numVerticies
-                   numIndices:(unsigned int)numIndices
-{
-    return [self createBufferDataByType:svar numVertices:numVerticies numIndices:numIndices uniforms:nil];
-}
-
--(MeshBuffer *)createBufferDataByType:(NSArray *)svar
-                  numVertices:(unsigned int)numVerticies
-                   numIndices:(unsigned int)numIndices
-                     uniforms:(NSDictionary*)uniformNames
-
-{
-    TGGenericElementParams params;
-    
-    memset(&params, 0, sizeof(params));
-    
-    params.numStrides = [svar count];
-    
-    params.strides = malloc(sizeof(TGVertexStride)*params.numStrides);
-    
-    for( int i = 0; i < params.numStrides; i++ )
-    {
-        TGVertexStride * stride = params.strides + i;
-        SVariables type = [svar[i] intValue];
-        switch (type) {
-            case sv_pos2f:
-                StrideInit2f(stride, sv_pos); // hmmm
-                break;
-            case sv_customAttr2f:
-            case sv_uv:
-                StrideInit2f(stride, type);
-                break;
-            case sv_normal:
-                self.lighting = true;
-                // fall thru
-            case sv_customAttr3f:
-            case sv_pos:
-                StrideInit3f(stride, type);
-                break;
-            case sv_customAttr4f:
-            case sv_acolor:
-                StrideInit4f(stride, type);
-                break;
-#if DEBUG
-            default:
-                NSLog(@"Unknown SVariable");
-                exit(1);
-                break;
-#endif
-        }
-        if( uniformNames )
-        {
-            NSString * name = uniformNames[@(type)];
-            if( name )
-                stride->shaderAttrName = [name UTF8String];
-        }
-    }
-    
-    params.numVertices = numVerticies;
-    params.numIndices  = numIndices;
-    GLsizei sz = [MeshBuffer calcDataSize:params.strides countStrides:params.numStrides numVertices:params.numVertices];
-    params.vertexData = malloc(sz);
-    if( params.numIndices > 0 )
-        params.indexData = malloc( sizeof(unsigned int) * params.numIndices );
-    
-    [self getBufferData:params.vertexData indexData:params.indexData];
-    
-    MeshBuffer * buffer = [[MeshBuffer alloc] init];
-    
-    [buffer setData:params.vertexData
-            strides:params.strides
-       countStrides:params.numStrides
-        numVertices:params.numVertices];
-    
-    if( params.indexData )
-    {
-        [buffer setIndexData:params.indexData
-                  numIndices:params.numIndices];
-    }
-    
-    [self addBuffer:buffer];
-    
-    free(params.strides);
-    free(params.vertexData);
-    if( params.indexData )
-        free(params.indexData);
-    
-    return buffer;
 }
 
 -(void)addBuffer:(MeshBuffer *)buffer
@@ -168,6 +68,7 @@
         _buffers = [NSMutableArray new];
     [_buffers addObject:buffer];
 }
+
 
 -(void)createTexture
 {
@@ -180,33 +81,30 @@
 
 -(void)createShader
 {
-    self.shader = [ShaderPool getShader:@"generic" klass:[GenericShader class] header:[self getShaderHeader]];
+    self.shader = [GenericShader shaderWithHeaders:[self getShaderHeader]];
 }
 
 - (NSString *)getShaderHeader
 {
     NSMutableArray * arr = [NSMutableArray new];
     for( MeshBuffer * buffer in _buffers )
-    {
-        // this is bug waiting to happen?
-        // wrt the same svType showing up in multiple
-        // buffers
-        [arr addObjectsFromArray:buffer.svTypes];
-    }
+        [arr addObjectsFromArray:buffer.indicesIntoShaderNames];
+
     NSString * pre = @"";
     
     for( NSNumber * num in arr )
     {
-        SVariables svar = [num intValue];
+        GenericVariables svar = [num intValue];
         NSString * ns;
         switch (svar) {
-            case sv_acolor:
+            case gv_acolor:
                 ns = @"#define COLOR\n";
                 break;
-            case sv_normal:
+            case gv_normal:
+                _lighting = true; // how buried is this??
                 ns = @"#define NORMAL\n";
                 break;
-            case sv_uv:
+            case gv_uv:
                 ns = @"#define TEXTURE\n";
                 break;
             default:
@@ -237,10 +135,9 @@
 
 -(void)getBufferLocations
 {
-    for( MeshBuffer * buffer in _buffers )
-    {
-        [buffer getLocations:self.shader];
-    }
+    if( _supportMeshBind )
+        for( MeshBuffer * buffer in _buffers )
+            [buffer getLocations:self.shader];
 }
 
 -(void)setColor:(GLKVector4)color
@@ -261,25 +158,14 @@
 
 -(void)render:(NSUInteger)w h:(NSUInteger)h
 {
-    GenericShader * genShader = (GenericShader *)self.shader;
+    Shader * shader = self.shader;
     
-    [genShader use];
+    [shader use];
     
-    GLKMatrix4 pvm = [self calcPVM];
-    genShader.pvm = pvm;
-    
-    if( _lighting )
-    {
-        genShader.normalMat = GLKMatrix3InvertAndTranspose(GLKMatrix4GetMatrix3(pvm), NULL);
-        genShader.lightDir  = _lightDir;
-        genShader.dirColor  = _dirColor;
-        genShader.ambient   = _ambient;
-    }
-    
-    if( _useColor )
-        genShader.color = _color;
+    if( _supportPrepare )
+        [shader prepareRender:self];
 
-    [self bindTextures:genShader bind:true];
+    [self bindTextures:true];
     
     for( MeshBuffer * b in _buffers )
     {
@@ -288,19 +174,19 @@
         [b unbind];
     }
     
-    [self bindTextures:genShader bind:false];
+    [self bindTextures:false];
 }
 
--(void)bindTextures:(GenericShader *)genShader bind:(bool)bind
+-(void)bindTextures:(bool)bind
 {
 }
 
 // capture hack
--(void)renderToCapture:(Shader *)shader atLocation:(GLint)location
+-(void)renderToCaptureAtBufferLocation:(GLint)location
 {
     for( MeshBuffer * buffer in _buffers )
     {
-        if( [buffer assignMeshToShader:shader atLocation:location] )
+        if( [buffer bindToTempLocation:location] )
         {
             [buffer draw];
             break; // we assume there is only one 'position' buffer.
@@ -335,16 +221,16 @@
     if( _texture )
     {
         Shader * shader = self.shader;
-        _texture.uLocation = [shader location:sv_sampler];
+        _texture.uLocation = [shader location:gv_sampler];
     }
 }
 
--(void)bindTextures:(GenericShader *)genShader bind:(bool)bind
+-(void)bindTextures:(bool)bind
 {
     if( _texture )
     {
         if( bind )
-            [_texture bind:genShader target:0];
+            [_texture bind:0];
         else
             [_texture unbind];
     }
@@ -416,14 +302,14 @@
     
 }
 
--(void)bindTextures:(GenericShader *)genShader bind:(bool)bind
+-(void)bindTextures:(bool)bind
 {
     int target = 0;
     for( Texture * t in _textures )
     {
         if( bind )
         {
-            [t bind:genShader target:target];
+            [t bind:target];
             ++target;
         }
         else

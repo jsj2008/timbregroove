@@ -10,28 +10,30 @@
 #import "TGTypes.h"
 
 
-static inline TGVertexStride * StrideInit2f(TGVertexStride * s, SVariables type)
+static inline TGVertexStride * StrideInit2f(TGVertexStride * s)
 {
     s->glType = GL_FLOAT;
     s->numSize = sizeof(float);
     s->numbersPerElement = 2;
-    s->shaderAttrName = NULL;
     s->location = -1;
-    s->tgVarType = type;
+    s->indexIntoShaderNames = -1;
+    s->strideType = st_float2;
     return s;
 }
 
-static inline TGVertexStride * StrideInit3f(TGVertexStride * s, SVariables type)
+static inline TGVertexStride * StrideInit3f(TGVertexStride * s)
 {
-    StrideInit2f(s,type);
+    StrideInit2f(s);
     s->numbersPerElement = 3;
+    s->strideType = st_float3;
     return s;
 }
 
-static inline TGVertexStride * StrideInit4f(TGVertexStride * s, SVariables type)
+static inline TGVertexStride * StrideInit4f(TGVertexStride * s)
 {
-    StrideInit2f(s,type);
+    StrideInit2f(s);
     s->numbersPerElement = 4;
+    s->strideType = st_float4;
     return s;
 }
 
@@ -43,11 +45,9 @@ static inline TGVertexStride * StrideInit4f(TGVertexStride * s, SVariables type)
 @interface MeshBuffer : NSObject
 
 @property (nonatomic) TGDrawType  drawType;
+@property (nonatomic) GLenum      usage;
 @property (nonatomic) GLuint      glVBuffer;
 @property (nonatomic) GLuint      glIBuffer;
-
-@property (nonatomic,readonly,getter=getSvTypes) NSArray * svTypes;
-
 
 +(GLsizei)calcDataSize: (TGVertexStride *)strides
           countStrides: (unsigned int)countStrides
@@ -61,14 +61,18 @@ static inline TGVertexStride * StrideInit4f(TGVertexStride * s, SVariables type)
 -(void)setIndexData:(unsigned int *)data
             numIndices:(unsigned int)numIndices;
 
+// for dynamic draw
+-(void)setData: (float *)data;
+
 -(void)getLocations:(Shader*)shader;
 
 -(void)bind;
 -(void)unbind;
-
 -(void)draw;
 
+-(NSArray *)indicesIntoShaderNames;
+
 // TODO: this probably belongs somewhere else
--(bool)assignMeshToShader:(Shader *)shader atLocation:(GLuint)location;
+-(bool)bindToTempLocation:(GLuint)location;
 
 @end

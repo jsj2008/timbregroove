@@ -26,6 +26,7 @@
     }
     return self;
 }
+
 -(id)wireUp
 {
     return self;
@@ -97,7 +98,7 @@
 
 // capture hack
 // TODO: in the future: not so much with the hacking
--(void)renderToCapture:(Shader *)shader atLocation:(GLint)location
+-(void)renderToCaptureAtBufferLocation:(GLint)location
 {
     
 }

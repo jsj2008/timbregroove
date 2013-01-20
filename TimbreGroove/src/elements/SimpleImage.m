@@ -7,43 +7,16 @@
 //
 
 #import "SimpleImage.h"
-#import "MeshBuffer.h"
-
-static MeshBuffer * __sharedBuffer;
+#import "GridPlane.h"
 
 @implementation SimpleImage
 
 -(void)createBuffer
 {
-    if( __sharedBuffer == nil )
-    {
-        __sharedBuffer =[self createBufferDataByType:@[@(sv_pos),@(sv_uv)] numVertices:6 numIndices:0];
-    }
-    else
-    {
-        if( !_buffers )
-            _buffers = [NSMutableArray new];
-        [_buffers addObject:__sharedBuffer];
-        NSLog(@"reusing vertext buffer %d",__sharedBuffer.glVBuffer);
-    }
+    GridPlane * gp = [GridPlane gridWithIndicesIntoNames:@[@(gv_pos),@(gv_uv)]
+                                                andDoUVs:true
+                                            andDoNormals:false];
+    [self addBuffer:gp];
 }
-
--(void)getBufferData:(void *)vertextData
-           indexData:(unsigned *)indexData
-{
-    static float v[6*(3+2)] = {
-    //   x   y  z    u    v
-        -1, -1, 0,   0,   0,
-        -1,  1, 0,   0,   1,
-         1, -1, 0,   1,   0,
-        
-        -1,  1, 0,   0,   1,
-         1,  1, 0,   1,   1,
-         1, -1, 0,   1,   0
-    };
-    
-    memcpy(vertextData, v, sizeof(v));
-}
-
 
 @end

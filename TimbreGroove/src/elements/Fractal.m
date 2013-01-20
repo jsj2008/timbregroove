@@ -8,57 +8,50 @@
 
 #import "Fractal.h"
 #import "GenericShader.h"
-#import "MeshBuffer.h"
+#import "GridPlane.h"
 
 @interface Fractal() {
     GLKVector2 _complexConstant;
     float      _viewportSize;
     float      _blend;
+    GLint      _posLocation;
     GLint      _complexConstantLocation;
     GLint      _viewportSizeLocation;
     GLint      _blendLocation;
     GLint      _backColorLocation;
+    MeshBuffer * _buffer;
     double  _tracker;
+    ShaderWrapper * _shader;
 }
 
 @end
 @implementation Fractal
 
-// write your own version of this:
 -(void)createBuffer
 {
-    MeshBuffer * b =
-    [self createBufferDataByType:@[@(sv_pos)]
-                     numVertices:4
-                      numIndices:0];
-    b.drawType = GL_TRIANGLE_FAN;
-}
-
--(void)getBufferData:(void *)vertextData
-           indexData:(unsigned *)indexData
-{
-    static GLfloat vertices[] = {
-        -1.0f ,-1.0f, 0,
-        1.0f, -1.0f, 0,
-        1.0f,  1.0f, 0,
-        -1.0f,  1.0f, 0 };
-    
-    memcpy(vertextData, vertices, sizeof(vertices));
+    GridPlane * gp = [GridPlane gridWithIndicesIntoNames:@[@(gv_pos)]
+                                                andDoUVs:false
+                                            andDoNormals:false];
+    [self addBuffer:gp];
+    _buffer = gp;
 }
 
 -(void)createShader
 {
-    Shader * shader = [ShaderPool getShader:@"fractal" klass:[GenericShader class] header:nil];
-    self.shader = shader;
+    _shader = [[ShaderWrapper alloc] init];
+    [_shader loadAndCompile:"fractal" andFragment:"fractal" andHeaders:nil];
 
-    GLuint program = shader.program;
+    GLuint program = _shader.program;
     _complexConstantLocation = glGetUniformLocation(program, "u_complexConstant");
     _viewportSizeLocation    = glGetUniformLocation(program, "u_viewportSize");
     _blendLocation           = glGetUniformLocation(program, "u_blend");
     _backColorLocation       = glGetUniformLocation(program, "u_backColor");
+    _posLocation             = glGetAttribLocation(program, "a_position");
     
-    GLKVector4 bc = { 0, 0.2, 0.5, 1 };
+    GLKVector4 bc = { 0.4, 0.5, 0.5, 1 };
     _backColor = bc;
+    
+    self.shader = (Shader *)_shader; // eek
 }
 
 -(void)update:(NSTimeInterval)dt
@@ -71,17 +64,14 @@
 
 -(void)render:(NSUInteger)w h:(NSUInteger)h
 {
-    Shader * shader = self.shader;
-    [shader use];
+    [_shader use];
     glUniform2fv(_complexConstantLocation, 1, _complexConstant.v);
     glUniform1f( _blendLocation, _blend);
-    glUniform1f(_viewportSizeLocation, (GLfloat)w);
+    glUniform2f(_viewportSizeLocation, (GLfloat)w, (GLfloat)h);
     glUniform4fv(_backColorLocation, 1, _backColor.v);
-    MeshBuffer * b = _buffers[0];
-    [b bind];
-    [b draw];
-    [b unbind];
-    
+    [_buffer bindToTempLocation:_posLocation];
+    [_buffer draw];
+    [_buffer unbind];
 }
 
 

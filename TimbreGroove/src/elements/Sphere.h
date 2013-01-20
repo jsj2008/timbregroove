@@ -11,7 +11,4 @@
 @class Texture;
 
 @interface Sphere : Generic
--(Sphere *)setRadius:(float)radius longs:(float)longs lats:(float)lats;
--(Sphere *)setRadius:(float)radius longs:(float)longs lats:(float)lats textureFile:(const char *)fileName;
-
 @end

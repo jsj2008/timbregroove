@@ -158,17 +158,12 @@
     return ok;
 }
 
--(void)bindTarget:(int)i
+-(void)bind:(int)target
 {
-    glActiveTexture(GL_TEXTURE0 + i);
+    glActiveTexture(GL_TEXTURE0 + target);
     glBindTexture(GL_TEXTURE_2D, _glTexture);
-    glUniform1i(_uLocation, i);
-    _target = i;
-}
-
--(void)bind:(Shader *)shader target:(int)i
-{
-    [self bindTarget:i];
+    glUniform1i(_uLocation, target);
+    _target = target;
 }
 
 -(void)unbind

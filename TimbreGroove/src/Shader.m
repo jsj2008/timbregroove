@@ -9,98 +9,11 @@
 #import "Shader.h"
 #import "ShaderLocations.h"
 
-static NSMutableDictionary * __shaders;
+static NSHashTable * __shaders;
 
-@implementation ShaderPool
+#define MAX_SHADER_VARIABLES 100
 
-+(id)getShader:(NSString *)name klass:(Class)klass header:(NSString *)header;
-{
-    
-    if (header == nil )
-        header = @"";
-    
-    NSString * tag = header == @"" ? @"(default)" : header;
-
-    NSString * key = [NSString stringWithFormat:@"%@-%@-%@", name, NSStringFromClass(klass), tag];
-    if( !__shaders )
-    {
-        __shaders = [NSMutableDictionary new];
-    }
-    else
-    {
-        Shader * s = __shaders[key];
-        if( s )
-        {
-#if DEBUG
-            NSLog(@"returning shader of type: %@ (%d)", key, s.program);
-#endif
-            return s;
-        }
-    }
-    
-    id <ShaderInit> shader = [[klass alloc] initWithName: name andHeader:header];
-
-#if DEBUG
-    NSLog(@"created shader of type: %@ (%d)", key, ((Shader *)shader).program);
-#endif
-    
-    __shaders[key] = shader;
-    
-    return shader;
-    
-}
-
-@end
-
-
-@interface Shader() {
-    NSString * _header;
-    GLuint _vshader;
-    GLuint _fshader;
-}
-@end
-
-@implementation Shader
-
-
--(id)init
-{
-    if( (self = [super init]))
-    {
-        _header = @"";
-    }
-    return self;
-}
-
--(id)initWithName:(NSString *)name andHeader:(NSString *)header
-{
-    if( (self = [super init]))
-    {
-        _header = header;
-        [self load:name withFragment:name];
-    }
-    return self;
-}
-
--(id)initWithVertex:(const char *)vert andFragment:(const char *)frag
-{
-    if( (self = [super init]))
-    {
-        _header = nil;
-        [self load:@(vert) withFragment:@(frag)];
-    }
-    return self;
-}
-
-
-#pragma mark - public
-
-- (ShaderLocations *)getLocations
-{
-    if( !_locations )
-        _locations = [[ShaderLocations alloc] initWithShader:self];
-    return _locations;
-}
+@implementation ShaderWrapper
 
 - (void)use
 {
@@ -117,98 +30,74 @@ static NSMutableDictionary * __shaders;
 #endif
 }
 
-
-#pragma mark - derived classes implement these
-
-- (GLint)location:(SVariables)type
+- (BOOL)loadAndCompile:(const char*)vert andFragment:(const char*)frag andHeaders:(NSString *)headers
 {
-#if DEBUG
-    NSLog(@"Don't know how to translate uniform name");
-    exit(1);
-#endif
-    return SV_ERROR;
-}
-
-
-#pragma mark - internal stuff
-
-- (BOOL)load:(NSString *)vname withFragment:(NSString *)fname
-{    
-    if (_program) {
-        glDeleteProgram(_program);
-        _program = 0;
-    }
-    
     _program = glCreateProgram();
     
-    NSString * path = [[NSBundle mainBundle] pathForResource:vname ofType:@"vsh"];
-    if (![self compileShader:&_vshader type:GL_VERTEX_SHADER file:path]) {
+    GLuint vshader;
+    NSString * path = [[NSBundle mainBundle] pathForResource:@(vert) ofType:@"vsh"];
+    if (![self compileShader:&vshader type:GL_VERTEX_SHADER file:path headers:headers]) {
         NSLog(@"Failed to compile vertex shader");
         exit(1);
     }
     
-    path = [[NSBundle mainBundle] pathForResource:fname ofType:@"fsh"];
-    if (![self compileShader:&_fshader type:GL_FRAGMENT_SHADER file:path]) {
+    GLuint fshader;
+    path = [[NSBundle mainBundle] pathForResource:@(frag) ofType:@"fsh"];
+    if (![self compileShader:&fshader type:GL_FRAGMENT_SHADER file:path headers:headers]) {
         NSLog(@"Failed to compile fragment shader");
         exit(1);
     }
     
-    glAttachShader(_program, _vshader);
-    glAttachShader(_program, _fshader);
+    glAttachShader(_program, vshader);
+    glAttachShader(_program, fshader);
     
-    if (![self link:_program]) {
-        NSLog(@"Failed to link program: %d", _program);
-        exit(1);
-        
-        if (_vshader) {
-            glDeleteShader(_vshader);
-            _vshader = 0;
+    if (![self link:_program])
+    {
+        if (vshader) {
+            glDeleteShader(vshader);
         }
-        if (_fshader) {
-            glDeleteShader(_fshader);
-            _fshader = 0;
+        if (fshader) {
+            glDeleteShader(fshader);
         }
         if (_program) {
             glDeleteProgram(_program);
             _program = 0;
         }
         
-        return NO;
+        NSLog(@"Failed to link program: %d", _program);
+        exit(1);
     }
     
     // Release vertex and fragment shaders.
-    if (_vshader) {
-        glDetachShader(_program, _vshader);
-        glDeleteShader(_vshader);
-        _vshader = 0;
+    if (vshader) {
+        glDetachShader(_program, vshader);
+        glDeleteShader(vshader);
     }
-    if (_fshader) {
-        glDetachShader(_program, _fshader);
-        glDeleteShader(_fshader);
-        _fshader = 0;
+    if (fshader) {
+        glDetachShader(_program, fshader);
+        glDeleteShader(fshader);
     }
 #if DEBUG
     NSLog(@"shader program: %d", _program);
-#endif    
+#endif
     return YES;
-}
-
-- (BOOL)compileShader:(GLuint *)shader type:(GLenum)type file:(NSString *)file
-{
     
+}
+- (BOOL)compileShader:(GLuint *)shader type:(GLenum)type file:(NSString *)file headers:(NSString * )headers
+{
     NSString * src = [NSString stringWithContentsOfFile:file
-                                                  encoding:NSUTF8StringEncoding
-                                                     error:nil] ;
+                                               encoding:NSUTF8StringEncoding
+                                                  error:nil] ;
     if (!src) {
         NSLog(@"Failed to load vertex shader %@",file);
         exit(1);
     }
-
-    if( _header )
-        src = [_header stringByAppendingString:src];
+    
+    if( [headers length])
+        src = [headers stringByAppendingString:src];
     
     const GLchar *source = [src UTF8String];
-
+    
     *shader = glCreateShader(type);
     glShaderSource(*shader, 1, &source, NULL);
     glCompileShader(*shader);
@@ -283,20 +172,11 @@ static NSMutableDictionary * __shaders;
 
 -(void)dealloc
 {
-    if (_vshader) {
-        glDeleteShader(_vshader);
-        _vshader = 0;
-    }
-    if (_fshader) {
-        glDeleteShader(_fshader);
-        _fshader = 0;
-    }
-    
     /*
-     If a program object to be deleted has shader objects attached to it, those shader 
-     objects will be automatically detached but not deleted unless they have already 
+     If a program object to be deleted has shader objects attached to it, those shader
+     objects will be automatically detached but not deleted unless they have already
      been flagged for deletion by a previous call to glDeleteShader.
-    */
+     */
     
     if( _program )
     {
@@ -304,5 +184,149 @@ static NSMutableDictionary * __shaders;
         glDeleteProgram(_program);
         _program = 0;
     }
+}
+@end
+
+
+@interface Shader () {
+    const char ** _names;
+    int           _numVars;
+    int           _lastAttr;
+    GLint         _vars[MAX_SHADER_VARIABLES];
+    id            _poolKey;
+    ShaderLocations * _locations;
+}
+
+@end
+@implementation Shader
+
++(id)shaderWithVertex:(const char *)vert
+          andFragment:(const char *)frag
+          andVarNames:(const char **)names
+          andNumNames:(int)numNames
+          andLastAttr:(int)lastAttr
+           andHeaders:(NSString *)headers
+{
+    Shader * shader = [Shader shaderFromPoolWithVertex:vert
+                                           andFragment:frag
+                                           andVarNames:names
+                                           andNumNames:numNames
+                                           andLastAttr:lastAttr
+                                            andHeaders:headers];
+    if( !shader )
+    {
+        shader = [[Shader alloc] initWithVertex:vert
+                                    andFragment:frag
+                                    andVarNames:names
+                                    andNumNames:numNames
+                                    andLastAttr:lastAttr
+                                     andHeaders:headers];
+    }
+    return shader;
+}
+
++(id)shaderFromPoolWithVertex:(const char *)vert
+                  andFragment:(const char *)frag
+                  andVarNames:(const char **)names
+                  andNumNames:(int)numNames
+                  andLastAttr:(int)lastAttr
+                   andHeaders:(NSString *)headers
+{
+    NSString * tag = [headers length] ? headers : @"default";
+    NSString * shaderId = [NSString stringWithFormat:@"%s-%s-%@",vert,frag,tag];
+    Shader * foundShader = nil;
+    if( __shaders )
+    {
+        for( Shader * testShader in __shaders )
+        {
+            if( [testShader->_poolKey isEqualToString:shaderId] )
+            {
+                foundShader = testShader;
+                break;
+            }
+        }
+    }
+#ifdef DEBUG
+    if( foundShader )
+        NSLog(@"reusing shader %d - %@",foundShader.program,shaderId);
+#endif
+    return foundShader;
+}
+
+-(id)initWithVertex:(const char *)vert
+        andFragment:(const char *)frag
+        andVarNames:(const char **)names
+        andNumNames:(int)numNames
+        andLastAttr:(int)lastAttr
+         andHeaders:(NSString *)headers
+{
+    if( !(self = [super init]) )
+        return nil;
+
+    _names = names;
+    _lastAttr = lastAttr;
+    _numVars = numNames;
+    
+    for( int i = 0; i < MAX_SHADER_VARIABLES; i++ )
+        _vars[i] = -1;
+    
+    if( ![self loadAndCompile:vert andFragment:frag andHeaders:headers] )
+        return nil;
+
+    _locations = [[ShaderLocations alloc] initWithShader:self];
+    [self getLocationsForNames];
+    
+    NSString * tag = [headers length] ? headers : @"default";
+    _poolKey = [NSString stringWithFormat:@"%s-%s-%@",vert,frag,tag];
+    if( !__shaders )
+        __shaders = [NSHashTable weakObjectsHashTable];
+    [__shaders addObject:self];
+    return self;
+}
+
+-(void)dealloc
+{
+    [__shaders removeObject:self];
+}
+
+#pragma mark - public
+
+- (void)getLocationsForNames
+{
+    [self use];
+    for( int i = 0; i < _numVars; i++ )
+        [self location:i];
+}
+
+- (GLint)location:(int)indexIntoNames
+{
+    if( _vars[indexIntoNames] == -1 )
+    {
+        if( indexIntoNames > _lastAttr )
+            _vars[indexIntoNames] = glGetUniformLocation(_program, _names[indexIntoNames]);
+        else
+            _vars[indexIntoNames] = glGetAttribLocation(_program, _names[indexIntoNames]);
+#if DEBUG
+        if( !_acceptMissingVars && _vars[indexIntoNames] == -1 )
+        {
+            NSLog(@"Can't find attr/uniform for (%d) %s in program %d", indexIntoNames, _names[indexIntoNames],_program);
+            exit(1);
+        }
+#endif
+    }
+    
+    return _vars[indexIntoNames];
+}
+
+- (void)writeToLocation:(int)indexIntoNames type:(TGUniformType)type data:(void*)data
+{
+    if( _acceptMissingVars && _vars[indexIntoNames] == -1 )
+        return;
+    [_locations writeToLocation:_vars[indexIntoNames] type:type data:data];
+}
+
+- (void) prepareRender:(TG3dObject *)object
+{
+    
 }
 @end

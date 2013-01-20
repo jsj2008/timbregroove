@@ -81,7 +81,7 @@
 					<key>userData</key>
 					<dict>
 						<key>instanceClass</key>
-						<string>CustomPlane</string>
+						<string>StockDemo</string>
 					</dict>
 					<key>icon</key>
 					<string>test.png</string>

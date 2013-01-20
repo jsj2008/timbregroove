@@ -32,10 +32,7 @@
 -(bool)loadFromFile:(NSString *)fileName;
 -(bool)loadFromImage:(UIImage *)image;
 
--(void)bindTarget:(int)i;
+-(void)bind:(int)target;
 -(void)unbind;
-
-// er, instant obsolesence
--(void)bind:(Shader *)shader target:(int)i;
 
 @end

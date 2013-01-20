@@ -18,12 +18,23 @@
 
 @implementation MenuItem
 
+-(id)init
+{
+    return [super init];
+}
+
 #if DEBUG
 -(void)render:(NSUInteger)w h:(NSUInteger)h
 {
     [super render:w h:h];
 }
 #endif
+
+-(void)createBuffer
+{
+    [self addBuffer:_buffer];
+    _buffer = nil;
+}
 
 -(void)onTap:(UITapGestureRecognizer *)tgr;
 {

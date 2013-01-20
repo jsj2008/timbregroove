@@ -7,6 +7,7 @@
 //
 
 #import "TG3dObject.h"
+#import "GenericShader.h"
 
 @class MeshBuffer;
 @class Texture;
@@ -22,28 +23,14 @@
 @property (nonatomic) GLKVector4 color;
 
 @property (nonatomic) bool       lighting;
+@property (nonatomic) bool       useColor;
+
 @property (nonatomic) GLKVector3 lightDir;
 @property (nonatomic) GLKVector3 dirColor;
 @property (nonatomic) GLKVector3 ambient;
-// these are order dependant
-//==============================================
-// write your own version of this:
+
+// derivations write these
 -(void)createBuffer;
-// that calls this:
--(MeshBuffer *)createBufferDataByType:(NSArray *)svars
-                          numVertices:(unsigned int)numVerticies
-                           numIndices:(unsigned int)numIndices;
-
-// or this
--(MeshBuffer *)createBufferDataByType:(NSArray *)svars
-                          numVertices:(unsigned int)numVerticies
-                           numIndices:(unsigned int)numIndices
-                             uniforms:(NSDictionary*)uniformNames;
-
-// which will call you back here:
--(void)getBufferData:(void *)vertextData
-           indexData:(unsigned *)indexData;
-
 -(void)configureLighting;
 
 // default behavoirs of these should be fine:
@@ -58,7 +45,7 @@
   Simple single texture shader support
 */
 @interface Generic : GenericBase 
-// NSString * or NSURL * to asset-library
+// NSString or filename or NSURL to asset-library
 @property (nonatomic, strong)   id        textureFileName;
 @property (nonatomic, strong)   Texture * texture;
 -(void)createTexture;

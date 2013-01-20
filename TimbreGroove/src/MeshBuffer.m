@@ -19,7 +19,7 @@
     TGVertexStride _strides[MAX_STRIDES];
     unsigned int   _numStrides;
     unsigned int   _strideSize;
-    NSMutableArray * __svTypes;
+    GLsizei        _bufferSize;
 }
 @end;
 
@@ -30,16 +30,11 @@
     if( (self = [super init]) )
     {
         _drawType = GL_TRIANGLES;
+        _usage = GL_STATIC_DRAW;
         _glIBuffer = -1;
-        __svTypes = [NSMutableArray new];
     }
     
     return self;
-}
-
--(NSArray *)getSvTypes
-{
-    return __svTypes;
 }
 
 -(void)draw
@@ -75,11 +70,25 @@
     for( int i = 0; i < _numStrides; i++ )
     {
         TGVertexStride * stride = _strides + i;
-        if( !stride->shaderAttrName )
-            stride->location = [shader location:stride->tgVarType];
-        else
-            stride->location = glGetAttribLocation(shader.program, stride->shaderAttrName);        
+        stride->location = [shader location:stride->indexIntoShaderNames];
     }
+}
+
+-(NSArray *)indicesIntoShaderNames
+{
+    NSMutableArray * arr = [NSMutableArray new];
+    for( int i = 0; i < _numStrides; i++ )
+    {
+        TGVertexStride * stride = _strides + i;
+        [arr addObject:@(stride->indexIntoShaderNames)];
+    }
+    return arr;
+}
+
+-(void)setData: (float *)data
+{
+    glBindBuffer(GL_ARRAY_BUFFER, _glVBuffer);
+    glBufferData(GL_ARRAY_BUFFER, _bufferSize, data, _usage);
 }
 
 -(void)setData: (float *)data
@@ -101,15 +110,14 @@
     {
         TGVertexStride * stride = strides + i;
         strideSize += (stride->numSize * stride->numbersPerElement);
-        [__svTypes addObject:@(stride->tgVarType)];
     }
 
-    GLsizei bufferSize = strideSize * numVertices;
+    GLsizei bufferSize = _bufferSize = strideSize * numVertices;
     
     glGenBuffers(1, &_glVBuffer);
     NSLog(@"created vertex buffer: %d",_glVBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, _glVBuffer);
-    glBufferData(GL_ARRAY_BUFFER, bufferSize, data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, bufferSize, data, _usage);
     
     _strideSize = strideSize;
     _numVertices = numVertices;
@@ -123,7 +131,7 @@
     glGenBuffers(1, &_glIBuffer);
     NSLog(@"created index buffer: %d",_glIBuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glIBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof(unsigned int), data, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof(unsigned int), data, _usage);
 }
 
 -(void)bind
@@ -158,22 +166,9 @@
 }
 
 // TODO: this probably belongs somewhere else
--(bool)assignMeshToShader:(Shader *)shader atLocation:(GLuint)location
+-(bool)bindToTempLocation:(GLuint)location
 {
-    unsigned int     strideOffset = 0;
-    TGVertexStride * stride;
-    int i;
-    for( i = 0; i < _numStrides; i++ )
-    {
-        stride = _strides + i;
-        if( stride->tgVarType == sv_pos )
-            break;
-        strideOffset += (stride->numSize * stride->numbersPerElement);
-    }
-
-    if( i == _numStrides )
-        return false;
-    
+    TGVertexStride * stride = _strides; // WAHOO!! assume the first stride is position!!!    
     glBindBuffer(GL_ARRAY_BUFFER, _glVBuffer);
     glEnableVertexAttribArray(location);
     glVertexAttribPointer( location,
@@ -181,7 +176,9 @@
                           stride->glType,
                           GL_FALSE,
                           _strideSize,
-                          BUFFER_OFFSET(strideOffset));
+                          BUFFER_OFFSET(0));
+    if( _glIBuffer != -1 )
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glIBuffer);
     return true;
 }
 
@@ -191,7 +188,7 @@
         glDeleteBuffers(1, &_glVBuffer);
     if( glIsBuffer(_glIBuffer))
         glDeleteBuffers(1, &_glIBuffer);
-    NSLog(@"Deleted buffers %d/%d",_glIBuffer,_glVBuffer);
+    NSLog(@"Deleted buffers index: %d/ vertex: %d",_glIBuffer,_glVBuffer);
     _glIBuffer = -1;
     _glVBuffer = 0;
 }

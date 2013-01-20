@@ -37,8 +37,8 @@
     
     _currentColor    = 1;
     _objDict         = [NSMutableDictionary new];
-    shader           = [ShaderPool getShader:@"generic" klass:[GenericShader class] header:@""];
-    _posLocation     = [shader location:sv_pos];
+    shader           = [GenericShader shaderWithHeaders:nil];
+    _posLocation     = [shader location:gv_pos];
     
     
 /*
@@ -77,7 +77,7 @@
             GLKVector4 color = NTC(_currentColor);
             shader.color = color;
             shader.pvm = [child calcPVM];
-            [child renderToCapture:shader atLocation:_posLocation];
+            [child renderToCaptureAtBufferLocation:_posLocation];
             _objDict[@(_currentColor)] = child;
             ++_currentColor;
         }

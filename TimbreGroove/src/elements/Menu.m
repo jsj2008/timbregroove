@@ -10,6 +10,7 @@
 #import "Menu.h"
 #import "MenuItem.h"
 #import "MenuView.h"
+#import "GridPlane.h"
 
 @interface Menu() {
 
@@ -51,6 +52,11 @@
                         {
                             return [(NSNumber *)obj1[@"order"] compare:obj2[@"order"]];
                         }];
+    
+    GridPlane * gp = [GridPlane gridWithIndicesIntoNames:@[@(gv_pos),@(gv_uv)]
+                                                andDoUVs:true
+                                            andDoNormals:false];
+    
     for( NSString *key in sortedKeys )
     {
         NSDictionary * menuItem = _meta[key];
@@ -62,9 +68,10 @@
 
         GLKVector3 position = { 0, y, 0 };
         
+        mi.buffer          = gp;
         mi.textureFileName = imageName;
-        mi.position     = position;
-        mi.meta         = menuItem;
+        mi.position        = position;
+        mi.meta            = menuItem;
 
         [mi wireUp];
         [self appendChild:mi];

@@ -263,6 +263,13 @@
     [_currentTrackView shrinkToNothing:self notify:@"viewIsGone"];
 }
 
+-(void)dumpCurrentView
+{
+    [_currentTrackView.graph cleanChildren];
+    [_currentTrackView removeFromSuperview];
+    _currentTrackView = nil;
+    
+}
 - (void)viewIsGone
 {
     NSArray * trackViews = [self getTrackViews];
@@ -270,14 +277,13 @@
     {
         if( view != _currentTrackView )
         {
-            [_currentTrackView.graph cleanChildren];
-            [_currentTrackView removeFromSuperview];
+            [self dumpCurrentView];
             _currentTrackView = view;
             [_currentTrackView showAndPlay:SHOW_NOW];
             return;
         }
     }
-    _currentTrackView = nil;
+    [self dumpCurrentView];
 }
 
 - (void)makeDawView

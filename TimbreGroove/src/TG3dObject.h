@@ -30,12 +30,14 @@ typedef enum FBO_BindFlags
 -(void)renderToFBO;
 -(void)renderToFBOWithClear:(bool)clear;
 -(void)renderToFBOWithClear:(bool)clear andBindFlags:(FBO_BindFlags)flags;
--(void)renderToCapture:(Shader *)shader atLocation:(GLint)location;
+-(void)renderToCaptureAtBufferLocation:(GLint)location;
 
-@property (nonatomic,strong) Camera   * camera;
-@property (nonatomic,strong) Shader   * shader;
-@property (nonatomic,strong) GLKView  * view;
-@property (nonatomic,strong) FBO      * fbo;
+@property (nonatomic) NSTimeInterval totalTime;
+
+@property (nonatomic,strong) Camera  * camera;
+@property (nonatomic,strong) Shader  * shader;
+@property (nonatomic,strong) GLKView * view;
+@property (nonatomic,strong) FBO     * fbo;
 
 @property (nonatomic)        GLKVector3 position;
 @property (nonatomic)        GLKVector3 rotation;

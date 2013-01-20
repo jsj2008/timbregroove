@@ -12,12 +12,80 @@
 #import "FBO.h"
 #import "TrackView.h"
 #import "SettingsVC.h"
+#import "GridPlane.h"
 
-static NSString * const _str_bakerShaderPicker = @"bakerShader";
+/*=============================================================================*/
+/*      Shader       */
+ /*=============================================================================*/
+
+enum {
+    iba_position,
+    iba_uv,
+    IBA_LAST_ATTR = iba_uv,
+    ibu_pvm,
+    ibu_pixelSize,
+    ibu_timeDiff,
+    ibu_refreshing,
+    ibu_sampSnap,
+    ibu_sampXPix,
+    IBA_NUM_NAMES
+} ImageBaker_Variables;
+
+static const char * __iamgeBaker_vars[] =
+{
+    "a_position",
+    "a_uv",
+    "u_pvm",
+    "u_pixelSize",
+    "u_timeDiff",
+    "u_refreshing",
+    "u_sampSnap",
+    "u_sampXPix"
+    
+};
 
 static const char * __bakerShakerModes[] = {
     "BLUR_DOWN", "SOLARIZE", "BLEED_UP"
 };
+
+
+#define IMAGE_BAKER_SHADER_NAME "imageBaker"
+
+@interface ImageBakerShader : Shader
+
+@end
+
+@implementation ImageBakerShader
+
++(id)shaderWithShaderMode:(int)mode
+{
+    return [[ImageBakerShader alloc] initWithShaderMode:mode];
+}
+
+-(id)initWithShaderMode:(int)mode
+{
+    NSString * headers = [(@"#define ") stringByAppendingString:@(__bakerShakerModes[mode])];
+    self.acceptMissingVars = true; // sigh
+    return [super initWithVertex:IMAGE_BAKER_SHADER_NAME
+                        andFragment:IMAGE_BAKER_SHADER_NAME
+                        andVarNames:__iamgeBaker_vars
+                        andNumNames:IBA_NUM_NAMES
+                        andLastAttr:IBA_LAST_ATTR
+                         andHeaders:headers];
+    
+}
+
+-(void)prepareRender:(TG3dObject *)object
+{
+    GLKMatrix4 pvm = [object calcPVM];
+    [self writeToLocation:ibu_pvm type:TG_MATRIX4 data:pvm.m];
+}
+@end
+
+/*=============================================================================*/
+/*      Node      */
+/*=============================================================================*/
+static NSString * const _str_bakerShaderPicker = @"bakerShader";
 
 static const char *__bakeShakerNames[] = {
     "Blur me down", "Heat me up", "Burn me out"
@@ -63,16 +131,16 @@ static const float __bakeShakerTimes[] = {
 {
     [super wireUp];
     GLKView * glview = (GLKView *)(self.view.superview);
+    
     GLint w = glview.drawableWidth;
     GLint h = glview.drawableHeight;
     _px = 1.0f / w;
     _py = 1.0f / h;
     GLKVector2 pixelSize = { _px, _py };
-    [self.shader.locations write:@"u_pixelSize" type:TG_VECTOR2 data:&pixelSize];
-
-    _uSampler2 = [self.shader.locations locationForName:@"u_sampSnap"];
-    _uSampler1 = [self.shader.locations locationForName:@"u_sampXPix"];
+    [self.shader writeToLocation:ibu_pixelSize type:TG_VECTOR2 data:&pixelSize];
     
+    _uSampler1 = [self.shader location:ibu_sampXPix];
+    _uSampler2 = [self.shader location:ibu_sampSnap];
     self.camera = [IdentityCamera new];
 
     _picture = [[Texture alloc] initWithFileName:@"aotk-ass-bare-512.tif"];
@@ -89,7 +157,8 @@ static const float __bakeShakerTimes[] = {
 -(void)setRefreshing:(bool)value
 {
     _refreshing = value;
-    [self.shader.locations write:@"u_refreshing" type:TG_BOOL data:&_refreshing];
+    
+    [self.shader writeToLocation:ibu_refreshing type:TG_BOOL data:&_refreshing];
     if( _refreshing )
     {
         _picture.uLocation = _uSampler1;
@@ -113,30 +182,16 @@ static const float __bakeShakerTimes[] = {
 
 -(void)createShader
 {
-    NSString * header = [(@"#define ") stringByAppendingString:@(__bakerShakerModes[_mode])];
-    self.shader = [[GenericShader alloc] initWithName:@"imageBaker" andHeader:header];
+    self.shader = [ImageBakerShader shaderWithShaderMode:_mode];
 }
 
 -(void)createBuffer
 {
-    [self createBufferDataByType:@[@(sv_pos),@(sv_uv)] numVertices:6 numIndices:0];
-}
-
--(void)getBufferData:(void *)vertextData
-           indexData:(unsigned *)indexData
-{
-    static float v[6*(3+2)] = {
-        //   x   y  z    u    v
-        -1, -1, 0,   0,   0,
-        -1,  1, 0,   0,   1,
-        1, -1, 0,   1,   0,
-        
-        -1,  1, 0,   0,   1,
-        1,  1, 0,   1,   1,
-        1, -1, 0,   1,   0
-    };
     
-    memcpy(vertextData, v, sizeof(v));
+    GridPlane * gp = [GridPlane gridWithIndicesIntoNames:@[@(iba_position),@(iba_uv)]
+                                                andDoUVs:true
+                                            andDoNormals:false];
+    [self addBuffer:gp];
 }
 
 -(void)getTextureLocations
@@ -157,7 +212,7 @@ static const float __bakeShakerTimes[] = {
             _time2 = 0.0;
         }
         float f = _time2;
-        [self.shader.locations write:@"u_timeDiff" type:TG_FLOAT data:&f];
+        [self.shader writeToLocation:ibu_timeDiff type:TG_FLOAT data:&f];
     }
     else
     {

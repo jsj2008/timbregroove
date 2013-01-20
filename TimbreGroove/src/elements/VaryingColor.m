@@ -7,40 +7,89 @@
 //
 
 #import "VaryingColor.h"
-#import "TGViewController.h"
+#import "GenericShader.h"
+#import "GridPlane.h"
 
+@interface VaryingColor () {
+    MeshBuffer * _colorBuffer;
+}
 
+@end
 @implementation VaryingColor
 
 -(void)createBuffer
 {
-    [self createBufferDataByType:@[@(sv_pos),@(sv_acolor)] numVertices:6 numIndices:0];
+    GridPlane * gp = [GridPlane gridWithWidth:2.0
+                                     andGrids:1
+                          andIndicesIntoNames:@[@(gv_pos)]
+                                     andDoUVs:false
+                                 andDoNormals:false];
+    [self addBuffer:gp];
+    [self addColorBuffer];
 }
 
--(void)getBufferData:(void *)vertextData
-           indexData:(unsigned *)indexData
+#define R0_1() (((float)(arc4random_uniform(0x1000000) % 255))/255.0)
+
+-(void)addColorBuffer
 {
-    static float v[6*(3+4)] = {
-   //   x   y  z    r    g   b,  a,
-        -1, -1, 0,   0,   0,  1,  1,
-        -1,  1, 0,   0,   1,  0,  1,
-         1, -1, 0,   1,   0,  0,  1,
+    bool doAdd = false;
+    
+    if( !_colorBuffer )
+    {
+        _colorBuffer = [MeshBuffer new];
+        _colorBuffer.usage = GL_DYNAMIC_DRAW;
+        doAdd = true;
+    }
+    
+    float cr = R0_1();
+    float cg = R0_1();
+    float cb = R0_1();
+    float dr = R0_1();
+    float dg = R0_1();
+    float db = R0_1();
+    
+     float v[6*(3+4)] = {
+   //   r         g        b,     a,
+       R0_1(),   R0_1(),  R0_1(),  1,
+       cr,       cg,      cb,      1,
+       dr,       dg,      db,      1,
         
-        -1,  1, 0,   1,   1,  0,  1,
-         1,  1, 0,   1,   0,  1,  1,
-         1, -1, 0,   1,   1,  1,  1
+       cr,       cg,      cb,      1,
+       R0_1(),   R0_1(),  R0_1(),  1,
+       dr,       dg,      db,      1
     };
     
-    memcpy(vertextData, v, sizeof(v));
+    if( doAdd )
+    {
+        TGVertexStride stride;
+        StrideInit4f(&stride);
+        stride.indexIntoShaderNames = gv_acolor;
+        
+        [_colorBuffer setData:v strides:&stride countStrides:1 numVertices:6];
+        
+        [self addBuffer:_colorBuffer];
+    }
+    else
+    {
+        [_colorBuffer setData:v];
+    }
 }
 
 -(void)update:(NSTimeInterval)dt
 {
-    static NSTimeInterval __dt;
+    static NSTimeInterval __second;
     
-    __dt += (dt * 50.0f);
+    __second += dt;
     
-    GLfloat r = GLKMathDegreesToRadians(__dt);
+    if( __second > 1.0 )
+    {
+        [self addColorBuffer];
+        __second = 0;
+    }
+        
+    NSTimeInterval time = (self.totalTime * 50.0f);
+    
+    GLfloat r = GLKMathDegreesToRadians(time);
     
     GLKVector3 rot = { r, 0, 0 };
     self.rotation = rot;

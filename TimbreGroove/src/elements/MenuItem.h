@@ -11,9 +11,11 @@
 #import "Interactive.h"
 
 @class MenuView;
+@class MeshBuffer;
 
 @interface MenuItem : SimpleImage<MenuItemRender, Interactive>
 
+@property (nonatomic,strong) MeshBuffer * buffer;
 @property (nonatomic,strong) NSDictionary * meta;
 
 -(void)onTap:(UITapGestureRecognizer *)tgr;
