@@ -34,11 +34,4 @@ typedef enum {
 +(id)shaderWithHeaders:(NSString *)headers;
 -(id)initWithHeaders:(NSString *)headers;
 
-@property (nonatomic) GLKVector4 color;
-@property (nonatomic) GLKMatrix4 pvm;
-@property (nonatomic) GLKMatrix3 normalMat;
-@property (nonatomic) GLKVector3 lightDir;
-@property (nonatomic) GLKVector3 dirColor;
-@property (nonatomic) GLKVector3 ambient;
-
 @end

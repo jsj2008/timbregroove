@@ -143,7 +143,7 @@ static const float __bakeShakerTimes[] = {
     _uSampler2 = [self.shader location:ibu_sampSnap];
     self.camera = [IdentityCamera new];
 
-    _picture = [[Texture alloc] initWithFileName:@"aotk-ass-bare-512.tif"];
+    _picture = [[Texture alloc] initWithFileName:@"pool.png"]; // aotk-ass-bare-512.tif"];
     _fbo1 = [[FBO alloc] initWithWidth:w height:h];
     _fbo2 = [[FBO alloc] initWithWidth:w height:h];
     _fbo3 = [[FBO alloc] initWithWidth:w height:h];

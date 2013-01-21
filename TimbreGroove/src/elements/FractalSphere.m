@@ -9,6 +9,7 @@
 #import "FractalSphere.h"
 #import "Fractal.h"
 #import "FBO.h"
+#import "Light.h"
 
 @interface FractalSphere() {
     Fractal * _texRenderer;
@@ -26,13 +27,18 @@
     _texRenderer.fbo = _fbo;
     _texRenderer.backColor = GLKVector4Make(0.3, 0.3, 0.6, 1);
     [_texRenderer wireUp];
-    self.ambient = GLKVector3Make(0, 0.5, 1);
     return [super wireUp];
 }
 
 -(void)createTexture
 {
     self.texture = _fbo;
+}
+
+-(void)configureLighting
+{
+    self.light = [Light new]; // defaults are good
+    self.light.ambientColor = GLKVector4Make(0, 0.5, 1, 1);
 }
 
 -(void)update:(NSTimeInterval)dt

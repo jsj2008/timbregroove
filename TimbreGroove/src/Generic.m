@@ -12,6 +12,7 @@
 #import "Camera.h"
 #import "Texture.h"
 #import "AssetLoader.h"
+#import "Light.h"
 
 @interface GenericBase () {
 @protected
@@ -26,6 +27,7 @@
 
 -(void)clean
 {
+    [super clean];
     _buffers = nil;
 }
 
@@ -101,7 +103,8 @@
                 ns = @"#define COLOR\n";
                 break;
             case gv_normal:
-                _lighting = true; // how buried is this??
+                if( !_light ) // how buried is this??
+                    _light = [Light new];
                 ns = @"#define NORMAL\n";
                 break;
             case gv_uv:
@@ -120,8 +123,6 @@
 
 -(void)configureLighting
 {
-    self.lightDir = GLKVector3Make(0, 0.5, 0);
-    self.dirColor = GLKVector3Make(1, 1, 1);
 }
 
 #pragma mark -

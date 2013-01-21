@@ -35,7 +35,9 @@
 
 -(void)clean
 {
-    
+    _shader = nil;
+    _fbo = nil;
+    // _camera = nil; ???
 }
 
 -(id)rewire

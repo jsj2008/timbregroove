@@ -115,7 +115,7 @@
     GLsizei bufferSize = _bufferSize = strideSize * numVertices;
     
     glGenBuffers(1, &_glVBuffer);
-    NSLog(@"created vertex buffer: %d",_glVBuffer);
+    NSLog(@"created vertex buffer: %@ (%d)",self.description, _glVBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, _glVBuffer);
     glBufferData(GL_ARRAY_BUFFER, bufferSize, data, _usage);
     

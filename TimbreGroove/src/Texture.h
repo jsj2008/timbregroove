@@ -12,10 +12,11 @@
 @class Shader;
 
 @interface Material : NSObject
--(void)setAmbientColor:(float *)f;
--(void)setDiffuseColor:(float *)f;
--(void)setSpecularColor:(float *)f;
--(void)setShininess:(float)f;
+
+@property (nonatomic) GLKVector4 ambientColor;
+@property (nonatomic) GLKVector4 diffuseColor;
+@property (nonatomic) GLKVector4 specularColor;
+@property (nonatomic) float      shininess;
 @end
 
 @interface Texture : Material

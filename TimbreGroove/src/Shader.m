@@ -78,7 +78,7 @@ static NSHashTable * __shaders;
         glDeleteShader(fshader);
     }
 #if DEBUG
-    NSLog(@"shader program: %d", _program);
+    NSLog(@"created shader: %@ (%d)" ,self.description,_program);
 #endif
     return YES;
     

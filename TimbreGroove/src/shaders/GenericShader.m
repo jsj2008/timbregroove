@@ -8,6 +8,7 @@
 
 #import "GenericShader.h"
 #import "Generic.h"
+#import "Light.h"
 
 const char * _generic_shader_name = "generic";
 
@@ -65,59 +66,27 @@ static const char * _generic_shader_var_names[NUM_GENERIC_VARIABLES] = {
                         andHeaders: headers];
 }
 
--(void)setPvm:(GLKMatrix4)pvm
-{
-    [self writeToLocation:gv_pvm type:TG_MATRIX4 data:pvm.m];
-    _pvm = pvm;
-}
-
--(void)setNormalMat:(GLKMatrix3)normalMat
-{
-    [self writeToLocation:gv_normalMat type:TG_MATRIX3 data:normalMat.m];
-    _normalMat = normalMat;
-}
-
--(void)setLightDir:(GLKVector3)lightDir
-{
-    [self writeToLocation:gv_lightDir type:TG_VECTOR3 data:lightDir.v];
-    _lightDir = lightDir;
-}
-
--(void)setDirColor:(GLKVector3)dirColor
-{
-    [self writeToLocation:gv_dirColor type:TG_VECTOR3 data:dirColor.v];
-    _dirColor = dirColor;
-}
-
--(void)setColor:(GLKVector4)color
-{
-    [self writeToLocation:gv_ucolor type:TG_VECTOR4 data:color.v];
-    _color = color;
-}
-
--(void)setAmbient:(GLKVector3)ambient
-{
-    [self writeToLocation:gv_ambient type:TG_VECTOR3 data:ambient.v];
-    _ambient = ambient;
-}
-
 - (void) prepareRender:(TG3dObject *)tgobj
 {
     GenericBase * object = (GenericBase *)tgobj;
     
     GLKMatrix4 pvm = [object calcPVM];
-    self.pvm = pvm;
+    [self writeToLocation:gv_pvm type:TG_MATRIX4 data:pvm.m];
     
-    if( object.lighting )
+    if( object.light )
     {
-        self.normalMat = GLKMatrix3InvertAndTranspose(GLKMatrix4GetMatrix3(pvm), NULL);
-        self.lightDir  = object.lightDir;
-        self.dirColor  = object.dirColor;
-        self.ambient   = object.ambient;
+        Light * light = object.light;
+        
+        GLKMatrix3 normalMat = GLKMatrix3InvertAndTranspose(GLKMatrix4GetMatrix3(pvm), NULL);
+        [self writeToLocation:gv_normalMat type:TG_MATRIX3 data:normalMat.m];
+        
+        [self writeToLocation:gv_lightDir type:TG_VECTOR3 data:light.direction.v];
+        [self writeToLocation:gv_dirColor type:TG_VECTOR3 data:light.dirColor.v];
+        [self writeToLocation:gv_ambient  type:TG_VECTOR3 data:light.ambientColor.v];
     }
     
     if( object.useColor )
-        self.color = object.color;
+        [self writeToLocation:gv_ucolor type:TG_VECTOR4 data:object.color.v];
 }
 
 @end

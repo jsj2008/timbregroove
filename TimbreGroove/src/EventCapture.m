@@ -75,8 +75,8 @@
         if( [child conformsToProtocol:@protocol(Interactive) ] )
         {
             GLKVector4 color = NTC(_currentColor);
-            shader.color = color;
-            shader.pvm = [child calcPVM];
+            [shader writeToLocation:gv_ucolor type:TG_VECTOR4 data:color.v];
+            [shader writeToLocation:gv_pvm type:TG_MATRIX4 data:[child calcPVM].m];
             [child renderToCaptureAtBufferLocation:_posLocation];
             _objDict[@(_currentColor)] = child;
             ++_currentColor;

@@ -33,9 +33,12 @@ const char * _fire_shader_name = "FireShader";
 
 -(id)init
 {
-    self = [super initWithVertex:_fire_shader_name andFragment:_fire_shader_name
-                     andVarNames:_fire_names andNumNames:FV_NUM_NAMES
-                     andLastAttr:FV_LAST_ATTR andHeaders:nil];
+    self = [super initWithVertex:_fire_shader_name
+                     andFragment:_fire_shader_name
+                     andVarNames:_fire_names
+                     andNumNames:FV_NUM_NAMES
+                     andLastAttr:FV_LAST_ATTR
+                      andHeaders:nil];
 
     return self;
 }

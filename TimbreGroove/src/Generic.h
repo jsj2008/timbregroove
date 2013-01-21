@@ -12,6 +12,7 @@
 @class MeshBuffer;
 @class Texture;
 @class Shader;
+@class Light;
 
 @interface GenericBase : TG3dObject {
 @protected
@@ -20,14 +21,11 @@
 
 @property (nonatomic, readonly) bool hasTexture;
 
+
+@property (nonatomic,strong) Light * light;
+
 @property (nonatomic) GLKVector4 color;
-
-@property (nonatomic) bool       lighting;
 @property (nonatomic) bool       useColor;
-
-@property (nonatomic) GLKVector3 lightDir;
-@property (nonatomic) GLKVector3 dirColor;
-@property (nonatomic) GLKVector3 ambient;
 
 // derivations write these
 -(void)createBuffer;

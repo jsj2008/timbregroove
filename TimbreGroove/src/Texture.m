@@ -10,18 +10,11 @@
 #import "Shader.h"
 
 @interface Material () {
-    GLKVector4 _ambient;
-    GLKVector4 _diffuse;
-    GLKVector4 _specular;
-    float      _shininess;
 }
 
 @end
+
 @implementation Material
--(void)setAmbientColor:(float *)f  { memcpy(_ambient.v,   f, sizeof(GLKVector4)); }
--(void)setDiffuseColor:(float *)f  { memcpy(_diffuse.v,   f, sizeof(GLKVector4)); }
--(void)setSpecularColor:(float *)f { memcpy(_specular.v,  f, sizeof(GLKVector4)); }
--(void)setShininess:(float)f       { _shininess = f; };
 @end
 
 #pragma mark -
