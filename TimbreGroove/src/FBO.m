@@ -15,6 +15,12 @@
 @end
 @implementation FBO
 
+- (id)init
+{
+    CGSize sz = [[UIScreen mainScreen] bounds].size;
+    
+    return [self initWithWidth:sz.width height:sz.height];
+}
 - (id) initWithWidth:(GLuint)width
               height:(GLuint)height
 {

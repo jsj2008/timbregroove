@@ -14,14 +14,14 @@ uniform mat3 normalMatrix;
 
 varying vec3 eyespaceNormal; 
 varying vec4 eyespacePosition;
-//varying vec2 textureCoordinate;
 varying vec3 objectspacePosition;
 
+varying vec2 textureCoordinate;
 
 void main(void)
 {
     
-//    textureCoordinate = texture;
+    textureCoordinate = texture;
     objectspacePosition = position.xyz;
     
     eyespaceNormal = normalMatrix * normal;

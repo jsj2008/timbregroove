@@ -29,7 +29,7 @@
 const char * _pool_names[] = {
     "position",
     "normal",
-//    "texture",
+    "texture",
     "modelViewProjectionMatrix",
     "modelViewMatrix",
     "normalMatrix",
@@ -58,10 +58,16 @@ const char * _pool_shader_name = "PoolShader";
         [self writeToLocation:pool_specColor type:TG_VECTOR4 data:spec.v];
         float shine = 0.5f;
         [self writeToLocation:pool_shininess type:TG_FLOAT data:&shine];
-        GLKVector4 lightPos =  { 0, 0, -1, 0 };
-        [self writeToLocation:pool_lightPos type:TG_VECTOR4 data:lightPos.v];        
+        self.lightPos =  (GLKVector3){ 0, 0, -3 };
     }
     return self;
+}
+
+-(void)setLightPos:(GLKVector3)lightPos
+{
+    GLKVector4 pos = GLKVector4Make(lightPos.x, lightPos.y, lightPos.z, 0);
+    [self writeToLocation:pool_lightPos type:TG_VECTOR4 data:pos.v];
+    _lightPos = lightPos;
 }
 
 -(void)prepareRender:(TG3dObject *)object
@@ -74,8 +80,6 @@ const char * _pool_shader_name = "PoolShader";
     [self writeToLocation:pool_mvm       type:TG_MATRIX4 data:modelView.m];
     [self writeToLocation:pool_normalMat type:TG_MATRIX3 data:normalMat.m];
     
-    float time = (float)object.totalTime;
-    [self writeToLocation:pool_time type:TG_FLOAT data:&time];
 }
 
 @end

@@ -24,7 +24,7 @@
  */
 
 #import <Foundation/Foundation.h>
-
+#import "Tween.h"
 /**
  * The Isgl3dTweener provides a control class to all Isgl3dTweens. 
  * 

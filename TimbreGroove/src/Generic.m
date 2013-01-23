@@ -168,13 +168,28 @@
 
     [self bindTextures:true];
     
-    for( MeshBuffer * b in _buffers )
+    if( [_buffers count] == 1 )
     {
+        MeshBuffer * b = _buffers[0];
         [b bind];
         [b draw];
         [b unbind];
     }
-    
+    else
+    {
+        MeshBuffer * drawable;
+        for( MeshBuffer * b in _buffers )
+        {
+            [b bind];
+            if( b.drawable )
+                drawable = b;
+        }
+        [drawable draw];
+        for( MeshBuffer * b in _buffers )
+        {
+            [b unbind];
+        }
+    }
     [self bindTextures:false];
 }
 

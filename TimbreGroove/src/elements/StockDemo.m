@@ -13,6 +13,7 @@
 #import "GridPlane.h"
 #import "SphereOid.h"
 #import "Torus.h"
+#import "Cube.h"
 
 #import "Fire.h"
 #import "Cloud.h"
@@ -81,6 +82,7 @@ typedef enum shaderType {
     if( _shaderType == pool )
     {
         self.texture = [[Texture alloc] initWithFileName:@"pool.png"];
+        //self.texture.repeat = true;
     }
 }
 
@@ -100,22 +102,33 @@ typedef enum shaderType {
     
     if( _shaderType == fire )
         indicesIntoNames = @[@(fv_position),@(fv_normal)];
-    else if( _shaderType == pool )
-        indicesIntoNames = @[@(pool_position),@(pool_normal)];
     else if( _shaderType == cloud )
         indicesIntoNames = @[@(cld_position),@(cld_normal)];
+    else if( _shaderType == pool )
+    {
+        indicesIntoNames = @[@(pool_position),@(pool_uv),@(pool_normal)];
+        UVs = true;
+    }
     
     if( [_geometryName isEqualToString:@"GridPlane"] )
     {
-        buffer = [GridPlane gridWithIndicesIntoNames:indicesIntoNames
-                                            andDoUVs:UVs
-                                        andDoNormals:true];
+        buffer = [GridPlane gridWithWidth:2
+                                 andGrids:10
+                      andIndicesIntoNames:indicesIntoNames
+                                 andDoUVs:UVs
+                             andDoNormals:true];
     }
     else if( [_geometryName isEqualToString:@"Torus"] )
     {
         buffer = [Torus torusWithIndicesIntoNames:indicesIntoNames
                                          andDoUVs:UVs
                                      andDoNormals:true];
+    }
+    else if( [_geometryName isEqualToString:@"Cube"] )
+    {
+        buffer = [Cube cubeWithIndicesIntoNames:indicesIntoNames
+                                         andDoUVs:UVs
+                                     andDoNormals:true];        
     }
     else
     {
@@ -141,7 +154,8 @@ typedef enum shaderType {
                                              initialValue: _shaderName
                                                  priority: SHADER_SETTINGS];
 
-    NSDictionary * shapes = @{ @"SphereOid": @"Ball", @"GridPlane":@"Board", @"Torus":@"Donut" };
+    NSDictionary * shapes = @{ @"SphereOid": @"Ball", @"GridPlane":@"Board",
+                                @"Torus":@"Donut", @"Cube":@"Box" };
     
     SettingsDescriptor * sd2;
     sd2 = [[SettingsDescriptor alloc] initWithControlType: SC_Picker

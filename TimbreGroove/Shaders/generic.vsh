@@ -14,7 +14,7 @@ varying lowp vec2 v_texCoordOut;
 
 #ifdef COLOR
 attribute vec4 a_color;
-varying lowp vec4 v_color;
+varying vec4 v_color;
 #endif
 
 #ifdef NORMAL

@@ -32,6 +32,7 @@
         _drawType = GL_TRIANGLES;
         _usage = GL_STATIC_DRAW;
         _glIBuffer = -1;
+        _drawable = true;
     }
     
     return self;
@@ -191,5 +192,17 @@
     NSLog(@"Deleted buffers index: %d/ vertex: %d",_glIBuffer,_glVBuffer);
     _glIBuffer = -1;
     _glVBuffer = 0;
+}
+@end
+
+@implementation ColorBuffer
+
+-(void)setDataWithRGBAs:(float *)rgba numColors:(unsigned int)numColors indexIntoNames:(int)indexIntoNames
+{
+    TGVertexStride stride;
+    StrideInit4f(&stride);
+    stride.indexIntoShaderNames = indexIntoNames;
+    [self setData:rgba strides:&stride countStrides:1 numVertices:numColors];    
+    self.drawable = false;
 }
 @end

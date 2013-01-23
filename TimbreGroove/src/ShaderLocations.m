@@ -32,6 +32,9 @@
 
 -(void)writeToLocation:(GLint)location type:(TGUniformType)type data:(void*)data
 {
+    float * pf = (float *)data;
+    GLKVector2 v2;
+    
     switch(type)
     {
         case TG_FLOAT:
@@ -39,7 +42,8 @@
             break;
             
         case TG_VECTOR2:
-            glUniform2fv(location, 1, data);
+            v2 = GLKVector2Make(*pf, *(pf+1));
+            glUniform2fv(location, 1, &v2.x);
             break;
             
         case TG_VECTOR3:

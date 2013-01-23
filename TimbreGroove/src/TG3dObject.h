@@ -23,7 +23,10 @@ typedef enum FBO_BindFlags
     FBOBF_SkipUnbind
 } FBO_BindFlags;
 
-@interface TG3dObject : Node
+@interface TG3dObject : Node {
+@protected
+    Shader * _shader;
+}
 
 -(void)update:(NSTimeInterval)dt;
 -(void)render:(NSUInteger)w h:(NSUInteger)h;
@@ -33,6 +36,7 @@ typedef enum FBO_BindFlags
 -(void)renderToCaptureAtBufferLocation:(GLint)location;
 
 @property (nonatomic) NSTimeInterval totalTime;
+@property (nonatomic) NSTimeInterval timer;
 
 @property (nonatomic,strong) Camera  * camera;
 @property (nonatomic,strong) Shader  * shader;

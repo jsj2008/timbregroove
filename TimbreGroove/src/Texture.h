@@ -22,7 +22,7 @@
 @interface Texture : Material
 
 @property (nonatomic) GLint uLocation;    // frag. shader sampler uniform location
-
+@property (nonatomic) bool repeat;
 @property (nonatomic,readonly) CGSize orgSize; // size of original image used
 
 -(id)initWithFileName:(NSString *)fileName;
@@ -37,3 +37,4 @@
 -(void)unbind;
 
 @end
+

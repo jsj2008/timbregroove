@@ -157,6 +157,11 @@
     glBindTexture(GL_TEXTURE_2D, _glTexture);
     glUniform1i(_uLocation, target);
     _target = target;
+    if( _repeat )
+    {
+        glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+        glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+    }
 }
 
 -(void)unbind
@@ -171,4 +176,5 @@
     NSLog(@"Deleted texture: %d",_glTexture);
     _glTexture = 0;
 }
+
 @end

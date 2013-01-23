@@ -9,6 +9,8 @@
 #ifndef TimbreGroove_TGTypes_h
 #define TimbreGroove_TGTypes_h
 
+#define R0_1() (((float)(arc4random_uniform(0x1000000) % 255))/255.0)
+
 typedef enum {
     TG_FLOAT,
     TG_VECTOR2,

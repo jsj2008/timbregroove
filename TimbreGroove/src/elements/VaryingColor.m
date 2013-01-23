@@ -28,8 +28,6 @@
     [self addColorBuffer];
 }
 
-#define R0_1() (((float)(arc4random_uniform(0x1000000) % 255))/255.0)
-
 -(void)addColorBuffer
 {
     bool doAdd = false;

@@ -46,6 +46,7 @@ static inline TGVertexStride * StrideInit4f(TGVertexStride * s)
 
 @property (nonatomic) TGDrawType  drawType;
 @property (nonatomic) GLenum      usage;
+@property (nonatomic) bool        drawable;
 @property (nonatomic) GLuint      glVBuffer;
 @property (nonatomic) GLuint      glIBuffer;
 
@@ -75,4 +76,8 @@ static inline TGVertexStride * StrideInit4f(TGVertexStride * s)
 // TODO: this probably belongs somewhere else
 -(bool)bindToTempLocation:(GLuint)location;
 
+@end
+
+@interface ColorBuffer : MeshBuffer
+-(void)setDataWithRGBAs:(float *)rgba numColors:(unsigned int)numColors indexIntoNames:(int)indexIntoNames;
 @end

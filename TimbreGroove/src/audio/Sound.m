@@ -13,6 +13,10 @@
 @interface Sound () {
     FMOD_SOUND *   _sound;
     FMOD_CHANNEL * _channel;
+    FMOD_CHANNELGROUP * _channelGroup;
+    float _pitch;
+    float _volume;
+    float _freq;
 }
 @end
 
@@ -42,24 +46,36 @@
         result = FMOD_System_PlaySound(system, FMOD_CHANNEL_FREE, _sound, true, &_channel);
         ERRCHECK(result);
 
-        /*
-        result = channel->setUserData((__bridge void *)self);
+        result = FMOD_Channel_GetFrequency(_channel, &_freq);
         ERRCHECK(result);
-         */
     }
     
     return self;
 }
 
+-(void)setPitch:(float)pitch
+{
+    FMOD_RESULT result = FMOD_Channel_SetFrequency(_channel, pitch);
+    ERRCHECK(result);
+}
+
+-(float)pitch
+{
+    FMOD_RESULT result = FMOD_Channel_GetFrequency(_channel, &_pitch);
+    ERRCHECK(result);
+    return _pitch;
+}
+
 -(float)volume
 {
-    float v;
-    FMOD_RESULT result = FMOD_Channel_GetVolume(_channel,&v);
+    FMOD_RESULT result = FMOD_Channel_GetVolume(_channel, &_volume);
     ERRCHECK(result);
-    return v;
+    return _volume;
 }
+
 -(void)setVolume:(float)volume
 {
+    _volume = volume;
     FMOD_RESULT result = FMOD_Channel_SetVolume(_channel,volume);
     ERRCHECK(result);
 }

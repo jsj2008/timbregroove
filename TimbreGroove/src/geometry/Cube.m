@@ -154,7 +154,7 @@ andIndicesIntoNames:(NSArray *)indicesIntoNames
         }
     }
     
-    GLushort indices[] =
+    unsigned int indices[] =
     {
         0, 2, 1,
         0, 3, 2,
@@ -170,7 +170,8 @@ andIndicesIntoNames:(NSArray *)indicesIntoNames
         20, 22, 21
     };
     
-    memcpy(indexData, indices, sizeof(indices));
+    if( indexData )
+        memcpy(indexData, indices, sizeof(indices));
 }
 
 @end

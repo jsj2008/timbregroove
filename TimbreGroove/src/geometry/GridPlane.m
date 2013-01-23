@@ -70,8 +70,8 @@ andIndicesIntoNames:(NSArray *)indicesIntoNames
             if( withUVs )
             {
                 v = (1.0f / _width) * (y + _width/2.0);
-                *pos++ = u;
-                *pos++ = v;
+                *pos++ = u; // * _gridSize;
+                *pos++ = v; // * _gridSize;
             }
             if( withNormals )
             {

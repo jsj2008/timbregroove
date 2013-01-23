@@ -13,6 +13,7 @@
 @property (nonatomic) bool  paused;
 @property (nonatomic) float volume;
 @property (nonatomic) float prevVolume;
+@property (nonatomic) float pitch;
 
 -(id)initWithFile:(const char *)fileName;
 -(void)play;

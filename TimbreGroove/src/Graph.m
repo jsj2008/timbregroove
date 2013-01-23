@@ -15,6 +15,7 @@
     for( TG3dObject * child in children )
     {
         child.totalTime += dt;
+        child.timer += dt;
         [child update:dt];
         NSArray * c = child.children;
         if( c )

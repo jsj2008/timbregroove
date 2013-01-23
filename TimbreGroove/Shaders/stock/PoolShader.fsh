@@ -6,7 +6,6 @@
 
 varying mediump vec3 eyespaceNormal;
 varying highp vec4 eyespacePosition;
-// varying mediump vec2 textureCoordinate;
 varying highp vec3 objectspacePosition;
 
 uniform highp vec4 materialSpecularColor;
@@ -20,12 +19,14 @@ const highp float M_PI = 3.14159;
 const highp float M_2PI = 6.28318;
 
 
+varying mediump vec2 textureCoordinate;
+
 void main(void)
 {
     
     highp float theta = asin(objectspacePosition.y / length(objectspacePosition.xyz));
     highp float phi = atan(objectspacePosition.z , objectspacePosition.x);
-    mediump vec2 textureCoordinate = vec2(theta / M_PI, phi / M_2PI);
+  //  mediump vec2 textureCoordinate = vec2(theta / M_PI, phi / M_2PI);
     
     highp vec2 position = (textureCoordinate - 0.5) * 2.0;
     highp float length = length(position);

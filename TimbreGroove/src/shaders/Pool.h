@@ -11,8 +11,8 @@
 typedef enum PoolVariables {
     pool_position,
     pool_normal,
- //   pool_uv,
-    POOL_LAST_ATTR = pool_normal,
+    pool_uv,
+    POOL_LAST_ATTR = pool_uv,
     pool_pvm,
     pool_mvm,
     pool_normalMat,
@@ -25,5 +25,7 @@ typedef enum PoolVariables {
 } PoolVariables;
 
 @interface Pool : Shader
+
+@property (nonatomic) GLKVector3 lightPos;
 
 @end

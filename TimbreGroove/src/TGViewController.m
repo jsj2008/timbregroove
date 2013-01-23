@@ -60,6 +60,8 @@
     }
     
     self.preferredFramesPerSecond = 60;
+    
+    [self createTrackAndNode:@{@"instanceView":@"TrackView",@"instanceClass":@"PoolScreen"}];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -218,7 +220,11 @@
     createNode:(NSDictionary *)options
 {
     [self closeAllMenus];
-    
+    [self createTrackAndNode:options];
+}
+
+-(void)createTrackAndNode:(NSDictionary *)options
+{
     NSString * klassName = options[@"instanceView"];
     Class klass;
     if( klassName )
@@ -234,6 +240,7 @@
     if( _currentTrackView )
         [_currentTrackView hideAndFade:SHOW_DIR_LEFT];
     _currentTrackView = tv;
+    
 }
 
 - (id)makeTrackView:(Class)klass
@@ -448,6 +455,24 @@
             [self unMakeDawView];
             _dawView = false;
         }
+    }
+}
+
+- (void) willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
+	
+    CGRect screenRect = [[UIScreen mainScreen] bounds];
+    CGRect rect = CGRectZero;
+    
+    if (toInterfaceOrientation == UIInterfaceOrientationPortrait || toInterfaceOrientation == UIInterfaceOrientationPortraitUpsideDown) {
+        rect = screenRect;
+        
+    } else if (toInterfaceOrientation == UIInterfaceOrientationLandscapeLeft || toInterfaceOrientation == UIInterfaceOrientationLandscapeRight) {
+        rect.size = CGSizeMake( screenRect.size.height, screenRect.size.width );
+    }
+    
+    for( TrackView * view in [self getTrackViews] )
+    {
+        view.frame = rect;
     }
 }
 
