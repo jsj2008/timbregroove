@@ -89,14 +89,10 @@
     [self setData:params.vertexData
           strides:params.strides
      countStrides:params.numStrides
-      numVertices:params.numVertices];
-    
-    if( params.indexData )
-    {
-        [self setIndexData:params.indexData
-                numIndices:params.numIndices];
-    }
-    
+      numVertices:params.numVertices
+        indexData:params.indexData
+       numIndices:params.numIndices];
+        
     free(params.strides);
     free(params.vertexData);
     if( params.indexData )

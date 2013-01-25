@@ -57,7 +57,9 @@ static inline TGVertexStride * StrideInit4f(TGVertexStride * s)
 -(void)setData:(float *)data
        strides:(TGVertexStride *)strides
   countStrides:(unsigned int)countStrides
-   numVertices: (unsigned int)numVertices;
+   numVertices:(unsigned int)numVertices
+     indexData:(unsigned int *)indexData
+    numIndices:(unsigned int)numIndices;
 
 -(void)setIndexData:(unsigned int *)data
             numIndices:(unsigned int)numIndices;

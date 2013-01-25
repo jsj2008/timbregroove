@@ -41,13 +41,9 @@
 -(void)draw
 {
     if( _glIBuffer == -1 )
-    {
         glDrawArrays(_drawType, 0, _numVertices);
-    }
     else
-    {
         glDrawElements(_drawType,_numIndices,GL_UNSIGNED_INT,(void*)0);
-    }
 }
 
 +(GLsizei)calcDataSize: (TGVertexStride *)strides
@@ -72,7 +68,7 @@
     {
         TGVertexStride * stride = _strides + i;
         stride->location = [shader location:stride->indexIntoShaderNames];
-    }
+    }    
 }
 
 -(NSArray *)indicesIntoShaderNames
@@ -96,6 +92,8 @@
        strides: (TGVertexStride *)strides
   countStrides: (unsigned int)countStrides
    numVertices: (unsigned int)numVertices
+     indexData:(unsigned int *)indexData
+    numIndices:(unsigned int)numIndices
 {
     
 #if DEBUG
@@ -124,6 +122,11 @@
     _numVertices = numVertices;
     memcpy(_strides, strides, countStrides * sizeof(TGVertexStride));
     _numStrides = countStrides;
+    
+    if( indexData )
+       [self setIndexData:indexData numIndices:numIndices];
+    
+    glBindVertexArrayOES(0);
 }
 
 -(void)setIndexData:(unsigned int *)data numIndices:(unsigned int)numIndices
@@ -135,10 +138,8 @@
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof(unsigned int), data, _usage);
 }
 
--(void)bind
+-(void)setupBindings
 {
-    glBindBuffer(GL_ARRAY_BUFFER, _glVBuffer);
-    
     unsigned int strideOffset = 0;
     
     for( int i = 0; i < _numStrides; i++ )
@@ -154,6 +155,14 @@
         
         strideOffset += (stride->numSize * stride->numbersPerElement);
     }
+
+    glEnableVertexAttribArray(0);
+}
+
+-(void)bind
+{
+    glBindBuffer(GL_ARRAY_BUFFER, _glVBuffer);
+    [self setupBindings];
     
     if( _glIBuffer != -1 )
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glIBuffer);
@@ -164,6 +173,7 @@
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     if( _glIBuffer != -1 )
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
 }
 
 // TODO: this probably belongs somewhere else
@@ -189,7 +199,7 @@
         glDeleteBuffers(1, &_glVBuffer);
     if( glIsBuffer(_glIBuffer))
         glDeleteBuffers(1, &_glIBuffer);
-    NSLog(@"Deleted buffers index: %d/ vertex: %d",_glIBuffer,_glVBuffer);
+    NSLog(@"Deleted buffers index (%d) and vertex (%d)",_glIBuffer,_glVBuffer);
     _glIBuffer = -1;
     _glVBuffer = 0;
 }
@@ -202,7 +212,7 @@
     TGVertexStride stride;
     StrideInit4f(&stride);
     stride.indexIntoShaderNames = indexIntoNames;
-    [self setData:rgba strides:&stride countStrides:1 numVertices:numColors];    
+    [self setData:rgba strides:&stride countStrides:1 numVertices:numColors indexData:NULL numIndices:0];
     self.drawable = false;
 }
 @end

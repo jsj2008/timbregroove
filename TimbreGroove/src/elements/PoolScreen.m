@@ -19,7 +19,7 @@
 #import "TrackView+Sound.h"
 #import "Sound.h"
 #import "MeshBuffer.h"
-
+#import "UIViewController+TGExtension.h"
 
 @interface PoolScreen : Generic {
     NSMutableArray * _waters;
@@ -205,6 +205,15 @@ const char * _pw_shader_name = "PoolWater";
     
     UITapGestureRecognizer *tgr = [[UITapGestureRecognizer alloc] initWithTarget:self
                                                                           action:@selector(onTap:)];
+
+    // .keyWindow is nil (wtf?)
+    UIWindow * window = [[UIApplication sharedApplication] delegate].window;
+    UITapGestureRecognizer * menuInvoker =  [window.rootViewController getMenuInvokerGesture];
+    if( menuInvoker )
+    {
+        [tgr requireGestureRecognizerToFail:menuInvoker];
+    }
+
     [self.view addGestureRecognizer:tgr];
     
     UILongPressGestureRecognizer *lpgr =

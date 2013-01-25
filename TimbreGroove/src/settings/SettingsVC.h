@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "UIView+TGViewExtensions.h"
+#import "UIView+TGExtension.h"
 #import <MobileCoreServices/MobileCoreServices.h>
 #import "AssetLoader.h"
 

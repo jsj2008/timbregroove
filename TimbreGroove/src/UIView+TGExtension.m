@@ -6,12 +6,12 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "UIView+TGViewExtensions.h"
+#import "UIView+TGExtension.h"
 #import "objc/runtime.h"
 
 static NSString * __tgve_member_name;
 
-@implementation UIView (TGViewExtensions)
+@implementation UIView (TGExtension)
 
 -(NSString *)memberName
 {
