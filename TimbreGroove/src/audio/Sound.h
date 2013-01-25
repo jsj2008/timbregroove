@@ -15,6 +15,9 @@
 @property (nonatomic) float prevVolume;
 @property (nonatomic) float pitch;
 
+@property (nonatomic, readonly) void * nativeSound;
+@property (nonatomic, readonly) void * nativeChannel;
+
 -(id)initWithFile:(const char *)fileName;
 -(void)play;
 -(void)pause;

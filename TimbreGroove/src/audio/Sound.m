@@ -53,6 +53,16 @@
     return self;
 }
 
+-(void *)nativeSound
+{
+    return _sound;
+}
+
+-(void *)nativeChannel
+{
+    return _channel;
+}
+
 -(void)setPitch:(float)pitch
 {
     FMOD_RESULT result = FMOD_Channel_SetFrequency(_channel, pitch);

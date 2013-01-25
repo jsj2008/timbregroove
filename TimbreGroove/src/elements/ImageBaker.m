@@ -114,11 +114,15 @@ static const float __bakeShakerTimes[] = {
 }
 
 @end
+
+
 @implementation ImageBaker
 
 +(NSDictionary *)getShaderModes
 {
-    return @{@(0):@(__bakeShakerNames[0]), @(1):@(__bakeShakerNames[1]),@(2):@(__bakeShakerNames[2])};
+    return @{@(0):@(__bakeShakerNames[0]),
+             @(1):@(__bakeShakerNames[1]),
+             @(2):@(__bakeShakerNames[2])};
 }
 
 -(void)setMode:(int)mode

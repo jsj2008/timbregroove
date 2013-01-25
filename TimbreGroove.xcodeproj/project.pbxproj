@@ -104,6 +104,9 @@
 		570F415F16ABB767000FCA7B /* Geometry.m in Sources */ = {isa = PBXBuildFile; fileRef = 570F415E16ABB767000FCA7B /* Geometry.m */; };
 		570F416216ABBA0E000FCA7B /* GridPlane.m in Sources */ = {isa = PBXBuildFile; fileRef = 570F416116ABBA0E000FCA7B /* GridPlane.m */; };
 		570F416516ABDFFD000FCA7B /* Cloud.m in Sources */ = {isa = PBXBuildFile; fileRef = 570F416416ABDFFD000FCA7B /* Cloud.m */; };
+		5712FB3E16B1A773004D62AE /* libDIRAC_iOS-fat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5712FB3D16B1A773004D62AE /* libDIRAC_iOS-fat.a */; };
+		5712FB4216B1A808004D62AE /* TimeStretch.m in Sources */ = {isa = PBXBuildFile; fileRef = 5712FB4116B1A808004D62AE /* TimeStretch.m */; };
+		5712FB4416B1B8B1004D62AE /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5712FB4316B1B8B1004D62AE /* Accelerate.framework */; };
 		5716775F16A685A800F78B25 /* AssetLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 5716775E16A685A800F78B25 /* AssetLoader.m */; };
 		5717F94B167EBFAC00D8054B /* Plane.m in Sources */ = {isa = PBXBuildFile; fileRef = 571ECFCA167BF31D00727A30 /* Plane.m */; };
 		571A42FE167C315700CD7E8F /* Graph.m in Sources */ = {isa = PBXBuildFile; fileRef = 571A42FD167C315600CD7E8F /* Graph.m */; };
@@ -155,6 +158,7 @@
 		574B6002168D2BB4008367D1 /* subtractPressureGradient.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 574B5FE5168CE148008367D1 /* subtractPressureGradient.fsh */; };
 		574B6003168D2BB4008367D1 /* velocityBoundary.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 574B5FE6168CE148008367D1 /* velocityBoundary.fsh */; };
 		574B6004168D2BB4008367D1 /* visualize.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 574B5FE7168CE148008367D1 /* visualize.fsh */; };
+		574E08FE16B1F6B30035C293 /* TG1Band-perc-mono-44k.aif in Resources */ = {isa = PBXBuildFile; fileRef = 574E08FD16B1F6B30035C293 /* TG1Band-perc-mono-44k.aif */; };
 		575AA12616ADA61F00635A76 /* Pool.m in Sources */ = {isa = PBXBuildFile; fileRef = 575AA12516ADA61F00635A76 /* Pool.m */; };
 		575AA12916ADAF6900635A76 /* Light.m in Sources */ = {isa = PBXBuildFile; fileRef = 575AA12816ADAF6900635A76 /* Light.m */; };
 		575AA12B16ADBB9500635A76 /* pool.png in Resources */ = {isa = PBXBuildFile; fileRef = 575AA12A16ADBB9500635A76 /* pool.png */; };
@@ -377,6 +381,11 @@
 		570F416116ABBA0E000FCA7B /* GridPlane.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GridPlane.m; sourceTree = "<group>"; };
 		570F416316ABDFF2000FCA7B /* Cloud.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Cloud.h; sourceTree = "<group>"; };
 		570F416416ABDFFD000FCA7B /* Cloud.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Cloud.m; sourceTree = "<group>"; };
+		5712FB3C16B1A773004D62AE /* Dirac.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Dirac.h; sourceTree = "<group>"; };
+		5712FB3D16B1A773004D62AE /* libDIRAC_iOS-fat.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libDIRAC_iOS-fat.a"; sourceTree = "<group>"; };
+		5712FB4016B1A808004D62AE /* TimeStretch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TimeStretch.h; path = audio/TimeStretch.h; sourceTree = "<group>"; };
+		5712FB4116B1A808004D62AE /* TimeStretch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TimeStretch.m; path = audio/TimeStretch.m; sourceTree = "<group>"; usesTabs = 0; };
+		5712FB4316B1B8B1004D62AE /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		5716775D16A685A800F78B25 /* AssetLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AssetLoader.h; path = src/AssetLoader.h; sourceTree = "<group>"; };
 		5716775E16A685A800F78B25 /* AssetLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AssetLoader.m; path = src/AssetLoader.m; sourceTree = "<group>"; };
 		571A42FC167C315600CD7E8F /* Graph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Graph.h; sourceTree = "<group>"; };
@@ -452,6 +461,7 @@
 		574B5FE7168CE148008367D1 /* visualize.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = visualize.fsh; sourceTree = "<group>"; };
 		574B5FF7168D20BD008367D1 /* FBO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FBO.h; sourceTree = "<group>"; };
 		574B5FF8168D20BD008367D1 /* FBO.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FBO.m; sourceTree = "<group>"; };
+		574E08FD16B1F6B30035C293 /* TG1Band-perc-mono-44k.aif */ = {isa = PBXFileReference; lastKnownFileType = file; path = "TG1Band-perc-mono-44k.aif"; sourceTree = "<group>"; };
 		575AA12316ADA61500635A76 /* Pool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Pool.h; sourceTree = "<group>"; };
 		575AA12516ADA61F00635A76 /* Pool.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Pool.m; sourceTree = "<group>"; };
 		575AA12716ADAF6900635A76 /* Light.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Light.h; sourceTree = "<group>"; };
@@ -548,6 +558,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5712FB4416B1B8B1004D62AE /* Accelerate.framework in Frameworks */,
 				575DA0061693E43300A50C41 /* AssetsLibrary.framework in Frameworks */,
 				575DA0041693E35A00A50C41 /* MobileCoreServices.framework in Frameworks */,
 				57CAF78516891EDB00459353 /* libc++.dylib in Frameworks */,
@@ -558,6 +569,7 @@
 				57E874FC16782894008243B2 /* CoreGraphics.framework in Frameworks */,
 				57E874FE16782894008243B2 /* GLKit.framework in Frameworks */,
 				57E8750016782894008243B2 /* OpenGLES.framework in Frameworks */,
+				5712FB3E16B1A773004D62AE /* libDIRAC_iOS-fat.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -661,6 +673,8 @@
 				57F7E49E16882889001156FF /* TrackView+Sound.m */,
 				578292D2169AB2CD0053ADCD /* SoundPool.h */,
 				578292D3169AB2CD0053ADCD /* SoundPool.m */,
+				5712FB4016B1A808004D62AE /* TimeStretch.h */,
+				5712FB4116B1A808004D62AE /* TimeStretch.m */,
 			);
 			name = audio;
 			sourceTree = "<group>";
@@ -755,9 +769,19 @@
 			path = geometry;
 			sourceTree = "<group>";
 		};
+		5712FB3B16B1A773004D62AE /* dirac */ = {
+			isa = PBXGroup;
+			children = (
+				5712FB3C16B1A773004D62AE /* Dirac.h */,
+				5712FB3D16B1A773004D62AE /* libDIRAC_iOS-fat.a */,
+			);
+			path = dirac;
+			sourceTree = "<group>";
+		};
 		571ECF97167BE2CE00727A30 /* contrib */ = {
 			isa = PBXGroup;
 			children = (
+				5712FB3B16B1A773004D62AE /* dirac */,
 				578CB90816A63C0000088BA2 /* fmod */,
 				57AFB3C416A3281F008192FB /* PVR */,
 				571ECF98167BE2CE00727A30 /* tweener */,
@@ -1047,6 +1071,7 @@
 		57A10E961685E08300B80314 /* audio */ = {
 			isa = PBXGroup;
 			children = (
+				574E08FD16B1F6B30035C293 /* TG1Band-perc-mono-44k.aif */,
 				57BFCBA316A220EB008903BA /* TG1Band-perc-24k.aif */,
 				57BFCBA416A220EB008903BA /* TG1Band-pitched-24k.aif */,
 				57BFCBA516A220EB008903BA /* TGAmb1-32k.aif */,
@@ -1141,6 +1166,7 @@
 		57E874F616782894008243B2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				5712FB4316B1B8B1004D62AE /* Accelerate.framework */,
 				575DA0051693E43300A50C41 /* AssetsLibrary.framework */,
 				57CAF78416891EDA00459353 /* libc++.dylib */,
 				575DA0031693E35A00A50C41 /* MobileCoreServices.framework */,
@@ -1372,6 +1398,7 @@
 				57811A9C16A931A2008B2B02 /* trash.png in Resources */,
 				575AA12B16ADBB9500635A76 /* pool.png in Resources */,
 				57A58EB116AE020C00C9FA53 /* poolLines.png in Resources */,
+				574E08FE16B1F6B30035C293 /* TG1Band-perc-mono-44k.aif in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1466,6 +1493,7 @@
 				575AA12916ADAF6900635A76 /* Light.m in Sources */,
 				575AA12E16ADBC6800635A76 /* PoolScreen.m in Sources */,
 				57A58EA816ADE68200C9FA53 /* Cube.m in Sources */,
+				5712FB4216B1A808004D62AE /* TimeStretch.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1537,6 +1565,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/TimbreGroove/src/contrib/fmod/lib\"",
+					"\"$(SRCROOT)/TimbreGroove/src/contrib/dirac\"",
 				);
 				OTHER_CFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1554,6 +1583,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/TimbreGroove/src/contrib/fmod/lib\"",
+					"\"$(SRCROOT)/TimbreGroove/src/contrib/dirac\"",
 				);
 				OTHER_CFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";

@@ -9,9 +9,10 @@
 #import "VaryingColor.h"
 #import "GenericShader.h"
 #import "GridPlane.h"
+#import "MeshBuffer.h"
 
 @interface VaryingColor () {
-    MeshBuffer * _colorBuffer;
+    ColorBuffer * _colorBuffer;
 }
 
 @end
@@ -30,15 +31,6 @@
 
 -(void)addColorBuffer
 {
-    bool doAdd = false;
-    
-    if( !_colorBuffer )
-    {
-        _colorBuffer = [MeshBuffer new];
-        _colorBuffer.usage = GL_DYNAMIC_DRAW;
-        doAdd = true;
-    }
-    
     float cr = R0_1();
     float cg = R0_1();
     float cb = R0_1();
@@ -57,19 +49,16 @@
        dr,       dg,      db,      1
     };
     
-    if( doAdd )
+    if( _colorBuffer )
     {
-        TGVertexStride stride;
-        StrideInit4f(&stride);
-        stride.indexIntoShaderNames = gv_acolor;
-        
-        [_colorBuffer setData:v strides:&stride countStrides:1 numVertices:6];
-        
-        [self addBuffer:_colorBuffer];
+        [_colorBuffer setData:v];
     }
     else
     {
-        [_colorBuffer setData:v];
+        _colorBuffer = [[ColorBuffer alloc] init];
+        _colorBuffer.usage = GL_DYNAMIC_DRAW;
+        [_colorBuffer setDataWithRGBAs:v numColors:6 indexIntoNames:gv_acolor];
+        [self addBuffer:_colorBuffer];
     }
 }
 
