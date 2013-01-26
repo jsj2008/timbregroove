@@ -166,16 +166,16 @@
 		576F8AC7167E92C000DF208E /* VaryingColor.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A66EF5167B374500B9EA75 /* VaryingColor.m */; };
 		577612FF16B308AB00948D47 /* UIViewController+TGExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 577612FE16B308AB00948D47 /* UIViewController+TGExtension.m */; };
 		577AE48816B35D1400B4FDF1 /* Fluid.m in Sources */ = {isa = PBXBuildFile; fileRef = 577AE48716B35D1400B4FDF1 /* Fluid.m */; };
-		577AE49416B35F7300B4FDF1 /* addForce.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 577AE48A16B35F7300B4FDF1 /* addForce.fsh */; };
-		577AE49516B35F7300B4FDF1 /* advect.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 577AE48B16B35F7300B4FDF1 /* advect.fsh */; };
-		577AE49616B35F7300B4FDF1 /* boundary.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 577AE48C16B35F7300B4FDF1 /* boundary.vsh */; };
-		577AE49716B35F7300B4FDF1 /* cursor.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 577AE48D16B35F7300B4FDF1 /* cursor.vsh */; };
-		577AE49816B35F7300B4FDF1 /* divergence.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 577AE48E16B35F7300B4FDF1 /* divergence.fsh */; };
-		577AE49916B35F7300B4FDF1 /* jacobi.txt in Resources */ = {isa = PBXBuildFile; fileRef = 577AE48F16B35F7300B4FDF1 /* jacobi.txt */; };
-		577AE49A16B35F7300B4FDF1 /* kernel.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 577AE49016B35F7300B4FDF1 /* kernel.vsh */; };
-		577AE49B16B35F7300B4FDF1 /* subtractPressureGradient.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 577AE49116B35F7300B4FDF1 /* subtractPressureGradient.fsh */; };
-		577AE49C16B35F7300B4FDF1 /* velocityBoundary.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 577AE49216B35F7300B4FDF1 /* velocityBoundary.fsh */; };
-		577AE49D16B35F7300B4FDF1 /* visualize.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 577AE49316B35F7300B4FDF1 /* visualize.fsh */; };
+		577AE4B416B3969800B4FDF1 /* addForce.fsh in Sources */ = {isa = PBXBuildFile; fileRef = 577AE4AA16B3969800B4FDF1 /* addForce.fsh */; };
+		577AE4B516B3969800B4FDF1 /* advect.fsh in Sources */ = {isa = PBXBuildFile; fileRef = 577AE4AB16B3969800B4FDF1 /* advect.fsh */; };
+		577AE4B616B3969800B4FDF1 /* boundary.vsh in Sources */ = {isa = PBXBuildFile; fileRef = 577AE4AC16B3969800B4FDF1 /* boundary.vsh */; };
+		577AE4B716B3969800B4FDF1 /* cursor.vsh in Sources */ = {isa = PBXBuildFile; fileRef = 577AE4AD16B3969800B4FDF1 /* cursor.vsh */; };
+		577AE4B816B3969800B4FDF1 /* divergence.fsh in Sources */ = {isa = PBXBuildFile; fileRef = 577AE4AE16B3969800B4FDF1 /* divergence.fsh */; };
+		577AE4B916B3969800B4FDF1 /* jacobi.vsh in Sources */ = {isa = PBXBuildFile; fileRef = 577AE4AF16B3969800B4FDF1 /* jacobi.vsh */; };
+		577AE4BA16B3969800B4FDF1 /* kernel.vsh in Sources */ = {isa = PBXBuildFile; fileRef = 577AE4B016B3969800B4FDF1 /* kernel.vsh */; };
+		577AE4BB16B3969800B4FDF1 /* subtractPressureGradient.fsh in Sources */ = {isa = PBXBuildFile; fileRef = 577AE4B116B3969800B4FDF1 /* subtractPressureGradient.fsh */; };
+		577AE4BC16B3969800B4FDF1 /* velocityBoundary.fsh in Sources */ = {isa = PBXBuildFile; fileRef = 577AE4B216B3969800B4FDF1 /* velocityBoundary.fsh */; };
+		577AE4BD16B3969800B4FDF1 /* visualize.fsh in Sources */ = {isa = PBXBuildFile; fileRef = 577AE4B316B3969800B4FDF1 /* visualize.fsh */; };
 		57811A9C16A931A2008B2B02 /* trash.png in Resources */ = {isa = PBXBuildFile; fileRef = 57811A9B16A931A2008B2B02 /* trash.png */; };
 		578292C7169879930053ADCD /* ImageBaker.m in Sources */ = {isa = PBXBuildFile; fileRef = 578292C6169879930053ADCD /* ImageBaker.m */; };
 		578292C9169A87B10053ADCD /* test.png in Resources */ = {isa = PBXBuildFile; fileRef = 578292C8169A87B00053ADCD /* test.png */; };
@@ -477,16 +477,16 @@
 		577612FD16B308AB00948D47 /* UIViewController+TGExtension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "UIViewController+TGExtension.h"; path = "src/UIViewController+TGExtension.h"; sourceTree = "<group>"; };
 		577612FE16B308AB00948D47 /* UIViewController+TGExtension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIViewController+TGExtension.m"; path = "src/UIViewController+TGExtension.m"; sourceTree = "<group>"; };
 		577AE48716B35D1400B4FDF1 /* Fluid.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Fluid.m; path = fluid/Fluid.m; sourceTree = "<group>"; };
-		577AE48A16B35F7300B4FDF1 /* addForce.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = addForce.fsh; path = fluid/addForce.fsh; sourceTree = "<group>"; };
-		577AE48B16B35F7300B4FDF1 /* advect.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = advect.fsh; path = fluid/advect.fsh; sourceTree = "<group>"; };
-		577AE48C16B35F7300B4FDF1 /* boundary.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = boundary.vsh; path = fluid/boundary.vsh; sourceTree = "<group>"; };
-		577AE48D16B35F7300B4FDF1 /* cursor.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = cursor.vsh; path = fluid/cursor.vsh; sourceTree = "<group>"; };
-		577AE48E16B35F7300B4FDF1 /* divergence.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = divergence.fsh; path = fluid/divergence.fsh; sourceTree = "<group>"; };
-		577AE48F16B35F7300B4FDF1 /* jacobi.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = jacobi.txt; path = fluid/jacobi.txt; sourceTree = "<group>"; };
-		577AE49016B35F7300B4FDF1 /* kernel.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = kernel.vsh; path = fluid/kernel.vsh; sourceTree = "<group>"; };
-		577AE49116B35F7300B4FDF1 /* subtractPressureGradient.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = subtractPressureGradient.fsh; path = fluid/subtractPressureGradient.fsh; sourceTree = "<group>"; };
-		577AE49216B35F7300B4FDF1 /* velocityBoundary.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = velocityBoundary.fsh; path = fluid/velocityBoundary.fsh; sourceTree = "<group>"; };
-		577AE49316B35F7300B4FDF1 /* visualize.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = visualize.fsh; path = fluid/visualize.fsh; sourceTree = "<group>"; };
+		577AE4AA16B3969800B4FDF1 /* addForce.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = addForce.fsh; sourceTree = "<group>"; };
+		577AE4AB16B3969800B4FDF1 /* advect.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = advect.fsh; sourceTree = "<group>"; };
+		577AE4AC16B3969800B4FDF1 /* boundary.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = boundary.vsh; sourceTree = "<group>"; };
+		577AE4AD16B3969800B4FDF1 /* cursor.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = cursor.vsh; sourceTree = "<group>"; };
+		577AE4AE16B3969800B4FDF1 /* divergence.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = divergence.fsh; sourceTree = "<group>"; };
+		577AE4AF16B3969800B4FDF1 /* jacobi.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = jacobi.vsh; sourceTree = "<group>"; };
+		577AE4B016B3969800B4FDF1 /* kernel.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = kernel.vsh; sourceTree = "<group>"; };
+		577AE4B116B3969800B4FDF1 /* subtractPressureGradient.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = subtractPressureGradient.fsh; sourceTree = "<group>"; };
+		577AE4B216B3969800B4FDF1 /* velocityBoundary.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = velocityBoundary.fsh; sourceTree = "<group>"; };
+		577AE4B316B3969800B4FDF1 /* visualize.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = visualize.fsh; sourceTree = "<group>"; };
 		57811A9B16A931A2008B2B02 /* trash.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = trash.png; sourceTree = "<group>"; };
 		578292C5169879930053ADCD /* ImageBaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageBaker.h; sourceTree = "<group>"; };
 		578292C6169879930053ADCD /* ImageBaker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageBaker.m; sourceTree = "<group>"; };
@@ -941,18 +941,18 @@
 		577AE48916B35F6300B4FDF1 /* fluid */ = {
 			isa = PBXGroup;
 			children = (
-				577AE48A16B35F7300B4FDF1 /* addForce.fsh */,
-				577AE48B16B35F7300B4FDF1 /* advect.fsh */,
-				577AE48C16B35F7300B4FDF1 /* boundary.vsh */,
-				577AE48D16B35F7300B4FDF1 /* cursor.vsh */,
-				577AE48E16B35F7300B4FDF1 /* divergence.fsh */,
-				577AE48F16B35F7300B4FDF1 /* jacobi.txt */,
-				577AE49016B35F7300B4FDF1 /* kernel.vsh */,
-				577AE49116B35F7300B4FDF1 /* subtractPressureGradient.fsh */,
-				577AE49216B35F7300B4FDF1 /* velocityBoundary.fsh */,
-				577AE49316B35F7300B4FDF1 /* visualize.fsh */,
+				577AE4AA16B3969800B4FDF1 /* addForce.fsh */,
+				577AE4AB16B3969800B4FDF1 /* advect.fsh */,
+				577AE4AC16B3969800B4FDF1 /* boundary.vsh */,
+				577AE4AD16B3969800B4FDF1 /* cursor.vsh */,
+				577AE4AE16B3969800B4FDF1 /* divergence.fsh */,
+				577AE4AF16B3969800B4FDF1 /* jacobi.vsh */,
+				577AE4B016B3969800B4FDF1 /* kernel.vsh */,
+				577AE4B116B3969800B4FDF1 /* subtractPressureGradient.fsh */,
+				577AE4B216B3969800B4FDF1 /* velocityBoundary.fsh */,
+				577AE4B316B3969800B4FDF1 /* visualize.fsh */,
 			);
-			name = fluid;
+			path = fluid;
 			sourceTree = "<group>";
 		};
 		578CB8FB16A60EFB00088BA2 /* node */ = {
@@ -1308,15 +1308,6 @@
 				5763AAA816AF0AAA00856C34 /* PoolScreen.vsh in Resources */,
 				5763AAAB16AF0AC700856C34 /* PoolScreen.fsh in Resources */,
 				570F415B16ABB646000FCA7B /* TileShader.vsh in Resources */,
-				577AE49416B35F7300B4FDF1 /* addForce.fsh in Resources */,
-				577AE49516B35F7300B4FDF1 /* advect.fsh in Resources */,
-				577AE49616B35F7300B4FDF1 /* boundary.vsh in Resources */,
-				577AE49716B35F7300B4FDF1 /* cursor.vsh in Resources */,
-				577AE49816B35F7300B4FDF1 /* divergence.fsh in Resources */,
-				577AE49A16B35F7300B4FDF1 /* kernel.vsh in Resources */,
-				577AE49B16B35F7300B4FDF1 /* subtractPressureGradient.fsh in Resources */,
-				577AE49C16B35F7300B4FDF1 /* velocityBoundary.fsh in Resources */,
-				577AE49D16B35F7300B4FDF1 /* visualize.fsh in Resources */,
 				570F412B16ABB084000FCA7B /* BrickShader.fsh in Resources */,
 				570F412C16ABB084000FCA7B /* BrickShader.vsh in Resources */,
 				570F412D16ABB084000FCA7B /* CloudShader.fsh in Resources */,
@@ -1410,7 +1401,6 @@
 				575AA12B16ADBB9500635A76 /* pool.png in Resources */,
 				57A58EB116AE020C00C9FA53 /* poolLines.png in Resources */,
 				574E08FE16B1F6B30035C293 /* TG1Band-perc-mono-44k.aif in Resources */,
-				577AE49916B35F7300B4FDF1 /* jacobi.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1508,6 +1498,16 @@
 				5712FB4216B1A808004D62AE /* TimeStretch.m in Sources */,
 				577612FF16B308AB00948D47 /* UIViewController+TGExtension.m in Sources */,
 				577AE48816B35D1400B4FDF1 /* Fluid.m in Sources */,
+				577AE4B416B3969800B4FDF1 /* addForce.fsh in Sources */,
+				577AE4B516B3969800B4FDF1 /* advect.fsh in Sources */,
+				577AE4B616B3969800B4FDF1 /* boundary.vsh in Sources */,
+				577AE4B716B3969800B4FDF1 /* cursor.vsh in Sources */,
+				577AE4B816B3969800B4FDF1 /* divergence.fsh in Sources */,
+				577AE4B916B3969800B4FDF1 /* jacobi.vsh in Sources */,
+				577AE4BA16B3969800B4FDF1 /* kernel.vsh in Sources */,
+				577AE4BB16B3969800B4FDF1 /* subtractPressureGradient.fsh in Sources */,
+				577AE4BC16B3969800B4FDF1 /* velocityBoundary.fsh in Sources */,
+				577AE4BD16B3969800B4FDF1 /* visualize.fsh in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
