@@ -24,7 +24,10 @@
 
 @end
 
-@interface Shader : ShaderWrapper
+@interface Shader : ShaderWrapper {
+@protected
+    GLint *       _vars;
+}
 
 +(id)shaderFromPoolWithVertex:(const char *)vert
                   andFragment:(const char *)frag

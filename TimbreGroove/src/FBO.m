@@ -44,7 +44,7 @@
     
     //if( !format )
         format = GL_RGBA;
-   // if( !type )
+   if( !type )
     type = GL_UNSIGNED_BYTE;
     
     glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, type, NULL);

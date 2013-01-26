@@ -42,6 +42,7 @@ typedef enum PoolWaterVariables {
     pw_turbulence,
     pw_center,
     pw_radius,
+    pw_scale,
     PW_NUM_NAMES
 } PoolWaterVariables;
 
@@ -53,16 +54,19 @@ const char * _pw_names[] = {
     "u_rippleSize",
     "u_turbulence",
     "u_center",
-    "u_radius"
+    "u_radius",
+    "u_scale"
 };
 
-const char * _pw_shader_name = "PoolWater";
+const char * _pw_shader_name = "PoolScreen";
 
 @interface PoolWaterShader : Shader
+
 @property (nonatomic) float rippleSize;
 @property (nonatomic) float turbulence;
 @property (nonatomic) GLKVector2 center;
 @property (nonatomic) float radius;
+@property (nonatomic) GLKVector2 scale;
 @end
 
 @implementation PoolWaterShader
@@ -80,6 +84,8 @@ const char * _pw_shader_name = "PoolWater";
         _rippleSize = 7.0;
         _turbulence = 0.005f;
         _radius = 0.01;
+        CGSize sz = [UIScreen mainScreen].bounds.size;
+        _scale = (GLKVector2){ 1/sz.width, 1/sz.height };
     }
     return self;
 }
@@ -88,6 +94,7 @@ const char * _pw_shader_name = "PoolWater";
 {
     [self writeToLocation:pw_ripple     type:TG_FLOAT   data:&_rippleSize];
     [self writeToLocation:pw_turbulence type:TG_FLOAT   data:&_turbulence];
+    [self writeToLocation:pw_scale      type:TG_VECTOR2 data:&_scale];
 }
 
 -(void)setCenter:(GLKVector2)center

@@ -9,6 +9,7 @@
 #import "UIViewController+TGExtension.h"
 
 @implementation UIViewController (TGExtension)
+
 -(UITapGestureRecognizer *)getMenuInvokerGesture;
 {
     Class tgrClass = [UITapGestureRecognizer class];

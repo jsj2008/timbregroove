@@ -106,7 +106,7 @@
 -(void)getBufferData:(void *)vertextData
            indexData:(unsigned *)indexData
              withUVs:(bool)withUVs
-         withNormals:(bool)withNormals;
+         withNormals:(bool)withNormals
 {
     
 }

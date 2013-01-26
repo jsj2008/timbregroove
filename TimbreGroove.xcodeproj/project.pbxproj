@@ -147,17 +147,6 @@
 		5737C4B41693206D00C12F2D /* imageBaker.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 5737C4AF1693090D00C12F2D /* imageBaker.fsh */; };
 		5737C4B51693206D00C12F2D /* imageBaker.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 5737C4AD169308DF00C12F2D /* imageBaker.vsh */; };
 		574B5FF9168D20BD008367D1 /* FBO.m in Sources */ = {isa = PBXBuildFile; fileRef = 574B5FF8168D20BD008367D1 /* FBO.m */; };
-		574B5FFA168D2BB4008367D1 /* addForce.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 574B5FDD168CE148008367D1 /* addForce.fsh */; };
-		574B5FFB168D2BB4008367D1 /* advect.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 574B5FDE168CE148008367D1 /* advect.fsh */; };
-		574B5FFC168D2BB4008367D1 /* boundary.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 574B5FDF168CE148008367D1 /* boundary.vsh */; };
-		574B5FFD168D2BB4008367D1 /* copy.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 574B5FE0168CE148008367D1 /* copy.fsh */; };
-		574B5FFE168D2BB4008367D1 /* cursor.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 574B5FE1168CE148008367D1 /* cursor.vsh */; };
-		574B5FFF168D2BB4008367D1 /* divergence.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 574B5FE2168CE148008367D1 /* divergence.fsh */; };
-		574B6000168D2BB4008367D1 /* jacobi.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 574B5FE3168CE148008367D1 /* jacobi.fsh */; };
-		574B6001168D2BB4008367D1 /* kernel.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 574B5FE4168CE148008367D1 /* kernel.vsh */; };
-		574B6002168D2BB4008367D1 /* subtractPressureGradient.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 574B5FE5168CE148008367D1 /* subtractPressureGradient.fsh */; };
-		574B6003168D2BB4008367D1 /* velocityBoundary.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 574B5FE6168CE148008367D1 /* velocityBoundary.fsh */; };
-		574B6004168D2BB4008367D1 /* visualize.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 574B5FE7168CE148008367D1 /* visualize.fsh */; };
 		574E08FE16B1F6B30035C293 /* TG1Band-perc-mono-44k.aif in Resources */ = {isa = PBXBuildFile; fileRef = 574E08FD16B1F6B30035C293 /* TG1Band-perc-mono-44k.aif */; };
 		575AA12616ADA61F00635A76 /* Pool.m in Sources */ = {isa = PBXBuildFile; fileRef = 575AA12516ADA61F00635A76 /* Pool.m */; };
 		575AA12916ADAF6900635A76 /* Light.m in Sources */ = {isa = PBXBuildFile; fileRef = 575AA12816ADAF6900635A76 /* Light.m */; };
@@ -168,14 +157,25 @@
 		575DA0041693E35A00A50C41 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 575DA0031693E35A00A50C41 /* MobileCoreServices.framework */; };
 		575DA0061693E43300A50C41 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 575DA0051693E43300A50C41 /* AssetsLibrary.framework */; };
 		575DA00A169437AC00A50C41 /* FractalSphere.m in Sources */ = {isa = PBXBuildFile; fileRef = 5737C4B216930BD500C12F2D /* FractalSphere.m */; };
-		5763AAA816AF0AAA00856C34 /* PoolWater.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 5763AAA716AF0AAA00856C34 /* PoolWater.vsh */; };
-		5763AAAB16AF0AC700856C34 /* PoolWater.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 5763AAAA16AF0AC700856C34 /* PoolWater.fsh */; };
+		5763AAA816AF0AAA00856C34 /* PoolScreen.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 5763AAA716AF0AAA00856C34 /* PoolScreen.vsh */; };
+		5763AAAB16AF0AC700856C34 /* PoolScreen.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 5763AAAA16AF0AC700856C34 /* PoolScreen.fsh */; };
 		5764756C167D5E8C00D5A431 /* GenericShader.m in Sources */ = {isa = PBXBuildFile; fileRef = 5764756B167D5E8C00D5A431 /* GenericShader.m */; };
 		57647571167D619800D5A431 /* Generic.m in Sources */ = {isa = PBXBuildFile; fileRef = 57647570167D619800D5A431 /* Generic.m */; };
 		57647577167D97EC00D5A431 /* generic.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 57647574167D7C4A00D5A431 /* generic.fsh */; };
 		57647578167D97EC00D5A431 /* generic.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 57647572167D7C3C00D5A431 /* generic.vsh */; };
 		576F8AC7167E92C000DF208E /* VaryingColor.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A66EF5167B374500B9EA75 /* VaryingColor.m */; };
 		577612FF16B308AB00948D47 /* UIViewController+TGExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 577612FE16B308AB00948D47 /* UIViewController+TGExtension.m */; };
+		577AE48816B35D1400B4FDF1 /* Fluid.m in Sources */ = {isa = PBXBuildFile; fileRef = 577AE48716B35D1400B4FDF1 /* Fluid.m */; };
+		577AE49416B35F7300B4FDF1 /* addForce.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 577AE48A16B35F7300B4FDF1 /* addForce.fsh */; };
+		577AE49516B35F7300B4FDF1 /* advect.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 577AE48B16B35F7300B4FDF1 /* advect.fsh */; };
+		577AE49616B35F7300B4FDF1 /* boundary.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 577AE48C16B35F7300B4FDF1 /* boundary.vsh */; };
+		577AE49716B35F7300B4FDF1 /* cursor.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 577AE48D16B35F7300B4FDF1 /* cursor.vsh */; };
+		577AE49816B35F7300B4FDF1 /* divergence.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 577AE48E16B35F7300B4FDF1 /* divergence.fsh */; };
+		577AE49916B35F7300B4FDF1 /* jacobi.txt in Resources */ = {isa = PBXBuildFile; fileRef = 577AE48F16B35F7300B4FDF1 /* jacobi.txt */; };
+		577AE49A16B35F7300B4FDF1 /* kernel.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 577AE49016B35F7300B4FDF1 /* kernel.vsh */; };
+		577AE49B16B35F7300B4FDF1 /* subtractPressureGradient.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 577AE49116B35F7300B4FDF1 /* subtractPressureGradient.fsh */; };
+		577AE49C16B35F7300B4FDF1 /* velocityBoundary.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 577AE49216B35F7300B4FDF1 /* velocityBoundary.fsh */; };
+		577AE49D16B35F7300B4FDF1 /* visualize.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 577AE49316B35F7300B4FDF1 /* visualize.fsh */; };
 		57811A9C16A931A2008B2B02 /* trash.png in Resources */ = {isa = PBXBuildFile; fileRef = 57811A9B16A931A2008B2B02 /* trash.png */; };
 		578292C7169879930053ADCD /* ImageBaker.m in Sources */ = {isa = PBXBuildFile; fileRef = 578292C6169879930053ADCD /* ImageBaker.m */; };
 		578292C9169A87B10053ADCD /* test.png in Resources */ = {isa = PBXBuildFile; fileRef = 578292C8169A87B00053ADCD /* test.png */; };
@@ -449,17 +449,6 @@
 		5737C4AF1693090D00C12F2D /* imageBaker.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = imageBaker.fsh; sourceTree = "<group>"; };
 		5737C4B116930BD400C12F2D /* FractalSphere.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FractalSphere.h; sourceTree = "<group>"; };
 		5737C4B216930BD500C12F2D /* FractalSphere.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FractalSphere.m; sourceTree = "<group>"; };
-		574B5FDD168CE148008367D1 /* addForce.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = addForce.fsh; sourceTree = "<group>"; };
-		574B5FDE168CE148008367D1 /* advect.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = advect.fsh; sourceTree = "<group>"; };
-		574B5FDF168CE148008367D1 /* boundary.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = boundary.vsh; sourceTree = "<group>"; };
-		574B5FE0168CE148008367D1 /* copy.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = copy.fsh; sourceTree = "<group>"; };
-		574B5FE1168CE148008367D1 /* cursor.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = cursor.vsh; sourceTree = "<group>"; };
-		574B5FE2168CE148008367D1 /* divergence.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = divergence.fsh; sourceTree = "<group>"; };
-		574B5FE3168CE148008367D1 /* jacobi.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = jacobi.fsh; sourceTree = "<group>"; };
-		574B5FE4168CE148008367D1 /* kernel.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = kernel.vsh; sourceTree = "<group>"; };
-		574B5FE5168CE148008367D1 /* subtractPressureGradient.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = subtractPressureGradient.fsh; sourceTree = "<group>"; };
-		574B5FE6168CE148008367D1 /* velocityBoundary.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = velocityBoundary.fsh; sourceTree = "<group>"; };
-		574B5FE7168CE148008367D1 /* visualize.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = visualize.fsh; sourceTree = "<group>"; };
 		574B5FF7168D20BD008367D1 /* FBO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FBO.h; sourceTree = "<group>"; };
 		574B5FF8168D20BD008367D1 /* FBO.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FBO.m; sourceTree = "<group>"; };
 		574E08FD16B1F6B30035C293 /* TG1Band-perc-mono-44k.aif */ = {isa = PBXFileReference; lastKnownFileType = file; path = "TG1Band-perc-mono-44k.aif"; sourceTree = "<group>"; };
@@ -474,8 +463,8 @@
 		575DA0011693C90400A50C41 /* SettingsVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SettingsVC.m; sourceTree = "<group>"; };
 		575DA0031693E35A00A50C41 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		575DA0051693E43300A50C41 /* AssetsLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AssetsLibrary.framework; path = System/Library/Frameworks/AssetsLibrary.framework; sourceTree = SDKROOT; };
-		5763AAA716AF0AAA00856C34 /* PoolWater.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = PoolWater.vsh; sourceTree = "<group>"; };
-		5763AAAA16AF0AC700856C34 /* PoolWater.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = PoolWater.fsh; sourceTree = "<group>"; };
+		5763AAA716AF0AAA00856C34 /* PoolScreen.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = PoolScreen.vsh; sourceTree = "<group>"; };
+		5763AAAA16AF0AC700856C34 /* PoolScreen.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = PoolScreen.fsh; sourceTree = "<group>"; };
 		5764756A167D5E8C00D5A431 /* GenericShader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GenericShader.h; path = ../shaders/GenericShader.h; sourceTree = "<group>"; };
 		5764756B167D5E8C00D5A431 /* GenericShader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = GenericShader.m; path = ../shaders/GenericShader.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		5764756F167D619800D5A431 /* Generic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Generic.h; path = ../Generic.h; sourceTree = "<group>"; };
@@ -487,6 +476,17 @@
 		57718EF716838D75001D7D35 /* CustomPlane.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomPlane.m; sourceTree = "<group>"; };
 		577612FD16B308AB00948D47 /* UIViewController+TGExtension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "UIViewController+TGExtension.h"; path = "src/UIViewController+TGExtension.h"; sourceTree = "<group>"; };
 		577612FE16B308AB00948D47 /* UIViewController+TGExtension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIViewController+TGExtension.m"; path = "src/UIViewController+TGExtension.m"; sourceTree = "<group>"; };
+		577AE48716B35D1400B4FDF1 /* Fluid.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Fluid.m; path = fluid/Fluid.m; sourceTree = "<group>"; };
+		577AE48A16B35F7300B4FDF1 /* addForce.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = addForce.fsh; path = fluid/addForce.fsh; sourceTree = "<group>"; };
+		577AE48B16B35F7300B4FDF1 /* advect.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = advect.fsh; path = fluid/advect.fsh; sourceTree = "<group>"; };
+		577AE48C16B35F7300B4FDF1 /* boundary.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = boundary.vsh; path = fluid/boundary.vsh; sourceTree = "<group>"; };
+		577AE48D16B35F7300B4FDF1 /* cursor.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = cursor.vsh; path = fluid/cursor.vsh; sourceTree = "<group>"; };
+		577AE48E16B35F7300B4FDF1 /* divergence.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = divergence.fsh; path = fluid/divergence.fsh; sourceTree = "<group>"; };
+		577AE48F16B35F7300B4FDF1 /* jacobi.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = jacobi.txt; path = fluid/jacobi.txt; sourceTree = "<group>"; };
+		577AE49016B35F7300B4FDF1 /* kernel.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = kernel.vsh; path = fluid/kernel.vsh; sourceTree = "<group>"; };
+		577AE49116B35F7300B4FDF1 /* subtractPressureGradient.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = subtractPressureGradient.fsh; path = fluid/subtractPressureGradient.fsh; sourceTree = "<group>"; };
+		577AE49216B35F7300B4FDF1 /* velocityBoundary.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = velocityBoundary.fsh; path = fluid/velocityBoundary.fsh; sourceTree = "<group>"; };
+		577AE49316B35F7300B4FDF1 /* visualize.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = visualize.fsh; path = fluid/visualize.fsh; sourceTree = "<group>"; };
 		57811A9B16A931A2008B2B02 /* trash.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = trash.png; sourceTree = "<group>"; };
 		578292C5169879930053ADCD /* ImageBaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageBaker.h; sourceTree = "<group>"; };
 		578292C6169879930053ADCD /* ImageBaker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageBaker.m; sourceTree = "<group>"; };
@@ -877,10 +877,10 @@
 		572EB1F316786C630062F290 /* shaders */ = {
 			isa = PBXGroup;
 			children = (
-				5763AAAA16AF0AC700856C34 /* PoolWater.fsh */,
-				5763AAA716AF0AAA00856C34 /* PoolWater.vsh */,
+				577AE48916B35F6300B4FDF1 /* fluid */,
+				5763AAAA16AF0AC700856C34 /* PoolScreen.fsh */,
+				5763AAA716AF0AAA00856C34 /* PoolScreen.vsh */,
 				570F40DA16ABA11F000FCA7B /* stock */,
-				574B5FDB168CE023008367D1 /* fluid */,
 				5700235F16A55528006F0E8E /* skinned */,
 				572EB1F416786C630062F290 /* fountain.fsh */,
 				572EB1F516786C630062F290 /* fountain.vsh */,
@@ -913,29 +913,12 @@
 		572EB287167AAD1C0062F290 /* elements */ = {
 			isa = PBXGroup;
 			children = (
+				577AE48616B35D0500B4FDF1 /* fluid */,
 				572D7F2B1683033D006D48BF /* generic */,
 				57F412F016814EBB00D9DC67 /* menu */,
 				578CB8FE16A6104900088BA2 /* misc */,
 			);
 			path = elements;
-			sourceTree = "<group>";
-		};
-		574B5FDB168CE023008367D1 /* fluid */ = {
-			isa = PBXGroup;
-			children = (
-				574B5FDD168CE148008367D1 /* addForce.fsh */,
-				574B5FDE168CE148008367D1 /* advect.fsh */,
-				574B5FDF168CE148008367D1 /* boundary.vsh */,
-				574B5FE0168CE148008367D1 /* copy.fsh */,
-				574B5FE1168CE148008367D1 /* cursor.vsh */,
-				574B5FE2168CE148008367D1 /* divergence.fsh */,
-				574B5FE3168CE148008367D1 /* jacobi.fsh */,
-				574B5FE4168CE148008367D1 /* kernel.vsh */,
-				574B5FE5168CE148008367D1 /* subtractPressureGradient.fsh */,
-				574B5FE6168CE148008367D1 /* velocityBoundary.fsh */,
-				574B5FE7168CE148008367D1 /* visualize.fsh */,
-			);
-			path = fluid;
 			sourceTree = "<group>";
 		};
 		575D9FFE1693C8A500A50C41 /* settings */ = {
@@ -945,6 +928,31 @@
 				575DA0011693C90400A50C41 /* SettingsVC.m */,
 			);
 			path = settings;
+			sourceTree = "<group>";
+		};
+		577AE48616B35D0500B4FDF1 /* fluid */ = {
+			isa = PBXGroup;
+			children = (
+				577AE48716B35D1400B4FDF1 /* Fluid.m */,
+			);
+			name = fluid;
+			sourceTree = "<group>";
+		};
+		577AE48916B35F6300B4FDF1 /* fluid */ = {
+			isa = PBXGroup;
+			children = (
+				577AE48A16B35F7300B4FDF1 /* addForce.fsh */,
+				577AE48B16B35F7300B4FDF1 /* advect.fsh */,
+				577AE48C16B35F7300B4FDF1 /* boundary.vsh */,
+				577AE48D16B35F7300B4FDF1 /* cursor.vsh */,
+				577AE48E16B35F7300B4FDF1 /* divergence.fsh */,
+				577AE48F16B35F7300B4FDF1 /* jacobi.txt */,
+				577AE49016B35F7300B4FDF1 /* kernel.vsh */,
+				577AE49116B35F7300B4FDF1 /* subtractPressureGradient.fsh */,
+				577AE49216B35F7300B4FDF1 /* velocityBoundary.fsh */,
+				577AE49316B35F7300B4FDF1 /* visualize.fsh */,
+			);
+			name = fluid;
 			sourceTree = "<group>";
 		};
 		578CB8FB16A60EFB00088BA2 /* node */ = {
@@ -1297,9 +1305,18 @@
 			files = (
 				570F415916ABB646000FCA7B /* FireShader.fsh in Resources */,
 				570F415A16ABB646000FCA7B /* HeatShader.vsh in Resources */,
-				5763AAA816AF0AAA00856C34 /* PoolWater.vsh in Resources */,
-				5763AAAB16AF0AC700856C34 /* PoolWater.fsh in Resources */,
+				5763AAA816AF0AAA00856C34 /* PoolScreen.vsh in Resources */,
+				5763AAAB16AF0AC700856C34 /* PoolScreen.fsh in Resources */,
 				570F415B16ABB646000FCA7B /* TileShader.vsh in Resources */,
+				577AE49416B35F7300B4FDF1 /* addForce.fsh in Resources */,
+				577AE49516B35F7300B4FDF1 /* advect.fsh in Resources */,
+				577AE49616B35F7300B4FDF1 /* boundary.vsh in Resources */,
+				577AE49716B35F7300B4FDF1 /* cursor.vsh in Resources */,
+				577AE49816B35F7300B4FDF1 /* divergence.fsh in Resources */,
+				577AE49A16B35F7300B4FDF1 /* kernel.vsh in Resources */,
+				577AE49B16B35F7300B4FDF1 /* subtractPressureGradient.fsh in Resources */,
+				577AE49C16B35F7300B4FDF1 /* velocityBoundary.fsh in Resources */,
+				577AE49D16B35F7300B4FDF1 /* visualize.fsh in Resources */,
 				570F412B16ABB084000FCA7B /* BrickShader.fsh in Resources */,
 				570F412C16ABB084000FCA7B /* BrickShader.vsh in Resources */,
 				570F412D16ABB084000FCA7B /* CloudShader.fsh in Resources */,
@@ -1347,17 +1364,6 @@
 				57F290FB16957F5D00293B0E /* fractal.vsh in Resources */,
 				5737C4B41693206D00C12F2D /* imageBaker.fsh in Resources */,
 				5737C4B51693206D00C12F2D /* imageBaker.vsh in Resources */,
-				574B5FFA168D2BB4008367D1 /* addForce.fsh in Resources */,
-				574B5FFB168D2BB4008367D1 /* advect.fsh in Resources */,
-				574B5FFC168D2BB4008367D1 /* boundary.vsh in Resources */,
-				574B5FFD168D2BB4008367D1 /* copy.fsh in Resources */,
-				574B5FFE168D2BB4008367D1 /* cursor.vsh in Resources */,
-				574B5FFF168D2BB4008367D1 /* divergence.fsh in Resources */,
-				574B6000168D2BB4008367D1 /* jacobi.fsh in Resources */,
-				574B6001168D2BB4008367D1 /* kernel.vsh in Resources */,
-				574B6002168D2BB4008367D1 /* subtractPressureGradient.fsh in Resources */,
-				574B6003168D2BB4008367D1 /* velocityBoundary.fsh in Resources */,
-				574B6004168D2BB4008367D1 /* visualize.fsh in Resources */,
 				57647577167D97EC00D5A431 /* generic.fsh in Resources */,
 				57647578167D97EC00D5A431 /* generic.vsh in Resources */,
 				572EB290167AC0020062F290 /* fountain.fsh in Resources */,
@@ -1404,6 +1410,7 @@
 				575AA12B16ADBB9500635A76 /* pool.png in Resources */,
 				57A58EB116AE020C00C9FA53 /* poolLines.png in Resources */,
 				574E08FE16B1F6B30035C293 /* TG1Band-perc-mono-44k.aif in Resources */,
+				577AE49916B35F7300B4FDF1 /* jacobi.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1500,6 +1507,7 @@
 				57A58EA816ADE68200C9FA53 /* Cube.m in Sources */,
 				5712FB4216B1A808004D62AE /* TimeStretch.m in Sources */,
 				577612FF16B308AB00948D47 /* UIViewController+TGExtension.m in Sources */,
+				577AE48816B35D1400B4FDF1 /* Fluid.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

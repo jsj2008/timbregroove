@@ -11,8 +11,6 @@
 
 static NSHashTable * __shaders;
 
-#define MAX_SHADER_VARIABLES 100
-
 @implementation ShaderWrapper
 
 - (void)use
@@ -190,9 +188,9 @@ static NSHashTable * __shaders;
 
 @interface Shader () {
     const char ** _names;
+    
     int           _numVars;
     int           _lastAttr;
-    GLint         _vars[MAX_SHADER_VARIABLES];
     id            _poolKey;
     ShaderLocations * _locations;
 }
@@ -266,8 +264,9 @@ static NSHashTable * __shaders;
     _names = names;
     _lastAttr = lastAttr;
     _numVars = numNames;
+    _vars = (GLint *)malloc(sizeof(GLint)*_numVars);
     
-    for( int i = 0; i < MAX_SHADER_VARIABLES; i++ )
+    for( int i = 0; i < _numVars; i++ )
         _vars[i] = -1;
     
     if( ![self loadAndCompile:vert andFragment:frag andHeaders:headers] )
@@ -286,6 +285,7 @@ static NSHashTable * __shaders;
 
 -(void)dealloc
 {
+    free(_vars);
     [__shaders removeObject:self];
 }
 
