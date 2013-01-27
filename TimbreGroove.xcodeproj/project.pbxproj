@@ -195,6 +195,7 @@
 		57BFCBAC16A220EB008903BA /* TGAmb3-32k.aif in Resources */ = {isa = PBXBuildFile; fileRef = 57BFCBA716A220EB008903BA /* TGAmb3-32k.aif */; };
 		57CAF78516891EDB00459353 /* libc++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 57CAF78416891EDA00459353 /* libc++.dylib */; };
 		57CCFFC216849337003B4A19 /* Text.m in Sources */ = {isa = PBXBuildFile; fileRef = 57CCFFC116849336003B4A19 /* Text.m */; };
+		57DF9C8116B5B9AB00050635 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57DF9C8016B5B9AB00050635 /* AVFoundation.framework */; };
 		57E1954616ABECA50099514B /* PoolShader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 57E1954516ABECA50099514B /* PoolShader.vsh */; };
 		57E1954A16ABEEBD0099514B /* SphereOid.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E1954916ABEEBD0099514B /* SphereOid.m */; };
 		57E62E67168433100030908E /* Photo.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E62E66168433100030908E /* Photo.m */; };
@@ -528,6 +529,7 @@
 		57DD3CDA168A5F92005980F6 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = ../Debug.xcconfig; sourceTree = "<group>"; };
 		57DD3CDF168A5FDD005980F6 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = ../Release.xcconfig; sourceTree = "<group>"; };
 		57DD3CE0168A5FF5005980F6 /* common.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = common.xcconfig; path = ../common.xcconfig; sourceTree = "<group>"; };
+		57DF9C8016B5B9AB00050635 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		57E1954516ABECA50099514B /* PoolShader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = PoolShader.vsh; sourceTree = "<group>"; };
 		57E1954816ABEEAC0099514B /* SphereOid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SphereOid.h; sourceTree = "<group>"; };
 		57E1954916ABEEBD0099514B /* SphereOid.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SphereOid.m; sourceTree = "<group>"; };
@@ -561,6 +563,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				57DF9C8116B5B9AB00050635 /* AVFoundation.framework in Frameworks */,
 				5712FB4416B1B8B1004D62AE /* Accelerate.framework in Frameworks */,
 				575DA0061693E43300A50C41 /* AssetsLibrary.framework in Frameworks */,
 				575DA0041693E35A00A50C41 /* MobileCoreServices.framework in Frameworks */,
@@ -1181,15 +1184,16 @@
 			children = (
 				5712FB4316B1B8B1004D62AE /* Accelerate.framework */,
 				575DA0051693E43300A50C41 /* AssetsLibrary.framework */,
-				57CAF78416891EDA00459353 /* libc++.dylib */,
-				575DA0031693E35A00A50C41 /* MobileCoreServices.framework */,
 				57019F711685C086007FA38F /* AudioToolbox.framework */,
+				57DF9C8016B5B9AB00050635 /* AVFoundation.framework */,
+				57E874FB16782894008243B2 /* CoreGraphics.framework */,
+				57E874F916782894008243B2 /* Foundation.framework */,
+				57E874FD16782894008243B2 /* GLKit.framework */,
+				575DA0031693E35A00A50C41 /* MobileCoreServices.framework */,
+				57E874FF16782894008243B2 /* OpenGLES.framework */,
 				57019F6F1685C042007FA38F /* QuartzCore.framework */,
 				57E874F716782894008243B2 /* UIKit.framework */,
-				57E874F916782894008243B2 /* Foundation.framework */,
-				57E874FB16782894008243B2 /* CoreGraphics.framework */,
-				57E874FD16782894008243B2 /* GLKit.framework */,
-				57E874FF16782894008243B2 /* OpenGLES.framework */,
+				57CAF78416891EDA00459353 /* libc++.dylib */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";

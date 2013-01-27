@@ -294,7 +294,7 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
 @end
 
 #pragma mark -
-#pragma mark Base class for Fluid kernels
+#pragma mark Kernel
 #pragma mark -
 
 @interface FluidKernel : NSObject {
@@ -312,14 +312,13 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
 @implementation FluidKernel
 
 -(void)setVShader:(const char *)vShader
-        FShader:(const char *)fShader
- textures:(NSDictionary *) textures
-     buffer:(MeshBuffer *)buffer;
+          FShader:(const char *)fShader
+         textures:(NSDictionary *) textures
+           buffer:(MeshBuffer *)buffer;
 {
     _buffer = buffer;
     _shader = [[FluidShader alloc] initWithVertex:vShader andFragment:fShader];
     _keyedTextures = [textures mutableCopy];
-    [_buffer getLocations:_shader];
     _bindFBO = true;
     _unbindFBO = true;
 }
@@ -368,6 +367,7 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     if( _fbo && _bindFBO )
        [_fbo bindToRender];
     
+    [_buffer getLocations:_shader];    
     [_buffer bind];
     [_buffer draw];
     [_buffer unbind];
@@ -393,7 +393,6 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
 @interface Fluid : TG3dObject {
     float _px;
     float _py;
-    CGSize _viewSize;
 }
 @end
 
@@ -432,7 +431,6 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     
     if( !_gestureRegistered )
     {
-        // be careful not to swipe
         // TODO: manually handle UITouch events for more control over this stuff
         UIPanGestureRecognizer * pgr = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(onDrag:)];
        // pgr.minimumNumberOfTouches = 2;
@@ -442,20 +440,18 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     
     // yea, yea reusing variable. Sue me later.
     view = (GLKView *)view.superview;
-    _viewSize = CGSizeMake(view.drawableWidth,view.drawableHeight);
-    CGFloat width = _viewSize.width;
-    CGFloat height = _viewSize.height;
-    _px = 1.0/width;
-    _py = 1.0/height;
+    CGSize sz = (CGSize){view.drawableWidth,view.drawableHeight};
+    _px = 1.0/sz.width;
+    _py = 1.0/sz.height;
   
     GLKVector2 px = { _px, _py };
-    GLKVector2 px1 = { 1.0, width/height };
+    GLKVector2 px1 = { 1.0, sz.width/sz.height };
     
-    _velocity0 = [[FBO alloc] initWithWidth:width height:height type:GL_HALF_FLOAT_OES format:0];
-    _velocity1 = [[FBO alloc] initWithWidth:width height:height type:GL_HALF_FLOAT_OES format:0];
-    _pressure0 = [[FBO alloc] initWithWidth:width height:height type:GL_HALF_FLOAT_OES format:GL_LUMINANCE];
-    _pressure1 = [[FBO alloc] initWithWidth:width height:height type:GL_HALF_FLOAT_OES format:GL_LUMINANCE];
-    _divergence = [[FBO alloc] initWithWidth:width height:height type:GL_HALF_FLOAT_OES format:GL_LUMINANCE];
+    _velocity0 = [[FBO alloc] initWithWidth:sz.width height:sz.height type:GL_HALF_FLOAT_OES format:0];
+    _velocity1 = [[FBO alloc] initWithWidth:sz.width height:sz.height type:GL_HALF_FLOAT_OES format:0];
+    _pressure0 = [[FBO alloc] initWithWidth:sz.width height:sz.height type:GL_HALF_FLOAT_OES format:GL_LUMINANCE];
+    _pressure1 = [[FBO alloc] initWithWidth:sz.width height:sz.height type:GL_HALF_FLOAT_OES format:GL_LUMINANCE];
+    _divergence = [[FBO alloc] initWithWidth:sz.width height:sz.height type:GL_HALF_FLOAT_OES format:GL_LUMINANCE];
     
     float twoPixelsX = _px * 2.0;
     float twoPixelsY = _py * 2.0;
@@ -642,7 +638,7 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
         _input_x = newX;
         _input_y = newY;
         
-        // NSLog(@"drag at: %f, %f", _input_x, _input_y);
+         NSLog(@"drag at: %f, %f", _input_x, _input_y);
     }
 }
 
