@@ -27,5 +27,5 @@ typedef enum PoolVariables {
 @interface Pool : Shader
 
 @property (nonatomic) GLKVector3 lightPos;
-
+@property (nonatomic) float time;
 @end

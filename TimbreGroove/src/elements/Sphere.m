@@ -12,7 +12,6 @@
 #import "Light.h"
 
 @interface Sphere() {
-    float _lightRot;
 }
 @end
 
@@ -31,11 +30,10 @@
 {
     if( self.light )
     {
-        _lightRot += 0.03;
         GLKVector3 lDir = self.light.direction;
         GLKMatrix4 mx = GLKMatrix4MakeTranslation( lDir.x, lDir.y, lDir.z );
         
-        mx = GLKMatrix4Rotate(mx, _lightRot, 0.0f, 1.0f, 0.0f);
+        mx = GLKMatrix4Rotate(mx, _lightRotation, 0.0f, 1.0f, 0.0f);
         self.light.direction = GLKMatrix4MultiplyVector3(mx,GLKVector3Make(-1, 0, 0));
     }
 }
@@ -46,7 +44,7 @@
     
     if( self.hasTexture )
     {
-        indiciesIntoNames = @[@(gv_pos),   @(gv_uv),    @(gv_normal)];
+        indiciesIntoNames = @[@(gv_pos),   @(gv_uv),  @(gv_normal)];
     }
     else
     {

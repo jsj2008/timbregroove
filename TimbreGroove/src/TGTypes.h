@@ -11,6 +11,10 @@
 
 #define R0_1() (((float)(arc4random_uniform(0x1000000) % 255))/255.0)
 
+#define TG_MIN(a,b)            (((a) < (b)) ? (a) : (b))
+#define TG_MAX(a,b)            (((a) > (b)) ? (a) : (b))
+#define TG_CLAMP(x, lo, hi)      (TG_MIN((hi), TG_MAX((x), (lo))))
+
 typedef enum {
     TG_FLOAT,
     TG_VECTOR2,
@@ -46,18 +50,6 @@ typedef struct TGVertexStride {
     int          indexIntoShaderNames;
     GLuint       location;
 } TGVertexStride;
-
-typedef struct TGGenericElementParams
-{
-    TGVertexStride * strides;
-    unsigned int     numStrides;
-    void *           vertexData;
-    unsigned int     numVertices;
-    unsigned int *   indexData;
-    unsigned int     numIndices;
-    
-} TGGenericElementParams;
-
 
 #define GL_ERROR_C { GLenum __e = glGetError(); if(__e) { NSLog(@"glError(%d/%04X) %s:%d",__e,__e,__FILE__,__LINE__); }}
 #define GL_CALL(f) { NSLog(@"calling: %s", f); }

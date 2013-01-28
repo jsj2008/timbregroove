@@ -11,13 +11,7 @@
 #import "Camera.h"
 #import "Tweener.h"
 #import "Tween.h"
-#import "Sound.h"
-#import "TG3dObject+Sound.h"
-#import "TrackView+Sound.h"
 #import "SettingsVC.h"
-
-static NSString * _str_volumeSlider = @"_volumeSlider";
-static NSString * _str_userMuteSwitch = @"_userMuteSwitch";
 
 @implementation TrackView
 
@@ -27,7 +21,6 @@ static NSString * _str_userMuteSwitch = @"_userMuteSwitch";
     TG3dObject * node = [[klass alloc] init];
     node.view = self;
     [self.graph appendChild:node];
-    [node assignSound:params];
     [node setValuesForKeysWithDictionary:params];
     [node wireUp];
 }
@@ -98,9 +91,10 @@ static NSString * _str_userMuteSwitch = @"_userMuteSwitch";
 
 -(NSArray *)getSettings
 {
-   return [[self getSoundSettings] arrayByAddingObjectsFromArray:[[self.graph firstChild] getSettings]];
+    return [[self.graph firstChild] getSettings];
 }
 
+/*
 -(NSArray *)getSoundSettings
 {
     TG3dObject * obj = self.firstNode;
@@ -121,6 +115,7 @@ static NSString * _str_userMuteSwitch = @"_userMuteSwitch";
 
     return @[sdv,sdm];
 }
+*/
 
 -(void)settingsGoingAway:(SettingsVC *)vc;
 {

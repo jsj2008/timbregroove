@@ -42,17 +42,20 @@
     GeometryStats stats;
     [self getStats:&stats];
     
-    TGGenericElementParams params;
+    TGVertexStride * strides;
+    unsigned int     numStrides;
+    void *           vertexData;
+    unsigned int     numVertices;
+    unsigned int *   indexData;
+    unsigned int     numIndices;
     
-    memset(&params, 0, sizeof(params));
+    numStrides = [strideTypes count];
     
-    params.numStrides = [strideTypes count];
+    strides = malloc(sizeof(TGVertexStride)*numStrides);
     
-    params.strides = malloc(sizeof(TGVertexStride)*params.numStrides);
-    
-    for( int i = 0; i < params.numStrides; i++ )
+    for( int i = 0; i < numStrides; i++ )
     {
-        TGVertexStride * stride = params.strides + i;
+        TGVertexStride * stride = strides + i;
         TGStrideType type = [strideTypes[i] intValue];
         switch (type) {
             case st_float2:
@@ -74,29 +77,29 @@
         stride->indexIntoShaderNames = [indicesIntoNames[i] intValue];
     }
     
-    params.numVertices = stats.numVertices;
-    params.numIndices  = stats.numIndices;
-    GLsizei sz = [MeshBuffer calcDataSize:params.strides countStrides:params.numStrides numVertices:params.numVertices];
-    params.vertexData = malloc(sz);
-    if( params.numIndices > 0 )
-        params.indexData = malloc( sizeof(unsigned int) * params.numIndices );
+    numVertices = stats.numVertices;
+    numIndices  = stats.numIndices;
+    GLsizei sz = [MeshBuffer calcDataSize:strides countStrides:numStrides numVertices:numVertices];
+    vertexData = malloc(sz);
+    if( numIndices > 0 )
+        indexData = malloc( sizeof(unsigned int) * numIndices );
     
-    [self getBufferData:params.vertexData
-              indexData:params.indexData
+    [self getBufferData:vertexData
+              indexData:indexData
                 withUVs:_UVs
             withNormals:_normals];
     
-    [self setData:params.vertexData
-          strides:params.strides
-     countStrides:params.numStrides
-      numVertices:params.numVertices
-        indexData:params.indexData
-       numIndices:params.numIndices];
+    [self setData:vertexData
+          strides:strides
+     countStrides:numStrides
+      numVertices:numVertices
+        indexData:indexData
+       numIndices:numIndices];
         
-    free(params.strides);
-    free(params.vertexData);
-    if( params.indexData )
-        free(params.indexData);
+    free(strides);
+    free(vertexData);
+    if( indexData )
+        free(indexData);
 }
 
 -(void)getStats:(GeometryStats *)stats

@@ -8,6 +8,8 @@
 
 #import "SphereOid.h"
 
+#define DEFAULT_SPHERE_CHUNK 30
+
 @interface SphereOid () {
     unsigned int _longs;
     unsigned int _lats;
@@ -21,9 +23,12 @@
                          andDoUVs:(bool)UVs
                      andDoNormals:(bool)normals
 {
-    return [SphereOid sphereWithRadius:1 andLongs:30 andLats:30
+    return [SphereOid sphereWithRadius:1
+                              andLongs:DEFAULT_SPHERE_CHUNK
+                               andLats:DEFAULT_SPHERE_CHUNK
                    andIndicesIntoNames:indicesIntoNames
-                              andDoUVs:UVs andDoNormals:normals];
+                              andDoUVs:UVs
+                          andDoNormals:normals];
 }
 
 +(id) sphereWithRadius:(float)radius
@@ -41,6 +46,7 @@
         sp->_radius = radius;
         [sp createWithIndicesIntoNames:indicesIntoNames doUVs:UVs doNormals:normals];
     }
+  //  sp.drawType = GL_POINTS;
     return sp;
 }
 
@@ -58,14 +64,16 @@
     float * data = vertextData;
     
 	for (int latNumber = 0; latNumber <= _lats; ++latNumber) {
+
+        float theta = latNumber * M_PI / _lats;
+        float sinTheta = sin(theta);
+        float cosTheta = cos(theta);
+
 		for (int longNumber = 0; longNumber <= _longs; ++longNumber) {
-            
-			float theta = latNumber * M_PI / _lats;
+        
 			float phi = longNumber * 2 * M_PI / _longs;
 			
-			float sinTheta = sin(theta);
-			float sinPhi = sin(phi);
-			float cosTheta = cos(theta);
+            float sinPhi = sin(phi);
 			float cosPhi = cos(phi);
 			
 			float x = cosPhi * sinTheta;
@@ -75,22 +83,25 @@
             *data++ = _radius * x;
             *data++ = _radius * y;
             *data++ = _radius * z;
-			
+			         
+            float u,v;
+            if( wUV )
+            {
+                u = 1 - ((float)longNumber / (float)_longs);
+                v = 1 - ((float)latNumber / (float)_lats);
+                
+                *data++ = u;
+                *data++ = v;
+                
+            }
+
             if( wNormals )
             {
                 *data++ = x;
                 *data++ = y;
                 *data++ = z;
             }
-            
-            if( wUV )
-            {
-                float u = 1.0 - (1.0 * longNumber / _longs);
-                float v = 1.0 * latNumber / _lats;
-                *data++ = u;
-                *data++ = v;
-            }
-		}
+        }
 	}
     
     unsigned int * idata = indexData;
@@ -109,10 +120,9 @@
             
             *idata++ = second;
             *idata++ = third;
-            *idata++ = fourth;
+            *idata++ = fourth;            
 		}
 	}
-    
 }
 
 @end

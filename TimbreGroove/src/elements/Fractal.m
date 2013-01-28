@@ -48,7 +48,7 @@
     _backColorLocation       = glGetUniformLocation(program, "u_backColor");
     _posLocation             = glGetAttribLocation(program, "a_position");
     
-    GLKVector4 bc = { 0.4, 0.5, 0.5, 1 };
+    GLKVector4 bc = { 0.0, 0.0, 0.45, 1 };
     _backColor = bc;
     
     self.shader = (Shader *)_shader; // eek

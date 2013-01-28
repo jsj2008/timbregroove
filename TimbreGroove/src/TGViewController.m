@@ -11,10 +11,6 @@
 #import "Factory.h"
 #import "TrackView.h"
 #import "Graph.h"
-#import "SoundMan.h"
-#import "SoundPool.h"
-#import "TG3dObject+Sound.h"
-#import "TrackView+Sound.h"
 #import "SettingsVC.h"
 
 #if 1
@@ -27,7 +23,6 @@
     MenuView  * _menuView;
     bool _dawView;
     TrackView * _currentTrackView;
-    SoundMan * _soundMan;
 }
 
 @property (strong, nonatomic) EAGLContext *context;
@@ -52,12 +47,6 @@
     
     Factory * globalFactory = [Factory sharedInstance];
     globalFactory.delegate = self;
-    
-    if( !_soundMan )
-    {
-        _soundMan = [SoundMan sharedInstance];
-        [_soundMan wakeup];
-    }
     
     self.preferredFramesPerSecond = 60;
     
@@ -115,7 +104,6 @@
 
 -(void)dealloc
 {
-    _soundMan = nil;
 }
 
 #pragma mark - GLKView and GLKViewController delegate methods
@@ -136,7 +124,6 @@
 {
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    [_soundMan update:self.timeSinceLastDraw];
 }
 
 
@@ -236,9 +223,9 @@
     
     [tv createNode:options];
     
-    [tv showAndPlay:SHOW_DIR_RIGHT];
+    [tv showFromDir:SHOW_DIR_RIGHT];
     if( _currentTrackView )
-        [_currentTrackView hideAndFade:SHOW_DIR_LEFT];
+        [_currentTrackView hideToDir:SHOW_DIR_LEFT];
     _currentTrackView = tv;
     
 }
@@ -266,7 +253,6 @@
         return;
     }
 
-    [_currentTrackView fade];
     [_currentTrackView shrinkToNothing:self notify:@"viewIsGone"];
 }
 
@@ -286,7 +272,7 @@
         {
             [self dumpCurrentView];
             _currentTrackView = view;
-            [_currentTrackView showAndPlay:SHOW_NOW];
+            [_currentTrackView showFromDir:SHOW_NOW];
             return;
         }
     }
@@ -312,7 +298,7 @@
     for (unsigned int q = 0; q < dim && vcount < count; q++) {
         for( unsigned int r = 0; r < dim && vcount < count; r++ ) {
             TrackView * view = trackViews[vcount++];
-            [view showAndSync:400];
+            [view showFromDir:SHOW_DIR_LEFT];
             view.frame = rc;
             [view animateProp:"x"      targetVal:q*w hide:false];
             [view animateProp:"y"      targetVal:r*h hide:false];
@@ -340,7 +326,7 @@
         else
         {
             view.frame = rc;
-            [view hideAndFade:HIDE_NOW];
+            [view hideToDir:HIDE_NOW];
         }
     }
 }
@@ -358,8 +344,8 @@
         if( trackViews[i] == _currentTrackView )
         {
             TrackView * next = trackViews[i+1];
-            [next showAndPlay:SHOW_DIR_LEFT];
-            [_currentTrackView hideAndFade:SHOW_DIR_RIGHT];
+            [next showFromDir:SHOW_DIR_LEFT];
+            [_currentTrackView hideToDir:SHOW_DIR_RIGHT];
             _currentTrackView = next;
             break;
         }
@@ -380,8 +366,8 @@
             if( i > 0 )
             {
                 TrackView * next = trackViews[i-1];
-                [next showAndPlay:SHOW_DIR_RIGHT];
-                [_currentTrackView hideAndFade:SHOW_DIR_LEFT];
+                [next showFromDir:SHOW_DIR_RIGHT];
+                [_currentTrackView hideToDir:SHOW_DIR_LEFT];
                 _currentTrackView = next;
             }
             break;

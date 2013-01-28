@@ -72,29 +72,14 @@
 
 -(void)renderToFBO
 {
-    [self renderToFBOWithClear:true andBindFlags:FBOBF_None];
-}
-
--(void)renderToFBOWithClear:(bool)clear
-{
-    [self renderToFBOWithClear:clear andBindFlags:FBOBF_None];
-}
-
--(void)renderToFBOWithClear:(bool)clear andBindFlags:(FBO_BindFlags)flags;
-{
     Camera * saveCamera = _camera;
     _camera = [IdentityCamera new];
-    if( (flags & FBOBF_SkipBind) == 0 )
         [_fbo bindToRender];
     glViewport(0, 0, _fbo.width, _fbo.height);
-    if( clear )
-    {
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    }
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     [self render:_fbo.width h:_fbo.height];
-    if( (flags & FBOBF_SkipUnbind) == 0 )
-        [_fbo unbindFromRender];
+    [_fbo unbindFromRender];
     _camera = saveCamera;
 }
 

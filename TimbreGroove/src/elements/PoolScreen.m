@@ -15,99 +15,15 @@
 #import "FBO.h"
 #import "Shader.h"
 #import "Tweener.h"
-#import "TG3dObject+Sound.h"
-#import "TrackView+Sound.h"
-#import "Sound.h"
 #import "MeshBuffer.h"
 #import "UIViewController+TGExtension.h"
+#import "Mixer.h"
+#import "PoolWater.h"
 
 @interface PoolScreen : Generic {
     NSMutableArray * _waters;
 }
 +(GLKVector2)screenToPool:(CGPoint)pt;
-
-@end
-
-//--------------------------------------------------------------------------------
-#pragma mark Pool Water Shader
-
-typedef enum PoolWaterVariables {
-    pw_position,
-    pw_uv,
-    PW_LAST_ATTR = pw_uv,
-//    pw_pvm,
-    pw_sampler,
-    pw_time,
-    pw_ripple,
-    pw_turbulence,
-    pw_center,
-    pw_radius,
-    pw_scale,
-    PW_NUM_NAMES
-} PoolWaterVariables;
-
-const char * _pw_names[] = {
-    "a_position",
-    "a_uvs",
-    "u_texture",
-    "u_time",
-    "u_rippleSize",
-    "u_turbulence",
-    "u_center",
-    "u_radius",
-    "u_scale"
-};
-
-const char * _pw_shader_name = "PoolScreen";
-
-@interface PoolWaterShader : Shader
-
-@property (nonatomic) float rippleSize;
-@property (nonatomic) float turbulence;
-@property (nonatomic) GLKVector2 center;
-@property (nonatomic) float radius;
-@property (nonatomic) GLKVector2 scale;
-@end
-
-@implementation PoolWaterShader
-
--(id)init
-{
-    self = [super initWithVertex:_pw_shader_name
-                     andFragment:_pw_shader_name
-                     andVarNames:_pw_names
-                     andNumNames:PW_NUM_NAMES
-                     andLastAttr:PW_LAST_ATTR
-                      andHeaders:nil];
-    if( self )
-    {
-        _rippleSize = 7.0;
-        _turbulence = 0.005f;
-        _radius = 0.01;
-        CGSize sz = [UIScreen mainScreen].bounds.size;
-        _scale = (GLKVector2){ 1/sz.width, 1/sz.height };
-    }
-    return self;
-}
-
--(void)writeStatics
-{
-    [self writeToLocation:pw_ripple     type:TG_FLOAT   data:&_rippleSize];
-    [self writeToLocation:pw_turbulence type:TG_FLOAT   data:&_turbulence];
-    [self writeToLocation:pw_scale      type:TG_VECTOR2 data:&_scale];
-}
-
--(void)setCenter:(GLKVector2)center
-{
-    _center = center;
-    [self writeToLocation:pw_center type:TG_VECTOR2 data:&_center];
-}
-
--(void)setRadius:(float)radius
-{
-    _radius = radius;
-    [self writeToLocation:pw_radius type:TG_FLOAT data:&_radius];
-}
 
 @end
 
@@ -123,7 +39,8 @@ const char * _pw_shader_name = "PoolScreen";
 @property (nonatomic) float centerX;
 @property (nonatomic) float centerY;
 @property (nonatomic) float radius;
-
+@property (nonatomic) float meteredRadius;
+@property (nonatomic) Sound * sound;
 @property (nonatomic) GLKVector2 center;
 
 @end
@@ -257,21 +174,36 @@ const char * _pw_shader_name = "PoolScreen";
     self.shader = shader;
 }
 
+-(void)update:(NSTimeInterval)dt
+{
+    if( self.timer > 1.0/8.0 )
+    {
+        for( PoolWater * water in _waters )
+        {
+            [water.sound updateMeters];
+            float peak = [water.sound averagePowerForChannel:0];
+            if( peak > 0 )
+                peak = 0;
+            float targetRadius = (peak + 160.0) / 640.0;
+            water.radius = targetRadius;
+        }
+        self.timer = 0.0;
+    }
+}
+
 -(void)render:(NSUInteger)w h:(NSUInteger)h
 {
     PoolWaterShader * shader = (PoolWaterShader *)_shader;
     
     [shader use];
-    float f = (float)self.totalTime;
-    [shader writeToLocation:pw_time type:TG_FLOAT data:&f];
-
+    
+    shader.time = (float)self.totalTime;
+    
     [self.texture bind:0];
     MeshBuffer * b = _buffers[0];
     [b bind];
 
     glDisable(GL_DEPTH_TEST);
-//    glEnable(GL_BLEND);
-//    glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
     
     for( PoolWater * water in _waters )
     {
@@ -284,6 +216,19 @@ const char * _pw_shader_name = "PoolScreen";
     [self.texture unbind];
 
     glEnable(GL_DEPTH_TEST);
+}
+
+
+-(void)setViewIsHidden:(NSNumber *)viewIsHidden
+{
+    bool hidden = [viewIsHidden boolValue];
+    for( PoolWater * water in _waters )
+        if( hidden )
+            [water.sound pause];
+        else
+            [water.sound play];
+    
+    [super setViewIsHidden:viewIsHidden];
 }
 
 +(GLKVector2)screenToPool:(CGPoint)pt
@@ -336,6 +281,12 @@ const char * _pw_shader_name = "PoolScreen";
 {
     PoolWater * child = [PoolWater new];
     [child setAnimatedRadius:0.2];
+    Mixer * mixer = [Mixer sharedInstance];
+    child.sound = [mixer getSound:"TGAmb1-32k"];
+    child.sound.numberOfLoops = -1;
+    child.sound.meteringEnabled = YES;
+    [child.sound play];
+
     if( !_waters )
         _waters = [NSMutableArray new];
     [_waters addObject:child];

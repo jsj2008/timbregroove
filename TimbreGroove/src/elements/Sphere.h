@@ -11,4 +11,5 @@
 @class Texture;
 
 @interface Sphere : Generic
+@property (nonatomic) float lightRotation;
 @end

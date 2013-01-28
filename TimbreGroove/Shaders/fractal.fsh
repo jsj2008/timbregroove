@@ -14,7 +14,7 @@ void main(void)
     const int nMaxIter = 128;
     
     float R = 3.5 * (gl_FragCoord.x - u_viewportSize.x / 2.0)  / u_viewportSize.x - 0.25;
-    float I = 3.5 * (gl_FragCoord.y - u_viewportSize.y / 2.0)  / u_viewportSize.y;
+    float I = 3.5 * (gl_FragCoord.y - u_viewportSize.y / 2.0)  / u_viewportSize.y - 0.2;
     
     float Real0 = R;
     float Imag0 = I;

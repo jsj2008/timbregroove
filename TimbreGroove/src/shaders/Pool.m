@@ -70,6 +70,12 @@ const char * _pool_shader_name = "PoolShader";
     _lightPos = lightPos;
 }
 
+-(void)setTime:(float)time
+{
+    _time = time;
+    [self writeToLocation:pool_time type:TG_FLOAT data:&time];
+}
+
 -(void)prepareRender:(TG3dObject *)object
 {
     GLKMatrix4 pvm = [object calcPVM];

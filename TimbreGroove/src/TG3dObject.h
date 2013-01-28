@@ -31,8 +31,6 @@ typedef enum FBO_BindFlags
 -(void)update:(NSTimeInterval)dt;
 -(void)render:(NSUInteger)w h:(NSUInteger)h;
 -(void)renderToFBO;
--(void)renderToFBOWithClear:(bool)clear;
--(void)renderToFBOWithClear:(bool)clear andBindFlags:(FBO_BindFlags)flags;
 -(void)renderToCaptureAtBufferLocation:(GLint)location;
 
 @property (nonatomic) NSTimeInterval totalTime;
@@ -62,7 +60,6 @@ typedef enum FBO_BindFlags
      alloc/init
      node.view = set to TrackView:GLKView
      placed in view.graph
-     sound is assigned
      params deserialized from plist (or store to be named)
      [node wireUp];
 

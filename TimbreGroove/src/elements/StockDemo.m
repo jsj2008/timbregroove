@@ -73,8 +73,9 @@ typedef enum shaderType {
 -(void)update:(NSTimeInterval)dt
 {
     _rot += 1;
-    GLKVector3 rot = { GLKMathDegreesToRadians(_rot), 0, 0 };
-    self.rotation = rot;
+    self.rotation = (GLKVector3){ 0, GLKMathDegreesToRadians(_rot), 0 };
+    if( _shaderType == pool )
+        ((Pool*)self.shader).time = (float)dt;
 }
 
 -(void)createTexture
@@ -101,9 +102,13 @@ typedef enum shaderType {
     bool UVs = false;
     
     if( _shaderType == fire )
+    {
         indicesIntoNames = @[@(fv_position),@(fv_normal)];
+    }
     else if( _shaderType == cloud )
+    {
         indicesIntoNames = @[@(cld_position),@(cld_normal)];
+    }
     else if( _shaderType == pool )
     {
         indicesIntoNames = @[@(pool_position),@(pool_uv),@(pool_normal)];

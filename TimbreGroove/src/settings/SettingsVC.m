@@ -7,7 +7,6 @@
 //
 
 #import "SettingsVC.h"
-#import "Sound.h"
 #import "AssetLoader.h"
 
 @implementation SettingsDescriptor

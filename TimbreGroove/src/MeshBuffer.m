@@ -126,7 +126,7 @@
     if( indexData )
        [self setIndexData:indexData numIndices:numIndices];
     
-    glBindVertexArrayOES(0);
+  //  glBindVertexArrayOES(0);
 }
 
 -(void)setIndexData:(unsigned int *)data numIndices:(unsigned int)numIndices
