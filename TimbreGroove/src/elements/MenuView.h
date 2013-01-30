@@ -6,10 +6,9 @@
 //  Copyright (c) 2012 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import <GLKit/GLKit.h>
 #import "View.h"
+#import "Menu.h"
 
-@class Menu;
 
 @interface MenuView : View
 @property (nonatomic) unsigned int level;

@@ -8,6 +8,7 @@
 
 #import "TGViewController.h"
 #import "MenuView.h"
+#import "MenuItem.h"
 #import "Factory.h"
 #import "TrackView.h"
 #import "Graph.h"
@@ -23,6 +24,7 @@
     MenuView  * _menuView;
     bool _dawView;
     TrackView * _currentTrackView;
+    TrackView * _rootView;
 }
 
 @property (strong, nonatomic) EAGLContext *context;
@@ -130,47 +132,73 @@
 #pragma mark -
 #pragma mark Menus
 
-- (id)makeMenuView:(NSDictionary *)meta
+- (id)Menu:(Menu*)menu makeMenuView:(NSDictionary *)meta
 {
+    // 1. Calculate menu frame
+    //--------------------------------
     GLKView *view = (GLKView *)self.view;
     CGRect rc = view.frame;
-    rc.size.width *= 0.20;
+    rc.size.width = (float)MENU_VIEW_WIDTH;
     rc.origin.x = -rc.size.width;
-//  EAGLContext * context = self.context;
 
+    // 2. Setup gl context
+    //--------------------------------
     EAGLContext * context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2
                                                   sharegroup:self.context.sharegroup];
     
+    // 3. Create and init MenuView object
+    //--------------------------------------------------
     MenuView * mview = [[MenuView alloc] initWithFrame:rc context:context];
     mview.drawableDepthFormat = view.drawableDepthFormat;
     mview.backgroundColor = [UIColor clearColor];
+    [view addSubview:mview];
+    [mview setupGL];
+
+    // 4. Trap taps for menu items
+    //--------------------------------
     UITapGestureRecognizer * tgr;
     tgr = [[UITapGestureRecognizer alloc] initWithTarget:mview action:@selector(onTap:)];
     [mview addGestureRecognizer:tgr];
-    [view addSubview:mview];
-    [mview setupGL];
-    Menu * menu = [mview createMenu:meta];
-    menu.viewMaker = self;
-    menu.menuView = mview;
+    
+    // 5. Create the drawing menu object
+    //-------------------------------------
+    Menu * newMenu = [mview createMenu:meta]; // null meta will read from menus.plist
+    newMenu.delegate = self;
+    
     return mview;
 }
 
-- (void)closeAllMenus
+- (bool)Menu:(Menu *)menu shouldEnable:(MenuItem *)mi
 {
+    if( [mi.name isEqualToString:@"delete_view"] )
+        return !([self isRootView]);
+    
+    return true;
+}
+
+- (NSNumber *)closeAllMenus
+{
+    bool closed = false;
     Class mClass = [MenuView class];
-    for( UIView * view in self.view.subviews )
+    for( View * view in self.view.subviews )
     {
         if( [view isKindOfClass:mClass] )
         {
-            [((MenuView *)view) hide];
+            if( view.visible && !view.hiding )
+            {
+                [((MenuView *)view) hide];
+                closed = true;
+            }
         }
     }
+    
+    return @(closed);
 }
 
 -(void)toggleMenuView
 {
     if( !_menuView )
-        _menuView = [self makeMenuView:nil];
+        _menuView = [self Menu:nil makeMenuView:nil];
     
     if( !_menuView.visible )
     {
@@ -227,7 +255,14 @@
     if( _currentTrackView )
         [_currentTrackView hideToDir:SHOW_DIR_LEFT];
     _currentTrackView = tv;
+    if( !_rootView )
+        _rootView = tv;
     
+}
+
+-(bool)isRootView
+{
+    return _currentTrackView == _rootView;
 }
 
 - (id)makeTrackView:(Class)klass
@@ -412,6 +447,8 @@
     {
         return;
     }
+    [self closeAllMenus];
+    
     [self slideToPrevView];
 }
 
@@ -421,11 +458,15 @@
     {
         return;
     }
+    [self closeAllMenus];
+    
     [self slideToNextView];
 }
 
 - (IBAction)pinch:(UIPinchGestureRecognizer *)pgr
 {
+    [self closeAllMenus];
+    
     if( pgr.scale < 1.0f )
     {
         if( !_dawView )

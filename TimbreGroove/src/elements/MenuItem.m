@@ -9,6 +9,9 @@
 #import "Menu.h"
 #import "MenuItem.h"
 #import "MenuView.h"
+#import "Texture.h"
+#import "Shader.h"
+#import "MeshBuffer.h"
 
 @interface MenuItem() {
     Menu * _subMenu;
@@ -18,22 +21,12 @@
 
 @implementation MenuItem
 
--(id)init
-{
-    return [super init];
-}
+// render actually happens in parent (Menu*) render:h
 
-#if DEBUG
--(void)render:(NSUInteger)w h:(NSUInteger)h
+-(void)update:(NSTimeInterval)dt
 {
-    [super render:w h:h];
-}
-#endif
-
--(void)createBuffer
-{
-    [self addBuffer:_buffer];
-    _buffer = nil;
+    Menu * owner = (Menu *)self.parent;
+    self.disabled = ![owner.delegate Menu:owner shouldEnable:self];
 }
 
 -(void)onTap:(UITapGestureRecognizer *)tgr;
@@ -45,8 +38,7 @@
         if( subMenuMeta )
         {
             Menu * owner = (Menu *)self.parent;
-            id<MenuViewMaker> maker = owner.viewMaker;
-            MenuView * view = [maker makeMenuView:subMenuMeta];
+            MenuView * view = [owner.delegate Menu:owner makeMenuView:subMenuMeta];
             view.level = owner.menuView.level + 1;
             _subMenu = view.menu;
         }
@@ -69,5 +61,23 @@
         }
     }
 }
+
+// capture hack
+-(void)renderToCaptureAtBufferLocation:(GLint)location
+{
+    if( !self.disabled )
+    {
+        Menu * menu = (Menu *)(self.parent);
+        MeshBuffer * buffer = menu.buffer;
+        [buffer bindToTempLocation:location];
+        [buffer draw];
+    }
+}
+
+-(GLKMatrix4)calcPVM
+{
+    return self.modelView;
+}
+
 
 @end

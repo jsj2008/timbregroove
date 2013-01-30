@@ -82,6 +82,7 @@
 -(void)hideAnimationComplete
 {
     _visible = false;
+    _hiding = false;
     [self deleteDrawable];
 }
 
@@ -133,6 +134,7 @@
     
     if( hideOnComplete )
     {
+        self.hiding = true;
         [params setObject:@"hideAnimationComplete" forKey:TWEEN_ON_COMPLETE_SELECTOR];
         [params setObject:self                     forKey:TWEEN_ON_COMPLETE_TARGET];
     }

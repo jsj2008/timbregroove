@@ -30,4 +30,19 @@
     return nil;
 }
 
+-(bool)clearMenus
+{
+    SEL cam = @selector(closeAllMenus);
+
+    for( UIViewController * vc in self.childViewControllers )
+    {
+        if( [vc respondsToSelector:cam] )
+        {
+            NSNumber *ret = [vc performSelector:@selector(closeAllMenus)];
+            return [ret boolValue];
+        }
+    }
+    
+    return false;
+}
 @end

@@ -8,24 +8,22 @@
 
 #import "TG3dObject.h"
 
-#define MENU_CAMERA_Z    -20.0
+#define MENU_VIEW_WIDTH 70 // pixels
+#define MENU_ITEM_SIZE  60 // pixels is that big enough?
 
 @class Menu;
 @class MenuView;
+@class MenuItem;
+@class MeshBuffer;
 
-@protocol MenuViewMaker <NSObject>
+@protocol MenuViewDelegate <NSObject> // TGViewController
 
-- (MenuView *)makeMenuView:(NSDictionary *)meta;
-
-@end
-
-@protocol MenuItemRender <NSObject>
-
-@property (nonatomic,strong) NSDictionary * meta;
+- (MenuView *)Menu:(Menu*)menu makeMenuView:(NSDictionary *)meta;
+- (bool)      Menu:(Menu*)menu shouldEnable:(MenuItem *)mi;
 
 @end
 
-@protocol MenuItemHandler <NSObject>
+@protocol MenuItemHandler <NSObject> // Factory
 
 -(void)handleSelect:(NSDictionary *) menuItemMeta;
 
@@ -35,6 +33,11 @@
 
 @property (nonatomic,weak) NSDictionary * meta;
 
-@property (nonatomic,strong) MenuView *        menuView;
-@property (nonatomic,strong) id<MenuViewMaker> viewMaker;
+@property (nonatomic,readonly) MenuView *        menuView;
+@property (nonatomic,strong) id<MenuViewDelegate> delegate;
+
+@property (nonatomic,strong) MeshBuffer * buffer;
+
+-(void)willBecomeVisible;
+
 @end

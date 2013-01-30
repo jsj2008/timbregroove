@@ -32,6 +32,8 @@
 
 -(void)writeToLocation:(GLint)location type:(TGUniformType)type data:(void*)data
 {
+    GLint i;
+    
     switch(type)
     {
         case TG_FLOAT:
@@ -60,7 +62,8 @@
 
         case TG_TEXTURE:
         case TG_BOOL:
-            glUniform1i(location, *(GLint *)data);
+            i = *(bool *)data ? 1 : 0;
+            glUniform1i(location, i);
             break;
     }
 }

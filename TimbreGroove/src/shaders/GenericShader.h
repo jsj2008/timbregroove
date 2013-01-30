@@ -31,6 +31,7 @@ typedef enum {
 
 @interface GenericShader : Shader
 
++(id)shaderWithIndicesIntoNames:(NSArray *)arr;
 +(id)shaderWithHeaders:(NSString *)headers;
 -(id)initWithHeaders:(NSString *)headers;
 

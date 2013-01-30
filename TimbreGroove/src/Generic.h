@@ -36,6 +36,9 @@
 -(void)getBufferLocations;
 -(void)getTextureLocations;
 -(void)addBuffer:(MeshBuffer *)buffer;
+
++(NSString *)getShaderHeaderWithIndicesIntoName:(NSArray *)arr;
+
 @end
 
 

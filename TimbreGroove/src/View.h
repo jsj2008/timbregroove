@@ -18,6 +18,8 @@
 }
 @property (nonatomic,readonly) id firstNode;
 @property (nonatomic) bool visible;
+@property (nonatomic) bool hiding;
+
 @property (nonatomic,readonly,getter = isInFullView) bool inFullView;
 
 @property (nonatomic) float x;

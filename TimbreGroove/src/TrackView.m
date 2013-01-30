@@ -57,7 +57,10 @@
 }
 
 - (void)hideToDir:(int)dir
-{    
+{
+    if( self.hiding )
+        return;
+    self.hiding = true;
     CGRect rc = self.frame;
     NSDictionary * params = @{  TWEEN_DURATION: @0.7f,
                               TWEEN_TRANSITION: TWEEN_FUNC_EASEOUTSINE,

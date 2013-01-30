@@ -16,13 +16,6 @@
 @class FBO;
 
 
-typedef enum FBO_BindFlags
-{
-    FBOBF_None,
-    FBOBF_SkipBind,
-    FBOBF_SkipUnbind
-} FBO_BindFlags;
-
 @interface TG3dObject : Node {
 @protected
     Shader * _shader;

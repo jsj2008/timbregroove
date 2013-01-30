@@ -91,7 +91,16 @@
     NSMutableArray * arr = [NSMutableArray new];
     for( MeshBuffer * buffer in _buffers )
         [arr addObjectsFromArray:buffer.indicesIntoShaderNames];
+    
+    if( [arr containsObject:@(gv_normal)] )
+        if( !_light ) // how buried is this??
+            _light = [Light new];
 
+    return [Generic getShaderHeaderWithIndicesIntoName:arr];
+}
+
++(NSString *)getShaderHeaderWithIndicesIntoName:(NSArray *)arr
+{
     NSString * pre = @"";
     
     for( NSNumber * num in arr )
@@ -103,8 +112,6 @@
                 ns = @"#define COLOR\n";
                 break;
             case gv_normal:
-                if( !_light ) // how buried is this??
-                    _light = [Light new];
                 ns = @"#define NORMAL\n";
                 break;
             case gv_uv:
@@ -195,20 +202,6 @@
 
 -(void)bindTextures:(bool)bind
 {
-}
-
-// capture hack
--(void)renderToCaptureAtBufferLocation:(GLint)location
-{
-    for( MeshBuffer * buffer in _buffers )
-    {
-        if( [buffer bindToTempLocation:location] )
-        {
-            [buffer draw];
-            break; // we assume there is only one 'position' buffer.
-        }
-    }
-    
 }
 
 @end

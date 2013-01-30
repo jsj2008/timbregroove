@@ -53,6 +53,11 @@ static const char * _generic_shader_var_names[NUM_GENERIC_VARIABLES] = {
     return shader;
 }
 
++(id)shaderWithIndicesIntoNames:(NSArray *)arr
+{
+    return [GenericShader shaderWithHeaders:[Generic getShaderHeaderWithIndicesIntoName:arr]];
+}
+
 -(id)initWithHeaders:(NSString *)headers
 {
     // TODO: deal with different headers requiring different names to be passed in

@@ -130,9 +130,7 @@
     UITapGestureRecognizer *tgr = [[UITapGestureRecognizer alloc] initWithTarget:self
                                                                           action:@selector(onTap:)];
 
-    // .keyWindow is nil (wtf?)
-    UIWindow * window = [[UIApplication sharedApplication] delegate].window;
-    UITapGestureRecognizer * menuInvoker =  [window.rootViewController getMenuInvokerGesture];
+    UITapGestureRecognizer * menuInvoker =  [[self getVC] getMenuInvokerGesture];
     if( menuInvoker )
     {
         [tgr requireGestureRecognizerToFail:menuInvoker];
@@ -147,6 +145,13 @@
     
     [self addPoolChild].center = (GLKVector2){0.4,0.4};
     return self;
+}
+
+-(UIViewController *)getVC
+{
+    // .keyWindow is nil (wtf?)
+    UIWindow * window = [[UIApplication sharedApplication] delegate].window;
+    return window.rootViewController;
 }
 
 -(void)createBuffer
@@ -263,6 +268,9 @@
 
 -(void)onTap:(UITapGestureRecognizer *)tgr
 {
+    if( [[self getVC] clearMenus] ) // yea, this should be somewhere else
+        return;
+    
     GLKVector2 pt = [PoolScreen screenToPool:[tgr locationInView:self.view]];
     PoolWater * water = [self waterFromPt:pt];
     if( water )

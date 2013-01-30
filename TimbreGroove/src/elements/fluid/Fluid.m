@@ -381,7 +381,10 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
         [t unbind];
     }
     
-    glEnable(prevBlend);
+    if( prevBlend )
+        glEnable(GL_BLEND);
+    else
+        glDisable(GL_BLEND);
 }
 
 @end
@@ -461,11 +464,16 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     QuadMesh * cursor = [[QuadMesh alloc]initWithX:_px*options.cursor_size*2 andY:_py*options.cursor_size*2];
     BoundaryMesh * boundary = [[BoundaryMesh alloc] initWithX:_px andY:_px];
     
+    NSDictionary * vv0sv0 = @{@(fl_velocity):_velocity0,@(fl_source):_velocity0};
+    NSDictionary * pp0dd  = @{@(fl_pressure):_pressure0,@(fl_divergence):_divergence};
+    NSDictionary * pp0vv1 = @{@(fl_pressure):_pressure0,@(fl_velocity):_velocity1};
+    NSDictionary * pp0vv0 = @{@(fl_pressure):_pressure0,@(fl_velocity):_velocity0};
+    
     // =================================
     _advectVelocity = [FluidKernel new];
     [_advectVelocity setVShader:"kernel"
                         FShader:"advect"
-                 textures:@{@(fl_velocity):_velocity0,@(fl_source):_velocity0}
+                 textures: vv0sv0
                    buffer: inside];
     
     [_advectVelocity setVector2:fl_px value:&px];
@@ -478,7 +486,7 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     _velocityBoundaryKernel = [FluidKernel new];
     [_velocityBoundaryKernel setVShader:"boundary"
                                 FShader:"advect"
-                         textures:@{@(fl_velocity):_velocity0,@(fl_source):_velocity0}
+                         textures:vv0sv0
                            buffer:boundary];
     
     [_velocityBoundaryKernel setVector2:fl_px value:&px];
@@ -513,7 +521,7 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     _jacobiKernel = [FluidKernel new];
     [_jacobiKernel setVShader:"kernel"
                       FShader:"jacobi"
-               textures: @{@(fl_pressure):_pressure0,@(fl_divergence):_divergence}
+               textures: pp0dd
                  buffer:all];
 
     [_jacobiKernel setFloat:fl_alpha value:-1.0];
@@ -525,7 +533,7 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     _pressureBoundaryKernel = [FluidKernel new];
     [_pressureBoundaryKernel setVShader:"boundary"
                                 FShader:"jacobi"
-                         textures: @{@(fl_pressure):_pressure0,@(fl_divergence):_divergence}
+                         textures: pp0dd
                            buffer:boundary];
 
     [_pressureBoundaryKernel setFloat:fl_alpha value:-1.0];
@@ -538,7 +546,7 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     _subtractPressureGradientKernel = [FluidKernel new];
     [_subtractPressureGradientKernel setVShader:"kernel"
                                         FShader:"subtractPressureGradient"
-                                 textures: @{@(fl_pressure):_pressure0,@(fl_velocity):_velocity1}
+                                 textures: pp0vv1
                                    buffer:all];
 
     [_subtractPressureGradientKernel setFloat:fl_scale_f value:1];
@@ -548,7 +556,7 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     _subtractPressureGradientBoundaryKernel = [FluidKernel new];
     [_subtractPressureGradientBoundaryKernel setVShader:"boundary"
                                                 FShader:"subtractPressureGradient"
-                                         textures: @{@(fl_pressure):_pressure0,@(fl_velocity):_velocity1}
+                                         textures: pp0vv1
                                            buffer:boundary];
     
     [_subtractPressureGradientBoundaryKernel setFloat:fl_scale_f value:-1];
@@ -558,7 +566,7 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     _drawKernel = [FluidKernel new];
     [_drawKernel setVShader:"kernel"
                     FShader:"visualize"
-             textures: @{@(fl_pressure):_pressure0,@(fl_velocity):_velocity0}
+             textures: pp0vv0
                buffer:all];
 
     [_drawKernel setVector2:fl_px value:&px];
@@ -611,7 +619,8 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     [_subtractPressureGradientKernel render];
     [_subtractPressureGradientBoundaryKernel render];
 
-    glEnable(prevDT);
+    if( prevDT )
+        glEnable(GL_DEPTH_TEST);
     
 }
 
@@ -620,7 +629,8 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     GLboolean prevDT = glIsEnabled(GL_DEPTH_TEST);
     glDisable(GL_DEPTH_TEST);
     [_drawKernel render];
-    glEnable(prevDT);
+    if( prevDT )
+        glEnable(GL_DEPTH_TEST);
 }
 
 -(void)onDrag:(UIPanGestureRecognizer *)pgr

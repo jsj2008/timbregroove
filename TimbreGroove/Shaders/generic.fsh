@@ -28,11 +28,11 @@ void main()
 #ifdef TEXTURE
     color = texture2D(u_sampler, v_texCoordOut);
 #else
-#ifdef COLOR
+  #ifdef COLOR
     color = v_color;
-#else
+  #else
     color = u_color;
-#endif
+  #endif
 #endif
 
 #ifdef NORMAL

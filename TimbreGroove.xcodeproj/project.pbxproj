@@ -162,6 +162,8 @@
 		57647578167D97EC00D5A431 /* generic.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 57647572167D7C3C00D5A431 /* generic.vsh */; };
 		576F8AC7167E92C000DF208E /* VaryingColor.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A66EF5167B374500B9EA75 /* VaryingColor.m */; };
 		577612FF16B308AB00948D47 /* UIViewController+TGExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 577612FE16B308AB00948D47 /* UIViewController+TGExtension.m */; };
+		57778F5916B97C2B00150097 /* menu.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 57778F5816B97C2B00150097 /* menu.fsh */; };
+		57778F5C16B97C3400150097 /* menu.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 57778F5B16B97C3400150097 /* menu.vsh */; };
 		577AE48816B35D1400B4FDF1 /* Fluid.m in Sources */ = {isa = PBXBuildFile; fileRef = 577AE48716B35D1400B4FDF1 /* Fluid.m */; };
 		577AE4B416B3969800B4FDF1 /* addForce.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 577AE4AA16B3969800B4FDF1 /* addForce.fsh */; };
 		577AE4B516B3969800B4FDF1 /* advect.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 577AE4AB16B3969800B4FDF1 /* advect.fsh */; };
@@ -468,6 +470,8 @@
 		57718EF716838D75001D7D35 /* CustomPlane.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomPlane.m; sourceTree = "<group>"; };
 		577612FD16B308AB00948D47 /* UIViewController+TGExtension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "UIViewController+TGExtension.h"; path = "src/UIViewController+TGExtension.h"; sourceTree = "<group>"; };
 		577612FE16B308AB00948D47 /* UIViewController+TGExtension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIViewController+TGExtension.m"; path = "src/UIViewController+TGExtension.m"; sourceTree = "<group>"; };
+		57778F5816B97C2B00150097 /* menu.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = menu.fsh; sourceTree = "<group>"; };
+		57778F5B16B97C3400150097 /* menu.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = menu.vsh; sourceTree = "<group>"; };
 		577AE48716B35D1400B4FDF1 /* Fluid.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Fluid.m; path = fluid/Fluid.m; sourceTree = "<group>"; };
 		577AE4AA16B3969800B4FDF1 /* addForce.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = addForce.fsh; sourceTree = "<group>"; };
 		577AE4AB16B3969800B4FDF1 /* advect.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = advect.fsh; sourceTree = "<group>"; };
@@ -810,11 +814,11 @@
 		572EB1E216786C630062F290 /* images */ = {
 			isa = PBXGroup;
 			children = (
+				572EB1E816786C630062F290 /* menu */,
 				5780832216B72992002810BD /* moon.png */,
 				5780831F16B7103A002810BD /* moon.gif */,
 				575AA12A16ADBB9500635A76 /* pool.png */,
 				57A58EB016AE020C00C9FA53 /* poolLines.png */,
-				572EB1E816786C630062F290 /* menu */,
 				570665F3167F3D3F0081B8C3 /* squareTest.tif */,
 				571ECFC3167BEC3B00727A30 /* aotk-ass-bare-512.tif */,
 				571ECFC1167BEA5E00727A30 /* aotk-ass-outline-512.tif */,
@@ -872,6 +876,8 @@
 				57F290F51695776400293B0E /* fractal.vsh */,
 				57647574167D7C4A00D5A431 /* generic.fsh */,
 				57647572167D7C3C00D5A431 /* generic.vsh */,
+				57778F5816B97C2B00150097 /* menu.fsh */,
+				57778F5B16B97C3400150097 /* menu.vsh */,
 				5737C4AF1693090D00C12F2D /* imageBaker.fsh */,
 				5737C4AD169308DF00C12F2D /* imageBaker.vsh */,
 				572EB1F616786C630062F290 /* hump.fsh */,
@@ -1281,6 +1287,8 @@
 			files = (
 				570F415916ABB646000FCA7B /* FireShader.fsh in Resources */,
 				570F415A16ABB646000FCA7B /* HeatShader.vsh in Resources */,
+				57778F5916B97C2B00150097 /* menu.fsh in Resources */,
+				57778F5C16B97C3400150097 /* menu.vsh in Resources */,
 				5763AAA816AF0AAA00856C34 /* PoolScreen.vsh in Resources */,
 				5763AAAB16AF0AC700856C34 /* PoolScreen.fsh in Resources */,
 				570F415B16ABB646000FCA7B /* TileShader.vsh in Resources */,

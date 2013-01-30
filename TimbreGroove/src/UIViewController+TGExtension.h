@@ -10,4 +10,5 @@
 
 @interface UIViewController (TGExtension)
 -(UITapGestureRecognizer *)getMenuInvokerGesture;
+-(bool)clearMenus;
 @end
