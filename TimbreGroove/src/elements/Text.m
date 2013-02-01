@@ -6,10 +6,15 @@
 //  Copyright (c) 2012 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "Text.h"
 #import "Texture.h"
 #import "Camera.h"
 #import "SettingsVC.h"
+#import "SimpleImage.h"
+
+@interface Text : SimpleImage
+
+@property (nonatomic,strong) NSString * text;
+@end
 
 NSString * const __str_textFieldName = @"textTexture";
 

@@ -6,7 +6,8 @@
 //
 //
 
-#import "StockDemo.h"
+#import "Generic.h"
+
 #import "SettingsVC.h"
 #import "Texture.h"
 
@@ -19,6 +20,13 @@
 #import "Cloud.h"
 #import "Pool.h"
 
+
+
+@interface StockDemo : Generic
+@property (nonatomic,strong) NSString * shaderName;
+@property (nonatomic,strong) NSString * geometryName;
+@end
+
 typedef enum shaderType {
     fire,
     cloud,
@@ -29,6 +37,7 @@ typedef enum shaderType {
 
 @interface StockDemo () {
     float _rot;
+    bool _rotateY;
     shaderType _shaderType;
 }
 
@@ -61,6 +70,7 @@ typedef enum shaderType {
 -(void)setGeometryName:(NSString *)geometryName
 {
     _geometryName = geometryName;
+    _rotateY = ![geometryName isEqualToString:@"Torus"];
     self.needsRewire = true;
 }
 
@@ -73,7 +83,8 @@ typedef enum shaderType {
 -(void)update:(NSTimeInterval)dt
 {
     _rot += 1;
-    self.rotation = (GLKVector3){ 0, GLKMathDegreesToRadians(_rot), 0 };
+    float rads = GLKMathDegreesToRadians(_rot);
+    self.rotation = (GLKVector3){ _rotateY ? 0 : rads, _rotateY ? rads : 0, 0 };
     if( _shaderType == pool )
         ((Pool*)self.shader).time = (float)dt;
 }

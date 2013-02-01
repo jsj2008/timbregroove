@@ -42,14 +42,13 @@
 {
     for( Node * node in _kids )
     {
-        
+#if DEBUG
         if ( ![node respondsToSelector:selector] )
         {
-            NSLog(@"%s can’t be placed\n",
-                    [NSStringFromClass([node class]) UTF8String]);
+            NSLog(@"%@ can’t be placed\n", node);
             exit(1);
         }
-        
+#endif
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
         [node performSelector:selector withObject:userObj];

@@ -14,7 +14,7 @@
 @class MeshBuffer;
 @class GLKView;
 @class FBO;
-
+@class View;
 
 @interface TG3dObject : Node {
 @protected
@@ -39,8 +39,9 @@
 @property (nonatomic)        GLKVector3 scale;
 @property (nonatomic)             float scaleXYZ;
 
-@property (nonatomic,strong) NSNumber * viewIsObscured;
-@property (nonatomic,strong) NSNumber * viewIsHidden;
+-(void)play;
+-(void)pause;
+-(void)stop;
 
 /*
   Do as little as humanly possible in init

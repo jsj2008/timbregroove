@@ -6,13 +6,21 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "ImageBaker.h"
+#import "Generic.h"
 #import "GenericShader.h"
 #import "Camera.h"
 #import "FBO.h"
 #import "TrackView.h"
 #import "SettingsVC.h"
 #import "GridPlane.h"
+
+@class TrackView;
+@interface ImageBaker : GenericMultiTextures
+
++(NSDictionary *)getShaderModes;
+
+@property (nonatomic) int mode;
+@end
 
 /*=============================================================================*/
 /*      Shader       */
@@ -152,8 +160,11 @@ static const float __bakeShakerTimes[] = {
     _fbo2 = [[FBO alloc] initWithWidth:w height:h];
     _fbo3 = [[FBO alloc] initWithWidth:w height:h];
 
+    _time = 0;
+    _time2 = 0;
+    
     [self setRefreshing:false];
-    [self setRefreshing:true];
+//    [self setRefreshing:true];
 
     return self;
 }

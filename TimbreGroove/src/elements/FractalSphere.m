@@ -6,12 +6,16 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "FractalSphere.h"
 #import "Fractal.h"
 #import "FBO.h"
 #import "Light.h"
 #import "Mixer.h"
 #import "Tweener.h"
+#import "Sphere.h"
+
+@interface FractalSphere : Sphere
+
+@end
 
 @interface FractalSphere() {
     Fractal * _texRenderer;
@@ -47,17 +51,6 @@
     _pmax = -200.0;
     
     return [super wireUp];
-}
-
--(void)setViewIsHidden:(NSNumber *)viewIsHidden
-{
-    bool hidden = [viewIsHidden boolValue];
-    if( hidden )
-        [_sound pause];
-    else
-        [_sound play];
-    
-    [super setViewIsHidden:viewIsHidden];
 }
 
 -(void)createTexture

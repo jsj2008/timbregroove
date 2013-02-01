@@ -18,6 +18,7 @@
 
 -(void)Factory:(Factory *)factory createNode:(NSDictionary *)options;
 -(void)Factory:(Factory *)factory deleteNode:(NSDictionary *)options;
+-(void)Factory:(Factory *)factory pauseToggle:(NSDictionary *)options;
 -(void)Factory:(Factory *)factory segueTo:(NSString *)segueName;
 
 @end

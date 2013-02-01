@@ -138,7 +138,7 @@ TWEEN_TRANSITION: TWEEN_FUNC_EASEINSINE,
         GLKMatrix4 mv = mi.modelView;
         [mi.texture bind:0];
         
-        if( !disabled )
+        if( mi.shadow && !disabled )
         {
             float ss = (1.0 - ((_lightFactor * 0.5) + 0.5)) * 0.8;
             _shader.shadowStrength = ss;

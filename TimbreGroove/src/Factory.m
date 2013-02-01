@@ -72,6 +72,10 @@ static Factory * __f;
         {
             [_delegate Factory:self deleteNode:ud];
         }
+        else if( [command isEqualToString:@"pauseToggle"] )
+        {
+            [_delegate Factory:self pauseToggle:ud];
+        }
     }
 }
 

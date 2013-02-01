@@ -28,8 +28,8 @@
         _far           = CAMERA_DEFAULT_FAR;
         _frustumAngle  = CAMERA_DEFAULT_frustum_ANGLE;
         
-        _position = GLKVector3Make( 0.0f, 0.0f, CAMERA_DEFAULT_Z );
-        _rotation = GLKVector3Make( 0.0f, 0.0f, 0.0f );
+        _position = (GLKVector3){ 0.0f, 0.0f, CAMERA_DEFAULT_Z };
+        _rotation = (GLKVector3){ 0.0f, 0.0f, 0.0f };
     }
     
     return self;

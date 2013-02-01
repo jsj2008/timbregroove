@@ -11,46 +11,120 @@
 #import "Tween.h"
 #import "Tweener.h"
 
+@interface ViewDelegateProxy : NSObject<ViewDelegate> {
+        NSMutableArray * _delegates;
+}
+-(void)addDelegate:(id<ViewDelegate>)delegate;
+@end
+
+@implementation ViewDelegateProxy
+
+-(void)addDelegate:(id<ViewDelegate>)delegate
+{
+    if( !_delegates )
+        _delegates = [NSMutableArray new];
+    [_delegates addObject:delegate];
+}
+
+-(void)p_notifyDelegates:(SEL)selector view:(View *)view
+{
+    for( id<ViewDelegate> delegate in _delegates )
+    {
+        if( [delegate respondsToSelector:selector]  )
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+            [delegate performSelector:selector withObject:view];
+#pragma clang diagnostic pop
+    }
+}
+
+-(void)tgViewWillAppear:(View *)view
+{
+    [view setupGL]; // yea??
+    view.hidden = NO;
+    [self p_notifyDelegates:_cmd view:view];
+}
+
+-(void)tgViewWillDisappear:(View *)view
+{
+    [self p_notifyDelegates:_cmd view:view];
+}
+
+-(void)tgViewIsFullyVisible:(View *)view
+{
+    [self p_notifyDelegates:_cmd view:view];
+}
+
+-(void)tgViewIsOutofSite:(View *)view
+{
+    view.hidden = YES;
+    [self p_notifyDelegates:_cmd view:view];
+    [view deleteDrawable];
+}
+
+@end
+
+@interface View() {
+    ViewDelegateProxy * _proxy;
+}
+
+@end
 @implementation View
 
 - (id)initWithFrame:(CGRect)frame context:(EAGLContext *)context;
 {
     self = [super initWithFrame:frame context:context];
     if (self) {
-        _backcolor = GLKVector4Make(0, 0, 0, 1);
-    }
-    return self;
-}
+        _backcolor = (GLKVector4){0, 0, 0, 1};
+        _desiredFrame = frame;
+        
+        _proxy = [ViewDelegateProxy new];
 
-
-- (void)setupGL
-{
-    if( [EAGLContext currentContext] != self.context )
-    {
-        [EAGLContext setCurrentContext:self.context];
-        NSLog(@"Set context %@",self.context);
-    }
-    else
-    {
-        NSLog(@"Did NOT Set context %@",self.context);
-    }
-    
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-   
-    if( !_graph )
-    {
+        // THIS MUST BE LEFT AS DEFAULT!
+        // (otherwise the context is not setup properly)
+        //self.enableSetNeedsDisplay = NO;
+        
         _graph = [[Graph alloc] init];
         _graph.camera = [[Camera alloc] init];
         _graph.view = self;
     }
+    return self;
 }
 
--(bool)isInFullView
+-(void)addDelegate:(id<ViewDelegate>)delegate
 {
-    CGRect rc = self.frame;
-    return rc.origin.x == 0;
+    [_proxy addDelegate:delegate];
+}
+
+- (void)setupGL
+{
+    EAGLContext * ctx = [EAGLContext currentContext];
+    if (ctx != self.context)
+    {
+        if( [EAGLContext setCurrentContext:self.context] )
+        {
+           // NSLog(@"Set context %@ from %@",self.context,ctx);
+        }
+        else
+        {
+            NSLog(@"setting context FAILED: %@",self.context);
+            exit(-1);
+        }
+    }
+    else
+    {
+        // NSLog(@"Did NOT Set context %@",self.context);
+    }
+
+    GLint src,dst;
+    glGetIntegerv(GL_BLEND_SRC, &src);
+    glGetIntegerv(GL_BLEND_DST, &dst);
+    if( !glIsEnabled(GL_DEPTH_TEST) )
+        glEnable(GL_DEPTH_TEST);
+    if( !glIsEnabled(GL_BLEND) )
+        glEnable(GL_BLEND);
+    if( src != GL_SRC_ALPHA || dst != GL_ONE_MINUS_SRC_ALPHA )
+       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 - (id)firstNode
@@ -60,15 +134,13 @@
 
 - (void)update:(NSTimeInterval)dt
 {
-    if( self.inFullView )
-    {
-        [_graph update:dt];
-        [self setNeedsDisplay];
-    }
+    [_graph update:dt];
+    [self setNeedsDisplay];
 }
 
-- (void)drawRect:(CGRect)rect
-{
+
+-(void)drawRect:(CGRect)rect
+{    
     NSUInteger w = self.drawableWidth;
     NSUInteger h = self.drawableHeight;
     [_graph.camera setPerspectiveForViewWidth:w andHeight:h];
@@ -79,64 +151,82 @@
     [_graph render:w h:h];
 }
 
--(void)hideAnimationComplete
+- (void)shrinkToNothing
 {
-    _visible = false;
-    _hiding = false;
-    [self deleteDrawable];
+    float      valX = self.frame.size.width  / 2.0;
+    float      valY = self.frame.size.height / 2.0;
+    float      dur  = 1.2;
+    NSString * func = TWEEN_FUNC_EASEOUTBOUNCE;
+
+    [_proxy tgViewWillDisappear:self];
+    
+    [self animateProp:"x"      targetVal:valX notifySelector:@selector(tgViewIsOutofSite:) duration:dur transition:func];
+    [self animateProp:"y"      targetVal:valY notifySelector:nil duration:dur transition:func];
+    [self animateProp:"width"  targetVal:0    notifySelector:nil duration:dur transition:func];
+    [self animateProp:"height" targetVal:0    notifySelector:nil duration:dur transition:func];
 }
 
-- (void)shrinkToNothing:(id)target notify:(NSString *)notify
+- (void)showFromDir:(int)dir
 {
-    CGSize sz = self.frame.size;
-    CGFloat midX = sz.width / 2.0f;
-    CGFloat midY = sz.height / 2.0f;
-    NSDictionary * params = @{    TWEEN_DURATION: @1.2f,
-                                TWEEN_TRANSITION: TWEEN_FUNC_EASEOUTBOUNCE,
-                                TWEEN_ON_COMPLETE_SELECTOR: notify,
-                                TWEEN_ON_COMPLETE_TARGET: target,
-                                    @"x": @(midX)
-                            };
-
-    [Tweener addTween:self withParameters:params];
-
-    NSDictionary * params2 = @{    TWEEN_DURATION: @1.2f,
-                                 TWEEN_TRANSITION: TWEEN_FUNC_EASEOUTBOUNCE,
-                                             @"y": @(midY)
-                                    };
+    [_proxy tgViewWillAppear:self];
     
-    [Tweener addTween:self withParameters:params2];
-
-    NSDictionary * params3 = @{    TWEEN_DURATION: @1.2f,
-        TWEEN_TRANSITION: TWEEN_FUNC_EASEOUTBOUNCE,
-        @"width": @(0)
-    };
+    if( dir == SHOW_NOW )
+    {
+        [_proxy tgViewIsFullyVisible:self];
+    }
+    else
+    {
+        // BUG: this doesn't for non-screen views appearing from the right
+        
+        // put this view offscreen
+        CGRect rc = self.frame;
+        rc.origin.x = rc.size.width * dir;
+        self.frame = rc;
+        
+        [self animateProp:"x" targetVal:_desiredFrame.origin.x notifySelector:@selector(tgViewIsFullyVisible:)];
+    }
     
-    [Tweener addTween:self withParameters:params3];
+}
 
-    NSDictionary * params4 = @{    TWEEN_DURATION: @1.2f,
-        TWEEN_TRANSITION: TWEEN_FUNC_EASEOUTBOUNCE,
-    @"height": @(0)
-    };
+- (void)hideToDir:(int)dir
+{
+    [_proxy tgViewWillDisappear:self];
     
-    [Tweener addTween:self withParameters:params4];
-
+    if( dir == HIDE_NOW )
+    {
+        [_proxy tgViewIsOutofSite:self];
+    }
+    else
+    {
+        // BUG: this doesn't for non-screen views hiding to the right
+        
+        float val = self.frame.size.width * dir;
+        [self animateProp:"x" targetVal:val notifySelector: @selector(tgViewIsOutofSite:)];
+    }
 }
 
 - (void)animateProp: (const char *)prop
-          targetVal: (CGFloat)targetVal
-               hide:(bool) hideOnComplete;
+          targetVal: (float)targetVal
+     notifySelector: (SEL)selector
 {
-    NSMutableDictionary * params = d(@{   TWEEN_DURATION: @0.5f,
-                                     TWEEN_TRANSITION: TWEEN_FUNC_EASEOUTSINE,
+    [self animateProp:prop targetVal:targetVal notifySelector:selector duration:0.5 transition:TWEEN_FUNC_EASEOUTSINE];
+}
+
+- (void)animateProp: (const char *)prop
+          targetVal: (float)targetVal
+     notifySelector: (SEL)selector
+           duration: (float)duration
+         transition: (NSString *)transition
+{
+    NSMutableDictionary * params = d(@{   TWEEN_DURATION: @(duration),
+                                     TWEEN_TRANSITION: transition,
                                      @(prop): @(targetVal)
                                      });
-    
-    if( hideOnComplete )
+
+    if( selector )
     {
-        self.hiding = true;
-        [params setObject:@"hideAnimationComplete" forKey:TWEEN_ON_COMPLETE_SELECTOR];
-        [params setObject:self                     forKey:TWEEN_ON_COMPLETE_TARGET];
+        params[TWEEN_ON_COMPLETE_TARGET]   = _proxy;
+        params[TWEEN_ON_COMPLETE_SELECTOR] = NSStringFromSelector(selector);
     }
     
     [Tweener addTween:self withParameters:params];

@@ -15,6 +15,4 @@
 @property (nonatomic,readonly) Menu * menu;
 
 - (Menu *)createMenu:(NSDictionary *)meta;
-- (void)show;
-- (void)hide;
 @end

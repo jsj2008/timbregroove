@@ -20,6 +20,7 @@
 
 - (MenuView *)Menu:(Menu*)menu makeMenuView:(NSDictionary *)meta;
 - (bool)      Menu:(Menu*)menu shouldEnable:(MenuItem *)mi;
+- (int)       Menu:(Menu*)menu playMode:(MenuItem *)mi;
 
 @end
 

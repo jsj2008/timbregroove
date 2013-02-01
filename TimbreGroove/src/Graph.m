@@ -10,6 +10,10 @@
 
 @implementation Graph
 
+-(void)play               { [self traverse:_cmd userObj:self.view]; }
+-(void)pause              { [self traverse:_cmd userObj:self.view]; }
+-(void)stop               { [self traverse:_cmd userObj:self.view]; }
+
 +(void)_inner_update:(NSArray *)children dt:(NSTimeInterval)dt
 {
     for( TG3dObject * child in children )

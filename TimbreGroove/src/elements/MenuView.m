@@ -32,7 +32,7 @@
     Menu * e = [[Menu alloc] init];
     e.meta = meta;
     e.view = self;
-    [_graph appendChild:e];
+    [self.graph appendChild:e];
     [e wireUp];
     
     return e;
@@ -40,79 +40,33 @@
 
 - (Menu *)menu
 {
-    return [_graph firstChild];
+    return [self.graph firstChild];
 }
 
-
-- (void)show
-{    
-    _visible = true;
-    
-    [self setupGL]; // is this right?
-    
-    [self.graph update:0]; // yea, hacky (for enable/disable)
-        
-    Menu * menu = self.menu;
-    [menu willBecomeVisible];
-    
-    unsigned int targetX = self.frame.size.width * _level;
-    
-    NSDictionary * params = @{  TWEEN_DURATION: @0.4f,
-                              TWEEN_TRANSITION: TWEEN_FUNC_LINEAR,
-                    TWEEN_ON_COMPLETE_SELECTOR: @"isInFullView",
-                    TWEEN_ON_COMPLETE_TARGET: self.menu,
-                                          @"x": @(targetX)
-                            };
-    
-    [Tweener addTween:self withParameters:params];
-}
-
--(bool)isInFullView
+-(void)setLevel:(unsigned int)level
 {
+    _level = level;
     CGRect rc = self.frame;
-    return rc.origin.x == rc.size.width * _level;
+    rc.origin.x = rc.size.width * level;
+    self.desiredFrame = rc;
 }
 
--(void)setX:(float)x
+-(void)tgViewWillAppear:(View *)view
 {
-    [super setX:x];
-    [self setNeedsDisplay];
+    if( view == self )
+        [self.graph update:0]; // yea, hacky (for enable/disable)
 }
 
-- (void)hide
-{
-    if( self.hiding )
-        return;
-    self.hiding = true;
-    CGRect rc = self.frame;
-    NSDictionary * params = @{  TWEEN_DURATION: @0.5f,
-                              TWEEN_TRANSITION: TWEEN_FUNC_EASEOUTTHROW,
-                                          @"x": @(-rc.size.width),
-                    TWEEN_ON_COMPLETE_SELECTOR: @"hideAnimationComplete",
-                      TWEEN_ON_COMPLETE_TARGET: self
-                };
-    
-    [Tweener addTween:self withParameters:params];    
-}
 
 - (void)onTap:(UITapGestureRecognizer *)tgr
 {
     if( tgr.state == UIGestureRecognizerStateEnded )
     {
         CGPoint pt = [tgr locationInView:self];
-        TG3dObject<Interactive> * e = [[EventCapture new] childElementOf:_graph fromScreenPt:pt];
+        TG3dObject<Interactive> * e = [[EventCapture new] childElementOf:self.graph fromScreenPt:pt];
         [e onTap:tgr];
         [self setNeedsDisplay];
     }
 }
-
-- (void)drawRect:(CGRect)rect
-{
-    glClearColor(_backcolor.r,_backcolor.g,_backcolor.b,_backcolor.a);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-    [self.graph render:rect.size.width h:rect.size.height];
-}
-
 
 @end

@@ -156,9 +156,11 @@ bool OGLES2Skinning::LoadTextures(CPVRTString* const pErrorStr)
 {
     for( int i = 0; i < m_numTextures; i++)
     {
-        if(PVRTTextureLoadFromPVR(m_ppTextureFiles[i].c_str(),m_uiTextures+i) != PVR_SUCCESS)
+        const char * tname = m_ppTextureFiles[i].c_str();
+        if(PVRTTextureLoadFromPVR(tname,m_uiTextures+i) != PVR_SUCCESS)
         {
-            *pErrorStr = "ERROR: Failed to load texture.";
+            printf("Problem with texture: %s\n",tname);
+            *pErrorStr = "ERROR: Failed to load texture";
             return false;
         }
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);

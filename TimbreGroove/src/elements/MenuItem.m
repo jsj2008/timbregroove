@@ -21,6 +21,11 @@
 
 @implementation MenuItem
 
+-(id)wireUp
+{
+    _shadow = true;
+    return [super wireUp];
+}
 // render actually happens in parent (Menu*) render:h
 
 -(void)update:(NSTimeInterval)dt
@@ -48,7 +53,7 @@
     
     if( _subMenu )
     {
-        [_subMenu.menuView show];
+        [_subMenu.menuView showFromDir:SHOW_DIR_LEFT];
     }
     else
     {

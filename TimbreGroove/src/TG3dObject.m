@@ -48,6 +48,10 @@
     return [self wireUp];
 }
 
+-(void)play {}
+-(void)pause {}
+-(void)stop {}
+
 #pragma mark inialize
 
 - (NSString *)getShaderHeader
@@ -130,7 +134,7 @@
 #if DEBUG
     if( !e || !e->_shader )
     {
-        NSLog(@"Missing shader");
+        NSLog(@"Missing shader (did you call wireUp?)");
         exit(1);
     }
 #endif
@@ -148,7 +152,7 @@
 #if DEBUG
     if( !e || !e->_camera )
     {
-        NSLog(@"Missing camera");
+        NSLog(@"Missing camera  (did you call wireUp?)");
         exit(1);
     }
 #endif
@@ -170,7 +174,7 @@
 #if DEBUG
     if( !e || !e->_view )
     {
-        NSLog(@"Missing graph view member");
+        NSLog(@"Missing graph view member  (did you call wireUp?)");
         exit(1);
     }
 #endif

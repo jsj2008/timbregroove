@@ -24,6 +24,7 @@ typedef enum MenuPlacement {
 @interface MenuItem : TG3dObject<Interactive>
 
 @property (nonatomic)       bool disabled;
+@property (nonatomic)       bool shadow;
 
 @property (nonatomic)        MenuPlacement placement;
 @property (nonatomic,strong) MeshBuffer * buffer;

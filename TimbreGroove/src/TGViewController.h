@@ -11,8 +11,9 @@
 #import "TGTypes.h"
 #import "Menu.h"
 #import "Factory.h"
+#import "View.h"
 
-@interface TGViewController : GLKViewController<MenuViewDelegate,FactoryDelegate>
+@interface TGViewController : GLKViewController<MenuViewDelegate,FactoryDelegate,ViewDelegate>
 
 - (IBAction)onTap:(UITapGestureRecognizer *)sender;
 - (IBAction)rightSwipe:(UISwipeGestureRecognizer *)sgr;

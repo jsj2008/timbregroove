@@ -167,6 +167,22 @@
 			<key>icon</key>
 			<string>audioProp.png</string>
 		</dict>
+		<key>plause_play</key>
+		<dict>
+			<key>order</key>
+			<integer>40</integer>
+			<key>userData</key>
+			<dict>
+				<key>command</key>
+				<string>pauseToggle</string>
+			</dict>
+			<key>renderClass</key>
+			<string>PauseToggle</string>
+			<key>handler</key>
+			<string>Factory</string>
+			<key>icon</key>
+			<string>pause.png</string>
+		</dict>
 		<key>delete_view</key>
 		<dict>
 			<key>placement</key>

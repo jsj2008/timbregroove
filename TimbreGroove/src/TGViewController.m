@@ -115,19 +115,91 @@
     NSTimeInterval dt = self.timeSinceLastUpdate;
     for (View * view in self.view.subviews )
     {
-        if( view.visible )
+        if( !view.hidden )
             [view update:dt];
     }
-
-    [self.view setNeedsDisplay];
 }
 
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
 {
-    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if( !_currentTrackView )
+    {
+        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+    
+    for (View * view in self.view.subviews )
+    {
+        if( !view.isHidden )
+        {
+            [view setupGL];            
+            [view display];
+        }
+    }
 }
 
+#pragma mark - this app View delegate methods
+
+-(void)tgViewWillAppear:(View *)view
+{
+    if( [view isKindOfClass:[TrackView class]] )
+    {
+        _currentTrackView = (TrackView *)view;
+        NSLog(@"Current view set to %@",_currentTrackView);
+        if( !_rootView )
+            _rootView = _currentTrackView;
+    }
+    else
+    {
+        NSLog(@"Menu is appearing: %@",view);
+    }
+}
+
+-(void)tgViewWillDisappear:(View *)view;
+{
+    
+}
+
+-(void)tgViewIsFullyVisible:(View *)view
+{
+    
+}
+
+-(void)tgViewIsOutofSite:(View *)view
+{
+    if( view == _menuView )
+    {
+        _menuView = nil;
+        view.markedForDelete = true;
+    }
+    else if( view == _currentTrackView )
+    {
+        // find the next available track view to display
+        for( TrackView * tv in [self getTrackViews] )
+        {
+            if( tv != view )
+            {
+                [tv showFromDir:SHOW_DIR_LEFT];
+                break;
+            }
+        }
+    }
+    
+    if( view.markedForDelete )
+    {
+        [view.graph cleanChildren];
+        [view removeFromSuperview];
+    }
+    
+    /*
+    if( resetContext && _currentTrackView )
+        // this is probably not the right place but at
+        // some point we have to notify OpenGL that we
+        // are switching contexts back to our current
+        // view thingy
+        [_currentTrackView setupGL];
+    */
+}
 
 #pragma mark -
 #pragma mark Menus
@@ -139,20 +211,21 @@
     GLKView *view = (GLKView *)self.view;
     CGRect rc = view.frame;
     rc.size.width = (float)MENU_VIEW_WIDTH;
-    rc.origin.x = -rc.size.width;
 
     // 2. Setup gl context
     //--------------------------------
     EAGLContext * context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2
                                                   sharegroup:self.context.sharegroup];
-    
+
     // 3. Create and init MenuView object
     //--------------------------------------------------
-    MenuView * mview = [[MenuView alloc] initWithFrame:rc context:context];
+    MenuView * mview = [[MenuView alloc] initWithFrame:rc context:context]; // this sets .desiredFrame
+    rc.origin.x = -rc.size.width; // then we move it off screen
+    mview.frame = rc;
     mview.drawableDepthFormat = view.drawableDepthFormat;
     mview.backgroundColor = [UIColor clearColor];
+    [mview addDelegate:self];
     [view addSubview:mview];
-    [mview setupGL];
 
     // 4. Trap taps for menu items
     //--------------------------------
@@ -176,43 +249,44 @@
     return true;
 }
 
+- (int)Menu:(Menu*)menu playMode:(MenuItem *)mi
+{
+    if( _currentTrackView )
+        return _currentTrackView.playMode;
+
+    return 0; // err...
+}
+
 - (NSNumber *)closeAllMenus
 {
     bool closed = false;
-    Class mClass = [MenuView class];
-    for( View * view in self.view.subviews )
+    for( MenuView * view in [self getViewsOfType:[MenuView class]] )
     {
-        if( [view isKindOfClass:mClass] )
+        if( !view.hidden )
         {
-            if( view.visible && !view.hiding )
-            {
-                [((MenuView *)view) hide];
-                closed = true;
-            }
+            view.markedForDelete = true;
+            [view hideToDir:HIDE_NOW];
+            closed = true;
         }
     }
-    
+
     return @(closed);
 }
 
 -(void)toggleMenuView
 {
     if( !_menuView )
-        _menuView = [self Menu:nil makeMenuView:nil];
-    
-    if( !_menuView.visible )
     {
-        if( _currentTrackView )
-            _currentTrackView.menuIsOver = [[NSNumber alloc] initWithBool:true];
-
-        [_menuView show];
+        _menuView = [self Menu:nil makeMenuView:nil];
+        [_menuView showFromDir:SHOW_DIR_LEFT];
+    }
+    else if( _menuView.hidden )
+    {
+        [_menuView showFromDir:SHOW_DIR_LEFT];
     }
     else
     {
-        [self closeAllMenus];
-        
-        if( _currentTrackView )
-            _currentTrackView.menuIsOver = [[NSNumber alloc] initWithBool:false];
+        [self closeAllMenus];        
     }
 }
 
@@ -221,14 +295,15 @@
 
 - (NSArray *)getTrackViews
 {
-    NSMutableArray * arr = [NSMutableArray new];
-    Class tClass = [TrackView class];
-    for( View * view in self.view.subviews )
-    {
-        if( [view isKindOfClass:tClass] )
-            [arr addObject:view];
-    }
-    return arr;
+    return [self getViewsOfType:[TrackView class]];
+}
+
+-(NSArray *)getViewsOfType:(Class)vClass
+{
+    return [self.view.subviews objectsAtIndexes:[self.view.subviews
+                                                 indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
+                                                                return [obj isKindOfClass:vClass];
+                                                            }]];
 }
 
 -(void)Factory:(Factory *)factory
@@ -251,13 +326,9 @@
     
     [tv createNode:options];
     
-    [tv showFromDir:SHOW_DIR_RIGHT];
     if( _currentTrackView )
         [_currentTrackView hideToDir:SHOW_DIR_LEFT];
-    _currentTrackView = tv;
-    if( !_rootView )
-        _rootView = tv;
-    
+    [tv showFromDir:SHOW_DIR_RIGHT];
 }
 
 -(bool)isRootView
@@ -273,49 +344,30 @@
     EAGLContext * context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2 sharegroup:self.context.sharegroup];
     TrackView * tview = [[klass alloc] initWithFrame:rc context:context];
     tview.drawableDepthFormat = view.drawableDepthFormat;
-
+    [tview addDelegate:self];
+    
     [view addSubview:tview];
     [view sendSubviewToBack:tview];
-    [tview setupGL];
+    [tview setupGL]; // required for calls made during initialization
     return tview;
 }
 
 -(void)Factory:(Factory *)factory deleteNode:(NSDictionary *)options
 {
-    if( !_currentTrackView )
-    {
-        // TODO: disable invalid menu items
-        return;
-    }
-
-    [_currentTrackView shrinkToNothing:self notify:@"viewIsGone"];
+    [self closeAllMenus];
+    _currentTrackView.markedForDelete = true;
+    [_currentTrackView shrinkToNothing];
 }
 
--(void)dumpCurrentView
+-(void)Factory:(Factory *)factory pauseToggle:(NSDictionary *)options
 {
-    [_currentTrackView.graph cleanChildren];
-    [_currentTrackView removeFromSuperview];
-    _currentTrackView = nil;
-    
-}
-- (void)viewIsGone
-{
-    NSArray * trackViews = [self getTrackViews];
-    for( TrackView * view in trackViews )
-    {
-        if( view != _currentTrackView )
-        {
-            [self dumpCurrentView];
-            _currentTrackView = view;
-            [_currentTrackView showFromDir:SHOW_NOW];
-            return;
-        }
-    }
-    [self dumpCurrentView];
+    if( _currentTrackView )
+        _currentTrackView.playMode = !_currentTrackView.playMode;
 }
 
 - (void)makeDawView
 {
+    /*
     NSArray * trackViews = [self getTrackViews];
     NSUInteger   count = [trackViews count];
     CGRect rc = self.view.frame;
@@ -341,10 +393,12 @@
             [view animateProp:"height" targetVal:h hide:false];
         }
     }
+     */
 }
 
 - (void)unMakeDawView
 {
+    /*
     NSArray * trackViews = [self getTrackViews];
     NSUInteger   count = [trackViews count];
     CGRect rc = self.view.frame;
@@ -364,6 +418,7 @@
             [view hideToDir:HIDE_NOW];
         }
     }
+     */
 }
 
 
@@ -371,19 +426,23 @@
 {
     if( !_currentTrackView )
         return;
-    
-    NSArray * trackViews = [self getTrackViews];
-    int count = [trackViews count];
-    for( int i = 0; i < count-1; i++ )
+    NSArray * arr = [self getTrackViews];
+    int max = [arr count] - 1;
+    int i = 0;
+    for( TrackView * view in arr )
     {
-        if( trackViews[i] == _currentTrackView )
+        if( view == _currentTrackView )
         {
-            TrackView * next = trackViews[i+1];
-            [next showFromDir:SHOW_DIR_LEFT];
-            [_currentTrackView hideToDir:SHOW_DIR_RIGHT];
-            _currentTrackView = next;
+            if( i < max )
+            {
+                TrackView * next = arr[i+1];
+                [_currentTrackView hideToDir:SHOW_DIR_RIGHT];
+                _currentTrackView = nil;
+                [next showFromDir:SHOW_DIR_LEFT];
+            }
             break;
         }
+        ++i;
     }
 }
 
@@ -392,21 +451,20 @@
     if( !_currentTrackView )
         return;
     
-    NSArray * trackViews = [self getTrackViews];
-    int count = [trackViews count];
-    for( int i = 0; i < count; i++ )
+    TrackView * prev = nil;
+    for( TrackView * view in [self getTrackViews] )
     {
-        if( trackViews[i] == _currentTrackView )
+        if( view == _currentTrackView )
         {
-            if( i > 0 )
+            if( prev )
             {
-                TrackView * next = trackViews[i-1];
-                [next showFromDir:SHOW_DIR_RIGHT];
                 [_currentTrackView hideToDir:SHOW_DIR_LEFT];
-                _currentTrackView = next;
+                _currentTrackView = nil;
+                [prev showFromDir:SHOW_DIR_RIGHT];
             }
             break;
         }
+        prev = view;
     }
 }
 

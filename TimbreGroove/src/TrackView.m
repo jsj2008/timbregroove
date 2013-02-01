@@ -12,6 +12,38 @@
 #import "Tweener.h"
 #import "Tween.h"
 #import "SettingsVC.h"
+#import "BlendState.h"
+
+#import "Generic.h"
+#import "GridPlane.h"
+@interface GreySq : Generic
+@end;
+
+@implementation GreySq
+
+-(id)wireUp
+{
+    self.camera = [IdentityCamera new];
+    self.color = (GLKVector4){ 0.3, 0.3, 0.5, 1.0 };
+    return [super wireUp];
+}
+
+-(void)createBuffer
+{
+    GridPlane * gp = [GridPlane gridWithIndicesIntoNames:@[@(gv_pos)]
+                                                andDoUVs:false
+                                            andDoNormals:false];
+    [self addBuffer:gp];
+}
+
+@end
+
+
+@interface TrackView () {
+    Generic * _greySquare;
+}
+
+@end
 
 @implementation TrackView
 
@@ -29,67 +61,32 @@
 {
     [super setupGL];
     GLKVector3 pos = { 0, 0, CAMERA_DEFAULT_Z };
-    _graph.camera.position = pos;
-    _backcolor = GLKVector4Make(0.1, 0.1, 0.1, 1);
+    self.graph.camera.position = pos;
+    _backcolor = (GLKVector4){0.1, 0.1, 0.1, 0.4};
 }
 
--(void)showAnimationComplete
+-(void)update:(NSTimeInterval)dt
 {
-    [self setupGL];
-    [_graph traverse:@selector(setViewIsHidden:) userObj:[[NSNumber alloc] initWithBool:false]];    
+    if( _playMode == tpm_play )
+    {
+        [super update:dt];
+    }
 }
 
-- (void)showFromDir:(int)dir
+- (void)drawRect:(CGRect)rect
 {
-    _visible = true;
-    
-    CGRect rc = self.frame;
-    rc.origin.x = rc.size.width * dir;
-    self.frame = rc;
-    NSDictionary * params = @{  TWEEN_DURATION: @0.7f,
-                                TWEEN_TRANSITION: TWEEN_FUNC_EASEOUTSINE,
-                        TWEEN_ON_COMPLETE_SELECTOR: @"showAnimationComplete",
-                        TWEEN_ON_COMPLETE_TARGET: self,
-                                            @"x": @(0)
-    };
-    
-    [Tweener addTween:self withParameters:params];
+    [super drawRect:rect];
+    if( _playMode == tpm_pause )
+    {
+        if( !_greySquare )
+            _greySquare = [[GreySq new] wireUp];
+        BlendState * bs = [BlendState enable:true
+                                   srcFactor:GL_DST_ALPHA
+                                   dstFactor:GL_SRC_COLOR];
+        [_greySquare render:rect.size.width h:rect.size.height];
+        [bs restore];
+    }
 }
-
-- (void)hideToDir:(int)dir
-{
-    if( self.hiding )
-        return;
-    self.hiding = true;
-    CGRect rc = self.frame;
-    NSDictionary * params = @{  TWEEN_DURATION: @0.7f,
-                              TWEEN_TRANSITION: TWEEN_FUNC_EASEOUTSINE,
-                                          @"x": @(rc.size.width*dir),
-                    TWEEN_ON_COMPLETE_SELECTOR: @"hideAnimationComplete",
-                      TWEEN_ON_COMPLETE_TARGET: self
-    };
-    
-    [Tweener addTween:self withParameters:params];
-}
-
--(void)hideAnimationComplete
-{
-    [super hideAnimationComplete];
-    [_graph traverse:@selector(setViewIsHidden:) userObj:[[NSNumber alloc] initWithBool:true]];
-}
-
--(void)setMenuIsOver:(NSNumber *)menuIsOver
-{
-    [_graph traverse:@selector(setViewIsObscured:) userObj:menuIsOver];
-    _menuIsOver = menuIsOver;
-}
-
-#if DEBUG
--(void)drawRect:(CGRect)rect
-{
-    [super drawRect:rect]; // for breakpoint setting
-}
-#endif
 
 
 -(NSArray *)getSettings

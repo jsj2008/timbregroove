@@ -13,8 +13,8 @@
 #import "Camera.h"
 #import "View.h"
 #import "Texture.h"
-#import "VaryingColor.h"
 #import "Geometry.h"
+#import "BlendState.h"
 
 #pragma mark -
 #pragma mark Options settings
@@ -353,15 +353,15 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     
     [_shader writeUValues];
     
-    GLboolean prevBlend = glIsEnabled(GL_BLEND);
+    BlendState * bs;
+
     if( _blend )
     {
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-        glEnable(GL_BLEND);
+        bs = [BlendState enable:true srcFactor:GL_SRC_ALPHA dstFactor:GL_ONE];
     }
     else
     {
-        glDisable(GL_BLEND);
+        bs = [BlendState enable:false];
     }
     
     if( _fbo && _bindFBO )
@@ -380,11 +380,8 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
         Texture * t = _keyedTextures[key];
         [t unbind];
     }
-    
-    if( prevBlend )
-        glEnable(GL_BLEND);
-    else
-        glDisable(GL_BLEND);
+
+    [bs restore];
 }
 
 @end

@@ -51,6 +51,8 @@
     free(textureFiles);
     free(textureNames);
     
+    [((View *)self.view) addDelegate:self];
+    
     return [super wireUp];
 }
 
@@ -70,17 +72,17 @@
     Skinner_Render(_skinnerThingy,self.modelView.m);
 }
 
--(void)setViewIsHidden:(NSNumber *)viewIsHidden
+-(void)tgViewIsFullyVisible:(View *)view
 {
-    if( [viewIsHidden boolValue] )
-        Skinner_Pause(_skinnerThingy);
-    else
-        Skinner_Resume(_skinnerThingy);
-    
-    [super setViewIsObscured:viewIsHidden];
+    Skinner_Resume(_skinnerThingy);
 }
 
+-(void)tgViewWillDisappear:(View *)view
+{
+    Skinner_Pause(_skinnerThingy);
+}
 @end
+
 void EnvExitMsg( const char * msg )
 {
     NSLog(@"%s",msg);

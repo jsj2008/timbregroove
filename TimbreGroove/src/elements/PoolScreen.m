@@ -7,15 +7,10 @@
 //
 
 #import "Generic.h"
-#import "Texture.h"
 #import "GridPlane.h"
 #import "Camera.h"
-#import "MeshBuffer.h"
-#import "Text.h"
 #import "FBO.h"
-#import "Shader.h"
 #import "Tweener.h"
-#import "MeshBuffer.h"
 #import "UIViewController+TGExtension.h"
 #import "Mixer.h"
 #import "PoolWater.h"
@@ -223,18 +218,6 @@
     glEnable(GL_DEPTH_TEST);
 }
 
-
--(void)setViewIsHidden:(NSNumber *)viewIsHidden
-{
-    bool hidden = [viewIsHidden boolValue];
-    for( PoolWater * water in _waters )
-        if( hidden )
-            [water.sound pause];
-        else
-            [water.sound play];
-    
-    [super setViewIsHidden:viewIsHidden];
-}
 
 +(GLKVector2)screenToPool:(CGPoint)pt
 {
