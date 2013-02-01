@@ -102,7 +102,6 @@
 		570F415F16ABB767000FCA7B /* Geometry.m in Sources */ = {isa = PBXBuildFile; fileRef = 570F415E16ABB767000FCA7B /* Geometry.m */; };
 		570F416216ABBA0E000FCA7B /* GridPlane.m in Sources */ = {isa = PBXBuildFile; fileRef = 570F416116ABBA0E000FCA7B /* GridPlane.m */; };
 		570F416516ABDFFD000FCA7B /* Cloud.m in Sources */ = {isa = PBXBuildFile; fileRef = 570F416416ABDFFD000FCA7B /* Cloud.m */; };
-		5712FB3E16B1A773004D62AE /* libDIRAC_iOS-fat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5712FB3D16B1A773004D62AE /* libDIRAC_iOS-fat.a */; };
 		5712FB4416B1B8B1004D62AE /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5712FB4316B1B8B1004D62AE /* Accelerate.framework */; };
 		5716775F16A685A800F78B25 /* AssetLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 5716775E16A685A800F78B25 /* AssetLoader.m */; };
 		571A42FE167C315700CD7E8F /* Graph.m in Sources */ = {isa = PBXBuildFile; fileRef = 571A42FD167C315600CD7E8F /* Graph.m */; };
@@ -378,8 +377,6 @@
 		570F416116ABBA0E000FCA7B /* GridPlane.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GridPlane.m; sourceTree = "<group>"; };
 		570F416316ABDFF2000FCA7B /* Cloud.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Cloud.h; sourceTree = "<group>"; };
 		570F416416ABDFFD000FCA7B /* Cloud.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Cloud.m; sourceTree = "<group>"; };
-		5712FB3C16B1A773004D62AE /* Dirac.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Dirac.h; sourceTree = "<group>"; };
-		5712FB3D16B1A773004D62AE /* libDIRAC_iOS-fat.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libDIRAC_iOS-fat.a"; sourceTree = "<group>"; };
 		5712FB4316B1B8B1004D62AE /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		5716775D16A685A800F78B25 /* AssetLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AssetLoader.h; path = src/AssetLoader.h; sourceTree = "<group>"; };
 		5716775E16A685A800F78B25 /* AssetLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AssetLoader.m; path = src/AssetLoader.m; sourceTree = "<group>"; };
@@ -486,14 +483,6 @@
 		578292C6169879930053ADCD /* ImageBaker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageBaker.m; sourceTree = "<group>"; };
 		578292C8169A87B00053ADCD /* test.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = test.png; sourceTree = "<group>"; };
 		578292CA169A8B650053ADCD /* imageBaker.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = imageBaker.png; sourceTree = "<group>"; };
-		578CB90A16A63C0000088BA2 /* fmod.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fmod.h; sourceTree = "<group>"; };
-		578CB90B16A63C0000088BA2 /* fmod.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = fmod.hpp; sourceTree = "<group>"; };
-		578CB90C16A63C0000088BA2 /* fmod_codec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fmod_codec.h; sourceTree = "<group>"; };
-		578CB90D16A63C0000088BA2 /* fmod_dsp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fmod_dsp.h; sourceTree = "<group>"; };
-		578CB90E16A63C0000088BA2 /* fmod_errors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fmod_errors.h; sourceTree = "<group>"; };
-		578CB90F16A63C0000088BA2 /* fmod_memoryinfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fmod_memoryinfo.h; sourceTree = "<group>"; };
-		578CB91016A63C0000088BA2 /* fmod_output.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fmod_output.h; sourceTree = "<group>"; };
-		578CB91116A63C0000088BA2 /* fmodiphone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fmodiphone.h; sourceTree = "<group>"; };
 		57900682168411640068659F /* Factory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Factory.h; sourceTree = "<group>"; };
 		57900683168411650068659F /* Factory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Factory.m; sourceTree = "<group>"; };
 		5790068616841F3B0068659F /* Interactive.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Interactive.h; sourceTree = "<group>"; };
@@ -515,9 +504,6 @@
 		57BFCBA716A220EB008903BA /* TGAmb3-32k.aif */ = {isa = PBXFileReference; lastKnownFileType = file; path = "TGAmb3-32k.aif"; sourceTree = "<group>"; };
 		57CAF78416891EDA00459353 /* libc++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libc++.dylib"; path = "usr/lib/libc++.dylib"; sourceTree = SDKROOT; };
 		57CCFFC116849336003B4A19 /* Text.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Text.m; sourceTree = "<group>"; };
-		57DD3CDA168A5F92005980F6 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = ../Debug.xcconfig; sourceTree = "<group>"; };
-		57DD3CDF168A5FDD005980F6 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = ../Release.xcconfig; sourceTree = "<group>"; };
-		57DD3CE0168A5FF5005980F6 /* common.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = common.xcconfig; path = ../common.xcconfig; sourceTree = "<group>"; };
 		57DF9C8016B5B9AB00050635 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		57DF9C8216B5BE2500050635 /* Mixer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Mixer.h; path = audio/Mixer.h; sourceTree = "<group>"; };
 		57DF9C8316B5BE2500050635 /* Mixer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Mixer.m; path = audio/Mixer.m; sourceTree = "<group>"; };
@@ -564,7 +550,6 @@
 				57E874FC16782894008243B2 /* CoreGraphics.framework in Frameworks */,
 				57E874FE16782894008243B2 /* GLKit.framework in Frameworks */,
 				57E8750016782894008243B2 /* OpenGLES.framework in Frameworks */,
-				5712FB3E16B1A773004D62AE /* libDIRAC_iOS-fat.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -754,20 +739,9 @@
 			path = geometry;
 			sourceTree = "<group>";
 		};
-		5712FB3B16B1A773004D62AE /* dirac */ = {
-			isa = PBXGroup;
-			children = (
-				5712FB3C16B1A773004D62AE /* Dirac.h */,
-				5712FB3D16B1A773004D62AE /* libDIRAC_iOS-fat.a */,
-			);
-			path = dirac;
-			sourceTree = "<group>";
-		};
 		571ECF97167BE2CE00727A30 /* contrib */ = {
 			isa = PBXGroup;
 			children = (
-				5712FB3B16B1A773004D62AE /* dirac */,
-				578CB90816A63C0000088BA2 /* fmod */,
 				57AFB3C416A3281F008192FB /* PVR */,
 				571ECF98167BE2CE00727A30 /* tweener */,
 			);
@@ -1029,29 +1003,6 @@
 			name = misc;
 			sourceTree = "<group>";
 		};
-		578CB90816A63C0000088BA2 /* fmod */ = {
-			isa = PBXGroup;
-			children = (
-				578CB90916A63C0000088BA2 /* inc */,
-			);
-			path = fmod;
-			sourceTree = "<group>";
-		};
-		578CB90916A63C0000088BA2 /* inc */ = {
-			isa = PBXGroup;
-			children = (
-				578CB90A16A63C0000088BA2 /* fmod.h */,
-				578CB90B16A63C0000088BA2 /* fmod.hpp */,
-				578CB90C16A63C0000088BA2 /* fmod_codec.h */,
-				578CB90D16A63C0000088BA2 /* fmod_dsp.h */,
-				578CB90E16A63C0000088BA2 /* fmod_errors.h */,
-				578CB90F16A63C0000088BA2 /* fmod_memoryinfo.h */,
-				578CB91016A63C0000088BA2 /* fmod_output.h */,
-				578CB91116A63C0000088BA2 /* fmodiphone.h */,
-			);
-			path = inc;
-			sourceTree = "<group>";
-		};
 		57A10E961685E08300B80314 /* audio */ = {
 			isa = PBXGroup;
 			children = (
@@ -1182,9 +1133,6 @@
 		57E8750216782894008243B2 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				57DD3CDA168A5F92005980F6 /* Debug.xcconfig */,
-				57DD3CDF168A5FDD005980F6 /* Release.xcconfig */,
-				57DD3CE0168A5FF5005980F6 /* common.xcconfig */,
 				57E8750716782894008243B2 /* main.m */,
 				57E8750916782894008243B2 /* TimbreGroove-Prefix.pch */,
 			);
@@ -1545,7 +1493,6 @@
 		};
 		57E8752316782894008243B2 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 57DD3CDA168A5F92005980F6 /* Debug.xcconfig */;
 			buildSettings = {
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TimbreGroove/TimbreGroove-Prefix.pch";
@@ -1563,7 +1510,6 @@
 		};
 		57E8752416782894008243B2 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 57DD3CDF168A5FDD005980F6 /* Release.xcconfig */;
 			buildSettings = {
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TimbreGroove/TimbreGroove-Prefix.pch";

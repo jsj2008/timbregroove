@@ -1,9 +1,0 @@
-//
-//  common.xcconfig
-//  TimbreGroove
-//
-//  Created by victor on 12/26/12.
-//  Copyright (c) 2012 Ass Over Tea Kettle. All rights reserved.
-//
-
-LIBRARY_SEARCH_PATHS = TimbreGroove/src/contrib/fmod/lib
