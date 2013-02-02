@@ -65,7 +65,7 @@
     self.rotation = GLKVector3Make(0, GLKMathDegreesToRadians(_rotation), 0);
 }
 
--(void)render
+-(void)render:(NSUInteger)w h:(NSUInteger)h
 {
     Skinner_Render(_skinnerThingy,self.modelView.m);
 }

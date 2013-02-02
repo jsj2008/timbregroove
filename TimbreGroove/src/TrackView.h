@@ -21,8 +21,6 @@ typedef enum TrackPlayMode {
 
 @property (nonatomic) TrackPlayMode playMode;
 
-// Derived classes implement this
--(void)createNode:(NSDictionary *)params;
 
 -(void)settingsGoingAway:(SettingsVC *)vc;
 -(NSArray *)getSettings; // array of SettingsDescriptor

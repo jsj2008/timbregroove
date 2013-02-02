@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="2.0" toolsVersion="2844" systemVersion="12C60" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" initialViewController="l1h-91-kwU">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="2.0" toolsVersion="3084" systemVersion="12C60" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" initialViewController="l1h-91-kwU">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="1930"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="2083"/>
     </dependencies>
     <scenes>
         <!--TrackController-->
@@ -9,7 +9,7 @@
             <objects>
                 <glkViewController storyboardIdentifier="tgTrackVC" autoresizesArchivedViewToFullSize="NO" title="trackVC" useStoryboardIdentifierAsRestorationIdentifier="YES" preferredFramesPerSecond="30" id="WK8-2Y-eNP" userLabel="TrackController" customClass="TrackController" sceneMemberID="viewController">
                     <glkView key="view" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="nuX-ZJ-smQ" customClass="View">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="271"/>
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="400"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <connections>
                             <outlet property="delegate" destination="WK8-2Y-eNP" id="Gll-Ja-KXn"/>
@@ -39,21 +39,28 @@
         <!--Main Daw View-->
         <scene sceneID="5">
             <objects>
-                <viewController title="Main Daw View" id="2" userLabel="Main Daw View" customClass="ViewController" sceneMemberID="viewController">
+                <viewController title="Main Daw View" id="2" userLabel="Main Daw View" customClass="ScreenViewController" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="JrJ-Nu-Kxq">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="480"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <containerView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="JeK-0b-O8X" userLabel="trackContainer">
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                                <connections>
+                                    <segue destination="WK8-2Y-eNP" kind="embed" id="Wqe-Ex-9VL"/>
+                                </connections>
+                            </containerView>
                             <pageControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" numberOfPages="3" translatesAutoresizingMaskIntoConstraints="NO" id="923-1m-xh9"/>
                             <toolbar hidden="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" barStyle="blackOpaque" translatesAutoresizingMaskIntoConstraints="NO" id="o8R-gM-dvf">
                                 <color key="backgroundColor" white="1" alpha="0.0" colorSpace="calibratedWhite"/>
                                 <items>
+                                    <barButtonItem systemItem="trash" id="ckd-52-Hf1"/>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="Dhp-JM-PQ7"/>
                                     <barButtonItem systemItem="pageCurl" id="Hiu-xo-Q9F">
                                         <connections>
                                             <segue destination="y6e-Ii-Ior" kind="modal" modalTransitionStyle="partialCurl" id="9St-y8-xGO"/>
                                         </connections>
                                     </barButtonItem>
-                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="lD9-Yz-GjA"/>
                                     <barButtonItem systemItem="add" id="Qg6-dx-Vlz">
                                         <color key="tintColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                     </barButtonItem>
@@ -65,28 +72,22 @@
                                     <segue destination="2ET-4a-dgw" kind="embed" id="V0o-GS-3fp"/>
                                 </connections>
                             </containerView>
-                            <containerView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="JeK-0b-O8X" userLabel="trackContainer">
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                                <connections>
-                                    <segue destination="WK8-2Y-eNP" kind="embed" id="Wqe-Ex-9VL"/>
-                                </connections>
-                            </containerView>
                         </subviews>
                         <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                         <gestureRecognizers/>
                         <constraints>
                             <constraint firstItem="JeK-0b-O8X" firstAttribute="trailing" secondItem="JrJ-Nu-Kxq" secondAttribute="trailing" type="default" id="1hr-2D-unP"/>
-                            <constraint firstAttribute="bottom" secondItem="JeK-0b-O8X" secondAttribute="bottom" constant="105" id="GSa-3L-MUd"/>
                             <constraint firstItem="JeK-0b-O8X" firstAttribute="leading" secondItem="JrJ-Nu-Kxq" secondAttribute="leading" type="default" id="N4y-20-BIR"/>
-                            <constraint firstItem="JeK-0b-O8X" firstAttribute="top" secondItem="JrJ-Nu-Kxq" secondAttribute="top" constant="104" id="Q95-bd-OGE"/>
                             <constraint firstItem="o8R-gM-dvf" firstAttribute="leading" secondItem="JrJ-Nu-Kxq" secondAttribute="leading" type="default" id="REn-x6-jlK"/>
                             <constraint firstItem="o8R-gM-dvf" firstAttribute="trailing" secondItem="JrJ-Nu-Kxq" secondAttribute="trailing" type="default" id="S1t-bz-olZ"/>
                             <constraint firstItem="kZb-MU-Lxc" firstAttribute="top" secondItem="JrJ-Nu-Kxq" secondAttribute="top" type="default" id="YFG-nO-Hfx"/>
                             <constraint firstItem="923-1m-xh9" firstAttribute="centerX" secondItem="o8R-gM-dvf" secondAttribute="centerX" type="default" id="Zr3-hd-CX0"/>
                             <constraint firstAttribute="bottom" secondItem="kZb-MU-Lxc" secondAttribute="bottom" constant="440" id="bOs-JC-VdP"/>
                             <constraint firstItem="kZb-MU-Lxc" firstAttribute="trailing" secondItem="JrJ-Nu-Kxq" secondAttribute="trailing" type="default" id="fK8-ft-4Lw"/>
+                            <constraint firstItem="JeK-0b-O8X" firstAttribute="top" secondItem="JrJ-Nu-Kxq" secondAttribute="top" constant="40" id="myj-pM-mr6"/>
                             <constraint firstItem="o8R-gM-dvf" firstAttribute="top" secondItem="JrJ-Nu-Kxq" secondAttribute="top" constant="441" id="onB-Zy-rTB"/>
                             <constraint firstItem="o8R-gM-dvf" firstAttribute="bottom" secondItem="923-1m-xh9" secondAttribute="bottom" type="default" id="w67-EA-dJH"/>
+                            <constraint firstItem="JeK-0b-O8X" firstAttribute="centerY" secondItem="JrJ-Nu-Kxq" secondAttribute="centerY" type="default" id="yJF-hI-kCR"/>
                             <constraint firstItem="kZb-MU-Lxc" firstAttribute="leading" secondItem="JrJ-Nu-Kxq" secondAttribute="leading" type="default" id="yMO-Si-Tbv"/>
                         </constraints>
                         <connections>
@@ -161,11 +162,23 @@
         </scene>
     </scenes>
     <classes>
-        <class className="MenuController" superclassName="TGBaseViewController">
+        <class className="BaseViewController" superclassName="GLKViewController">
+            <source key="sourceIdentifier" type="project" relativePath="./Classes/BaseViewController.h"/>
+        </class>
+        <class className="MenuController" superclassName="BaseViewController">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/MenuController.h"/>
         </class>
         <class className="NSLayoutConstraint" superclassName="NSObject">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/NSLayoutConstraint.h"/>
+        </class>
+        <class className="ScreenViewController" superclassName="UIViewController">
+            <source key="sourceIdentifier" type="project" relativePath="./Classes/ScreenViewController.h"/>
+            <relationships>
+                <relationship kind="action" name="dblTapForMenus:" candidateClass="UITapGestureRecognizer"/>
+                <relationship kind="outlet" name="bottomMenuBar" candidateClass="UIToolbar"/>
+                <relationship kind="outlet" name="containerView" candidateClass="UIView"/>
+                <relationship kind="outlet" name="menuContainer" candidateClass="UIView"/>
+            </relationships>
         </class>
         <class className="SettingsVC" superclassName="UIViewController">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/SettingsVC.h"/>
@@ -174,23 +187,11 @@
                 <relationship kind="outlet" name="componentTitleLabel" candidateClass="UILabel"/>
             </relationships>
         </class>
-        <class className="TGBaseViewController" superclassName="GLKViewController">
-            <source key="sourceIdentifier" type="project" relativePath="./Classes/TGBaseViewController.h"/>
-        </class>
-        <class className="TrackController" superclassName="TGBaseViewController">
+        <class className="TrackController" superclassName="BaseViewController">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/TrackController.h"/>
         </class>
         <class className="View" superclassName="GLKView">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/View.h"/>
-        </class>
-        <class className="ViewController" superclassName="UIViewController">
-            <source key="sourceIdentifier" type="project" relativePath="./Classes/ViewController.h"/>
-            <relationships>
-                <relationship kind="action" name="dblTapForMenus:" candidateClass="UITapGestureRecognizer"/>
-                <relationship kind="outlet" name="bottomMenuBar" candidateClass="UIToolbar"/>
-                <relationship kind="outlet" name="containerView" candidateClass="UIView"/>
-                <relationship kind="outlet" name="menuContainer" candidateClass="UIView"/>
-            </relationships>
         </class>
     </classes>
     <simulatedMetricsContainer key="defaultSimulatedMetrics">

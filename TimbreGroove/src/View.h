@@ -10,15 +10,16 @@
 #import "Graph.h"
 
 
-@interface View : GLKView
-
-@property (nonatomic) GLKVector4 backColor;
-
+@interface View : GLKView {
+@protected
+    GLKVector4 _backcolor;
+}
 @property (nonatomic,readonly) id firstNode;
+
+
 @property (nonatomic,strong) Graph * graph;
-@property (nonatomic) bool skipBoilerPlate;
 
 -(void)update:(NSTimeInterval)dt;
 -(void)render;
-
+-(id)createNode:(NSDictionary *)params;
 @end

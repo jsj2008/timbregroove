@@ -31,5 +31,5 @@ typedef enum PoolWaterVariables {
 @property (nonatomic) float radius;
 @property (nonatomic) GLKVector2 scale;
 @property (nonatomic) float time;
--(void)writeStaticsWithW:(float)w H:(float)h;
+-(void)writeStatics;
 @end

@@ -164,7 +164,7 @@
     return _camera;
 }
 
--(View *)view
+-(GLKView *)view
 {
     TG3dObject * e = self;
     

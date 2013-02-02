@@ -6,17 +6,16 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "TGBaseViewController.h"
-#import "Graph.h"
-#import "Camera.h"
+#import "BaseViewController.h"
+#import "View.h"
 
-@interface TGBaseViewController () {
-
+@interface BaseViewController () {
 }
 
 @end
 
-@implementation TGBaseViewController
+@implementation BaseViewController
+
 
 - (void)viewDidLoad
 {
@@ -24,14 +23,12 @@
     
     self.context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
     
-    NSLog(@"Created Context: %@", self.context);
     View *view = self.viewview;
     view.context = self.context;
     view.drawableDepthFormat = GLKViewDrawableDepthFormat24;
     
     [self setupGL];
-    self.preferredFramesPerSecond = 30;
-    
+    self.preferredFramesPerSecond = 60;
 }
 
 -(View *)viewview
@@ -54,6 +51,10 @@
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
+-(void)startGL
+{
+}
+
 - (void)tearDownGL
 {
     if ([EAGLContext currentContext] == self.context) {
@@ -62,35 +63,18 @@
     self.context = nil;
 }
 
-- (void)startGL
-{
-    
-}
-
--(id)createNode:(NSDictionary *)params
-{
-    Class klass = NSClassFromString(params[@"instanceClass"]);
-    TG3dObject * node = [[klass alloc] init];
-    View * view = self.viewview;
-    node.view = view;
-    [view.graph appendChild:node];
-    [node setValuesForKeysWithDictionary:params];
-    [node wireUp];
-    return node;
-}
-
 #pragma mark - GLKView and GLKViewController delegate methods
 
 - (void)update
 {
-    [self.viewview update:self.timeSinceLastUpdate];    
+    NSTimeInterval dt = self.timeSinceLastUpdate;
+    [self.viewview update:dt];
+    
 }
 
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
 {
-    [EAGLContext setCurrentContext:self.context];
-
-    [((View *)view) render];
+    [(View *)view render];
 }
 
 @end

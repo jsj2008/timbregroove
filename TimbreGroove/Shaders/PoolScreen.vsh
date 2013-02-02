@@ -8,7 +8,6 @@ attribute vec2 a_uvs;
 
 uniform mat4 u_pvm;
 uniform vec2 u_scale;
-
 varying vec2 v_st;
 
 void main(void)

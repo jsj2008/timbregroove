@@ -8,12 +8,14 @@
 
 #import <UIKit/UIKit.h>
 #import <GLKit/GLKit.h>
+#import "BaseViewController.h"
 #import "TGTypes.h"
 #import "Menu.h"
 #import "Factory.h"
 #import "View.h"
-#import "TGBaseViewController.h"
 
-@interface TrackController : TGBaseViewController
+@interface TrackController : BaseViewController
+
+-(void)startGL;
 
 @end

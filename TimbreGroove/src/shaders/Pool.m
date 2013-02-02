@@ -9,7 +9,6 @@
 #import "Pool.h"
 #import "TG3dObject.h"
 #import "Generic.h"
-#import "Texture.h"
 
 /*
  attribute vec4 position;

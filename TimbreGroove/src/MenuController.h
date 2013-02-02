@@ -6,8 +6,8 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "TGBaseViewController.h"
+#import "BaseViewController.h"
 
-@interface MenuController : TGBaseViewController
+@interface MenuController : BaseViewController
 
 @end

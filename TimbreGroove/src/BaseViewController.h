@@ -9,14 +9,11 @@
 #import <GLKit/GLKit.h>
 #import "View.h"
 
-@interface TGBaseViewController : GLKViewController
+@interface BaseViewController : GLKViewController
 
 @property (nonatomic,strong) EAGLContext * context;
 @property (nonatomic,readonly)  View * viewview;
 
 -(void)startGL;
 -(void)setupGL;
-
--(id)createNode:(NSDictionary *)params;
-
 @end

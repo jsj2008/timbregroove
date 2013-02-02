@@ -47,20 +47,12 @@
 
 @implementation TrackView
 
--(void)createNode:(NSDictionary *)params;
-{
-    Class klass = NSClassFromString(params[@"instanceClass"]);
-    TG3dObject * node = [[klass alloc] init];
-    node.view = self;
-    [self.graph appendChild:node];
-    [node setValuesForKeysWithDictionary:params];
-    [node wireUp];
-}
 
 -(void)setupGL
 {
     GLKVector3 pos = { 0, 0, CAMERA_DEFAULT_Z };
     self.graph.camera.position = pos;
+    _backcolor = (GLKVector4){0.1, 0.1, 0.1, 0.4};
 }
 
 -(void)update:(NSTimeInterval)dt

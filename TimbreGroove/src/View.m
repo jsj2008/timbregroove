@@ -8,6 +8,8 @@
 
 #import "View.h"
 #import "Camera.h"
+#import "Tween.h"
+#import "Tweener.h"
 
 @implementation View
 
@@ -20,7 +22,7 @@
     return self;
 }
 
-- (id)initWithCoder:(NSCoder *)aDecoder
+- (id) initWithCoder:(NSCoder *)aDecoder
 {
     self = [super initWithCoder:aDecoder];
     if (self) {
@@ -31,13 +33,29 @@
 
 -(void)wireUp
 {
-    _backColor = (GLKVector4){0.2, 0.2, 0.2, 1};
+    _backcolor = (GLKVector4){0, 0, 0, 1};
+    // THIS MUST BE LEFT AS DEFAULT!
+    // (otherwise the context is not setup properly)
+    //self.enableSetNeedsDisplay = NO;
+    self.opaque = YES;
     
     _graph = [[Graph alloc] init];
     _graph.camera = [[Camera alloc] init];
     _graph.view = self;
     
 }
+
+-(id)createNode:(NSDictionary *)params
+{
+    Class klass = NSClassFromString(params[@"instanceClass"]);
+    TG3dObject * node = [[klass alloc] init];
+    node.view = self;
+    [self.graph appendChild:node];
+    [node setValuesForKeysWithDictionary:params];
+    [node wireUp];
+    return node;
+}
+
 - (id)firstNode
 {
     return _graph.firstChild;
@@ -46,22 +64,18 @@
 - (void)update:(NSTimeInterval)dt
 {
     [_graph update:dt];
-    [self setNeedsDisplay];
 }
 
 
--(void)render
+-(void)render // drawRect:(CGRect)rect
 {
     NSUInteger w = self.drawableWidth;
     NSUInteger h = self.drawableHeight;
-    if( !_skipBoilerPlate )
-    {
-        [_graph.camera setPerspectiveForViewWidth:w andHeight:h];
-        
-        glClearColor(_backColor.r,_backColor.g,_backColor.b,_backColor.a);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    }
+    [_graph.camera setPerspectiveForViewWidth:w andHeight:h];
     
+    glClearColor(_backcolor.r,_backcolor.g,_backcolor.b,_backcolor.a);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     [_graph render:w h:h];
 }
 

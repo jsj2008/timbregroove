@@ -46,7 +46,7 @@
     unsigned int     numStrides;
     void *           vertexData;
     unsigned int     numVertices;
-    unsigned int *   indexData;
+    unsigned int *   indexData = NULL;
     unsigned int     numIndices;
     
     numStrides = [strideTypes count];

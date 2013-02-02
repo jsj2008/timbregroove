@@ -20,10 +20,6 @@
 
 @implementation MenuView
 
-- (void)setupGL
-{
-}
-
 - (Menu *)createMenu:(NSDictionary *)meta
 {
     Menu * e = [[Menu alloc] init];
@@ -39,6 +35,20 @@
 {
     return [self.graph firstChild];
 }
+
+-(void)setLevel:(unsigned int)level
+{
+    _level = level;
+    CGRect rc = self.frame;
+    rc.origin.x = rc.size.width * level;
+}
+
+-(void)tgViewWillAppear:(View *)view
+{
+    if( view == self )
+        [self.graph update:0]; // yea, hacky (for enable/disable)
+}
+
 
 - (void)onTap:(UITapGestureRecognizer *)tgr
 {

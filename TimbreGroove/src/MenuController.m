@@ -7,28 +7,17 @@
 //
 
 #import "MenuController.h"
-#import "Text.h"
-
-@interface MenuController () {
-    Text * _text;
-}
-
-@end
 
 @implementation MenuController
 
--(void)viewDidLoad
-{
-    [super viewDidLoad];
-}
-
 -(void)startGL
 {
-    [self setupGL];
-    Text * text = [self createNode:@{@"instanceClass":@"Text"}];
-    text.scale = (GLKVector3){ 10.0, 1.0, 1.0 };
+    [EAGLContext setCurrentContext:self.context];
+    View * tv = (View*)self.view; // [self makeTrackView:klass];
     
-    //self.viewview.backColor = (GLKVector4){0.5,1.0,0.5,1.0};
+    Text * t = [tv createNode:@{@"instanceClass":@"Text"}];
+    t.scale = (GLKVector3){ 13.0, 1, 1 };
 }
+
 
 @end
