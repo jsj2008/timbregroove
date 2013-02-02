@@ -7,6 +7,7 @@
 //
 
 #import "MenuController.h"
+#import "Text.h"
 
 @implementation MenuController
 

@@ -67,14 +67,21 @@
 
 - (void)update
 {
-    NSTimeInterval dt = self.timeSinceLastUpdate;
-    [self.viewview update:dt];
+    View * view = (View*)self.view;
+    if( view.hidden || view.superview.hidden )
+        return;
     
+    NSTimeInterval dt = self.timeSinceLastUpdate;
+    [view update:dt];
 }
 
-- (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
+- (void)glkView:(GLKView *)glkView drawInRect:(CGRect)rect
 {
-    [(View *)view render];
+    View * view = (View*)glkView;
+    if( view.hidden || view.superview.hidden )
+        return;
+    
+    [view render];
 }
 
 @end

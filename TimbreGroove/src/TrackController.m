@@ -7,13 +7,14 @@
 //
 
 #import "TrackController.h"
+#import "View.h"
 
 @implementation TrackController
 
 -(void)startGL
 {
     [self setupGL];
-    View * tv = (View*)self.view; // [self makeTrackView:klass];
+    View * tv = (View*)self.view;
     
     [tv createNode:@{@"instanceClass":@"PoolScreen"}];
 }

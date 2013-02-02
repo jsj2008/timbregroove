@@ -8,7 +8,7 @@
         <scene sceneID="QpR-ic-xzf">
             <objects>
                 <glkViewController storyboardIdentifier="tgTrackVC" autoresizesArchivedViewToFullSize="NO" title="trackVC" useStoryboardIdentifierAsRestorationIdentifier="YES" preferredFramesPerSecond="30" id="WK8-2Y-eNP" userLabel="TrackController" customClass="TrackController" sceneMemberID="viewController">
-                    <glkView key="view" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="nuX-ZJ-smQ" customClass="View">
+                    <glkView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="nuX-ZJ-smQ" customClass="View">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="400"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <connections>
@@ -24,7 +24,7 @@
         <scene sceneID="Q83-1L-b0D">
             <objects>
                 <glkViewController storyboardIdentifier="tgMenuVC" autoresizesArchivedViewToFullSize="NO" title="menuVC" useStoryboardIdentifierAsRestorationIdentifier="YES" preferredFramesPerSecond="30" id="2ET-4a-dgw" userLabel="MenuController" customClass="MenuController" sceneMemberID="viewController">
-                    <glkView key="view" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="yfD-D1-NBS" customClass="View">
+                    <glkView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="yfD-D1-NBS" customClass="View">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="40"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <connections>
@@ -66,7 +66,7 @@
                                     </barButtonItem>
                                 </items>
                             </toolbar>
-                            <containerView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="kZb-MU-Lxc" userLabel="menuHolder">
+                            <containerView hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="kZb-MU-Lxc" userLabel="menuHolder">
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                                 <connections>
                                     <segue destination="2ET-4a-dgw" kind="embed" id="V0o-GS-3fp"/>
@@ -96,9 +96,9 @@
                     </view>
                     <navigationItem key="navigationItem" id="dlQ-Fc-7zy"/>
                     <connections>
-                        <outlet property="bottomMenuBar" destination="o8R-gM-dvf" id="VOC-2R-ecb"/>
-                        <outlet property="containerView" destination="JeK-0b-O8X" id="kPw-wE-Pun"/>
-                        <outlet property="menuContainer" destination="kZb-MU-Lxc" id="PEX-eV-8eU"/>
+                        <outlet property="menuContainer" destination="kZb-MU-Lxc" id="cU6-Uw-jt5"/>
+                        <outlet property="toolBar" destination="o8R-gM-dvf" id="GiO-2x-Qbr"/>
+                        <outlet property="trackContainer" destination="JeK-0b-O8X" id="wiO-YP-kEg"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="4" sceneMemberID="firstResponder"/>
@@ -161,39 +161,6 @@
             <point key="canvasLocation" x="-899" y="293"/>
         </scene>
     </scenes>
-    <classes>
-        <class className="BaseViewController" superclassName="GLKViewController">
-            <source key="sourceIdentifier" type="project" relativePath="./Classes/BaseViewController.h"/>
-        </class>
-        <class className="MenuController" superclassName="BaseViewController">
-            <source key="sourceIdentifier" type="project" relativePath="./Classes/MenuController.h"/>
-        </class>
-        <class className="NSLayoutConstraint" superclassName="NSObject">
-            <source key="sourceIdentifier" type="project" relativePath="./Classes/NSLayoutConstraint.h"/>
-        </class>
-        <class className="ScreenViewController" superclassName="UIViewController">
-            <source key="sourceIdentifier" type="project" relativePath="./Classes/ScreenViewController.h"/>
-            <relationships>
-                <relationship kind="action" name="dblTapForMenus:" candidateClass="UITapGestureRecognizer"/>
-                <relationship kind="outlet" name="bottomMenuBar" candidateClass="UIToolbar"/>
-                <relationship kind="outlet" name="containerView" candidateClass="UIView"/>
-                <relationship kind="outlet" name="menuContainer" candidateClass="UIView"/>
-            </relationships>
-        </class>
-        <class className="SettingsVC" superclassName="UIViewController">
-            <source key="sourceIdentifier" type="project" relativePath="./Classes/SettingsVC.h"/>
-            <relationships>
-                <relationship kind="action" name="backToHome:"/>
-                <relationship kind="outlet" name="componentTitleLabel" candidateClass="UILabel"/>
-            </relationships>
-        </class>
-        <class className="TrackController" superclassName="BaseViewController">
-            <source key="sourceIdentifier" type="project" relativePath="./Classes/TrackController.h"/>
-        </class>
-        <class className="View" superclassName="GLKView">
-            <source key="sourceIdentifier" type="project" relativePath="./Classes/View.h"/>
-        </class>
-    </classes>
     <simulatedMetricsContainer key="defaultSimulatedMetrics">
         <nil key="statusBar"/>
         <simulatedOrientationMetrics key="orientation"/>
