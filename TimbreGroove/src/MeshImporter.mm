@@ -51,8 +51,6 @@
     free(textureFiles);
     free(textureNames);
     
-    [((View *)self.view) addDelegate:self];
-    
     return [super wireUp];
 }
 
@@ -67,7 +65,7 @@
     self.rotation = GLKVector3Make(0, GLKMathDegreesToRadians(_rotation), 0);
 }
 
--(void)render:(NSUInteger)w h:(NSUInteger)h
+-(void)render
 {
     Skinner_Render(_skinnerThingy,self.modelView.m);
 }

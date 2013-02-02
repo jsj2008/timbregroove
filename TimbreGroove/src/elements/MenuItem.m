@@ -53,7 +53,7 @@
     
     if( _subMenu )
     {
-        [_subMenu.menuView showFromDir:SHOW_DIR_LEFT];
+//        [_subMenu.menuView showFromDir:SHOW_DIR_LEFT];
     }
     else
     {

@@ -231,7 +231,7 @@ static NSHashTable * __shaders;
                    andHeaders:(NSString *)headers
 {
     NSString * tag = [headers length] ? headers : @"default";
-    NSString * shaderId = [NSString stringWithFormat:@"%s-%s-%@",vert,frag,tag];
+    NSString * shaderId = [NSString stringWithFormat:@"%s-%s-%@-%@",vert,frag,tag,[EAGLContext currentContext]];
     Shader * foundShader = nil;
     if( __shaders )
     {

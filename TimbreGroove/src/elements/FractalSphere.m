@@ -81,7 +81,7 @@
     self.lightRotation += 0.03;
     [super update:dt];
 
-    if( self.timer > 1.0/8.0 )
+    if( _timer > 1.0/8.0 )
     {
         [_sound updateMeters];
         float peak = [_sound averagePowerForChannel:0];
@@ -107,7 +107,7 @@
             [Tweener addTween:self withParameters:params];
         }
         
-        [_texRenderer update:self.timer/2.0];
+        [_texRenderer update:_timer/2.0];
         [_texRenderer renderToFBO];
         
         _myRot += (peakVal * 5.0);

@@ -22,9 +22,6 @@
 
 - (void)setupGL
 {
-    [super setupGL];
-    
-    _backcolor = (GLKVector4){0.3, 0.3, 0.3, 0.7};
 }
 
 - (Menu *)createMenu:(NSDictionary *)meta
@@ -42,21 +39,6 @@
 {
     return [self.graph firstChild];
 }
-
--(void)setLevel:(unsigned int)level
-{
-    _level = level;
-    CGRect rc = self.frame;
-    rc.origin.x = rc.size.width * level;
-    self.desiredFrame = rc;
-}
-
--(void)tgViewWillAppear:(View *)view
-{
-    if( view == self )
-        [self.graph update:0]; // yea, hacky (for enable/disable)
-}
-
 
 - (void)onTap:(UITapGestureRecognizer *)tgr
 {

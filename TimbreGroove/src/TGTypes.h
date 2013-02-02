@@ -62,4 +62,9 @@ static inline NSMutableArray * a(NSArray *a)
 {
     return [[NSMutableArray alloc] initWithArray:a];
 }
+
+static inline void DumpRect(const char *s, CGRect rc)
+{
+    NSLog(@"%s: %f, %f - %f x %f", s, rc.origin.x, rc.origin.y, rc.size.width, rc.size.height);
+}
 #endif

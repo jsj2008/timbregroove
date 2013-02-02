@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "TGViewController.h"
+#import "TrackController.h"
 #import "MenuView.h"
 #import "MenuItem.h"
 #import "Factory.h"
@@ -20,7 +20,27 @@
 #define CMSG(s)
 #endif
 
-@interface TGViewController () {
+
+@implementation TrackController
+
+-(void)viewDidLoad
+{
+    [super viewDidLoad];
+}
+
+-(void)startGL
+{
+    [self setupGL];
+    [self createNode:@{@"instanceClass":@"PoolScreen"}];
+}
+@end
+
+
+@interface OLDTrackContrller : GLKViewController<MenuViewDelegate,FactoryDelegate>
+
+
+@end
+@interface OLDTrackContrller () {
     MenuView  * _menuView;
     bool _dawView;
     TrackView * _currentTrackView;
@@ -31,12 +51,10 @@
 
 @end
 
-@implementation TGViewController
+@implementation OLDTrackContrller
 
 - (void)viewDidLoad
 {
-    CMSG("viewDidLoad");
-    
     [super viewDidLoad];
     
     self.context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
@@ -51,7 +69,10 @@
     globalFactory.delegate = self;
     
     self.preferredFramesPerSecond = 60;
-    
+}
+
+-(void)startGL
+{
     [self createTrackAndNode:@{@"instanceView":@"TrackView",@"instanceClass":@"PoolScreen"}];
 }
 
@@ -120,86 +141,8 @@
     }
 }
 
-- (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
-{
-    if( !_currentTrackView )
-    {
-        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    }
-    
-    for (View * view in self.view.subviews )
-    {
-        if( !view.isHidden )
-        {
-            [view setupGL];            
-            [view display];
-        }
-    }
-}
-
 #pragma mark - this app View delegate methods
 
--(void)tgViewWillAppear:(View *)view
-{
-    if( [view isKindOfClass:[TrackView class]] )
-    {
-        _currentTrackView = (TrackView *)view;
-        NSLog(@"Current view set to %@",_currentTrackView);
-        if( !_rootView )
-            _rootView = _currentTrackView;
-    }
-    else
-    {
-        NSLog(@"Menu is appearing: %@",view);
-    }
-}
-
--(void)tgViewWillDisappear:(View *)view;
-{
-    
-}
-
--(void)tgViewIsFullyVisible:(View *)view
-{
-    
-}
-
--(void)tgViewIsOutofSite:(View *)view
-{
-    if( view == _menuView )
-    {
-        _menuView = nil;
-        view.markedForDelete = true;
-    }
-    else if( view == _currentTrackView )
-    {
-        // find the next available track view to display
-        for( TrackView * tv in [self getTrackViews] )
-        {
-            if( tv != view )
-            {
-                [tv showFromDir:SHOW_DIR_LEFT];
-                break;
-            }
-        }
-    }
-    
-    if( view.markedForDelete )
-    {
-        [view.graph cleanChildren];
-        [view removeFromSuperview];
-    }
-    
-    /*
-    if( resetContext && _currentTrackView )
-        // this is probably not the right place but at
-        // some point we have to notify OpenGL that we
-        // are switching contexts back to our current
-        // view thingy
-        [_currentTrackView setupGL];
-    */
-}
 
 #pragma mark -
 #pragma mark Menus
@@ -224,7 +167,6 @@
     mview.frame = rc;
     mview.drawableDepthFormat = view.drawableDepthFormat;
     mview.backgroundColor = [UIColor clearColor];
-    [mview addDelegate:self];
     [view addSubview:mview];
 
     // 4. Trap taps for menu items
@@ -257,38 +199,6 @@
     return 0; // err...
 }
 
-- (NSNumber *)closeAllMenus
-{
-    bool closed = false;
-    for( MenuView * view in [self getViewsOfType:[MenuView class]] )
-    {
-        if( !view.hidden )
-        {
-            view.markedForDelete = true;
-            [view hideToDir:HIDE_NOW];
-            closed = true;
-        }
-    }
-
-    return @(closed);
-}
-
--(void)toggleMenuView
-{
-    if( !_menuView )
-    {
-        _menuView = [self Menu:nil makeMenuView:nil];
-        [_menuView showFromDir:SHOW_DIR_LEFT];
-    }
-    else if( _menuView.hidden )
-    {
-        [_menuView showFromDir:SHOW_DIR_LEFT];
-    }
-    else
-    {
-        [self closeAllMenus];        
-    }
-}
 
 #pragma mark -
 #pragma mark DAW view managment
@@ -309,7 +219,6 @@
 -(void)Factory:(Factory *)factory
     createNode:(NSDictionary *)options
 {
-    [self closeAllMenus];
     [self createTrackAndNode:options];
 }
 
@@ -326,9 +235,6 @@
     
     [tv createNode:options];
     
-    if( _currentTrackView )
-        [_currentTrackView hideToDir:SHOW_DIR_LEFT];
-    [tv showFromDir:SHOW_DIR_RIGHT];
 }
 
 -(bool)isRootView
@@ -344,19 +250,14 @@
     EAGLContext * context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2 sharegroup:self.context.sharegroup];
     TrackView * tview = [[klass alloc] initWithFrame:rc context:context];
     tview.drawableDepthFormat = view.drawableDepthFormat;
-    [tview addDelegate:self];
     
     [view addSubview:tview];
     [view sendSubviewToBack:tview];
-    [tview setupGL]; // required for calls made during initialization
     return tview;
 }
 
 -(void)Factory:(Factory *)factory deleteNode:(NSDictionary *)options
 {
-    [self closeAllMenus];
-    _currentTrackView.markedForDelete = true;
-    [_currentTrackView shrinkToNothing];
 }
 
 -(void)Factory:(Factory *)factory pauseToggle:(NSDictionary *)options
@@ -422,51 +323,6 @@
 }
 
 
-- (void)slideToPrevView
-{
-    if( !_currentTrackView )
-        return;
-    NSArray * arr = [self getTrackViews];
-    int max = [arr count] - 1;
-    int i = 0;
-    for( TrackView * view in arr )
-    {
-        if( view == _currentTrackView )
-        {
-            if( i < max )
-            {
-                TrackView * next = arr[i+1];
-                [_currentTrackView hideToDir:SHOW_DIR_RIGHT];
-                _currentTrackView = nil;
-                [next showFromDir:SHOW_DIR_LEFT];
-            }
-            break;
-        }
-        ++i;
-    }
-}
-
--(void)slideToNextView
-{
-    if( !_currentTrackView )
-        return;
-    
-    TrackView * prev = nil;
-    for( TrackView * view in [self getTrackViews] )
-    {
-        if( view == _currentTrackView )
-        {
-            if( prev )
-            {
-                [_currentTrackView hideToDir:SHOW_DIR_LEFT];
-                _currentTrackView = nil;
-                [prev showFromDir:SHOW_DIR_RIGHT];
-            }
-            break;
-        }
-        prev = view;
-    }
-}
 
 #pragma mark - Segue
 
@@ -481,8 +337,6 @@
 {
     CMSG("prepareForSegue");
     
-    [self closeAllMenus];
-    
     [super prepareForSegue:segue sender:sender];
     
     NSArray * settings = [_currentTrackView getSettings];
@@ -495,53 +349,6 @@
 #pragma mark - Gestures
 
 
-- (IBAction)onTap:(UITapGestureRecognizer *)sender {
-    [self toggleMenuView];
-}
-
-- (IBAction)rightSwipe:(UISwipeGestureRecognizer *)sgr
-{
-    if( sgr.state != UIGestureRecognizerStateEnded )
-    {
-        return;
-    }
-    [self closeAllMenus];
-    
-    [self slideToPrevView];
-}
-
-- (IBAction)leftSwipe:(UISwipeGestureRecognizer *)sgr
-{
-    if( sgr.state != UIGestureRecognizerStateEnded )
-    {
-        return;
-    }
-    [self closeAllMenus];
-    
-    [self slideToNextView];
-}
-
-- (IBAction)pinch:(UIPinchGestureRecognizer *)pgr
-{
-    [self closeAllMenus];
-    
-    if( pgr.scale < 1.0f )
-    {
-        if( !_dawView )
-        {
-            [self makeDawView];
-            _dawView = true;
-        }
-    }
-    else
-    {
-        if( _dawView )
-        {
-            [self unMakeDawView];
-            _dawView = false;
-        }
-    }
-}
 
 - (void) willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
 	

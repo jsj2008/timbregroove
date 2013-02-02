@@ -59,10 +59,8 @@
 
 -(void)setupGL
 {
-    [super setupGL];
     GLKVector3 pos = { 0, 0, CAMERA_DEFAULT_Z };
     self.graph.camera.position = pos;
-    _backcolor = (GLKVector4){0.1, 0.1, 0.1, 0.4};
 }
 
 -(void)update:(NSTimeInterval)dt
@@ -70,21 +68,6 @@
     if( _playMode == tpm_play )
     {
         [super update:dt];
-    }
-}
-
-- (void)drawRect:(CGRect)rect
-{
-    [super drawRect:rect];
-    if( _playMode == tpm_pause )
-    {
-        if( !_greySquare )
-            _greySquare = [[GreySq new] wireUp];
-        BlendState * bs = [BlendState enable:true
-                                   srcFactor:GL_DST_ALPHA
-                                   dstFactor:GL_SRC_COLOR];
-        [_greySquare render:rect.size.width h:rect.size.height];
-        [bs restore];
     }
 }
 

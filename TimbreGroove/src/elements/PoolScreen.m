@@ -11,9 +11,9 @@
 #import "Camera.h"
 #import "FBO.h"
 #import "Tweener.h"
-#import "UIViewController+TGExtension.h"
 #import "Mixer.h"
 #import "PoolWater.h"
+#import "View.h"
 
 @interface PoolScreen : Generic {
     NSMutableArray * _waters;
@@ -119,34 +119,12 @@
 
 -(id)wireUp
 {
-    self.camera = [IdentityCamera new];
+    //self.camera = [IdentityCamera new];
     [super wireUp];
+    self.view.skipBoilerPlate = true;
     
-    UITapGestureRecognizer *tgr = [[UITapGestureRecognizer alloc] initWithTarget:self
-                                                                          action:@selector(onTap:)];
-
-    UITapGestureRecognizer * menuInvoker =  [[self getVC] getMenuInvokerGesture];
-    if( menuInvoker )
-    {
-        [tgr requireGestureRecognizerToFail:menuInvoker];
-    }
-
-    [self.view addGestureRecognizer:tgr];
-    
-    UILongPressGestureRecognizer *lpgr =
-    [[UILongPressGestureRecognizer alloc] initWithTarget:self
-                                                  action:@selector(onLongTap:)];
-    [self.view addGestureRecognizer:lpgr];
-    
-    [self addPoolChild].center = (GLKVector2){0.4,0.4};
+    [self addPoolChild].center = (GLKVector2){0,0};
     return self;
-}
-
--(UIViewController *)getVC
-{
-    // .keyWindow is nil (wtf?)
-    UIWindow * window = [[UIApplication sharedApplication] delegate].window;
-    return window.rootViewController;
 }
 
 -(void)createBuffer
@@ -170,13 +148,14 @@
 -(void)createShader
 {
     PoolWaterShader * shader = [PoolWaterShader new];
-    [shader writeStatics];
+    GLKView * view = self.view;
+    [shader writeStaticsWithW:view.drawableWidth H:view.drawableHeight];
     self.shader = shader;
 }
 
 -(void)update:(NSTimeInterval)dt
 {
-    if( self.timer > 1.0/8.0 )
+    if( _timer > 1.0/8.0 )
     {
         for( PoolWater * water in _waters )
         {
@@ -185,9 +164,9 @@
             if( peak > 0 )
                 peak = 0;
             float targetRadius = (peak + 160.0) / 640.0;
-            water.radius = targetRadius;
+            water.radius = targetRadius + 1.0;
         }
-        self.timer = 0.0;
+        _timer = 0.0;
     }
 }
 
@@ -197,14 +176,12 @@
     
     [shader use];
     
-    shader.time = (float)self.totalTime;
+    shader.time = (float)_totalTime;
     
     [self.texture bind:0];
     MeshBuffer * b = _buffers[0];
     [b bind];
 
-    glDisable(GL_DEPTH_TEST);
-    
     for( PoolWater * water in _waters )
     {
         shader.center = water.center;
@@ -215,7 +192,6 @@
     [b unbind];
     [self.texture unbind];
 
-    glEnable(GL_DEPTH_TEST);
 }
 
 
@@ -239,34 +215,6 @@
     return nil;
 }
 
--(void)onLongTap:(UILongPressGestureRecognizer *)lpgr
-{
-    GLKVector2 pt = [PoolScreen screenToPool:[lpgr locationInView:self.view]];
-    PoolWater * water = [self waterFromPt:pt];
-    if( water )
-    {
-        [water animateRadius];
-    }
-}
-
--(void)onTap:(UITapGestureRecognizer *)tgr
-{
-    if( [[self getVC] clearMenus] ) // yea, this should be somewhere else
-        return;
-    
-    GLKVector2 pt = [PoolScreen screenToPool:[tgr locationInView:self.view]];
-    PoolWater * water = [self waterFromPt:pt];
-    if( water )
-    {
-        //[water onTap:tgr];
-    }
-    else
-    {
-        PoolWater * water = [self addPoolChild];
-        water.center = pt;
-    }
-    
-}
 
 -(PoolWater *)addPoolChild
 {

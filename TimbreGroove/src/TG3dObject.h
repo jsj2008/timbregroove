@@ -19,6 +19,8 @@
 @interface TG3dObject : Node {
 @protected
     Shader * _shader;
+    NSTimeInterval _totalTime;
+    NSTimeInterval _timer;
 }
 
 -(void)update:(NSTimeInterval)dt;
@@ -31,7 +33,7 @@
 
 @property (nonatomic,strong) Camera  * camera;
 @property (nonatomic,strong) Shader  * shader;
-@property (nonatomic,strong) GLKView * view;
+@property (nonatomic,strong) View    * view;
 @property (nonatomic,strong) FBO     * fbo;
 
 @property (nonatomic)        GLKVector3 position;

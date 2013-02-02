@@ -37,14 +37,13 @@ const char * _pw_shader_name = "PoolScreen";
         _rippleSize = 7.0;
         _turbulence = 0.005f;
         _radius = 0.01;
-        CGSize sz = [UIScreen mainScreen].bounds.size;
-        _scale = (GLKVector2){ 1/sz.width, 1/sz.height };
     }
     return self;
 }
 
--(void)writeStatics
+-(void)writeStaticsWithW:(float)w H:(float)h
 {
+    _scale = (GLKVector2){ 1/w, 1/h };
     [self writeToLocation:pw_ripple     type:TG_FLOAT   data:&_rippleSize];
     [self writeToLocation:pw_turbulence type:TG_FLOAT   data:&_turbulence];
     [self writeToLocation:pw_scale      type:TG_VECTOR2 data:&_scale];
