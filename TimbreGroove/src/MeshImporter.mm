@@ -3,6 +3,8 @@
 #include "SkinnedPVR.h"
 #include <mach/mach_time.h>
 
+@class View;
+
 @interface MeshImporter () {
     PVR_SKINNER _skinnerThingy;
     float _rotation;

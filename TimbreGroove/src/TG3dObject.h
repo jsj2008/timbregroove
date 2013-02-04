@@ -14,7 +14,7 @@
 @class MeshBuffer;
 @class GLKView;
 @class FBO;
-@class View;
+@class GraphView;
 
 @interface TG3dObject : Node {
 @protected
@@ -52,7 +52,6 @@
  First time init for default TG3dObject:
  
      alloc/init
-     node.view = set to TrackView:GLKView
      placed in view.graph
      params deserialized from plist (or store to be named)
      [node wireUp];
@@ -67,6 +66,8 @@
  */
 
 -(id)   wireUp;
+-(id)   wireUpWithViewSize:(CGSize)viewSize;
+
 -(void) clean;
 -(id)   rewire;
 @property (nonatomic) bool needsRewire;

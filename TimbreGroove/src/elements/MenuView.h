@@ -6,11 +6,11 @@
 //  Copyright (c) 2012 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "View.h"
+#import "GraphView.h"
 #import "Menu.h"
 
 
-@interface MenuView : View
+@interface MenuView : GraphView
 @property (nonatomic) unsigned int level;
 @property (nonatomic,readonly) Menu * menu;
 

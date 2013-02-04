@@ -11,6 +11,5 @@
 
 
 @interface Graph : TG3dObject
-
-
+@property (nonatomic,strong) EAGLContext * context;
 @end

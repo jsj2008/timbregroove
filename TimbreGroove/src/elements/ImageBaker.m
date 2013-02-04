@@ -10,11 +10,9 @@
 #import "GenericShader.h"
 #import "Camera.h"
 #import "FBO.h"
-#import "TrackView.h"
 #import "SettingsVC.h"
 #import "GridPlane.h"
 
-@class TrackView;
 @interface ImageBaker : GenericMultiTextures
 
 +(NSDictionary *)getShaderModes;
@@ -139,13 +137,13 @@ static const float __bakeShakerTimes[] = {
     self.needsRewire = true;
 }
 
--(id)wireUp
+-(id)wireUpWithViewSize:(CGSize)viewSize
 {
     [super wireUp];
-    GLKView * glview = (GLKView *)(self.view.superview);
+
     
-    GLint w = glview.drawableWidth;
-    GLint h = glview.drawableHeight;
+    GLint w = viewSize.width;
+    GLint h = viewSize.height;
     _px = 1.0f / w;
     _py = 1.0f / h;
     GLKVector2 pixelSize = { _px, _py };

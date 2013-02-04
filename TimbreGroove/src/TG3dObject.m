@@ -32,6 +32,10 @@
     return self;
 }
 
+-(id)wireUpWithViewSize:(CGSize)viewSize
+{
+    return [self wireUp];
+}
 
 -(void)clean
 {

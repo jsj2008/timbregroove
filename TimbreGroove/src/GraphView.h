@@ -10,7 +10,7 @@
 #import "Graph.h"
 
 
-@interface View : GLKView {
+@interface GraphView : GLKView {
 @protected
     GLKVector4 _backcolor;
 }
@@ -21,5 +21,4 @@
 
 -(void)update:(NSTimeInterval)dt;
 -(void)render;
--(id)createNode:(NSDictionary *)params;
 @end

@@ -6,12 +6,12 @@
 //  Copyright (c) 2012 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "View.h"
+#import "GraphView.h"
 #import "Camera.h"
 #import "Tween.h"
 #import "Tweener.h"
 
-@implementation View
+@implementation GraphView
 
 - (id)initWithFrame:(CGRect)frame context:(EAGLContext *)context;
 {
@@ -34,26 +34,8 @@
 -(void)wireUp
 {
     _backcolor = (GLKVector4){0, 0, 0, 1};
-    // THIS MUST BE LEFT AS DEFAULT!
-    // (otherwise the context is not setup properly)
-    //self.enableSetNeedsDisplay = NO;
-    self.opaque = YES;
-    
-    _graph = [[Graph alloc] init];
-    _graph.camera = [[Camera alloc] init];
-    _graph.view = self;
-    
-}
 
--(id)createNode:(NSDictionary *)params
-{
-    Class klass = NSClassFromString(params[@"instanceClass"]);
-    TG3dObject * node = [[klass alloc] init];
-    node.view = self;
-    [self.graph appendChild:node];
-    [node setValuesForKeysWithDictionary:params];
-    [node wireUp];
-    return node;
+    self.opaque = YES;
 }
 
 - (id)firstNode
@@ -66,6 +48,19 @@
     [_graph update:dt];
 }
 
+-(void)setGraph:(Graph *)graph
+{
+    if( graph == nil )
+    {
+        self.context = nil;
+    }
+    else
+    {
+        self.context = graph.context;
+        self.drawableDepthFormat = GLKViewDrawableDepthFormat24;
+    }
+    _graph = graph;
+}
 
 -(void)render // drawRect:(CGRect)rect
 {

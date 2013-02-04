@@ -11,7 +11,7 @@
 #import "FBO.h"
 #import "MeshBuffer.h"
 #import "Camera.h"
-#import "View.h"
+#import "GraphView.h"
 #import "Texture.h"
 #import "Geometry.h"
 #import "BlendState.h"
@@ -425,22 +425,9 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
 
 @implementation Fluid
 
--(id)wireUp
+-(id)wireUpWithViewSize:(CGSize)viewSize
 {
-    GLKView * view = self.view;
-    
-    if( !_gestureRegistered )
-    {
-        // TODO: manually handle UITouch events for more control over this stuff
-        UIPanGestureRecognizer * pgr = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(onDrag:)];
-       // pgr.minimumNumberOfTouches = 2;
-        [view addGestureRecognizer:pgr];
-        _gestureRegistered = true;
-    }
-    
-    // yea, yea reusing variable. Sue me later.
-    view = (GLKView *)view.superview;
-    CGSize sz = (CGSize){view.drawableWidth,view.drawableHeight};
+    CGSize sz = viewSize;
     _px = 1.0/sz.width;
     _py = 1.0/sz.height;
   
@@ -569,6 +556,18 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     [_drawKernel setVector2:fl_px value:&px];
     
     return self;
+}
+
+-(void)setView:(GLKView *)view
+{
+    if( !_gestureRegistered )
+    {
+        // TODO: manually handle UITouch events for more control over this stuff
+        UIPanGestureRecognizer * pgr = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(onDrag:)];
+        // pgr.minimumNumberOfTouches = 2;
+        [view addGestureRecognizer:pgr];
+        _gestureRegistered = true;
+    }
 }
 
 -(void)update:(NSTimeInterval)dt

@@ -7,11 +7,14 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "NewTrackPicker.h"
 
-@interface ScreenViewController : UIViewController
-@property (weak, nonatomic) IBOutlet UIView *trackContainer;
+@interface ScreenViewController : UIViewController<NewTrackDelegate>
+
+@property (weak, nonatomic) IBOutlet UIView *frontTrackContainer;
 @property (weak, nonatomic) IBOutlet UIView *menuContainer;
 @property (weak, nonatomic) IBOutlet UIToolbar *toolBar;
+@property (weak, nonatomic) IBOutlet UIView *backTrackContainer;
 
 
 - (IBAction)dblTapForMenus:(UITapGestureRecognizer *)sender;

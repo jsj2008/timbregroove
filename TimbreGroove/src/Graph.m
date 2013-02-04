@@ -7,8 +7,21 @@
 //
 
 #import "Graph.h"
+#import "Camera.h"
 
 @implementation Graph
+
+-(id)init
+{
+    self = [super init];
+    if( self )
+    {
+        _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+        self.camera = [Camera new];
+        [EAGLContext setCurrentContext:_context];
+    }
+    return self;
+}
 
 -(void)play               { [self traverse:_cmd userObj:self.view]; }
 -(void)pause              { [self traverse:_cmd userObj:self.view]; }

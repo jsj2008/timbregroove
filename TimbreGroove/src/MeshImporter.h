@@ -1,5 +1,4 @@
 #import "TG3dObject.h"
-#import "View.h"
 
 @interface MeshImporter : TG3dObject
 

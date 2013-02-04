@@ -120,26 +120,32 @@
 -(id)wireUp
 {
     self.camera = [IdentityCamera new];
-    [super wireUp];
+    [super wireUp];    
     
+    [self addPoolChild].center = (GLKVector2){0.4,0.4};
+    return self;
+}
+
+-(void)setView:(GLKView *)view
+{
+    /*
     UITapGestureRecognizer *tgr = [[UITapGestureRecognizer alloc] initWithTarget:self
                                                                           action:@selector(onTap:)];
-
+    
     UITapGestureRecognizer * menuInvoker =  [[self getVC] getMenuInvokerGesture];
     if( menuInvoker )
     {
         [tgr requireGestureRecognizerToFail:menuInvoker];
     }
-
-    [self.view addGestureRecognizer:tgr];
+    
+    [view addGestureRecognizer:tgr];
     
     UILongPressGestureRecognizer *lpgr =
     [[UILongPressGestureRecognizer alloc] initWithTarget:self
                                                   action:@selector(onLongTap:)];
-    [self.view addGestureRecognizer:lpgr];
-    
-    [self addPoolChild].center = (GLKVector2){0.4,0.4};
-    return self;
+    [view addGestureRecognizer:lpgr];
+    */
+    [super setView:view];
 }
 
 -(UIViewController *)getVC

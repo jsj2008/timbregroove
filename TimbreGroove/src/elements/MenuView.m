@@ -43,7 +43,7 @@
     rc.origin.x = rc.size.width * level;
 }
 
--(void)tgViewWillAppear:(View *)view
+-(void)tgViewWillAppear:(GraphView *)view
 {
     if( view == self )
         [self.graph update:0]; // yea, hacky (for enable/disable)
