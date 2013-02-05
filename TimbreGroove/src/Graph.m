@@ -16,9 +16,7 @@
     self = [super init];
     if( self )
     {
-        _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
         self.camera = [Camera new];
-        [EAGLContext setCurrentContext:_context];
     }
     return self;
 }
@@ -61,5 +59,26 @@
     [Graph _inner_render:self.children w:w h:h];
 }
 
+-(NSArray *)getSettings
+{
+    NSMutableArray * settings = [NSMutableArray new];
+    for( TG3dObject * child in self.children )
+    {
+        NSArray * arr = [child getSettings];
+        if( arr && [arr count] )
+           [settings addObjectsFromArray:arr];
+    }
+    
+    return settings;
+}
 
+-(id)rewire
+{
+    for( TG3dObject * child in self.children )
+    {
+        [child rewire];
+    }
+    
+    return nil;
+}
 @end

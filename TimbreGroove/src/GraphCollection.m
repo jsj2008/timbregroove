@@ -43,5 +43,13 @@
     return [_graphs count];
 }
 
+-(void)removeGraphAtIndex:(unsigned int)i
+{
+    Graph * graph = _graphs[i];
+    [_graphs removeObjectAtIndex:i];
+    [graph cleanChildren];
+    graph = nil;
+}
+
 
 @end

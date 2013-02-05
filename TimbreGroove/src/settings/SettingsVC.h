@@ -48,8 +48,9 @@ typedef enum SettingControl
 
 @class SettingsVC;
 
-@protocol CaresDeeply <NSObject>
--(void)settingsGoingAway:(SettingsVC *)vc;
+@protocol SettingVCDelegate <NSObject>
+-(void)SettingsVC:(SettingsVC *)vc getSettings:(NSMutableArray *)array;
+-(void)SettingsVC:(SettingsVC *)vc commitChanges:(NSDictionary *)settings;
 @end
 
 @interface SettingsVC : UIViewController <UIPickerViewDataSource,
@@ -58,11 +59,8 @@ typedef enum SettingControl
                                           AssetLoaderDelegate,
                                           UIImagePickerControllerDelegate>
 
-@property (nonatomic,strong) id<CaresDeeply> caresDeeply;
-@property (nonatomic,strong) NSArray * settings;
-@property (nonatomic,strong) NSArray * options;
+@property (nonatomic,strong) id<SettingVCDelegate> delegate;
 
--(IBAction)backToHome:(id)sender;
 @property (weak, nonatomic) IBOutlet UILabel *componentTitleLabel;
 
 @end

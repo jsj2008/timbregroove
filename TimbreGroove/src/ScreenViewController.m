@@ -12,13 +12,11 @@
 #import "Graph.h"
 #import "GraphView.h"
 
-#import "NewTrackPicker.h"
 #import "NewTrackContainerVC.h"
 
 @interface ScreenViewController () {
-    bool _seenMenu;
     bool _started;
-    bool _menusShowing;
+
     GraphCollection * _graphs;
     GLKViewController * _graphVC;
     CGSize _viewSz;
@@ -43,9 +41,8 @@
             if( [vc.title isEqualToString:@"graphVC"] )
             {
                 _graphVC = (GLKViewController*)vc;
-                GraphView * view = (GraphView *)_graphVC.view;
-                view.frame = _frontTrackContainer.bounds;
-                _viewSz = view.frame.size;
+                _graphVC.view.frame = _graphContainer.bounds;
+                _viewSz = _graphVC.view.frame.size;
                 if( !_started )
                 {
                     [self performSelector:@selector(performTransition:)
@@ -57,7 +54,6 @@
             }
         }
     }
-    NSLog(@"LAYOUT");
 }
 
 - (void)didReceiveMemoryWarning
@@ -71,26 +67,28 @@
     CGRect bottomRC = _toolBar.frame;
     CGRect topRC    = _menuContainer.frame;
     
-    _menusShowing = topRC.origin.y == 0;
+    bool menusShowing = topRC.origin.y == 0;
+
+    float speed = 0.75;
     
-    if( _menusShowing )
+    if( menusShowing )
     {
         bottomRC.origin.y = self.view.frame.size.height;
         topRC.origin.y = -topRC.size.height;
+        speed = 0.5;
     }
     else
     {
+        _trashCan.enabled = _graphs.count > 1;
         bottomRC.origin.y -= bottomRC.size.height;
         topRC.origin.y = 0;
     }
-    [UIView animateWithDuration:1.0
+    [UIView animateWithDuration:speed
                      animations:^{
                          _toolBar.frame = bottomRC;
                          _menuContainer.frame = topRC;
                      }
                      completion:^(BOOL finished){
-                         _menusShowing = !_menusShowing;
-                         NSLog(@"Menus set to: %d",(int)_menusShowing);
                      }];
 }
 
@@ -106,42 +104,73 @@
 
 - (void)performTransitionWithGraph:(Graph*)graph orParams:(NSDictionary *)params
 {
-    CGRect org = _frontTrackContainer.frame;
+    CGRect org = _graphContainer.frame;
     CGRect offscreen = org;
     offscreen.origin.x = org.size.width;
     
-    [UIView animateWithDuration:1.0
+    float speed = 0.4;
+    
+    [UIView animateWithDuration:speed
                      animations:^{
-                         _frontTrackContainer.frame = offscreen;
+                         _graphContainer.frame = offscreen;
                      }
                      completion:^(BOOL finished){
-                         
-                         _graphVC.paused = YES;
-                         
                          Graph * g;
+                         
+                         bool markedForDelete = false;
                          
                          if( params )
                          {
                              g = [_graphs createGraphBasedOnNodeType:params
                                                                     withViewSize:_viewSz];
+                             
+                             _pager.numberOfPages = _graphs.count;
+                             _pager.currentPage = _pager.numberOfPages - 1;
                          }
-                         else
+                         else if( graph )
                          {
                              g = graph;
                          }
+                         else
+                         {
+                             unsigned int i = (unsigned int)_pager.currentPage;
+                             markedForDelete = true;
+                             i = i ? 0 : 1;
+                             g = [_graphs graphAtIndex:i];
+                         }
                          
+                         _graphVC.paused = YES;
                          ((GraphView *)_graphVC.view).graph = g;
                          _graphVC.paused = NO;
                          
-                         [UIView animateWithDuration:1.0
+                         [UIView animateWithDuration:speed
                                           animations:^{
-                                              _frontTrackContainer.frame = org;
+                                              _graphContainer.frame = org;
                                           }
                                           completion:^(BOOL finished){
+                                              if( markedForDelete )
+                                              {
+                                                  [_graphs removeGraphAtIndex:_pager.currentPage];
+                                                  _pager.numberOfPages = _graphs.count;
+                                                  _pager.currentPage = 0;
+                                                  [self performSelector:@selector(toggleMenus)
+                                                             withObject:nil
+                                                             afterDelay:0.1];
+                                              }
                                           }];
                           
                      }];
     
+}
+
+- (IBAction)changePage:(id)sender
+{
+    [self performTransitionWithGraph:[_graphs graphAtIndex:_pager.currentPage]];
+}
+
+- (IBAction)trash:(UIBarButtonItem *)sender
+{
+    [self performTransition:nil];
 }
 
 - (IBAction)dblTapForMenus:(UITapGestureRecognizer *)sender
@@ -155,6 +184,31 @@
     {
         ((NewTrackContainerVC *)segue.destinationViewController).delegate = self;
     }
+    else if( [segue.identifier isEqualToString:@"settings"] )
+    {
+        ((SettingsVC *)segue.destinationViewController).delegate = self;
+    }
+    else if( [segue.identifier isEqualToString:@"pause"] )
+    {
+        _graphVC.paused = YES;
+        ((PauseViewController *)segue.destinationViewController).delegate = self;
+    }
+    else
+    {
+        NSLog(@"Doing seque called; %@", segue.identifier);
+    }
+}
+
+-(void)SettingsVC:(SettingsVC *)vc getSettings:(NSMutableArray *)array
+{
+    [array addObjectsFromArray:[(GraphView *)_graphVC.view getSettings]];
+}
+
+-(void)SettingsVC:(SettingsVC *)vc commitChanges:(NSDictionary *)settings
+{
+    [((GraphView *)_graphVC.view) performSelector:@selector(commitSettings)
+                                       withObject:nil
+                                       afterDelay:0.3];
 }
 
 -(void)NewTrack:(NewTrackContainerVC *)vc selection:(NSDictionary *)params
@@ -166,4 +220,8 @@
     
 }
 
+-(void)PauseViewController:(PauseViewController *)pvc resume:(BOOL)ok
+{
+    _graphVC.paused = NO;
+}
 @end

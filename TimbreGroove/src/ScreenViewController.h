@@ -8,15 +8,19 @@
 
 #import <UIKit/UIKit.h>
 #import "NewTrackPicker.h"
+#import "SettingsVC.h"
+#import "PauseViewController.h"
 
-@interface ScreenViewController : UIViewController<NewTrackDelegate>
+@interface ScreenViewController : UIViewController < NewTrackDelegate,
+                                                     SettingVCDelegate,
+                                                     PauseViewDelegate>
 
-@property (weak, nonatomic) IBOutlet UIView *frontTrackContainer;
+@property (weak, nonatomic) IBOutlet UIView *graphContainer;
 @property (weak, nonatomic) IBOutlet UIView *menuContainer;
 @property (weak, nonatomic) IBOutlet UIToolbar *toolBar;
-@property (weak, nonatomic) IBOutlet UIView *backTrackContainer;
-
-
+@property (weak, nonatomic) IBOutlet UIPageControl *pager;
+@property (weak, nonatomic) IBOutlet UIBarButtonItem *trashCan;
+- (IBAction)changePage:(id)sender;
+- (IBAction)trash:(UIBarButtonItem *)sender;
 - (IBAction)dblTapForMenus:(UITapGestureRecognizer *)sender;
-
 @end

@@ -41,15 +41,19 @@
 {
     _shader = nil;
     _fbo = nil;
-    // _camera = nil; ???
 }
 
 -(id)rewire
 {
-    self.needsRewire = false;
-    [self cleanChildren];
-    [self clean];
-    return [self wireUp];
+    if( self.needsRewire )
+    {
+        self.needsRewire = false;
+        [self cleanChildren];
+        [self clean];
+        [self wireUp];
+    }
+    
+    return self;
 }
 
 -(void)play {}

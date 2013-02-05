@@ -18,7 +18,7 @@
                 </glkViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ePO-OE-qeP" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1" y="-251"/>
+            <point key="canvasLocation" x="29" y="-353"/>
         </scene>
         <!--New Track Controller-->
         <scene sceneID="BF2-l7-WIG">
@@ -83,7 +83,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="srG-C6-c0v" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="32" y="278"/>
+            <point key="canvasLocation" x="196" y="186"/>
         </scene>
         <!--New Track Picker-->
         <scene sceneID="wzF-x4-7LI">
@@ -145,7 +145,52 @@
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="zji-cE-Y2f" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="514" y="315"/>
+            <point key="canvasLocation" x="614" y="279"/>
+        </scene>
+        <!--Pause View Controller-->
+        <scene sceneID="tgn-UJ-Sny">
+            <objects>
+                <viewController id="sOA-eX-6md" customClass="PauseViewController" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="9bV-s9-v7O">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="480"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <subviews>
+                            <imageView opaque="NO" userInteractionEnabled="NO" alpha="0.70000000000000007" contentMode="scaleToFill" image="code.png" translatesAutoresizingMaskIntoConstraints="NO" id="bUb-uq-jFA">
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="370" id="Arp-wc-VIj"/>
+                                    <constraint firstAttribute="width" constant="319" id="TqR-bz-lGb"/>
+                                </constraints>
+                            </imageView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="pex-bB-yGQ">
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="163" id="FeG-XQ-34d"/>
+                                    <constraint firstAttribute="height" constant="44" id="Rzn-hq-DSi"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="Chalkduster" family="Chalkduster" pointSize="15"/>
+                                <state key="normal" title="&lt;-- resume">
+                                    <color key="titleColor" red="1" green="0.5" blue="0.0" alpha="0.82999999999999996" colorSpace="calibratedRGB"/>
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <state key="highlighted">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="resume:" destination="sOA-eX-6md" eventType="touchUpInside" id="7Ng-eE-OIZ"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="pex-bB-yGQ" firstAttribute="centerX" secondItem="9bV-s9-v7O" secondAttribute="centerX" type="default" id="NXg-w2-LrU"/>
+                            <constraint firstItem="bUb-uq-jFA" firstAttribute="leading" secondItem="9bV-s9-v7O" secondAttribute="leading" constant="-14" id="Ohs-r3-074"/>
+                            <constraint firstAttribute="bottom" secondItem="pex-bB-yGQ" secondAttribute="bottom" constant="43" id="RnD-x0-mYo"/>
+                            <constraint firstItem="bUb-uq-jFA" firstAttribute="top" secondItem="9bV-s9-v7O" secondAttribute="top" constant="99" id="aYe-9d-j6n"/>
+                        </constraints>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Rgi-QY-EnG" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-158" y="466"/>
         </scene>
         <!--Main Daw View-->
         <scene sceneID="5">
@@ -156,20 +201,27 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <containerView tag="100" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="JeK-0b-O8X" userLabel="graphContainer">
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                 <connections>
                                     <segue destination="WK8-2Y-eNP" kind="embed" id="Wqe-Ex-9VL"/>
                                 </connections>
                             </containerView>
-                            <pageControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" hidesForSinglePage="YES" numberOfPages="3" translatesAutoresizingMaskIntoConstraints="NO" id="923-1m-xh9">
+                            <pageControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" hidesForSinglePage="YES" numberOfPages="1" translatesAutoresizingMaskIntoConstraints="NO" id="923-1m-xh9">
                                 <constraints>
                                     <constraint firstAttribute="width" constant="300" id="Ugy-9b-rf6"/>
+                                    <constraint firstAttribute="height" constant="36" id="fSA-kC-96x"/>
                                 </constraints>
+                                <connections>
+                                    <action selector="changePage:" destination="2" eventType="valueChanged" id="htH-nt-XBU"/>
+                                </connections>
                             </pageControl>
                             <toolbar clearsContextBeforeDrawing="NO" contentMode="scaleToFill" barStyle="blackOpaque" translatesAutoresizingMaskIntoConstraints="NO" id="o8R-gM-dvf">
                                 <items>
                                     <barButtonItem systemItem="trash" id="ckd-52-Hf1">
                                         <color key="tintColor" red="0.63563603940000002" green="0.3178701511" blue="0.0" alpha="0.82999999999999996" colorSpace="calibratedRGB"/>
+                                        <connections>
+                                            <action selector="trash:" destination="2" id="ls1-1B-ZsZ"/>
+                                        </connections>
                                     </barButtonItem>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="Dhp-JM-PQ7"/>
                                     <barButtonItem systemItem="pageCurl" id="Hiu-xo-Q9F">
@@ -200,6 +252,9 @@
                                             <state key="highlighted">
                                                 <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                             </state>
+                                            <connections>
+                                                <segue destination="sOA-eX-6md" kind="modal" identifier="pause" modalTransitionStyle="partialCurl" id="kXK-tx-z1k"/>
+                                            </connections>
                                         </button>
                                     </barButtonItem>
                                     <barButtonItem style="plain" id="Y7R-Lo-4vJ">
@@ -265,9 +320,11 @@
                     </view>
                     <navigationItem key="navigationItem" id="dlQ-Fc-7zy"/>
                     <connections>
-                        <outlet property="frontTrackContainer" destination="JeK-0b-O8X" id="cmw-TN-2jk"/>
+                        <outlet property="graphContainer" destination="JeK-0b-O8X" id="7nD-Dc-Hqy"/>
                         <outlet property="menuContainer" destination="isx-ng-eFR" id="Gm9-Ap-cUJ"/>
+                        <outlet property="pager" destination="923-1m-xh9" id="ORS-7p-41V"/>
                         <outlet property="toolBar" destination="o8R-gM-dvf" id="GiO-2x-Qbr"/>
+                        <outlet property="trashCan" destination="ckd-52-Hf1" id="4e1-Lb-TbI"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="4" sceneMemberID="firstResponder"/>
@@ -277,22 +334,23 @@
                     </connections>
                 </tapGestureRecognizer>
             </objects>
-            <point key="canvasLocation" x="-467" y="307"/>
+            <point key="canvasLocation" x="-555" y="-421"/>
         </scene>
-        <!--SettingsVC-->
+        <!--SettingsVC - settingsVC-->
         <scene sceneID="hPc-YQ-T8I">
             <objects>
-                <viewController id="y6e-Ii-Ior" customClass="SettingsVC" sceneMemberID="viewController">
-                    <view key="view" opaque="NO" alpha="0.60000000000000009" contentMode="scaleToFill" id="BKI-PZ-die">
+                <viewController title="settingsVC" id="y6e-Ii-Ior" customClass="SettingsVC" sceneMemberID="viewController">
+                    <view key="view" opaque="NO" contentMode="scaleToFill" id="BKI-PZ-die">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="480"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Name_of_component" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0Tf-wy-qWh">
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="settings" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0Tf-wy-qWh">
                                 <constraints>
+                                    <constraint firstAttribute="height" constant="21" id="CXf-q4-fhJ"/>
                                     <constraint firstAttribute="width" constant="245" id="Czz-8J-cA3"/>
                                 </constraints>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <color key="textColor" white="0.92348160282258063" alpha="1" colorSpace="calibratedWhite"/>
+                                <fontDescription key="fontDescription" name="Chalkduster" family="Chalkduster" pointSize="19"/>
+                                <color key="textColor" red="1" green="0.5" blue="0.0" alpha="0.82999999999999996" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                         </subviews>
@@ -309,7 +367,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="LRJ-No-y8D" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-59" y="831"/>
+            <point key="canvasLocation" x="-503" y="763"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="dJb-LU-YTJ">
@@ -327,10 +385,11 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="WQp-At-0Du" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-899" y="293"/>
+            <point key="canvasLocation" x="-947" y="-411"/>
         </scene>
     </scenes>
     <resources>
+        <image name="code.png" width="331" height="423"/>
         <image name="powerOn.png" width="24" height="24"/>
         <image name="rabbit.png" width="48" height="48"/>
         <image name="snail.png" width="48" height="48"/>
@@ -362,20 +421,28 @@
         <class className="NewTrackPicker" superclassName="UICollectionViewController">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/NewTrackPicker.h"/>
         </class>
+        <class className="PauseViewController" superclassName="UIViewController">
+            <source key="sourceIdentifier" type="project" relativePath="./Classes/PauseViewController.h"/>
+            <relationships>
+                <relationship kind="action" name="resume:"/>
+            </relationships>
+        </class>
         <class className="ScreenViewController" superclassName="UIViewController">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/ScreenViewController.h"/>
             <relationships>
+                <relationship kind="action" name="changePage:"/>
                 <relationship kind="action" name="dblTapForMenus:" candidateClass="UITapGestureRecognizer"/>
-                <relationship kind="outlet" name="backTrackContainer" candidateClass="UIView"/>
-                <relationship kind="outlet" name="frontTrackContainer" candidateClass="UIView"/>
+                <relationship kind="action" name="trash:" candidateClass="UIBarButtonItem"/>
+                <relationship kind="outlet" name="graphContainer" candidateClass="UIView"/>
                 <relationship kind="outlet" name="menuContainer" candidateClass="UIView"/>
+                <relationship kind="outlet" name="pager" candidateClass="UIPageControl"/>
                 <relationship kind="outlet" name="toolBar" candidateClass="UIToolbar"/>
+                <relationship kind="outlet" name="trashCan" candidateClass="UIBarButtonItem"/>
             </relationships>
         </class>
         <class className="SettingsVC" superclassName="UIViewController">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/SettingsVC.h"/>
             <relationships>
-                <relationship kind="action" name="backToHome:"/>
                 <relationship kind="outlet" name="componentTitleLabel" candidateClass="UILabel"/>
             </relationships>
         </class>

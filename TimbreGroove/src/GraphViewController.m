@@ -10,6 +10,7 @@
 #import "Graph.h"
 
 @interface GraphViewController : GLKViewController
+@property (nonatomic,strong) EAGLContext * context;
 @end
 
 @interface GraphViewController () {
@@ -25,11 +26,15 @@
     [super viewDidLoad];
     
     self.preferredFramesPerSecond = 60;
-}
+    _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+    GLKView * view = (GLKView *)self.view;
+    view.context = _context;
+    view.drawableDepthFormat = GLKViewDrawableDepthFormat24;
 
--(GraphView *)viewview
-{
-    return (GraphView *)self.view;
+    [EAGLContext setCurrentContext:_context];
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 - (void)didReceiveMemoryWarning
@@ -38,27 +43,16 @@
     // Dispose of any resources that can be recreated.
 }
 
-- (void)tearDownGL
-{
-    GLKView * view = (GLKView *)self.view;
-    if ([EAGLContext currentContext] == view.context) {
-        [EAGLContext setCurrentContext:nil];
-    }    
-}
-
 #pragma mark - GLKView and GLKViewController delegate methods
 
 - (void)update
 {
-    GraphView * view = (GraphView*)self.view;
-    NSTimeInterval dt = self.timeSinceLastUpdate;
-    [view update:dt];
+    [(GraphView*)self.view update:self.timeSinceLastUpdate];
 }
 
 - (void)glkView:(GLKView *)glkView drawInRect:(CGRect)rect
 {
-    GraphView * view = (GraphView*)glkView;
-    [view render];
+    [(GraphView*)glkView render];
 }
 
 @end

@@ -38,11 +38,6 @@
     self.opaque = YES;
 }
 
-- (id)firstNode
-{
-    return _graph.firstChild;
-}
-
 - (void)update:(NSTimeInterval)dt
 {
     [_graph update:dt];
@@ -50,15 +45,6 @@
 
 -(void)setGraph:(Graph *)graph
 {
-    if( graph == nil )
-    {
-        self.context = nil;
-    }
-    else
-    {
-        self.context = graph.context;
-        self.drawableDepthFormat = GLKViewDrawableDepthFormat24;
-    }
     _graph = graph;
 }
 
@@ -74,5 +60,13 @@
     [_graph render:w h:h];
 }
 
+-(NSArray *)getSettings
+{
+    return [_graph getSettings];
+}
 
+-(void)commitSettings
+{
+    [_graph rewire];
+}
 @end

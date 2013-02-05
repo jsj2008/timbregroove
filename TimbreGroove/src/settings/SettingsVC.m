@@ -54,18 +54,22 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    [self installControls];
+    
+    NSMutableArray * setting = [NSMutableArray new];
+    [_delegate SettingsVC:self getSettings:setting];
+    [self installControls:setting];
 }
 
-- (void)didReceiveMemoryWarning
+-(void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [_delegate SettingsVC:self commitChanges:_settingsDict];
+}
+
+-(void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
-}
-
--(IBAction)backToHome:(id)sender {
-    [self.caresDeeply settingsGoingAway:self];
-    [self.navigationController popToRootViewControllerAnimated:YES];
 }
 
 #pragma mark Control creation
@@ -143,7 +147,7 @@
 {
     UILabel * label = [[UILabel alloc] initWithFrame:CGRectZero];
     label.translatesAutoresizingMaskIntoConstraints = NO;
-    [label setText:sd.labelText];
+    [label setText:[sd.labelText lowercaseString]];
     label.memberName = [sd.memberName stringByAppendingString:@"_label"];
     [self.view addSubview:label];
     
@@ -151,23 +155,24 @@
     label.opaque = example.opaque;
     label.textColor = example.textColor;
     label.backgroundColor = example.backgroundColor;
+    label.font = example.font;
 
     return label;
 }
 
--(void)installControls
+-(void)installControls:(NSArray *)settings
 {   
-    _settings = [_settings sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
+    settings = [settings sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
         return ((SettingsDescriptor *)obj1).priority < ((SettingsDescriptor *)obj2).priority ?
                                   NSOrderedAscending : NSOrderedDescending;
     }];
-    _settingsDict = [[NSMutableDictionary alloc] initWithCapacity:[_settings count]];
+    _settingsDict = [[NSMutableDictionary alloc] initWithCapacity:[settings count]];
     UIView * prevControl = _componentTitleLabel;
     prevControl.memberName = @"_componentTitleLabel";
     
     NSMutableArray * constraints = [NSMutableArray new];
 
-    for( SettingsDescriptor * sd in _settings )
+    for( SettingsDescriptor * sd in settings )
     {
         _settingsDict[sd.memberName] = sd;
         UIView * control = [self createControl:sd];
@@ -176,7 +181,6 @@
         prevControl = control;
     }
     [self.view addConstraints:constraints];
-    _settings = nil; // don't need this anymore
 }
 
 #pragma mark Picture Picker
@@ -199,7 +203,6 @@
     [self setValue:controller forKey:sd.memberName];
     
     UIButton * button = [UIButton buttonWithType:UIButtonTypeCustom];
-                         //buttonWithType:UIButtonTypeRoundedRect];
     button.translatesAutoresizingMaskIntoConstraints = NO;
     [self.view addSubview:button];
     button.memberName = [sd.memberName stringByAppendingString:@"_button"];
@@ -306,6 +309,7 @@ didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
     UITextField * textField = [[UITextField alloc] initWithFrame:CGRectZero];
     textField.translatesAutoresizingMaskIntoConstraints = NO;
+    textField.backgroundColor = [UIColor whiteColor];
     [textField setText:sd.initialValue];
     textField.memberName = sd.memberName;
     [self.view addSubview:textField];

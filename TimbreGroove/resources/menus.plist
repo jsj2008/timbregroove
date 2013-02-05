@@ -4,6 +4,22 @@
 <dict>
 	<key>new_element</key>
 	<dict>
+		<key>pool_element</key>
+		<dict>
+			<key>order</key>
+			<integer>40</integer>
+			<key>userData</key>
+			<dict>
+				<key>instanceClass</key>
+				<string>PoolScreen</string>
+			</dict>
+			<key>icon</key>
+			<string>newModel.png</string>
+			<key>handler</key>
+			<string>Factory</string>
+			<key>renderClass</key>
+			<string>MenuItem</string>
+		</dict>
 		<key>imageBaker_element</key>
 		<dict>
 			<key>order</key>

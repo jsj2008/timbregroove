@@ -10,15 +10,12 @@
 #import "Graph.h"
 
 
-@interface GraphView : GLKView {
-@protected
-    GLKVector4 _backcolor;
-}
-@property (nonatomic,readonly) id firstNode;
-
-
+@interface GraphView : GLKView 
+@property (nonatomic) GLKVector4 backcolor;
 @property (nonatomic,strong) Graph * graph;
 
 -(void)update:(NSTimeInterval)dt;
 -(void)render;
+-(NSArray *)getSettings;
+-(void)commitSettings;
 @end
