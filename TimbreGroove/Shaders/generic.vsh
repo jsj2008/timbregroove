@@ -27,6 +27,10 @@ uniform vec3 u_ambient;
 varying vec3 v_lightFilter;
 #endif
 
+#ifdef DISTORTION
+uniform vec3 u_distortionPoint;
+#endif
+
 uniform mat4 u_pvm;
 
 void main()
@@ -45,6 +49,15 @@ void main()
     v_lightFilter = u_ambient + u_dirColor * directionalLightWeighting;
 #endif
     
+
+#ifdef DISTORTION
+    vec3 pos = a_position.xyz;
+    float dist = sin(distance(pos,u_distortionPoint));
+    pos += vec3(dist,dist,0) * 0.25;
+    gl_Position = u_pvm * vec4( pos, a_position.w );
+#else
 	gl_Position   = u_pvm * a_position;
+#endif
+
 }
 

@@ -11,8 +11,9 @@
 #import "GraphCollection.h"
 #import "Graph.h"
 #import "GraphView.h"
-
+#import "GraphDefinitions.h"
 #import "NewTrackContainerVC.h"
+#import "Global.h"
 
 @interface ScreenViewController () {
     bool _started;
@@ -30,6 +31,29 @@
 {
     [super viewDidLoad];
     _graphs = [GraphCollection new];
+    
+    [[Global sharedInstance] addObserver:self
+                              forKeyPath:@"recording"
+                                 options:NSKeyValueObservingOptionNew
+                                 context:NULL];
+}
+
+-(void)observeValueForKeyPath:(NSString *)keyPath
+                     ofObject:(id)object
+                       change:(NSDictionary *)change
+                      context:(void *)context
+{
+    if( [keyPath isEqualToString:@"recording"] )
+    {
+        if( [Global sharedInstance].recording )
+        {
+            _recordButton.tintColor = [UIColor redColor];
+        }
+        else
+        {
+            _recordButton.tintColor = [UIColor purpleColor];
+        }
+    }
 }
 
 -(void)viewDidLayoutSubviews
@@ -46,7 +70,7 @@
                 if( !_started )
                 {
                     [self performSelector:@selector(performTransition:)
-                               withObject:@{@"instanceClass":@"Text"}
+                               withObject:[GraphDefinitions getDefinitionForName:@"pool_element"]
                                afterDelay:0.25];
                     
                     _started = true;
@@ -122,7 +146,7 @@
                          if( params )
                          {
                              g = [_graphs createGraphBasedOnNodeType:params
-                                                                    withViewSize:_viewSz];
+                                                        withViewSize:_viewSz];
                              
                              _pager.numberOfPages = _graphs.count;
                              _pager.currentPage = _pager.numberOfPages - 1;
@@ -148,6 +172,7 @@
                                               _graphContainer.frame = org;
                                           }
                                           completion:^(BOOL finished){
+                                              [Global sharedInstance].displayingGraph = g;
                                               if( markedForDelete )
                                               {
                                                   [_graphs removeGraphAtIndex:_pager.currentPage];
@@ -171,6 +196,11 @@
 - (IBAction)trash:(UIBarButtonItem *)sender
 {
     [self performTransition:nil];
+}
+
+- (IBAction)record:(UIBarButtonItem *)sender {
+    Global * g = [Global sharedInstance];
+    g.recording = !g.recording;
 }
 
 - (IBAction)dblTapForMenus:(UITapGestureRecognizer *)sender

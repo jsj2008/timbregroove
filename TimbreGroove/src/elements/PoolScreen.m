@@ -182,7 +182,7 @@
 
 -(void)update:(NSTimeInterval)dt
 {
-    if( self.timer > 1.0/8.0 )
+    if( _timer > 1.0/8.0 )
     {
         for( PoolWater * water in _waters )
         {
@@ -193,7 +193,7 @@
             float targetRadius = (peak + 160.0) / 640.0;
             water.radius = targetRadius;
         }
-        self.timer = 0.0;
+        _timer = 0.0;
     }
 }
 

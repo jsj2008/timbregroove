@@ -24,6 +24,7 @@ typedef enum {
     gv_lightDir,
     gv_dirColor,
     gv_ambient,
+    gv_distortionPt, // vec3
     
     NUM_GENERIC_VARIABLES
     

@@ -64,14 +64,14 @@ typedef enum shaderType {
 -(void)setShaderName:(NSString *)shaderName
 {
     _shaderName = shaderName;
-    self.needsRewire = true;
+    self.settingsAreDirty = true;
 }
 
 -(void)setGeometryName:(NSString *)geometryName
 {
     _geometryName = geometryName;
     _rotateY = ![geometryName isEqualToString:@"Torus"];
-    self.needsRewire = true;
+    self.settingsAreDirty = true;
 }
 
 -(void)createShader

@@ -134,7 +134,7 @@ static const float __bakeShakerTimes[] = {
 -(void)setMode:(int)mode
 {
     _mode = mode;
-    self.needsRewire = true;
+    self.settingsAreDirty = true;
 }
 
 -(id)wireUpWithViewSize:(CGSize)viewSize

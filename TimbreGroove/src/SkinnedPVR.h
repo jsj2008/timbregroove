@@ -9,7 +9,11 @@
 #ifndef __TimbreGroove__SkinnedPVR__
 #define __TimbreGroove__SkinnedPVR__
 
+
+#ifdef __cplusplus
 #include <iostream>
+extern "C" {
+#endif
 
 typedef void * PVR_SKINNER;
 
@@ -33,5 +37,9 @@ int           EnvGeti(int pref);
 void *        EnvGet(int param);
 int           EnvSet(int param,void *);
 unsigned long EnvGetTime();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* defined(__TimbreGroove__SkinnedPVR__) */

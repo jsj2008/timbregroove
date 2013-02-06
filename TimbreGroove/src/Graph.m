@@ -8,7 +8,17 @@
 
 #import "Graph.h"
 #import "Camera.h"
+#import "Global.h"
 
+@interface Graph() {
+    // as of this writing the majority of graphs (all?)
+    // only have one top level node. Keep a pointer
+    // so we don't do any unnecessary ARC calls into _kids[]
+    // during update and render
+    __weak TG3dObject * _single;
+}
+
+@end
 @implementation Graph
 
 -(id)init
@@ -16,9 +26,17 @@
     self = [super init];
     if( self )
     {
-        self.camera = [Camera new];
+        self.camera = [Camera new];        
     }
+    
     return self;
+}
+
+
+-(void)appendChild:(Node *)child
+{    
+    _single = _kids == nil ? (TG3dObject*)child : nil;
+    [super appendChild:child];
 }
 
 -(void)play               { [self traverse:_cmd userObj:self.view]; }
@@ -29,8 +47,8 @@
 {
     for( TG3dObject * child in children )
     {
-        child.totalTime += dt;
-        child.timer += dt;
+        child->_totalTime += dt;
+        child->_timer += dt;
         [child update:dt];
         NSArray * c = child.children;
         if( c )
@@ -40,7 +58,14 @@
 
 -(void)update:(NSTimeInterval)dt
 {
-    [Graph _inner_update:self.children dt:dt];
+    if( _single )
+    {
+        _single->_totalTime += dt;
+        _single->_timer += dt;
+        [_single update:dt];
+    }
+    else
+        [Graph _inner_update:self.children dt:dt];
 }
 
 +(void)_inner_render:(NSArray *)children w:(NSUInteger)w h:(NSUInteger)h
@@ -56,7 +81,10 @@
 
 -(void)render:(NSUInteger)w h:(NSUInteger)h
 {
-    [Graph _inner_render:self.children w:w h:h];
+    if( _single )
+        [_single render:w h:h];
+    else
+        [Graph _inner_render:self.children w:w h:h];
 }
 
 -(NSArray *)getSettings
@@ -72,13 +100,14 @@
     return settings;
 }
 
--(id)rewire
+-(id)settingsChanged
 {
     for( TG3dObject * child in self.children )
     {
-        [child rewire];
+        [child settingsChanged];
     }
     
     return nil;
 }
+
 @end

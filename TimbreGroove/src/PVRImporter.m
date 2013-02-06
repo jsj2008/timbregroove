@@ -1,7 +1,6 @@
 
-#include "MeshImporter.h"
+#include "PVRImporter.h"
 #include "SkinnedPVR.h"
-#include <mach/mach_time.h>
 
 @class View;
 
@@ -106,15 +105,8 @@ void * EnvGet(int param)
     return (void *)[[[[NSBundle mainBundle] resourcePath] stringByAppendingString:@"/"] UTF8String];
 }
 
-static mach_timebase_info_data_t _s_sTimeBaseInfo;
-static bool _s_mach_time_installed = false;
-
 unsigned long EnvGetTime()
 {
-    if( !_s_mach_time_installed )
-        mach_timebase_info(&_s_sTimeBaseInfo);        
-	uint64_t time = mach_absolute_time();
-	uint64_t millis = (time * (_s_sTimeBaseInfo.numer/_s_sTimeBaseInfo.denom))/1000000.0;
-	return millis;
+    return (unsigned long)( /*floor*/(CACurrentMediaTime()*1000.0) );
 }
 

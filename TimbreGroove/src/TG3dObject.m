@@ -43,11 +43,11 @@
     _fbo = nil;
 }
 
--(id)rewire
+-(id)settingsChanged
 {
-    if( self.needsRewire )
+    if( self.settingsAreDirty )
     {
-        self.needsRewire = false;
+        self.settingsAreDirty = false;
         [self cleanChildren];
         [self clean];
         [self wireUp];
@@ -167,10 +167,8 @@
     return e ? e->_camera : nil;
 }
 
--(Camera *)ownCamera
-{
-    return _camera;
-}
+-(void)didAttachToView:(GraphView *)view {}
+-(void)didDetachFromView:(GraphView *)view {}
 
 -(GLKView *)view
 {
@@ -193,7 +191,7 @@
 
 -(NSArray *)getSettings
 {
-    return @[];
+    return nil;
 }
 
 @end

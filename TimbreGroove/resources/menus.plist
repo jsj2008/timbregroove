@@ -10,15 +10,13 @@
 			<integer>40</integer>
 			<key>userData</key>
 			<dict>
+				<key>wantsTouch</key>
+				<true/>
 				<key>instanceClass</key>
 				<string>PoolScreen</string>
 			</dict>
 			<key>icon</key>
 			<string>newModel.png</string>
-			<key>handler</key>
-			<string>Factory</string>
-			<key>renderClass</key>
-			<string>MenuItem</string>
 		</dict>
 		<key>imageBaker_element</key>
 		<dict>
@@ -118,6 +116,8 @@
 			<integer>50</integer>
 			<key>userData</key>
 			<dict>
+				<key>wantsTouch</key>
+				<true/>
 				<key>instanceClass</key>
 				<string>Photo</string>
 			</dict>

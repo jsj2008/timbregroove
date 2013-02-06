@@ -9,9 +9,10 @@
 #import "NewTrackPicker.h"
 #import "NewTrackCell.h"
 #import "NewTrackContainerVC.h"
+#import "GraphDefinitions.h"
 
 @interface NewTrackPicker () {
-    NSDictionary * _items;
+    NSMutableDictionary * _items;
     NSArray * _keys;
 }
 
@@ -40,16 +41,8 @@
 
 - (void)getItems
 {
-	NSString * menuPath = [[NSBundle mainBundle] pathForResource:@"menus"
-                                                          ofType:@"plist" ];
-
-	_items = [[NSDictionary dictionaryWithContentsOfFile:menuPath] objectForKey:@"new_element"];
-    
-    _keys = [_items
-             keysSortedByValueUsingComparator:^NSComparisonResult(id obj1, id obj2)
-             {
-                 return [(NSNumber *)obj1[@"order"] compare:obj2[@"order"]];
-             }];
+    _items = [NSMutableDictionary new];
+    _keys = [GraphDefinitions getAllDefinitions:_items];
 }
 
 - (void)viewDidLoad

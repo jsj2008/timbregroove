@@ -10,6 +10,11 @@
 #import "Camera.h"
 #import "Tween.h"
 #import "Tweener.h"
+#import "RecordGesture.h"
+
+@interface GraphView () {
+}
+@end
 
 @implementation GraphView
 
@@ -36,6 +41,22 @@
     _backcolor = (GLKVector4){0, 0, 0, 1};
 
     self.opaque = YES;
+    
+    _recordGesture = [[RecordGesture alloc] initWithTarget:self action:@selector(record:)];
+    [self addGestureRecognizer:_recordGesture];
+}
+
+-(void)record:(UIPanGestureRecognizer *)upg
+{
+    /*
+    static char * states[] = {
+        "UIGestureRecognizerStatePossible",
+        "UIGestureRecognizerStateBegan",
+        "UIGestureRecognizerStateChanged",
+        "UIGestureRecognizerStateEnded",
+        "UIGestureRecognizerStateCancelled",
+        "UIGestureRecognizerStateFailed" };
+    */
 }
 
 - (void)update:(NSTimeInterval)dt
@@ -45,7 +66,11 @@
 
 -(void)setGraph:(Graph *)graph
 {
+    if( _graph )
+        [_graph traverse:@selector(didDetachFromView:) userObj:self];
     _graph = graph;
+    _graph.view = self;
+    [_graph traverse:@selector(didAttachToView:) userObj:self];
 }
 
 -(void)render // drawRect:(CGRect)rect
@@ -67,6 +92,7 @@
 
 -(void)commitSettings
 {
-    [_graph rewire];
+    [_graph settingsChanged];
 }
+
 @end
