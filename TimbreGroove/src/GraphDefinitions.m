@@ -7,29 +7,23 @@
 //
 
 #import "GraphDefinitions.h"
+#import "Config.h"
 
 @implementation GraphDefinitions
 
 +(NSDictionary *)getDefinitionForName:(NSString *)name
 {
-	NSString * menuPath = [[NSBundle mainBundle] pathForResource:@"menus"
-                                                          ofType:@"plist" ];
-    
-    NSDictionary * items = [[NSDictionary dictionaryWithContentsOfFile:menuPath] objectForKey:@"new_element"];
+    NSDictionary * items = [[Config sharedInstance] valueForKey:@"new_element"];
     
     return items[name][@"userData"];
 }
 
 +(NSArray *)getAllDefinitions:(NSMutableDictionary *)results
 {
-	NSString * menuPath = [[NSBundle mainBundle] pathForResource:@"menus"
-                                                          ofType:@"plist" ];
-    
     if( !results )
         results = [NSMutableDictionary new];
     
-    [results addEntriesFromDictionary:[[NSDictionary dictionaryWithContentsOfFile:menuPath]
-                                       objectForKey:@"new_element"]];
+    [results addEntriesFromDictionary:[[Config sharedInstance] valueForKey:@"new_element"]];
     
     return [results
              keysSortedByValueUsingComparator:^NSComparisonResult(id obj1, id obj2)

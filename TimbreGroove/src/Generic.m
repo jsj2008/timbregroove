@@ -158,11 +158,11 @@
 #pragma mark Per frame
 #pragma mark -
 
+/*
 -(void)update:(NSTimeInterval)dt
 {
-    // update model and camera matrix here
-    // so children can adjust accordingly
 }
+*/
 
 -(void)render:(NSUInteger)w h:(NSUInteger)h
 {

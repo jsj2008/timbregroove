@@ -6,9 +6,8 @@
 //  Copyright (c) 2012 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "Generic.h"
-#import "RecordGesture.h"
+#import "DistortedGeneric.h"
 
-@interface Photo : Generic<RecordGestureReceiver>
+@interface Photo : DistortedGeneric
 
 @end

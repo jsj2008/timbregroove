@@ -10,24 +10,25 @@
 #import "SettingsVC.h"
 #import "Texture.h"
 #import "GridPlane.h"
-#import "PointRecorder.h"
-
-#import "GraphView.h"
+#import "Mixer.h"
 
 static NSString * __str_pictureFieldName = @"picturePicker";
 
 @interface Photo () {
-    PointPlayer * _player;
 }
-
 @end
+
 @implementation Photo
 
 -(id)wireUp
 {
     if( !self.textureFileName )
         self.textureFileName = @"Alex.png";
-    return [super wireUp];
+    if( !self.soundName )
+        self.soundName = @"congas";
+    [super wireUp];
+    self.distortionFactor = 1.0;
+    return self;
 }
 
 -(void)createBuffer
@@ -40,46 +41,6 @@ static NSString * __str_pictureFieldName = @"picturePicker";
     [self addBuffer:gp];
 }
 
--(void)didAttachToView:(GraphView *)view
-{
-    [view.recordGesture addReceiver:self];
-}
-
--(void)didDetachFromView:(GraphView *)view
-{
-    [view.recordGesture removeReceiver:self];
-}
-
--(NSString *)getShaderHeader
-{
-    return [[super getShaderHeader] stringByAppendingString:@"\n#define DISTORTION"];
-}
-
--(void)RecordGesture:(RecordGesture*)rg recordingBegin:(PointRecorder *)recorder
-{
-    _player = nil;
-}
-
--(void)RecordGesture:(RecordGesture*)rg recordedPt:(GLKVector3)pt
-{
-    [self.shader writeToLocation:gv_distortionPt type:TG_VECTOR3 data:pt.v];
-}
-
--(void)RecordGesture:(RecordGesture*)rg recordingDone:(PointRecorder *)recorder
-{
-    _player = [recorder makePlayer];
-    _timer = 0;
-}
-
--(void)update:(NSTimeInterval)dt
-{
-    if( _player && (_timer > _player.duration) )
-    {
-        _timer = 0;
-        GLKVector3 pt = _player.next;
-        [self.shader writeToLocation:gv_distortionPt type:TG_VECTOR3 data:pt.v];
-    }
-}
 
 -(void)setTexture:(Texture *)texture
 {
@@ -99,8 +60,10 @@ static NSString * __str_pictureFieldName = @"picturePicker";
         self.scale = scale;
     }
 }
+
 -(NSArray *)getSettings
 {
+    NSMutableArray * arr = [[NSMutableArray alloc] initWithArray:[super getSettings]];
     SettingsDescriptor * sd;
     sd = [[SettingsDescriptor alloc]  initWithControlType: SC_Picture
                                                memberName: __str_pictureFieldName
@@ -109,7 +72,8 @@ static NSString * __str_pictureFieldName = @"picturePicker";
                                              initialValue: self.textureFileName
                                                  priority: SHADER_SETTINGS];
     
-    return @[sd];
+    [arr addObject:sd];
+    return arr;
     
 }
 @end

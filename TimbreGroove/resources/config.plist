@@ -2,6 +2,59 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>sounds</key>
+	<dict>
+		<key>vibes</key>
+		<dict>
+			<key>isSoundfont</key>
+			<false/>
+			<key>preset</key>
+			<string>Vibraphone</string>
+			<key>lo</key>
+			<integer>0</integer>
+			<key>hi</key>
+			<string>127</string>
+		</dict>
+		<key>triangle</key>
+		<dict>
+			<key>isSountfont</key>
+			<true/>
+			<key>patch</key>
+			<integer>0</integer>
+			<key>preset</key>
+			<string>triangle</string>
+			<key>lo</key>
+			<integer>46</integer>
+			<key>hi</key>
+			<integer>53</integer>
+		</dict>
+		<key>congas</key>
+		<dict>
+			<key>isSoundfont</key>
+			<true/>
+			<key>patch</key>
+			<integer>0</integer>
+			<key>lo</key>
+			<integer>68</integer>
+			<key>hi</key>
+			<string>73</string>
+			<key>preset</key>
+			<string>CONGAS_3</string>
+		</dict>
+		<key>ambience</key>
+		<dict>
+			<key>isSoundfont</key>
+			<true/>
+			<key>patch</key>
+			<integer>0</integer>
+			<key>preset</key>
+			<string>atmos1</string>
+			<key>lo</key>
+			<integer>0</integer>
+			<key>hi</key>
+			<integer>127</integer>
+		</dict>
+	</dict>
 	<key>new_element</key>
 	<dict>
 		<key>pool_element</key>
@@ -143,70 +196,6 @@
 			<string>Factory</string>
 			<key>icon</key>
 			<string>text.png</string>
-		</dict>
-	</dict>
-	<key>main</key>
-	<dict>
-		<key>mood</key>
-		<dict>
-			<key>order</key>
-			<integer>20</integer>
-			<key>renderClass</key>
-			<string>MenuItem</string>
-			<key>handler</key>
-			<string>TGMoodSwing</string>
-			<key>icon</key>
-			<string>mood.png</string>
-		</dict>
-		<key>settings</key>
-		<dict>
-			<key>order</key>
-			<integer>30</integer>
-			<key>userData</key>
-			<dict>
-				<key>segueTo</key>
-				<string>segueToSettings</string>
-			</dict>
-			<key>renderClass</key>
-			<string>MenuItem</string>
-			<key>handler</key>
-			<string>Factory</string>
-			<key>icon</key>
-			<string>audioProp.png</string>
-		</dict>
-		<key>plause_play</key>
-		<dict>
-			<key>order</key>
-			<integer>40</integer>
-			<key>userData</key>
-			<dict>
-				<key>command</key>
-				<string>pauseToggle</string>
-			</dict>
-			<key>renderClass</key>
-			<string>PauseToggle</string>
-			<key>handler</key>
-			<string>Factory</string>
-			<key>icon</key>
-			<string>pause.png</string>
-		</dict>
-		<key>delete_view</key>
-		<dict>
-			<key>placement</key>
-			<string>bottom</string>
-			<key>order</key>
-			<integer>1000</integer>
-			<key>userData</key>
-			<dict>
-				<key>command</key>
-				<string>deleteNode</string>
-			</dict>
-			<key>renderClass</key>
-			<string>MenuItem</string>
-			<key>handler</key>
-			<string>Factory</string>
-			<key>icon</key>
-			<string>trash.png</string>
 		</dict>
 	</dict>
 </dict>

@@ -22,19 +22,21 @@
     [super wireUp];
     if( !self.hasTexture )
         self.color = GLKVector4Make(0, 1, 0, 1);
+    self.distortionFactor = 0.8;
     return self;
 }
 
 
 -(void)update:(NSTimeInterval)dt
 {
+    [super update:dt];
     if( self.light )
     {
         GLKVector3 lDir = self.light.direction;
         GLKMatrix4 mx = GLKMatrix4MakeTranslation( lDir.x, lDir.y, lDir.z );
         
-        mx = GLKMatrix4Rotate(mx, _lightRotation, 0.0f, 1.0f, 0.0f);
-        self.light.direction = GLKMatrix4MultiplyVector3(mx,GLKVector3Make(-1, 0, 0));
+      //  mx = GLKMatrix4Rotate(mx, _lightRotation, 0.0f, 1.0f, 0.0f);
+        self.light.direction = GLKMatrix4MultiplyVector3(mx,GLKVector3Make(-1, 0, -1));
     }
 }
 

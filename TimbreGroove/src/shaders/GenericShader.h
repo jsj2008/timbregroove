@@ -20,11 +20,14 @@ typedef enum {
     gv_pvm, // projection-view-mat
     gv_sampler,
     gv_ucolor,
+    
     gv_normalMat,
     gv_lightDir,
     gv_dirColor,
     gv_ambient,
+    
     gv_distortionPt, // vec3
+    gv_distortionFactor, // float
     
     NUM_GENERIC_VARIABLES
     

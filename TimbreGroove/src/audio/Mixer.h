@@ -9,14 +9,17 @@
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 
-@interface Sound : AVAudioPlayer
-
+@interface Sound : NSObject
+-(OSStatus)playNote:(int)note forDuration:(NSTimeInterval)duration;
+@property (nonatomic,readonly) int lowestPlayable;
+@property (nonatomic,readonly) int highestPlayable;
 @end
 
 @interface Mixer : NSObject
 
 +(Mixer *)sharedInstance;
 
--(Sound *)getSound:(const char *)name;
+-(Sound *)getSound:(NSString *)name;
+-(NSArray *)getAllSoundNames;
 
 @end

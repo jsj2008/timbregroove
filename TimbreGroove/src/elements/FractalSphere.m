@@ -42,11 +42,12 @@
     [_texRenderer update:0.01];
     [_texRenderer renderToFBO];
 
+    /*
     _sound = [[Mixer sharedInstance] getSound:"TGAmb2-32k"];
     _sound.meteringEnabled = YES;
     _sound.numberOfLoops = -1;
     [_sound play];
-    
+    */
     _pmin = 1000.0;
     _pmax = -200.0;
     
@@ -78,11 +79,12 @@
 }
 -(void)update:(NSTimeInterval)dt
 {
-    self.lightRotation += 0.03;
+   // self.lightRotation += 0.03;
     [super update:dt];
 
     if( self.timer > 1.0/8.0 )
     {
+        /*
         [_sound updateMeters];
         float peak = [_sound averagePowerForChannel:0];
         if( peak > _pmax )
@@ -106,11 +108,11 @@
             
             [Tweener addTween:self withParameters:params];
         }
-        
+        */
         [_texRenderer update:self.timer/2.0];
         [_texRenderer renderToFBO];
         
-        _myRot += (peakVal * 5.0);
+        _myRot += 0.4; // (peakVal * 5.0);
         float rads = GLKMathDegreesToRadians(_myRot);
         GLKVector3 rot = { GLKMathDegreesToRadians(0), rads, 0};
         self.rotation = rot;

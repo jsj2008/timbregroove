@@ -8,9 +8,13 @@
 
 #import "PointRecorder.h"
 
+typedef struct RecordPoint {
+    CGPoint         pt;
+    NSTimeInterval  ts;
+} RecordPoint;
+
 @interface PointPlayer () {
-    CGPoint *        _points;
-    NSTimeInterval * _durations;
+    RecordPoint *    _points;
     unsigned int     _currentPoint;
     unsigned int     _numPoints;
 }
@@ -24,19 +28,15 @@
     exit(-1);
 }
 
--(id)initWithPoints:(CGPoint*)points
-       andDurations:(NSTimeInterval *)durations
+-(id)initWithPoints:(RecordPoint*)points
           numPoints:(unsigned int)numPts
 {
     self = [super init];
     if( self )
     {
-        _points    = (CGPoint *)malloc(sizeof(CGPoint)*numPts);
-        _durations = (NSTimeInterval *)malloc(sizeof(NSTimeInterval)*numPts);
-        
-        memcpy(_points, points, sizeof(CGPoint)*numPts);
-        memcpy(_durations, durations, sizeof(NSTimeInterval)*numPts);
-        
+        size_t sz = sizeof(RecordPoint)*numPts;
+        _points    = (RecordPoint *)malloc(sz);
+        memcpy(_points, points, sz);
         _numPoints = numPts;
         [self reset];
     }
@@ -46,7 +46,6 @@
 -(void)dealloc
 {
     free(_points);
-    free(_durations);
 }
 
 -(void)reset
@@ -58,25 +57,23 @@
 {
     if( _currentPoint == _numPoints )
         _currentPoint = 0;
-    CGPoint pt = _points[_currentPoint++];
+    CGPoint pt = _points[_currentPoint++].pt;
     return (GLKVector3){ pt.x, pt.y, 0 };
 }
 
 -(NSTimeInterval)duration
 {
     unsigned int loc = _currentPoint == _numPoints ? 0 : _currentPoint;
-    return _durations[loc];
+    return _points[loc].ts;
 }
 
 
 @end
 @interface PointRecorder () {
-    CGPoint * _points;
-    NSTimeInterval * _durations;
+    RecordPoint * _points;
     unsigned int _capacity;
     unsigned int _numPoints;
     unsigned int _currentPoint;
-    NSTimeInterval _startTime;
     NSTimeInterval _lastAdd;
 }
 @end
@@ -96,12 +93,16 @@
 -(void)dealloc
 {
     free(_points);
-    free(_durations);
+}
+
+-(unsigned int)count
+{
+    return _numPoints;
 }
 
 -(GLKVector3)lastPt
 {
-    CGPoint pt = _points[_currentPoint - 1];
+    CGPoint pt = _points[_currentPoint - 1].pt;
     return (GLKVector3){ pt.x, pt.y, 0 };
 }
 
@@ -109,45 +110,36 @@
 {
     if( _points )
         free(_points);
-    if( _durations )
-        free(_durations);
-    _startTime = 0.0;
     _lastAdd = 0.0;
     _currentPoint = 0;
     _numPoints = 0;
     _capacity = 100;
-    _points = (CGPoint *)malloc(sizeof(CGPoint)*_capacity);
-    _durations = (NSTimeInterval *)malloc(sizeof(NSTimeInterval)*_capacity);
-    _points[0] = (CGPoint){0,0};
-    _durations[0] = 0;
+    size_t sz = sizeof(RecordPoint)*_capacity;
+    _points = (RecordPoint *)malloc(sz);
+    memset(_points, 0, sz);
 }
 
 -(void)add:(CGPoint)pt
 {
-    if( !_startTime )
-        _startTime = CACurrentMediaTime();
-    
     if( _numPoints == _capacity )
     {
         _capacity += 100;
-        CGPoint * newbuf = (CGPoint *)malloc(sizeof(CGPoint)*_capacity);
-        memcpy(newbuf, _points, sizeof(CGPoint)*_numPoints);
+        size_t sz = sizeof(RecordPoint)*_capacity;
+        RecordPoint * newbuf = (RecordPoint *)malloc(sz);
+        memset(newbuf, 0, sz);
+        memcpy(newbuf, _points, sizeof(RecordPoint)*_numPoints);
         free(_points);
         _points = newbuf;
-        NSTimeInterval * newtbuf = (NSTimeInterval*)malloc(sizeof(NSTimeInterval)*_capacity);
-        memcpy(newtbuf, _durations, sizeof(NSTimeInterval)*_numPoints);
-        free(_durations);
-        _durations = newtbuf;
     }
     CFTimeInterval now = CACurrentMediaTime();
-    _points[_numPoints] = pt;
-    _durations[_numPoints] = _lastAdd ? now - _lastAdd : 0;
+    _points[_numPoints].pt = pt;
+    _points[_numPoints].ts = _lastAdd ? now - _lastAdd : 0;
     _lastAdd = now;
     ++_numPoints;
 }
 
 -(PointPlayer *)makePlayer
 {
-    return [[PointPlayer alloc] initWithPoints:_points andDurations:_durations numPoints:_numPoints];
+    return [[PointPlayer alloc] initWithPoints:_points numPoints:_numPoints];
 }
 @end

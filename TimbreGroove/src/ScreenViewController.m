@@ -14,6 +14,7 @@
 #import "GraphDefinitions.h"
 #import "NewTrackContainerVC.h"
 #import "Global.h"
+#import "Mixer.h"
 
 @interface ScreenViewController () {
     bool _started;
@@ -60,6 +61,8 @@
 {
     if( !_started )
     {
+        [Mixer sharedInstance];
+        
         for( UIViewController * vc in self.childViewControllers )
         {
             if( [vc.title isEqualToString:@"graphVC"] )
@@ -70,7 +73,7 @@
                 if( !_started )
                 {
                     [self performSelector:@selector(performTransition:)
-                               withObject:[GraphDefinitions getDefinitionForName:@"pool_element"]
+                               withObject:[GraphDefinitions getDefinitionForName:@"photo_element"]
                                afterDelay:0.25];
                     
                     _started = true;

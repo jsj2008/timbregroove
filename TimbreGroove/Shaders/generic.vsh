@@ -29,6 +29,7 @@ varying vec3 v_lightFilter;
 
 #ifdef DISTORTION
 uniform vec3 u_distortionPoint;
+uniform float u_distortionFactor;
 #endif
 
 uniform mat4 u_pvm;
@@ -51,10 +52,17 @@ void main()
     
 
 #ifdef DISTORTION
+    /*
     vec3 pos = a_position.xyz;
     float dist = sin(distance(pos,u_distortionPoint));
-    pos += vec3(dist,dist,0) * 0.25;
+    pos += vec3(dist,dist,0) * u_distortionFactor;
     gl_Position = u_pvm * vec4( pos, a_position.w );
+     */
+    float maxDistance = 1.0;
+    vec3 pos = a_position.xyz;
+    float length = clamp( abs(distance(pos.xyz,u_distortionPoint)), 0.0, maxDistance );
+    float distortion = sin(length*5.0) * (maxDistance - length);
+    gl_Position = u_pvm * vec4(pos*(1.0+distortion),a_position.w);
 #else
 	gl_Position   = u_pvm * a_position;
 #endif

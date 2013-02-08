@@ -11,7 +11,16 @@
 #import "Shader.h"
 #import "MeshBuffer.h"
 #import "FBO.h"
+#import "SettingsVC.h"
+#import "Mixer.h"
+#import "GraphView.h"
 
+@interface TG3dObject () {
+    PointPlayer * _ptPlayer;
+    float _noteTimer;
+}
+
+@end
 
 @implementation TG3dObject
 
@@ -29,6 +38,9 @@
 
 -(id)wireUp
 {
+    self.settingsAreDirty = false;
+    if( !_soundName )
+        self.soundName = @"vibes";
     return self;
 }
 
@@ -47,7 +59,6 @@
 {
     if( self.settingsAreDirty )
     {
-        self.settingsAreDirty = false;
         [self cleanChildren];
         [self clean];
         [self wireUp];
@@ -56,9 +67,59 @@
     return self;
 }
 
+#pragma mark sound stuff
+
 -(void)play {}
 -(void)pause {}
 -(void)stop {}
+
+-(void)setSoundName:(NSString *)soundName
+{
+    _soundName = soundName;
+    self.sound = [[Mixer sharedInstance] getSound:soundName];
+}
+
+-(void)didAttachToView:(GraphView *)view
+{
+    [view.tapRecordGesture addReceiver:self];
+}
+
+-(void)didDetachFromView:(GraphView *)view
+{
+    [view.tapRecordGesture removeReceiver:self];
+}
+
+-(void)TapRecordGesture:(TapRecordGesture*)rg recordingWillBegin:(PointRecorder *)recorder
+{
+    _ptPlayer = nil;
+}
+
+-(void)TapRecordGesture:(TapRecordGesture*)rg recordingBegan:(PointRecorder *)recorder
+{
+    _ptPlayer = nil;
+}
+
+-(void)TapRecordGesture:(TapRecordGesture*)rg recordedPt:(GLKVector3)pt
+{
+    [self playNoteAtPt:pt];
+}
+
+-(void)TapRecordGesture:(TapRecordGesture*)rg recordingDone:(PointRecorder *)recorder
+{
+    _ptPlayer = [recorder makePlayer];
+    _noteTimer = 0;
+}
+
+-(void)playNoteAtPt:(GLKVector3)pt
+{
+    Sound * sound = self.sound;
+    if( !sound )
+        return; // not sure when this happens anymore
+    int lo = sound.lowestPlayable;
+    int hi = sound.highestPlayable;
+    int note = lo + (int)( (hi-lo) * pt.y );
+    [sound playNote:note forDuration:0.3];
+}
 
 #pragma mark inialize
 
@@ -73,8 +134,12 @@
 
 -(void)update:(NSTimeInterval)dt
 {
-    // update model and camera matrix here
-    // so children can adjust accordingly
+    _noteTimer += dt;
+    if( _ptPlayer && (_noteTimer > _ptPlayer.duration ) )
+    {
+        [self playNoteAtPt:_ptPlayer.next];
+        _noteTimer = 0;
+    }
 }
 
 -(void)render:(NSUInteger)w h:(NSUInteger)h
@@ -167,9 +232,6 @@
     return e ? e->_camera : nil;
 }
 
--(void)didAttachToView:(GraphView *)view {}
--(void)didDetachFromView:(GraphView *)view {}
-
 -(GLKView *)view
 {
     TG3dObject * e = self;
@@ -191,7 +253,22 @@
 
 -(NSArray *)getSettings
 {
-    return nil;
+    NSMutableDictionary * snames = [NSMutableDictionary new];
+    NSArray * keys = [[Mixer sharedInstance] getAllSoundNames];
+    for( NSString * key in keys )
+        snames[key] = key;
+    
+    SettingsDescriptor * sd;
+    sd = [[SettingsDescriptor alloc]  initWithControlType: SC_Picker
+                                               memberName: @("audioSoundName")
+                                                labelText: @"Sound"
+                                                  options: @{ @"values":snames,
+                                                        @"target":self, @"key":@"soundName"}
+                                             initialValue: self.soundName
+                                                 priority: AUDIO_SETTINGS];
+    
+    return @[sd];
+    
 }
 
 @end

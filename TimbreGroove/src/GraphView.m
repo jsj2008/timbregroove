@@ -44,19 +44,18 @@
     
     _recordGesture = [[RecordGesture alloc] initWithTarget:self action:@selector(record:)];
     [self addGestureRecognizer:_recordGesture];
+    
+    _tapRecordGesture = [[TapRecordGesture alloc] initWithTarget:self action:@selector(tapRecord:)];
+    [self addGestureRecognizer:_tapRecordGesture];
 }
 
--(void)record:(UIPanGestureRecognizer *)upg
+-(void)record:(RecordGesture *)upg
 {
-    /*
-    static char * states[] = {
-        "UIGestureRecognizerStatePossible",
-        "UIGestureRecognizerStateBegan",
-        "UIGestureRecognizerStateChanged",
-        "UIGestureRecognizerStateEnded",
-        "UIGestureRecognizerStateCancelled",
-        "UIGestureRecognizerStateFailed" };
-    */
+}
+
+-(void)tapRecord:(TapRecordGesture *)trg
+{
+    
 }
 
 - (void)update:(NSTimeInterval)dt

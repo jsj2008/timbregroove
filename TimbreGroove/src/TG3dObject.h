@@ -8,14 +8,16 @@
 
 #import "TGTypes.h"
 #import "Node.h"
+#import "RecordGesture.h"
 
 @class Camera;
 @class Shader;
 @class MeshBuffer;
 @class FBO;
 @class GraphView;
+@class Sound;
 
-@interface TG3dObject : Node {
+@interface TG3dObject : Node<TapRecordGestureReceiver> {
 @protected
     Shader * _shader;
     NSTimeInterval _totalTime;
@@ -39,6 +41,9 @@
 @property (nonatomic)        GLKVector3 rotation;
 @property (nonatomic)        GLKVector3 scale;
 @property (nonatomic)             float scaleXYZ;
+
+@property (nonatomic,strong) NSString * soundName;
+@property (nonatomic,strong) Sound * sound;
 
 -(void)play;
 -(void)pause;

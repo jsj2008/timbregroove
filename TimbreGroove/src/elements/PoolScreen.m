@@ -186,12 +186,14 @@
     {
         for( PoolWater * water in _waters )
         {
+            /*
             [water.sound updateMeters];
             float peak = [water.sound averagePowerForChannel:0];
             if( peak > 0 )
                 peak = 0;
             float targetRadius = (peak + 160.0) / 640.0;
             water.radius = targetRadius;
+             */
         }
         _timer = 0.0;
     }
@@ -278,12 +280,14 @@
 {
     PoolWater * child = [PoolWater new];
     [child setAnimatedRadius:0.2];
+    /*
     Mixer * mixer = [Mixer sharedInstance];
     child.sound = [mixer getSound:"TGAmb1-32k"];
     child.sound.numberOfLoops = -1;
     child.sound.meteringEnabled = YES;
     [child.sound play];
-
+     */
+    
     if( !_waters )
         _waters = [NSMutableArray new];
     [_waters addObject:child];

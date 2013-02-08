@@ -28,6 +28,8 @@
 // useful for sending the info to a shader in update:
 @property (nonatomic,readonly) GLKVector3 lastPt;
 
+@property (nonatomic,readonly) unsigned int count;
+
 -(PointPlayer *)makePlayer;
 
 @end

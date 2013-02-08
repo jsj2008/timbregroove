@@ -10,11 +10,13 @@
 #import "Graph.h"
 
 @class RecordGesture;
+@class TapRecordGesture;
 
-@interface GraphView : GLKView <UIGestureRecognizerDelegate>
+@interface GraphView : GLKView 
 @property (nonatomic) GLKVector4 backcolor;
 @property (nonatomic,strong) Graph * graph;
 @property (nonatomic,strong) RecordGesture * recordGesture;
+@property (nonatomic,strong) TapRecordGesture * tapRecordGesture;
 
 -(void)update:(NSTimeInterval)dt;
 -(void)render;
