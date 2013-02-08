@@ -22,6 +22,7 @@
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *trashCan;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *recordButton;
 - (IBAction)changePage:(id)sender;
+- (IBAction)volumeChanged:(UISlider *)sender;
 - (IBAction)trash:(UIBarButtonItem *)sender;
 - (IBAction)record:(UIBarButtonItem *)sender;
 - (IBAction)dblTapForMenus:(UITapGestureRecognizer *)sender;

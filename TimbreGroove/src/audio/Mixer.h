@@ -22,4 +22,5 @@
 -(Sound *)getSound:(NSString *)name;
 -(NSArray *)getAllSoundNames;
 
+@property (nonatomic) AudioUnitParameterValue mixerOutputGain;
 @end

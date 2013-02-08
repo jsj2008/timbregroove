@@ -196,6 +196,10 @@
     [self performTransitionWithGraph:[_graphs graphAtIndex:_pager.currentPage]];
 }
 
+- (IBAction)volumeChanged:(UISlider *)sender {
+    [Mixer sharedInstance].mixerOutputGain = sender.value;
+}
+
 - (IBAction)trash:(UIBarButtonItem *)sender
 {
     [self performTransition:nil];
