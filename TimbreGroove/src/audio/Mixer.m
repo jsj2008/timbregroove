@@ -10,6 +10,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import <AudioToolbox/AudioToolbox.h>
 #import "Config.h"
+#import "Mixer+Diag.h"
 
 #ifndef DEBUG
 #undef NSAssert
@@ -19,7 +20,7 @@
 static inline const char * fixOSResult(OSStatus result)
 {
     static char resultString[10];
-    sprintf(resultString, "%04lx",result);
+    sprintf(resultString, "%08lx",result);
     /*
     UInt32 swappedResult = CFSwapInt32HostToBig (result);
     bcopy (&swappedResult, resultString, 4);
@@ -78,7 +79,7 @@ static Mixer * __sharedMixer;
                                    noteCommand,
                                    noteNum, onVelocity, 0);
     
-    NSAssert(result == noErr,@"Unable to start note. Error code: %d '%.4s'\n", (int) result, fixOSResult(result));
+    NSAssert(result == noErr,@"Unable to start note. Error code: %d '%s'\n", (int) result, fixOSResult(result));
     [self performSelector:@selector(stopNote:) withObject:@(note) afterDelay:duration];
     return result;
 }
@@ -93,7 +94,7 @@ static Mixer * __sharedMixer;
                                    noteCommand,
                                    noteNum, 0, 0);
     
-    NSAssert(result == noErr,@"Unable to stop note. Error code: %d '%.4s'\n", (int) result, fixOSResult(result));
+    NSAssert(result == noErr,@"Unable to stop note. Error code: %d '%s'\n", (int) result, fixOSResult(result));
     return result;
 }
 
@@ -105,12 +106,13 @@ static Mixer * __sharedMixer;
 //..............................................................................
 
 @interface Mixer () {
-    AUGraph _processingGraph;
-    NSDictionary * _aliases;
-    Float64   _graphSampleRate;
-    AudioUnit _samplerUnit;
-    AudioUnit _ioUnit;
-    AudioUnit _mixerUnit;
+    AUGraph           _processingGraph;
+    NSDictionary *   _aliases;
+    Float64          _graphSampleRate;
+    NSMutableArray * _samplerUnits;
+    AudioUnit        _ioUnit;
+    AudioUnit        _mixerUnit;
+    AUNode           _mixerNode;
 }
 @end
 
@@ -121,6 +123,7 @@ static Mixer * __sharedMixer;
     self = [super init];
     if( self )
     {
+        _samplerUnits = [NSMutableArray new];
         _aliases = [[Config sharedInstance] valueForKey:@"sounds"];
         [self setupAVSession];
         [self setupAUGraph];
@@ -149,7 +152,7 @@ static Mixer * __sharedMixer;
                                              0
                                              );
     
-    NSAssert (result == noErr, @"Unable to set output gain. Error code: %d '%.4s'", (int) result, fixOSResult(result));
+    NSAssert (result == noErr, @"Unable to set output gain. Error code: %d '%s'", (int) result, fixOSResult(result));
     
 }
 
@@ -160,10 +163,14 @@ static Mixer * __sharedMixer;
 
 -(Sound *)getSound:(NSString *)name
 {
-    return [[Sound alloc] initWithAudioUnit:_samplerUnit andMeta:[self loadSound:name]];
+    AudioUnit sampler = [self makeSampler];
+    Sound * sound =  [[Sound alloc] initWithAudioUnit:sampler
+                                    andMeta:[self loadSound:name sampler:sampler]];
+    [_samplerUnits addObject:sound];
+    return sound;
 }
 
--(NSDictionary *)loadSound:(NSString *)alias
+-(NSDictionary *)loadSound:(NSString *)alias sampler:(AudioUnit)sampler
 {
     NSDictionary * meta = _aliases[alias];
     BOOL isSoundfont = [meta[@"isSoundfont"] boolValue];
@@ -176,11 +183,11 @@ static Mixer * __sharedMixer;
     
     if( isSoundfont )
     {
-        [self loadSF2FromURL:presetURL withPatch:[meta[@"patch"] intValue]];
+        [self loadSF2FromURL:presetURL withPatch:[meta[@"patch"] intValue] sampler:sampler];
     }
     else
     {
-        [self loadSynthFromPresetURL: presetURL];
+        [self loadSynthFromPresetURL: presetURL sampler:sampler];
     }
     
     return meta;
@@ -211,10 +218,54 @@ static Mixer * __sharedMixer;
     return YES;
 }
 
+
+-(AudioUnit)makeSampler
+{
+	OSStatus result = noErr;
+    
+	AudioComponentDescription cd = {};
+	cd.componentManufacturer     = kAudioUnitManufacturer_Apple;
+	cd.componentFlags            = 0;
+	cd.componentFlagsMask        = 0;
+	cd.componentType = kAudioUnitType_MusicDevice;
+	cd.componentSubType = kAudioUnitSubType_Sampler;
+	
+    AUNode samplerNode;
+    result = AUGraphAddNode(_processingGraph, &cd, &samplerNode);
+    NSAssert (result == noErr, @"Unable to add the Sampler unit to the audio processing graph. Error code: %d '%s'", (int) result, fixOSResult(result));
+
+    AudioUnit samplerUnit;
+    result = AUGraphNodeInfo (_processingGraph, samplerNode, 0, &samplerUnit);
+    NSAssert (result == noErr, @"Unable to obtain a reference to the Sampler unit. Error code: %d '%s'", (int) result, fixOSResult(result));
+   
+    UInt32 busCount = [_samplerUnits count] + 1;
+    result = AudioUnitSetProperty (_mixerUnit,
+                                   kAudioUnitProperty_ElementCount,
+                                   kAudioUnitScope_Input,
+                                   0,
+                                   &busCount,
+                                   sizeof (busCount)
+                                   );
+    NSAssert (result == noErr, @"Unable to set buscount on mixer. Error code: %d '%s'", (int) result, fixOSResult(result));
+    
+    result = AUGraphConnectNodeInput (_processingGraph, samplerNode, 0, _mixerNode, busCount-1);
+    NSAssert (result == noErr, @"Unable to interconnect the nodes in the audio processing graph. Error code: %d '%s'", (int) result, fixOSResult(result));
+    
+    [self configUnit:samplerUnit];
+    
+    Boolean isUpdated;
+    result = AUGraphUpdate(_processingGraph, &isUpdated);
+    NSAssert (result == noErr, @"Unable to update graph. Error code: %d '%s'", (int) result, fixOSResult(result));
+    
+    [self dumpParameters:samplerUnit];
+    
+    return samplerUnit;
+}
+
 -(OSStatus)setupAUGraph
 {
 	OSStatus result = noErr;
-	AUNode samplerNode, ioNode, mixerNode;
+	AUNode ioNode;
     
     // Specify the common portion of an audio unit's identify, used for both audio units
     // in the graph.
@@ -224,42 +275,32 @@ static Mixer * __sharedMixer;
 	cd.componentFlagsMask        = 0;
     
 	result = NewAUGraph (&_processingGraph);
-    NSAssert (result == noErr, @"Unable to create an AUGraph object. Error code: %d '%.4s'", (int) result, fixOSResult(result));
-    
-    // ------ SAMPLER --------------
-	cd.componentType = kAudioUnitType_MusicDevice;
-	cd.componentSubType = kAudioUnitSubType_Sampler;
-	
-	result = AUGraphAddNode (_processingGraph, &cd, &samplerNode);
-    NSAssert (result == noErr, @"Unable to add the Sampler unit to the audio processing graph. Error code: %d '%.4s'", (int) result, fixOSResult(result));
+    NSAssert (result == noErr, @"Unable to create an AUGraph object. Error code: %d '%s'", (int) result, fixOSResult(result));
     
     // ------ MIXER --------------
     
     cd.componentType          = kAudioUnitType_Mixer;
     cd.componentSubType       = kAudioUnitSubType_MultiChannelMixer;
 
-    result = AUGraphAddNode (_processingGraph, &cd, &mixerNode);
-    NSAssert (result == noErr, @"Unable to add the Mixer unit to the audio processing graph. Error code: %d '%.4s'", (int) result, fixOSResult(result));
+    result = AUGraphAddNode (_processingGraph, &cd, &_mixerNode);
+    NSAssert (result == noErr, @"Unable to add the Mixer unit to the audio processing graph. Error code: %d '%s'", (int) result, fixOSResult(result));
 
     // ------ I/O --------------
 	cd.componentType = kAudioUnitType_Output;
 	cd.componentSubType = kAudioUnitSubType_RemoteIO;
     
 	result = AUGraphAddNode (_processingGraph, &cd, &ioNode);
-    NSAssert (result == noErr, @"Unable to add the Output unit to the audio processing graph. Error code: %d '%.4s'", (int) result, fixOSResult(result));
+    NSAssert (result == noErr, @"Unable to add the Output unit to the audio processing graph. Error code: %d '%s'", (int) result, fixOSResult(result));
     
     
 	result = AUGraphOpen (_processingGraph);
-    NSAssert (result == noErr, @"Unable to open the audio processing graph. Error code: %d '%.4s'", (int) result, fixOSResult(result));
-    
-	result = AUGraphNodeInfo (_processingGraph, samplerNode, 0, &_samplerUnit);
-    NSAssert (result == noErr, @"Unable to obtain a reference to the Sampler unit. Error code: %d '%.4s'", (int) result, fixOSResult(result));
-    
-	result = AUGraphNodeInfo (_processingGraph, mixerNode, 0, &_mixerUnit);
-    NSAssert (result == noErr, @"Unable to obtain a reference to the I/O unit. Error code: %d '%.4s'", (int) result, fixOSResult(result));
+    NSAssert (result == noErr, @"Unable to open the audio processing graph. Error code: %d '%s'", (int) result, fixOSResult(result));
+
+	result = AUGraphNodeInfo (_processingGraph, _mixerNode, 0, &_mixerUnit);
+    NSAssert (result == noErr, @"Unable to obtain a reference to the I/O unit. Error code: %d '%s'", (int) result, fixOSResult(result));
     
 	result = AUGraphNodeInfo (_processingGraph, ioNode, 0, &_ioUnit);
-    NSAssert (result == noErr, @"Unable to obtain a reference to the I/O unit. Error code: %d '%.4s'", (int) result, fixOSResult(result));
+    NSAssert (result == noErr, @"Unable to obtain a reference to the I/O unit. Error code: %d '%s'", (int) result, fixOSResult(result));
 
     
     UInt32 busCount = 1;
@@ -271,20 +312,17 @@ static Mixer * __sharedMixer;
                                    &busCount,
                                    sizeof (busCount)
                                    );
-    NSAssert (result == noErr, @"Unable to set buscount on mixer. Error code: %d '%.4s'", (int) result, fixOSResult(result));
+    NSAssert (result == noErr, @"Unable to set buscount on mixer. Error code: %d '%s'", (int) result, fixOSResult(result));
     
-
-    result = AUGraphConnectNodeInput (_processingGraph, samplerNode, 0, mixerNode, 0);
-    NSAssert (result == noErr, @"Unable to interconnect the nodes in the audio processing graph. Error code: %d '%.4s'", (int) result, fixOSResult(result));
-
-	result = AUGraphConnectNodeInput (_processingGraph, mixerNode, 0, ioNode, 0);
-    NSAssert (result == noErr, @"Unable to interconnect the nodes in the audio processing graph. Error code: %d '%.4s'", (int) result, fixOSResult(result));
+	result = AUGraphConnectNodeInput (_processingGraph, _mixerNode, 0, ioNode, 0);
+    NSAssert (result == noErr, @"Unable to interconnect the nodes in the audio processing graph. Error code: %d '%s'", (int) result, fixOSResult(result));
     
     
     return result;
 }
 
-- (OSStatus) loadSynthFromPresetURL: (NSURL *) presetURL {
+- (OSStatus) loadSynthFromPresetURL: (NSURL *) presetURL sampler:(AudioUnit)sampler
+{
     
 	OSStatus result = noErr;
     
@@ -294,7 +332,7 @@ static Mixer * __sharedMixer;
 		
         CFPropertyListRef plr = (__bridge CFPropertyListRef)presetPropertyList;
 		result = AudioUnitSetProperty(
-                                      _samplerUnit,
+                                      sampler,
                                       kAudioUnitProperty_ClassInfo,
                                       kAudioUnitScope_Global,
                                       0,
@@ -302,15 +340,16 @@ static Mixer * __sharedMixer;
                                       sizeof(plr)
                                       );
         NSAssert (result == noErr,
-                   @"Unable to set the patch on a soundfont file. Error code:%d '%.4s'",
+                   @"Unable to set the patch on a soundfont file. Error code:%d '%s'",
                    (int) result,
-                   fixOSResult(result));        
+                   fixOSResult(result));
+        
 	}
 
 	return result;
 }
 
--(OSStatus) loadSF2FromURL: (NSURL *)bankURL withPatch: (int)presetNumber
+-(OSStatus) loadSF2FromURL: (NSURL *)bankURL withPatch: (int)presetNumber sampler:(AudioUnit)sampler
 {
     OSStatus result = noErr;
     
@@ -320,7 +359,7 @@ static Mixer * __sharedMixer;
     bpdata.bankLSB  = kAUSampler_DefaultBankLSB;
     bpdata.presetID = (UInt8) presetNumber;
     
-    result = AudioUnitSetProperty(_samplerUnit,
+    result = AudioUnitSetProperty(sampler,
                                   kAUSamplerProperty_LoadPresetFromBank,
                                   kAudioUnitScope_Global,
                                   0,
@@ -328,7 +367,7 @@ static Mixer * __sharedMixer;
                                   sizeof(bpdata));
     
     NSAssert (result == noErr,
-               @"Unable to set the preset property on the Sampler. Error code:%d '%.4s'",
+               @"Unable to set the preset property on the Sampler. Error code:%d '%s'",
                (int) result,
                fixOSResult(result));
     
@@ -351,7 +390,7 @@ static Mixer * __sharedMixer;
                                       sampleRatePropertySize
                                       );
     
-    NSAssert (result == noErr, @"AudioUnitSetProperty (set Sampler unit output stream sample rate). Error code: %d '%.4s'", (int) result, fixOSResult(result));
+    NSAssert (result == noErr, @"AudioUnitSetProperty (set Sampler unit output stream sample rate). Error code: %d '%s'", (int) result, fixOSResult(result));
     
     result =    AudioUnitGetProperty (
                                       unit,
@@ -362,7 +401,7 @@ static Mixer * __sharedMixer;
                                       &framesPerSlicePropertySize
                                       );
     
-    NSAssert (result == noErr, @"Unable to retrieve the maximum frames per slice property from the I/O unit. Error code: %d '%.4s'", (int) result, fixOSResult(result));
+    NSAssert (result == noErr, @"Unable to retrieve the maximum frames per slice property from the I/O unit. Error code: %d '%s'", (int) result, fixOSResult(result));
     
     return result;
 }
@@ -372,17 +411,16 @@ static Mixer * __sharedMixer;
     OSStatus result = noErr;
     
     result = AudioUnitInitialize (_ioUnit);
-    NSAssert (result == noErr, @"Unable to initialize the I/O unit. Error code: %d '%.4s'", (int) result, fixOSResult(result));
+    NSAssert (result == noErr, @"Unable to initialize the I/O unit. Error code: %d '%s'", (int) result, fixOSResult(result));
 
     [self configUnit:_ioUnit];
-    [self configUnit:_samplerUnit];
     [self configUnit:_mixerUnit];
     
     result = AUGraphInitialize (graph);
-    NSAssert (result == noErr, @"Unable to initialze AUGraph object. Error code: %d '%.4s'", (int) result, fixOSResult(result));
+    NSAssert (result == noErr, @"Unable to initialze AUGraph object. Error code: %d '%s'", (int) result, fixOSResult(result));
     
     result = AUGraphStart (graph);
-    NSAssert (result == noErr, @"Unable to start audio processing graph. Error code: %d '%.4s'", (int) result, fixOSResult(result));
+    NSAssert (result == noErr, @"Unable to start audio processing graph. Error code: %d '%s'", (int) result, fixOSResult(result));
 #if DEBUG
     CAShow (graph);
 #endif

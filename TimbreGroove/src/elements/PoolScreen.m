@@ -280,13 +280,6 @@
 {
     PoolWater * child = [PoolWater new];
     [child setAnimatedRadius:0.2];
-    /*
-    Mixer * mixer = [Mixer sharedInstance];
-    child.sound = [mixer getSound:"TGAmb1-32k"];
-    child.sound.numberOfLoops = -1;
-    child.sound.meteringEnabled = YES;
-    [child.sound play];
-     */
     
     if( !_waters )
         _waters = [NSMutableArray new];

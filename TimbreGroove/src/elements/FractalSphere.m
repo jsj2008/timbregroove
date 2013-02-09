@@ -42,12 +42,6 @@
     [_texRenderer update:0.01];
     [_texRenderer renderToFBO];
 
-    /*
-    _sound = [[Mixer sharedInstance] getSound:"TGAmb2-32k"];
-    _sound.meteringEnabled = YES;
-    _sound.numberOfLoops = -1;
-    [_sound play];
-    */
     _pmin = 1000.0;
     _pmax = -200.0;
     
