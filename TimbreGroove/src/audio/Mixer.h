@@ -40,5 +40,7 @@ void CheckError( OSStatus error, const char *operation);
 -(Sound *)getSound:(NSString *)name;
 -(NSArray *)getAllSoundNames;
 
+-(void *)fetchAudioFrame;
+
 @property (nonatomic) AudioUnitParameterValue mixerOutputGain;
 @end

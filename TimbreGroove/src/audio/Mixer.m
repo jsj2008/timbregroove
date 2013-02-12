@@ -12,6 +12,7 @@
 #import "Config.h"
 #import "Mixer+Diag.h"
 #import "Mixer+Midi.h"
+#import "RingBuffer.h"
 
 #ifndef DEBUG
 #undef NSAssert
@@ -121,8 +122,71 @@ static Mixer * __sharedMixer;
 }
 
 @end
+//..............................................................................
+//..............................................................................
+//..............................................................................
 
+#define BUFFERS_IN_RING 3
 
+typedef struct tagRenderCBContext {
+    RingBufferOpaque rbo;
+    long fetchCount;
+    long dropCount;
+    Float64 timeStamps[BUFFERS_IN_RING];
+    UInt32  numFrames[BUFFERS_IN_RING];
+    unsigned int lastTS;
+    UInt32 bufferSize;
+} RenderCBContext;
+
+OSStatus renderCallback(
+                    void *							inRefCon,
+                    AudioUnitRenderActionFlags *	ioActionFlags,
+                    const AudioTimeStamp *			inTimeStamp,
+                    UInt32							inBusNumber,
+                    UInt32							inNumberFrames,
+                    AudioBufferList *				ioData)
+{
+    if( (*ioActionFlags & kAudioUnitRenderAction_PostRender) == 0 )
+        return noErr;
+    
+    RenderCBContext * context = inRefCon;
+    
+    UInt32 sz = 0;
+    for( int i = 0; i < ioData->mNumberBuffers; i++ )
+        sz += ioData->mBuffers[i].mDataByteSize;
+    
+    if( context->rbo )
+    {
+        if( sz != context->bufferSize )
+        {
+            RingBufferRelease(context->rbo);
+            context->rbo = 0;
+        }
+    }
+
+    if( !context->rbo )
+    {
+        context->rbo = RingBuffer(2, sizeof(AudioSampleType), sz * BUFFERS_IN_RING);
+        context->bufferSize = sz;
+    }
+    
+    if( context->fetchCount < 2 )
+    {
+        RingBufferStore(context->rbo, ioData, inNumberFrames, inTimeStamp->mSampleTime);
+        
+        ++context->fetchCount;
+        if( ++context->lastTS == BUFFERS_IN_RING )
+            context->lastTS = 0;
+        context->timeStamps[ context->lastTS ] = inTimeStamp->mSampleTime;
+        context->numFrames[ context->lastTS ] = inNumberFrames;
+    }
+    else
+    {
+        ++context->dropCount;
+    }
+    
+    return noErr;
+}
 //..............................................................................
 //..............................................................................
 //..............................................................................
@@ -132,8 +196,12 @@ static Mixer * __sharedMixer;
     Float64          _graphSampleRate;
     unsigned int     _numSamplerUnits;
     unsigned int     _capSamplerUnits;
+    RenderCBContext  _cbContext;
     
     AudioStreamBasicDescription _stdASBD;
+    
+    void * _captureBuffer;
+    UInt32 _captureByteSize;
 }
 @end
 
@@ -149,6 +217,8 @@ static Mixer * __sharedMixer;
         _samplerUnits = malloc(sizeof(AudioUnit)*_capSamplerUnits);
         memset(_samplerUnits, 0, sizeof(AudioUnit)*_capSamplerUnits);
         
+        _cbContext.rbo = 0;
+        
         _aliases = [[Config sharedInstance] valueForKey:@"sounds"];
         [self setupAVSession];
         [self setupStdASBD]; // assumes _graphSampleRate
@@ -163,6 +233,8 @@ static Mixer * __sharedMixer;
 {
     [self midiDealloc];
     free(_samplerUnits);
+    if( _captureBuffer )
+        free(_captureBuffer);
 }
 
 -(void)setupStdASBD
@@ -170,7 +242,7 @@ static Mixer * __sharedMixer;
     size_t bytesPerSample = sizeof (AudioUnitSampleType);
     
     _stdASBD.mFormatID          = kAudioFormatLinearPCM;
-    _stdASBD.mFormatFlags       = kAudioFormatFlagsAudioUnitCanonical; 
+    _stdASBD.mFormatFlags       = kAudioFormatFlagsAudioUnitCanonical; // signed int
     _stdASBD.mBytesPerPacket    = bytesPerSample;
     _stdASBD.mFramesPerPacket   = 1;
     _stdASBD.mBytesPerFrame     = bytesPerSample;
@@ -201,6 +273,38 @@ static Mixer * __sharedMixer;
             __sharedMixer = [Mixer new];
     }
     return __sharedMixer;
+}
+
+-(void *)fetchAudioFrame:(unsigned int *)dropCount
+{
+    if( !_cbContext.fetchCount )
+        return NULL;
+    
+    if( !_captureBuffer || (_captureByteSize != _cbContext.bufferSize) )
+    {
+        if( _captureBuffer )
+            free(_captureBuffer);
+        _captureBuffer = malloc(sizeof(AudioBufferList)+sizeof(AudioBuffer)+_cbContext.bufferSize);
+        AudioBufferList * abl = _captureBuffer;
+        Byte * dataBuff = ((Byte *)&abl->mBuffers[1].mData) + sizeof(void *);
+        UInt32 buffsz = _cbContext.bufferSize / 2;
+        abl->mNumberBuffers = 2;
+        abl->mBuffers[0].mNumberChannels = 1;
+        abl->mBuffers[0].mDataByteSize = buffsz;
+        abl->mBuffers[0].mData = dataBuff;
+        abl->mBuffers[1].mNumberChannels = 1;
+        abl->mBuffers[1].mDataByteSize = buffsz;
+        abl->mBuffers[1].mData = dataBuff + buffsz;
+        _captureByteSize = _cbContext.bufferSize;
+    }
+
+    int i = _cbContext.lastTS;
+    RingBufferFetch(_cbContext.rbo, _captureBuffer, _cbContext.numFrames[i], _cbContext.timeStamps[i]);
+    --_cbContext.fetchCount;
+    if( dropCount )
+        *dropCount = _cbContext.dropCount;
+    _cbContext.dropCount = 0;
+    return _captureBuffer;
 }
 
 - (void) setMixerOutputGain: (AudioUnitParameterValue) newGain
@@ -319,7 +423,9 @@ static Mixer * __sharedMixer;
     result = AUGraphUpdate(_processingGraph, &isUpdated);
     CheckError(result,"Unable to update graph.");
     
-    [self dumpParameters:samplerUnit];
+    [self dumpParameters:samplerUnit forUnit:@"Sampler Unit"];
+    [self dumpParameters:_ioUnit forUnit:@"RIO Unit"];
+    [self dumpGraph];
     
     return samplerUnit;
 }
@@ -328,57 +434,33 @@ static Mixer * __sharedMixer;
 {
 	OSStatus result = noErr;
 	AUNode ioNode;
+
+    CheckError(NewAUGraph (&_processingGraph),"Unable to create an AUGraph object.");
     
-    // Specify the common portion of an audio unit's identify, used for both audio units
-    // in the graph.
 	AudioComponentDescription cd = {};
 	cd.componentManufacturer     = kAudioUnitManufacturer_Apple;
 	cd.componentFlags            = 0;
 	cd.componentFlagsMask        = 0;
-    
-	result = NewAUGraph (&_processingGraph);
-    CheckError(result,"Unable to create an AUGraph object.");
-    
-    // ------ MIXER --------------
-    
-    cd.componentType          = kAudioUnitType_Mixer;
-    cd.componentSubType       = kAudioUnitSubType_MultiChannelMixer;
+    cd.componentType             = kAudioUnitType_Mixer;
+    cd.componentSubType          = kAudioUnitSubType_MultiChannelMixer;
+    CheckError(AUGraphAddNode (_processingGraph, &cd, &_mixerNode),"Unable to add the Mixer unit to the audio processing graph.");
 
-    result = AUGraphAddNode (_processingGraph, &cd, &_mixerNode);
-    CheckError(result,"Unable to add the Mixer unit to the audio processing graph.");
-
-    // ------ I/O --------------
-	cd.componentType = kAudioUnitType_Output;
+	cd.componentType    = kAudioUnitType_Output;
 	cd.componentSubType = kAudioUnitSubType_RemoteIO;
-    
-	result = AUGraphAddNode (_processingGraph, &cd, &ioNode);
-    CheckError(result,"Unable to add the Output unit to the audio processing graph.");
-    
-    
-	result = AUGraphOpen (_processingGraph);
-    CheckError(result,"Unable to open the audio processing graph.");
+    CheckError(AUGraphAddNode (_processingGraph, &cd, &ioNode),"Unable to add the Output unit to the audio processing graph.");
 
-	result = AUGraphNodeInfo (_processingGraph, _mixerNode, 0, &_mixerUnit);
-    CheckError(result,"Unable to obtain a reference to the I/O unit.");
-    
-	result = AUGraphNodeInfo (_processingGraph, ioNode, 0, &_ioUnit);
-    CheckError(result,"Unable to obtain a reference to the I/O unit.");
+    CheckError(AUGraphOpen (_processingGraph),                                 "Unable to open the audio processing graph.");
+    CheckError(AUGraphNodeInfo (_processingGraph, _mixerNode, 0, &_mixerUnit), "Unable to obtain a reference to the I/O unit.");
+    CheckError(AUGraphNodeInfo (_processingGraph, ioNode, 0, &_ioUnit),        "Unable to obtain a reference to the I/O unit.");
 
-    
-    UInt32 busCount = 1;
-    result = AudioUnitSetProperty (
-                                   _mixerUnit,
-                                   kAudioUnitProperty_ElementCount,
-                                   kAudioUnitScope_Input,
-                                   0,
-                                   &busCount,
-                                   sizeof (busCount)
-                                   );
-    CheckError(result,"Unable to set buscount on mixer.");
-    
-	result = AUGraphConnectNodeInput (_processingGraph, _mixerNode, 0, ioNode, 0);
+    CheckError(AudioUnitAddRenderNotify(_mixerUnit, renderCallback, &_cbContext), "Could not set callback");
+
+	
+    result = AUGraphConnectNodeInput (_processingGraph, _mixerNode, 0, ioNode, 0);
     CheckError(result,"Unable to interconnect the nodes in the audio processing graph.");
     
+    result = AudioUnitSetProperty(_mixerUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &_stdASBD, sizeof(_stdASBD));
+    CheckError(result,"Unable to set RIO output stream format");
     
     return result;
 }
@@ -474,10 +556,9 @@ static Mixer * __sharedMixer;
     
     result = AUGraphStart (_processingGraph);
     CheckError(result,"Unable to start audio processing graph.");
-#if DEBUG
-    CAShow (_processingGraph);
-#endif
 
+    [self dumpGraph];
+    
     return result;
 }
 

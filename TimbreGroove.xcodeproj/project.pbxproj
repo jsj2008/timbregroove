@@ -193,6 +193,8 @@
 		57A58EB116AE020C00C9FA53 /* poolLines.png in Resources */ = {isa = PBXBuildFile; fileRef = 57A58EB016AE020C00C9FA53 /* poolLines.png */; };
 		57A66EED167B1D1C00B9EA75 /* Texture.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A66EEC167B1D1C00B9EA75 /* Texture.m */; };
 		57A66EEF167B293E00B9EA75 /* aotk_tex_64.png in Resources */ = {isa = PBXBuildFile; fileRef = 57A66EEE167B293E00B9EA75 /* aotk_tex_64.png */; };
+		57BE7FB316CAC9AA001972ED /* CARingBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57BE7FB116CAC9AA001972ED /* CARingBuffer.cpp */; };
+		57BE7FB616CACA0D001972ED /* RingBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57BE7FB416CACA0C001972ED /* RingBuffer.cpp */; };
 		57BF036716C61C2300148359 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57BF036616C61C2300148359 /* CoreAudio.framework */; };
 		57C3BB8516C6B5B000899F4B /* Mixer+Diag.m in Sources */ = {isa = PBXBuildFile; fileRef = 57C3BB8416C6B5B000899F4B /* Mixer+Diag.m */; };
 		57CAF78516891EDB00459353 /* libc++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 57CAF78416891EDA00459353 /* libc++.dylib */; };
@@ -517,6 +519,20 @@
 		57A66EEB167B1D1B00B9EA75 /* Texture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Texture.h; sourceTree = "<group>"; };
 		57A66EEC167B1D1C00B9EA75 /* Texture.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Texture.m; sourceTree = "<group>"; };
 		57A66EEE167B293E00B9EA75 /* aotk_tex_64.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = aotk_tex_64.png; sourceTree = "<group>"; };
+		57ABE51916C9FF3100A412E1 /* AUComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AUComponent.h; path = System/Library/Frameworks/AudioUnit.framework/Headers/AUComponent.h; sourceTree = SDKROOT; };
+		57ABE51A16C9FF3100A412E1 /* AudioComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AudioComponent.h; path = System/Library/Frameworks/AudioUnit.framework/Headers/AudioComponent.h; sourceTree = SDKROOT; };
+		57ABE51B16C9FF3100A412E1 /* AudioOutputUnit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AudioOutputUnit.h; path = System/Library/Frameworks/AudioUnit.framework/Headers/AudioOutputUnit.h; sourceTree = SDKROOT; };
+		57ABE51C16C9FF3100A412E1 /* AudioUnit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AudioUnit.h; path = System/Library/Frameworks/AudioUnit.framework/Headers/AudioUnit.h; sourceTree = SDKROOT; };
+		57ABE51D16C9FF3100A412E1 /* AudioUnitParameters.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AudioUnitParameters.h; path = System/Library/Frameworks/AudioUnit.framework/Headers/AudioUnitParameters.h; sourceTree = SDKROOT; };
+		57ABE51E16C9FF3100A412E1 /* AudioUnitProperties.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AudioUnitProperties.h; path = System/Library/Frameworks/AudioUnit.framework/Headers/AudioUnitProperties.h; sourceTree = SDKROOT; };
+		57ABE51F16C9FF3100A412E1 /* MusicDevice.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MusicDevice.h; path = System/Library/Frameworks/AudioUnit.framework/Headers/MusicDevice.h; sourceTree = SDKROOT; };
+		57BE7FB116CAC9AA001972ED /* CARingBuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CARingBuffer.cpp; sourceTree = "<group>"; };
+		57BE7FB216CAC9AA001972ED /* CARingBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CARingBuffer.h; sourceTree = "<group>"; };
+		57BE7FB416CACA0C001972ED /* RingBuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RingBuffer.cpp; sourceTree = "<group>"; };
+		57BE7FB516CACA0C001972ED /* RingBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RingBuffer.h; sourceTree = "<group>"; };
+		57BE7FBA16CACE03001972ED /* CAAtomic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CAAtomic.h; sourceTree = "<group>"; };
+		57BE7FBB16CACE03001972ED /* CAAutoDisposer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CAAutoDisposer.h; sourceTree = "<group>"; };
+		57BE7FBC16CACE03001972ED /* CABitOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CABitOperations.h; sourceTree = "<group>"; };
 		57BF036616C61C2300148359 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		57C3BB8316C6B5B000899F4B /* Mixer+Diag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Mixer+Diag.h"; sourceTree = "<group>"; };
 		57C3BB8416C6B5B000899F4B /* Mixer+Diag.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "Mixer+Diag.m"; sourceTree = "<group>"; };
@@ -694,6 +710,8 @@
 				57C3BB8416C6B5B000899F4B /* Mixer+Diag.m */,
 				5714713D16C8451E00CA2A69 /* Mixer+Midi.h */,
 				5714713E16C8451E00CA2A69 /* Mixer+Midi.m */,
+				57BE7FB516CACA0C001972ED /* RingBuffer.h */,
+				57BE7FB416CACA0C001972ED /* RingBuffer.cpp */,
 			);
 			path = audio;
 			sourceTree = "<group>";
@@ -801,6 +819,8 @@
 		571ECF97167BE2CE00727A30 /* contrib */ = {
 			isa = PBXGroup;
 			children = (
+				57BE7FAF16CAC936001972ED /* CoreAudioHelpers */,
+				57BE7FAE16CAC8BE001972ED /* SDK-headers */,
 				57AFB3C416A3281F008192FB /* PVR */,
 				571ECF98167BE2CE00727A30 /* tweener */,
 			);
@@ -1139,6 +1159,42 @@
 				5700232E16A553D3006F0E8E /* PVRTVertex.h */,
 			);
 			path = PVR;
+			sourceTree = "<group>";
+		};
+		57BE7FAE16CAC8BE001972ED /* SDK-headers */ = {
+			isa = PBXGroup;
+			children = (
+				57ABE51916C9FF3100A412E1 /* AUComponent.h */,
+				57ABE51A16C9FF3100A412E1 /* AudioComponent.h */,
+				57ABE51B16C9FF3100A412E1 /* AudioOutputUnit.h */,
+				57ABE51C16C9FF3100A412E1 /* AudioUnit.h */,
+				57ABE51D16C9FF3100A412E1 /* AudioUnitParameters.h */,
+				57ABE51E16C9FF3100A412E1 /* AudioUnitProperties.h */,
+				57ABE51F16C9FF3100A412E1 /* MusicDevice.h */,
+			);
+			name = "SDK-headers";
+			path = ../../../../../../../../../Users/victor/Desktop/TimbreGroove/TimbreGroove/src/contrib;
+			sourceTree = SDKROOT;
+		};
+		57BE7FAF16CAC936001972ED /* CoreAudioHelpers */ = {
+			isa = PBXGroup;
+			children = (
+				57BE7FB016CAC96D001972ED /* PublicUtility */,
+			);
+			path = CoreAudioHelpers;
+			sourceTree = "<group>";
+		};
+		57BE7FB016CAC96D001972ED /* PublicUtility */ = {
+			isa = PBXGroup;
+			children = (
+				57BE7FBA16CACE03001972ED /* CAAtomic.h */,
+				57BE7FBB16CACE03001972ED /* CAAutoDisposer.h */,
+				57BE7FBC16CACE03001972ED /* CABitOperations.h */,
+				57BE7FB216CAC9AA001972ED /* CARingBuffer.h */,
+				57BE7FB116CAC9AA001972ED /* CARingBuffer.cpp */,
+			);
+			name = PublicUtility;
+			path = Public;
 			sourceTree = "<group>";
 		};
 		57E874E816782894008243B2 = {
@@ -1512,6 +1568,8 @@
 				579AD1A916C40B670071AA9A /* Config.m in Sources */,
 				57C3BB8516C6B5B000899F4B /* Mixer+Diag.m in Sources */,
 				5714713F16C8451E00CA2A69 /* Mixer+Midi.m in Sources */,
+				57BE7FB316CAC9AA001972ED /* CARingBuffer.cpp in Sources */,
+				57BE7FB616CACA0D001972ED /* RingBuffer.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

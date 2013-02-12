@@ -9,6 +9,8 @@
 #import "Mixer.h"
 
 @interface Mixer (Diag)
--(void)dumpParameters:(AudioUnit)au;
+-(void)dumpParameters:(AudioUnit)au forUnit:(NSString *)name;
+- (void) printASBD: (AudioStreamBasicDescription) asbd;
+-(void)dumpGraph;
 
 @end

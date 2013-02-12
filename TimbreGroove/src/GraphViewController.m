@@ -8,6 +8,7 @@
 
 #import "GraphView.h"
 #import "Graph.h"
+#import "Mixer.h"
 
 @interface GraphViewController : GLKViewController
 @property (nonatomic,strong) EAGLContext * context;
@@ -47,6 +48,8 @@
 
 - (void)update
 {
+    [[Mixer sharedInstance] fetchAudioFrame];
+    
     [(GraphView*)self.view update:self.timeSinceLastUpdate];
 }
 

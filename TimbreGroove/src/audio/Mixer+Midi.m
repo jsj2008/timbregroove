@@ -12,10 +12,6 @@ void MyMIDINotifyProc (const MIDINotification  *message, void *refCon) {
     printf("MIDI Notify, messageId=%ld,", message->messageID);
 }
 
-static char * _noteNames[] = {
-    "C", "C#", "D", "D#", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"
-};
-
 // Get the MIDI messages as they're sent
 static void MyMIDIReadProc(const MIDIPacketList *pktlist,
                            void *refCon,
@@ -24,10 +20,16 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
     // Cast our Sampler unit back to an audio unit
     AudioUnit player = (AudioUnit) refCon;
 
+    /*
+     static char * _noteNames[] = {
+     "C", "C#", "D", "D#", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"
+     };
+     
     const MIDITimeStamp kMillion = 1000 * 1000;
     static MIDITimeStamp s_prevTS = 0;
     MIDITimeStamp ts;
     MIDITimeStamp diff;
+    */
     
     MIDIPacket *packet = (MIDIPacket *)pktlist->packet;
     for (int i=0; i < pktlist->numPackets; i++) {
@@ -38,7 +40,7 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
         if (midiCommand == 0x09) {
             Byte note = packet->data[1] & 0x7F;
             Byte velocity = packet->data[2] & 0x7F;
-
+/*
             if( !i )
             {
                 ts = packet->timeStamp;
@@ -49,7 +51,7 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
             // Log the note letter in a readable format
             int noteNumber = ((int) note) % 12;
             NSLog(@"%s: %i - ts:%lld", _noteNames[noteNumber], noteNumber, diff/kMillion);
-            
+*/            
             // Use MusicDeviceMIDIEvent to send our MIDI message to the sampler to be played
             OSStatus result = MusicDeviceMIDIEvent (player, midiStatus, note, velocity, 0);
             if( result != noErr ) // don't call CheckError unless it really is an error
