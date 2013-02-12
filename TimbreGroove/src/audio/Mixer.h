@@ -8,14 +8,32 @@
 
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
+#import <CoreMIDI/CoreMIDI.h>
+
+void CheckError( OSStatus error, const char *operation);
 
 @interface Sound : NSObject
 -(OSStatus)playNote:(int)note forDuration:(NSTimeInterval)duration;
+-(void)playMidiFile:(NSString *)filename;
+-(void)addNoteCache:(int)note ts:(MIDITimeStamp)ts;
 @property (nonatomic,readonly) int lowestPlayable;
 @property (nonatomic,readonly) int highestPlayable;
+@property (nonatomic,readonly) AudioUnit sampler;
 @end
 
-@interface Mixer : NSObject
+@interface Mixer : NSObject {
+    // here for categories
+    AUGraph          _processingGraph;
+    AudioUnit *      _samplerUnits;
+    AudioUnit        _ioUnit;
+    AudioUnit        _mixerUnit;
+    AUNode           _mixerNode;
+    
+    MIDIClientRef  _midiClient;
+    MusicTimeStamp _playerTrackLength;
+    MusicSequence  _currentSequence;
+    MusicPlayer    _musicPlayer;
+}
 
 +(Mixer *)sharedInstance;
 

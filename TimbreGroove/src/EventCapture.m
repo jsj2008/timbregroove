@@ -40,11 +40,6 @@
     shader           = [GenericShader shaderWithHeaders:nil];
     _posLocation     = [shader location:gv_pos];
     
-    
-/*
-    GLint orgFB;
-	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &orgFB);
-*/
     [fbo bindToRender];
     glViewport(0, 0, fbo.width, fbo.height);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -53,7 +48,7 @@
     [shader use];
     [self recursive_render:graph.children shader:shader];
     
-	glReadPixels((GLuint)pt.x,
+    glReadPixels((GLuint)pt.x,
                  sz.height - (GLuint)pt.y,
                  1,
                  1,

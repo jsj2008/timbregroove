@@ -39,8 +39,6 @@
 -(id)wireUp
 {
     self.settingsAreDirty = false;
-    if( !_soundName )
-        self.soundName = @"vibes";
     return self;
 }
 
@@ -75,6 +73,8 @@
 
 -(void)setSoundName:(NSString *)soundName
 {
+    if( self.sound && [_soundName isEqualToString:soundName])
+        return;
     _soundName = soundName;
     self.sound = [[Mixer sharedInstance] getSound:soundName];
 }

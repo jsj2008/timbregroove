@@ -61,8 +61,6 @@
 {
     if( !_started )
     {
-        [Mixer sharedInstance];
-        
         for( UIViewController * vc in self.childViewControllers )
         {
             if( [vc.title isEqualToString:@"graphVC"] )

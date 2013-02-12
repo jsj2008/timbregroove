@@ -67,6 +67,12 @@
     self.light.ambientColor = (GLKVector4){subColor, subColor, peakVal, 1};
 }
 
+-(void)setSounds
+{
+    self.soundName = @"vibes";
+    [self.sound playMidiFile:@"ChildOfGod"];
+}
+
 -(void)tweenDone
 {
     _tweening = false;

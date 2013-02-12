@@ -70,16 +70,16 @@
 
 - (GLint) locationForName:(NSString *)name
 {
-	NSNumber * index = _d[name];
+    NSNumber * index = _d[name];
     GLint location;
-	if (index) {
-		location = (GLint)[index intValue];        
-	} else {
+    if (index) {
+        location = (GLint)[index intValue];
+    } else {
         location = glGetUniformLocation(_shader.program, [name UTF8String]);
         if( !_d )
             _d = [NSMutableDictionary new];
         _d[name] = @(location);
-	}
+    }
     return location;
 }
 

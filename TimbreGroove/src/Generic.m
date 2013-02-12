@@ -43,6 +43,7 @@
     [self getBufferLocations];
     [self getTextureLocations];
     [self configureLighting];
+    [self setSounds];
     return self;
 }
 
@@ -58,12 +59,6 @@
 #pragma mark Initialization sequence
 #pragma mark -
 
-
--(void)createBuffer
-{
-    
-}
-
 -(void)addBuffer:(MeshBuffer *)buffer
 {
     if( !_buffers )
@@ -72,14 +67,10 @@
 }
 
 
--(void)createTexture
-{
-}
-
--(void)createTextures
-{
-}
-
+-(void)createBuffer{}
+-(void)createTexture{}
+-(void)createTextures{}
+-(void)setSounds{}
 
 -(void)createShader
 {

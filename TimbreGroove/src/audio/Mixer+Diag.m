@@ -14,15 +14,15 @@
 
 -(void)dumpParameters:(AudioUnit)inUnit
 {
-    AudioUnitPropertyID 	inID = kAudioUnitProperty_ParameterList;
-    AudioUnitScope			inScope = kAudioUnitScope_Global;
-    AudioUnitElement		inElement = 0;
-    UInt32   				outDataSize;
+    AudioUnitPropertyID     inID = kAudioUnitProperty_ParameterList;
+    AudioUnitScope          inScope = kAudioUnitScope_Global;
+    AudioUnitElement        inElement = 0;
+    UInt32                  outDataSize;
     Boolean 				outWritable;
     
 	OSStatus result = AudioUnitGetPropertyInfo(inUnit, inID, inScope, inElement, &outDataSize, &outWritable);
     
-    if( result != noErr ) { NSLog(@"Error getting parameters: %08lX", result); return; }
+    CheckError(result, "Error getting parameters");
     
     NSLog(@"\nparaminfo size: %d \nWritable: %d", (unsigned int)outDataSize, (int)outWritable);
 	int nparams = outDataSize / sizeof(AudioUnitPropertyID);
@@ -30,7 +30,7 @@
 	memset (auIDs, 0xFF, outDataSize);
 
 	result = AudioUnitGetProperty(inUnit, inID, inScope, inElement, auIDs, &outDataSize);
-    if( result != noErr ) { NSLog(@"Error getting parameters (2): %08lX", result); return; }
+    CheckError(result, "Error getting parameters (2)");
     
     char str[1000];
     
@@ -44,7 +44,7 @@
                                             auIDs[i],
                                             &auinfo,
                                             &propertySize);
-        if( result != noErr ) { NSLog(@"Error getting parameters (3): %08lX", result); return; }
+        CheckError(result, "Error getting parameters (3)");
         
         if( auinfo.cfNameString )       
         {

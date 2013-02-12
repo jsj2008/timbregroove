@@ -30,6 +30,7 @@
 // derivations write these
 -(void)createBuffer;
 -(void)configureLighting;
+-(void)setSounds;
 
 // default behavoirs of these should be fine:
 -(void)createShader;
