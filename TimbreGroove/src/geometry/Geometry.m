@@ -21,19 +21,21 @@
 
 -(NSArray *)getStrideTypes
 {
+    const TGStrideType st = st_float3;
+
     if( _UVs )
     {
         if( _normals )
-            return @[@(st_float3),@(st_float2),@(st_float3)];
+            return @[@(st),@(st_float2),@(st_float3)];
         else
-            return @[@(st_float3),@(st_float2)];
+            return @[@(st),@(st_float2)];
     }
     else
     {
         if( _normals )
-            return @[@(st_float3),@(st_float3)];
+            return @[@(st),@(st_float3)];
     }
-    return @[@(st_float3)];
+    return @[@(st)];
 }
 
 -(void)createBufferDataByType:(NSArray *)strideTypes
@@ -100,6 +102,15 @@
     free(vertexData);
     if( indexData )
         free(indexData);
+}
+
+// for dynamic draw
+-(void)resetVertices
+{
+    void * vertexData = malloc(self.bufferSize);
+    [self getBufferData:vertexData indexData:NULL withUVs:_UVs withNormals:_normals];
+    [self setData:vertexData];
+    free(vertexData);
 }
 
 -(void)getStats:(GeometryStats *)stats

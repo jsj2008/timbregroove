@@ -570,7 +570,7 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     }
 }
 
--(void)update:(NSTimeInterval)dt
+-(void)update:(NSTimeInterval)dt  mixerUpdate:(MixerUpdate *)mixerUpdate
 {
     GLboolean prevDT = glIsEnabled(GL_DEPTH_TEST);
     glDisable(GL_DEPTH_TEST);

@@ -36,6 +36,8 @@
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
+    [self setPreferredFramesPerSecond:40];
 }
 
 - (void)didReceiveMemoryWarning
@@ -48,9 +50,10 @@
 
 - (void)update
 {
-    [[Mixer sharedInstance] fetchAudioFrame];
+    MixerUpdate mixerUpdate;
+    [[Mixer sharedInstance] update:&mixerUpdate];
     
-    [(GraphView*)self.view update:self.timeSinceLastUpdate];
+    [(GraphView*)self.view update:self.timeSinceLastUpdate mixerUpdate:&mixerUpdate];
 }
 
 - (void)glkView:(GLKView *)glkView drawInRect:(CGRect)rect

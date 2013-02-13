@@ -50,8 +50,8 @@ enum MidiNotes {
     };
 
 enum {
-	kMIDIMessage_NoteOn    = 0x9,
-	kMIDIMessage_NoteOff   = 0x8,
+    kMIDIMessage_NoteOn    = 0x9,
+    kMIDIMessage_NoteOff   = 0x8,
 };
 
 static Mixer * __sharedMixer;
@@ -93,9 +93,9 @@ static Mixer * __sharedMixer;
 
 -(OSStatus)playNote:(int)note forDuration:(NSTimeInterval)duration
 {
-	UInt32 noteNum = note;
-	UInt32 onVelocity = 127;
-	UInt32 noteCommand = 	kMIDIMessage_NoteOn << 4 | 0;
+    UInt32 noteNum = note;
+    UInt32 onVelocity = 127;
+    UInt32 noteCommand =     kMIDIMessage_NoteOn << 4 | 0;
     
     OSStatus result = noErr;
     result = MusicDeviceMIDIEvent (_samplerUnit,
@@ -109,8 +109,8 @@ static Mixer * __sharedMixer;
 
 -(OSStatus)stopNote:(NSNumber *)note
 {
-	UInt32 noteNum = [note unsignedIntegerValue];
-	UInt32 noteCommand = kMIDIMessage_NoteOff << 4 | 0;
+    UInt32 noteNum = [note unsignedIntegerValue];
+    UInt32 noteCommand = kMIDIMessage_NoteOff << 4 | 0;
     
     OSStatus result = noErr;
     result = MusicDeviceMIDIEvent (_samplerUnit,
@@ -126,25 +126,22 @@ static Mixer * __sharedMixer;
 //..............................................................................
 //..............................................................................
 
-#define BUFFERS_IN_RING 3
+#define BUFFERS_IN_RING 10
 
 typedef struct tagRenderCBContext {
     RingBufferOpaque rbo;
     long fetchCount;
-    long dropCount;
-    Float64 timeStamps[BUFFERS_IN_RING];
-    UInt32  numFrames[BUFFERS_IN_RING];
-    unsigned int lastTS;
+    UInt32  numFrames;
     UInt32 bufferSize;
 } RenderCBContext;
 
 OSStatus renderCallback(
-                    void *							inRefCon,
-                    AudioUnitRenderActionFlags *	ioActionFlags,
-                    const AudioTimeStamp *			inTimeStamp,
-                    UInt32							inBusNumber,
-                    UInt32							inNumberFrames,
-                    AudioBufferList *				ioData)
+                    void *                            inRefCon,
+                    AudioUnitRenderActionFlags *    ioActionFlags,
+                    const AudioTimeStamp *            inTimeStamp,
+                    UInt32                            inBusNumber,
+                    UInt32                            inNumberFrames,
+                    AudioBufferList *                ioData)
 {
     if( (*ioActionFlags & kAudioUnitRenderAction_PostRender) == 0 )
         return noErr;
@@ -169,21 +166,13 @@ OSStatus renderCallback(
         context->rbo = RingBuffer(2, sizeof(AudioSampleType), sz * BUFFERS_IN_RING);
         context->bufferSize = sz;
     }
+
+    double ts = CACurrentMediaTime();
+    RingBufferStore(context->rbo, ioData, inNumberFrames, ts);
     
-    if( context->fetchCount < 2 )
-    {
-        RingBufferStore(context->rbo, ioData, inNumberFrames, inTimeStamp->mSampleTime);
-        
-        ++context->fetchCount;
-        if( ++context->lastTS == BUFFERS_IN_RING )
-            context->lastTS = 0;
-        context->timeStamps[ context->lastTS ] = inTimeStamp->mSampleTime;
-        context->numFrames[ context->lastTS ] = inNumberFrames;
-    }
-    else
-    {
-        ++context->dropCount;
-    }
+    ++context->fetchCount;
+    
+    context->numFrames = inNumberFrames;
     
     return noErr;
 }
@@ -275,10 +264,13 @@ OSStatus renderCallback(
     return __sharedMixer;
 }
 
--(void *)fetchAudioFrame:(unsigned int *)dropCount
+-(void)update:(MixerUpdate *)mixerUpdate
 {
+    mixerUpdate->audioBufferList = NULL;
+    mixerUpdate->droppedCaptureFrames = 0;
+    
     if( !_cbContext.fetchCount )
-        return NULL;
+        return;
     
     if( !_captureBuffer || (_captureByteSize != _cbContext.bufferSize) )
     {
@@ -298,13 +290,14 @@ OSStatus renderCallback(
         _captureByteSize = _cbContext.bufferSize;
     }
 
-    int i = _cbContext.lastTS;
-    RingBufferFetch(_cbContext.rbo, _captureBuffer, _cbContext.numFrames[i], _cbContext.timeStamps[i]);
-    --_cbContext.fetchCount;
-    if( dropCount )
-        *dropCount = _cbContext.dropCount;
-    _cbContext.dropCount = 0;
-    return _captureBuffer;
+    int numFrames = _cbContext.numFrames;
+    double ts = CACurrentMediaTime();
+    RingBufferFetch(_cbContext.rbo, _captureBuffer, numFrames, ts);
+    
+    mixerUpdate->droppedCaptureFrames = _cbContext.fetchCount;
+    mixerUpdate->audioBufferList = _captureBuffer;
+    mixerUpdate->numFrames = numFrames;
+    _cbContext.fetchCount = 0;
 }
 
 - (void) setMixerOutputGain: (AudioUnitParameterValue) newGain
@@ -342,7 +335,7 @@ OSStatus renderCallback(
     BOOL isSoundfont = [meta[@"isSoundfont"] boolValue];
     NSString * ext = isSoundfont ? @"sf2" : @"aupreset";
     
-	NSURL *presetURL = [[NSBundle mainBundle] URLForResource: meta[@"preset"]
+    NSURL *presetURL = [[NSBundle mainBundle] URLForResource: meta[@"preset"]
                                                withExtension: ext];
     
     NSAssert(presetURL, @"preset path fail: %@",alias);
@@ -387,15 +380,15 @@ OSStatus renderCallback(
 
 -(AudioUnit)makeSampler
 {
-	OSStatus result = noErr;
+    OSStatus result = noErr;
     
-	AudioComponentDescription cd = {};
-	cd.componentManufacturer     = kAudioUnitManufacturer_Apple;
-	cd.componentFlags            = 0;
-	cd.componentFlagsMask        = 0;
-	cd.componentType = kAudioUnitType_MusicDevice;
-	cd.componentSubType = kAudioUnitSubType_Sampler;
-	
+    AudioComponentDescription cd = {};
+    cd.componentManufacturer     = kAudioUnitManufacturer_Apple;
+    cd.componentFlags            = 0;
+    cd.componentFlagsMask        = 0;
+    cd.componentType = kAudioUnitType_MusicDevice;
+    cd.componentSubType = kAudioUnitSubType_Sampler;
+    
     AUNode samplerNode;
     result = AUGraphAddNode(_processingGraph, &cd, &samplerNode);
     CheckError(result,"Unable to add the Sampler unit to the audio processing graph.");
@@ -424,7 +417,7 @@ OSStatus renderCallback(
     CheckError(result,"Unable to update graph.");
     
     [self dumpParameters:samplerUnit forUnit:@"Sampler Unit"];
-    [self dumpParameters:_ioUnit forUnit:@"RIO Unit"];
+    [self dumpParameters:_mixerUnit forUnit:@"Mixer Unit"];
     [self dumpGraph];
     
     return samplerUnit;
@@ -432,21 +425,21 @@ OSStatus renderCallback(
 
 -(OSStatus)setupAUGraph
 {
-	OSStatus result = noErr;
-	AUNode ioNode;
+    OSStatus result = noErr;
+    AUNode ioNode;
 
     CheckError(NewAUGraph (&_processingGraph),"Unable to create an AUGraph object.");
     
-	AudioComponentDescription cd = {};
-	cd.componentManufacturer     = kAudioUnitManufacturer_Apple;
-	cd.componentFlags            = 0;
-	cd.componentFlagsMask        = 0;
+    AudioComponentDescription cd = {};
+    cd.componentManufacturer     = kAudioUnitManufacturer_Apple;
+    cd.componentFlags            = 0;
+    cd.componentFlagsMask        = 0;
     cd.componentType             = kAudioUnitType_Mixer;
     cd.componentSubType          = kAudioUnitSubType_MultiChannelMixer;
     CheckError(AUGraphAddNode (_processingGraph, &cd, &_mixerNode),"Unable to add the Mixer unit to the audio processing graph.");
 
-	cd.componentType    = kAudioUnitType_Output;
-	cd.componentSubType = kAudioUnitSubType_RemoteIO;
+    cd.componentType    = kAudioUnitType_Output;
+    cd.componentSubType = kAudioUnitSubType_RemoteIO;
     CheckError(AUGraphAddNode (_processingGraph, &cd, &ioNode),"Unable to add the Output unit to the audio processing graph.");
 
     CheckError(AUGraphOpen (_processingGraph),                                 "Unable to open the audio processing graph.");
@@ -455,7 +448,7 @@ OSStatus renderCallback(
 
     CheckError(AudioUnitAddRenderNotify(_mixerUnit, renderCallback, &_cbContext), "Could not set callback");
 
-	
+    
     result = AUGraphConnectNodeInput (_processingGraph, _mixerNode, 0, ioNode, 0);
     CheckError(result,"Unable to interconnect the nodes in the audio processing graph.");
     
@@ -468,14 +461,14 @@ OSStatus renderCallback(
 - (OSStatus) loadSynthFromPresetURL: (NSURL *) presetURL sampler:(AudioUnit)sampler
 {
     
-	OSStatus result = noErr;
+    OSStatus result = noErr;
     
     NSDictionary * presetPropertyList = [NSDictionary dictionaryWithContentsOfURL:presetURL];
     
-	if (presetPropertyList != 0) {
-		
+    if (presetPropertyList != 0) {
+        
         CFPropertyListRef plr = (__bridge CFPropertyListRef)presetPropertyList;
-		result = AudioUnitSetProperty(
+        result = AudioUnitSetProperty(
                                       sampler,
                                       kAudioUnitProperty_ClassInfo,
                                       kAudioUnitScope_Global,
@@ -484,9 +477,9 @@ OSStatus renderCallback(
                                       sizeof(plr)
                                       );
         CheckError(result, "Unable to set the patch on a soundfont file");
-	}
+    }
 
-	return result;
+    return result;
 }
 
 -(OSStatus) loadSF2FromURL: (NSURL *)bankURL withPatch: (int)presetNumber sampler:(AudioUnit)sampler

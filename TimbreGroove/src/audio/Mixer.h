@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 #import <CoreMIDI/CoreMIDI.h>
+#import "TGTypes.h"
 
 void CheckError( OSStatus error, const char *operation);
 
@@ -40,7 +41,7 @@ void CheckError( OSStatus error, const char *operation);
 -(Sound *)getSound:(NSString *)name;
 -(NSArray *)getAllSoundNames;
 
--(void *)fetchAudioFrame;
+-(void)update:(MixerUpdate *)mixerUpdate;
 
 @property (nonatomic) AudioUnitParameterValue mixerOutputGain;
 @end

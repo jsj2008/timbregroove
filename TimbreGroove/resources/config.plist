@@ -4,6 +4,17 @@
 <dict>
 	<key>sounds</key>
 	<dict>
+		<key>sin</key>
+		<dict>
+			<key>isSoundfont</key>
+			<false/>
+			<key>preset</key>
+			<string>sin</string>
+			<key>lo</key>
+			<integer>0</integer>
+			<key>hi</key>
+			<string>127</string>
+		</dict>
 		<key>vibes</key>
 		<dict>
 			<key>isSoundfont</key>
@@ -67,6 +78,20 @@
 				<true/>
 				<key>instanceClass</key>
 				<string>PoolScreen</string>
+			</dict>
+			<key>icon</key>
+			<string>newModel.png</string>
+		</dict>
+		<key>oscilloscope_element</key>
+		<dict>
+			<key>order</key>
+			<integer>44</integer>
+			<key>userData</key>
+			<dict>
+				<key>wantsTouch</key>
+				<true/>
+				<key>instanceClass</key>
+				<string>Oscilloscope</string>
 			</dict>
 			<key>icon</key>
 			<string>newModel.png</string>

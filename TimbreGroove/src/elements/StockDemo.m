@@ -80,7 +80,7 @@ typedef enum shaderType {
     self.shader = [klass new];
 }
 
--(void)update:(NSTimeInterval)dt
+-(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate
 {
     _rot += 1;
     float rads = GLKMathDegreesToRadians(_rot);

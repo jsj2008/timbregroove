@@ -27,9 +27,9 @@
 }
 
 
--(void)update:(NSTimeInterval)dt
+-(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate
 {
-    [super update:dt];
+    [super update:dt mixerUpdate:mixerUpdate];
     if( self.light )
     {
         GLKVector3 lDir = self.light.direction;

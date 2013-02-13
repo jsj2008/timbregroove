@@ -66,6 +66,7 @@ static inline TGVertexStride * StrideInit4f(TGVertexStride * s)
 
 // for dynamic draw
 -(void)setData: (float *)data;
+@property (nonatomic,readonly) GLsizei bufferSize;
 
 -(void)getLocations:(Shader*)shader;
 

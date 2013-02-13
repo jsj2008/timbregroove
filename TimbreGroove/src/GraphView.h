@@ -18,7 +18,7 @@
 @property (nonatomic,strong) RecordGesture * recordGesture;
 @property (nonatomic,strong) TapRecordGesture * tapRecordGesture;
 
--(void)update:(NSTimeInterval)dt;
+-(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate;
 -(void)render;
 -(NSArray *)getSettings;
 -(void)commitSettings;

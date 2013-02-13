@@ -71,7 +71,7 @@
                 if( !_started )
                 {
                     [self performSelector:@selector(performTransition:)
-                               withObject:[GraphDefinitions getDefinitionForName:@"fractalSphere_element"]
+                               withObject:[GraphDefinitions getDefinitionForName:@"oscilloscope_element"]
                                afterDelay:0.25];
                     
                     _started = true;

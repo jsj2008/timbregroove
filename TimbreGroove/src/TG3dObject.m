@@ -132,7 +132,7 @@
 
 #pragma mark update render
 
--(void)update:(NSTimeInterval)dt
+-(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate
 {
     _noteTimer += dt;
     if( _ptPlayer && (_noteTimer > _ptPlayer.duration ) )

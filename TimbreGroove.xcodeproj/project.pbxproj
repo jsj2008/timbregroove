@@ -193,6 +193,10 @@
 		57A58EB116AE020C00C9FA53 /* poolLines.png in Resources */ = {isa = PBXBuildFile; fileRef = 57A58EB016AE020C00C9FA53 /* poolLines.png */; };
 		57A66EED167B1D1C00B9EA75 /* Texture.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A66EEC167B1D1C00B9EA75 /* Texture.m */; };
 		57A66EEF167B293E00B9EA75 /* aotk_tex_64.png in Resources */ = {isa = PBXBuildFile; fileRef = 57A66EEE167B293E00B9EA75 /* aotk_tex_64.png */; };
+		57B2098D16CAFAC0007BE2A2 /* Oscilloscope.m in Sources */ = {isa = PBXBuildFile; fileRef = 57B2098C16CAFABF007BE2A2 /* Oscilloscope.m */; };
+		57B2099016CB30FD007BE2A2 /* sin.aupreset in Resources */ = {isa = PBXBuildFile; fileRef = 57B2098F16CB30FD007BE2A2 /* sin.aupreset */; };
+		57B2099216CB3886007BE2A2 /* ChildOfGodSolo.mid in Resources */ = {isa = PBXBuildFile; fileRef = 57B2099116CB3886007BE2A2 /* ChildOfGodSolo.mid */; };
+		57B2099416CB43D8007BE2A2 /* simpleMel.mid in Resources */ = {isa = PBXBuildFile; fileRef = 57B2099316CB43D8007BE2A2 /* simpleMel.mid */; };
 		57BE7FB316CAC9AA001972ED /* CARingBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57BE7FB116CAC9AA001972ED /* CARingBuffer.cpp */; };
 		57BE7FB616CACA0D001972ED /* RingBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57BE7FB416CACA0C001972ED /* RingBuffer.cpp */; };
 		57BF036716C61C2300148359 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57BF036616C61C2300148359 /* CoreAudio.framework */; };
@@ -526,6 +530,11 @@
 		57ABE51D16C9FF3100A412E1 /* AudioUnitParameters.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AudioUnitParameters.h; path = System/Library/Frameworks/AudioUnit.framework/Headers/AudioUnitParameters.h; sourceTree = SDKROOT; };
 		57ABE51E16C9FF3100A412E1 /* AudioUnitProperties.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AudioUnitProperties.h; path = System/Library/Frameworks/AudioUnit.framework/Headers/AudioUnitProperties.h; sourceTree = SDKROOT; };
 		57ABE51F16C9FF3100A412E1 /* MusicDevice.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MusicDevice.h; path = System/Library/Frameworks/AudioUnit.framework/Headers/MusicDevice.h; sourceTree = SDKROOT; };
+		57B2098B16CAFABF007BE2A2 /* Oscilloscope.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Oscilloscope.h; sourceTree = "<group>"; };
+		57B2098C16CAFABF007BE2A2 /* Oscilloscope.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Oscilloscope.m; sourceTree = "<group>"; };
+		57B2098F16CB30FD007BE2A2 /* sin.aupreset */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = sin.aupreset; sourceTree = "<group>"; };
+		57B2099116CB3886007BE2A2 /* ChildOfGodSolo.mid */ = {isa = PBXFileReference; lastKnownFileType = audio.midi; path = ChildOfGodSolo.mid; sourceTree = "<group>"; };
+		57B2099316CB43D8007BE2A2 /* simpleMel.mid */ = {isa = PBXFileReference; lastKnownFileType = audio.midi; path = simpleMel.mid; sourceTree = "<group>"; };
 		57BE7FB116CAC9AA001972ED /* CARingBuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CARingBuffer.cpp; sourceTree = "<group>"; };
 		57BE7FB216CAC9AA001972ED /* CARingBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CARingBuffer.h; sourceTree = "<group>"; };
 		57BE7FB416CACA0C001972ED /* RingBuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RingBuffer.cpp; sourceTree = "<group>"; };
@@ -1081,6 +1090,8 @@
 				570F40D816AB8EE0000FCA7B /* StockDemo.m */,
 				578292C6169879930053ADCD /* ImageBaker.m */,
 				575AA12D16ADBC6800635A76 /* PoolScreen.m */,
+				57B2098B16CAFABF007BE2A2 /* Oscilloscope.h */,
+				57B2098C16CAFABF007BE2A2 /* Oscilloscope.m */,
 			);
 			name = misc;
 			sourceTree = "<group>";
@@ -1088,7 +1099,10 @@
 		57A10E961685E08300B80314 /* audio */ = {
 			isa = PBXGroup;
 			children = (
+				57B2099316CB43D8007BE2A2 /* simpleMel.mid */,
+				57B2099116CB3886007BE2A2 /* ChildOfGodSolo.mid */,
 				5714714216C86A4900CA2A69 /* ChildOfGod.mid */,
+				57B2098F16CB30FD007BE2A2 /* sin.aupreset */,
 				57FF32EE16C445C500948935 /* Vibraphone.aupreset */,
 				57FF32E216C41BEC00948935 /* atmos1.sf2 */,
 				57FF32E316C41BEC00948935 /* CONGAS_3.sf2 */,
@@ -1468,6 +1482,9 @@
 				57FF32EC16C41BEC00948935 /* triangle.sf2 in Resources */,
 				57FF32EF16C445C500948935 /* Vibraphone.aupreset in Resources */,
 				5714714316C86A4900CA2A69 /* ChildOfGod.mid in Resources */,
+				57B2099016CB30FD007BE2A2 /* sin.aupreset in Resources */,
+				57B2099216CB3886007BE2A2 /* ChildOfGodSolo.mid in Resources */,
+				57B2099416CB43D8007BE2A2 /* simpleMel.mid in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1570,6 +1587,7 @@
 				5714713F16C8451E00CA2A69 /* Mixer+Midi.m in Sources */,
 				57BE7FB316CAC9AA001972ED /* CARingBuffer.cpp in Sources */,
 				57BE7FB616CACA0D001972ED /* RingBuffer.cpp in Sources */,
+				57B2098D16CAFAC0007BE2A2 /* Oscilloscope.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

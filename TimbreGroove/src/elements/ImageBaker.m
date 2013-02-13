@@ -212,7 +212,7 @@ static const float __bakeShakerTimes[] = {
     // knock out default behavoir
 }
 
--(void)update:(NSTimeInterval)dt
+-(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate
 {
     _time += dt;    // frame rate
     _time2 += dt;   // fx duration

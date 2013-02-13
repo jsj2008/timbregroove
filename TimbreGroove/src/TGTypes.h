@@ -37,6 +37,7 @@ typedef enum {
 } TGDrawType;
 
 typedef enum TGStrideType {
+    st_float1 = 900,
     st_float2 = 1000,
     st_float3,
     st_float4
@@ -51,8 +52,15 @@ typedef struct TGVertexStride {
     GLuint       location;
 } TGVertexStride;
 
+typedef struct MixerUpdate {
+    void * audioBufferList;
+    unsigned int numFrames;
+    unsigned int droppedCaptureFrames;
+} MixerUpdate;
+
 #define GL_ERROR_C { GLenum __e = glGetError(); if(__e) { NSLog(@"glError(%d/%04X) %s:%d",__e,__e,__FILE__,__LINE__); }}
 #define GL_CALL(f) { NSLog(@"calling: %s", f); }
+
 static inline NSMutableDictionary * d( NSDictionary * a )
 {
     return [[NSMutableDictionary alloc] initWithDictionary:a];

@@ -35,4 +35,7 @@ typedef struct GeomtryStats
              withUVs:(bool)withUVs
          withNormals:(bool)withNormals;
 
+// for derived classes that use dynamic draw
+-(void)resetVertices;
+
 @end

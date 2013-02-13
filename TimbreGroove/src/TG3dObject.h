@@ -24,7 +24,7 @@
     NSTimeInterval _timer;
 }
 
--(void)update:(NSTimeInterval)dt;
+-(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate;
 -(void)render:(NSUInteger)w h:(NSUInteger)h;
 -(void)renderToFBO;
 -(void)renderToCaptureAtBufferLocation:(GLint)location;

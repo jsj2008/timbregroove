@@ -180,7 +180,7 @@
     self.shader = shader;
 }
 
--(void)update:(NSTimeInterval)dt
+-(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate
 {
     if( _timer > 1.0/8.0 )
     {

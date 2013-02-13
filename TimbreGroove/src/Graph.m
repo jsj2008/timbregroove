@@ -43,29 +43,29 @@
 -(void)pause              { [self traverse:_cmd userObj:self.view]; }
 -(void)stop               { [self traverse:_cmd userObj:self.view]; }
 
-+(void)_inner_update:(NSArray *)children dt:(NSTimeInterval)dt
++(void)_inner_update:(NSArray *)children dt:(NSTimeInterval)dt  mixerUpdate:(MixerUpdate *)mixerUpdate
 {
     for( TG3dObject * child in children )
     {
         child->_totalTime += dt;
         child->_timer += dt;
-        [child update:dt];
+        [child update:dt mixerUpdate:mixerUpdate];
         NSArray * c = child.children;
         if( c )
-            [self _inner_update:c dt:dt];
+            [self _inner_update:c dt:dt mixerUpdate:mixerUpdate];
     }
 }
 
--(void)update:(NSTimeInterval)dt
+-(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate
 {
     if( _single )
     {
         _single->_totalTime += dt;
         _single->_timer += dt;
-        [_single update:dt];
+        [_single update:dt mixerUpdate:mixerUpdate];
     }
     else
-        [Graph _inner_update:self.children dt:dt];
+        [Graph _inner_update:self.children dt:dt mixerUpdate:mixerUpdate];
 }
 
 +(void)_inner_render:(NSArray *)children w:(NSUInteger)w h:(NSUInteger)h

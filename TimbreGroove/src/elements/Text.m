@@ -31,7 +31,7 @@ NSString * const __str_textFieldName = @"textTexture";
     self.texture = [[Texture alloc] initWithString:_text];
 }
 
--(void)update:(NSTimeInterval)dt
+-(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate
 {
     _time += (dt*15);
     GLKVector3 rot = { 0, GLKMathDegreesToRadians(_time), 0 };

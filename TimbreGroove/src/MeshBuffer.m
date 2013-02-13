@@ -62,6 +62,11 @@
     return size;
 }
 
+-(GLsizei)bufferSize
+{
+    return _bufferSize;
+}
+
 -(void)getLocations:(Shader*)shader
 {
     for( int i = 0; i < _numStrides; i++ )
@@ -207,7 +212,9 @@
 
 @implementation ColorBuffer
 
--(void)setDataWithRGBAs:(float *)rgba numColors:(unsigned int)numColors indexIntoNames:(int)indexIntoNames
+-(void)setDataWithRGBAs:(float *)rgba
+              numColors:(unsigned int)numColors
+         indexIntoNames:(int)indexIntoNames
 {
     TGVertexStride stride;
     StrideInit4f(&stride);
