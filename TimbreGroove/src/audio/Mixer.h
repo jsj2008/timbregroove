@@ -23,17 +23,20 @@ void CheckError( OSStatus error, const char *operation);
 @end
 
 @interface Mixer : NSObject {
+@private
     // here for categories
     AUGraph          _processingGraph;
     AudioUnit *      _samplerUnits;
     AudioUnit        _ioUnit;
     AudioUnit        _mixerUnit;
+    AudioUnit        _masterEQUnit;
     AUNode           _mixerNode;
     
     MIDIClientRef  _midiClient;
     MusicTimeStamp _playerTrackLength;
     MusicSequence  _currentSequence;
     MusicPlayer    _musicPlayer;
+    bool           _midiFilePlaying;
 }
 
 +(Mixer *)sharedInstance;

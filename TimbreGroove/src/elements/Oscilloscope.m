@@ -16,6 +16,7 @@
 @interface OscilloscopeMesh : Geometry {
     float _spacing;
     float _width;
+    float _height;
     float * _data;
 }
 @end
@@ -28,6 +29,7 @@
     if (self) {
         _spacing = NUM_POINTS_F;
         _width = 2.0;
+        _height = 2.0;
         self.drawType = TG_LINE_STRIP; // TG_POINTS;
         self.usage = GL_DYNAMIC_DRAW;
         [self createWithIndicesIntoNames:indicesIntoNames
@@ -62,7 +64,7 @@
         x = -(_width/2.0) + (gridSize * i);
 
         *pos++ = x;
-        *pos++ = _data ? _data[i] : 0;
+        *pos++ = _data ? _data[i] * _height : 0;
         *pos++ = 0;
         if( withNormals )
         {
@@ -97,28 +99,20 @@
     [self.sound playMidiFile:@"simpleMel"];
 }
 
-#define DIVISOR ((float)0x5FFF)
-
 -(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate
 {
-    AudioBufferList * abl = mixerUpdate->audioBufferList;
-    unsigned int numFrames = mixerUpdate->numFrames;
-    
-    AudioSampleType * pleft  = abl->mBuffers[0].mData;
-    float prevs[4] = { 0, 0, 0, 0 };
-    int ring = 0;
-    for( int i = 0; i < numFrames; i++ )
+    if( mixerUpdate->numFrames != NUM_POINTS )
     {
-        float f = (float)( *pleft++ ) / DIVISOR;
-        for (int n = 0; n < 4; n++ ) {
-            int x = 3 - ((ring + n) % 4);
-            f += prevs[ x ] / (float)((n+1)*5);
-        }
-        _data[i] = f;
-        prevs[ring] = f;
-        ring = (ring + 1) % 4;
+        // TODO: Resample point buffer to match frames
+        // for now just flat line
+        
     }
-    [((OscilloscopeMesh *)_buffers[0]) resetScopeData:_data];
+    else
+    {
+        AudioBufferList * abl = mixerUpdate->audioBufferList;
+        memcpy(_data, abl->mBuffers[0].mData, abl->mBuffers[0].mDataByteSize); // left channel    
+        [((OscilloscopeMesh *)_buffers[0]) resetScopeData:_data];
+    }
 }
 
 -(void)render:(NSUInteger)w h:(NSUInteger)h

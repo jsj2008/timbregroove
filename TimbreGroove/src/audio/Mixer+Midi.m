@@ -12,6 +12,8 @@ void MyMIDINotifyProc (const MIDINotification  *message, void *refCon) {
     printf("MIDI Notify, messageId=%ld,", message->messageID);
 }
 
+//#define SHOW_NOTES
+
 // Get the MIDI messages as they're sent
 static void MyMIDIReadProc(const MIDIPacketList *pktlist,
                            void *refCon,
@@ -20,16 +22,16 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
     // Cast our Sampler unit back to an audio unit
     AudioUnit player = (AudioUnit) refCon;
 
-    /*
-     static char * _noteNames[] = {
+#ifdef SHOW_NOTES
+    static char * _noteNames[] = {
      "C", "C#", "D", "D#", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"
      };
-     
+    
     const MIDITimeStamp kMillion = 1000 * 1000;
     static MIDITimeStamp s_prevTS = 0;
     MIDITimeStamp ts;
     MIDITimeStamp diff;
-    */
+#endif
     
     MIDIPacket *packet = (MIDIPacket *)pktlist->packet;
     for (int i=0; i < pktlist->numPackets; i++) {
@@ -40,7 +42,7 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
         if (midiCommand == 0x09) {
             Byte note = packet->data[1] & 0x7F;
             Byte velocity = packet->data[2] & 0x7F;
-/*
+#ifdef SHOW_NOTES
             if( !i )
             {
                 ts = packet->timeStamp;
@@ -51,7 +53,7 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
             // Log the note letter in a readable format
             int noteNumber = ((int) note) % 12;
             NSLog(@"%s: %i - ts:%lld", _noteNames[noteNumber], noteNumber, diff/kMillion);
-*/            
+#endif
             // Use MusicDeviceMIDIEvent to send our MIDI message to the sampler to be played
             OSStatus result = MusicDeviceMIDIEvent (player, midiStatus, note, velocity, 0);
             if( result != noErr ) // don't call CheckError unless it really is an error
@@ -122,6 +124,7 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
     // reduces latency when MusicPlayerStart is called
     CheckError( MusicPlayerPreroll(_musicPlayer), "MusicPlayerPreroll failed" );
     CheckError( MusicPlayerStart(_musicPlayer), "MusicPlayerStart failed" );
+    _midiFilePlaying = true;
 
     // Get length of track so that we know how long to kill time for
     MusicTrack t;
@@ -132,16 +135,21 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
 
 -(BOOL)isPlayerDone
 {
+    if( !_midiFilePlaying )
+        return YES;
+    
     MusicTimeStamp now = 0;
     MusicPlayerGetTime (_musicPlayer, &now);
     if (now >= _playerTrackLength)
-        return NO;
-
-    // Stop the player and dispose of the objects
-    MusicPlayerStop(_musicPlayer);
-    DisposeMusicSequence(_currentSequence);
-    _currentSequence = 0;
-    return YES;
+    {
+        // Stop the player and dispose of the objects
+        MusicPlayerStop(_musicPlayer);
+        DisposeMusicSequence(_currentSequence);
+        _currentSequence = 0;
+        _midiFilePlaying = false;
+        return YES;
+    }
+    return NO;
 }
 
 -(void)midiDealloc

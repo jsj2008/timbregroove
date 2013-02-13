@@ -11,6 +11,7 @@
 @interface Mixer (Midi)
 -(void)setupMidi;
 -(void)playMidiFile:(NSString *)filename throughSampler:(AudioUnit)sampler;
+-(BOOL)isPlayerDone;
 
 -(void)midiDealloc;
 @end

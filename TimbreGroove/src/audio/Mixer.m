@@ -163,7 +163,7 @@ OSStatus renderCallback(
 
     if( !context->rbo )
     {
-        context->rbo = RingBuffer(2, sizeof(AudioSampleType), sz * BUFFERS_IN_RING);
+        context->rbo = RingBuffer(2, sizeof(Float32), sz * BUFFERS_IN_RING);
         context->bufferSize = sz;
     }
 
@@ -224,6 +224,8 @@ OSStatus renderCallback(
     free(_samplerUnits);
     if( _captureBuffer )
         free(_captureBuffer);
+    if( _cbContext.rbo )
+        RingBufferRelease(_cbContext.rbo);
 }
 
 -(void)setupStdASBD
@@ -269,35 +271,38 @@ OSStatus renderCallback(
     mixerUpdate->audioBufferList = NULL;
     mixerUpdate->droppedCaptureFrames = 0;
     
-    if( !_cbContext.fetchCount )
-        return;
-    
-    if( !_captureBuffer || (_captureByteSize != _cbContext.bufferSize) )
+    if( _cbContext.fetchCount )
     {
-        if( _captureBuffer )
-            free(_captureBuffer);
-        _captureBuffer = malloc(sizeof(AudioBufferList)+sizeof(AudioBuffer)+_cbContext.bufferSize);
-        AudioBufferList * abl = _captureBuffer;
-        Byte * dataBuff = ((Byte *)&abl->mBuffers[1].mData) + sizeof(void *);
-        UInt32 buffsz = _cbContext.bufferSize / 2;
-        abl->mNumberBuffers = 2;
-        abl->mBuffers[0].mNumberChannels = 1;
-        abl->mBuffers[0].mDataByteSize = buffsz;
-        abl->mBuffers[0].mData = dataBuff;
-        abl->mBuffers[1].mNumberChannels = 1;
-        abl->mBuffers[1].mDataByteSize = buffsz;
-        abl->mBuffers[1].mData = dataBuff + buffsz;
-        _captureByteSize = _cbContext.bufferSize;
-    }
+        if( !_captureBuffer || (_captureByteSize != _cbContext.bufferSize) )
+        {
+            if( _captureBuffer )
+                free(_captureBuffer);
+            _captureBuffer = malloc(sizeof(AudioBufferList)+sizeof(AudioBuffer)+_cbContext.bufferSize);
+            AudioBufferList * abl = _captureBuffer;
+            Byte * dataBuff = ((Byte *)&abl->mBuffers[1].mData) + sizeof(void *);
+            UInt32 buffsz = _cbContext.bufferSize / 2;
+            abl->mNumberBuffers = 2;
+            abl->mBuffers[0].mNumberChannels = 1;
+            abl->mBuffers[0].mDataByteSize = buffsz;
+            abl->mBuffers[0].mData = dataBuff;
+            abl->mBuffers[1].mNumberChannels = 1;
+            abl->mBuffers[1].mDataByteSize = buffsz;
+            abl->mBuffers[1].mData = dataBuff + buffsz;
+            _captureByteSize = _cbContext.bufferSize;
+        }
 
-    int numFrames = _cbContext.numFrames;
-    double ts = CACurrentMediaTime();
-    RingBufferFetch(_cbContext.rbo, _captureBuffer, numFrames, ts);
+        int numFrames = _cbContext.numFrames;
+        double ts = CACurrentMediaTime();
+        RingBufferFetch(_cbContext.rbo, _captureBuffer, numFrames, ts);
+        
+        mixerUpdate->droppedCaptureFrames = _cbContext.fetchCount;
+        mixerUpdate->audioBufferList = _captureBuffer;
+        mixerUpdate->numFrames = numFrames;
+    }
     
-    mixerUpdate->droppedCaptureFrames = _cbContext.fetchCount;
-    mixerUpdate->audioBufferList = _captureBuffer;
-    mixerUpdate->numFrames = numFrames;
     _cbContext.fetchCount = 0;
+    
+    [self isPlayerDone];
 }
 
 - (void) setMixerOutputGain: (AudioUnitParameterValue) newGain
@@ -426,7 +431,8 @@ OSStatus renderCallback(
 -(OSStatus)setupAUGraph
 {
     OSStatus result = noErr;
-    AUNode ioNode;
+    AUNode ioNode, eqNode, cvNode;
+    AudioUnit cvUnit;
 
     CheckError(NewAUGraph (&_processingGraph),"Unable to create an AUGraph object.");
     
@@ -438,23 +444,44 @@ OSStatus renderCallback(
     cd.componentSubType          = kAudioUnitSubType_MultiChannelMixer;
     CheckError(AUGraphAddNode (_processingGraph, &cd, &_mixerNode),"Unable to add the Mixer unit to the audio processing graph.");
 
+    cd.componentType    = kAudioUnitType_Effect;
+    cd.componentSubType = kAudioUnitSubType_NBandEQ;
+    CheckError(AUGraphAddNode (_processingGraph, &cd, &eqNode),"Unable to add the master EQ unit to the audio processing graph.");
+
+    cd.componentType    = kAudioUnitType_FormatConverter;
+    cd.componentSubType = kAudioUnitSubType_AUConverter;
+    CheckError(AUGraphAddNode (_processingGraph, &cd, &cvNode),"Unable to add the master EQ unit to the audio processing graph.");
+
     cd.componentType    = kAudioUnitType_Output;
     cd.componentSubType = kAudioUnitSubType_RemoteIO;
     CheckError(AUGraphAddNode (_processingGraph, &cd, &ioNode),"Unable to add the Output unit to the audio processing graph.");
 
-    CheckError(AUGraphOpen (_processingGraph),                                 "Unable to open the audio processing graph.");
-    CheckError(AUGraphNodeInfo (_processingGraph, _mixerNode, 0, &_mixerUnit), "Unable to obtain a reference to the I/O unit.");
-    CheckError(AUGraphNodeInfo (_processingGraph, ioNode, 0, &_ioUnit),        "Unable to obtain a reference to the I/O unit.");
+    
+    CheckError(AUGraphOpen (_processingGraph),                                    "Unable to open the audio processing graph.");
+    CheckError(AUGraphNodeInfo (_processingGraph, _mixerNode, 0, &_mixerUnit),    "Unable to obtain a reference to the mixer unit.");
+    CheckError(AUGraphNodeInfo (_processingGraph, eqNode,     0, &_masterEQUnit), "Unable to obtain a reference to the master EQ unit.");
+    CheckError(AUGraphNodeInfo (_processingGraph, cvNode,     0, &cvUnit),        "Unable to obtain a reference to the master EQ unit.");
+    CheckError(AUGraphNodeInfo (_processingGraph, ioNode,     0, &_ioUnit),       "Unable to obtain a reference to the I/O unit.");
 
-    CheckError(AudioUnitAddRenderNotify(_mixerUnit, renderCallback, &_cbContext), "Could not set callback");
+    AudioStreamBasicDescription fasbd = {0};
+    AudioStreamBasicDescription iasbd = {0};
+    unsigned long asbdSize = sizeof(fasbd);
+    CheckError(AudioUnitGetProperty(_masterEQUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &fasbd, &asbdSize), "ugh fmt 1");
+    CheckError(AudioUnitGetProperty(_mixerUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &iasbd, &asbdSize), "ugh fmt 2");
+    CheckError(AudioUnitSetProperty(cvUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input,  0, &iasbd, asbdSize), "ugh fmt 3");
+    CheckError(AudioUnitSetProperty(cvUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &fasbd, asbdSize), "ugh fmt 4");
+    
+    CheckError(AudioUnitAddRenderNotify(_masterEQUnit, renderCallback, &_cbContext), "Could not set callback");
+    
+    result = AUGraphConnectNodeInput (_processingGraph, _mixerNode, 0, cvNode, 0);
+    CheckError(result,"Unable to interconnect the mixer/conv nodes in the audio processing graph.");
 
+    result = AUGraphConnectNodeInput (_processingGraph, cvNode, 0, eqNode, 0);
+    CheckError(result,"Unable to interconnect the mixer/conv nodes in the audio processing graph.");
     
-    result = AUGraphConnectNodeInput (_processingGraph, _mixerNode, 0, ioNode, 0);
-    CheckError(result,"Unable to interconnect the nodes in the audio processing graph.");
-    
-    result = AudioUnitSetProperty(_mixerUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &_stdASBD, sizeof(_stdASBD));
-    CheckError(result,"Unable to set RIO output stream format");
-    
+    result = AUGraphConnectNodeInput (_processingGraph, eqNode, 0, ioNode, 0);
+    CheckError(result,"Unable to interconnect the cv/rio nodes in the audio processing graph.");
+
     return result;
 }
 
@@ -505,8 +532,6 @@ OSStatus renderCallback(
 - (OSStatus) configUnit:(AudioUnit)unit
 {
     OSStatus result = noErr;
-    UInt32 framesPerSlice = 0;
-    UInt32 framesPerSlicePropertySize = sizeof (framesPerSlice);
     UInt32 sampleRatePropertySize = sizeof (_graphSampleRate);
     
     result =    AudioUnitSetProperty (
@@ -518,18 +543,19 @@ OSStatus renderCallback(
                                       sampleRatePropertySize
                                       );
     
-    CheckError(result,"AudioUnitSetProperty (set Sampler unit output stream sample rate).");
+    CheckError(result,"AudioUnitSetProperty (set unit output stream sample rate).");
     
-    result =    AudioUnitGetProperty (
+    UInt32 framesPerSlice = 4096;
+    result =    AudioUnitSetProperty (
                                       unit,
                                       kAudioUnitProperty_MaximumFramesPerSlice,
                                       kAudioUnitScope_Global,
                                       0,
                                       &framesPerSlice,
-                                      &framesPerSlicePropertySize
+                                      sizeof (framesPerSlice)
                                       );
     
-    CheckError(result,"Unable to retrieve the maximum frames per slice property from the I/O unit.");
+    CheckError(result,"Unable to set the maximum frames per slice property from the I/O unit.");
     
     return result;
 }
@@ -538,11 +564,14 @@ OSStatus renderCallback(
 {
     OSStatus result = noErr;
     
-    result = AudioUnitInitialize (_ioUnit);
-    CheckError(result,"Unable to initialize the I/O unit.");
-
-    [self configUnit:_ioUnit];
+    result = AudioUnitInitialize(_ioUnit); // sampling rate is otherwise not writable
+    CheckError(result, "Could not initialize ioUnit");
+    
     [self configUnit:_mixerUnit];
+    [self configUnit:_masterEQUnit];
+    [self configUnit:_ioUnit];
+    
+    [self dumpGraph];
     
     result = AUGraphInitialize (_processingGraph);
     CheckError(result,"Unable to initialze AUGraph object.");
