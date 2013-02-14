@@ -122,6 +122,20 @@ typedef struct  tagAUFlagDump {
     NSLog (@"  Bits per Channel:    %10d\n----------------------------\n",    (unsigned int)asbd.mBitsPerChannel);
 }
 
+-(void)dumpEQ
+{
+    for( int i = 0; i < kNUM_EQ_BANDS; i++ )
+    {
+        if( i == 1 )
+            continue;
+        float bw, center, peak;
+        AudioUnitGetParameter(_masterEQUnit, kAUNBandEQParam_Bandwidth+i, kAudioUnitScope_Global, 0, &bw);
+        AudioUnitGetParameter(_masterEQUnit, kAUNBandEQParam_Frequency +i, kAudioUnitScope_Global, 0, &center);
+        AudioUnitGetParameter(_masterEQUnit, kAUNBandEQParam_Gain+i, kAudioUnitScope_Global, 0, &peak);
+        NSLog(@"EQ[%d] center: %05.4f bw: %02.4f  peak:%02.4f", i, center, bw, peak);
+    }
+}
+
 -(void)dumpGraph
 {
     CAShow(_processingGraph);

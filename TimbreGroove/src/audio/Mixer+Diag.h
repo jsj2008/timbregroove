@@ -12,5 +12,6 @@
 -(void)dumpParameters:(AudioUnit)au forUnit:(NSString *)name;
 - (void) printASBD: (AudioStreamBasicDescription) asbd;
 -(void)dumpGraph;
+-(void)dumpEQ;
 
 @end

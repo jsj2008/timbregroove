@@ -13,28 +13,12 @@
 #import "Mixer+Diag.h"
 #import "Mixer+Midi.h"
 #import "RingBuffer.h"
+#import <libkern/OSAtomic.h>
 
-#ifndef DEBUG
-#undef NSAssert
-#define NSAssert(cond,str,...)
-#endif
-
-void CheckError( OSStatus error, const char *operation) {
-    if (error == noErr)
-        return;
-    char errorString[ 20];        // See if it appears to be a 4-char-code
-    *( UInt32 *)( errorString + 1) = CFSwapInt32HostToBig( error);
-    if (isprint( errorString[ 1]) && isprint( errorString[ 2]) &&
-        isprint( errorString[ 3]) && isprint( errorString[ 4]))
-    {
-        errorString[0] = errorString[5] = '\'';
-        errorString[6] = '\0';
-    }
-    else                        // No, format it as an integer
-        sprintf( errorString, "%d %04X", (int) error, (int)error);
-    fprintf( stderr, "Error: %s (%s)\n", operation, errorString);
-    exit( 1);
-}
+const float kBottomOfOctiveRange = 0.05;
+const float kTopOfOctiveRange = 5.0;
+const AudioUnitParameterValue kEQBypassON  = 1;
+const AudioUnitParameterValue kEQBypassOFF = 0;
 
 enum MidiNotes {
     kC0 = 0,
@@ -53,6 +37,24 @@ enum {
     kMIDIMessage_NoteOn    = 0x9,
     kMIDIMessage_NoteOff   = 0x8,
 };
+
+void CheckError( OSStatus error, const char *operation) {
+    if (error == noErr)
+        return;
+    char errorString[ 20];        // See if it appears to be a 4-char-code
+    *( UInt32 *)( errorString + 1) = CFSwapInt32HostToBig( error);
+    if (isprint( errorString[ 1]) && isprint( errorString[ 2]) &&
+        isprint( errorString[ 3]) && isprint( errorString[ 4]))
+    {
+        errorString[0] = errorString[5] = '\'';
+        errorString[6] = '\0';
+    }
+    else                        // No, format it as an integer
+        sprintf( errorString, "%d %04X", (int) error, (int)error);
+    fprintf( stderr, "Error: %s (%s)\n", operation, errorString);
+    exit( 1);
+}
+
 
 static Mixer * __sharedMixer;
 
@@ -126,53 +128,60 @@ static Mixer * __sharedMixer;
 //..............................................................................
 //..............................................................................
 
-#define BUFFERS_IN_RING 10
+// hard to tell where to set this number. The number of frames coming in
+// can jump from 512 to 8x that without warning but since we can only
+// ever interpret kFramesForDisplay (~512) at a time we only store that much
+// TODO: Maybe want to think about downsampling
+// but that could be awefully CPU expensive if inNumberFrames is some
+// crazy number like 8k.
+// Arrived at '16' because there seems to be an average of 5-10 dropped
+// frames per UI thread fetch (vs. audio thread store) and the RingBuffer
+// will step up to power of 2 anyway.
+// This could probably set to something like '4' b/c the UI thread
+// only ever picks up the latest slice but it just seem like by bumping
+// this number huge, we likely avoid having the audio thread write
+// directly into the same slot that we that is currently be read from
+#define FRAME_MAX (kFramesForDisplay * 16)
 
 typedef struct tagRenderCBContext {
-    RingBufferOpaque rbo;
-    long fetchCount;
-    UInt32  numFrames;
-    UInt32 bufferSize;
+    AudioStreamBasicDescription asbd;
+    RingBufferOpaque  rbo;
+    int32_t /*UInt32*/ fetchCount; // mark the last store (also: dropCount)
 } RenderCBContext;
 
 OSStatus renderCallback(
-                    void *                            inRefCon,
-                    AudioUnitRenderActionFlags *    ioActionFlags,
-                    const AudioTimeStamp *            inTimeStamp,
-                    UInt32                            inBusNumber,
-                    UInt32                            inNumberFrames,
-                    AudioBufferList *                ioData)
+                    void *                         inRefCon,
+                    AudioUnitRenderActionFlags *   ioActionFlags,
+                    const AudioTimeStamp *         inTimeStamp,
+                    UInt32                         inBusNumber,
+                    UInt32                         inNumberFrames,
+                    AudioBufferList *              ioData)
 {
-    if( (*ioActionFlags & kAudioUnitRenderAction_PostRender) == 0 )
+    if( (*ioActionFlags & kAudioUnitRenderAction_PostRender) == 0 ||
+            inNumberFrames < kFramesForDisplay )
+    {
         return noErr;
+    }
     
     RenderCBContext * context = inRefCon;
     
-    UInt32 sz = 0;
-    for( int i = 0; i < ioData->mNumberBuffers; i++ )
-        sz += ioData->mBuffers[i].mDataByteSize;
-    
-    if( context->rbo )
-    {
-        if( sz != context->bufferSize )
-        {
-            RingBufferRelease(context->rbo);
-            context->rbo = 0;
-        }
-    }
-
     if( !context->rbo )
     {
-        context->rbo = RingBuffer(2, sizeof(Float32), sz * BUFFERS_IN_RING);
-        context->bufferSize = sz;
+        context->rbo = RingBuffer(context->asbd.mChannelsPerFrame,
+                                  context->asbd.mBytesPerFrame,
+                                  FRAME_MAX);
     }
 
-    double ts = CACurrentMediaTime();
-    RingBufferStore(context->rbo, ioData, inNumberFrames, ts);
+    // Store to the next timeslot b/c display thread may be
+    // reading from current 'fetchCount' slot
+    SInt64 ts = (context->fetchCount + 1) * kFramesForDisplay;
     
-    ++context->fetchCount;
-    
-    context->numFrames = inNumberFrames;
+    // only store what the display can handle
+    RingBufferStore(context->rbo, ioData, kFramesForDisplay, ts );
+
+    OSAtomicCompareAndSwap32Barrier(context->fetchCount,
+                                    context->fetchCount+1,
+                                    (volatile int32_t *)&context->fetchCount);
     
     return noErr;
 }
@@ -269,55 +278,43 @@ OSStatus renderCallback(
 -(void)update:(MixerUpdate *)mixerUpdate
 {
     mixerUpdate->audioBufferList = NULL;
-    mixerUpdate->droppedCaptureFrames = 0;
+
+    RenderCBContext ctx = _cbContext; // copy in case AU callback writes while we do this
     
-    if( _cbContext.fetchCount )
+    if( ctx.fetchCount )
     {
-        if( !_captureBuffer || (_captureByteSize != _cbContext.bufferSize) )
+        if( !_captureBuffer )
         {
-            if( _captureBuffer )
-                free(_captureBuffer);
-            _captureBuffer = malloc(sizeof(AudioBufferList)+sizeof(AudioBuffer)+_cbContext.bufferSize);
+            _captureByteSize = kFramesForDisplay * ctx.asbd.mBytesPerFrame * 2; // 2 channels
+            _captureBuffer = malloc(sizeof(AudioBufferList)+sizeof(AudioBuffer)+_captureByteSize);
             AudioBufferList * abl = _captureBuffer;
             Byte * dataBuff = ((Byte *)&abl->mBuffers[1].mData) + sizeof(void *);
-            UInt32 buffsz = _cbContext.bufferSize / 2;
+            UInt32 channelBufferSize = _captureByteSize / 2;
             abl->mNumberBuffers = 2;
             abl->mBuffers[0].mNumberChannels = 1;
-            abl->mBuffers[0].mDataByteSize = buffsz;
+            abl->mBuffers[0].mDataByteSize = channelBufferSize;
             abl->mBuffers[0].mData = dataBuff;
             abl->mBuffers[1].mNumberChannels = 1;
-            abl->mBuffers[1].mDataByteSize = buffsz;
-            abl->mBuffers[1].mData = dataBuff + buffsz;
-            _captureByteSize = _cbContext.bufferSize;
+            abl->mBuffers[1].mDataByteSize = channelBufferSize;
+            abl->mBuffers[1].mData = dataBuff + channelBufferSize;
         }
 
-        int numFrames = _cbContext.numFrames;
-        double ts = CACurrentMediaTime();
-        RingBufferFetch(_cbContext.rbo, _captureBuffer, numFrames, ts);
-        
-        mixerUpdate->droppedCaptureFrames = _cbContext.fetchCount;
+        // Ringbuffer will return silence (all zeroes) if our fetch
+        // here is no longer available - iow, there was too much
+        // lag betweeen store vs. fetch
+        SInt64 ts = ctx.fetchCount * kFramesForDisplay;
+
+        RingBufferFetch(ctx.rbo, _captureBuffer, kFramesForDisplay, ts);
+
         mixerUpdate->audioBufferList = _captureBuffer;
-        mixerUpdate->numFrames = numFrames;
+        
+        OSAtomicCompareAndSwap32Barrier(_cbContext.fetchCount,
+                                        0,
+                                        (volatile int32_t *)&_cbContext.fetchCount);
     }
     
-    _cbContext.fetchCount = 0;
     
     [self isPlayerDone];
-}
-
-- (void) setMixerOutputGain: (AudioUnitParameterValue) newGain
-{    
-    OSStatus result = AudioUnitSetParameter (
-                                             _mixerUnit,
-                                             kMultiChannelMixerParam_Volume,
-                                             kAudioUnitScope_Output,
-                                             0,
-                                             newGain,
-                                             0
-                                             );
-    
-    CheckError(result,"Unable to set output gain.");
-    
 }
 
 -(NSArray *)getAllSoundNames
@@ -417,15 +414,48 @@ OSStatus renderCallback(
     
     [self configUnit:samplerUnit];
     
-    Boolean isUpdated;
-    result = AUGraphUpdate(_processingGraph, &isUpdated);
+    //Boolean isUpdated;
+    result = AUGraphUpdate(_processingGraph, NULL); // NULL forces synchronous update &isUpdated);
     CheckError(result,"Unable to update graph.");
     
-    [self dumpParameters:samplerUnit forUnit:@"Sampler Unit"];
-    [self dumpParameters:_mixerUnit forUnit:@"Mixer Unit"];
     [self dumpGraph];
     
     return samplerUnit;
+}
+
+-(OSStatus)setupMasterEQ
+{
+    OSStatus result;
+    
+    UInt32 numBands = kNUM_EQ_BANDS;
+    result = AudioUnitSetProperty(_masterEQUnit, kAUNBandEQProperty_NumberOfBands, kAudioUnitScope_Global, 0, &numBands, sizeof(numBands));
+    CheckError(result, "Could not set number of EQ bands");
+
+    CheckError(AudioUnitAddRenderNotify(_masterEQUnit, renderCallback, &_cbContext), "Could not set callback");
+    
+    for( int i = 0; i < kNUM_EQ_BANDS; i++ )
+    {
+        result = AudioUnitSetParameter (_masterEQUnit,
+                                        kAUNBandEQParam_FilterType + i,
+                                        kAudioUnitScope_Global,
+                                        0,
+                                        kAUNBandEQFilterType_Parametric,
+                                        0);
+        CheckError(result,"Unable to set eq filter type.");
+        
+        result = AudioUnitSetParameter (_masterEQUnit,
+                                        kAUNBandEQParam_BypassBand + i,
+                                        kAudioUnitScope_Global,
+                                        0,
+                                        kEQBypassOFF,
+                                        0);
+        
+        CheckError(result,"Unable to set eq bypass to OFF.");
+        _selectedEQdBand = i;
+        self.eqCenter = 0.5;
+    }
+    
+    return result;
 }
 
 -(OSStatus)setupAUGraph
@@ -456,7 +486,6 @@ OSStatus renderCallback(
     cd.componentSubType = kAudioUnitSubType_RemoteIO;
     CheckError(AUGraphAddNode (_processingGraph, &cd, &ioNode),"Unable to add the Output unit to the audio processing graph.");
 
-    
     CheckError(AUGraphOpen (_processingGraph),                                    "Unable to open the audio processing graph.");
     CheckError(AUGraphNodeInfo (_processingGraph, _mixerNode, 0, &_mixerUnit),    "Unable to obtain a reference to the mixer unit.");
     CheckError(AUGraphNodeInfo (_processingGraph, eqNode,     0, &_masterEQUnit), "Unable to obtain a reference to the master EQ unit.");
@@ -470,24 +499,24 @@ OSStatus renderCallback(
     CheckError(AudioUnitGetProperty(_mixerUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &iasbd, &asbdSize), "ugh fmt 2");
     CheckError(AudioUnitSetProperty(cvUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input,  0, &iasbd, asbdSize), "ugh fmt 3");
     CheckError(AudioUnitSetProperty(cvUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &fasbd, asbdSize), "ugh fmt 4");
+    _cbContext.asbd = fasbd;
     
-    CheckError(AudioUnitAddRenderNotify(_masterEQUnit, renderCallback, &_cbContext), "Could not set callback");
+    [self setupMasterEQ];
     
     result = AUGraphConnectNodeInput (_processingGraph, _mixerNode, 0, cvNode, 0);
     CheckError(result,"Unable to interconnect the mixer/conv nodes in the audio processing graph.");
 
     result = AUGraphConnectNodeInput (_processingGraph, cvNode, 0, eqNode, 0);
-    CheckError(result,"Unable to interconnect the mixer/conv nodes in the audio processing graph.");
+    CheckError(result,"Unable to interconnect the conv/eq nodes in the audio processing graph.");
     
     result = AUGraphConnectNodeInput (_processingGraph, eqNode, 0, ioNode, 0);
-    CheckError(result,"Unable to interconnect the cv/rio nodes in the audio processing graph.");
+    CheckError(result,"Unable to interconnect the eq/rio nodes in the audio processing graph.");
 
     return result;
 }
 
 - (OSStatus) loadSynthFromPresetURL: (NSURL *) presetURL sampler:(AudioUnit)sampler
 {
-    
     OSStatus result = noErr;
     
     NSDictionary * presetPropertyList = [NSDictionary dictionaryWithContentsOfURL:presetURL];
@@ -571,17 +600,107 @@ OSStatus renderCallback(
     [self configUnit:_masterEQUnit];
     [self configUnit:_ioUnit];
     
-    [self dumpGraph];
-    
     result = AUGraphInitialize (_processingGraph);
     CheckError(result,"Unable to initialze AUGraph object.");
     
     result = AUGraphStart (_processingGraph);
     CheckError(result,"Unable to start audio processing graph.");
 
-    [self dumpGraph];
-    
     return result;
 }
 
+
+- (void) setMixerOutputGain: (AudioUnitParameterValue) newGain
+{
+    OSStatus result = AudioUnitSetParameter (
+                                             _mixerUnit,
+                                             kMultiChannelMixerParam_Volume,
+                                             kAudioUnitScope_Output,
+                                             0,
+                                             newGain,
+                                             0
+                                             );
+    
+    CheckError(result,"Unable to set output gain.");
+
+    _mixerOutputGain = newGain;
+}
+
+-(void) setEqBandwidth:(AudioUnitParameterValue)eqBandwidth
+{
+    // 0.05 through 5.0 octaves
+    AudioUnitParameterValue nativeValue = (eqBandwidth * (kTopOfOctiveRange-kBottomOfOctiveRange)) +
+                                            (eqBandwidth * kBottomOfOctiveRange);
+    //NSLog(@"eq bw set to %f <- %f", nativeValue, eqBandwidth);
+    OSStatus result = AudioUnitSetParameter (
+                                             _masterEQUnit,
+                                             kAUNBandEQParam_Bandwidth + _selectedEQdBand,
+                                             kAudioUnitScope_Global,
+                                             0,
+                                             nativeValue,
+                                             0
+                                             );
+    
+    CheckError(result,"Unable to set eq HiBandwidth.");
+
+    _eqBandwidth = eqBandwidth;    
+}
+
+-(void) calcEQBandLow:(float *)lo andHigh:(float *)hi
+{
+    const float kLowestFreq = 20.0;
+    float highestFreq = _graphSampleRate / 2.0;
+    float singleEQBandRange = (highestFreq - kLowestFreq) / kNUM_EQ_BANDS;
+    *lo = (singleEQBandRange * _selectedEQdBand) + kLowestFreq;
+    *hi = *lo + singleEQBandRange;
+}
+
+-(void) setEqCenter:(AudioUnitParameterValue)eqCenter
+{
+    // 20 Hz to < Nyquist freq (sampleRate/2)
+    float min, max;
+    [self calcEQBandLow:&min andHigh:&max];
+    AudioUnitParameterValue nativeValue = (eqCenter * (max-min)) + (min * eqCenter);
+    //NSLog(@"eq center to %f <- %f", nativeValue, eqCenter);
+    OSStatus result = AudioUnitSetParameter (
+                                             _masterEQUnit,
+                                             kAUNBandEQParam_Frequency + _selectedEQdBand,
+                                             kAudioUnitScope_Global,
+                                             0,
+                                             nativeValue,
+                                             0
+                                             );
+    
+    CheckError(result,"Unable to set eq HiCenter.");
+    
+    _eqCenter = eqCenter;
+}
+
+-(void) setEqPeak:(AudioUnitParameterValue)eqPeak
+{
+    // –96 through +24 dB
+    float min = -96;
+    float max = 24;
+    // TODO: I think this should be log() something other than "linear"
+    AudioUnitParameterValue nativeValue = (eqPeak * (max-min)) + (min * eqPeak);
+    //NSLog(@"eq[%d] peak to %f <- %f", _selectedEQdBand, nativeValue, eqPeak);
+    
+    //
+    // 6db = (x * (24 + 96)) - 96;
+    // 6 + 96 = x * 130;
+    // 102 / 130 = x
+    //
+    OSStatus result = AudioUnitSetParameter (
+                                             _masterEQUnit,
+                                             kAUNBandEQParam_Gain + _selectedEQdBand,
+                                             kAudioUnitScope_Global,
+                                             0,
+                                             nativeValue,
+                                             0
+                                             );
+    
+    CheckError(result,"Unable to set eq peak.");
+    
+    _eqPeak = eqPeak;
+}
 @end

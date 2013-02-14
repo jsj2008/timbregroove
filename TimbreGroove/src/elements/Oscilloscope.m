@@ -10,9 +10,6 @@
 #import "Geometry.h"
 #import "Mixer.h"
 
-#define NUM_POINTS 512
-#define NUM_POINTS_F ((float)NUM_POINTS)
-
 @interface OscilloscopeMesh : Geometry {
     float _spacing;
     float _width;
@@ -27,7 +24,7 @@
 {
     self = [super init];
     if (self) {
-        _spacing = NUM_POINTS_F;
+        _spacing = kFramesForDisplay;
         _width = 2.0;
         _height = 2.0;
         self.drawType = TG_LINE_STRIP; // TG_POINTS;
@@ -79,7 +76,8 @@
 @end
 
 @interface Oscilloscope () {
-    float _data[NUM_POINTS];
+    float _data[kFramesForDisplay];
+    __weak OscilloscopeMesh * _osc;
 }
 
 @end
@@ -90,6 +88,7 @@
 {
     self.color = (GLKVector4){ 0.4, 1, 0.4, 1};
     OscilloscopeMesh * mesh = [[OscilloscopeMesh alloc] initWithIndicesIntoNames:@[@(gv_pos)]];
+    _osc = mesh;
     [self addBuffer:mesh];
 }
 
@@ -101,23 +100,18 @@
 
 -(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate
 {
-    if( mixerUpdate->numFrames != NUM_POINTS )
+    AudioBufferList * abl = mixerUpdate->audioBufferList;
+    if( abl )
     {
-        // TODO: Resample point buffer to match frames
-        // for now just flat line
-        
+        [_osc resetScopeData:abl->mBuffers[0].mData];
+        [_osc resetVertices];
     }
-    else
-    {
-        AudioBufferList * abl = mixerUpdate->audioBufferList;
-        memcpy(_data, abl->mBuffers[0].mData, abl->mBuffers[0].mDataByteSize); // left channel    
-        [((OscilloscopeMesh *)_buffers[0]) resetScopeData:_data];
-    }
+    Mixer * mixer = [Mixer sharedInstance];
+    //mixer.selectedEQdBand ???
+    float r = mixer.eqBandwidth;
+    float g = mixer.eqCenter;;
+    float b = mixer.eqPeak;
+    self.color = (GLKVector4){ r, g, b, 1};
 }
 
--(void)render:(NSUInteger)w h:(NSUInteger)h
-{
-    [_buffers[0] resetVertices];
-    [super render:w h:h];
-}
 @end

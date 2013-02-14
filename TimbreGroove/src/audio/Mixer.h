@@ -22,6 +22,17 @@ void CheckError( OSStatus error, const char *operation);
 @property (nonatomic,readonly) AudioUnit sampler;
 @end
 
+static const UInt32 kFramesForDisplay = 512;
+
+//important(!): goes from low to high
+typedef enum eqBands {
+    kEQLow,
+    kEQMid,
+    kEQHigh,
+    
+    kNUM_EQ_BANDS
+} eqBands;
+
 @interface Mixer : NSObject {
 @private
     // here for categories
@@ -46,5 +57,10 @@ void CheckError( OSStatus error, const char *operation);
 
 -(void)update:(MixerUpdate *)mixerUpdate;
 
+
 @property (nonatomic) AudioUnitParameterValue mixerOutputGain;
+@property (nonatomic) eqBands selectedEQdBand;
+@property (nonatomic) AudioUnitParameterValue eqCenter;
+@property (nonatomic) AudioUnitParameterValue eqPeak;  // really, don't animate
+@property (nonatomic) AudioUnitParameterValue eqBandwidth;
 @end
