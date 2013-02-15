@@ -124,11 +124,12 @@ typedef struct  tagAUFlagDump {
 
 -(void)dumpEQ
 {
-    for( int i = 0; i < kNUM_EQ_BANDS; i++ )
+    //    for( int i = 0; i < kNUM_EQ_BANDS; i++ )
     {
-        if( i == 1 )
-            continue;
+        //    if( i == 1 )
+        //    continue;
         float bw, center, peak;
+        int i = _selectedEQBand;
         AudioUnitGetParameter(_masterEQUnit, kAUNBandEQParam_Bandwidth+i, kAudioUnitScope_Global, 0, &bw);
         AudioUnitGetParameter(_masterEQUnit, kAUNBandEQParam_Frequency +i, kAudioUnitScope_Global, 0, &center);
         AudioUnitGetParameter(_masterEQUnit, kAUNBandEQParam_Gain+i, kAudioUnitScope_Global, 0, &peak);

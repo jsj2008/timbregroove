@@ -13,8 +13,11 @@
 #import "RecordGesture.h"
 #import "Mixer.h"
 #import "Mixer+Diag.h"
+#import "Mixer+Parameters.h"
+#define CLAMP_TO_0_1(x) (x < 0.0 ? 0.0 : x > 1.0 ? 1.0 : x)
 
 @interface GraphView () {
+    eqBands _gotEQBand;
 }
 @end
 
@@ -25,6 +28,8 @@
     self = [super initWithFrame:frame context:context];
     if (self) {
         [self wireUp];
+        _gotEQBand = -1;
+        
     }
     return self;
 }
@@ -58,25 +63,33 @@
 {
     if( pgr.state == UIGestureRecognizerStateChanged )
     {
-        CGPoint pt = [pgr locationInView:self]; // translationInView:pgr.view];
-        CGSize sz = pgr.view.frame.size;
-        pt.x /= sz.width;
-        pt.y /= sz.height;
-        if( pt.x > 1.0 ) pt.x = 1.0;
-        if( pt.x < 0.0 ) pt.x = 0.0;
-        if( pt.y > 1.0 ) pt.y = 1.0;
-        if( pt.y < 0.0 ) pt.y = 0.0;
-        pt.y = 1.0 - pt.y;
-        
         Mixer * mixer = [Mixer sharedInstance];
-        mixer.selectedEQdBand = pt.x < 0.5 ? kEQLow : kEQHigh;
-        mixer.eqBandwidth = pt.y;
-        mixer.eqCenter = pt.x;
-        mixer.eqPeak = (pt.y * 0.25) + 0.25;
+        CGSize sz = self.frame.size;
+        
+        CGPoint tpt = [pgr translationInView:self];
+        tpt.x /= sz.width;
+        tpt.y /= -sz.height;
+        AudioUnitParameterValue peak = tpt.y / 2.0;
+        if( _gotEQBand == -1 )
+        {
+            CGPoint pt = [pgr locationInView:self];
+            pt.x /= sz.width;
+            _gotEQBand = pt.x < 0.5 ? kEQLow : kEQHigh;
+            mixer.selectedEQBand = _gotEQBand;
+        }
+
+        //NSLog(@"translation: %f,%f  band: %d", tpt.x, tpt.y, _gotEQBand);
+
+        mixer.eqBandwidth = CLAMP_TO_0_1(tpt.y);
+        mixer.eqCenter = CLAMP_TO_0_1(tpt.x);
+        mixer.eqPeak = CLAMP_TO_0_1(peak);
         
         // from mixer+diag
-        //[mixer dumpEQ];
-
+        [mixer dumpEQ];
+    }
+    else
+    {
+        _gotEQBand = -1;
     }
 }
 

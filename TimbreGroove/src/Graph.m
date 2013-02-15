@@ -15,7 +15,7 @@
     // only have one top level node. Keep a pointer
     // so we don't do any unnecessary ARC calls into _kids[]
     // during update and render
-    /* __weak */ TG3dObject * _single;
+     __weak  TG3dObject * _single;
 }
 
 @end

@@ -91,7 +91,7 @@
 				<key>wantsTouch</key>
 				<true/>
 				<key>instanceClass</key>
-				<string>Oscilloscope</string>
+				<string>EQPanel</string>
 			</dict>
 			<key>icon</key>
 			<string>newModel.png</string>

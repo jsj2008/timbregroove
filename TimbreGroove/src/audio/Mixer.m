@@ -12,11 +12,10 @@
 #import "Config.h"
 #import "Mixer+Diag.h"
 #import "Mixer+Midi.h"
+#import "Mixer+Parameters.h"
 #import "RingBuffer.h"
 #import <libkern/OSAtomic.h>
 
-const float kBottomOfOctiveRange = 0.05;
-const float kTopOfOctiveRange = 5.0;
 const AudioUnitParameterValue kEQBypassON  = 1;
 const AudioUnitParameterValue kEQBypassOFF = 0;
 
@@ -191,13 +190,11 @@ OSStatus renderCallback(
 
 @interface Mixer () {
     NSDictionary *   _aliases;
-    Float64          _graphSampleRate;
     unsigned int     _numSamplerUnits;
     unsigned int     _capSamplerUnits;
     RenderCBContext  _cbContext;
     
     AudioStreamBasicDescription _stdASBD;
-    
     void * _captureBuffer;
     UInt32 _captureByteSize;
 }
@@ -433,13 +430,19 @@ OSStatus renderCallback(
 
     CheckError(AudioUnitAddRenderNotify(_masterEQUnit, renderCallback, &_cbContext), "Could not set callback");
     
+    AudioUnitParameterValue filterTypes[kNUM_EQ_BANDS] = {
+        kAUNBandEQFilterType_ResonantLowPass,
+        kAUNBandEQFilterType_Parametric,
+        kAUNBandEQFilterType_ResonantHighPass
+    };
+    
     for( int i = 0; i < kNUM_EQ_BANDS; i++ )
     {
         result = AudioUnitSetParameter (_masterEQUnit,
                                         kAUNBandEQParam_FilterType + i,
                                         kAudioUnitScope_Global,
                                         0,
-                                        kAUNBandEQFilterType_Parametric,
+                                        filterTypes[i],
                                         0);
         CheckError(result,"Unable to set eq filter type.");
         
@@ -451,7 +454,7 @@ OSStatus renderCallback(
                                         0);
         
         CheckError(result,"Unable to set eq bypass to OFF.");
-        _selectedEQdBand = i;
+        _selectedEQBand = i;
         self.eqCenter = 0.5;
     }
     
@@ -609,98 +612,4 @@ OSStatus renderCallback(
     return result;
 }
 
-
-- (void) setMixerOutputGain: (AudioUnitParameterValue) newGain
-{
-    OSStatus result = AudioUnitSetParameter (
-                                             _mixerUnit,
-                                             kMultiChannelMixerParam_Volume,
-                                             kAudioUnitScope_Output,
-                                             0,
-                                             newGain,
-                                             0
-                                             );
-    
-    CheckError(result,"Unable to set output gain.");
-
-    _mixerOutputGain = newGain;
-}
-
--(void) setEqBandwidth:(AudioUnitParameterValue)eqBandwidth
-{
-    // 0.05 through 5.0 octaves
-    AudioUnitParameterValue nativeValue = (eqBandwidth * (kTopOfOctiveRange-kBottomOfOctiveRange)) +
-                                            (eqBandwidth * kBottomOfOctiveRange);
-    //NSLog(@"eq bw set to %f <- %f", nativeValue, eqBandwidth);
-    OSStatus result = AudioUnitSetParameter (
-                                             _masterEQUnit,
-                                             kAUNBandEQParam_Bandwidth + _selectedEQdBand,
-                                             kAudioUnitScope_Global,
-                                             0,
-                                             nativeValue,
-                                             0
-                                             );
-    
-    CheckError(result,"Unable to set eq HiBandwidth.");
-
-    _eqBandwidth = eqBandwidth;    
-}
-
--(void) calcEQBandLow:(float *)lo andHigh:(float *)hi
-{
-    const float kLowestFreq = 20.0;
-    float highestFreq = _graphSampleRate / 2.0;
-    float singleEQBandRange = (highestFreq - kLowestFreq) / kNUM_EQ_BANDS;
-    *lo = (singleEQBandRange * _selectedEQdBand) + kLowestFreq;
-    *hi = *lo + singleEQBandRange;
-}
-
--(void) setEqCenter:(AudioUnitParameterValue)eqCenter
-{
-    // 20 Hz to < Nyquist freq (sampleRate/2)
-    float min, max;
-    [self calcEQBandLow:&min andHigh:&max];
-    AudioUnitParameterValue nativeValue = (eqCenter * (max-min)) + (min * eqCenter);
-    //NSLog(@"eq center to %f <- %f", nativeValue, eqCenter);
-    OSStatus result = AudioUnitSetParameter (
-                                             _masterEQUnit,
-                                             kAUNBandEQParam_Frequency + _selectedEQdBand,
-                                             kAudioUnitScope_Global,
-                                             0,
-                                             nativeValue,
-                                             0
-                                             );
-    
-    CheckError(result,"Unable to set eq HiCenter.");
-    
-    _eqCenter = eqCenter;
-}
-
--(void) setEqPeak:(AudioUnitParameterValue)eqPeak
-{
-    // –96 through +24 dB
-    float min = -96;
-    float max = 24;
-    // TODO: I think this should be log() something other than "linear"
-    AudioUnitParameterValue nativeValue = (eqPeak * (max-min)) + (min * eqPeak);
-    //NSLog(@"eq[%d] peak to %f <- %f", _selectedEQdBand, nativeValue, eqPeak);
-    
-    //
-    // 6db = (x * (24 + 96)) - 96;
-    // 6 + 96 = x * 130;
-    // 102 / 130 = x
-    //
-    OSStatus result = AudioUnitSetParameter (
-                                             _masterEQUnit,
-                                             kAUNBandEQParam_Gain + _selectedEQdBand,
-                                             kAudioUnitScope_Global,
-                                             0,
-                                             nativeValue,
-                                             0
-                                             );
-    
-    CheckError(result,"Unable to set eq peak.");
-    
-    _eqPeak = eqPeak;
-}
 @end

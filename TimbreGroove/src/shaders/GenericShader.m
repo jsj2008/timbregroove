@@ -28,6 +28,9 @@ static const char * _generic_shader_var_names[NUM_GENERIC_VARIABLES] = {
     "u_lightDir",
     "u_dirColor",
     "u_ambient",
+    
+    "u_p1", "u_p2", "u_p3",
+    
     "u_distortionPoint",
     "u_distortionFactor"
 };

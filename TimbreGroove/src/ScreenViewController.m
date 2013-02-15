@@ -15,6 +15,7 @@
 #import "NewTrackContainerVC.h"
 #import "Global.h"
 #import "Mixer.h"
+#import "Mixer+Parameters.h"
 
 @interface ScreenViewController () {
     bool _started;

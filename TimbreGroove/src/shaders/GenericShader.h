@@ -26,6 +26,10 @@ typedef enum {
     gv_dirColor,
     gv_ambient,
     
+    gv_p1, // bezier startPt
+    gv_p2, // bezier controlPt
+    gv_p3, // bezier endPt
+    
     gv_distortionPt, // vec3
     gv_distortionFactor, // float
     

@@ -33,6 +33,15 @@ typedef enum eqBands {
     kNUM_EQ_BANDS
 } eqBands;
 
+enum {
+    kEQPeakIndex,
+    kEQBandwidthIndex,
+    kEQCenterIndex,
+    
+    kNUM_EQ_PROPS
+};
+
+
 @interface Mixer : NSObject {
 @private
     // here for categories
@@ -42,6 +51,11 @@ typedef enum eqBands {
     AudioUnit        _mixerUnit;
     AudioUnit        _masterEQUnit;
     AUNode           _mixerNode;
+    Float64          _graphSampleRate;
+
+    AudioUnitParameterValue _mixerOutputGain;
+    eqBands _selectedEQBand;
+    AudioUnitParameterValue _eqValues[kNUM_EQ_BANDS][kNUM_EQ_PROPS];
     
     MIDIClientRef  _midiClient;
     MusicTimeStamp _playerTrackLength;
@@ -58,9 +72,4 @@ typedef enum eqBands {
 -(void)update:(MixerUpdate *)mixerUpdate;
 
 
-@property (nonatomic) AudioUnitParameterValue mixerOutputGain;
-@property (nonatomic) eqBands selectedEQdBand;
-@property (nonatomic) AudioUnitParameterValue eqCenter;
-@property (nonatomic) AudioUnitParameterValue eqPeak;  // really, don't animate
-@property (nonatomic) AudioUnitParameterValue eqBandwidth;
 @end
