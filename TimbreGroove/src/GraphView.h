@@ -18,6 +18,7 @@
 @property (nonatomic,strong) RecordGesture * recordGesture;
 @property (nonatomic,strong) TapRecordGesture * tapRecordGesture;
 
+-(void)watchForGlobals:(id)target lookup:(NSDictionary *)lookups;
 -(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate;
 -(void)render;
 -(NSArray *)getSettings;

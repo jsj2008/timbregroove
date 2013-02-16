@@ -37,6 +37,14 @@ static inline TGVertexStride * StrideInit4f(TGVertexStride * s)
     return s;
 }
 
+static inline TGVertexStride * StrideInit1f(TGVertexStride * s)
+{
+    StrideInit2f(s);
+    s->numbersPerElement = 1;
+    s->strideType = st_float1;
+    return s;
+}
+
 @class Shader;
 
 /*

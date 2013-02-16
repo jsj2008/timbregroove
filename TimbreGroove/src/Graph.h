@@ -11,5 +11,5 @@
 
 
 @interface Graph : TG3dObject
-
+@property (nonatomic,strong) NSMutableDictionary * globalNotifees;
 @end

@@ -165,7 +165,6 @@
 		57647571167D619800D5A431 /* Generic.m in Sources */ = {isa = PBXBuildFile; fileRef = 57647570167D619800D5A431 /* Generic.m */; };
 		57647577167D97EC00D5A431 /* generic.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 57647574167D7C4A00D5A431 /* generic.fsh */; };
 		57647578167D97EC00D5A431 /* generic.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 57647572167D7C3C00D5A431 /* generic.vsh */; };
-		577368CA16CDB64C0051551F /* Bezier.m in Sources */ = {isa = PBXBuildFile; fileRef = 577368C916CDB64C0051551F /* Bezier.m */; };
 		577368CC16CDBAF40051551F /* bezier.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 577368CB16CDBAF40051551F /* bezier.fsh */; };
 		577368CE16CDBB320051551F /* bezier.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 577368CD16CDBB320051551F /* bezier.vsh */; };
 		577368D116CDC42D0051551F /* Line.m in Sources */ = {isa = PBXBuildFile; fileRef = 577368D016CDC42D0051551F /* Line.m */; };
@@ -213,6 +212,7 @@
 		57CB3B0B16BE2BC5007C093C /* NewTrackPicker.m in Sources */ = {isa = PBXBuildFile; fileRef = 57CB3B0A16BE2BC5007C093C /* NewTrackPicker.m */; };
 		57CB3B0E16BE2BF9007C093C /* NewTrackCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 57CB3B0D16BE2BF9007C093C /* NewTrackCell.m */; };
 		57CCFFC216849337003B4A19 /* Text.m in Sources */ = {isa = PBXBuildFile; fileRef = 57CCFFC116849336003B4A19 /* Text.m */; };
+		57CE24D716CF01CA0007BDD0 /* FivePointBezier.m in Sources */ = {isa = PBXBuildFile; fileRef = 57CE24D616CF01CA0007BDD0 /* FivePointBezier.m */; };
 		57DF9C8116B5B9AB00050635 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57DF9C8016B5B9AB00050635 /* AVFoundation.framework */; };
 		57DF9C8416B5BE2500050635 /* Mixer.m in Sources */ = {isa = PBXBuildFile; fileRef = 57DF9C8316B5BE2500050635 /* Mixer.m */; };
 		57E1954616ABECA50099514B /* PoolShader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 57E1954516ABECA50099514B /* PoolShader.vsh */; };
@@ -495,8 +495,6 @@
 		57647572167D7C3C00D5A431 /* generic.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = generic.vsh; sourceTree = "<group>"; };
 		57647574167D7C4A00D5A431 /* generic.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = generic.fsh; sourceTree = "<group>"; };
 		57647576167D8AC100D5A431 /* TGTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = TGTypes.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
-		577368C816CDB64C0051551F /* Bezier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Bezier.h; sourceTree = "<group>"; };
-		577368C916CDB64C0051551F /* Bezier.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Bezier.m; sourceTree = "<group>"; };
 		577368CB16CDBAF40051551F /* bezier.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = bezier.fsh; sourceTree = "<group>"; };
 		577368CD16CDBB320051551F /* bezier.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = bezier.vsh; sourceTree = "<group>"; };
 		577368CF16CDC42D0051551F /* Line.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Line.h; sourceTree = "<group>"; };
@@ -569,6 +567,8 @@
 		57CB3B0C16BE2BF9007C093C /* NewTrackCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NewTrackCell.h; path = ../NewTrackCell.h; sourceTree = "<group>"; };
 		57CB3B0D16BE2BF9007C093C /* NewTrackCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NewTrackCell.m; path = ../NewTrackCell.m; sourceTree = "<group>"; };
 		57CCFFC116849336003B4A19 /* Text.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Text.m; sourceTree = "<group>"; };
+		57CE24D516CF01CA0007BDD0 /* FivePointBezier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FivePointBezier.h; sourceTree = "<group>"; };
+		57CE24D616CF01CA0007BDD0 /* FivePointBezier.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FivePointBezier.m; sourceTree = "<group>"; };
 		57DF9C8016B5B9AB00050635 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		57DF9C8216B5BE2500050635 /* Mixer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Mixer.h; sourceTree = "<group>"; };
 		57DF9C8316B5BE2500050635 /* Mixer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Mixer.m; sourceTree = "<group>"; };
@@ -771,6 +771,8 @@
 				575AA12516ADA61F00635A76 /* Pool.m */,
 				5780832416B73299002810BD /* PoolWater.h */,
 				5780832516B73299002810BD /* PoolWater.m */,
+				57CE24D516CF01CA0007BDD0 /* FivePointBezier.h */,
+				57CE24D616CF01CA0007BDD0 /* FivePointBezier.m */,
 			);
 			path = shaders;
 			sourceTree = "<group>";
@@ -1036,8 +1038,6 @@
 				5700236416A55680006F0E8E /* SkinnedPVR.cpp */,
 				5707CA7116BC9E4500B24818 /* Text.h */,
 				57CCFFC116849336003B4A19 /* Text.m */,
-				577368C816CDB64C0051551F /* Bezier.h */,
-				577368C916CDB64C0051551F /* Bezier.m */,
 			);
 			name = library;
 			sourceTree = "<group>";
@@ -1616,10 +1616,10 @@
 				57BE7FB316CAC9AA001972ED /* CARingBuffer.cpp in Sources */,
 				57BE7FB616CACA0D001972ED /* RingBuffer.cpp in Sources */,
 				57B2098D16CAFAC0007BE2A2 /* Oscilloscope.m in Sources */,
-				577368CA16CDB64C0051551F /* Bezier.m in Sources */,
 				577368D116CDC42D0051551F /* Line.m in Sources */,
 				577368D416CDCBF70051551F /* EQPanel.m in Sources */,
 				577368D716CDEE380051551F /* Mixer+Parameters.m in Sources */,
+				57CE24D716CF01CA0007BDD0 /* FivePointBezier.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

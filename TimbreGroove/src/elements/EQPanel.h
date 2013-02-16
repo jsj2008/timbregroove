@@ -6,9 +6,17 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "Bezier.h"
+#import "Generic.h"
+
+typedef enum BezShapes {
+    kBezShape_Parametric,
+    kBezShape_LowPassRes,
+    kBezShape_HiPassRes
+} BezShapes;
 
 
-@interface EQPanel : Bezier
 
+@interface EQPanel : Generic
+@property (nonatomic) BezShapes shapeDisplay;
+@property (nonatomic) BezShapes shapeEdit;
 @end

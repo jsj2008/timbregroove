@@ -15,6 +15,11 @@
 #define TG_MAX(a,b)            (((a) > (b)) ? (a) : (b))
 #define TG_CLAMP(x, lo, hi)      (TG_MIN((hi), TG_MAX((x), (lo))))
 
+#define CLAMP_TO_0_1(x) (x < 0.0 ? 0.0 : x > 1.0 ? 1.0 : x)
+
+#define GL_ERROR_C { GLenum __e = glGetError(); if(__e) { NSLog(@"glError(%d/%04X) %s:%d",__e,__e,__FILE__,__LINE__); }}
+#define GL_CALL(f) { NSLog(@"calling: %s", f); }
+
 typedef enum {
     TG_FLOAT,
     TG_VECTOR2,
@@ -58,8 +63,6 @@ typedef struct MixerUpdate {
     unsigned int droppedCaptureFrames;
 } MixerUpdate;
 
-#define GL_ERROR_C { GLenum __e = glGetError(); if(__e) { NSLog(@"glError(%d/%04X) %s:%d",__e,__e,__FILE__,__LINE__); }}
-#define GL_CALL(f) { NSLog(@"calling: %s", f); }
 
 static inline NSMutableDictionary * d( NSDictionary * a )
 {

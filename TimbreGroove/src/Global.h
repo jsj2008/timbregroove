@@ -23,4 +23,6 @@
 @property (nonatomic,readonly) NSTimeInterval lengthOf8thNote;
 @property (nonatomic,readonly) NSTimeInterval lengthOf16thNote;
 
+@property (nonatomic) float panXBy;
+@property (nonatomic) float panYBy;
 @end

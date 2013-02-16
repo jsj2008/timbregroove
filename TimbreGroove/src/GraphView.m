@@ -7,17 +7,17 @@
 //
 
 #import "GraphView.h"
+#import "Global.h"
 #import "Camera.h"
-#import "Tween.h"
-#import "Tweener.h"
-#import "RecordGesture.h"
-#import "Mixer.h"
-#import "Mixer+Diag.h"
-#import "Mixer+Parameters.h"
-#define CLAMP_TO_0_1(x) (x < 0.0 ? 0.0 : x > 1.0 ? 1.0 : x)
 
 @interface GraphView () {
-    eqBands _gotEQBand;
+    bool    _panTracking;
+    CGPoint _panStart;
+    CGPoint _panLast;
+    CGPoint _panDirs;
+    
+    NSMutableArray * _watchingGlobals;
+    int _phonyContext;
 }
 @end
 
@@ -28,12 +28,65 @@
     self = [super initWithFrame:frame context:context];
     if (self) {
         [self wireUp];
-        _gotEQBand = -1;
-        
     }
     return self;
 }
 
+-(void)watchForGlobals:(id)target lookup:(NSDictionary *)lookups
+{
+    NSMutableDictionary * graphDict = _graph.globalNotifees;
+    if( !graphDict )
+    {
+        graphDict = [NSMutableDictionary new];
+        _graph.globalNotifees = graphDict;
+    }
+    for (NSString * propName in lookups )
+    {
+        NSMutableArray * notifieesForProp = graphDict[propName];
+        if( !notifieesForProp )
+        {
+            notifieesForProp = [NSMutableArray new];
+            graphDict[propName] = notifieesForProp;
+        }
+        [notifieesForProp addObject:@[target,lookups[propName]]];
+        if( [_watchingGlobals indexOfObject:propName] == NSNotFound )
+        {
+            [_watchingGlobals addObject:propName];
+            [[Global sharedInstance] addObserver:self
+                                      forKeyPath:propName
+                                         options:NSKeyValueObservingOptionNew
+                                         context:&_phonyContext];
+        }
+    }
+}
+
+-(void)observeValueForKeyPath:(NSString *)keyPath
+                     ofObject:(id)object
+                       change:(NSDictionary *)change
+                      context:(void *)context
+{
+    NSMutableDictionary * graphDict = _graph.globalNotifees;
+    if( graphDict )
+    {
+        NSArray * notifieesForProp = graphDict[keyPath];
+        
+        // this can be null when another graph (no
+        // longer in view) requested this property
+        if( notifieesForProp )
+        {
+            for( NSArray * targetInfo in notifieesForProp )
+            {
+                id target = targetInfo[0];
+                SEL sel = NSSelectorFromString(targetInfo[1]);
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+                [target performSelector:sel];
+#pragma clang diagnostic pop
+            }
+        }
+    }
+    
+}
 - (id) initWithCoder:(NSCoder *)aDecoder
 {
     self = [super initWithCoder:aDecoder];
@@ -49,47 +102,53 @@
 
     self.opaque = YES;
     
+    _watchingGlobals = [NSMutableArray new];
+    
     _recordGesture = [[RecordGesture alloc] initWithTarget:self action:@selector(record:)];
     [self addGestureRecognizer:_recordGesture];
     
     _tapRecordGesture = [[TapRecordGesture alloc] initWithTarget:self action:@selector(tapRecord:)];
     [self addGestureRecognizer:_tapRecordGesture];
     
-    UIPanGestureRecognizer * pgr = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(userParam:)];
+    UIPanGestureRecognizer * pgr = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panning:)];
     [self addGestureRecognizer:pgr];
 }
 
--(void)userParam:(UIPanGestureRecognizer *)pgr
+-(void)panning:(UIPanGestureRecognizer *)pgr
 {
     if( pgr.state == UIGestureRecognizerStateChanged )
     {
-        Mixer * mixer = [Mixer sharedInstance];
-        CGSize sz = self.frame.size;
+        CGSize sz       = self.frame.size;
+        CGPoint pt      = [pgr locationInView:self];
         
-        CGPoint tpt = [pgr translationInView:self];
-        tpt.x /= sz.width;
-        tpt.y /= -sz.height;
-        AudioUnitParameterValue peak = tpt.y / 2.0;
-        if( _gotEQBand == -1 )
+        if( _panTracking )
         {
-            CGPoint pt = [pgr locationInView:self];
-            pt.x /= sz.width;
-            _gotEQBand = pt.x < 0.5 ? kEQLow : kEQHigh;
-            mixer.selectedEQBand = _gotEQBand;
+            // We notice a change in direction here:
+            float currXdir = pt.x - _panLast.x < 0.0 ? -1 : 1;
+            float currYdir = pt.y - _panLast.y < 0.0 ? -1 : 1;
+            if( (currXdir != _panDirs.x) || (currYdir != _panDirs.y) )
+            {
+                _panStart = _panLast;
+                _panDirs = (CGPoint){ currXdir, currYdir };
+            }
         }
+        else
+        {
+            _panStart = pt;
+            _panLast = pt;
+            _panDirs = (CGPoint){ 1, 1 };
+            _panTracking = true;
+        }
+        Global * global = [Global sharedInstance];
 
-        //NSLog(@"translation: %f,%f  band: %d", tpt.x, tpt.y, _gotEQBand);
+        global.panXBy = (pt.x - _panStart.x) / sz.width;
+        global.panYBy = -(pt.y - _panStart.y) / sz.height;
 
-        mixer.eqBandwidth = CLAMP_TO_0_1(tpt.y);
-        mixer.eqCenter = CLAMP_TO_0_1(tpt.x);
-        mixer.eqPeak = CLAMP_TO_0_1(peak);
-        
-        // from mixer+diag
-        [mixer dumpEQ];
+        _panLast = pt;
     }
     else
     {
-        _gotEQBand = -1;
+        _panTracking = false;
     }
 }
 

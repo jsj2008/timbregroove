@@ -60,6 +60,9 @@
         TGVertexStride * stride = strides + i;
         TGStrideType type = [strideTypes[i] intValue];
         switch (type) {
+            case st_float1:
+                StrideInit1f(stride);
+                break;
             case st_float2:
                 StrideInit2f(stride);
                 break;
