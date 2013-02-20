@@ -4,6 +4,32 @@
 <dict>
 	<key>sounds</key>
 	<dict>
+		<key>clav</key>
+		<dict>
+			<key>isSoundfont</key>
+			<true/>
+			<key>patch</key>
+			<integer>0</integer>
+			<key>preset</key>
+			<string>Clavinet (21KB)</string>
+			<key>lo</key>
+			<integer>0</integer>
+			<key>hi</key>
+			<integer>127</integer>
+		</dict>
+		<key>rhodes</key>
+		<dict>
+			<key>isSoundfont</key>
+			<true/>
+			<key>patch</key>
+			<integer>0</integer>
+			<key>preset</key>
+			<string>rhodes_small</string>
+			<key>lo</key>
+			<integer>0</integer>
+			<key>hi</key>
+			<integer>127</integer>
+		</dict>
 		<key>sin</key>
 		<dict>
 			<key>isSoundfont</key>
@@ -82,7 +108,7 @@
 			<key>icon</key>
 			<string>newModel.png</string>
 		</dict>
-		<key>oscilloscope_element</key>
+		<key>spincube_element</key>
 		<dict>
 			<key>order</key>
 			<integer>44</integer>
@@ -91,7 +117,7 @@
 				<key>wantsTouch</key>
 				<true/>
 				<key>instanceClass</key>
-				<string>EQPanel</string>
+				<string>SpinCube</string>
 			</dict>
 			<key>icon</key>
 			<string>newModel.png</string>

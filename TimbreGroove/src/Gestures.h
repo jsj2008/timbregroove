@@ -12,6 +12,11 @@
 @class RecordGesture;
 @class TapRecordGesture;
 
+@interface PannerGesture : UIPanGestureRecognizer<UIGestureRecognizerDelegate>
+-(id)initWithTarget:(id)target action:(SEL)action;
+@property (nonatomic) float maxVelocity;
+@property (nonatomic) CGRect limitRC; // ignore motion outside this rect
+@end
 
 @protocol RecordGestureReceiver <NSObject>
 -(void)RecordGesture:(RecordGesture*)rg recordingWillBegin:(PointRecorder *)recorder;
@@ -39,6 +44,3 @@
 @property (nonatomic) bool recording;
 @end
 
-@interface MenuInvokeGesture : UITapGestureRecognizer
-
-@end

@@ -6,8 +6,10 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "SimpleImage.h"
+#import "GenericWithTexture.h"
 
-@interface Text : SimpleImage
+@interface Text : GenericWithTexture
+-(id)init;
+-(id)initWithString:(NSString *)text;
 @property (nonatomic,strong) NSString * text;
 @end

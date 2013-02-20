@@ -8,7 +8,7 @@
 
 #import "DistortedGeneric.h"
 #import "PointRecorder.h"
-#import "GraphView.h"
+#import "GraphView+Touches.h"
 
 
 @interface DistortedGeneric () {

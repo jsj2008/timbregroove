@@ -11,6 +11,9 @@
 @class TG3dObject;
 
 @interface EventCapture : NSObject
--(id)childElementOf:(TG3dObject *)root
-          fromScreenPt:(CGPoint)fromScreenPt;
+-(id)childElementOf:(TG3dObject *)graph
+       fromScreenPt:(CGPoint)pt
+             inView:(UIView *)view;
+
++(id)getGraphViewTapChildElementOf:(TG3dObject *)root;
 @end

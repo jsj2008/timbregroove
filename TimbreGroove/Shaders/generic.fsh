@@ -27,6 +27,9 @@ void main()
     
 #ifdef TEXTURE
     color = texture2D(u_sampler, v_texCoordOut);
+  #ifdef U_COLOR
+    color += u_color;
+  #endif
 #else
   #ifdef COLOR
     color = v_color;

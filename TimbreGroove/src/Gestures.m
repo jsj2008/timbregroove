@@ -6,7 +6,7 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "RecordGesture.h"
+#import "Gestures.h"
 #import <UIKit/UIGestureRecognizerSubclass.h>
 #import "Global.h"
 
@@ -271,16 +271,29 @@
 @end
 
 //=========================================================================
+@implementation PannerGesture
 
-@implementation MenuInvokeGesture
-
--(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+-(id)initWithTarget:(id)target action:(SEL)action
 {
-    if( [Global sharedInstance].recording )
+    self = [super initWithTarget:target action:action];
+    if( self )
     {
-        self.state = UIGestureRecognizerStateFailed;
+        self.delegate = self;
     }
-    [super touchesBegan:touches withEvent:event];
+    return self;
 }
 
+-(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    [super touchesMoved:touches withEvent:event];
+    CGPoint pt = [self locationInView:self.view];
+    if( !CGRectContainsPoint(_limitRC, pt) )
+        self.state = UIGestureRecognizerStateCancelled;
+}
+-(BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer
+shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
+{
+    return YES;
+}
 @end
+//=========================================================================

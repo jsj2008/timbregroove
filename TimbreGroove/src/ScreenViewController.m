@@ -6,7 +6,10 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "ScreenViewController.h"
+#import <UIKit/UIKit.h>
+#import "NewTrackPicker.h"
+#import "SettingsVC.h"
+#import "PauseViewController.h"
 #import "TGTypes.h"
 #import "GraphCollection.h"
 #import "Graph.h"
@@ -17,14 +20,27 @@
 #import "Mixer.h"
 #import "Mixer+Parameters.h"
 
-@interface ScreenViewController () {
+@interface ScreenViewController : UIViewController < NewTrackDelegate,
+                                                        SettingVCDelegate,
+                                                        PauseViewDelegate>
+{
     bool _started;
-
+    
     GraphCollection * _graphs;
     GLKViewController * _graphVC;
     CGSize _viewSz;
 }
-
+@property (weak, nonatomic) IBOutlet UIView *graphContainer;
+@property (weak, nonatomic) IBOutlet UIView *menuContainer;
+@property (weak, nonatomic) IBOutlet UIToolbar *toolBar;
+@property (weak, nonatomic) IBOutlet UIPageControl *pager;
+@property (weak, nonatomic) IBOutlet UIBarButtonItem *trashCan;
+@property (weak, nonatomic) IBOutlet UIBarButtonItem *recordButton;
+- (IBAction)changePage:(id)sender;
+- (IBAction)volumeChanged:(UISlider *)sender;
+- (IBAction)trash:(UIBarButtonItem *)sender;
+- (IBAction)record:(UIBarButtonItem *)sender;
+- (IBAction)dblTapForMenus:(UITapGestureRecognizer *)sender;
 @end
 
 @implementation ScreenViewController
@@ -72,7 +88,7 @@
                 if( !_started )
                 {
                     [self performSelector:@selector(performTransition:)
-                               withObject:[GraphDefinitions getDefinitionForName:@"oscilloscope_element"]
+                               withObject:[GraphDefinitions getDefinitionForName:@"spincube_element"]
                                afterDelay:0.25];
                     
                     _started = true;
@@ -196,7 +212,7 @@
 }
 
 - (IBAction)volumeChanged:(UISlider *)sender {
-    [Mixer sharedInstance].mixerOutputGain = sender.value;
+    [Global sharedInstance].paramKnob4 = sender.value;
 }
 
 - (IBAction)trash:(UIBarButtonItem *)sender

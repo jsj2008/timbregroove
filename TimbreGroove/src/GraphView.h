@@ -12,13 +12,17 @@
 @class RecordGesture;
 @class TapRecordGesture;
 
-@interface GraphView : GLKView 
+@interface GraphView : GLKView {
+@private // here for categories
+    bool    _panTracking;
+    CGPoint _panLast;
+    RecordGesture * _recordGesture;
+    TapRecordGesture * _tapRecordGesture;
+}
 @property (nonatomic) GLKVector4 backcolor;
 @property (nonatomic,strong) Graph * graph;
-@property (nonatomic,strong) RecordGesture * recordGesture;
-@property (nonatomic,strong) TapRecordGesture * tapRecordGesture;
 
--(void)watchForGlobals:(id)target lookup:(NSDictionary *)lookups;
+-(void)watchForGlobals:(NSDictionary *)lookups;
 -(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate;
 -(void)render;
 -(NSArray *)getSettings;

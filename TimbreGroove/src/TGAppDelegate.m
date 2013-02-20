@@ -8,6 +8,7 @@
 
 #import "TGAppDelegate.h"
 
+
 @implementation TGAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions

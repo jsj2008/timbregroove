@@ -40,6 +40,11 @@ andIndicesIntoNames:(NSArray *)indicesIntoNames
     return gp;
 }
 
+-(float)width
+{
+    return _width;
+}
+
 -(void)getStats:(GeometryStats *)stats
 {
     unsigned int m = _gridSize + 1;

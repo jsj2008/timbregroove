@@ -87,6 +87,9 @@
         if( !_light ) // how buried is this??
             _light = [Light new];
 
+    if( _useColor )
+       [arr addObject:@(gv_ucolor)];
+    
     return [Generic getShaderHeaderWithIndicesIntoName:arr];
 }
 
@@ -108,6 +111,8 @@
             case gv_uv:
                 ns = @"#define TEXTURE\n";
                 break;
+            case gv_ucolor:
+                ns = @"#define U_COLOR\n";
             default:
                 break;
         }
@@ -175,20 +180,25 @@
     }
     else
     {
-        MeshBuffer * drawable;
         for( MeshBuffer * b in _buffers )
-        {
             [b bind];
-            if( b.drawable )
-                drawable = b;
-        }
-        [drawable draw];
+
         for( MeshBuffer * b in _buffers )
-        {
+            if( b.drawable )
+                [b draw];
+        
+        for( MeshBuffer * b in _buffers )
             [b unbind];
-        }
     }
     [self bindTextures:false];
+}
+
+-(void)renderToCaptureAtBufferLocation:(GLint)location
+{
+    MeshBuffer * buffer = _buffers[0];
+    [buffer bindToTempLocation:location];
+    [buffer draw];
+    [buffer unbind];
 }
 
 -(void)bindTextures:(bool)bind

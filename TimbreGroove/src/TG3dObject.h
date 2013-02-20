@@ -8,7 +8,7 @@
 
 #import "TGTypes.h"
 #import "Node.h"
-#import "RecordGesture.h"
+#import "Gestures.h"
 
 @class Camera;
 @class Shader;
@@ -28,6 +28,9 @@
 -(void)render:(NSUInteger)w h:(NSUInteger)h;
 -(void)renderToFBO;
 -(void)renderToCaptureAtBufferLocation:(GLint)location;
+
+@property (nonatomic) bool autoRenderChildren;
+@property (nonatomic) bool interactive;
 
 @property (nonatomic) NSTimeInterval totalTime;
 @property (nonatomic) NSTimeInterval timer;

@@ -13,7 +13,7 @@
 #import "FBO.h"
 #import "SettingsVC.h"
 #import "Mixer.h"
-#import "GraphView.h"
+#import "GraphView+Touches.h"
 
 @interface TG3dObject () {
     PointPlayer * _ptPlayer;
@@ -32,6 +32,7 @@
     if( (self = [super init]) )
     {
         self.scaleXYZ = 1.0;
+        _autoRenderChildren = true;
     }
     return self;
 }
@@ -151,11 +152,19 @@
 {
     Camera * saveCamera = _camera;
     _camera = [IdentityCamera new];
-        [_fbo bindToRender];
+    [_fbo bindToRender];
     glViewport(0, 0, _fbo.width, _fbo.height);
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    GLboolean prevDT;
+    if( !_fbo.allowDepthCheck )
+    {
+        prevDT = glIsEnabled(GL_DEPTH_TEST);
+        glDisable(GL_DEPTH_TEST);
+    }
+    glClearColor(_fbo.clearColor.r,_fbo.clearColor.g,_fbo.clearColor.b,_fbo.clearColor.a);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     [self render:_fbo.width h:_fbo.height];
+    if( !_fbo.allowDepthCheck  && prevDT == GL_TRUE )
+        glEnable(GL_DEPTH_TEST);
     [_fbo unbindFromRender];
     _camera = saveCamera;
 }
@@ -164,7 +173,6 @@
 // TODO: in the future: not so much with the hacking
 -(void)renderToCaptureAtBufferLocation:(GLint)location
 {
-    
 }
 
 #pragma mark Perspective

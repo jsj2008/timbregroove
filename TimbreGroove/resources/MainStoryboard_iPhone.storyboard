@@ -307,7 +307,7 @@
                                 </items>
                             </toolbar>
                         </subviews>
-                        <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                         <gestureRecognizers/>
                         <constraints>
                             <constraint firstItem="JeK-0b-O8X" firstAttribute="trailing" secondItem="JrJ-Nu-Kxq" secondAttribute="trailing" type="default" id="1hr-2D-unP"/>
@@ -338,7 +338,7 @@
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="4" sceneMemberID="firstResponder"/>
-                <tapGestureRecognizer numberOfTapsRequired="2" id="VdI-ME-IAO" userLabel="MenuInvokeGesture (see class)" customClass="MenuInvokeGesture">
+                <tapGestureRecognizer numberOfTapsRequired="2" id="VdI-ME-IAO" userLabel="MenuInvokeGesture (see class)">
                     <connections>
                         <action selector="dblTapForMenus:" destination="2" id="5wJ-c5-Z5e"/>
                     </connections>

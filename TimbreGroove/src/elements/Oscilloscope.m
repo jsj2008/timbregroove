@@ -32,8 +32,8 @@
 
 -(void)setSounds
 {
-    self.soundName = @"ambience";
-    [self.sound playMidiFile:@"simpleMel"];
+    self.soundName = @"clav";
+    [self.sound playMidiFile:@"funkRiff1"];
 }
 
 -(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate

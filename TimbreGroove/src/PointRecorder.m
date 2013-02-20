@@ -124,12 +124,15 @@ typedef struct RecordPoint {
     if( _numPoints == _capacity )
     {
         _capacity += 100;
-        size_t sz = sizeof(RecordPoint)*_capacity;
+        _points = realloc(_points, sizeof(RecordPoint)*_capacity);
+        /*
+         size_t sz = sizeof(RecordPoint)*_capacity;
         RecordPoint * newbuf = (RecordPoint *)malloc(sz);
         memset(newbuf, 0, sz);
         memcpy(newbuf, _points, sizeof(RecordPoint)*_numPoints);
         free(_points);
         _points = newbuf;
+         */
     }
     CFTimeInterval now = CACurrentMediaTime();
     _points[_numPoints].pt = pt;

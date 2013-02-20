@@ -11,7 +11,6 @@
 #import "Camera.h"
 #import "FBO.h"
 #import "Tweener.h"
-#import "UIViewController+TGExtension.h"
 #import "Mixer.h"
 #import "PoolWater.h"
 
@@ -126,34 +125,6 @@
     return self;
 }
 
--(void)setView:(GLKView *)view
-{
-    /*
-    UITapGestureRecognizer *tgr = [[UITapGestureRecognizer alloc] initWithTarget:self
-                                                                          action:@selector(onTap:)];
-    
-    UITapGestureRecognizer * menuInvoker =  [[self getVC] getMenuInvokerGesture];
-    if( menuInvoker )
-    {
-        [tgr requireGestureRecognizerToFail:menuInvoker];
-    }
-    
-    [view addGestureRecognizer:tgr];
-    
-    UILongPressGestureRecognizer *lpgr =
-    [[UILongPressGestureRecognizer alloc] initWithTarget:self
-                                                  action:@selector(onLongTap:)];
-    [view addGestureRecognizer:lpgr];
-    */
-    [super setView:view];
-}
-
--(UIViewController *)getVC
-{
-    // .keyWindow is nil (wtf?)
-    UIWindow * window = [[UIApplication sharedApplication] delegate].window;
-    return window.rootViewController;
-}
 
 -(void)createBuffer
 {
@@ -259,9 +230,6 @@
 
 -(void)onTap:(UITapGestureRecognizer *)tgr
 {
-    if( [[self getVC] clearMenus] ) // yea, this should be somewhere else
-        return;
-    
     GLKVector2 pt = [PoolScreen screenToPool:[tgr locationInView:self.view]];
     PoolWater * water = [self waterFromPt:pt];
     if( water )

@@ -155,7 +155,7 @@ static const char * _sbp_var_names[] = {
 
 @end
 
-@implementation SixPointBezierMesh
+@implementation FivePointBezierMesh
 
 #define BEZ_SEGMENTS 100
 

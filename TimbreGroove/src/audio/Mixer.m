@@ -16,9 +16,6 @@
 #import "RingBuffer.h"
 #import <libkern/OSAtomic.h>
 
-const AudioUnitParameterValue kEQBypassON  = 1;
-const AudioUnitParameterValue kEQBypassOFF = 0;
-
 enum MidiNotes {
     kC0 = 0,
     kC1 = 12,
@@ -37,9 +34,7 @@ enum {
     kMIDIMessage_NoteOff   = 0x8,
 };
 
-void CheckError( OSStatus error, const char *operation) {
-    if (error == noErr)
-        return;
+void _CheckError( OSStatus error, const char *operation) {
     char errorString[ 20];        // See if it appears to be a 4-char-code
     *( UInt32 *)( errorString + 1) = CFSwapInt32HostToBig( error);
     if (isprint( errorString[ 1]) && isprint( errorString[ 2]) &&
@@ -220,6 +215,7 @@ OSStatus renderCallback(
         [self setupAUGraph];
         [self startGraph];
         [self setupMidi];
+        [self setupUI];
     }
     return self;
 }
@@ -254,11 +250,14 @@ OSStatus renderCallback(
     if( _numSamplerUnits == _capSamplerUnits )
     {
         _capSamplerUnits += 8;
+        _samplerUnits = realloc(_samplerUnits,sizeof(AudioUnit)*_capSamplerUnits);
+        /*
         AudioUnit * temp = malloc(sizeof(AudioUnit)*_capSamplerUnits);
         memset(temp, 0, sizeof(AudioUnit)*_capSamplerUnits);
         memcpy(temp, _samplerUnits, sizeof(AudioUnit)*_numSamplerUnits);
         free(_samplerUnits);
         _samplerUnits = temp;
+         */
     }
     _samplerUnits[_numSamplerUnits++] = su;
 }
@@ -430,11 +429,7 @@ OSStatus renderCallback(
 
     CheckError(AudioUnitAddRenderNotify(_masterEQUnit, renderCallback, &_cbContext), "Could not set callback");
     
-    AudioUnitParameterValue filterTypes[kNUM_EQ_BANDS] = {
-        kAUNBandEQFilterType_ResonantLowPass,
-        kAUNBandEQFilterType_Parametric,
-        kAUNBandEQFilterType_ResonantHighPass
-    };
+    EQBandInfo * bands = self.bands;
     
     for( int i = 0; i < kNUM_EQ_BANDS; i++ )
     {
@@ -442,20 +437,24 @@ OSStatus renderCallback(
                                         kAUNBandEQParam_FilterType + i,
                                         kAudioUnitScope_Global,
                                         0,
-                                        filterTypes[i],
+                                        bands[i].filterType,
                                         0);
         CheckError(result,"Unable to set eq filter type.");
-        
-        result = AudioUnitSetParameter (_masterEQUnit,
-                                        kAUNBandEQParam_BypassBand + i,
-                                        kAudioUnitScope_Global,
-                                        0,
-                                        kEQBypassOFF,
-                                        0);
-        
-        CheckError(result,"Unable to set eq bypass to OFF.");
-        _selectedEQBand = i;
-        self.eqCenter = 0.5;
+    }
+    
+    [self enableSelectedEQBand];
+    
+    for( int i = 0; i < kNUM_EQ_BANDS; i++ )
+    {
+        // initialize with default default values
+        for (int n = 0; n < bands[i].numKnobs; n++)
+        {
+            ParamDefinition * pd = &bands[i].defs[n];
+            if( pd->name )
+            {
+                [self turnKnobTo:pd->def pd:pd band:i]; // this will set ->normalized field
+            }
+        }
     }
     
     return result;
@@ -505,6 +504,9 @@ OSStatus renderCallback(
     _cbContext.asbd = fasbd;
     
     [self setupMasterEQ];
+    
+    // not sure where to put this:
+    [self setMixerOutputGain:(AudioUnitParameterValue)0.5];
     
     result = AUGraphConnectNodeInput (_processingGraph, _mixerNode, 0, cvNode, 0);
     CheckError(result,"Unable to interconnect the mixer/conv nodes in the audio processing graph.");

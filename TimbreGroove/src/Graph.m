@@ -82,9 +82,15 @@
 -(void)render:(NSUInteger)w h:(NSUInteger)h
 {
     if( _single )
+    {
         [_single render:w h:h];
+        if( _single.autoRenderChildren && _single.children )
+            [Graph _inner_render:_single.children w:w h:h];
+    }
     else
+    {
         [Graph _inner_render:self.children w:w h:h];
+    }
 }
 
 -(NSArray *)getSettings

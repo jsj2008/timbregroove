@@ -40,6 +40,6 @@
 @property (nonatomic) GLKVector3 * controlPoints; // [5] no more, no less
 @end
 
-@interface SixPointBezierMesh : Geometry
+@interface FivePointBezierMesh : Geometry
 
 @end

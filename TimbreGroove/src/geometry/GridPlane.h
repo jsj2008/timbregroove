@@ -20,4 +20,5 @@ andIndicesIntoNames:(NSArray *)indicesIntoNames
            andDoUVs:(bool)UVs
        andDoNormals:(bool)normals;
 
+@property (nonatomic, readonly) float width;
 @end

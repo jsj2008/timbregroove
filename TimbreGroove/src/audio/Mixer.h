@@ -10,8 +10,11 @@
 #import <AVFoundation/AVFoundation.h>
 #import <CoreMIDI/CoreMIDI.h>
 #import "TGTypes.h"
+#import "MixerParamConsts.h"
 
-void CheckError( OSStatus error, const char *operation);
+#define CheckError(error,str) { if (error != noErr) { _CheckError(error,str); } }
+
+void _CheckError( OSStatus error, const char *operation);
 
 @interface Sound : NSObject
 -(OSStatus)playNote:(int)note forDuration:(NSTimeInterval)duration;
@@ -24,24 +27,6 @@ void CheckError( OSStatus error, const char *operation);
 
 static const UInt32 kFramesForDisplay = 512;
 
-//important(!): goes from low to high
-typedef enum eqBands {
-    kEQLow,
-    kEQMid,
-    kEQHigh,
-    
-    kNUM_EQ_BANDS
-} eqBands;
-
-enum {
-    kEQPeakIndex,
-    kEQBandwidthIndex,
-    kEQCenterIndex,
-    
-    kNUM_EQ_PROPS
-};
-
-
 @interface Mixer : NSObject {
 @private
     // here for categories
@@ -53,9 +38,9 @@ enum {
     AUNode           _mixerNode;
     Float64          _graphSampleRate;
 
+    NSDictionary *          _globalsParamMap;
     AudioUnitParameterValue _mixerOutputGain;
-    eqBands _selectedEQBand;
-    AudioUnitParameterValue _eqValues[kNUM_EQ_BANDS][kNUM_EQ_PROPS];
+    int                     _selectedEQBand; // actually eqBands
     
     MIDIClientRef  _midiClient;
     MusicTimeStamp _playerTrackLength;

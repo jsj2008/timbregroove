@@ -9,8 +9,8 @@
 #import "Generic.h"
 
 typedef enum BezShapes {
-    kBezShape_Parametric,
     kBezShape_LowPassRes,
+    kBezShape_Parametric,
     kBezShape_HiPassRes
 } BezShapes;
 

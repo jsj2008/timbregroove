@@ -19,6 +19,9 @@
 - (void)bindToRender;
 - (void)unbindFromRender;
 
+@property (nonatomic) GLKVector4 clearColor;
+@property (nonatomic) bool allowDepthCheck;
+
 //deprecated
 - (id) initWithWidth:(GLuint)width
               height:(GLuint)height

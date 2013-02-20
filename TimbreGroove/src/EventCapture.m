@@ -12,6 +12,9 @@
 #import "MeshBuffer.h"
 #import "Interactive.h"
 #import "FBO.h"
+#import "Global.h"
+#import "Graph.h"
+#import "GraphView.h"
 
 #define _NTC(n) ((n&0xFF)/255.0f)
 #define NTC(n) { _NTC((n>>16)), _NTC((n>>8)), _NTC(n), 1.0 }
@@ -26,14 +29,21 @@
 
 @implementation EventCapture
 
++(id)getGraphViewTapChildElementOf:(TG3dObject *)root
+{
+    UIView * view = [Global sharedInstance].displayingGraph.view;
+    CGPoint pt = [Global sharedInstance].windowTap;
+    return [[EventCapture new] childElementOf:root fromScreenPt:pt inView:view];
+}
+
 -(id)childElementOf:(TG3dObject *)graph
-          fromScreenPt:(CGPoint)pt
+       fromScreenPt:(CGPoint)pt
+             inView:(UIView *)view
 {
     GenericShader * shader;
 	uint8_t pix[4];
-    CGSize sz = [[UIScreen mainScreen] bounds].size;
+    CGSize sz = view.frame.size;
     FBO * fbo = [[FBO alloc] initWithWidth:sz.width height:sz.height];
-    
     
     _currentColor    = 1;
     _objDict         = [NSMutableDictionary new];
@@ -67,7 +77,7 @@
 {
     for( TG3dObject * child in children )
     {
-        if( [child conformsToProtocol:@protocol(Interactive) ] )
+        if( child.interactive )
         {
             GLKVector4 color = NTC(_currentColor);
             [shader writeToLocation:gv_ucolor type:TG_VECTOR4 data:color.v];

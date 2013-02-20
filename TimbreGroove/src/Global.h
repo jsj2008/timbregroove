@@ -23,6 +23,23 @@
 @property (nonatomic,readonly) NSTimeInterval lengthOf8thNote;
 @property (nonatomic,readonly) NSTimeInterval lengthOf16thNote;
 
-@property (nonatomic) float panXBy;
-@property (nonatomic) float panYBy;
+@property (nonatomic) float paramKnob1; // eq
+@property (nonatomic) float paramKnob2; // eq
+@property (nonatomic) float paramKnob3; // eq
+@property (nonatomic) float paramKnob4; // volume
+@property (nonatomic) float paramKnob5;
+@property (nonatomic) float paramKnob6;
+@property (nonatomic) float paramKnob7;
+@property (nonatomic) float paramKnob8;
+
+@property (nonatomic) CGPoint paramPad1; // tap
+@property (nonatomic) CGPoint paramPad2; // cursor direction (1 finger)
+@property (nonatomic) CGPoint paramPad3; // cursor direction (2 finger)
+@property (nonatomic) CGPoint paramPad4;
+@property (nonatomic) CGPoint paramPad5;
+@property (nonatomic) CGPoint paramPad6;
+@property (nonatomic) CGPoint paramPad7;
+@property (nonatomic) CGPoint paramPad8;
+
+@property (nonatomic) CGPoint windowTap;
 @end

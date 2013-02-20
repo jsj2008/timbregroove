@@ -19,6 +19,21 @@ NSString * const __str_textFieldName = @"textTexture";
 
 @implementation Text
 
+-(id)init
+{
+    return [super init];
+}
+
+-(id)initWithString:(NSString *)text
+{
+    self = [super init];
+    if( self )
+    {
+        _text = text;
+    }
+    return self;
+}
+
 -(id)wireUp
 {
     if( !_text )

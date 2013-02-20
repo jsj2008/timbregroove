@@ -9,15 +9,11 @@
 #import "GraphView.h"
 #import "Global.h"
 #import "Camera.h"
+#import "Gestures.h"
+#import "GraphView+Touches.h"
 
 @interface GraphView () {
-    bool    _panTracking;
-    CGPoint _panStart;
-    CGPoint _panLast;
-    CGPoint _panDirs;
-    
     NSMutableArray * _watchingGlobals;
-    int _phonyContext;
 }
 @end
 
@@ -32,7 +28,7 @@
     return self;
 }
 
--(void)watchForGlobals:(id)target lookup:(NSDictionary *)lookups
+-(void)watchForGlobals:(NSDictionary *)lookups
 {
     NSMutableDictionary * graphDict = _graph.globalNotifees;
     if( !graphDict )
@@ -48,14 +44,14 @@
             notifieesForProp = [NSMutableArray new];
             graphDict[propName] = notifieesForProp;
         }
-        [notifieesForProp addObject:@[target,lookups[propName]]];
+        [notifieesForProp addObject:lookups[propName]];
         if( [_watchingGlobals indexOfObject:propName] == NSNotFound )
         {
             [_watchingGlobals addObject:propName];
             [[Global sharedInstance] addObserver:self
                                       forKeyPath:propName
                                          options:NSKeyValueObservingOptionNew
-                                         context:&_phonyContext];
+                                         context:NULL];
         }
     }
 }
@@ -74,14 +70,9 @@
         // longer in view) requested this property
         if( notifieesForProp )
         {
-            for( NSArray * targetInfo in notifieesForProp )
+            for( void (^dispatchBlock)() in notifieesForProp )
             {
-                id target = targetInfo[0];
-                SEL sel = NSSelectorFromString(targetInfo[1]);
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
-                [target performSelector:sel];
-#pragma clang diagnostic pop
+                dispatchBlock();
             }
         }
     }
@@ -104,62 +95,9 @@
     
     _watchingGlobals = [NSMutableArray new];
     
-    _recordGesture = [[RecordGesture alloc] initWithTarget:self action:@selector(record:)];
-    [self addGestureRecognizer:_recordGesture];
-    
-    _tapRecordGesture = [[TapRecordGesture alloc] initWithTarget:self action:@selector(tapRecord:)];
-    [self addGestureRecognizer:_tapRecordGesture];
-    
-    UIPanGestureRecognizer * pgr = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panning:)];
-    [self addGestureRecognizer:pgr];
+    [self setupTouches];
 }
 
--(void)panning:(UIPanGestureRecognizer *)pgr
-{
-    if( pgr.state == UIGestureRecognizerStateChanged )
-    {
-        CGSize sz       = self.frame.size;
-        CGPoint pt      = [pgr locationInView:self];
-        
-        if( _panTracking )
-        {
-            // We notice a change in direction here:
-            float currXdir = pt.x - _panLast.x < 0.0 ? -1 : 1;
-            float currYdir = pt.y - _panLast.y < 0.0 ? -1 : 1;
-            if( (currXdir != _panDirs.x) || (currYdir != _panDirs.y) )
-            {
-                _panStart = _panLast;
-                _panDirs = (CGPoint){ currXdir, currYdir };
-            }
-        }
-        else
-        {
-            _panStart = pt;
-            _panLast = pt;
-            _panDirs = (CGPoint){ 1, 1 };
-            _panTracking = true;
-        }
-        Global * global = [Global sharedInstance];
-
-        global.panXBy = (pt.x - _panStart.x) / sz.width;
-        global.panYBy = -(pt.y - _panStart.y) / sz.height;
-
-        _panLast = pt;
-    }
-    else
-    {
-        _panTracking = false;
-    }
-}
-
--(void)record:(RecordGesture *)upg
-{
-}
-
--(void)tapRecord:(TapRecordGesture *)trg
-{
-    
-}
 
 - (void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate
 {
