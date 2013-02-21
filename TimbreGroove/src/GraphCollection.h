@@ -8,11 +8,13 @@
 
 #import <Foundation/Foundation.h>
 
+@class ConfigGraphicElement;
+
 @interface GraphCollection : NSObject
 
 @property (nonatomic,readonly) unsigned int count;
 
--(id)createGraphBasedOnNodeType:(NSDictionary *)params withViewSize:(CGSize)viewSize;
+-(id)createGraphBasedOnConfig:(ConfigGraphicElement *)config withViewSize:(CGSize)viewSize;
 -(id)graphAtIndex:(unsigned int)i;
 -(void)removeGraphAtIndex:(unsigned int)i;
 @end

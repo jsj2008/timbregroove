@@ -1,24 +1,24 @@
 //
-//  NewTrackPicker.m
+//  NewScenePicker.m
 //  TimbreGroove
 //
 //  Created by victor on 2/3/13.
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "NewTrackPicker.h"
-#import "NewTrackCell.h"
-#import "NewTrackContainerVC.h"
-#import "GraphDefinitions.h"
+#import "NewScenePicker.h"
+#import "NewSceneCell.h"
+#import "NewSceneViewController.h"
+#import "Config.h"
 
-@interface NewTrackPicker () {
+@interface NewScenePicker () {
     NSMutableDictionary * _items;
     NSArray * _keys;
 }
 
 @end
 
-@implementation NewTrackPicker
+@implementation NewScenePicker
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -42,7 +42,10 @@
 - (void)getItems
 {
     _items = [NSMutableDictionary new];
-    _keys = [GraphDefinitions getAllDefinitions:_items];
+    Config * config = [Config sharedInstance];
+    _keys = [config getSceneNames];
+    for( NSString * name in _keys)
+        _items[_keys] = [config getScene:name];
 }
 
 - (void)viewDidLoad
@@ -66,11 +69,12 @@
 {
     static NSString * cellName = @"NewTrackCell";
     
-    NewTrackCell * cell = (NewTrackCell *)[collectionView dequeueReusableCellWithReuseIdentifier:cellName forIndexPath:indexPath];
+    NewSceneCell * cell = (NewSceneCell *)[collectionView dequeueReusableCellWithReuseIdentifier:cellName
+                                                                                    forIndexPath:indexPath];
     
-    NSDictionary * item = _items[_keys[indexPath.item]];
-    cell.cellImage.image = [UIImage imageNamed:item[@"icon"]];
-    cell.cellLabel.text = ((NSDictionary*)item[@"userData"])[@"instanceClass"];
+    ConfigScene * item = _items[_keys[indexPath.item]];
+    cell.cellImage.image = [UIImage imageNamed:item.icon];
+    cell.cellLabel.text = item.displayName;
     
     return cell;
 }
@@ -88,10 +92,8 @@
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-   // [collectionView selectItemAtIndexPath:indexPath animated:YES scrollPosition:UICollectionViewScrollPositionCenteredHorizontally];
-    NSLog(@"selected: %d", indexPath.item);
-    NSDictionary * item = _items[_keys[indexPath.item]];
-    [self.delegate NewTrack:(NewTrackContainerVC*)self.parentViewController selection:item];
+    ConfigScene * item = _items[_keys[indexPath.item]];
+    [self.delegate NewScene:(NewSceneViewController*)self.parentViewController selection:item];
 }
 
 // "called when the user taps on an already-selected item in multi-select mode"

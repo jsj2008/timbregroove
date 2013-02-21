@@ -1,5 +1,5 @@
 //
-//  NewTrackCell.h
+//  NewSceneCell.h
 //  TimbreGroove
 //
 //  Created by victor on 2/3/13.
@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface NewTrackCell : UICollectionViewCell
+@interface NewSceneCell : UICollectionViewCell
 @property (weak, nonatomic) IBOutlet UILabel *cellLabel;
 @property (weak, nonatomic) IBOutlet UIImageView *cellImage;
 

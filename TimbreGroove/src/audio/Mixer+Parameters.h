@@ -10,6 +10,7 @@
 
 
 typedef enum eqBands {
+    kEQDisabled = -1,
     kEQLow,
     kEQMid,
     kEQHigh,
@@ -87,7 +88,7 @@ typedef struct EQBandInfo
 @property (nonatomic) eqBands selectedEQBand; // also calls enabledSelectedEQBand
 @property (nonatomic) EQBandInfo * bands;
 
-
+-(NSDictionary *)getAUParameters;
 
 -(void)enableSelectedEQBand;
 -(void)setupUI;

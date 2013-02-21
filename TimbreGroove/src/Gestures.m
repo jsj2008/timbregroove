@@ -50,7 +50,7 @@
                        change:(NSDictionary *)change
                       context:(void *)context
 {
-    if( [keyPath isEqualToString:@"recording"] )
+    if( [kGlobalRecording isEqualToString:keyPath] )
     {
         _recording = [Global sharedInstance].recording;
         if( _recording )
@@ -179,7 +179,7 @@
         _receivers = [NSMutableArray new];
         
         [[Global sharedInstance] addObserver:self
-                                  forKeyPath:@"recording"
+                                  forKeyPath:(NSString *)kGlobalRecording
                                      options:NSKeyValueObservingOptionNew
                                      context:NULL];
     }
@@ -201,7 +201,7 @@
                        change:(NSDictionary *)change
                       context:(void *)context
 {
-    if( [keyPath isEqualToString:@"recording"] )
+    if( [kGlobalRecording isEqualToString:keyPath] )
     {
         _recording = [Global sharedInstance].recording;
         if( _recording )

@@ -43,7 +43,6 @@
     [self getBufferLocations];
     [self getTextureLocations];
     [self configureLighting];
-    [self setSounds];
     return self;
 }
 
@@ -70,7 +69,6 @@
 -(void)createBuffer{}
 -(void)createTexture{}
 -(void)createTextures{}
--(void)setSounds{}
 
 -(void)createShader
 {

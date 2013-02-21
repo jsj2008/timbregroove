@@ -22,9 +22,9 @@
 @property (nonatomic) GLKVector4 backcolor;
 @property (nonatomic,strong) Graph * graph;
 
--(void)watchForGlobals:(NSDictionary *)lookups;
 -(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate;
 -(void)render;
+
 -(NSArray *)getSettings;
 -(void)commitSettings;
 @end

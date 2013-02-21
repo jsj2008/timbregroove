@@ -6,7 +6,12 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
+#define NO_GLOBAL_DECLS
 #import "Global.h"
+
+NSString const * kGlobalScene        = @"scene";
+NSString const * kGlobalRecording    = @"recording";
+NSString const * kGlobalDisplayGraph = @"displayGraph";
 
 static Global * __sharedGlobal;
 
@@ -17,24 +22,8 @@ static Global * __sharedGlobal;
     self = [super init];
     if( self )
     {
-        _BPM = FACTORY_BPM;
     }
     return self;
-}
-
--(NSTimeInterval)lengthOfQuarterNote
-{
-    return (NSTimeInterval)(60.0) / _BPM;
-}
-
--(NSTimeInterval)lengthOf8thNote
-{
-    return (NSTimeInterval)(60.0) / (_BPM*2.0);
-}
-
--(NSTimeInterval)lengthOf16thNote
-{
-    return (NSTimeInterval)(60.0) / (_BPM*4.0);
 }
 
 +(Global *)sharedInstance

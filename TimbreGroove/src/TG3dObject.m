@@ -12,14 +12,11 @@
 #import "MeshBuffer.h"
 #import "FBO.h"
 #import "SettingsVC.h"
-#import "Mixer.h"
 #import "GraphView+Touches.h"
 
 @interface TG3dObject () {
     PointPlayer * _ptPlayer;
-    float _noteTimer;
 }
-
 @end
 
 @implementation TG3dObject
@@ -66,19 +63,7 @@
     return self;
 }
 
-#pragma mark sound stuff
-
--(void)play {}
--(void)pause {}
--(void)stop {}
-
--(void)setSoundName:(NSString *)soundName
-{
-    if( self.sound && [_soundName isEqualToString:soundName])
-        return;
-    _soundName = soundName;
-    self.sound = [[Mixer sharedInstance] getSound:soundName];
-}
+#pragma mark record stuff
 
 -(void)didAttachToView:(GraphView *)view
 {
@@ -102,24 +87,12 @@
 
 -(void)TapRecordGesture:(TapRecordGesture*)rg recordedPt:(GLKVector3)pt
 {
-    [self playNoteAtPt:pt];
+//    [self playNoteAtPt:pt];
 }
 
 -(void)TapRecordGesture:(TapRecordGesture*)rg recordingDone:(PointRecorder *)recorder
 {
     _ptPlayer = [recorder makePlayer];
-    _noteTimer = 0;
-}
-
--(void)playNoteAtPt:(GLKVector3)pt
-{
-    Sound * sound = self.sound;
-    if( !sound )
-        return; // not sure when this happens anymore
-    int lo = sound.lowestPlayable;
-    int hi = sound.highestPlayable;
-    int note = lo + (int)( (hi-lo) * pt.y );
-    [sound playNote:note forDuration:0.3];
 }
 
 #pragma mark inialize
@@ -135,12 +108,6 @@
 
 -(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate
 {
-    _noteTimer += dt;
-    if( _ptPlayer && (_noteTimer > _ptPlayer.duration ) )
-    {
-        [self playNoteAtPt:_ptPlayer.next];
-        _noteTimer = 0;
-    }
 }
 
 -(void)render:(NSUInteger)w h:(NSUInteger)h
@@ -261,22 +228,11 @@
 
 -(NSArray *)getSettings
 {
-    NSMutableDictionary * snames = [NSMutableDictionary new];
-    NSArray * keys = [[Mixer sharedInstance] getAllSoundNames];
-    for( NSString * key in keys )
-        snames[key] = key;
-    
-    SettingsDescriptor * sd;
-    sd = [[SettingsDescriptor alloc]  initWithControlType: SC_Picker
-                                               memberName: @("audioSoundName")
-                                                labelText: @"Sound"
-                                                  options: @{ @"values":snames,
-                                                        @"target":self, @"key":@"soundName"}
-                                             initialValue: self.soundName
-                                                 priority: AUDIO_SETTINGS];
-    
-    return @[sd];
-    
+    return nil;
 }
 
+-(NSDictionary *)getParameters
+{
+    return nil;
+}
 @end

@@ -9,6 +9,7 @@
 #import "Graph.h"
 #import "Camera.h"
 #import "Global.h"
+#import "Config.h"
 
 @interface Graph() {
     // as of this writing the majority of graphs (all?)
@@ -32,6 +33,17 @@
     return self;
 }
 
+-(id)createTopLevelNodeWithConfig:(ConfigGraphicElement *)config andViewSize:(CGSize)viewSize;
+{
+    Class klass = NSClassFromString(config.instanceClass);
+    TG3dObject * node = [[klass alloc] init];
+    [self appendChild:node];
+    NSDictionary * userData = config.customProperties;
+    if( userData )
+        [node setValuesForKeysWithDictionary:userData];
+    [node wireUpWithViewSize:viewSize];
+    return node;
+}
 
 -(void)appendChild:(Node *)child
 {    
@@ -114,6 +126,19 @@
     }
     
     return nil;
+}
+
+-(NSDictionary *)getParameters
+{
+    NSMutableDictionary * params = [NSMutableDictionary new];
+    for( TG3dObject * child in self.children )
+    {
+        NSDictionary * dict = [child getParameters];
+        if( dict && [dict count] )
+           [params addEntriesFromDictionary:dict];
+    }
+    
+    return params;
 }
 
 @end

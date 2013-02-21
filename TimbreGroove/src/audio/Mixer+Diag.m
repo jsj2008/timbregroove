@@ -7,6 +7,7 @@
 //
 
 #import "Mixer+Diag.h"
+#import "Mixer+Parameters.h"
 #import <AudioUnit/AudioUnit.h>
 
 typedef struct  tagAUFlagDump {
@@ -130,10 +131,17 @@ typedef struct  tagAUFlagDump {
         //    continue;
         float bw, center, peak;
         int i = _selectedEQBand;
-        AudioUnitGetParameter(_masterEQUnit, kAUNBandEQParam_Bandwidth+i, kAudioUnitScope_Global, 0, &bw);
-        AudioUnitGetParameter(_masterEQUnit, kAUNBandEQParam_Frequency +i, kAudioUnitScope_Global, 0, &center);
-        AudioUnitGetParameter(_masterEQUnit, kAUNBandEQParam_Gain+i, kAudioUnitScope_Global, 0, &peak);
-        NSLog(@"EQ[%d] center: %05.4f bw: %02.4f  peak:%02.4f", i, center, bw, peak);
+        if( i == kEQDisabled )
+        {
+            NSLog(@"Can't dump EQ because it is disabled");
+        }
+        else
+        {
+            AudioUnitGetParameter(_masterEQUnit, kAUNBandEQParam_Bandwidth+i, kAudioUnitScope_Global, 0, &bw);
+            AudioUnitGetParameter(_masterEQUnit, kAUNBandEQParam_Frequency +i, kAudioUnitScope_Global, 0, &center);
+            AudioUnitGetParameter(_masterEQUnit, kAUNBandEQParam_Gain+i, kAudioUnitScope_Global, 0, &peak);
+            NSLog(@"EQ[%d] center: %05.4f bw: %02.4f  peak:%02.4f", i, center, bw, peak);
+        }
     }
 }
 

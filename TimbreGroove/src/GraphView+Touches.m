@@ -9,6 +9,8 @@
 #import "GraphView+Touches.h"
 #import "Gestures.h"
 #import "Global.h"
+#import "Scene.h"
+#import "Names.h"
 
 @implementation GraphView (Touches)
 @dynamic recordGesture;
@@ -46,7 +48,7 @@
     [self addGestureRecognizer:pnch];
     
     PannerGesture * pgr = [[PannerGesture alloc] initWithTarget:self action:@selector(panning:)];
- //   [self addGestureRecognizer:pgr];
+    [self addGestureRecognizer:pgr];
     pgr.limitRC = self.frame;
     
     UISwipeGestureRecognizerDirection dirs[4] = {
@@ -56,12 +58,10 @@
         UISwipeGestureRecognizerDirectionDown
     };
     UISwipeGestureRecognizer * sgr;
-    for( int i = 0; i < 8; i++ )
+    for( int i = 0; i < 4; i++ )
     {
         sgr = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipe:)];
-        sgr.direction = dirs[i % 4];
-        sgr.numberOfTouchesRequired = ((i >> 2) & 1) + 1;
-        //[sgr requireGestureRecognizerToFail:pgr];
+        sgr.direction = dirs[i];
         [self addGestureRecognizer:sgr];
     }
 }
@@ -86,10 +86,8 @@
                 pt.y = -1;
                 break;
         }
-        if( sgr.numberOfTouchesRequired == 2 )
-            [Global sharedInstance].paramPad3 = pt;
-        else
-            [Global sharedInstance].paramPad2 = pt;
+        Scene * scene = [Global sharedInstance].scene;
+        [scene setTrigger:kTriggerDirection point:pt];
     }
 }
 
@@ -109,7 +107,7 @@
             else
                 scale = 1.0;
         }
-        [Global sharedInstance].paramKnob3 = scale;
+        [[Global sharedInstance].scene setTrigger:kTriggerPinch value:scale];
     }
 }
 
@@ -117,12 +115,13 @@
 {
     if( tgr.state == UIGestureRecognizerStateEnded )
     {
+        Scene * scene   = [Global sharedInstance].scene;
         CGSize sz       = self.frame.size;
         CGPoint pt      = [tgr locationInView:self];
-        [Global sharedInstance].windowTap = pt;
+        [scene setTrigger:kTriggerTapPos point:pt];
         pt.x /= sz.width;
         pt.y = 1.0 - (pt.y / sz.height); // up is up damn it
-        [Global sharedInstance].paramPad1 = pt;
+        [scene setTrigger:kTriggerTap1 point:pt];
     }
 }
 
@@ -132,16 +131,21 @@
     {
         CGSize sz       = self.frame.size;
         CGPoint pt      = [pgr locationInView:self];
-        Global * global = [Global sharedInstance];
         
         if( !_panTracking )
         {
             _panLast = pt;
             _panTracking = true;
         }
+
+        Scene * scene   = [Global sharedInstance].scene;
         
-        global.paramKnob1 = (pt.x - _panLast.x) / sz.width;
-        global.paramKnob2 = -(pt.y - _panLast.y) / sz.height;
+        CGPoint spt = (CGPoint){ (pt.x - _panLast.x) / sz.width,
+                                -(pt.y - _panLast.y) / sz.height };
+        
+        [scene setTrigger:kTriggerPanX value:spt.x];
+        [scene setTrigger:kTriggerPanY value:spt.y];
+        [scene setTrigger:kTriggerDrag1 point:spt];
         
         _panLast = pt;
     }

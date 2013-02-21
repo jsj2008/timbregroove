@@ -15,5 +15,8 @@
        fromScreenPt:(CGPoint)pt
              inView:(UIView *)view;
 
-+(id)getGraphViewTapChildElementOf:(TG3dObject *)root;
++(id)getGraphViewTapChildElementOf:(TG3dObject *)root
+                            inView:(UIView *)view
+                              atPt:(CGPoint)pt;
+
 @end

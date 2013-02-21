@@ -10,22 +10,28 @@
 #import <AVFoundation/AVFoundation.h>
 #import <CoreMIDI/CoreMIDI.h>
 #import "TGTypes.h"
-#import "MixerParamConsts.h"
+
+#ifndef SKIP_MIXER_DECLS
+extern const AudioUnitParameterValue kEQBypassON;
+extern const AudioUnitParameterValue kEQBypassOFF;
+#endif
+
+#define  kFramesForDisplay 512
 
 #define CheckError(error,str) { if (error != noErr) { _CheckError(error,str); } }
 
 void _CheckError( OSStatus error, const char *operation);
 
-@interface Sound : NSObject
+@class ConfigInstrument;
+
+@interface Instrument : NSObject
 -(OSStatus)playNote:(int)note forDuration:(NSTimeInterval)duration;
--(void)playMidiFile:(NSString *)filename;
--(void)addNoteCache:(int)note ts:(MIDITimeStamp)ts;
+
 @property (nonatomic,readonly) int lowestPlayable;
 @property (nonatomic,readonly) int highestPlayable;
 @property (nonatomic,readonly) AudioUnit sampler;
 @end
 
-static const UInt32 kFramesForDisplay = 512;
 
 @interface Mixer : NSObject {
 @private
@@ -38,7 +44,6 @@ static const UInt32 kFramesForDisplay = 512;
     AUNode           _mixerNode;
     Float64          _graphSampleRate;
 
-    NSDictionary *          _globalsParamMap;
     AudioUnitParameterValue _mixerOutputGain;
     int                     _selectedEQBand; // actually eqBands
     
@@ -51,8 +56,9 @@ static const UInt32 kFramesForDisplay = 512;
 
 +(Mixer *)sharedInstance;
 
--(Sound *)getSound:(NSString *)name;
--(NSArray *)getAllSoundNames;
+-(Instrument *)loadInstrumentFromConfig:(ConfigInstrument *)config;
+
+-(NSDictionary *)getParameters;
 
 -(void)update:(MixerUpdate *)mixerUpdate;
 

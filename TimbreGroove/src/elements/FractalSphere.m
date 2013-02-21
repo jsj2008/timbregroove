@@ -9,7 +9,6 @@
 #import "Fractal.h"
 #import "FBO.h"
 #import "Light.h"
-#import "Mixer.h"
 #import "Tweener.h"
 #import "Sphere.h"
 
@@ -21,7 +20,6 @@
     Fractal * _texRenderer;
     float _myRot;
     FBO *_fbo;
-    Sound * _sound;
     
     float _pmin;
     float _pmax;
@@ -65,12 +63,6 @@
     _peakVal = peakVal;
     float subColor = TG_CLAMP(peakVal*0.7,0.3,0.6);
     self.light.ambientColor = (GLKVector4){subColor, subColor, peakVal, 1};
-}
-
--(void)setSounds
-{
-    self.soundName = @"vibes";
-    [self.sound playMidiFile:@"ChildOfGod"];
 }
 
 -(void)tweenDone

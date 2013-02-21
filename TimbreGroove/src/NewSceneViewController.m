@@ -1,26 +1,26 @@
 //
-//  NewTrackContainerVC.m
+//  NewSceneContainerVC.m
 //  TimbreGroove
 //
 //  Created by victor on 2/3/13.
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "NewTrackContainerVC.h"
-#import "NewTrackPicker.h"
+#import "NewSceneViewController.h"
+#import "NewScenePicker.h"
 
-@interface NewTrackContainerVC ()
+@interface NewSceneViewController ()
 
 @end
 
-@implementation NewTrackContainerVC
+@implementation NewSceneViewController
 
 -(void)viewDidLoad
 {
     self.pickerVC.delegate = self.delegate;
 }
 
--(NewTrackPicker *)pickerVC
+-(NewScenePicker *)pickerVC
 {
     return self.childViewControllers[0];
 }

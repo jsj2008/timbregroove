@@ -12,7 +12,6 @@
 #import "MeshBuffer.h"
 #import "Interactive.h"
 #import "FBO.h"
-#import "Global.h"
 #import "Graph.h"
 #import "GraphView.h"
 
@@ -29,10 +28,8 @@
 
 @implementation EventCapture
 
-+(id)getGraphViewTapChildElementOf:(TG3dObject *)root
++(id)getGraphViewTapChildElementOf:(TG3dObject *)root inView:(UIView *)view atPt:(CGPoint)pt
 {
-    UIView * view = [Global sharedInstance].displayingGraph.view;
-    CGPoint pt = [Global sharedInstance].windowTap;
     return [[EventCapture new] childElementOf:root fromScreenPt:pt inView:view];
 }
 

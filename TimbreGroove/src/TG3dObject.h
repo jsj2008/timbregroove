@@ -15,7 +15,6 @@
 @class MeshBuffer;
 @class FBO;
 @class GraphView;
-@class Sound;
 
 @interface TG3dObject : Node<TapRecordGestureReceiver> {
 @protected
@@ -45,13 +44,6 @@
 @property (nonatomic)        GLKVector3 scale;
 @property (nonatomic)             float scaleXYZ;
 
-@property (nonatomic,strong) NSString * soundName;
-@property (nonatomic,strong) Sound * sound;
-
--(void)play;
--(void)pause;
--(void)stop;
-
 -(id)   wireUp;
 -(id)   wireUpWithViewSize:(CGSize)viewSize;
 
@@ -63,6 +55,7 @@
 - (GLKMatrix4) calcPVM;   // combine camera and model
 - (NSString *) getShaderHeader;
 - (NSArray *)  getSettings;
+- (NSDictionary *)getParameters;
 
 -(void)didAttachToView:(GraphView *)view;
 -(void)didDetachFromView:(GraphView *)view;

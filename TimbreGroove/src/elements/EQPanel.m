@@ -5,15 +5,19 @@
 //  Created by victor on 2/14/13.
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
+#define NO_EQPANEL_DECLS
+
 
 #import "EQPanel.h"
 #import "Mixer.h"
-#import "Mixer+Parameters.h"
 #import "Global.h"
 #import "GraphView.h"
 #import "FBO.h"
 #import "Texture.h"
 #import "GenericWithTexture.h"
+
+NSString const * kParamCurveShape   = @"CurveShape";
+NSString const * kParamCurveWidth   = @"CurveWidth";
 
 @interface EQOffText : GenericWithTexture
 @end
@@ -75,8 +79,6 @@
     _lowPassRes = lowpass;
     _hiPassRes  = hipass;
     
-    self.shapeDisplay = kBezShape_LowPassRes;
-    self.shapeEdit = kBezShape_LowPassRes;
 #endif
     
     _IamATexture = self.fbo != nil;
@@ -84,54 +86,52 @@
     if( _IamATexture )
     {
         self.fbo.allowDepthCheck = true;
-        self.fbo.clearColor = (GLKVector4){0.3, 0.3, 0.7, 1.0};
+        self.fbo.clearColor = (GLKVector4){0.3, 0.3, 0.3, 1.0};
         self.scale = (GLKVector3){ 0.25, 1, 1 };
         
         _eqOff = [[EQOffText new] wireUp]; // [[[Text alloc] initWithString:@"EQ off"] wireUp];
         _eqOff.position = (GLKVector3){0.75, 0, 0 };
-        _eqOff.scale =self.scale;
-        //_eqOff.scale = self.scale;
+        _eqOff.scale = self.scale;
         [self appendChild:_eqOff];
+    }
+    else
+    {
+        int curve = [Mixer sharedInstance].selectedEQBand;
+        self.shapeDisplay = curve;
+        self.shapeEdit = curve;        
     }
     return self;
 }
 
 -(void)didAttachToView:(GraphView *)view
 {
-    [view watchForGlobals:@{  kParamKnob1:^{ [self updateCurve:0]; },
-                              kParamKnob2:^{ [self updateCurve:1]; },
-                              kParamKnob3:^{ [self updateCurve:2]; }}];
-    
     if( _eqOff )
        [_eqOff didAttachToView:view];
 }
 
--(void)toggleBand
+-(NSDictionary *)getParameters
 {
-    CGPoint pt = [Global sharedInstance].paramPad1;
-    eqBands band;
-    if( pt.y <= 0.333)
-        band = kEQLow;
-    else if( pt.y >= 0.666)
-        band = kEQHigh;
-    else
-        band = kEQMid;
-
-    [Mixer sharedInstance].selectedEQBand = band;
-    self.shapeDisplay = band;
-    self.shapeEdit = band;
+    CGPoint dmy;
+    
+    return @{
+             kParamCurveShape: ^(CGPoint pt){ [self updateCurve:0 pt:pt scale:0]; },
+             kParamCurveWidth: ^(float f){ [self updateCurve:2 pt:dmy scale:f]; }
+             };
 }
 
--(void)updateCurve:(int)knobNum
+-(void)updateCurve:(int)knobNum pt:(CGPoint)pt scale:(float)scale
 {
 #ifndef TEST_WITH_SQUARE
+    
+    if( _shapeEdit == kBezShape_NONE )
+        return;
+    
     if(knobNum == 2 && _shapeEdit != kBezShape_Parametric)
         return;
     
     self.shapeDisplay = _shapeEdit;
     
     FivePointBezier *  fpb    = (FivePointBezier *)self.shader;
-    Global *           global = [Global sharedInstance];
 
     CGPoint left    = fpb.left;
     CGPoint right   = fpb.right;
@@ -141,14 +141,14 @@
  
     if( knobNum == 2 )
     {
-        float xmove2 = global.paramKnob3;
+        float xmove2 = scale;
         left.x -= xmove2;
         right.x += xmove2;
     }
     else
     {
-        float xmove = global.paramKnob1;
-        float ymove = global.paramKnob2;
+        float xmove = pt.x;
+        float ymove = pt.y;
         
         rCntrl.x += xmove;
         lCntrl.x += xmove;
@@ -183,7 +183,7 @@
         fpb.controlPoints = _parametric;
     else if( shapeDisplay == kBezShape_LowPassRes )
         fpb.controlPoints = _lowPassRes;
-    else
+    else if( shapeDisplay == kBezShape_HiPassRes )
         fpb.controlPoints = _hiPassRes;
     
     _shapeDisplay = shapeDisplay;

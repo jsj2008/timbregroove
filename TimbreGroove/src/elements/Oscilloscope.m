@@ -30,12 +30,6 @@
     [self addBuffer:mesh];
 }
 
--(void)setSounds
-{
-    self.soundName = @"clav";
-    [self.sound playMidiFile:@"funkRiff1"];
-}
-
 -(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate
 {
     [super update:dt mixerUpdate:mixerUpdate];

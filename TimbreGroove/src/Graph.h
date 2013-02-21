@@ -9,7 +9,8 @@
 #import "TGTypes.h"
 #import "TG3dObject.h"
 
+@class ConfigGraphicElement;
 
 @interface Graph : TG3dObject
-@property (nonatomic,strong) NSMutableDictionary * globalNotifees;
+-(id)createTopLevelNodeWithConfig:(ConfigGraphicElement *)config andViewSize:(CGSize)viewSize;
 @end

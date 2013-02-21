@@ -28,56 +28,6 @@
     return self;
 }
 
--(void)watchForGlobals:(NSDictionary *)lookups
-{
-    NSMutableDictionary * graphDict = _graph.globalNotifees;
-    if( !graphDict )
-    {
-        graphDict = [NSMutableDictionary new];
-        _graph.globalNotifees = graphDict;
-    }
-    for (NSString * propName in lookups )
-    {
-        NSMutableArray * notifieesForProp = graphDict[propName];
-        if( !notifieesForProp )
-        {
-            notifieesForProp = [NSMutableArray new];
-            graphDict[propName] = notifieesForProp;
-        }
-        [notifieesForProp addObject:lookups[propName]];
-        if( [_watchingGlobals indexOfObject:propName] == NSNotFound )
-        {
-            [_watchingGlobals addObject:propName];
-            [[Global sharedInstance] addObserver:self
-                                      forKeyPath:propName
-                                         options:NSKeyValueObservingOptionNew
-                                         context:NULL];
-        }
-    }
-}
-
--(void)observeValueForKeyPath:(NSString *)keyPath
-                     ofObject:(id)object
-                       change:(NSDictionary *)change
-                      context:(void *)context
-{
-    NSMutableDictionary * graphDict = _graph.globalNotifees;
-    if( graphDict )
-    {
-        NSArray * notifieesForProp = graphDict[keyPath];
-        
-        // this can be null when another graph (no
-        // longer in view) requested this property
-        if( notifieesForProp )
-        {
-            for( void (^dispatchBlock)() in notifieesForProp )
-            {
-                dispatchBlock();
-            }
-        }
-    }
-    
-}
 - (id) initWithCoder:(NSCoder *)aDecoder
 {
     self = [super initWithCoder:aDecoder];

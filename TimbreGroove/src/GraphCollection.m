@@ -8,6 +8,7 @@
 
 #import "GraphCollection.h"
 #import "Graph.h"
+#import "Config.h"
 
 @interface GraphCollection () {
     NSMutableArray * _graphs;
@@ -17,21 +18,17 @@
 
 @implementation GraphCollection
 
--(id)createGraphBasedOnNodeType:(NSDictionary *)params withViewSize:(CGSize)viewSize
+-(id)createGraphBasedOnConfig:(ConfigGraphicElement *)config withViewSize:(CGSize)viewSize;
 {
     Graph * graph = [Graph new];
-    Class klass = NSClassFromString(params[@"instanceClass"]);
-    TG3dObject * node = [[klass alloc] init];
-    [graph appendChild:node];
-    [node setValuesForKeysWithDictionary:params];
-    [node wireUpWithViewSize:viewSize];
-    
+    [graph createTopLevelNodeWithConfig:config andViewSize:viewSize];
     if( !_graphs )
         _graphs = [NSMutableArray new];
     [_graphs addObject:graph];
     
     return graph;
 }
+
 
 -(id)graphAtIndex:(unsigned int)i
 {

@@ -98,7 +98,12 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
     
     CheckError( NewMusicPlayer(&_musicPlayer), "NewMusicPlayer failed" );
 }
-    
+
+-(void)playMidiFile:(NSString *)filename withInstrument:(Instrument *)instrument
+{
+    [self playMidiFile:filename throughSampler:instrument.sampler];
+}
+
 -(void)playMidiFile:(NSString *)filename throughSampler:(AudioUnit)sampler
 {    
 	NSURL *midiFileURL = [[NSBundle mainBundle] URLForResource:filename

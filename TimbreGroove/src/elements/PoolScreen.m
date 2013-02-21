@@ -14,11 +14,13 @@
 #import "Mixer.h"
 #import "PoolWater.h"
 
+
+NSString const * kParamPoolMoveItem = @"MoveItem";
+
 @interface PoolScreen : Generic {
     NSMutableArray * _waters;
+    CGSize _viewSz;
 }
-+(GLKVector2)screenToPool:(CGPoint)pt;
-
 @end
 
 //--------------------------------------------------------------------------------
@@ -34,7 +36,6 @@
 @property (nonatomic) float centerY;
 @property (nonatomic) float radius;
 @property (nonatomic) float meteredRadius;
-@property (nonatomic) Sound * sound;
 @property (nonatomic) GLKVector2 center;
 
 @end
@@ -78,6 +79,18 @@
     }
 }
 
+-(void)setCenterX:(float)centerX
+{
+    _centerX = centerX;
+    _center = (GLKVector2){ _centerX, _centerY };
+}
+
+-(void)setCenterY:(float)centerY
+{
+    _centerY = centerY;
+    _center = (GLKVector2){ _centerX, _centerY };
+}
+
 -(void)setAnimatedRadius:(float)radius
 {
     _resizingRadius = true;
@@ -95,6 +108,8 @@
 
 -(void)moveTo:(GLKVector2)pt
 {
+    NSLog(@"Moving to: %f, %f", pt.x, pt.y);
+    
     NSDictionary * params = @{    TWEEN_DURATION: @0.5f,
                                 TWEEN_TRANSITION: TWEEN_FUNC_EASEOUTSINE,
                                     @"centerX": @(pt.x)
@@ -116,8 +131,9 @@
 
 @implementation PoolScreen
 
--(id)wireUp
+-(id)wireUpWithViewSize:(CGSize)viewSize
 {
+    _viewSz = viewSize;
     self.camera = [IdentityCamera new];
     [super wireUp];    
     
@@ -146,7 +162,9 @@
 
 -(void)createShader
 {
-    PoolWaterShader * shader = [PoolWaterShader new];
+    PoolWaterShader * shader = [[PoolWaterShader alloc] init];
+    CGSize sz = _viewSz;
+    shader.scale = (GLKVector2){ 1/sz.width, 1/sz.height };
     [shader writeStatics];
     self.shader = shader;
 }
@@ -198,9 +216,9 @@
 }
 
 
-+(GLKVector2)screenToPool:(CGPoint)pt
+-(GLKVector2)screenToPool:(CGPoint)pt
 {
-    CGSize sz = [UIScreen mainScreen].bounds.size;
+    CGSize sz = _viewSz;
     float xsize = sz.width / 2.0; // (float)self.view.drawableWidth / 2.0;
     float ysize = sz.height / 2.0; // (float)self.view.drawableHeight / 2.0;
     float x = -(pt.x - xsize) / xsize;
@@ -218,9 +236,16 @@
     return nil;
 }
 
+-(NSDictionary *)getParameters
+{
+    return @{
+             kParamPoolMoveItem: ^(NSValue * pt){ [_waters[0] moveTo:[self screenToPool:[pt CGPointValue]]]; }
+             };
+}
+
 -(void)onLongTap:(UILongPressGestureRecognizer *)lpgr
 {
-    GLKVector2 pt = [PoolScreen screenToPool:[lpgr locationInView:self.view]];
+    GLKVector2 pt = [self screenToPool:[lpgr locationInView:self.view]];
     PoolWater * water = [self waterFromPt:pt];
     if( water )
     {
@@ -230,7 +255,7 @@
 
 -(void)onTap:(UITapGestureRecognizer *)tgr
 {
-    GLKVector2 pt = [PoolScreen screenToPool:[tgr locationInView:self.view]];
+    GLKVector2 pt = [self screenToPool:[tgr locationInView:self.view]];
     PoolWater * water = [self waterFromPt:pt];
     if( water )
     {

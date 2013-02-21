@@ -15,6 +15,7 @@
 #import "Mixer+Parameters.h"
 #import "RingBuffer.h"
 #import <libkern/OSAtomic.h>
+#import "Names.h"
 
 enum MidiNotes {
     kC0 = 0,
@@ -52,21 +53,21 @@ void _CheckError( OSStatus error, const char *operation) {
 
 static Mixer * __sharedMixer;
 
-@interface Sound () {
+@interface Instrument () {
     AudioUnit _samplerUnit;
     MIDITimeStamp _prevTimeStamp;
 }
 
 @end
-@implementation Sound
+@implementation Instrument
 
--(id)initWithAudioUnit:(AudioUnit)au andMeta:(NSDictionary *)meta
+-(id)initWithAudioUnit:(AudioUnit)au andConfig:(ConfigInstrument *)config
 {
     if( (self = [super init]) )
     {
         _samplerUnit = au;
-        _lowestPlayable = [meta[@"lo"] intValue];
-        _highestPlayable = [meta[@"hi"] intValue];
+        _lowestPlayable = config.low;
+        _highestPlayable = config.high;
         _prevTimeStamp = 0;
     }
     
@@ -82,11 +83,6 @@ static Mixer * __sharedMixer;
 {
     
 }
--(void)playMidiFile:(NSString *)filename
-{
-    [[Mixer sharedInstance] playMidiFile:filename throughSampler:_samplerUnit];
-}
-
 -(OSStatus)playNote:(int)note forDuration:(NSTimeInterval)duration
 {
     UInt32 noteNum = note;
@@ -184,7 +180,6 @@ OSStatus renderCallback(
 //..............................................................................
 
 @interface Mixer () {
-    NSDictionary *   _aliases;
     unsigned int     _numSamplerUnits;
     unsigned int     _capSamplerUnits;
     RenderCBContext  _cbContext;
@@ -209,7 +204,6 @@ OSStatus renderCallback(
         
         _cbContext.rbo = 0;
         
-        _aliases = [[Config sharedInstance] valueForKey:@"sounds"];
         [self setupAVSession];
         [self setupStdASBD]; // assumes _graphSampleRate
         [self setupAUGraph];
@@ -313,41 +307,62 @@ OSStatus renderCallback(
     [self isPlayerDone];
 }
 
--(NSArray *)getAllSoundNames
-{
-    return [_aliases allKeys];
-}
-
--(Sound *)getSound:(NSString *)name
+-(Instrument *)loadInstrumentFromConfig:(ConfigInstrument *)config;
 {
     AudioUnit sampler = [self makeSampler];
-    Sound * sound =  [[Sound alloc] initWithAudioUnit:sampler
-                                    andMeta:[self loadSound:name sampler:sampler]];
-    [self stowSamplerUnit:sound.sampler];
-    return sound;
+    Instrument * instrument =  [[Instrument alloc] initWithAudioUnit:sampler
+                                    andConfig:[self loadSound:config sampler:sampler]];
+    [self stowSamplerUnit:instrument.sampler];
+    return instrument;
 }
 
--(NSDictionary *)loadSound:(NSString *)alias sampler:(AudioUnit)sampler
+-(ConfigInstrument *)loadSound:(ConfigInstrument *)config sampler:(AudioUnit)sampler
 {
-    NSDictionary * meta = _aliases[alias];
-    BOOL isSoundfont = [meta[@"isSoundfont"] boolValue];
+    bool isSoundfont = config.isSoundFont;
     NSString * ext = isSoundfont ? @"sf2" : @"aupreset";
     
-    NSURL *presetURL = [[NSBundle mainBundle] URLForResource: meta[@"preset"]
+    NSURL *presetURL = [[NSBundle mainBundle] URLForResource: config.preset
                                                withExtension: ext];
     
-    NSAssert(presetURL, @"preset path fail: %@",alias);
+    NSAssert(presetURL, @"preset path fail: %@",config.preset);
     
     if( isSoundfont )
     {
-        [self loadSF2FromURL:presetURL withPatch:[meta[@"patch"] intValue] sampler:sampler];
+        [self loadSF2FromURL:presetURL withPatch:config.patch sampler:sampler];
     }
     else
     {
         [self loadSynthFromPresetURL: presetURL sampler:sampler];
     }
     
-    return meta;
+    return config;
+}
+
+-(void)handleParamChange:(NSString const *)paramName value:(NSValue *)value
+{
+    
+}
+
+-(NSDictionary *)getParameters
+{
+    NSMutableDictionary * dict = [[NSMutableDictionary alloc] initWithDictionary:
+    @{
+      kParamTempo: ^(NSValue *v){ [self handleParamChange:kParamTempo value:v]; },
+      kParamPitch: ^(NSValue *v){ [self handleParamChange:kParamPitch value:v]; },
+      kParamInstrumentP1: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP1 value:v]; },
+      kParamInstrumentP2: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP2 value:v]; },
+      kParamInstrumentP3: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP3 value:v]; },
+      kParamInstrumentP4: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP4 value:v]; },
+      kParamInstrumentP5: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP5 value:v]; },
+      kParamInstrumentP6: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP6 value:v]; },
+      kParamInstrumentP7: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP7 value:v]; },
+      kParamInstrumentP8: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP8 value:v]; }
+      }];
+    
+    [dict addEntriesFromDictionary:[self getAUParameters]];
+    
+    return dict;
+    
 }
 
 

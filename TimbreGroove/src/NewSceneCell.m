@@ -1,14 +1,14 @@
 //
-//  NewTrackCell.m
+//  NewSceneCell.m
 //  TimbreGroove
 //
 //  Created by victor on 2/3/13.
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "NewTrackCell.h"
+#import "NewSceneCell.h"
 
-@implementation NewTrackCell
+@implementation NewSceneCell
 
 - (id)initWithFrame:(CGRect)frame
 {

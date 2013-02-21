@@ -5,33 +5,16 @@
 //  Created by victor on 2/14/13.
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
-#define TimbreGroove_MixerParamConsts_h // prevent including here
+#define SKIP_MIXER_DECLS
 
 #import "Mixer.h"
 #import "Mixer+Parameters.h"
 #import "Global.h"
-
-
-NSString * const kParamKnob1 = @"paramKnob1";
-NSString * const kParamKnob2 = @"paramKnob2";
-NSString * const kParamKnob3 = @"paramKnob3";
-NSString * const kParamKnob4 = @"paramKnob4";
-NSString * const kParamKnob5 = @"paramKnob5";
-NSString * const kParamKnob6 = @"paramKnob6";
-NSString * const kParamKnob7 = @"paramKnob7";
-NSString * const kParamKnob8 = @"paramKnob8";
-
-NSString * const kParamPad1 = @"paramPad1";
-NSString * const kParamPad2 = @"paramPad2";
-NSString * const kParamPad3 = @"paramPad3";
-NSString * const kParamPad4 = @"paramPad4";
-NSString * const kParamPad5 = @"paramPad5";
-NSString * const kParamPad6 = @"paramPad6";
-NSString * const kParamPad7 = @"paramPad7";
-NSString * const kParamPad8 = @"paramPad8";
+#import "Names.h"
 
 const AudioUnitParameterValue kEQBypassON = 1;
 const AudioUnitParameterValue kEQBypassOFF = 0;
+const unsigned int kDisplayFrames = 512;
 
 const AudioUnitParameterValue kBottomOfOctiveRange = 0.05;
 const AudioUnitParameterValue kTopOfOctiveRange = 5.0;
@@ -127,7 +110,7 @@ static EQBandInfo _bandInfos[kNUM_EQ_BANDS] = {
         "Bass",
         kEQLow,
         kAUNBandEQFilterType_ResonantLowPass,
-        kEQBypassOFF,
+        kEQBypassON,
         2,
         _eqLowKnobMaps,
         _eqLowPDs
@@ -182,42 +165,34 @@ static EQBandInfo _bandInfos[kNUM_EQ_BANDS] = {
 
 -(void)setupUI
 {
-    _globalsParamMap = @{kParamKnob1: ^{ [self turnEQKnobBy:[Global sharedInstance].paramKnob1 knob:0]; },
-                         kParamKnob2: ^{ [self turnEQKnobBy:[Global sharedInstance].paramKnob2 knob:1]; },
-                         kParamKnob3: ^{ [self turnEQKnobBy:[Global sharedInstance].paramKnob3 knob:2]; },
-                         kParamKnob4: ^{ [self setMixerOutputGain:[Global sharedInstance].paramKnob4]; }
-                         };
-    
-    for( NSString * propName in _globalsParamMap )
-    {
-        [[Global sharedInstance] addObserver:self
-                                  forKeyPath:propName
-                                     options:NSKeyValueObservingOptionNew
-                                     context:NULL];
-    }
+    _selectedEQBand = kEQDisabled;
 }
 
--(void)observeValueForKeyPath:(NSString *)keyPath
-                     ofObject:(id)object
-                       change:(NSDictionary *)change
-                      context:(void *)context
+-(void)turnEQBy:(NSString const *)paramName knob:(EQParamKnob)knob
 {
-    for (NSString * key in _globalsParamMap)
-        if( [keyPath isEqualToString:key] )
-        {
-            void (^ dispatchBlock)() = _globalsParamMap[key];
-            dispatchBlock();
-        }
+    id sceneObj = [Global sharedInstance].scene;
+    float value = [sceneObj floatForKey:(NSString *)paramName];
+    [self turnEQKnobBy:value knob:knob];
 }
 
+-(float)getGlobalFloat:(NSString const *)paramName
+{
+    id sceneObj = [Global sharedInstance].scene;
+    return [sceneObj floatForKey:(NSString *)paramName];
+}
 
 -(const EQBandInfo *)getSelectedEQBandInfo
 {
+    if( _selectedEQBand == kEQDisabled )
+        return NULL;
     return &_bandInfos[_selectedEQBand];
 }
 
 -(void)turnEQKnobBy:(float)by knob:(EQParamKnob)knob
 {
+    if( _selectedEQBand == kEQDisabled )
+        return;
+    
     EQBandInfo * bi = &_bandInfos[_selectedEQBand];
     
     if( bi->numKnobs <= knob )
@@ -230,6 +205,19 @@ static EQBandInfo _bandInfos[kNUM_EQ_BANDS] = {
     
    // NSLog(@"%s[%10s]: %05.3f %1.4f -> [%1.4f] ", bi->name, def->name, def->val, by, def->normalized );
 }
+
+-(NSDictionary *)getAUParameters
+{
+    return
+    @{
+      kParamEQFrequency: ^(float f){ [self turnEQKnobBy:f knob:0]; },
+      kParamEQPeak:      ^(float f){ [self turnEQKnobBy:f knob:1]; },
+      kParamEQBandwidth: ^(float f){ [self turnEQKnobBy:f knob:2]; },
+      kParamMasterVolume:^(float f){ [self setMixerOutputGain:f]; }
+      };
+}
+
+
 
 -(float)turnKnobBy:(float)by pd:(ParamDefinition *)def easing:(KnobEasing)easing band:(int)band
 {
@@ -275,9 +263,13 @@ static EQBandInfo _bandInfos[kNUM_EQ_BANDS] = {
 
 -(void)setSelectedEQBand:(eqBands)selectedEQBand
 {
-    _bandInfos[_selectedEQBand].byPass = kEQBypassON;
+    if( _selectedEQBand == selectedEQBand )
+        return;
+    if( _selectedEQBand != kEQDisabled )
+        _bandInfos[_selectedEQBand].byPass = kEQBypassON;
     _selectedEQBand = selectedEQBand;
-    _bandInfos[_selectedEQBand].byPass = kEQBypassOFF;
+    if( selectedEQBand != kEQDisabled )
+        _bandInfos[_selectedEQBand].byPass = kEQBypassOFF;
     [self enableSelectedEQBand];
 }
 

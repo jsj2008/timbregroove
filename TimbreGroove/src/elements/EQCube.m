@@ -6,62 +6,85 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "SpinCube.h"
+#import "Generic.h"
 #import "Cube.h"
 #import "EQPanel.h"
 #import "FBO.h"
 #import "Light.h"
 #import "GraphView.h"
 #import "Mixer.h"
+#import "Mixer+Parameters.h"
 #import "Tweener.h"
 #import "Global.h"
 #import "GenericWithTexture.h"
 #import "EventCapture.h"
 
-#define CUBE_TILT  -0.2
-#define CUBE_WIDTH 1.8
-#define BUTTON_SCALE 0.25
 
-@interface SpinCube () {
+#define CUBE_TILT  0.1
+#define CUBE_SIZE 1.8
+#define BUTTON_SCALE 0.25
+#define CUBE_GUTTER_PADDING (CUBE_SIZE * 0.09)
+#define EQ_PANEL_HEIGHT 256
+
+@interface EQCube : Generic  {
     EQPanel * _eqPanel;
     FBO * _fbo;
     GenericWithTexture * _next;
     GenericWithTexture * _prev;
-    
-    unsigned int _currentFace;
+    int _currentBand;
+    eqBands _bands[kNUM_EQ_BANDS+1];
 }
 @property (nonatomic) float cubeRotation;
 @end
-@implementation SpinCube
+
+@implementation EQCube
 
 -(id)wireUp
 {
-    _fbo = [[FBO alloc] initWithWidth:1024 height:256];
+    _fbo = [[FBO alloc] initWithWidth:EQ_PANEL_HEIGHT * 4 height:EQ_PANEL_HEIGHT];
     _eqPanel = [[EQPanel alloc] init];
     _eqPanel.fbo = _fbo;
     [_eqPanel wireUp];
     
     [super wireUp];
 
-    self.rotation = (GLKVector3){ CUBE_TILT,  0, 0 };
+    [self setupButtons];
+    
+    int eqband = [Mixer sharedInstance].selectedEQBand;
+    for( int b = 0; b < kNUM_EQ_BANDS+1; b++ )
+    {
+        _bands[b] = kEQDisabled + b;
+        if( _bands[b] == eqband )
+            _currentBand = b;
+    }
+    _eqPanel.shapeEdit = eqband;
 
+    self.cubeRotation = 90 * eqband;
+    
+    self.position = (GLKVector3){ 0, CUBE_TILT/2.0, 0 };
+    
+
+    return self;
+}
+
+-(void)setupButtons
+{
     _next = [[GenericWithTexture alloc] initWithText:@"Next -->"];
     _prev = [[GenericWithTexture alloc] initWithText:@"<-- Prev"];
     
     _next.scaleXYZ = BUTTON_SCALE;
     _next.interactive = true;
-    _next.color = (GLKVector4){ 0.5, 0.0, 0.0, 1.0 };
     _prev.scaleXYZ = BUTTON_SCALE;
     _prev.interactive = true;
     [self appendChild:[_next wireUp]];
     [self appendChild:[_prev wireUp]];
 
     float bw = (_next.gridWidth * BUTTON_SCALE) / 2.0; // position is center of thing
-    float cw = CUBE_WIDTH / 2.0;
-    _next.position = (GLKVector3){  cw, -(bw+cw), 0 };
-    _prev.position = (GLKVector3){ -cw, -(bw+cw), 0 };
+    float cw = CUBE_SIZE / 2.0;
+    float y = -(bw+cw+CUBE_GUTTER_PADDING);
+    _next.position = (GLKVector3){  cw, y, 0 };
+    _prev.position = (GLKVector3){ -cw, y, 0 };
     
-    return self;
 }
 
 -(void)createTexture
@@ -72,7 +95,7 @@
 -(void)createBuffer
 {
     self.color = (GLKVector4){ 0.4, 0.4, 0.6, 1.0 };
-    Cube * cube = [Cube cubeWithWidth:CUBE_WIDTH
+    Cube * cube = [Cube cubeWithWidth:CUBE_SIZE
                   andIndicesIntoNames:@[@(gv_pos),@(gv_uv),@(gv_normal)]
                              andDoUVs:true
                          andDoNormals:true
@@ -84,13 +107,17 @@
 {
     if( !self.light )
         self.light = [Light new]; // defaults are good
-    self.light.ambientColor = (GLKVector4){0.8, 0.8, 0.8, 1};
-    self.light.direction = (GLKVector3){ -1, 0, 0 };
+    self.light.ambientColor = (GLKVector4){0.2, 0.2, 0.2, 1};
+    self.light.direction = (GLKVector3){ 0.5, 1, -0.5 };
 }
 
 -(void)isPrevNext
 {
-    GenericWithTexture * button = [EventCapture getGraphViewTapChildElementOf:self];
+    UIView * view;
+    CGPoint screenPt;
+    GenericWithTexture * button = [EventCapture getGraphViewTapChildElementOf:self
+                                                                       inView:view
+                                                                         atPt:screenPt];
     if( button == _prev )
         [self rotateToNextFace:(CGPoint){-1,0}];
     else if( button == _next )
@@ -99,11 +126,7 @@
 
 -(void)didAttachToView:(GraphView *)view
 {
-    [_eqPanel didAttachToView:view];
-    
-    [view watchForGlobals:@{ kParamPad3:^{ [self rotateToNextFace:[Global sharedInstance].paramPad3]; },
-                             kParamPad1:^{ [self isPrevNext]; }
-     }];
+    [_eqPanel didAttachToView:view];    
 }
 
 -(void)setCubeRotation:(float)cubeRotation
@@ -115,7 +138,7 @@
 
 -(void)rotateToNextFace:(CGPoint)pt // pt is direction
 {
-    float rot = (_cubeRotation + (90.0*pt.x) + (90.0*pt.y));
+    float rot = (_cubeRotation + (90.0*pt.x) );
     NSDictionary * params = @{    TWEEN_DURATION: @0.5f,
                                   TWEEN_TRANSITION: TWEEN_FUNC_EASEINSINE,
                                   @"cubeRotation": @(rot),
@@ -124,11 +147,15 @@
                                   };
     
     [Tweener addTween:self withParameters:params];
+    
+    _currentBand = abs((_currentBand + (int)pt.x) % 4);
 }
 
 -(void)doneRotation
 {
-    
+    eqBands band = _bands[_currentBand];
+    _eqPanel.shapeEdit = band;
+    [Mixer sharedInstance].selectedEQBand = band;
 }
 
 -(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate
@@ -139,8 +166,5 @@
     [super update:dt mixerUpdate:mixerUpdate];
 }
 
--(void)xrender:(NSUInteger)w h:(NSUInteger)h
-{
-    
-}
+
 @end

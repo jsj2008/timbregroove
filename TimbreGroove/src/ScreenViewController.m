@@ -7,29 +7,37 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "NewTrackPicker.h"
-#import "SettingsVC.h"
-#import "PauseViewController.h"
+
+#import "Global.h"
+#import "Config.h"
+#import "Scene.h"
+#import "Names.h"
+
 #import "TGTypes.h"
-#import "GraphCollection.h"
 #import "Graph.h"
 #import "GraphView.h"
-#import "GraphDefinitions.h"
-#import "NewTrackContainerVC.h"
-#import "Global.h"
-#import "Mixer.h"
-#import "Mixer+Parameters.h"
 
-@interface ScreenViewController : UIViewController < NewTrackDelegate,
+#import "NewScenePicker.h"
+#import "SettingsVC.h"
+#import "PauseViewController.h"
+#import "NewSceneViewController.h"
+
+@interface ScreenViewController : UIViewController < NewSceneDelegate,
                                                         SettingVCDelegate,
                                                         PauseViewDelegate>
 {
-    bool _started;
+    NSMutableArray * _scenes;
     
-    GraphCollection * _graphs;
+    int _postDeleteSceneIndex;
+    
     GLKViewController * _graphVC;
-    CGSize _viewSz;
+    Global * _global;
+
+    Graph * _utilityGraph;
+    Graph * _stowedDisplayGraph;
+    
 }
+
 @property (weak, nonatomic) IBOutlet UIView *graphContainer;
 @property (weak, nonatomic) IBOutlet UIView *menuContainer;
 @property (weak, nonatomic) IBOutlet UIToolbar *toolBar;
@@ -37,7 +45,8 @@
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *trashCan;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *recordButton;
 - (IBAction)changePage:(id)sender;
-- (IBAction)volumeChanged:(UISlider *)sender;
+- (IBAction)toolbarSlider:(UISlider *)sender;
+- (IBAction)audioPanel:(UIButton *)sender;
 - (IBAction)trash:(UIBarButtonItem *)sender;
 - (IBAction)record:(UIBarButtonItem *)sender;
 - (IBAction)dblTapForMenus:(UITapGestureRecognizer *)sender;
@@ -48,12 +57,25 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    _graphs = [GraphCollection new];
+
+    _postDeleteSceneIndex = -1;
+    // force some global instializations
+    [Config sharedInstance];
     
-    [[Global sharedInstance] addObserver:self
-                              forKeyPath:@"recording"
-                                 options:NSKeyValueObservingOptionNew
-                                 context:NULL];
+    _global = [Global sharedInstance];
+
+    _scenes = [NSMutableArray new];
+    
+    [_global addObserver:self
+              forKeyPath:(NSString *)kGlobalRecording
+                 options:NSKeyValueObservingOptionNew
+                 context:NULL];
+    
+    [_global addObserver:self
+              forKeyPath:(NSString *)kGlobalScene
+                 options:NSKeyValueObservingOptionNew
+                 context:NULL];
+
 }
 
 -(void)observeValueForKeyPath:(NSString *)keyPath
@@ -61,9 +83,9 @@
                        change:(NSDictionary *)change
                       context:(void *)context
 {
-    if( [keyPath isEqualToString:@"recording"] )
+    if( [kGlobalRecording isEqualToString:keyPath] )
     {
-        if( [Global sharedInstance].recording )
+        if( _global.recording )
         {
             _recordButton.tintColor = [UIColor redColor];
         }
@@ -72,11 +94,17 @@
             _recordButton.tintColor = [UIColor purpleColor];
         }
     }
+    else if( [kGlobalScene isEqualToString:keyPath] )
+    {
+        [self performSelector:@selector(performTransition:)
+                   withObject:_global.scene.graph
+                   afterDelay:0.12];
+    }
 }
 
 -(void)viewDidLayoutSubviews
 {
-    if( !_started )
+    if( !_global.scene )
     {
         for( UIViewController * vc in self.childViewControllers )
         {
@@ -84,18 +112,27 @@
             {
                 _graphVC = (GLKViewController*)vc;
                 _graphVC.view.frame = _graphContainer.bounds;
-                _viewSz = _graphVC.view.frame.size;
-                if( !_started )
-                {
-                    [self performSelector:@selector(performTransition:)
-                               withObject:[GraphDefinitions getDefinitionForName:@"spincube_element"]
-                               afterDelay:0.25];
-                    
-                    _started = true;
-                }
+                _global.graphViewSize = _graphVC.view.frame.size;
+                [self createAScene:[Config sharedInstance].defaultScene];
+                break;
             }
         }
     }
+}
+
+- (void)createAScene:(ConfigScene *)config
+{
+    Scene * scene = [Scene sceneWithConfig:config];
+    [_scenes addObject:scene];
+    _global.scene = scene;
+}
+
+- (void)deleteScene
+{
+    [_scenes removeObject:_scenes[_postDeleteSceneIndex]];
+    _pager.numberOfPages = [_scenes count];
+    _pager.currentPage = 0;
+    _postDeleteSceneIndex = -1;
 }
 
 - (void)didReceiveMemoryWarning
@@ -121,7 +158,7 @@
     }
     else
     {
-        _trashCan.enabled = _graphs.count > 1;
+        _trashCan.enabled = _scenes.count > 1;
         bottomRC.origin.y -= bottomRC.size.height;
         topRC.origin.y = 0;
     }
@@ -134,17 +171,8 @@
                      }];
 }
 
-- (void)performTransition:(NSDictionary *)params
-{
-    [self performTransitionWithGraph:nil orParams:params];
-}
 
-- (void)performTransitionWithGraph:(Graph*)graph
-{
-    [self performTransitionWithGraph:graph orParams:nil];    
-}
-
-- (void)performTransitionWithGraph:(Graph*)graph orParams:(NSDictionary *)params
+- (void)performTransition:(Graph*)graph
 {
     CGRect org = _graphContainer.frame;
     CGRect offscreen = org;
@@ -157,32 +185,8 @@
                          _graphContainer.frame = offscreen;
                      }
                      completion:^(BOOL finished){
-                         Graph * g;
-                         
-                         bool markedForDelete = false;
-                         
-                         if( params )
-                         {
-                             g = [_graphs createGraphBasedOnNodeType:params
-                                                        withViewSize:_viewSz];
-                             
-                             _pager.numberOfPages = _graphs.count;
-                             _pager.currentPage = _pager.numberOfPages - 1;
-                         }
-                         else if( graph )
-                         {
-                             g = graph;
-                         }
-                         else
-                         {
-                             unsigned int i = (unsigned int)_pager.currentPage;
-                             markedForDelete = true;
-                             i = i ? 0 : 1;
-                             g = [_graphs graphAtIndex:i];
-                         }
-                         
                          _graphVC.paused = YES;
-                         ((GraphView *)_graphVC.view).graph = g;
+                         ((GraphView *)_graphVC.view).graph = graph;
                          _graphVC.paused = NO;
                          
                          [UIView animateWithDuration:speed
@@ -190,38 +194,81 @@
                                               _graphContainer.frame = org;
                                           }
                                           completion:^(BOOL finished){
-                                              [Global sharedInstance].displayingGraph = g;
-                                              if( markedForDelete )
+                                              if( _postDeleteSceneIndex != -1 )
                                               {
-                                                  [_graphs removeGraphAtIndex:_pager.currentPage];
-                                                  _pager.numberOfPages = _graphs.count;
-                                                  _pager.currentPage = 0;
+                                                  [self deleteScene];
                                                   [self performSelector:@selector(toggleMenus)
                                                              withObject:nil
                                                              afterDelay:0.1];
                                               }
                                           }];
-                          
+                     }];
+}
+
+- (void)performUtilityTransitionWithGraph:(Graph*)graph
+{
+    CGRect org = _graphContainer.frame;
+    CGRect offscreen = org;
+    offscreen.origin.y = org.size.height;
+    
+    float speed = 0.4;
+    
+    [UIView animateWithDuration:speed
+                     animations:^{
+                         _graphContainer.frame = offscreen;
+                     }
+                     completion:^(BOOL finished){
+                         Graph * g = graph;
+                         ((GraphView *)_graphVC.view).graph = g;
+                         [UIView animateWithDuration:speed
+                                          animations:^{
+                                              _graphContainer.frame = org;
+                                          }
+                                          completion:^(BOOL finished){
+                                              _global.scene.graph = g;
+                                          }];
+                         
                      }];
     
 }
 
 - (IBAction)changePage:(id)sender
 {
-    [self performTransitionWithGraph:[_graphs graphAtIndex:_pager.currentPage]];
+    _global.scene = _scenes[_pager.currentPage];
 }
 
-- (IBAction)volumeChanged:(UISlider *)sender {
-    [Global sharedInstance].paramKnob4 = sender.value;
+- (IBAction)toolbarSlider:(UISlider *)sender
+{
+    [_global.scene setTrigger:kTriggerMainSlider value:sender.value];
+}
+
+- (IBAction)audioPanel:(UIButton *)sender
+{
+    if( _utilityGraph )
+    {
+        [self performUtilityTransitionWithGraph:_stowedDisplayGraph];
+        _utilityGraph = nil;
+        _stowedDisplayGraph = nil;
+    }
+    else
+    {
+        _stowedDisplayGraph = _global.scene.graph;
+        _utilityGraph = [[Graph alloc] init];
+        ConfigGraphicElement * config = [[Config sharedInstance] getGraphicElement:kConfigEQPanel];
+        [_utilityGraph createTopLevelNodeWithConfig:config andViewSize:_global.graphViewSize];
+        [self performUtilityTransitionWithGraph:_utilityGraph];
+    }
 }
 
 - (IBAction)trash:(UIBarButtonItem *)sender
 {
-    [self performTransition:nil];
+    _postDeleteSceneIndex = _pager.currentPage;
+    int i = _postDeleteSceneIndex ? 0 : 1;
+    _global.scene = _scenes[i];
 }
 
 - (IBAction)record:(UIBarButtonItem *)sender {
-    Global * g = [Global sharedInstance];
+    Global * g = _global;
     g.recording = !g.recording;
 }
 
@@ -234,7 +281,7 @@
 {
     if( [segue.identifier isEqualToString:@"newTrack"] )
     {
-        ((NewTrackContainerVC *)segue.destinationViewController).delegate = self;
+        ((NewSceneViewController *)segue.destinationViewController).delegate = self;
     }
     else if( [segue.identifier isEqualToString:@"settings"] )
     {
@@ -263,11 +310,10 @@
                                        afterDelay:0.3];
 }
 
--(void)NewTrack:(NewTrackContainerVC *)vc selection:(NSDictionary *)params
+-(void)NewScene:(NewSceneViewController *)vc selection:(ConfigScene *)sceneConfig
 {
-    NSDictionary * p = params[@"userData"];
     [vc.presentingViewController dismissViewControllerAnimated:YES completion:^{
-        [self performSelector:@selector(performTransition:) withObject:p afterDelay:0.25];
+        [self performSelector:@selector(createAScene:) withObject:sceneConfig afterDelay:0.25];
     }];
     
 }
