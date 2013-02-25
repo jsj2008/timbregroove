@@ -14,7 +14,6 @@
 #import "GraphView.h"
 #import "Mixer.h"
 #import "Mixer+Parameters.h"
-#import "Tweener.h"
 #import "Global.h"
 #import "GenericWithTexture.h"
 #import "EventCapture.h"
@@ -136,27 +135,28 @@
     _cubeRotation = cubeRotation;
 }
 
--(void)rotateToNextFace:(CGPoint)pt // pt is direction
-{
-    float rot = (_cubeRotation + (90.0*pt.x) );
-    NSDictionary * params = @{    TWEEN_DURATION: @0.5f,
-                                  TWEEN_TRANSITION: TWEEN_FUNC_EASEINSINE,
-                                  @"cubeRotation": @(rot),
-                                  TWEEN_ON_COMPLETE_SELECTOR: @"doneRotation",
-                                  TWEEN_ON_COMPLETE_TARGET: self
-                                  };
-    
-    [Tweener addTween:self withParameters:params];
-    
-    _currentBand = abs((_currentBand + (int)pt.x) % 4);
-}
-
 -(void)doneRotation
 {
     eqBands band = _bands[_currentBand];
     _eqPanel.shapeEdit = band;
     [Mixer sharedInstance].selectedEQBand = band;
 }
+
+-(void)rotateToNextFace:(CGPoint)pt // pt is direction
+{
+    /*
+     float rot = (_cubeRotation + (90.0*pt.x) );
+    NSDictionary * params = @{    kTweenDuration: @0.5f,
+                                  kTweenFunction: kTweenEaseInSine,
+                                  @"cubeRotation": @(rot),
+                                  kTweenCompleteBlock: ^{ [self doneRotation]; }
+                                  };
+    
+    [Tweener addTween:self withParameters:params];
+    */
+    _currentBand = abs((_currentBand + (int)pt.x) % 4);
+}
+
 
 -(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate
 {

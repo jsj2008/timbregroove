@@ -32,20 +32,11 @@ uniform vec3 u_distortionPoint;
 uniform float u_distortionFactor;
 #endif
 
-#ifdef BEZIER
-uniform vec2 u_p1;
-uniform vec2 u_p2;
-uniform vec2 u_p3;
-vec2 QuadraticBezierPoint(float pos)
-{
-    vec2 p1 = u_p1, p2 = u_p2, p3 = u_p3;
-    
-    vec2 P12 = (p2-p1)*pos,
-         P23 = (p3-p2)*pos;
-    
-    return (((p2+P23)-(p1+P12))*pos) + p1 + P12;
-}
+#ifdef TIME
+uniform float u_time;
+varying float v_time;
 #endif
+
 uniform mat4 u_pvm;
 
 void main()
@@ -66,15 +57,11 @@ void main()
     v_lightFilter = u_ambient + u_dirColor * directionalLightWeighting;
 #endif
     
-#ifdef BEZIER
-    vec2 posxy = a_position.xy;
-    if( posxy.x >= u_p1.x && posxy.x <= u_p3.x  )
-         pos = vec3( QuadraticBezierPoint( posxy.x ), pos.y );
-    else
-        pos = vec3(u_p1,pos.z);
+#ifdef TIME
+    v_time = u_time;
 #endif
 
-#ifdef DISTORTION
+#ifdef MESH_DISTORTION
     /*
     float dist = sin(distance(pos,u_distortionPoint));
     pos += vec3(dist,dist,0) * u_distortionFactor;

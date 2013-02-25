@@ -41,7 +41,7 @@
 @property (nonatomic,readonly) NSString * displayName;
 @property (nonatomic,readonly) ConfigAudioProfile * audioElement;
 @property (nonatomic,readonly) ConfigGraphicElement * graphicElement;
-@property (nonatomic,readonly) NSDictionary * connections;
+@property (nonatomic,readonly) NSArray * connections;
 @end
 
 @interface Config : NSObject

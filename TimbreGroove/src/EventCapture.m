@@ -44,7 +44,7 @@
     
     _currentColor    = 1;
     _objDict         = [NSMutableDictionary new];
-    shader           = [GenericShader shaderWithHeaders:nil];
+    shader           = [GenericShader shader];
     _posLocation     = [shader location:gv_pos];
     
     [fbo bindToRender];

@@ -92,5 +92,6 @@ typedef struct EQBandInfo
 
 -(void)enableSelectedEQBand;
 -(void)setupUI;
+-(void)triggerExpected;
 
 @end

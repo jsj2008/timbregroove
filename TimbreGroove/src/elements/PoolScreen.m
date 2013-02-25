@@ -10,7 +10,6 @@
 #import "GridPlane.h"
 #import "Camera.h"
 #import "FBO.h"
-#import "Tweener.h"
 #import "Mixer.h"
 #import "PoolWater.h"
 
@@ -94,35 +93,37 @@ NSString const * kParamPoolMoveItem = @"MoveItem";
 -(void)setAnimatedRadius:(float)radius
 {
     _resizingRadius = true;
-    
-    NSDictionary * params = @{    TWEEN_DURATION: @0.2f,
-                                TWEEN_TRANSITION: TWEEN_FUNC_EASEINSINE,
+    /*
+    NSDictionary * params = @{    kTweenDuration: @0.2f,
+                                kTweenFunction: kTweenEaseInSine,
                                     @"radius": @(radius),
-                                TWEEN_ON_COMPLETE_SELECTOR: @"doneResizingRadius",
-                                TWEEN_ON_COMPLETE_TARGET: self
+                                  kTweenCompleteBlock:  ^{ [self doneResizingRadius]; }
     };
     
     [Tweener addTween:self withParameters:params];
+     */
     
 }
 
 -(void)moveTo:(GLKVector2)pt
 {
+    /*
     NSLog(@"Moving to: %f, %f", pt.x, pt.y);
     
-    NSDictionary * params = @{    TWEEN_DURATION: @0.5f,
-                                TWEEN_TRANSITION: TWEEN_FUNC_EASEOUTSINE,
+    NSDictionary * params = @{    kTweenDuration: @0.5f,
+                                kTweenFunction: kTweenEaseOutSine,
                                     @"centerX": @(pt.x)
                                     };
     
     [Tweener addTween:self withParameters:params];
 
-    NSDictionary * params2 = @{    TWEEN_DURATION: @0.5f,
-                                TWEEN_TRANSITION: TWEEN_FUNC_EASEOUTSINE,
+    NSDictionary * params2 = @{    kTweenDuration: @0.5f,
+                                kTweenFunction: kTweenEaseOutSine,
                                     @"centerY": @(pt.y)
                                     };
     
     [Tweener addTween:self withParameters:params2];    
+     */
 }
 
 @end
@@ -135,7 +136,7 @@ NSString const * kParamPoolMoveItem = @"MoveItem";
 {
     _viewSz = viewSize;
     self.camera = [IdentityCamera new];
-    [super wireUp];    
+    [super wireUpWithViewSize:viewSize];
     
     [self addPoolChild].center = (GLKVector2){0.4,0.4};
     return self;

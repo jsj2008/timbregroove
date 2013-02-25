@@ -37,9 +37,10 @@
     [view.recordGesture removeReceiver:self];
 }
 
--(NSString *)getShaderHeader
+-(void)getShaderFeatures:(NSMutableArray *)putHere
 {
-    return [[super getShaderHeader] stringByAppendingString:@"\n#define DISTORTION"];
+    [super getShaderFeatures:putHere];
+    [putHere addObject:kShaderFeatureDistort];
 }
 
 -(void)RecordGesture:(RecordGesture*)rg recordingWillBegin:(PointRecorder *)recorder

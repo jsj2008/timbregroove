@@ -11,6 +11,7 @@
 #import "Mixer+Parameters.h"
 #import "Global.h"
 #import "Names.h"
+#import "Scene.h"
 
 const AudioUnitParameterValue kEQBypassON = 1;
 const AudioUnitParameterValue kEQBypassOFF = 0;
@@ -166,6 +167,49 @@ static EQBandInfo _bandInfos[kNUM_EQ_BANDS] = {
 -(void)setupUI
 {
     _selectedEQBand = kEQDisabled;
+    Global * g = [Global sharedInstance];
+    [g addObserver:self
+        forKeyPath:(NSString *)kGlobalScene
+           options:NSKeyValueObservingOptionNew
+           context:NULL];    
+}
+
+-(void)observeValueForKeyPath:(NSString *)keyPath
+                     ofObject:(id)object
+                       change:(NSDictionary *)change
+                      context:(void *)context
+{
+    if( [kGlobalScene isEqualToString:keyPath] )
+    {
+        _expectedTriggerFlags = 0;
+        Scene * scene = [Global sharedInstance].scene;
+        if( [scene somebodyExpectsTrigger:kTriggerDynamicPeak] )
+            _expectedTriggerFlags = kExpectsPeak;
+        if( [scene somebodyExpectsTrigger:kTriggerDynamicHold] )
+            _expectedTriggerFlags |= kExpectsPeakHold;
+    }
+}
+
+-(void)triggerExpected
+{
+    OSStatus result;
+    AudioUnitParameterValue value;
+    Scene * scene = [Global sharedInstance].scene;
+    
+    if( (_expectedTriggerFlags & kExpectsPeak) != 0 )
+    {
+        result = AudioUnitGetParameter(_mixerUnit, kMultiChannelMixerParam_PostAveragePower,
+                                       kAudioUnitScope_Global, 0, &value);
+        CheckError(result, "Error getting peak value");
+        [scene setTrigger:kTriggerDynamicPeak value:value];
+    }
+    if( (_expectedTriggerFlags & kExpectsPeakHold) != 0 )
+    {
+        result = AudioUnitGetParameter(_mixerUnit, kMultiChannelMixerParam_PostPeakHoldLevel,
+                                       kAudioUnitScope_Global, 0, &value);
+        CheckError(result, "Error getting peak hold value");
+        [scene setTrigger:kTriggerDynamicHold value:value];
+    }
 }
 
 -(void)turnEQBy:(NSString const *)paramName knob:(EQParamKnob)knob

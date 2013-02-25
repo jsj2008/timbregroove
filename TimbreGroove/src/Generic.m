@@ -5,7 +5,7 @@
 //  Created by victor on 12/16/12.
 //  Copyright (c) 2012 Ass Over Tea Kettle. All rights reserved.
 //
-
+#define SKIP_GENERIC_DECLS
 #import "Generic.h"
 #import "GenericShader.h"
 #import "MeshBuffer.h"
@@ -13,6 +13,16 @@
 #import "Texture.h"
 #import "AssetLoader.h"
 #import "Light.h"
+
+NSString const * kShaderFeatureColor = @"#define COLOR\n";
+NSString const * kShaderFeatureNormal = @"#define NORMAL\n";
+NSString const * kShaderFeatureTexture = @"#define TEXTURE\n";
+NSString const * kShaderFeatureUColor = @"#define U_COLOR\n";
+NSString const * kShaderFeatureTime =  @"#define TIME\n";
+NSString const * kShaderFeatureDistort =  @"#define MESH_DISTORT\n";
+NSString const * kShaderFeatureDistortTexture =  @"#define TEXTURE_DISTORT\n";
+NSString const * kShaderFeaturePsychedelic =  @"#define PSYCHEDELIC\n";
+NSString const * kShaderFeatureSpotFilter =  @"#define SPOT_FILTER\n";
 
 @interface GenericBase () {
 @protected
@@ -72,53 +82,47 @@
 
 -(void)createShader
 {
-    self.shader = [GenericShader shaderWithHeaders:[self getShaderHeader]];
+    NSMutableArray * features = [NSMutableArray new];
+    [self getShaderFeatures:features];
+    NSMutableString * strFeatures = [NSMutableString new];
+    for( NSString * feature in features )
+        [strFeatures appendString:feature];
+    self.shader = [GenericShader shaderWithHeaders:strFeatures];
 }
 
-- (NSString *)getShaderHeader
+-(void)getShaderFeatures:(NSMutableArray *)putHere
 {
     NSMutableArray * arr = [NSMutableArray new];
     for( MeshBuffer * buffer in _buffers )
         [arr addObjectsFromArray:buffer.indicesIntoShaderNames];
+
+    for( NSNumber * num in arr )
+    {
+        GenericVariables svar = [num intValue];
+        switch (svar) {
+            case gv_acolor:
+                [putHere addObject:kShaderFeatureColor];
+                break;
+            case gv_normal:
+                [putHere addObject:kShaderFeatureNormal];
+                break;
+            case gv_uv:
+                [putHere addObject:kShaderFeatureTexture];
+                break;
+            default:
+                break;
+        }
+    }
     
     if( [arr containsObject:@(gv_normal)] )
         if( !_light ) // how buried is this??
             _light = [Light new];
 
     if( _useColor )
-       [arr addObject:@(gv_ucolor)];
+        [putHere addObject:kShaderFeatureUColor];
     
-    return [Generic getShaderHeaderWithIndicesIntoName:arr];
-}
-
-+(NSString *)getShaderHeaderWithIndicesIntoName:(NSArray *)arr
-{
-    NSString * pre = @"";
-    
-    for( NSNumber * num in arr )
-    {
-        GenericVariables svar = [num intValue];
-        NSString * ns;
-        switch (svar) {
-            case gv_acolor:
-                ns = @"#define COLOR\n";
-                break;
-            case gv_normal:
-                ns = @"#define NORMAL\n";
-                break;
-            case gv_uv:
-                ns = @"#define TEXTURE\n";
-                break;
-            case gv_ucolor:
-                ns = @"#define U_COLOR\n";
-            default:
-                break;
-        }
-        if(ns)
-            pre = [pre stringByAppendingString:ns];
-    }
-    
-    return pre;
+    if( _timerType != kSTT_None )
+        [putHere addObject:kShaderFeatureTime];
 }
 
 

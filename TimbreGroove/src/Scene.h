@@ -9,8 +9,10 @@
 #import <Foundation/Foundation.h>
 
 @class ConfigScene;
+@class GraphView;
 @class Graph;
 @class Audio;
+@class Parameter;
 
 
 @interface Scene : NSObject
@@ -27,5 +29,12 @@
 -(void)setTrigger:(NSString const *)name b:(bool)b;
 -(void)setTrigger:(NSString const *)name obj:(id)obj;
 
+-(void)queue:(Parameter *)parameter;
+-(void)update:(NSTimeInterval)dt view:(GraphView *)view;
+
+// see TriggerMap
+-(bool)somebodyExpectsTrigger:(NSString const *)triggerName;
+
+// for derivations (that don't exist yet)
 -(NSDictionary *)getRuntimeConnections;
 @end

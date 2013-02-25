@@ -30,6 +30,7 @@
     {
         self.scaleXYZ = 1.0;
         _autoRenderChildren = true;
+        _parameters = [NSMutableArray new];
     }
     return self;
 }
@@ -37,12 +38,18 @@
 -(id)wireUp
 {
     self.settingsAreDirty = false;
+    [self installParameters];
     return self;
 }
 
 -(id)wireUpWithViewSize:(CGSize)viewSize
 {
     return [self wireUp];
+}
+
+-(void)installParameters
+{
+    
 }
 
 -(void)clean
@@ -93,14 +100,6 @@
 -(void)TapRecordGesture:(TapRecordGesture*)rg recordingDone:(PointRecorder *)recorder
 {
     _ptPlayer = [recorder makePlayer];
-}
-
-#pragma mark inialize
-
-- (NSString *)getShaderHeader
-{
-    // #define for shaders go here (in derivations)
-    return @"";
 }
 
 
@@ -233,6 +232,13 @@
 
 -(NSDictionary *)getParameters
 {
-    return nil;
+    Shader * shader = self.shader;
+    NSMutableDictionary * dict = [NSMutableDictionary new];
+    for( ShaderParameter * param in _parameters )
+    {
+        param.shader = shader;
+        dict[param.parameterName] = param.paramBlock;
+    }
+    return dict;
 }
 @end

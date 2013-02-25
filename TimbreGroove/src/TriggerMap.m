@@ -7,6 +7,7 @@
 //
 
 #import "TriggerMap.h"
+#import "Parameter.h"
 #import <UIKit/UIGeometry.h>
 
 
@@ -58,6 +59,11 @@
     for (NSString * paramName in _mappings[key]) {
         [_targetObj setValue:value forKey:paramName];
     }
+}
+
+-(bool)expectsTrigger:(NSString const *)triggerName
+{
+    return _mappings[triggerName] != nil;
 }
 
 -(void)utilityMerge:(NSDictionary *)src

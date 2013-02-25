@@ -303,8 +303,11 @@ OSStatus renderCallback(
                                         (volatile int32_t *)&_cbContext.fetchCount);
     }
     
-    
     [self isPlayerDone];
+    
+    if( !( _expectedTriggerFlags == kNoOneExpectsNothin ) )
+        [self triggerExpected];
+    
 }
 
 -(Instrument *)loadInstrumentFromConfig:(ConfigInstrument *)config;

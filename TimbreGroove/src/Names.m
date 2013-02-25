@@ -40,13 +40,14 @@ NSString const * kParamLightDirection   =   @"Light Direction";
 NSString const * kParamLightColor       =   @"Color of Light";
 NSString const * kParamNewElement       =   @"Create";
 
-NSString const * kTriggerTapPos      =   @"Tappos";
+NSString const * kTriggerTapPos      =   @"TapNative";
 NSString const * kTriggerTap1        =   @"Tap";
 NSString const * kTriggerTap2        =   @"Tap2";
 NSString const * kTriggerTap3        =   @"Tap3";
 NSString const * kTriggerDblTap      =   @"DblTap";
 NSString const * kTriggerPanX        =   @"PanX";
 NSString const * kTriggerPanY        =   @"PanY";
+NSString const * kTriggerDragPos     =   @"DragNative";
 NSString const * kTriggerDrag1       =   @"Drag";
 NSString const * kTriggerDrag2       =   @"Drag2";
 NSString const * kTriggerDrag3       =   @"Drag3";
@@ -60,6 +61,7 @@ NSString const * kTriggerHoldAndTap  =   @"HoldTap";
 NSString const * kTriggerMainSlider  =   @"MainSlider";
 
 NSString const * kTriggerDynamicPeak     =   @"Loudness";
+NSString const * kTriggerDynamicHold     =   @"LoudnessHold";
 NSString const * kTriggerFrequencyPeak   =   @"Changes in Treble/Bass";
 NSString const * kTriggerBeat            =   @"Beat";
 NSString const * kTriggerNote            =   @"Note";

@@ -325,8 +325,50 @@ static NSHashTable * __shaders;
     [_locations writeToLocation:_vars[indexIntoNames] type:type data:data];
 }
 
+-(const char *)nameForIndex:(int)index
+{
+    return _names[index];
+}
+
 - (void) prepareRender:(TG3dObject *)object
 {
     
 }
 @end
+
+
+@implementation ShaderParameter
+
+-(id)initWithShaderDef:(ShaderParameterDefinition *)sdef
+{
+    self = [super initWithDef:(ParameterDefintion *)sdef];
+    if( self )
+    {
+    }
+    return self;
+}
+
+-(void)setShader:(Shader *)shader
+{
+    _shader = shader;
+    ShaderParameterDefinition * spd = (ShaderParameterDefinition *)_pd;
+    self.parameterName = @([shader nameForIndex:spd->indexIntoNames]);
+    __weak ShaderParameter * me = self;
+    _paramBlock = ^(NSValue *nsv){
+        [me setValueTo:nsv];
+        if( spd->pd.duration == 0 )
+            [shader writeToLocation:spd->indexIntoNames type:spd->pd.type data:&spd->pd.currentValue];
+    };
+    
+    [shader writeToLocation:spd->indexIntoNames type:spd->pd.type data:&spd->pd.def];
+}
+
+-(void)update:(NSTimeInterval)dt
+{
+    [super update:dt];
+    ShaderParameterDefinition * spd = (ShaderParameterDefinition *)_pd;
+    [self.shader writeToLocation:spd->indexIntoNames type:spd->pd.type data:&spd->pd.currentValue];
+}
+
+@end
+

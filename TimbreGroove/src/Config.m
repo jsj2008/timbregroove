@@ -24,7 +24,7 @@ NSString * const kConfigAudioInstrument    = @"instrument";
 NSString * const kConfigEQPanel = @"eqcube";
 
 NSString * const kConfigInstruments           = @"instruments";
-NSString * const kConfigInstrumentIsSoundFont = @"isSoundFont";
+NSString * const kConfigInstrumentIsSoundFont = @"isSoundfont";
 NSString * const kConfigInstrumentPatch       = @"patch";
 NSString * const kConfigInstrumentPreset      = @"preset";
 NSString * const kConfigInstrumentLowNote     = @"lo";
@@ -121,5 +121,5 @@ static Config * __sharedConfig;
 -(NSString *)displayName { return [_me valueForKey:kConfigSceneDisplayName]; };
 -(ConfigAudioProfile *)audioElement { return [__sharedConfig getAudioProfile:[_me valueForKey:kConfigSceneAudio]];}
 -(ConfigGraphicElement *)graphicElement { return [__sharedConfig getGraphicElement:[_me valueForKey:kConfigScene3d]];}
--(NSDictionary *)connections { return [_me valueForKey:kConfigSceneConnections]; };
+-(NSArray *)connections { return [_me valueForKey:kConfigSceneConnections]; };
 @end

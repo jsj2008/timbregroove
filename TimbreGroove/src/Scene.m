@@ -10,13 +10,16 @@
 #import "TriggerMap.h"
 #import "Config.h"
 #import "Graph.h"
+#import "GraphView.h"
 #import "Global.h"
 #import "Audio.h"
+#import "Parameter.h"
 
 @interface Scene () {
     TriggerMap * _map;
     NSMutableDictionary * _dynamicProps;
     ConfigScene * _config;
+    NSMutableArray * _tweenQueue;
 }
 
 @end
@@ -43,18 +46,22 @@
 {
     self = [super init];
     if (self) {
+        _tweenQueue = [NSMutableArray new];
         _dynamicProps = [NSMutableDictionary new];
         _map = [[TriggerMap alloc] initWithWatchee:self];
         _config = config;
         _graph = [Graph new];
         Global * g = [Global sharedInstance];
-        [_graph createTopLevelNodeWithConfig:config.graphicElement andViewSize:g.graphViewSize];
         _audio = [Audio new];
         [_audio loadAudioFromConfig:config.audioElement];
+        [_graph createTopLevelNodeWithConfig:config.graphicElement andViewSize:g.graphViewSize];
         [_map addParameters:[_graph getParameters]];
         [_map addParameters:[_audio getParameters]];
-        [_map addMappings:config.connections];
+        NSArray * connectionMaps = config.connections;
+        for( NSDictionary * map in connectionMaps )
+            [_map addMappings:map];
         [_map addMappings:[self getRuntimeConnections]];
+        [_audio start];
     }
     return self;
 }
@@ -82,9 +89,32 @@
     [_map trigger:name withValue:obj];
 }
 
+-(bool)somebodyExpectsTrigger:(NSString const *)triggerName
+{
+    return [_map expectsTrigger:triggerName];
+}
+
 -(NSDictionary *)getRuntimeConnections
 {
     return @{};
+}
+
+-(void)queue:(Parameter *)parameter
+{
+    [_tweenQueue addObject:parameter];
+}
+
+-(void)update:(NSTimeInterval)dt view:(GraphView *)view
+{
+    MixerUpdate mixerUpdate;
+    [_audio update:dt mixerUpdate:&mixerUpdate];
+    [view update:dt mixerUpdate:&mixerUpdate];
+    for( Parameter * param in _tweenQueue )
+    {
+        [param update:dt];
+        if( param.isCompleted )
+           [_tweenQueue removeObject:param];        
+    }
 }
 
 -(void)setValue:(id)value forUndefinedKey:(NSString *)key

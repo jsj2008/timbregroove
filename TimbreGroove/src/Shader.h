@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "TGTypes.h"
+#import "Parameter.h"
 
 @class TG3dObject;
 
@@ -58,7 +59,21 @@
 // Get the gl location for a variable (uniform or attribute) if you want to call
 // glUniform* yourself:
 - (GLint) location:(int)indexIntoNames;
+-(const char *)nameForIndex:(int)index;
+
 
 @property (nonatomic) bool acceptMissingVars;
 
+@end
+
+typedef struct ShaderParameterDefinition {
+    ParameterDefintion  pd;
+    int indexIntoNames;
+} ShaderParameterDefinition;
+
+@interface ShaderParameter : Parameter
+
+-(id)initWithShaderDef:(ShaderParameterDefinition *)sdef;
+
+@property (nonatomic,weak) Shader *shader;
 @end

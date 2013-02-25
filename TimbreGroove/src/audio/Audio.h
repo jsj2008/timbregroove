@@ -7,11 +7,14 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "TGTypes.h"
 
 @class ConfigAudioProfile;
 
 @interface Audio : NSObject
 
 -(void)loadAudioFromConfig:(ConfigAudioProfile *)config;
+-(void)start;
 -(NSDictionary *)getParameters;
+-(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate;
 @end

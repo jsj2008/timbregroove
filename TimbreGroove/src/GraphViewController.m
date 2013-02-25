@@ -8,13 +8,15 @@
 
 #import "GraphView.h"
 #import "Graph.h"
-#import "Mixer.h"
+#import "Global.h"
+#import "Scene.h"
 
 @interface GraphViewController : GLKViewController
 @property (nonatomic,strong) EAGLContext * context;
 @end
 
 @interface GraphViewController () {
+    Global * _global;
 }
 
 @end
@@ -37,6 +39,8 @@
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
+    _global = [Global sharedInstance];
+    
     [self setPreferredFramesPerSecond:40];
 }
 
@@ -50,10 +54,7 @@
 
 - (void)update
 {
-    MixerUpdate mixerUpdate;
-    [[Mixer sharedInstance] update:&mixerUpdate];
-    
-    [(GraphView*)self.view update:self.timeSinceLastUpdate mixerUpdate:&mixerUpdate];
+    [_global.scene update:self.timeSinceLastUpdate view:(GraphView *)self.view];
 }
 
 - (void)glkView:(GLKView *)glkView drawInRect:(CGRect)rect

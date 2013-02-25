@@ -29,10 +29,15 @@ static const char * _generic_shader_var_names[NUM_GENERIC_VARIABLES] = {
     "u_dirColor",
     "u_ambient",
     
-    "u_p1", "u_p2", "u_p3",
+    "u_time",
     
     "u_distortionPoint",
-    "u_distortionFactor"
+    "u_distortionFactor",
+    "u_rippleSize",
+    "u_ripplePt",
+    "u_spotLocation",
+    "u_spotIntensity"
+    
 };
 
 
@@ -43,6 +48,10 @@ static const char * _generic_shader_var_names[NUM_GENERIC_VARIABLES] = {
 
 @implementation GenericShader
 
++(id)shader
+{
+    return [GenericShader shaderWithHeaders:nil];
+}
 
 +(id)shaderWithHeaders:(NSString *)headers
 {
@@ -56,11 +65,6 @@ static const char * _generic_shader_var_names[NUM_GENERIC_VARIABLES] = {
         shader = [[GenericShader alloc] initWithHeaders:headers];
 
     return shader;
-}
-
-+(id)shaderWithIndicesIntoNames:(NSArray *)arr
-{
-    return [GenericShader shaderWithHeaders:[Generic getShaderHeaderWithIndicesIntoName:arr]];
 }
 
 -(id)initWithHeaders:(NSString *)headers
@@ -97,6 +101,24 @@ static const char * _generic_shader_var_names[NUM_GENERIC_VARIABLES] = {
     
     if( object.useColor )
         [self writeToLocation:gv_ucolor type:TG_VECTOR4 data:object.color.v];
+    
+    ShaderTimeType stt = object.timerType;
+    if( stt > kSTT_Custom )
+    {
+        float time;
+        if( stt == kSTT_Timer )
+            time = object.timer;
+        else if( stt == kSTT_CountDown)
+        {
+            float countDown = object.countDownBase - object.timer;
+            if( countDown < 0.0 )
+                return; // N.B. <-----------------
+            time = countDown;
+        }
+        else
+            time = object.totalTime;
+        [self writeToLocation:gv_time type:TG_FLOAT data:&time];
+    }
 }
 
 @end

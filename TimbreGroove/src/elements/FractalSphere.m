@@ -9,7 +9,6 @@
 #import "Fractal.h"
 #import "FBO.h"
 #import "Light.h"
-#import "Tweener.h"
 #import "Sphere.h"
 
 @interface FractalSphere : Sphere
@@ -76,31 +75,6 @@
 
     if( self.timer > 1.0/8.0 )
     {
-        /*
-        [_sound updateMeters];
-        float peak = [_sound averagePowerForChannel:0];
-        if( peak > _pmax )
-            _pmax = peak;
-        if( peak < _pmin )
-            _pmin = peak;
-    
-//        peak = TG_CLAMP(peak, -160, 0.0);
-        float peakVal = ((peak - _pmin) / (_pmax - (_pmin+0.01)));
-
-        if( !_tweening )
-        {
-            _tweening = true;
-            NSDictionary * params = @{
-                  TWEEN_DURATION: @(1.0/2.0),
-                TWEEN_TRANSITION: TWEEN_FUNC_LINEAR,
-                      @"peakVal": @(peakVal),
-                TWEEN_ON_COMPLETE_SELECTOR: @"tweenDone",
-                TWEEN_ON_COMPLETE_TARGET: self
-            };
-            
-            [Tweener addTween:self withParameters:params];
-        }
-        */
         [_texRenderer update:self.timer/2.0 mixerUpdate:mixerUpdate];
         [_texRenderer renderToFBO];
         

@@ -20,7 +20,6 @@ typedef enum PoolWaterVariables {
     pw_turbulence,
     pw_center,
     pw_radius,
-    pw_scale,
     PW_NUM_NAMES
 } PoolWaterVariables;
 

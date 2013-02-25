@@ -21,6 +21,7 @@
     Shader * _shader;
     NSTimeInterval _totalTime;
     NSTimeInterval _timer;
+    NSMutableArray * _parameters;
 }
 
 -(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate;
@@ -46,6 +47,7 @@
 
 -(id)   wireUp;
 -(id)   wireUpWithViewSize:(CGSize)viewSize;
+-(void) installParameters;
 
 -(void) clean;
 -(id)   settingsChanged;
@@ -53,7 +55,6 @@
 
 - (GLKMatrix4) modelView; // based on position/rotation/scale
 - (GLKMatrix4) calcPVM;   // combine camera and model
-- (NSString *) getShaderHeader;
 - (NSArray *)  getSettings;
 - (NSDictionary *)getParameters;
 

@@ -3,9 +3,29 @@
 <plist version="1.0">
 <dict>
 	<key>default_scene</key>
-	<string>tranquility</string>
+	<string>test</string>
 	<key>scenes</key>
 	<dict>
+		<key>test</key>
+		<dict>
+			<key>connections</key>
+			<array>
+				<dict>
+					<key>Tap</key>
+					<string>u_ripplePt</string>
+					<key>Drag</key>
+					<string>u_ripplePt</string>
+				</dict>
+			</array>
+			<key>icon</key>
+			<string>mood.png</string>
+			<key>display</key>
+			<string>tranquility...</string>
+			<key>3d_element</key>
+			<string>ripple</string>
+			<key>audio_element</key>
+			<string>tranquility</string>
+		</dict>
 		<key>tranquility</key>
 		<dict>
 			<key>icon</key>
@@ -136,6 +156,15 @@
 		<dict>
 			<key>instanceClass</key>
 			<string>PoolScreen</string>
+			<key>order</key>
+			<integer>40</integer>
+			<key>icon</key>
+			<string>newModel.png</string>
+		</dict>
+		<key>ripple</key>
+		<dict>
+			<key>instanceClass</key>
+			<string>Ripple</string>
 			<key>order</key>
 			<integer>40</integer>
 			<key>icon</key>

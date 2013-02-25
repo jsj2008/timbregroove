@@ -13,6 +13,7 @@ extern NSString const * kGlobalScene;
 extern NSString const * kGlobalRecording;
 #endif
 
+
 @class Scene;
 
 @interface Global : NSObject

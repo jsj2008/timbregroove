@@ -93,6 +93,7 @@ extern NSString const * kTriggerTap3;
 extern NSString const * kTriggerDblTap;
 extern NSString const * kTriggerPanX;
 extern NSString const * kTriggerPanY;
+extern NSString const * kTriggerDragPos;
 extern NSString const * kTriggerDrag1;
 extern NSString const * kTriggerDrag2;
 extern NSString const * kTriggerDrag3;
@@ -106,6 +107,7 @@ extern NSString const * kTriggerHoldAndTap;
 extern NSString const * kTriggerMainSlider;
 
 extern NSString const * kTriggerDynamicPeak;
+extern NSString const * kTriggerDynamicHold;
 extern NSString const * kTriggerFrequencyPeak;
 extern NSString const * kTriggerBeat;
 extern NSString const * kTriggerNote;

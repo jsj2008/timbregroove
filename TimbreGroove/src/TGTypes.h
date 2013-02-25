@@ -31,6 +31,10 @@ typedef enum {
     TG_TEXTURE
 } TGUniformType;
 
+#define TGParameterType TGUniformType
+#define TG_POINT        TG_VECTOR2
+#define TG_COLOR        TG_VECTOR4
+
 typedef enum {
     TG_POINTS = GL_POINTS, // etc.
     TG_LINES,

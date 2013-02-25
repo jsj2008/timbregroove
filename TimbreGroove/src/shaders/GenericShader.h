@@ -26,12 +26,15 @@ typedef enum {
     gv_dirColor,
     gv_ambient,
     
-    gv_p1, // bezier startPt
-    gv_p2, // bezier controlPt
-    gv_p3, // bezier endPt
+    gv_time,
     
     gv_distortionPt, // vec3
     gv_distortionFactor, // float
+    
+    gv_rippleSize,
+    gv_ripplePt,
+    gv_spotLocation,
+    gv_spotIntensity,
     
     NUM_GENERIC_VARIABLES
     
@@ -39,7 +42,7 @@ typedef enum {
 
 @interface GenericShader : Shader
 
-+(id)shaderWithIndicesIntoNames:(NSArray *)arr;
++(id)shader;
 +(id)shaderWithHeaders:(NSString *)headers;
 -(id)initWithHeaders:(NSString *)headers;
 

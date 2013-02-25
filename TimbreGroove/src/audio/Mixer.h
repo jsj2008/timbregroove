@@ -32,6 +32,11 @@ void _CheckError( OSStatus error, const char *operation);
 @property (nonatomic,readonly) AudioUnit sampler;
 @end
 
+typedef enum ExpectedTriggerFlags {
+    kNoOneExpectsNothin = 0,
+    kExpectsPeak = 1,
+    kExpectsPeakHold = 1 << 1
+} ExpectedTriggerFlags;
 
 @interface Mixer : NSObject {
 @private
@@ -46,6 +51,8 @@ void _CheckError( OSStatus error, const char *operation);
 
     AudioUnitParameterValue _mixerOutputGain;
     int                     _selectedEQBand; // actually eqBands
+    
+    ExpectedTriggerFlags _expectedTriggerFlags;
     
     MIDIClientRef  _midiClient;
     MusicTimeStamp _playerTrackLength;

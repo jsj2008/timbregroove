@@ -111,17 +111,24 @@
     }
 }
 
+-(CGPoint)nativeToTG:(CGPoint)pt
+{
+    CGSize sz       = self.frame.size;
+    pt.x /= sz.width;
+    pt.y = 1.0 - (pt.y / sz.height); // up is up damn it
+    pt.x = (pt.x - 0.5) * 2.0;
+    pt.y = (pt.y - 0.5) * 2.0;
+    return pt;
+}
+
 -(void)tap:(UITapGestureRecognizer *)tgr
 {
     if( tgr.state == UIGestureRecognizerStateEnded )
     {
         Scene * scene   = [Global sharedInstance].scene;
-        CGSize sz       = self.frame.size;
         CGPoint pt      = [tgr locationInView:self];
         [scene setTrigger:kTriggerTapPos point:pt];
-        pt.x /= sz.width;
-        pt.y = 1.0 - (pt.y / sz.height); // up is up damn it
-        [scene setTrigger:kTriggerTap1 point:pt];
+        [scene setTrigger:kTriggerTap1 point:[self nativeToTG:pt]];
     }
 }
 
@@ -142,10 +149,11 @@
         
         CGPoint spt = (CGPoint){ (pt.x - _panLast.x) / sz.width,
                                 -(pt.y - _panLast.y) / sz.height };
-        
+
         [scene setTrigger:kTriggerPanX value:spt.x];
         [scene setTrigger:kTriggerPanY value:spt.y];
-        [scene setTrigger:kTriggerDrag1 point:spt];
+        [scene setTrigger:kTriggerDrag1 point:[self nativeToTG:pt]];
+        [scene setTrigger:kTriggerDragPos point:pt];
         
         _panLast = pt;
     }
