@@ -15,12 +15,19 @@ NSString const * kMoodSexy = @"Sexy";
 
 
 NSString const * kParamMasterVolume   =   @"MasterVolume";
-NSString const * kParamEQFrequency    =   @"EQfreq";
-NSString const * kParamEQBandwidth    =   @"EQbw";
-NSString const * kParamEQPeak         =   @"EQpeak";
 NSString const * kParamTempo          =   @"Tempo";
 NSString const * kParamMIDINote       =   @"Note";
 NSString const * kParamPitch          =   @"Pitch";
+
+NSString const * kParamChannel        =   @"Channel";
+NSString const * kParamChannelVolume  =   @"ChannelVolume";
+
+NSString const * kParamEQBand         =   @"EQBand";
+NSString const * kParamEQFrequency    =   @"EQfreq";
+NSString const * kParamEQBandwidth    =   @"EQbw";
+NSString const * kParamEQPeak         =   @"EQpeak";
+NSString const * kParamEQBypass       =   @"EQBypass";
+
 
 NSString const * kParamInstrumentP1  = @"PerformanceParameter1";
 NSString const * kParamInstrumentP2  = @"PerformanceParameter2";
@@ -39,6 +46,12 @@ NSString const * kParamRotation         =   @"Rotation";
 NSString const * kParamLightDirection   =   @"Light Direction";
 NSString const * kParamLightColor       =   @"Color of Light";
 NSString const * kParamNewElement       =   @"Create";
+
+NSString const * kTriggerVPad1       =   @"VirtualPad1";
+NSString const * kTriggerVPad2       =   @"VirtualPad2";
+NSString const * kTriggerVPad3       =   @"VirtualPad3";
+NSString const * kTriggerVPad4       =   @"VirtualPad4";
+NSString const * kTriggerVPad5       =   @"VirtualPad5";
 
 NSString const * kTriggerTapPos      =   @"TapNative";
 NSString const * kTriggerTap1        =   @"Tap";

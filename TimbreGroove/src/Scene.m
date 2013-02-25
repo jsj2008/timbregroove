@@ -109,11 +109,22 @@
     MixerUpdate mixerUpdate;
     [_audio update:dt mixerUpdate:&mixerUpdate];
     [view update:dt mixerUpdate:&mixerUpdate];
+    NSMutableArray * markedForDelete;
     for( Parameter * param in _tweenQueue )
     {
         [param update:dt];
         if( param.isCompleted )
-           [_tweenQueue removeObject:param];        
+        {
+            if( !markedForDelete )
+                markedForDelete = [NSMutableArray new];
+            [markedForDelete addObject:param];
+        }
+    }
+    if( markedForDelete )
+    {
+        for( Parameter * param in markedForDelete )
+            [_tweenQueue removeObject:param];
+        [markedForDelete removeAllObjects];
     }
 }
 

@@ -28,7 +28,8 @@ typedef enum {
     TG_MATRIX3,
     TG_MATRIX4,
     TG_BOOL,
-    TG_TEXTURE
+    TG_TEXTURE,
+    TG_BOOL_FLOAT
 } TGUniformType;
 
 #define TGParameterType TGUniformType

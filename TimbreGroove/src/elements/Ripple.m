@@ -16,18 +16,11 @@
 #import "Parameter.h"
 
 
-ShaderParameterDefinition rippleSize = {
-    { TG_FLOAT, { 1.5 }, { 1.5 }, { 15.0 }, kTweenLinear, 0.0, true },
-    gv_rippleSize
-};
-
-ShaderParameterDefinition ripplePt = {
-    { TG_POINT, {{ 0, 0 }}, {{ -1,-1 }}, {{ 1,1 }}, kTweenLinear, 1.0, false },
-    gv_ripplePt
-};
-
 @interface Ripple : GenericWithTexture {
 
+    ShaderParameterDefinition _ripplePt;
+    ShaderParameterDefinition _rippleSize;
+    
     float _zRot;
     float _spotRadius;
 }
@@ -44,14 +37,25 @@ ShaderParameterDefinition ripplePt = {
         self.countDownBase = 3.4;
         _timer = self.countDownBase + 0.1;
         self.scale = (GLKVector3){ 1.5, 3.0, 0 };
+        
+        _ripplePt = (ShaderParameterDefinition){
+            { TG_POINT, {{ 0, 0 }}, {{ -1,-1 }}, {{ 1,1 }}, kTweenEaseOutSine, 1.0  },
+            gv_ripplePt
+        };
+        
+        _rippleSize = (ShaderParameterDefinition){
+            { TG_FLOAT, { 1.5 }, { 1.5 }, { 15.0 }, kTweenLinear, 0.0, kParamFlagPerformScaling },
+            gv_rippleSize
+        };
+        
     }
     return self;
 }
 
 -(void)installParameters
 {
-    [_parameters addObject:[[ShaderParameter alloc] initWithShaderDef:&rippleSize]];
-    [_parameters addObject:[[ShaderParameter alloc] initWithShaderDef:&ripplePt]];
+    [_parameters addObject:[[ShaderParameter alloc] initWithShaderDef:&_rippleSize]];
+    [_parameters addObject:[[ShaderParameter alloc] initWithShaderDef:&_ripplePt]];
 }
 
 

@@ -49,8 +49,8 @@ typedef enum ExpectedTriggerFlags {
     AUNode           _mixerNode;
     Float64          _graphSampleRate;
 
-    AudioUnitParameterValue _mixerOutputGain;
-    int                     _selectedEQBand; // actually eqBands
+    int              _selectedEQBand; // actually eqBands
+    int              _selectedChannel; // aka bus, aka element
     
     ExpectedTriggerFlags _expectedTriggerFlags;
     

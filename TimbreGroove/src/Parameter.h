@@ -24,6 +24,12 @@ typedef enum TweenFunction {
     kTweenEaseOutThrow
 } TweenFunction;
 
+typedef enum ParamFlags {
+    kParamFlagNone = 0,
+    kParamFlagPerformScaling = 1,
+    kParamFlagsAdditiveValues = 1 << 1,
+} ParamFlags;
+
 union _ParamValue {
     float fv[4];
     float f;
@@ -40,7 +46,9 @@ typedef struct ParameterDefintion {
     ParamValue      max;
     TweenFunction   function;
     NSTimeInterval  duration;
-    bool            performScaling;
+    ParamFlags      flags;
+    
+    // calculated at runtime...
     ParamValue      scale;
     ParamValue      currentValue; // native
     ParamValue      normalized;   // scaled
@@ -51,18 +59,16 @@ typedef struct ParameterDefintion {
 @interface Parameter : NSObject {
     @protected
     ParameterDefintion * _pd;
-    ParamBlock _paramBlock;
+    int _numFloats;
 }
 
 -(id)initWithDef:(ParameterDefintion *)def;
 
-@property (nonatomic,strong) ParamBlock paramBlock;
-@property (nonatomic,strong) TweenCompleteBlock onCompleteBlock;
-@property (nonatomic,readonly) ParameterDefintion * definition;
-@property (nonatomic,strong) NSString const * parameterName;
-@property (nonatomic) bool isCompleted;
+@property (nonatomic,strong) TweenCompleteBlock   onCompleteBlock;
+@property (nonatomic)        ParameterDefintion * definition;
+@property (nonatomic,strong) NSString const *     parameterName;
+@property (nonatomic)        bool                 isCompleted;
 
--(void)setValueBy:(NSValue *)nsv;
 -(void)setValueTo:(NSValue *)nsv;
 
 

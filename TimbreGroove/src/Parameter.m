@@ -14,8 +14,9 @@
 #import "Scene.h"
 
 @interface Parameter () {
-    int _numFloats;
 
+    bool _tweening;
+    
     NSTimeInterval _runningTime;
     ParamValue     _initValue;
     ParamValue     _targetValue;    
@@ -30,36 +31,49 @@
     self = [super init];
     if( self )
     {
-        _pd = def;
-        switch (_pd->type)
+        if( def )
         {
-            case TG_COLOR:
-                _numFloats = 4;
-                break;
-            case TG_VECTOR3:
-                _numFloats = 3;
-                break;
-            case TG_POINT:
-                _numFloats = 2;
-                break;
-            case TG_FLOAT:
-                _numFloats = 1;
-                break;
-            default:
-                _numFloats = 0;
-                break;
+            [self setDefinition:def];
+            [self calcScale];
         }
-        
-        for( int i = 0; i < _numFloats; i++ )
-        {
-            if( _pd->performScaling )
-                _pd->scale.fv[i] = 1.0 / (_pd->max.fv[i] - _pd->min.fv[i]);
-            else
-                _pd->scale.fv[i] = 1.0;
-        }
-        
     }
     return self;
+}
+
+
+-(void)setDefinition:(ParameterDefintion *)definition
+{
+    _pd = definition;
+    switch (_pd->type)
+    {
+        case TG_COLOR:
+            _numFloats = 4;
+            break;
+        case TG_VECTOR3:
+            _numFloats = 3;
+            break;
+        case TG_POINT:
+            _numFloats = 2;
+            break;
+        case TG_FLOAT:
+            _numFloats = 1;
+            break;
+        case TG_BOOL_FLOAT:
+        default:
+            _numFloats = 0;
+            break;
+    }
+}
+
+-(void)calcScale
+{
+    for( int i = 0; i < _numFloats; i++ )
+    {
+        if( _pd->flags & kParamFlagPerformScaling )
+            _pd->scale.fv[i] = 1.0 / (_pd->max.fv[i] - _pd->min.fv[i]);
+        else
+            _pd->scale.fv[i] = 1.0;
+    }
 }
 
 -(ParameterDefintion *)definition
@@ -67,17 +81,7 @@
     return _pd;
 }
 
--(void)setValueBy:(NSValue *)nsv
-{
-    [self setValueTo:nsv additive:true];
-}
-
 -(void)setValueTo:(NSValue *)nsv
-{
-    [self setValueTo:nsv additive:false];
-}
-
--(void)setValueTo:(NSValue *)nsv additive:(bool)additive
 {
     ParamValue newValue;
     CGPoint * ppt;
@@ -100,6 +104,15 @@
                 newValue.f = [((NSNumber *)nsv) floatValue];
             else
                 newValue = [nsv parameterValue];
+        case TG_BOOL_FLOAT:
+            if( [nsv isKindOfClass:[NSNumber class]])
+                newValue.f = [((NSNumber *)nsv) floatValue];
+            else
+                newValue = [nsv parameterValue];
+            if( newValue.f > 0 )
+                newValue.f = 1.0;
+            else
+                newValue.f = 0;
         default:
             break;
     }
@@ -108,9 +121,12 @@
     {
         for( int i = 0; i < _numFloats; i++ )
         {
-            newValue.fv[i] *= _pd->scale.fv[i];
-            newValue.fv[i] += _pd->min.fv[i];
-            if( additive )
+            if( _pd->flags & kParamFlagPerformScaling )
+            {
+                newValue.fv[i] *= _pd->scale.fv[i];
+                newValue.fv[i] += _pd->min.fv[i];
+            }
+            if( _pd->flags & kParamFlagsAdditiveValues )
                 newValue.fv[i] += _pd->currentValue.fv[i];
             if( newValue.fv[i] < _pd->min.fv[i] )
                 newValue.fv[i] = _pd->min.fv[i];
@@ -129,9 +145,24 @@
         _runningTime = 0.0;
         _targetValue = newValue;
         _isCompleted = false;
-        [self queue];
+        if( !_tweening )
+        {
+            [self queue];
+            _tweening = true;
+        }
     }
     
+}
+
+-(void)killTween
+{
+    if( _tweening )
+    {
+		_runningTime = _pd->duration;
+		_isCompleted = true;
+        _tweening = false;
+        _targetValue = _pd->currentValue;
+    }
 }
 
 - (void) update:(NSTimeInterval)dt
@@ -142,6 +173,7 @@
     {
 		_runningTime = _pd->duration;
 		_isCompleted = true;
+        _tweening = false;
 	}
 	
     ParamValue newValue;
@@ -174,8 +206,6 @@
                 break;
         }
         
-        if( _paramBlock )
-            _paramBlock(nsv);
     }
     
     _pd->currentValue = newValue;

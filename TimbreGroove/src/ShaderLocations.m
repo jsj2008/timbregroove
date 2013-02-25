@@ -37,6 +37,7 @@
     switch(type)
     {
         case TG_FLOAT:
+        case TG_BOOL_FLOAT:
             glUniform1f(location, *(GLfloat *)data);
             break;
             

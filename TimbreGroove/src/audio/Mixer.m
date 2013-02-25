@@ -442,39 +442,13 @@ OSStatus renderCallback(
     OSStatus result;
     
     UInt32 numBands = kNUM_EQ_BANDS;
-    result = AudioUnitSetProperty(_masterEQUnit, kAUNBandEQProperty_NumberOfBands, kAudioUnitScope_Global, 0, &numBands, sizeof(numBands));
+    result = AudioUnitSetProperty(_masterEQUnit, kAUNBandEQProperty_NumberOfBands,
+                                  kAudioUnitScope_Global, 0, &numBands, sizeof(numBands));
     CheckError(result, "Could not set number of EQ bands");
-
+    
     CheckError(AudioUnitAddRenderNotify(_masterEQUnit, renderCallback, &_cbContext), "Could not set callback");
     
-    EQBandInfo * bands = self.bands;
-    
-    for( int i = 0; i < kNUM_EQ_BANDS; i++ )
-    {
-        result = AudioUnitSetParameter (_masterEQUnit,
-                                        kAUNBandEQParam_FilterType + i,
-                                        kAudioUnitScope_Global,
-                                        0,
-                                        bands[i].filterType,
-                                        0);
-        CheckError(result,"Unable to set eq filter type.");
-    }
-    
-    [self enableSelectedEQBand];
-    
-    for( int i = 0; i < kNUM_EQ_BANDS; i++ )
-    {
-        // initialize with default default values
-        for (int n = 0; n < bands[i].numKnobs; n++)
-        {
-            ParamDefinition * pd = &bands[i].defs[n];
-            if( pd->name )
-            {
-                [self turnKnobTo:pd->def pd:pd band:i]; // this will set ->normalized field
-            }
-        }
-    }
-    
+    [self configureEQ];
     return result;
 }
 
@@ -522,9 +496,6 @@ OSStatus renderCallback(
     _cbContext.asbd = fasbd;
     
     [self setupMasterEQ];
-    
-    // not sure where to put this:
-    [self setMixerOutputGain:(AudioUnitParameterValue)0.5];
     
     result = AUGraphConnectNodeInput (_processingGraph, _mixerNode, 0, cvNode, 0);
     CheckError(result,"Unable to interconnect the mixer/conv nodes in the audio processing graph.");

@@ -13,7 +13,9 @@
 
 +(id)valueWithParameter:(ParamValue)pvalue
 {
-    return [NSValue valueWithBytes:&pvalue objCType:@encode(ParamValue)];
+    static const char * encodedName = @encode(ParamValue);
+    
+    return [NSValue valueWithBytes:&pvalue objCType:encodedName];
 }
 
 -(ParamValue)parameterValue;

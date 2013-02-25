@@ -341,30 +341,47 @@ static NSHashTable * __shaders;
 
 -(id)initWithShaderDef:(ShaderParameterDefinition *)sdef
 {
-    self = [super initWithDef:(ParameterDefintion *)sdef];
-    if( self )
-    {
-    }
-    return self;
+    return [super initWithDef:(ParameterDefintion *)sdef];
 }
 
 -(void)setShader:(Shader *)shader
 {
+    // These are set of relatively unrelated tasks
+    // but they might as well be done here:
+    
+    // 1. set this instance's shader
+    //
     _shader = shader;
+    
+    // 2. expose the shader variable name for setting up trigger maps
+    //
     ShaderParameterDefinition * spd = (ShaderParameterDefinition *)_pd;
     self.parameterName = @([shader nameForIndex:spd->indexIntoNames]);
+    
+    // 3. set up the trigger ParamBlock
+    //
     __weak ShaderParameter * me = self;
     _paramBlock = ^(NSValue *nsv){
+        if( me == nil )
+        {
+            NSLog(@"Weak ShaderParameter let go");
+            exit(-1);
+        }
         [me setValueTo:nsv];
+        // if there is no animation then set the variable right now
+        // other wise it's already 'currentValue' so don't bother
         if( spd->pd.duration == 0 )
             [shader writeToLocation:spd->indexIntoNames type:spd->pd.type data:&spd->pd.currentValue];
     };
     
+    // 4. set the default value into the shader
+    //
     [shader writeToLocation:spd->indexIntoNames type:spd->pd.type data:&spd->pd.def];
 }
 
 -(void)update:(NSTimeInterval)dt
 {
+    // This is called if the property is animating
     [super update:dt];
     ShaderParameterDefinition * spd = (ShaderParameterDefinition *)_pd;
     [self.shader writeToLocation:spd->indexIntoNames type:spd->pd.type data:&spd->pd.currentValue];

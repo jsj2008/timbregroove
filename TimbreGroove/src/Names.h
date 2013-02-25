@@ -60,13 +60,18 @@ extern NSString const * kMoodDark;
 extern NSString const * kMoodSexy;
 
 extern NSString const * kParamMasterVolume;
+extern NSString const * kParamTempo;
+extern NSString const * kParamMIDINote;
+extern NSString const * kParamPitch;
+
+extern NSString const * kParamChannel;
+extern NSString const * kParamChannelVolume;
+
+extern NSString const * kParamEQBand;
 extern NSString const * kParamEQFrequency;
 extern NSString const * kParamEQBandwidth;
 extern NSString const * kParamEQPeak;
-extern NSString const * kParamTempo;
-extern NSString const * kParamMIDINote;
-
-extern NSString const * kParamPitch;
+extern NSString const * kParamEQBypass;
 
 extern NSString const * kParamInstrumentP1;
 extern NSString const * kParamInstrumentP2;
@@ -85,6 +90,12 @@ extern NSString const * kParamRotation;
 extern NSString const * kParamLightDirection;
 extern NSString const * kParamLightColor;
 extern NSString const * kParamNewElement;
+
+extern NSString const * kTriggerVPad1;
+extern NSString const * kTriggerVPad2;
+extern NSString const * kTriggerVPad3;
+extern NSString const * kTriggerVPad4;
+extern NSString const * kTriggerVPad5;
 
 extern NSString const * kTriggerTapPos;
 extern NSString const * kTriggerTap1;
