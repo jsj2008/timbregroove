@@ -12,6 +12,12 @@
 			<array>
 				<dict>
 					<key>Tap</key>
+					<string>SwellSound</string>
+				</dict>
+				<dict>
+					<key>MainSlider</key>
+					<string>MasterVolume</string>
+					<key>Tap</key>
 					<string>u_ripplePt</string>
 					<key>Drag</key>
 					<string>u_ripplePt</string>
@@ -54,10 +60,15 @@
 		</dict>
 		<key>tranquility</key>
 		<dict>
+			<key>instanceClass</key>
+			<string>Serenity</string>
 			<key>midifile</key>
 			<string>simpleMel</string>
-			<key>instrument</key>
-			<string>ambience</string>
+			<key>instruments</key>
+			<array>
+				<string>congas</string>
+				<string>ambience</string>
+			</array>
 		</dict>
 	</dict>
 	<key>instruments</key>

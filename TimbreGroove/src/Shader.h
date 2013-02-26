@@ -73,7 +73,6 @@ typedef struct ShaderParameterDefinition {
 
 @interface ShaderParameter : Parameter
 
-@property (nonatomic,strong) ParamBlock paramBlock;
 -(id)initWithShaderDef:(ShaderParameterDefinition *)sdef;
 
 @property (nonatomic,weak) Shader *shader;

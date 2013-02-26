@@ -9,9 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "TGTypes.h"
 
-typedef void (^TweenCompleteBlock)();
-typedef void (^ParamBlock)(NSValue *);
-
+//typedef void (^ParamBlock)(NSValue *);
+#define ParamBlock id
 
 typedef enum TweenFunction {    
     kTweenLinear,
@@ -21,7 +20,8 @@ typedef enum TweenFunction {
     kTweenEaseInBounce,
     kTweenEaseOutBounce,
     kTweenEaseInThrow,
-    kTweenEaseOutThrow
+    kTweenEaseOutThrow,
+    kTweenSwellInOut
 } TweenFunction;
 
 typedef enum ParamFlags {
@@ -32,12 +32,27 @@ typedef enum ParamFlags {
 
 union _ParamValue {
     float fv[4];
+    int i;
     float f;
+    bool boool;
     struct { float x, y,  z;  };
     struct { float r,  g,  b,  a;  };
 };
 
 typedef union _ParamValue ParamValue;
+
+#define PvToPoint(pv) *(CGPoint *)(&((pv).x))
+#define PvToV3(pv)    *(GLKVector3 *)(&((pv).x))
+#define PvToV4(pv)    *(GLKVector4 *)(&((pv).x))
+
+typedef struct ParamPayload {
+    ParamValue      v;
+    TGParameterType type;
+    bool            additive;
+    NSTimeInterval  duration;
+    TweenFunction   function;
+} ParamPayload;
+
 
 typedef struct ParameterDefintion {
     TGParameterType type;
@@ -62,22 +77,22 @@ typedef struct ParameterDefintion {
     int _numFloats;
 }
 
--(id)initWithDef:(ParameterDefintion *)def;
+-(id)initWithDef:(ParameterDefintion *)def valueNotify:(id)notify;
 
-@property (nonatomic,strong) TweenCompleteBlock   onCompleteBlock;
-@property (nonatomic)        ParameterDefintion * definition;
-@property (nonatomic,strong) NSString const *     parameterName;
-@property (nonatomic)        bool                 isCompleted;
+@property (nonatomic,strong) id valueNotify;
+@property (nonatomic,strong) id myParamBlock;
 
--(void)setValueTo:(NSValue *)nsv;
+-(void)setValueTo:(ParamPayload)inValue;
 
-
-@property (nonatomic) NSTimeInterval tweenStart;
-
+// Tweening
 -(void)update:(NSTimeInterval)dt;
+@property (nonatomic) bool isCompleted;
 
 // for derived classes
 -(void)queue;
+@property (nonatomic)        ParameterDefintion * definition;
+@property (nonatomic,strong) NSString const *  parameterName;
+-(void)calcScale;
 
 @end
 

@@ -14,7 +14,8 @@
 #import "Camera.h"
 #import "Global.h"
 #import "Parameter.h"
-
+#import "Scene.h"
+#import "Names.h"
 
 @interface Ripple : GenericWithTexture {
 
@@ -39,7 +40,7 @@
         self.scale = (GLKVector3){ 1.5, 3.0, 0 };
         
         _ripplePt = (ShaderParameterDefinition){
-            { TG_POINT, {{ 0, 0 }}, {{ -1,-1 }}, {{ 1,1 }}, kTweenEaseOutSine, 1.0  },
+            { TG_POINT, {{ 0.0, 0.0 }}, {{ -1.0,-1.0 }}, {{ 1.0,1.0 }}, kTweenEaseOutSine, 1.0  },
             gv_ripplePt
         };
         
@@ -63,6 +64,9 @@
 {
     [super wireUp];
 
+    Scene * scene = [Global sharedInstance].scene;
+    [scene setParameter:kParamChannelVolume value:1.0 func:kTweenLinear duration:0.0];
+    
     NSTimeInterval initTime = self.countDownBase;
     [self.shader writeToLocation:gv_time type:TG_FLOAT data:&initTime];
     return self;

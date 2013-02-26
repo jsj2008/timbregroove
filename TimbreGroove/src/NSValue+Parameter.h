@@ -10,7 +10,16 @@
 
 @interface NSValue (Parameter)
 +(id)valueWithParameter:(ParamValue)pvalue;
--(ParamValue)parameterValue;
--(GLKVector3)vector3Value;
--(GLKVector4)vector4Value;
++(id)valueWithPayload:(ParamPayload)payload;
+
+// this *Value nomenclature is how obj-c
+// runtime unboxes (no shit)
+-(ParamPayload)ParamPayloadValue;
+-(ParamValue)ParamValueValue;
+-(CGPoint)CGPointValue;
+-(GLKVector3)GLKVector3Value;
+-(GLKVector4)GLKVector4Value;
+-(bool)boolValue;
+-(float)floatValue;
+-(int)intValue;
 @end

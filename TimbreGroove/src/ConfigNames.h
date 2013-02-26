@@ -19,9 +19,10 @@ extern NSString * const kConfigSceneAudio;
 extern NSString * const kConfigScene3d;
 extern NSString * const kConfigSceneConnections;
 
+extern NSString * const kConfigAudioInstanceClass;
 extern NSString * const kConfigAudioProfiles;
 extern NSString * const kConfigAudioMidiFile;
-extern NSString * const kConfigAudioInstrument;
+extern NSString * const kConfigAudioInstruments;
 
 extern NSString * const kConfigEQPanel;
 

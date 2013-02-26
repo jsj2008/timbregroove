@@ -14,12 +14,14 @@
 #import "Global.h"
 #import "Audio.h"
 #import "Parameter.h"
+#import "NSValue+Parameter.h"
 
 @interface Scene () {
     TriggerMap * _map;
     NSMutableDictionary * _dynamicProps;
     ConfigScene * _config;
     NSMutableArray * _tweenQueue;
+    bool _started;
 }
 
 @end
@@ -45,15 +47,14 @@
 -(id)initWithConfig:(ConfigScene *)config
 {
     self = [super init];
-    if (self) {
+    if (self) {        
         _tweenQueue = [NSMutableArray new];
         _dynamicProps = [NSMutableDictionary new];
         _map = [[TriggerMap alloc] initWithWatchee:self];
         _config = config;
+        _audio = [Audio audioFromConfig:config.audioElement];
         _graph = [Graph new];
         Global * g = [Global sharedInstance];
-        _audio = [Audio new];
-        [_audio loadAudioFromConfig:config.audioElement];
         [_graph createTopLevelNodeWithConfig:config.graphicElement andViewSize:g.graphViewSize];
         [_map addParameters:[_graph getParameters]];
         [_map addParameters:[_audio getParameters]];
@@ -61,7 +62,6 @@
         for( NSDictionary * map in connectionMaps )
             [_map addMappings:map];
         [_map addMappings:[self getRuntimeConnections]];
-        [_audio start];
     }
     return self;
 }
@@ -71,22 +71,83 @@
     [_graph cleanChildren];
 }
 
+-(void)setParameter:(NSString const *)name
+              value:(float)value
+               func:(TweenFunction)f
+           duration:(NSTimeInterval)duration
+{
+    ParamPayload pv;
+    pv.v.f = value;
+    pv.type = TG_FLOAT;
+    pv.additive = false;
+    pv.duration = duration;
+    pv.function = f;
+    [self setValue:[NSValue valueWithPayload:pv] forKey:(NSString *)name];    
+}
+
+-(void)tweakParameter:(NSString const *)name
+                value:(float)value
+                 func:(TweenFunction)func
+             duration:(NSTimeInterval)duration
+{
+    ParamPayload pv;
+    pv.v.f = value;
+    pv.type = TG_FLOAT;
+    pv.additive = true;
+    pv.duration = duration;
+    pv.function = func;
+    [self setValue:[NSValue valueWithPayload:pv] forKey:(NSString *)name];
+}
+
+-(void)tweakTrigger:(NSString const *)name by:(float)value
+{
+    ParamPayload pv;
+    pv.v.f = value;
+    pv.type = TG_FLOAT;
+    pv.additive = true;
+    pv.duration = 0;
+    [_map trigger:name withValue:[NSValue valueWithPayload:pv]];
+    
+}
+
+-(void)tweakTrigger:(NSString const *)name byPoint:(CGPoint)pt
+{
+    ParamPayload pv;
+    PvToPoint(pv.v) = pt;
+    pv.type = TG_VECTOR2;
+    pv.additive = true;
+    pv.duration = 0;
+    [_map trigger:name withValue:[NSValue valueWithPayload:pv]];
+}
+
 -(void)setTrigger:(NSString const *)name value:(float)value
 {
-    [_map trigger:name withValue:[NSNumber numberWithFloat:value]];
+    ParamPayload pv;
+    pv.v.f = value;
+    pv.type = TG_FLOAT;
+    pv.additive = false;
+    pv.duration = 0;
+    [_map trigger:name withValue:[NSValue valueWithPayload:pv]];
 }
+
 -(void)setTrigger:(NSString const *)name b:(bool)b
 {
-    [_map trigger:name withValue:[NSNumber numberWithBool:b]];
+    ParamPayload pv;
+    pv.v.boool = b;
+    pv.type = TG_BOOL;
+    pv.additive = false;
+    pv.duration = 0;
+    [_map trigger:name withValue:[NSValue valueWithPayload:pv]];
 }
 
 -(void)setTrigger:(NSString const *)name point:(CGPoint)pt
 {
-    [_map trigger:name withValue:[NSValue valueWithCGPoint:pt]];
-}
--(void)setTrigger:(NSString const *)name obj:(id)obj
-{
-    [_map trigger:name withValue:obj];
+    ParamPayload pv;
+    PvToPoint(pv.v) = pt;
+    pv.type = TG_VECTOR2;
+    pv.additive = false;
+    pv.duration = 0;
+    [_map trigger:name withValue:[NSValue valueWithPayload:pv]];
 }
 
 -(bool)somebodyExpectsTrigger:(NSString const *)triggerName
@@ -106,31 +167,29 @@
 
 -(void)update:(NSTimeInterval)dt view:(GraphView *)view
 {
+    if( !_started )
+    {
+        _started = true;
+        [_audio start];
+        return; // see you in 1/60th of a second!
+    }
+    
     MixerUpdate mixerUpdate;
     [_audio update:dt mixerUpdate:&mixerUpdate];
     [view update:dt mixerUpdate:&mixerUpdate];
-    NSMutableArray * markedForDelete;
+    
     for( Parameter * param in _tweenQueue )
     {
         [param update:dt];
         if( param.isCompleted )
-        {
-            if( !markedForDelete )
-                markedForDelete = [NSMutableArray new];
-            [markedForDelete addObject:param];
-        }
-    }
-    if( markedForDelete )
-    {
-        for( Parameter * param in markedForDelete )
             [_tweenQueue removeObject:param];
-        [markedForDelete removeAllObjects];
     }
 }
 
 -(void)setValue:(id)value forUndefinedKey:(NSString *)key
 {
-    _dynamicProps[key] = value;
+    ParamPayload pl = [(NSValue *)value ParamPayloadValue];
+    _dynamicProps[key] = [NSValue valueWithPayload:pl];
 }
 
 -(id)valueForUndefinedKey:(NSString *)key

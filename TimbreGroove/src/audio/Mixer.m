@@ -17,18 +17,11 @@
 #import <libkern/OSAtomic.h>
 #import "Names.h"
 
-enum MidiNotes {
-    kC0 = 0,
-    kC1 = 12,
-    kC2 = 24,
-    kC3 = 36,
-    kC4 = 48,
-    kC5 = 60,
-    kMiddleC = kC5,
-    kA440 = 69,
-    kC6 = 72,
-    kC7 = 84,
-    };
+typedef struct NewSamplerInfo
+{
+    AudioUnit au;
+    int       channelNumber;
+} NewSamplerInfo;
 
 enum {
     kMIDIMessage_NoteOn    = 0x9,
@@ -61,11 +54,12 @@ static Mixer * __sharedMixer;
 @end
 @implementation Instrument
 
--(id)initWithAudioUnit:(AudioUnit)au andConfig:(ConfigInstrument *)config
+-(id)initWithNSI:(NewSamplerInfo)nsi andConfig:(ConfigInstrument *)config
 {
     if( (self = [super init]) )
     {
-        _samplerUnit = au;
+        _samplerUnit = nsi.au;
+        _channel = nsi.channelNumber;
         _lowestPlayable = config.low;
         _highestPlayable = config.high;
         _prevTimeStamp = 0;
@@ -180,8 +174,6 @@ OSStatus renderCallback(
 //..............................................................................
 
 @interface Mixer () {
-    unsigned int     _numSamplerUnits;
-    unsigned int     _capSamplerUnits;
     RenderCBContext  _cbContext;
     
     AudioStreamBasicDescription _stdASBD;
@@ -197,11 +189,6 @@ OSStatus renderCallback(
     self = [super init];
     if( self )
     {
-        _capSamplerUnits = 8;
-        _numSamplerUnits = 0;
-        _samplerUnits = malloc(sizeof(AudioUnit)*_capSamplerUnits);
-        memset(_samplerUnits, 0, sizeof(AudioUnit)*_capSamplerUnits);
-        
         _cbContext.rbo = 0;
         
         [self setupAVSession];
@@ -217,7 +204,7 @@ OSStatus renderCallback(
 -(void)dealloc
 {
     [self midiDealloc];
-    free(_samplerUnits);
+
     if( _captureBuffer )
         free(_captureBuffer);
     if( _cbContext.rbo )
@@ -239,22 +226,6 @@ OSStatus renderCallback(
     
 }
 
--(void)stowSamplerUnit:(AudioUnit)su
-{
-    if( _numSamplerUnits == _capSamplerUnits )
-    {
-        _capSamplerUnits += 8;
-        _samplerUnits = realloc(_samplerUnits,sizeof(AudioUnit)*_capSamplerUnits);
-        /*
-        AudioUnit * temp = malloc(sizeof(AudioUnit)*_capSamplerUnits);
-        memset(temp, 0, sizeof(AudioUnit)*_capSamplerUnits);
-        memcpy(temp, _samplerUnits, sizeof(AudioUnit)*_numSamplerUnits);
-        free(_samplerUnits);
-        _samplerUnits = temp;
-         */
-    }
-    _samplerUnits[_numSamplerUnits++] = su;
-}
 
 +(Mixer *)sharedInstance
 {
@@ -312,11 +283,9 @@ OSStatus renderCallback(
 
 -(Instrument *)loadInstrumentFromConfig:(ConfigInstrument *)config;
 {
-    AudioUnit sampler = [self makeSampler];
-    Instrument * instrument =  [[Instrument alloc] initWithAudioUnit:sampler
-                                    andConfig:[self loadSound:config sampler:sampler]];
-    [self stowSamplerUnit:instrument.sampler];
-    return instrument;
+    NewSamplerInfo nsi = [self makeSampler];
+    [self loadSound:config sampler:nsi.au];
+    return [[Instrument alloc] initWithNSI:nsi andConfig:config];
 }
 
 -(ConfigInstrument *)loadSound:(ConfigInstrument *)config sampler:(AudioUnit)sampler
@@ -394,7 +363,7 @@ OSStatus renderCallback(
 }
 
 
--(AudioUnit)makeSampler
+-(NewSamplerInfo)makeSampler
 {
     OSStatus result = noErr;
     
@@ -413,7 +382,7 @@ OSStatus renderCallback(
     result = AUGraphNodeInfo (_processingGraph, samplerNode, 0, &samplerUnit);
     CheckError(result,"Unable to obtain a reference to the Sampler unit.");
    
-    UInt32 busCount = _numSamplerUnits + 1;
+    UInt32 busCount = self.numChannels + 1;
     result = AudioUnitSetProperty (_mixerUnit,
                                    kAudioUnitProperty_ElementCount,
                                    kAudioUnitScope_Input,
@@ -422,6 +391,8 @@ OSStatus renderCallback(
                                    sizeof (busCount)
                                    );
     CheckError(result,"Unable to set buscount on mixer.");
+    
+    self.numChannels = busCount;
     
     result = AUGraphConnectNodeInput (_processingGraph, samplerNode, 0, _mixerNode, busCount-1);
     CheckError(result,"Unable to interconnect the nodes in the audio processing graph.");
@@ -434,7 +405,7 @@ OSStatus renderCallback(
     
     [self dumpGraph];
     
-    return samplerUnit;
+    return (NewSamplerInfo){ samplerUnit, busCount-1 };
 }
 
 -(OSStatus)setupMasterEQ

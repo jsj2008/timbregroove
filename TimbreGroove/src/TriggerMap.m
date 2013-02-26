@@ -12,7 +12,7 @@
 
 
 @interface TriggerMap () {
-    NSMutableDictionary * _parameters;
+    NSMutableDictionary * _paramNames;
     NSMutableDictionary * _mappings;
     
     id _targetObj;
@@ -25,7 +25,7 @@
     self = [super init];
     if (self) {
         _targetObj = objectToWatch;
-        _parameters = [NSMutableDictionary new];
+        _paramNames = [NSMutableDictionary new];
         _mappings = [NSMutableDictionary new];
     }
     return self;
@@ -37,21 +37,22 @@
                       context:(void *)context
 {
     if( [change[NSKeyValueChangeKindKey] intValue] == NSKeyValueChangeSetting )
-        for( ParamBlock pblock in _parameters[keyPath] )
+        for( void (^pblock)(NSValue *) in _paramNames[keyPath] )
         {
             NSValue * v = change[NSKeyValueChangeNewKey];
-            pblock(v);
+            ParamPayload pl = [v ParamPayloadValue];
+            pblock([NSValue valueWithPayload:pl]);
         }
 }
 
 -(void)addParameters:(NSDictionary *)paramKeyBlockValues
 {
-    [self utilityMerge:paramKeyBlockValues dst:_parameters setProp:true];
+    [self utilityMerge:paramKeyBlockValues dst:_paramNames watchProp:true];
 }
 
 -(void)addMappings:(NSDictionary *)triggerKeyParamValues
 {
-    [self utilityMerge:triggerKeyParamValues dst:_mappings setProp:false];
+    [self utilityMerge:triggerKeyParamValues dst:_mappings watchProp:false];
 }
 
 -(void)trigger:(NSString const *)key withValue:(NSValue *)value;
@@ -68,12 +69,12 @@
 
 -(void)utilityMerge:(NSDictionary *)src
                 dst:(NSMutableDictionary *)dst
-            setProp:(bool)setProp
+          watchProp:(bool)watchProp
 {
     for (NSString * srcKey in src) {
         if( !dst[srcKey] )
         {
-            if(setProp)
+            if(watchProp)
             {
                 [_targetObj addObserver:self
                              forKeyPath:srcKey

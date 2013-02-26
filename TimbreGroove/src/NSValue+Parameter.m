@@ -18,26 +18,20 @@
     return [NSValue valueWithBytes:&pvalue objCType:encodedName];
 }
 
--(ParamValue)parameterValue;
++(id)valueWithPayload:(ParamPayload)payload
 {
-    ParamValue v;
-    [self getValue:&v];
-    return v;
+    static const char * encodedName = @encode(ParamPayload);
+    
+    return [NSValue valueWithBytes:&payload objCType:encodedName];
 }
 
--(GLKVector3)vector3Value;
-{
-    ParamValue v;
-    [self getValue:&v];
-    return *(GLKVector3 *)&v;
-}
-
--(GLKVector4)vector4Value;
-{
-    ParamValue v;
-    [self getValue:&v];
-    return *(GLKVector4 *)&v;
-}
-
+-(ParamPayload)ParamPayloadValue { ParamPayload pp; [self getValue:&pp]; return pp; }
+-(ParamValue)ParamValueValue     { ParamValue v; [self getValue:&v]; return v;}
+-(CGPoint)CGPointValue           { ParamValue v; [self getValue:&v]; return PvToPoint(v); }
+-(GLKVector3)GLKVector3Value     { ParamValue v; [self getValue:&v]; return PvToV3(v); }
+-(GLKVector4)GLKVector4Value     { ParamValue v; [self getValue:&v]; return PvToV4(v); }
+-(bool)boolValue                 { ParamValue v; [self getValue:&v]; return v.boool; }
+-(float)floatValue               { ParamValue v; [self getValue:&v]; return v.f; }
+-(int)intValue                   { ParamValue v; [self getValue:&v]; return v.i; }
 
 @end

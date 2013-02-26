@@ -14,11 +14,19 @@
 @interface Audio () {
     Mixer * _mixer;
     NSString * _midiFile;
-    Instrument * _instrument;
 }
 
 @end
 @implementation Audio
+
++(id)audioFromConfig:(ConfigAudioProfile *)config
+{
+    Class klass = NSClassFromString(config.instanceClass);
+    Audio * audio = [klass new];
+    [audio loadAudioFromConfig:config];
+    return audio;
+}
+
 - (id)init
 {
     self = [super init];
@@ -27,26 +35,22 @@
     }
     return self;
 }
+
 -(void)loadAudioFromConfig:(ConfigAudioProfile *)config
 {
-    ConfigInstrument * instrumentConfig = config.instrument;
-    if( instrumentConfig )
-    {
-        Instrument * instrument = [_mixer loadInstrumentFromConfig:instrumentConfig];
-        if( instrument )
-        {
-            _instrument = instrument;
-            _midiFile = config.midiFile;
-        }
-    }
+    NSDictionary * instrumentConfigs = config.instruments;
+    _instruments = [NSMutableDictionary new];
+    for( NSString * name in instrumentConfigs )
+        _instruments[name] = [_mixer loadInstrumentFromConfig:instrumentConfigs[name]];
+    _midiFile = config.midiFile;
 }
 
 -(void)start
 {
     if( _midiFile )
-        [_mixer playMidiFile:_midiFile withInstrument:_instrument];
-    _instrument = nil;
-    
+    {
+        //[_mixer playMidiFile:_midiFile withInstrument:];
+    }
 }
 
 -(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate

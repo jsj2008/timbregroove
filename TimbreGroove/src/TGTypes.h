@@ -20,6 +20,7 @@
 #define GL_ERROR_C { GLenum __e = glGetError(); if(__e) { NSLog(@"glError(%d/%04X) %s:%d",__e,__e,__FILE__,__LINE__); }}
 #define GL_CALL(f) { NSLog(@"calling: %s", f); }
 
+
 typedef enum {
     TG_FLOAT,
     TG_VECTOR2,
@@ -29,7 +30,8 @@ typedef enum {
     TG_MATRIX4,
     TG_BOOL,
     TG_TEXTURE,
-    TG_BOOL_FLOAT
+    TG_BOOL_FLOAT,
+    TG_INT
 } TGUniformType;
 
 #define TGParameterType TGUniformType

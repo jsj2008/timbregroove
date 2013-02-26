@@ -14,8 +14,11 @@
 #import "Parameter.h"
 #import "Scene.h"
 
-const AudioUnitParameterValue kEQBypassON = 1;
-const AudioUnitParameterValue kEQBypassOFF = 0;
+//////////////////////////////////////////////////////////////////
+#pragma mark consts and typedefs
+
+const AudioUnitParameterValue kEQBypassON = 1.0;
+const AudioUnitParameterValue kEQBypassOFF = 0.0;
 const unsigned int kDisplayFrames = 512;
 
 const AudioUnitParameterValue kBottomOfOctiveRange = 0.05;
@@ -24,6 +27,8 @@ const AudioUnitParameterValue kLowestFreq = 20.0;
 const AudioUnitParameterValue kNyquistFixupNeeded = -120619.58;
 const AudioUnitParameterValue kMinDb = -96.0;
 const AudioUnitParameterValue kMaxDb = 24.0;
+
+const AudioUnitElement kBusWhatBus = -1;
 
 typedef enum EQParamKnob {
     kEQKnobByPass,
@@ -46,7 +51,7 @@ typedef struct AudioParameterDefinition {
     AudioUnitParameterID id;
     int band; // if applicable
     AudioUnitScope scope;
-    int bus;
+    AudioUnitElement bus;
 }AudioParameterDefinition;
 
 typedef struct EQBandInfo
@@ -55,11 +60,24 @@ typedef struct EQBandInfo
     AudioParameterDefinition defs[kPK_NUM_EQ_KNOBS];
 } EQBandInfo;
 
+//////////////////////////////////////////////////////////////////
+#pragma mark Data defintions
+
+static ParameterDefintion _channels =
+{
+    TG_INT, { 0 }, { 0 }, { 0 /* set in setNumChannels */ }
+};
+
+static ParameterDefintion _eqBand =
+{
+    TG_INT, { .i = kEQDisabled } , { .i = kEQDisabled }, { .i = kNUM_EQ_BANDS }
+};
+
 
 static AudioParameterDefinition _mixerOutVolume =
 {
     {   TG_FLOAT,
-        { 0.5 }, { 0 }, { 1 },
+        { 0.5 }, { 0.0 }, { 1.0 },
         kTweenEaseInSine, 0.1
     },
     kMultiChannelMixerParam_Volume, 0, kAudioUnitScope_Output
@@ -68,10 +86,10 @@ static AudioParameterDefinition _mixerOutVolume =
 static AudioParameterDefinition _mixerInVolume =
 {
     {   TG_FLOAT,
-        { 1.0 }, { 0 }, { 1 },
+        { 1.0 }, { 0.0 }, { 1.0 },
         kTweenEaseInSine, 0.5
     },
-    kMultiChannelMixerParam_Volume, 0, kAudioUnitScope_Input
+    kMultiChannelMixerParam_Volume, 0, kAudioUnitScope_Input, kBusWhatBus
 };
 
 // N.B. These are layed out like eqBands enum
@@ -135,7 +153,7 @@ static EQBandInfo _bandInfos[kNUM_EQ_BANDS] =
             },
             {
                 {   TG_FLOAT,
-                    { 0 }, { kMinDb }, { kMaxDb },
+                    { 0.0 }, { kMinDb }, { kMaxDb },
                     kTweenEaseInSine, 0.2,
                     kParamFlagPerformScaling | kParamFlagsAdditiveValues
                 },
@@ -154,7 +172,7 @@ static EQBandInfo _bandInfos[kNUM_EQ_BANDS] =
             },
             {
                 {   TG_FLOAT,
-                    { 1000.0 }, { kLowestFreq }, { 7000 /* kNyquistFixupNeeded */ },
+                    { 1000.0 }, { kLowestFreq }, { 7000.0 /* kNyquistFixupNeeded */ },
                     kTweenEaseInSine, 0.2,
                     kParamFlagPerformScaling | kParamFlagsAdditiveValues
                 },
@@ -175,120 +193,44 @@ static EQBandInfo _bandInfos[kNUM_EQ_BANDS] =
     }
 };
 
-@interface AudioParameterBase : Parameter {
-@protected
-    ParamBlock _paramBlock;
+//////////////////////////////////////////////////////////////////
+#pragma mark Parameter class decls
+
+@interface MixerParameter : Parameter {
+    @protected
+    __weak Mixer * _mixer;
+}
+@property (nonatomic,weak) Mixer * mixer;
+@end
+
+@interface MixerPropertyParameter : MixerParameter {
+    NSString * _propName;
+}
+-(id)initWithDef:(ParameterDefintion *)def name:(NSString const *)name prop:(NSString *)propName;
+@end
+
+
+@interface AudioParameter : MixerParameter {
     AudioUnit _au;
 }
-
-@property (nonatomic,strong) ParamBlock paramBlock;
+-(id)initWithAU:(AudioUnit)au def:(AudioParameterDefinition *)apd name:(NSString const *)name;
+@property (nonatomic,weak) Mixer * mixer;
 @end
 
-@implementation AudioParameterBase
-
--(id)initWithAudioUnit:(AudioUnit)au andDef:(AudioParameterDefinition *)apd
-{
-    self = [super initWithDef:&apd->pd];
-    if( self )
-    {
-        _au = au;        
-    }
-    return self;
-    
+@interface EQAudioParameter : AudioParameter {
+    EQParamKnob _knob;
 }
-
-
--(void)update:(NSTimeInterval)dt
-{
-    [super update:dt];
-    AudioParameterDefinition * apd = (AudioParameterDefinition *)_pd;
-    OSStatus result;
-    result = AudioUnitSetParameter (_au,
-                                    apd->id + apd->band,
-                                    apd->scope,
-                                    apd->bus,
-                                    apd->pd.currentValue.f,
-                                    0);
-    
-    CheckError(result, "Could not turn audio knob");
-}
+-(id)initWithAU:(AudioUnit)au knob:(EQParamKnob)knob name:(NSString const *)name;
 @end
 
-@interface AudioParameter : AudioParameterBase
-
-@end
-
-@implementation AudioParameter
-
--(id)initWithAudioUnit:(AudioUnit)au andDef:(AudioParameterDefinition *)apd
-{
-    self = [super initWithAudioUnit:au andDef:apd];
-    if( self )
-    {
-        OSStatus result;
-        result = AudioUnitSetParameter (_au,
-                                        apd->id + apd->band,
-                                        apd->scope,
-                                        apd->bus,
-                                        apd->pd.def.f,
-                                        0);
-        
-        CheckError(result, "Could not turn audio knob to default");
-        
-        __weak Parameter * me = self;
-        _paramBlock = ^(NSValue * f){
-            [me setValueTo:f];
-        };
-    }
-    return self;
-}
-
-@end
-
-
-@interface EQParameter : AudioParameterBase
--(id)initWithAU:(AudioUnit)au andKnob:(EQParamKnob)knob andMixer:(Mixer *)mixer;
-@end
-
-
-@implementation EQParameter
-
--(id)initWithAU:(AudioUnit)au andKnob:(EQParamKnob)knob andMixer:(Mixer *)mixer;
-{
-    self = [super initWithAudioUnit:au andDef:nil];
-    if( self )
-    {
-        OSStatus result;
-        for( int i = 0; i < kNUM_EQ_BANDS; i++ )
-        {
-            AudioParameterDefinition * apd = &_bandInfos[i].defs[knob];
-            result = AudioUnitSetParameter (au,
-                                            apd->id + apd->band,
-                                            apd->scope,
-                                            apd->bus,
-                                            apd->pd.def.f,
-                                            0);
-            
-            CheckError(result, "Could not turn audio knob");
-        }
-        
-        __weak EQParameter * me = self;
-        ParameterDefintion **pp = &_pd;
-        _paramBlock = ^(NSValue * f){
-            eqBands band = mixer.selectedEQBand;
-            *pp = &_bandInfos[band].defs[knob].pd;
-            [me setValueTo:f];
-        };
-    }
-    return self;
-}
-
-@end
+//////////////////////////////////////////////////////////////////
+#pragma mark Mixer (!)
 
 @implementation Mixer (Parameters)
 
 @dynamic selectedEQBand;
 @dynamic selectedChannel;
+@dynamic numChannels;
 
 -(NSDictionary *)getAUParameters
 {
@@ -304,25 +246,12 @@ static EQBandInfo _bandInfos[kNUM_EQ_BANDS] =
     }
     
     NSMutableDictionary * pmap = [NSMutableDictionary new];
+    for( MixerParameter * mp in _auParameters )
+    {
+        mp.mixer = self;
+        pmap[mp.parameterName] = mp.myParamBlock;
+    }
     
-    pmap[kParamEQFrequency] = [[EQParameter alloc] initWithAU:_mixerUnit andKnob:kEQKnobFreq andMixer:self].paramBlock;
-    pmap[kParamEQPeak]      = [[EQParameter alloc] initWithAU:_mixerUnit andKnob:kEQKnobPeak andMixer:self].paramBlock;
-    pmap[kParamEQBandwidth] = [[EQParameter alloc] initWithAU:_mixerUnit andKnob:kEQKnobBandwidth andMixer:self].paramBlock;
-    pmap[kParamEQBypass]    = [[EQParameter alloc] initWithAU:_mixerUnit andKnob:kEQKnobByPass andMixer:self].paramBlock;
-    
-    pmap[kParamMasterVolume]= [[AudioParameter alloc] initWithAudioUnit:_mixerUnit andDef:&_mixerOutVolume].paramBlock;
-    
-    pmap[kParamEQBand] = ^(NSValue *nsv){
-        int band = [((NSNumber *)nsv) intValue];
-        if( band >= kNUM_EQ_BANDS || band < kEQDisabled )
-            band = kEQDisabled;
-        [self setSelectedEQBand:band];
-    };
-    
-    pmap[kParamChannel] = ^(NSValue *nsv){
-        int channel = [((NSNumber *)nsv) intValue];
-        [self setSelectedChannel:channel];
-    };
     
     return pmap;
 }
@@ -331,11 +260,23 @@ static EQBandInfo _bandInfos[kNUM_EQ_BANDS] =
 -(void)setupUI
 {
     _selectedEQBand = kEQDisabled;
-    Global * g = [Global sharedInstance];
-    [g addObserver:self
-        forKeyPath:(NSString *)kGlobalScene
-           options:NSKeyValueObservingOptionNew
-           context:NULL];    
+    _selectedChannel = 0;
+
+    _auParameters = @[
+                      [[EQAudioParameter alloc] initWithAU:_masterEQUnit knob:kEQKnobFreq name:kParamEQFrequency],
+                      [[EQAudioParameter alloc] initWithAU:_masterEQUnit knob:kEQKnobPeak name:kParamEQPeak],
+                      [[EQAudioParameter alloc] initWithAU:_masterEQUnit knob:kEQKnobBandwidth name:kParamEQBandwidth],
+                      [[EQAudioParameter alloc] initWithAU:_masterEQUnit knob:kEQKnobByPass name:kParamEQBypass],
+                      [[AudioParameter alloc] initWithAU:_mixerUnit def:&_mixerOutVolume name:kParamMasterVolume],
+                      [[AudioParameter alloc] initWithAU:_mixerUnit def:&_mixerInVolume name:kParamChannelVolume],
+                      [[MixerPropertyParameter alloc] initWithDef:&_eqBand name:kParamEQBand prop:@"selectedEQBand"],
+                      [[MixerPropertyParameter alloc] initWithDef:&_channels name:kParamChannel prop:@"selectedChannel"]
+                      ];
+    
+    [[Global sharedInstance] addObserver:self
+                              forKeyPath:(NSString *)kGlobalScene
+                                 options:NSKeyValueObservingOptionNew
+                                 context:NULL];    
 }
 
 -(void)observeValueForKeyPath:(NSString *)keyPath
@@ -376,6 +317,22 @@ static EQBandInfo _bandInfos[kNUM_EQ_BANDS] =
     }
 }
 
+-(void)setParameterValue:(AudioUnitParameterValue)value
+                     apd:(AudioParameterDefinition *)apd
+                      au:(AudioUnit)au
+{
+    OSStatus result;
+    AudioUnitElement bus = apd->bus == kBusWhatBus ? _selectedChannel : apd->bus;
+    result = AudioUnitSetParameter (au,
+                                    apd->id + apd->band,
+                                    apd->scope,
+                                    bus,
+                                    value,
+                                    0);
+    
+    CheckError(result, "Could not turn audio knob");
+}
+
 
 -(void)setSelectedChannel:(int)selectedChannel
 {
@@ -385,6 +342,17 @@ static EQBandInfo _bandInfos[kNUM_EQ_BANDS] =
 -(int)selectedChannel
 {
     return _selectedChannel;
+}
+
+-(void)setNumChannels:(int)numChannels
+{
+    _numChannels = numChannels;
+    _channels.max.i = numChannels - 1;
+}
+
+-(int)numChannels
+{
+    return _numChannels;
 }
 
 -(void)setSelectedEQBand:(eqBands)selectedEQBand
@@ -435,7 +403,113 @@ static EQBandInfo _bandInfos[kNUM_EQ_BANDS] =
                                         0);
         CheckError(result,"Unable to set eq filter type.");
     }
+}
+@end
+
+//////////////////////////////////////////////////////////////////
+#pragma mark Property doodads impls
+
+@implementation MixerParameter
+@end
+
+@implementation MixerPropertyParameter
+
+-(id)initWithDef:(ParameterDefintion *)def name:(NSString const *)name prop:(NSString *)propName
+{
+    self = [super initWithDef:def valueNotify:nil];
+    if( self )
+    {
+        _propName = propName;
+        self.parameterName = name;
+    }
+    return self;
+}
+
+-(void)setMixer:(Mixer *)mixer
+{
+    __block MixerPropertyParameter * me = self;
+    self.valueNotify = ^{
+        [mixer setValue:@(me->_pd->currentValue.i) forKey:me->_propName];
+    };
     
-    [self enableSelectedEQBand];    
+    [mixer setValue:@(_pd->def.i) forKey:me->_propName];
+}
+@end
+
+@implementation AudioParameter
+
+-(id)initWithAU:(AudioUnit)au def:(AudioParameterDefinition *)apd name:(NSString const *)name
+{
+    self = [super initWithDef:&apd->pd valueNotify:nil];
+    if( self )
+    {
+        self.parameterName = name;
+        _au = au;
+    }
+    return self;
+}
+
+-(void)setMixer:(Mixer *)mixer
+{
+    _mixer = mixer;
+    __block AudioParameter * me = self;
+    self.valueNotify = ^{
+        if( me->_pd ) // disabled eq params will null this out
+            [mixer setParameterValue:me->_pd->currentValue.f apd:(AudioParameterDefinition *)me->_pd au:me->_au];
+    };
+    
+    if( _pd )
+        [mixer setParameterValue:_pd->def.f apd:(AudioParameterDefinition *)_pd au:_au];
+}
+
+@end
+
+@implementation EQAudioParameter
+
+-(id)initWithAU:(AudioUnit)au knob:(EQParamKnob)knob name:(NSString const *)name;
+{
+    self = [super initWithAU:au def:nil name:name];
+    if( self )
+    {
+        _knob = knob;
+    }
+    return self;
+}
+
+-(void)updatePD
+{
+    eqBands band = _mixer.selectedEQBand;
+    if( band == kEQDisabled )
+    {
+        self.definition = NULL;
+    }
+    else
+    {
+        self.definition =  (ParameterDefintion *)&_bandInfos[band].defs[_knob];
+        [self calcScale];
+    }
+}
+
+-(void)setMixer:(Mixer *)mixer
+{
+    _mixer = mixer;
+    
+    [self updatePD];
+    
+    [super setMixer:mixer];
+    
+    [mixer addObserver:self
+              forKeyPath:@"selectedEQBand"
+                 options:NSKeyValueObservingOptionNew
+                 context:NULL];
+    
+}
+
+-(void)observeValueForKeyPath:(NSString *)keyPath
+                     ofObject:(id)object
+                       change:(NSDictionary *)change
+                      context:(void *)context
+{
+    [self updatePD];
 }
 @end

@@ -237,7 +237,7 @@
     for( ShaderParameter * param in _parameters )
     {
         param.shader = shader;
-        dict[param.parameterName] = param.paramBlock;
+        dict[param.parameterName] = param.myParamBlock;
     }
     return dict;
 }

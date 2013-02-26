@@ -7,12 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "Parameter.h"
 
 @class ConfigScene;
 @class GraphView;
 @class Graph;
 @class Audio;
-@class Parameter;
+
 
 
 @interface Scene : NSObject
@@ -24,10 +25,23 @@
 @property (nonatomic,strong) Graph * graph;
 @property (nonatomic,strong) Audio * audio;
 
+
+-(void)setParameter:(NSString const *)name
+              value:(float)value
+               func:(TweenFunction)f
+           duration:(NSTimeInterval)duration;
+-(void)tweakParameter:(NSString const *)name
+                value:(float)value
+                 func:(TweenFunction)f
+             duration:(NSTimeInterval)duration;
+
 -(void)setTrigger:(NSString const *)name value:(float)value;
 -(void)setTrigger:(NSString const *)name point:(CGPoint)pt;
 -(void)setTrigger:(NSString const *)name b:(bool)b;
--(void)setTrigger:(NSString const *)name obj:(id)obj;
+
+-(void)tweakTrigger:(NSString const *)name by:(float)value;
+-(void)tweakTrigger:(NSString const *)name byPoint:(CGPoint)pt;
+
 
 -(void)queue:(Parameter *)parameter;
 -(void)update:(NSTimeInterval)dt view:(GraphView *)view;

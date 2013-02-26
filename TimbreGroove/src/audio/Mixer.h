@@ -14,6 +14,7 @@
 #ifndef SKIP_MIXER_DECLS
 extern const AudioUnitParameterValue kEQBypassON;
 extern const AudioUnitParameterValue kEQBypassOFF;
+extern const int kMaxChannels;
 #endif
 
 #define  kFramesForDisplay 512
@@ -24,9 +25,24 @@ void _CheckError( OSStatus error, const char *operation);
 
 @class ConfigInstrument;
 
+enum MidiNotes {
+    kC0 = 0,
+    kC1 = 12,
+    kC2 = 24,
+    kC3 = 36,
+    kC4 = 48,
+    kC5 = 60,
+    kMiddleC = kC5,
+    kA440 = 69,
+    kC6 = 72,
+    kC7 = 84,
+};
+
+
 @interface Instrument : NSObject
 -(OSStatus)playNote:(int)note forDuration:(NSTimeInterval)duration;
 
+@property (nonatomic,readonly) int channel;
 @property (nonatomic,readonly) int lowestPlayable;
 @property (nonatomic,readonly) int highestPlayable;
 @property (nonatomic,readonly) AudioUnit sampler;
@@ -42,7 +58,7 @@ typedef enum ExpectedTriggerFlags {
 @private
     // here for categories
     AUGraph          _processingGraph;
-    AudioUnit *      _samplerUnits;
+
     AudioUnit        _ioUnit;
     AudioUnit        _mixerUnit;
     AudioUnit        _masterEQUnit;
@@ -51,6 +67,9 @@ typedef enum ExpectedTriggerFlags {
 
     int              _selectedEQBand; // actually eqBands
     int              _selectedChannel; // aka bus, aka element
+    int              _numChannels;
+    
+    NSArray *        _auParameters;
     
     ExpectedTriggerFlags _expectedTriggerFlags;
     
@@ -68,6 +87,5 @@ typedef enum ExpectedTriggerFlags {
 -(NSDictionary *)getParameters;
 
 -(void)update:(MixerUpdate *)mixerUpdate;
-
 
 @end

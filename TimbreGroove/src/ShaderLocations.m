@@ -61,9 +61,10 @@
             glUniformMatrix4fv(location, 1, 0, data);
             break;
 
+        case TG_INT:
         case TG_TEXTURE:
         case TG_BOOL:
-            i = *(bool *)data ? 1 : 0;
+            i = *(GLint *)data ? 1 : 0;
             glUniform1i(location, i);
             break;
     }

@@ -23,11 +23,13 @@ typedef enum eqBands {
 
 @property (nonatomic) eqBands selectedEQBand; 
 @property (nonatomic) int     selectedChannel;
+@property (nonatomic) int     numChannels;
 
 -(NSDictionary *)getAUParameters;
 
 -(void)configureEQ;
 -(void)setupUI;
 -(void)triggerExpected;
+
 
 @end

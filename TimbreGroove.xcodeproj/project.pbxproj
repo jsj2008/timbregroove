@@ -223,6 +223,7 @@
 		57D0EBD616D43CD600DBF457 /* GraphView+Touches.m in Sources */ = {isa = PBXBuildFile; fileRef = 57D0EBD516D43CD600DBF457 /* GraphView+Touches.m */; };
 		57D0EBD916D4B1C500DBF457 /* TriggerMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 57D0EBD816D4B1C400DBF457 /* TriggerMap.m */; };
 		57D0EBDC16D4BA5400DBF457 /* Names.m in Sources */ = {isa = PBXBuildFile; fileRef = 57D0EBDB16D4BA5300DBF457 /* Names.m */; };
+		57DF536A16DC1A6000990B8D /* Serenity.m in Sources */ = {isa = PBXBuildFile; fileRef = 57DF536916DC1A6000990B8D /* Serenity.m */; };
 		57DF9C8116B5B9AB00050635 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57DF9C8016B5B9AB00050635 /* AVFoundation.framework */; };
 		57DF9C8416B5BE2500050635 /* Mixer.m in Sources */ = {isa = PBXBuildFile; fileRef = 57DF9C8316B5BE2500050635 /* Mixer.m */; };
 		57E1954616ABECA50099514B /* PoolShader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 57E1954516ABECA50099514B /* PoolShader.vsh */; };
@@ -592,6 +593,8 @@
 		57D0EBD816D4B1C400DBF457 /* TriggerMap.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TriggerMap.m; sourceTree = "<group>"; };
 		57D0EBDA16D4BA5200DBF457 /* Names.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Names.h; sourceTree = "<group>"; };
 		57D0EBDB16D4BA5300DBF457 /* Names.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Names.m; sourceTree = "<group>"; };
+		57DF536816DC1A6000990B8D /* Serenity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Serenity.h; sourceTree = "<group>"; };
+		57DF536916DC1A6000990B8D /* Serenity.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Serenity.m; sourceTree = "<group>"; };
 		57DF9C8016B5B9AB00050635 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		57DF9C8216B5BE2500050635 /* Mixer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Mixer.h; sourceTree = "<group>"; };
 		57DF9C8316B5BE2500050635 /* Mixer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Mixer.m; sourceTree = "<group>"; };
@@ -752,6 +755,7 @@
 		57019F761685C15B007FA38F /* audio */ = {
 			isa = PBXGroup;
 			children = (
+				57DF536716DC19E400990B8D /* elements */,
 				5751F2DC16D569A700144F2B /* Audio.h */,
 				5751F2DD16D569A700144F2B /* Audio.m */,
 				57DF9C8216B5BE2500050635 /* Mixer.h */,
@@ -1265,6 +1269,15 @@
 			path = Public;
 			sourceTree = "<group>";
 		};
+		57DF536716DC19E400990B8D /* elements */ = {
+			isa = PBXGroup;
+			children = (
+				57DF536816DC1A6000990B8D /* Serenity.h */,
+				57DF536916DC1A6000990B8D /* Serenity.m */,
+			);
+			path = elements;
+			sourceTree = "<group>";
+		};
 		57E874E816782894008243B2 = {
 			isa = PBXGroup;
 			children = (
@@ -1658,6 +1671,7 @@
 				5751F2E616D5FACB00144F2B /* Ripple.m in Sources */,
 				572098E116DA9FA40075E584 /* Parameter.m in Sources */,
 				572098E516DABF390075E584 /* NSValue+Parameter.m in Sources */,
+				57DF536A16DC1A6000990B8D /* Serenity.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

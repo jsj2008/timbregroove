@@ -11,8 +11,11 @@
 
 @class ConfigAudioProfile;
 
-@interface Audio : NSObject
-
+@interface Audio : NSObject {
+    @protected
+    NSMutableDictionary * _instruments;
+}
++(id)audioFromConfig:(ConfigAudioProfile *)config;
 -(void)loadAudioFromConfig:(ConfigAudioProfile *)config;
 -(void)start;
 -(NSDictionary *)getParameters;

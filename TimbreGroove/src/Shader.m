@@ -341,7 +341,7 @@ static NSHashTable * __shaders;
 
 -(id)initWithShaderDef:(ShaderParameterDefinition *)sdef
 {
-    return [super initWithDef:(ParameterDefintion *)sdef];
+    return [super initWithDef:(ParameterDefintion *)sdef valueNotify:nil];
 }
 
 -(void)setShader:(Shader *)shader
@@ -360,31 +360,13 @@ static NSHashTable * __shaders;
     
     // 3. set up the trigger ParamBlock
     //
-    __weak ShaderParameter * me = self;
-    _paramBlock = ^(NSValue *nsv){
-        if( me == nil )
-        {
-            NSLog(@"Weak ShaderParameter let go");
-            exit(-1);
-        }
-        [me setValueTo:nsv];
-        // if there is no animation then set the variable right now
-        // other wise it's already 'currentValue' so don't bother
-        if( spd->pd.duration == 0 )
-            [shader writeToLocation:spd->indexIntoNames type:spd->pd.type data:&spd->pd.currentValue];
+    self.valueNotify = ^{
+        [shader writeToLocation:spd->indexIntoNames type:spd->pd.type data:&spd->pd.currentValue];
     };
     
     // 4. set the default value into the shader
     //
     [shader writeToLocation:spd->indexIntoNames type:spd->pd.type data:&spd->pd.def];
-}
-
--(void)update:(NSTimeInterval)dt
-{
-    // This is called if the property is animating
-    [super update:dt];
-    ShaderParameterDefinition * spd = (ShaderParameterDefinition *)_pd;
-    [self.shader writeToLocation:spd->indexIntoNames type:spd->pd.type data:&spd->pd.currentValue];
 }
 
 @end

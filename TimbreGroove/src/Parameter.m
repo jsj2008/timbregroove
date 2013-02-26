@@ -17,6 +17,10 @@
 
     bool _tweening;
     
+    bool _swellFlipped;
+    
+    NSTimeInterval _duration;
+    TweenFunction  _function;
     NSTimeInterval _runningTime;
     ParamValue     _initValue;
     ParamValue     _targetValue;    
@@ -26,7 +30,7 @@
 
 @implementation Parameter
 
--(id)initWithDef:(ParameterDefintion *)def
+-(id)initWithDef:(ParameterDefintion *)def valueNotify:(id)notify
 {
     self = [super init];
     if( self )
@@ -36,14 +40,27 @@
             [self setDefinition:def];
             [self calcScale];
         }
+        _valueNotify = notify;
     }
     return self;
 }
 
-
+-(id)myParamBlock
+{
+    if( _myParamBlock )
+        return _myParamBlock;
+    
+    __block Parameter * me = self;
+    return ^(NSValue * nsvpayload){
+        [me setValueTo:[nsvpayload ParamPayloadValue]];
+    };
+}
 -(void)setDefinition:(ParameterDefintion *)definition
 {
     _pd = definition;
+    if( !_pd )
+        return;
+    
     switch (_pd->type)
     {
         case TG_COLOR:
@@ -67,7 +84,13 @@
 
 -(void)calcScale
 {
-    for( int i = 0; i < _numFloats; i++ )
+    if( _pd->type == TG_INT )
+    {
+        if( _pd->flags & kParamFlagPerformScaling )
+            _pd->scale.f = 1.0 / (float)(_pd->max.i - _pd->min.i);
+        
+    }
+    else for( int i = 0; i < _numFloats; i++ )
     {
         if( _pd->flags & kParamFlagPerformScaling )
             _pd->scale.fv[i] = 1.0 / (_pd->max.fv[i] - _pd->min.fv[i]);
@@ -81,39 +104,102 @@
     return _pd;
 }
 
--(void)setValueTo:(NSValue *)nsv
+-(void)setValueTo:(ParamPayload)inValue
 {
-    ParamValue newValue;
-    CGPoint * ppt;
-    GLKVector3 * pv3;
-    switch (_pd->type)
+    ParamValue   newValue;
+    
+    /*
+        Here we need to determine a new value regarless of the
+        what the incoming type is aot the param type.
+     
+     */
+    float f;
+    
+    switch (inValue.type)
     {
-        case TG_COLOR:
-            newValue = [nsv parameterValue];
-            break;
-        case TG_VECTOR3:
-            pv3 = (GLKVector3 *)&newValue;
-            *pv3 = [nsv vector3Value];
-            break;
-        case TG_POINT:
-            ppt = (CGPoint *)&newValue;
-            *ppt = [nsv CGPointValue];
-            break;
-        case TG_FLOAT:
-            if( [nsv isKindOfClass:[NSNumber class]])
-                newValue.f = [((NSNumber *)nsv) floatValue];
-            else
-                newValue = [nsv parameterValue];
+        case TG_BOOL:
+        {
+            switch (_pd->type)
+            {
+                case TG_BOOL:
+                    newValue.boool = inValue.v.boool;
+                    break;
+                default:
+                    f = inValue.v.boool ? 1.0 : 0.0;
+                    newValue.r =
+                    newValue.g =
+                    newValue.b =
+                    newValue.a = f;
+            };
+        }
+        break;
+
         case TG_BOOL_FLOAT:
-            if( [nsv isKindOfClass:[NSNumber class]])
-                newValue.f = [((NSNumber *)nsv) floatValue];
-            else
-                newValue = [nsv parameterValue];
-            if( newValue.f > 0 )
-                newValue.f = 1.0;
-            else
-                newValue.f = 0;
+        {
+            f = inValue.v.f > 0 ? 1.0 : 0.0;
+            newValue.r =
+            newValue.g =
+            newValue.b =
+            newValue.a = f;
+        }
+        break;
+        
+        case TG_INT:
+        {
+            switch (_pd->type) {
+                case TG_INT:
+                    newValue.i = inValue.v.i;
+                    break;
+                case TG_BOOL:
+                    newValue.boool = !!inValue.v.i;
+                    break;                    
+                default:
+                    f = inValue.v.i;
+                    newValue.r =
+                    newValue.g =
+                    newValue.b =
+                    newValue.a = f;
+                    break;
+            }
+        }
+        case TG_FLOAT:
+        {
+            switch (_pd->type)
+            {
+                case TG_INT:
+                    newValue.i = (int)roundf(inValue.v.f);
+                    break;
+                case TG_BOOL:
+                    newValue.boool = inValue.v.f > 0.0 ? true : false;
+                    break;
+                default:
+                    newValue.r =
+                    newValue.g =
+                    newValue.b =
+                    newValue.a = inValue.v.f;
+            };
+            
+        }
+        break;
+            
+        case TG_POINT:
+        {
+            switch (_pd->type)
+            {
+                case TG_BOOL:
+                    // lookie all the policy-meister goo righ here!
+                    newValue.boool = inValue.v.y > 0.0 ? true : false;
+                    break;
+                default:
+                    newValue.x = inValue.v.x;
+                    newValue.y = inValue.v.y;
+                    newValue.z = _pd->currentValue.z;
+                    newValue.a = _pd->currentValue.a;
+            };
+            
+        }
         default:
+            newValue = inValue.v;
             break;
     }
 
@@ -126,7 +212,7 @@
                 newValue.fv[i] *= _pd->scale.fv[i];
                 newValue.fv[i] += _pd->min.fv[i];
             }
-            if( _pd->flags & kParamFlagsAdditiveValues )
+            if( _pd->flags & kParamFlagsAdditiveValues || inValue.additive )
                 newValue.fv[i] += _pd->currentValue.fv[i];
             if( newValue.fv[i] < _pd->min.fv[i] )
                 newValue.fv[i] = _pd->min.fv[i];
@@ -134,10 +220,37 @@
                 newValue.fv[i] = _pd->max.fv[i];
         }
     }
+    else if( _pd->type == TG_INT )
+    {
+        if( _pd->flags & kParamFlagPerformScaling )
+        {
+            newValue.i = (int)roundf( (float)newValue.i* _pd->scale.f);
+            newValue.i += _pd->min.i;
+        }
+        if( _pd->flags & kParamFlagsAdditiveValues || inValue.additive )
+            newValue.i += _pd->currentValue.i;
+        if( newValue.i < _pd->min.i )
+            newValue.i = _pd->min.i;
+        else if( newValue.i > _pd->max.i )
+            newValue.i = _pd->max.i;
+    }
     
-    if( _pd->duration == 0.0 )
+    if( inValue.duration != 0 )
+    {
+        _duration = inValue.duration;
+        _function = inValue.function;
+    }
+    else if( _pd->duration != 0 )
+    {
+        _duration = _pd->duration;
+        _function = _pd->function;
+        
+    }
+    if( _duration == 0.0 )
     {
         _pd->currentValue = newValue;
+        void (^valNotify)(NSValue *) = _valueNotify;
+        valNotify( [NSValue valueWithParameter:_pd->currentValue]);
     }
     else
     {
@@ -145,6 +258,7 @@
         _runningTime = 0.0;
         _targetValue = newValue;
         _isCompleted = false;
+        _swellFlipped = false;
         if( !_tweening )
         {
             [self queue];
@@ -158,7 +272,7 @@
 {
     if( _tweening )
     {
-		_runningTime = _pd->duration;
+		_runningTime = _duration;
 		_isCompleted = true;
         _tweening = false;
         _targetValue = _pd->currentValue;
@@ -169,9 +283,9 @@
 {
     _runningTime += dt;
 
-	if (_runningTime >= _pd->duration )
+	if (_runningTime >= _duration )
     {
-		_runningTime = _pd->duration;
+		_runningTime = _duration;
 		_isCompleted = true;
         _tweening = false;
 	}
@@ -183,47 +297,41 @@
     }
     else
     {
-        float delta = [self tweenFunc:_runningTime / _pd->duration];
-        NSValue * nsv = nil;
+        float delta = [self tweenFunc:_function progression:_runningTime / _duration];
         switch (_pd->type)
         {
+            case TG_INT:
+                newValue.i = (int)( roundf( (float)_initValue.i + (_targetValue.i - _initValue.i) * delta) );
+                break;
             case TG_COLOR:
                 newValue.a = _initValue.a + (_targetValue.a - _initValue.a) * delta;
                 // fall thru!
             case TG_VECTOR3:
                 newValue.z = _initValue.z + (_targetValue.z - _initValue.z) * delta;
-                nsv = [NSValue valueWithParameter:newValue];
                 // fall thru!
             case TG_POINT:
                 newValue.y = _initValue.y + (_targetValue.y - _initValue.y) * delta;
-                if( !nsv )
-                    nsv = [NSValue valueWithCGPoint:*(CGPoint *)&newValue];
                 // fall thru!
             default:
                 newValue.f = _initValue.f + (_targetValue.f - _initValue.f) * delta;
-                if( !nsv )
-                    nsv = [NSNumber numberWithFloat:newValue.f];
                 break;
         }
         
     }
     
     _pd->currentValue = newValue;
+    void (^valNotify)(NSValue *) = _valueNotify;
+    valNotify( [NSValue valueWithParameter:_pd->currentValue]);
     
 }
 
-- (void) onComplete
-{	
-    if( _onCompleteBlock )
-        _onCompleteBlock();
-}
 
 /**
  * Calculate the tween function from progression [0..1]
  */
-- (float) tweenFunc:(float)progression {
+- (float) tweenFunc:(TweenFunction)func progression:(float)progression {
 	
-    switch (_pd->function) {
+    switch (func) {
         case kTweenLinear:
             break;
             
@@ -247,10 +355,26 @@
             
         case kTweenEaseInThrow:
             return 1.0 - [self easeOutThrow:1.0 - progression];
+            
+        case kTweenSwellInOut:
+            return [self swellInOut:progression];
 	}
 	return progression;
 }
 
+- (float) swellInOut:(float)progresion {
+    if( progresion < 0.5 )
+        return [self tweenFunc:kTweenEaseInSine progression:progresion*2.0];
+    if( !_swellFlipped )
+    {
+        ParamValue tmp = _initValue;
+        _initValue = _targetValue;
+        _targetValue = tmp;
+        _swellFlipped = true;
+    }
+    return [self tweenFunc:kTweenEaseInSine progression:progresion];
+    
+}
 - (float) easeOutBounce:(float)progression {
 	// calculted with rebound speed = f * incoming speed
 	float f = 0.7;

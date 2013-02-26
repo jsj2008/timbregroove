@@ -18,8 +18,9 @@ NSString * const kConfigScene3d          = @"3d_element";
 NSString * const kConfigSceneConnections = @"connections";
 
 NSString * const kConfigAudioProfiles      = @"audio_elements";
+NSString * const kConfigAudioInstanceClass = @"instanceClass";
 NSString * const kConfigAudioMidiFile      = @"midifile";
-NSString * const kConfigAudioInstrument    = @"instrument";
+NSString * const kConfigAudioInstruments   = @"instruments";
 
 NSString * const kConfigEQPanel = @"eqcube";
 
@@ -113,7 +114,16 @@ static Config * __sharedConfig;
 
 @implementation ConfigAudioProfile
 -(NSString *)midiFile { return [_me valueForKey:kConfigAudioMidiFile]; }
--(ConfigInstrument *)instrument { return [__sharedConfig getInstrument:[_me valueForKey:kConfigAudioInstrument]]; }
+-(NSString *)instanceClass { return [_me valueForKey:kConfigAudioInstanceClass]; }
+-(NSDictionary *)customProperties { return [_me valueForKey:kConfig3dCustomProperties]; }
+-(NSDictionary*)instruments
+{
+    NSMutableDictionary * dict = [NSMutableDictionary new];
+    NSArray * names = [_me valueForKey:kConfigAudioInstruments];
+    for( NSString * name in names )
+        dict[name] = [__sharedConfig getInstrument:name];
+    return dict;
+}
 @end
 
 @implementation ConfigScene
