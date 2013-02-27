@@ -21,6 +21,7 @@ typedef enum eqBands {
 
 @interface Mixer (Parameters)
 
+@property (nonatomic,strong) NSString * selectedEQBandName;
 @property (nonatomic) eqBands selectedEQBand; 
 @property (nonatomic) int     selectedChannel;
 @property (nonatomic) int     numChannels;

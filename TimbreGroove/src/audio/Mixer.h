@@ -65,6 +65,7 @@ typedef enum ExpectedTriggerFlags {
     AUNode           _mixerNode;
     Float64          _graphSampleRate;
 
+    NSString *       _selectedEQBandName;
     int              _selectedEQBand; // actually eqBands
     int              _selectedChannel; // aka bus, aka element
     int              _numChannels;

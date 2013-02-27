@@ -34,7 +34,7 @@
                                     <segue destination="ZW8-59-fcQ" kind="embed" id="6Ux-cH-SRm"/>
                                 </connections>
                             </containerView>
-                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="New Track" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="psf-j1-knr">
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="New Scene" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="psf-j1-knr">
                                 <constraints>
                                     <constraint firstAttribute="width" constant="183" id="God-Tk-TvY"/>
                                     <constraint firstAttribute="height" constant="21" id="k4R-m1-zXU"/>
@@ -200,62 +200,59 @@
                         <rect key="frame" x="0.0" y="0.0" width="320" height="480"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <containerView tag="100" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="JeK-0b-O8X" userLabel="graphContainer">
-                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
-                                <connections>
-                                    <segue destination="WK8-2Y-eNP" kind="embed" id="Wqe-Ex-9VL"/>
-                                </connections>
-                            </containerView>
-                            <pageControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" hidesForSinglePage="YES" numberOfPages="1" translatesAutoresizingMaskIntoConstraints="NO" id="923-1m-xh9">
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="0Wn-cp-VV6" userLabel="MenuClicker">
+                                <subviews>
+                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" alpha="0.20000000000000015" contentMode="left" text="m  e  n  u " textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4Gs-iF-nzd">
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="21" id="FQ5-KW-TWe"/>
+                                            <constraint firstAttribute="width" constant="221" id="afr-fl-N6K"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" name="GillSans-Bold" family="Gill Sans" pointSize="26"/>
+                                        <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="calibratedRGB"/>
+                                        <nil key="highlightedColor"/>
+                                        <size key="shadowOffset" width="-3" height="-3"/>
+                                    </label>
+                                </subviews>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <gestureRecognizers/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="300" id="Ugy-9b-rf6"/>
-                                    <constraint firstAttribute="height" constant="36" id="fSA-kC-96x"/>
+                                    <constraint firstItem="4Gs-iF-nzd" firstAttribute="leading" secondItem="0Wn-cp-VV6" secondAttribute="leading" constant="52" id="dV9-UO-icM"/>
+                                    <constraint firstAttribute="bottom" secondItem="4Gs-iF-nzd" secondAttribute="bottom" constant="9" id="itc-Fx-pJd"/>
                                 </constraints>
                                 <connections>
-                                    <action selector="changePage:" destination="2" eventType="valueChanged" id="htH-nt-XBU"/>
+                                    <outletCollection property="gestureRecognizers" destination="iGd-gm-gGL" appends="YES" id="CDR-RD-3Ci"/>
                                 </connections>
-                            </pageControl>
-                            <toolbar clearsContextBeforeDrawing="NO" contentMode="scaleToFill" barStyle="blackOpaque" translatesAutoresizingMaskIntoConstraints="NO" id="o8R-gM-dvf">
+                            </view>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sgZ-a0-HtI" userLabel="MenuClicker (bottom)">
+                                <subviews>
+                                    <pageControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" hidesForSinglePage="YES" numberOfPages="1" translatesAutoresizingMaskIntoConstraints="NO" id="923-1m-xh9">
+                                        <gestureRecognizers/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="300" id="Ugy-9b-rf6"/>
+                                            <constraint firstAttribute="height" constant="36" id="fSA-kC-96x"/>
+                                        </constraints>
+                                        <connections>
+                                            <action selector="changePage:" destination="2" eventType="valueChanged" id="htH-nt-XBU"/>
+                                        </connections>
+                                    </pageControl>
+                                </subviews>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <gestureRecognizers/>
+                                <constraints>
+                                    <constraint firstItem="923-1m-xh9" firstAttribute="centerX" secondItem="sgZ-a0-HtI" secondAttribute="centerX" type="default" id="TsN-aY-HMZ"/>
+                                    <constraint firstItem="923-1m-xh9" firstAttribute="top" secondItem="sgZ-a0-HtI" secondAttribute="top" constant="54" id="uge-06-IZ1"/>
+                                </constraints>
+                                <connections>
+                                    <outletCollection property="gestureRecognizers" destination="i2l-AR-mCs" appends="YES" id="wIq-Su-Vhn"/>
+                                </connections>
+                            </view>
+                            <toolbar clearsContextBeforeDrawing="NO" contentMode="scaleToFill" barStyle="blackOpaque" translatesAutoresizingMaskIntoConstraints="NO" id="isx-ng-eFR" userLabel="AudioToolbar">
                                 <items>
-                                    <barButtonItem systemItem="trash" id="ckd-52-Hf1">
-                                        <color key="tintColor" red="0.63563603940000002" green="0.3178701511" blue="0.0" alpha="0.82999999999999996" colorSpace="calibratedRGB"/>
+                                    <barButtonItem style="plain" systemItem="stop" id="yIm-he-YH4">
+                                        <color key="tintColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                         <connections>
-                                            <action selector="trash:" destination="2" id="ls1-1B-ZsZ"/>
+                                            <action selector="closeAudioMenu:" destination="2" id="beh-Ok-HCo"/>
                                         </connections>
-                                    </barButtonItem>
-                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="Dhp-JM-PQ7"/>
-                                    <barButtonItem systemItem="pageCurl" id="Hiu-xo-Q9F">
-                                        <color key="tintColor" red="0.63563603940217384" green="0.31787015108177002" blue="0.0" alpha="0.83000000000000007" colorSpace="calibratedRGB"/>
-                                        <connections>
-                                            <segue destination="y6e-Ii-Ior" kind="modal" identifier="settings" modalTransitionStyle="partialCurl" id="9St-y8-xGO"/>
-                                        </connections>
-                                    </barButtonItem>
-                                    <barButtonItem systemItem="add" id="Qg6-dx-Vlz">
-                                        <color key="tintColor" red="0.63563603940000002" green="0.3178701511" blue="0.0" alpha="0.82999999999999996" colorSpace="calibratedRGB"/>
-                                        <connections>
-                                            <segue destination="NXI-xo-XLV" kind="modal" identifier="newTrack" modalTransitionStyle="flipHorizontal" id="VyT-GL-UtP"/>
-                                        </connections>
-                                    </barButtonItem>
-                                </items>
-                            </toolbar>
-                            <toolbar clearsContextBeforeDrawing="NO" contentMode="scaleToFill" barStyle="blackOpaque" translatesAutoresizingMaskIntoConstraints="NO" id="isx-ng-eFR" userLabel="Toolbar (top)">
-                                <items>
-                                    <barButtonItem style="plain" id="yIm-he-YH4">
-                                        <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="7lC-tt-qyo">
-                                            <rect key="frame" x="12" y="9" width="27" height="27"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                            <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
-                                            <state key="normal" image="powerOn.png">
-                                                <color key="titleColor" red="0.19607843459999999" green="0.30980393290000002" blue="0.52156865600000002" alpha="1" colorSpace="calibratedRGB"/>
-                                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                            </state>
-                                            <state key="highlighted">
-                                                <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                            </state>
-                                            <connections>
-                                                <segue destination="sOA-eX-6md" kind="modal" identifier="pause" modalTransitionStyle="partialCurl" id="kXK-tx-z1k"/>
-                                            </connections>
-                                        </button>
                                     </barButtonItem>
                                     <barButtonItem image="recordPink.png" style="plain" id="bNJ-Ig-B3i">
                                         <color key="tintColor" red="1" green="0.66644673612265581" blue="0.63792929610427029" alpha="1" colorSpace="calibratedRGB"/>
@@ -264,8 +261,8 @@
                                         </connections>
                                     </barButtonItem>
                                     <barButtonItem style="plain" id="Y7R-Lo-4vJ">
-                                        <slider key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" id="uos-jg-Hiz">
-                                            <rect key="frame" x="77" y="11" width="118" height="23"/>
+                                        <slider key="customView" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" id="uos-jg-Hiz">
+                                            <rect key="frame" x="67" y="11" width="118" height="23"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                             <color key="minimumTrackTintColor" red="0.68074898097826086" green="0.34043032178577998" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                             <color key="maximumTrackTintColor" red="1" green="0.5" blue="0.0" alpha="0.83000000000000007" colorSpace="calibratedRGB"/>
@@ -277,7 +274,7 @@
                                     </barButtonItem>
                                     <barButtonItem style="plain" id="8Tx-af-GTz" userLabel="Snail">
                                         <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="g8q-5G-Oe6">
-                                            <rect key="frame" x="205" y="9" width="27" height="27"/>
+                                            <rect key="frame" x="195" y="9" width="27" height="27"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                             <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
                                             <state key="normal" title="Button" image="snail.png">
@@ -291,7 +288,7 @@
                                     </barButtonItem>
                                     <barButtonItem style="plain" id="2lE-Wp-M3p" userLabel="Rabbit">
                                         <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="5IA-bo-VPT">
-                                            <rect key="frame" x="242" y="9" width="27" height="27"/>
+                                            <rect key="frame" x="232" y="9" width="27" height="27"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                             <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
                                             <state key="normal" title="Button" image="rabbit.png">
@@ -305,7 +302,7 @@
                                     </barButtonItem>
                                     <barButtonItem style="plain" id="XrC-EE-hUe" userLabel="AudioPanel">
                                         <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="Zdg-UW-dTh">
-                                            <rect key="frame" x="279" y="9" width="27" height="27"/>
+                                            <rect key="frame" x="269" y="9" width="27" height="27"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                             <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
                                             <state key="normal" title="Button" image="audioProp.png">
@@ -322,41 +319,97 @@
                                     </barButtonItem>
                                 </items>
                             </toolbar>
+                            <toolbar clearsContextBeforeDrawing="NO" contentMode="scaleToFill" barStyle="blackOpaque" translatesAutoresizingMaskIntoConstraints="NO" id="o8R-gM-dvf" userLabel="UtilityToolbar">
+                                <items>
+                                    <barButtonItem systemItem="trash" id="ckd-52-Hf1">
+                                        <color key="tintColor" red="0.63563603940000002" green="0.3178701511" blue="0.0" alpha="0.82999999999999996" colorSpace="calibratedRGB"/>
+                                        <connections>
+                                            <action selector="trash:" destination="2" id="ls1-1B-ZsZ"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="Dhp-JM-PQ7"/>
+                                    <barButtonItem style="plain" id="8kd-6a-HEW">
+                                        <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="qli-g8-y9O">
+                                            <rect key="frame" x="146" y="9" width="27" height="27"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                            <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                            <state key="normal" image="powerOn.png">
+                                                <color key="titleColor" red="0.19607843459999999" green="0.30980393290000002" blue="0.52156865600000002" alpha="1" colorSpace="calibratedRGB"/>
+                                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                            </state>
+                                            <state key="highlighted">
+                                                <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                            </state>
+                                            <connections>
+                                                <segue destination="sOA-eX-6md" kind="modal" id="P92-I8-fsw"/>
+                                            </connections>
+                                        </button>
+                                    </barButtonItem>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="M7M-Nr-iUY"/>
+                                    <barButtonItem systemItem="pageCurl" id="Hiu-xo-Q9F">
+                                        <color key="tintColor" red="0.63563603940217384" green="0.31787015108177002" blue="0.0" alpha="0.83000000000000007" colorSpace="calibratedRGB"/>
+                                        <connections>
+                                            <segue destination="y6e-Ii-Ior" kind="modal" identifier="settings" modalTransitionStyle="partialCurl" id="9St-y8-xGO"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem systemItem="add" id="Qg6-dx-Vlz">
+                                        <color key="tintColor" red="0.63563603940000002" green="0.3178701511" blue="0.0" alpha="0.82999999999999996" colorSpace="calibratedRGB"/>
+                                        <connections>
+                                            <segue destination="NXI-xo-XLV" kind="modal" identifier="newTrack" modalTransitionStyle="flipHorizontal" id="VyT-GL-UtP"/>
+                                        </connections>
+                                    </barButtonItem>
+                                </items>
+                            </toolbar>
+                            <containerView tag="100" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="JeK-0b-O8X" userLabel="graphContainer">
+                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                                <connections>
+                                    <segue destination="WK8-2Y-eNP" kind="embed" id="Wqe-Ex-9VL"/>
+                                </connections>
+                            </containerView>
                         </subviews>
                         <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                         <gestureRecognizers/>
                         <constraints>
+                            <constraint firstItem="sgZ-a0-HtI" firstAttribute="top" secondItem="JrJ-Nu-Kxq" secondAttribute="top" constant="439" id="0S2-nB-U59"/>
                             <constraint firstItem="JeK-0b-O8X" firstAttribute="trailing" secondItem="JrJ-Nu-Kxq" secondAttribute="trailing" type="default" id="1hr-2D-unP"/>
-                            <constraint firstItem="923-1m-xh9" firstAttribute="top" secondItem="JrJ-Nu-Kxq" secondAttribute="top" constant="449" id="7ke-Fj-HSm"/>
-                            <constraint firstItem="o8R-gM-dvf" firstAttribute="top" secondItem="JrJ-Nu-Kxq" secondAttribute="top" constant="482" id="Fwh-f8-Off"/>
+                            <constraint firstItem="sgZ-a0-HtI" firstAttribute="leading" secondItem="JrJ-Nu-Kxq" secondAttribute="leading" type="default" id="31l-UL-G2u"/>
+                            <constraint firstAttribute="bottom" secondItem="sgZ-a0-HtI" secondAttribute="bottom" constant="-102" id="87b-et-fvy"/>
+                            <constraint firstItem="sgZ-a0-HtI" firstAttribute="trailing" secondItem="JrJ-Nu-Kxq" secondAttribute="trailing" type="default" id="Itu-bm-IR8"/>
                             <constraint firstItem="JeK-0b-O8X" firstAttribute="leading" secondItem="JrJ-Nu-Kxq" secondAttribute="leading" type="default" id="N4y-20-BIR"/>
                             <constraint firstItem="isx-ng-eFR" firstAttribute="trailing" secondItem="JrJ-Nu-Kxq" secondAttribute="trailing" type="default" id="QzT-a6-XgY"/>
                             <constraint firstItem="o8R-gM-dvf" firstAttribute="leading" secondItem="JrJ-Nu-Kxq" secondAttribute="leading" type="default" id="REn-x6-jlK"/>
                             <constraint firstItem="o8R-gM-dvf" firstAttribute="trailing" secondItem="JrJ-Nu-Kxq" secondAttribute="trailing" type="default" id="S1t-bz-olZ"/>
+                            <constraint firstItem="0Wn-cp-VV6" firstAttribute="leading" secondItem="JrJ-Nu-Kxq" secondAttribute="leading" type="default" id="SBg-t4-JZW"/>
+                            <constraint firstItem="0Wn-cp-VV6" firstAttribute="trailing" secondItem="JrJ-Nu-Kxq" secondAttribute="trailing" type="default" id="SGv-2F-goM"/>
+                            <constraint firstItem="0Wn-cp-VV6" firstAttribute="top" secondItem="JrJ-Nu-Kxq" secondAttribute="top" constant="-97" id="UoX-JD-ujz"/>
                             <constraint firstItem="JeK-0b-O8X" firstAttribute="centerY" secondItem="JrJ-Nu-Kxq" secondAttribute="centerY" type="default" id="aJk-cI-CQ3"/>
-                            <constraint firstItem="isx-ng-eFR" firstAttribute="top" secondItem="JrJ-Nu-Kxq" secondAttribute="top" constant="-45" id="rGX-Lj-5nP"/>
-                            <constraint firstItem="923-1m-xh9" firstAttribute="leading" secondItem="JrJ-Nu-Kxq" secondAttribute="leading" constant="9" id="urd-6T-Xcf"/>
+                            <constraint firstAttribute="bottom" secondItem="0Wn-cp-VV6" secondAttribute="bottom" constant="442" id="gAh-Ac-m1G"/>
+                            <constraint firstItem="o8R-gM-dvf" firstAttribute="top" secondItem="JrJ-Nu-Kxq" secondAttribute="top" constant="482" id="gDo-BT-YGo"/>
+                            <constraint firstItem="isx-ng-eFR" firstAttribute="top" secondItem="JrJ-Nu-Kxq" secondAttribute="top" constant="-45" id="o8J-2t-dVt"/>
                             <constraint firstItem="JeK-0b-O8X" firstAttribute="top" secondItem="JrJ-Nu-Kxq" secondAttribute="top" constant="40" id="v81-9p-wS5"/>
                             <constraint firstItem="isx-ng-eFR" firstAttribute="leading" secondItem="JrJ-Nu-Kxq" secondAttribute="leading" type="default" id="zU4-lT-Hjr"/>
                         </constraints>
-                        <connections>
-                            <outletCollection property="gestureRecognizers" destination="VdI-ME-IAO" appends="YES" id="cWL-1H-3Mf"/>
-                        </connections>
                     </view>
                     <navigationItem key="navigationItem" id="dlQ-Fc-7zy"/>
                     <connections>
+                        <outlet property="audioToolbar" destination="isx-ng-eFR" id="5Q4-k0-vsg"/>
                         <outlet property="graphContainer" destination="JeK-0b-O8X" id="7nD-Dc-Hqy"/>
-                        <outlet property="menuContainer" destination="isx-ng-eFR" id="Gm9-Ap-cUJ"/>
+                        <outlet property="menuAreaView" destination="0Wn-cp-VV6" id="xBI-J1-g9X"/>
                         <outlet property="pager" destination="923-1m-xh9" id="ORS-7p-41V"/>
                         <outlet property="recordButton" destination="bNJ-Ig-B3i" id="Znm-rN-d3k"/>
-                        <outlet property="toolBar" destination="o8R-gM-dvf" id="GiO-2x-Qbr"/>
                         <outlet property="trashCan" destination="ckd-52-Hf1" id="4e1-Lb-TbI"/>
+                        <outlet property="utilityToolBar" destination="o8R-gM-dvf" id="M1Z-je-DIl"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="4" sceneMemberID="firstResponder"/>
-                <tapGestureRecognizer numberOfTapsRequired="2" id="VdI-ME-IAO" userLabel="MenuInvokeGesture (see class)">
+                <tapGestureRecognizer id="iGd-gm-gGL" userLabel="InvokeMenu">
                     <connections>
-                        <action selector="dblTapForMenus:" destination="2" id="5wJ-c5-Z5e"/>
+                        <action selector="showMenu:" destination="2" id="px1-y8-8Eu"/>
+                    </connections>
+                </tapGestureRecognizer>
+                <tapGestureRecognizer id="i2l-AR-mCs" userLabel="InvokeMenu (bottom)">
+                    <connections>
+                        <action selector="showMenu:" destination="2" id="Uap-ae-yqU"/>
                     </connections>
                 </tapGestureRecognizer>
             </objects>

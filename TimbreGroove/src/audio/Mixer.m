@@ -93,9 +93,9 @@ static Mixer * __sharedMixer;
     return result;
 }
 
--(OSStatus)stopNote:(NSNumber *)note
+-(OSStatus)stopNote:(id)note
 {
-    UInt32 noteNum = [note unsignedIntegerValue];
+    UInt32 noteNum = [(NSNumber *)note unsignedIntegerValue];
     UInt32 noteCommand = kMIDIMessage_NoteOff << 4 | 0;
     
     OSStatus result = noErr;

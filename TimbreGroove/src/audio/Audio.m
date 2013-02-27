@@ -9,11 +9,14 @@
 #import "Audio.h"
 #import "Mixer.h"
 #import "Mixer+Midi.h"
+#import "Mixer+Parameters.h"
 #import "Config.h"
 
 @interface Audio () {
+@protected
     Mixer * _mixer;
     NSString * _midiFile;
+    ConfigAudioProfile * _config;
 }
 
 @end
@@ -43,14 +46,11 @@
     for( NSString * name in instrumentConfigs )
         _instruments[name] = [_mixer loadInstrumentFromConfig:instrumentConfigs[name]];
     _midiFile = config.midiFile;
+    _config = config;
 }
 
 -(void)start
 {
-    if( _midiFile )
-    {
-        //[_mixer playMidiFile:_midiFile withInstrument:];
-    }
 }
 
 -(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate
@@ -60,6 +60,38 @@
 
 -(NSDictionary *)getParameters
 {
-    return [_mixer getParameters];
+    // get parameters will configure the
+    // defaults
+    NSDictionary * dict = [_mixer getParameters];
+    
+    // so we have to do config work AFTER that
+    NSString * eqName = _config.EQ;
+    if( eqName )
+        _mixer.selectedEQBandName = eqName;
+    _config = nil; // ok, we're done now
+
+    return dict;
+    
 }
+@end
+
+@interface AutoPlayMidiFile : Audio
+@end
+@implementation AutoPlayMidiFile
+
+-(void)start
+{
+    if( _midiFile )
+    {
+        Instrument * instrument = nil;
+        for( NSString * name in _instruments )
+        {
+            instrument = _instruments[name];
+            break;
+        }
+        [_mixer playMidiFile:_midiFile withInstrument:instrument];
+    }
+}
+
+
 @end

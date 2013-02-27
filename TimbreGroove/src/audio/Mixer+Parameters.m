@@ -13,6 +13,7 @@
 #import "Names.h"
 #import "Parameter.h"
 #import "Scene.h"
+#import "ConfigNames.h"
 
 //////////////////////////////////////////////////////////////////
 #pragma mark consts and typedefs
@@ -194,11 +195,12 @@ static EQBandInfo _bandInfos[kNUM_EQ_BANDS] =
 };
 
 //////////////////////////////////////////////////////////////////
-#pragma mark Parameter class decls
+#pragma mark Parameter class decls ////////////////////
 
 @interface MixerParameter : Parameter {
     @protected
     __weak Mixer * _mixer;
+    bool _debugDump;
 }
 @property (nonatomic,weak) Mixer * mixer;
 @end
@@ -224,10 +226,11 @@ static EQBandInfo _bandInfos[kNUM_EQ_BANDS] =
 @end
 
 //////////////////////////////////////////////////////////////////
-#pragma mark Mixer (!)
+#pragma mark Mixer (!) //////////////////////////////////////// 
 
 @implementation Mixer (Parameters)
 
+@dynamic selectedEQBandName;
 @dynamic selectedEQBand;
 @dynamic selectedChannel;
 @dynamic numChannels;
@@ -355,6 +358,23 @@ static EQBandInfo _bandInfos[kNUM_EQ_BANDS] =
     return _numChannels;
 }
 
+-(void)setSelectedEQBandName:(NSString *)selectedEQBandName
+{
+    eqBands band;
+    if( [kConfigEQBandLowPass isEqualToString:selectedEQBandName] )
+        band = kEQLow;
+    else if( [kConfigEQBandParametric isEqualToString:selectedEQBandName])
+        band = kEQMid;
+    else if( [kConfigEQBandHighPass isEqualToString:selectedEQBandName])
+        band = kEQHigh;
+    self.selectedEQBand = band;
+}
+
+-(NSString *)selectedEQBandName
+{
+    return _selectedEQBandName;
+}
+
 -(void)setSelectedEQBand:(eqBands)selectedEQBand
 {
     if( _selectedEQBand == selectedEQBand )
@@ -407,7 +427,7 @@ static EQBandInfo _bandInfos[kNUM_EQ_BANDS] =
 @end
 
 //////////////////////////////////////////////////////////////////
-#pragma mark Property doodads impls
+#pragma mark Property doodads impls //////////////////// ////////////////////
 
 @implementation MixerParameter
 @end
@@ -455,7 +475,11 @@ static EQBandInfo _bandInfos[kNUM_EQ_BANDS] =
     __block AudioParameter * me = self;
     self.valueNotify = ^{
         if( me->_pd ) // disabled eq params will null this out
+        {
             [mixer setParameterValue:me->_pd->currentValue.f apd:(AudioParameterDefinition *)me->_pd au:me->_au];
+            if( me->_debugDump )
+                NSLog(@"audio param[%@]: %f", me.parameterName, me->_pd->currentValue.f);
+        }
     };
     
     if( _pd )
@@ -471,6 +495,7 @@ static EQBandInfo _bandInfos[kNUM_EQ_BANDS] =
     self = [super initWithAU:au def:nil name:name];
     if( self )
     {
+        _debugDump = true;
         _knob = knob;
     }
     return self;

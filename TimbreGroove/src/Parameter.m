@@ -93,7 +93,7 @@
     else for( int i = 0; i < _numFloats; i++ )
     {
         if( _pd->flags & kParamFlagPerformScaling )
-            _pd->scale.fv[i] = 1.0 / (_pd->max.fv[i] - _pd->min.fv[i]);
+            _pd->scale.fv[i] = (_pd->max.fv[i] - _pd->min.fv[i]);
         else
             _pd->scale.fv[i] = 1.0;
     }
@@ -107,13 +107,15 @@
 -(void)setValueTo:(ParamPayload)inValue
 {
     ParamValue   newValue;
-    
     /*
         Here we need to determine a new value regarless of the
         what the incoming type is aot the param type.
      
      */
     float f;
+    
+    if( _tweening )
+        _pd->currentValue = _targetValue;
     
     switch (inValue.type)
     {
@@ -210,7 +212,6 @@
             if( _pd->flags & kParamFlagPerformScaling )
             {
                 newValue.fv[i] *= _pd->scale.fv[i];
-                newValue.fv[i] += _pd->min.fv[i];
             }
             if( _pd->flags & kParamFlagsAdditiveValues || inValue.additive )
                 newValue.fv[i] += _pd->currentValue.fv[i];

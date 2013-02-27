@@ -39,17 +39,19 @@
 }
 
 @property (weak, nonatomic) IBOutlet UIView *graphContainer;
-@property (weak, nonatomic) IBOutlet UIView *menuContainer;
-@property (weak, nonatomic) IBOutlet UIToolbar *toolBar;
+@property (weak, nonatomic) IBOutlet UIView *audioToolbar;
+@property (weak, nonatomic) IBOutlet UIToolbar *utilityToolBar;
 @property (weak, nonatomic) IBOutlet UIPageControl *pager;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *trashCan;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *recordButton;
+@property (weak, nonatomic) IBOutlet UIView *menuAreaView;
+- (IBAction)closeAudioMenu:(UIBarButtonItem *)sender;
 - (IBAction)changePage:(id)sender;
 - (IBAction)toolbarSlider:(UISlider *)sender;
 - (IBAction)audioPanel:(UIButton *)sender;
 - (IBAction)trash:(UIBarButtonItem *)sender;
 - (IBAction)record:(UIBarButtonItem *)sender;
-- (IBAction)dblTapForMenus:(UITapGestureRecognizer *)sender;
+- (IBAction)showMenu:(UITapGestureRecognizer *)sender;
 @end
 
 @implementation ScreenViewController
@@ -143,8 +145,8 @@
 
 -(void)toggleMenus
 {
-    CGRect bottomRC = _toolBar.frame;
-    CGRect topRC    = _menuContainer.frame;
+    CGRect bottomRC = _utilityToolBar.frame;
+    CGRect topRC    = _audioToolbar.frame;
     
     bool menusShowing = topRC.origin.y == 0;
 
@@ -164,8 +166,8 @@
     }
     [UIView animateWithDuration:speed
                      animations:^{
-                         _toolBar.frame = bottomRC;
-                         _menuContainer.frame = topRC;
+                         _utilityToolBar.frame = bottomRC;
+                         _audioToolbar.frame = topRC;
                      }
                      completion:^(BOOL finished){
                      }];
@@ -232,6 +234,10 @@
     
 }
 
+- (IBAction)closeAudioMenu:(UIBarButtonItem *)sender {
+    [self toggleMenus];
+}
+
 - (IBAction)changePage:(id)sender
 {
     _global.scene = _scenes[_pager.currentPage];
@@ -272,7 +278,7 @@
     g.recording = !g.recording;
 }
 
-- (IBAction)dblTapForMenus:(UITapGestureRecognizer *)sender
+- (IBAction)showMenu:(UITapGestureRecognizer *)sender
 {
     [self toggleMenus];
 }

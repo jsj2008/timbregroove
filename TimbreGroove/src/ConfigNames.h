@@ -24,6 +24,11 @@ extern NSString * const kConfigAudioProfiles;
 extern NSString * const kConfigAudioMidiFile;
 extern NSString * const kConfigAudioInstruments;
 
+extern NSString const * kConfigAudioEQ        ;
+extern NSString const * kConfigEQBandLowPass  ;
+extern NSString const * kConfigEQBandParametric;
+extern NSString const * kConfigEQBandHighPass ;
+
 extern NSString * const kConfigEQPanel;
 
 extern NSString * const kConfigInstruments;

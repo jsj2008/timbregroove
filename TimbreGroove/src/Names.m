@@ -23,6 +23,7 @@ NSString const * kParamChannel        =   @"Channel";
 NSString const * kParamChannelVolume  =   @"ChannelVolume";
 
 NSString const * kParamEQBand         =   @"EQBand";
+
 NSString const * kParamEQFrequency    =   @"EQfreq";
 NSString const * kParamEQBandwidth    =   @"EQbw";
 NSString const * kParamEQPeak         =   @"EQpeak";

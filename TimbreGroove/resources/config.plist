@@ -6,6 +6,26 @@
 	<string>test</string>
 	<key>scenes</key>
 	<dict>
+		<key>scope</key>
+		<dict>
+			<key>connections</key>
+			<array>
+				<dict>
+					<key>PanX</key>
+					<string>EQfreq</string>
+					<key>MainSlider</key>
+					<string>MasterVolume</string>
+				</dict>
+			</array>
+			<key>icon</key>
+			<string>fractalSphere.png</string>
+			<key>display</key>
+			<string>scope</string>
+			<key>3d_element</key>
+			<string>oscilloscope</string>
+			<key>audio_element</key>
+			<string>funky</string>
+		</dict>
 		<key>test</key>
 		<dict>
 			<key>connections</key>
@@ -24,13 +44,13 @@
 				</dict>
 			</array>
 			<key>icon</key>
-			<string>mood.png</string>
+			<string>test.png</string>
 			<key>display</key>
-			<string>tranquility...</string>
+			<string>test</string>
 			<key>3d_element</key>
 			<string>ripple</string>
 			<key>audio_element</key>
-			<string>tranquility</string>
+			<string>jazz</string>
 		</dict>
 		<key>tranquility</key>
 		<dict>
@@ -51,12 +71,30 @@
 	</dict>
 	<key>audio_elements</key>
 	<dict>
+		<key>jazz</key>
+		<dict>
+			<key>instanceClass</key>
+			<string>Serenity</string>
+			<key>midifile</key>
+			<string>simpleMel</string>
+			<key>instruments</key>
+			<array>
+				<string>vibes</string>
+				<string>congas</string>
+			</array>
+		</dict>
 		<key>funky</key>
 		<dict>
+			<key>EQ</key>
+			<string>LowPass</string>
+			<key>instanceClass</key>
+			<string>AutoPlayMidiFile</string>
 			<key>midifile</key>
 			<string>funkRiff1</string>
-			<key>instrument</key>
-			<string>clav</string>
+			<key>instruments</key>
+			<array>
+				<string>clav</string>
+			</array>
 		</dict>
 		<key>tranquility</key>
 		<dict>

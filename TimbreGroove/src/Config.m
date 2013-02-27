@@ -8,6 +8,9 @@
 #define TimbreGroove_ConfigNames_h // prevent extern decls here
 #import "Config.h"
 
+// d'oh the const in the wrong place - ah well, the "right" way
+// is way too many warning messages at this point
+
 NSString * const kConfigDefaultScene  = @"default_scene";
 
 NSString * const kConfigScenes           = @"scenes";
@@ -21,6 +24,11 @@ NSString * const kConfigAudioProfiles      = @"audio_elements";
 NSString * const kConfigAudioInstanceClass = @"instanceClass";
 NSString * const kConfigAudioMidiFile      = @"midifile";
 NSString * const kConfigAudioInstruments   = @"instruments";
+
+NSString * const kConfigAudioEQ        =   @"EQ";
+NSString * const kConfigEQBandLowPass  =   @"LowPass";
+NSString * const kConfigEQBandParametric = @"Parametric";
+NSString * const kConfigEQBandHighPass =   @"HightPass";
 
 NSString * const kConfigEQPanel = @"eqcube";
 
@@ -68,9 +76,18 @@ static Config * __sharedConfig;
     return __sharedConfig;
 }
 -(ConfigScene *)defaultScene { return [self getScene:_plistConfig[kConfigDefaultScene]]; }
--(NSArray *)getSceneNames { return [_plistConfig[kConfigScenes] allKeys]; }
+-(NSDictionary *)getScenes {
+    NSMutableDictionary * sceneDict = [NSMutableDictionary new];
+    NSDictionary * scenes = _plistConfig[kConfigScenes];
+    for( NSString * name in scenes )
+    {
+        sceneDict[name] = [[ConfigScene alloc] initWithD:scenes[name]];
+    }
+    return sceneDict;
+}
 -(ConfigScene *)getScene:(NSString *)name {
-    return [[ConfigScene alloc] initWithD:[_plistConfig[kConfigScenes] valueForKey:name]];
+    NSDictionary * scenes = _plistConfig[kConfigScenes];
+    return [[ConfigScene alloc] initWithD:[scenes valueForKey:name]];
 }
 -(ConfigInstrument *)getInstrument:(NSString *)name {
     return [[ConfigInstrument alloc] initWithD:[_plistConfig[kConfigInstruments] valueForKey:name]];
@@ -114,6 +131,7 @@ static Config * __sharedConfig;
 
 @implementation ConfigAudioProfile
 -(NSString *)midiFile { return [_me valueForKey:kConfigAudioMidiFile]; }
+-(NSString *)EQ { return [_me valueForKey:kConfigAudioEQ]; }
 -(NSString *)instanceClass { return [_me valueForKey:kConfigAudioInstanceClass]; }
 -(NSDictionary *)customProperties { return [_me valueForKey:kConfig3dCustomProperties]; }
 -(NSDictionary*)instruments

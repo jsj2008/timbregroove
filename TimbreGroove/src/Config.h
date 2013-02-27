@@ -33,6 +33,7 @@
 
 @interface ConfigAudioProfile : ConfigBase
 @property (nonatomic,readonly) NSString * midiFile;
+@property (nonatomic,readonly) NSString * EQ;
 @property (nonatomic,readonly) NSDictionary * instruments;
 @property (nonatomic,readonly) NSString * instanceClass;
 @property (nonatomic,readonly) NSDictionary * customProperties;
@@ -49,7 +50,7 @@
 @interface Config : NSObject
 +(Config*)sharedInstance;
 -(ConfigScene *)defaultScene;
--(NSArray *)getSceneNames;
+-(NSDictionary *)getScenes;
 -(ConfigScene *)getScene:(NSString *)name;
 -(ConfigGraphicElement *)getGraphicElement:(NSString *)name;
 @end

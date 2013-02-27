@@ -593,7 +593,6 @@
 		57D0EBD816D4B1C400DBF457 /* TriggerMap.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TriggerMap.m; sourceTree = "<group>"; };
 		57D0EBDA16D4BA5200DBF457 /* Names.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Names.h; sourceTree = "<group>"; };
 		57D0EBDB16D4BA5300DBF457 /* Names.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Names.m; sourceTree = "<group>"; };
-		57DF536816DC1A6000990B8D /* Serenity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Serenity.h; sourceTree = "<group>"; };
 		57DF536916DC1A6000990B8D /* Serenity.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Serenity.m; sourceTree = "<group>"; };
 		57DF9C8016B5B9AB00050635 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		57DF9C8216B5BE2500050635 /* Mixer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Mixer.h; sourceTree = "<group>"; };
@@ -775,6 +774,7 @@
 		57019F771685C318007FA38F /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				572EB287167AAD1C0062F290 /* elements */,
 				57ED524E16C05DD100B38054 /* graph */,
 				575D9FFE1693C8A500A50C41 /* modalScreens */,
 				57E8E2B816C1BF7600CD39BC /* Global.h */,
@@ -1016,9 +1016,6 @@
 			children = (
 				578CB8FD16A6102C00088BA2 /* openGL */,
 				578CB8FC16A60F2D00088BA2 /* Cocoa */,
-				570F415C16ABB736000FCA7B /* geometry */,
-				570F40D316AB8B96000FCA7B /* shaders */,
-				572EB287167AAD1C0062F290 /* elements */,
 				57019F761685C15B007FA38F /* audio */,
 				57019F771685C318007FA38F /* UI */,
 			);
@@ -1107,6 +1104,8 @@
 		578CB8FD16A6102C00088BA2 /* openGL */ = {
 			isa = PBXGroup;
 			children = (
+				570F415C16ABB736000FCA7B /* geometry */,
+				570F40D316AB8B96000FCA7B /* shaders */,
 				57E590A616BA2E3F00330F40 /* BlendState.h */,
 				57E590A716BA2E3F00330F40 /* BlendState.m */,
 				572EB2271678BF740062F290 /* Camera.h */,
@@ -1272,7 +1271,6 @@
 		57DF536716DC19E400990B8D /* elements */ = {
 			isa = PBXGroup;
 			children = (
-				57DF536816DC1A6000990B8D /* Serenity.h */,
 				57DF536916DC1A6000990B8D /* Serenity.m */,
 			);
 			path = elements;

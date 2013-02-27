@@ -12,7 +12,7 @@
 #import "Config.h"
 
 @interface NewScenePicker () {
-    NSMutableDictionary * _items;
+    NSDictionary * _items;
     NSArray * _keys;
 }
 
@@ -41,11 +41,8 @@
 
 - (void)getItems
 {
-    _items = [NSMutableDictionary new];
-    Config * config = [Config sharedInstance];
-    _keys = [config getSceneNames];
-    for( NSString * name in _keys)
-        _items[_keys] = [config getScene:name];
+    _items = [[Config sharedInstance] getScenes];
+    _keys = [_items allKeys];
 }
 
 - (void)viewDidLoad

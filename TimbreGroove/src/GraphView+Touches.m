@@ -150,8 +150,14 @@
         CGPoint spt = (CGPoint){ (pt.x - _panLast.x) / sz.width,
                                 -(pt.y - _panLast.y) / sz.height };
 
-        [scene setTrigger:kTriggerPanX value:spt.x];
-        [scene setTrigger:kTriggerPanY value:spt.y];
+        // we get a ton of 0 movement
+        if( fabsf(spt.x) > FLT_EPSILON )
+        {
+            NSLog(@"Pan x: %f for pt:%d,%d", spt.x, (int)pt.x, (int)pt.y);
+            [scene setTrigger:kTriggerPanX value:spt.x];
+        }
+        if( fabsf(spt.y) > FLT_EPSILON )
+            [scene setTrigger:kTriggerPanY value:spt.y];
         [scene setTrigger:kTriggerDrag1 point:[self nativeToTG:pt]];
         [scene setTrigger:kTriggerDragPos point:pt];
         
