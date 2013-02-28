@@ -49,9 +49,9 @@
     
 }
 
--(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate
+-(void)update:(NSTimeInterval)dt
 {
-    [super update:dt mixerUpdate:mixerUpdate];
+    [super update:dt];
     
 }
 

@@ -158,12 +158,12 @@
 }
 
 
--(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate
+-(void)update:(NSTimeInterval)dt
 {
-    [_eqPanel update:dt mixerUpdate:mixerUpdate];
+    [_eqPanel update:dt];
     [_eqPanel renderToFBO];
     
-    [super update:dt mixerUpdate:mixerUpdate];
+    [super update:dt];
 }
 
 

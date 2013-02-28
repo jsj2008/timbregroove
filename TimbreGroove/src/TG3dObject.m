@@ -105,7 +105,7 @@
 
 #pragma mark update render
 
--(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate
+-(void)update:(NSTimeInterval)dt
 {
 }
 

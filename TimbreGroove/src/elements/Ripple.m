@@ -73,9 +73,9 @@
 }
 
 
--(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate
+-(void)update:(NSTimeInterval)dt
 {
-    [super update:dt mixerUpdate:mixerUpdate];
+    [super update:dt];
     _zRot += 0.04;
     self.rotation = (GLKVector3){ 0, 0, GLKMathDegreesToRadians(_zRot) };
 }

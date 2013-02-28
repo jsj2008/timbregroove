@@ -22,7 +22,7 @@
 @property (nonatomic) GLKVector4 backcolor;
 @property (nonatomic,strong) Graph * graph;
 
--(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate;
+-(void)update:(NSTimeInterval)dt;
 -(void)render;
 
 -(NSArray *)getSettings;

@@ -193,7 +193,7 @@
     }
     
     [_audio update:dt scene:self];
-    [view update:dt mixerUpdate:NULL];
+    [view update:dt];
     
     for( Parameter * param in _tweenQueue )
     {

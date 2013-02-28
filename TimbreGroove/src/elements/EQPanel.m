@@ -214,11 +214,11 @@ NSString const * kParamCurveWidth   = @"CurveWidth";
 #endif
 }
 
--(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate
+-(void)update:(NSTimeInterval)dt
 {
-    [super update:dt mixerUpdate:mixerUpdate];
+    [super update:dt];
     if( _eqOff )
-       [_eqOff update:dt mixerUpdate:mixerUpdate];
+       [_eqOff update:dt];
 }
 
 -(void)render:(NSUInteger)w h:(NSUInteger)h

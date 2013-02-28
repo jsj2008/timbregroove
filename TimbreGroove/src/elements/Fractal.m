@@ -54,7 +54,7 @@
     self.shader = (Shader *)_shader; // eek
 }
 
--(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate
+-(void)update:(NSTimeInterval)dt
 {
     _tracker += (dt*3.4);
     double tim = _tracker;

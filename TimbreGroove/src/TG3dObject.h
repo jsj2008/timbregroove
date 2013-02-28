@@ -24,7 +24,7 @@
     NSMutableArray * _parameters;
 }
 
--(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate;
+-(void)update:(NSTimeInterval)dt;
 -(void)render:(NSUInteger)w h:(NSUInteger)h;
 -(void)renderToFBO;
 -(void)renderToCaptureAtBufferLocation:(GLint)location;

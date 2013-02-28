@@ -66,9 +66,9 @@
     _dTimer = 0;
 }
 
--(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate
+-(void)update:(NSTimeInterval)dt
 {
-    [super update:dt mixerUpdate:mixerUpdate];
+    [super update:dt];
     _dTimer += dt;
     if( _player && (_dTimer > _player.duration) )
     {

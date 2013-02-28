@@ -55,7 +55,7 @@
     return [super wireUp];
 }
 
--(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate
+-(void)update:(NSTimeInterval)dt
 {
     _time += dt;
     if( _time > 0.3f )

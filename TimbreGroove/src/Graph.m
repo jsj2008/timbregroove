@@ -70,20 +70,20 @@
 //    [self traverse:_cmd userObj:self.view];
 }
 
-+(void)_inner_update:(NSArray *)children dt:(NSTimeInterval)dt  mixerUpdate:(MixerUpdate *)mixerUpdate
++(void)_inner_update:(NSArray *)children dt:(NSTimeInterval)dt
 {
     for( TG3dObject * child in children )
     {
         child->_totalTime += dt;
         child->_timer += dt;
-        [child update:dt mixerUpdate:mixerUpdate];
+        [child update:dt];
         NSArray * c = child.children;
         if( c )
-            [self _inner_update:c dt:dt mixerUpdate:mixerUpdate];
+            [self _inner_update:c dt:dt];
     }
 }
 
--(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate
+-(void)update:(NSTimeInterval)dt
 {
     if( _isPaused )
         return;
@@ -92,10 +92,10 @@
     {
         _single->_totalTime += dt;
         _single->_timer += dt;
-        [_single update:dt mixerUpdate:mixerUpdate];
+        [_single update:dt];
     }
     else
-        [Graph _inner_update:self.children dt:dt mixerUpdate:mixerUpdate];
+        [Graph _inner_update:self.children dt:dt];
 }
 
 +(void)_inner_render:(NSArray *)children w:(NSUInteger)w h:(NSUInteger)h

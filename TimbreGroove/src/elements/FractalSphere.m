@@ -36,7 +36,7 @@
     _texRenderer.fbo = _fbo;
     _texRenderer.backColor = GLKVector4Make(0.3, 0.3, 0.3, 1);
     [_texRenderer wireUp];
-    [_texRenderer update:0.01 mixerUpdate:NULL];
+    [_texRenderer update:0.01];
     [_texRenderer renderToFBO];
 
     _pmin = 1000.0;
@@ -68,14 +68,14 @@
 {
     _tweening = false;
 }
--(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate
+-(void)update:(NSTimeInterval)dt
 {
    // self.lightRotation += 0.03;
-    [super update:dt mixerUpdate:mixerUpdate];
+    [super update:dt];
 
     if( self.timer > 1.0/8.0 )
     {
-        [_texRenderer update:self.timer/2.0 mixerUpdate:mixerUpdate];
+        [_texRenderer update:self.timer/2.0];
         [_texRenderer renderToFBO];
         
         _myRot += 0.4; // (peakVal * 5.0);

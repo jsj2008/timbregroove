@@ -49,9 +49,9 @@
 }
 
 
-- (void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate
+- (void)update:(NSTimeInterval)dt
 {
-    [_graph update:dt mixerUpdate:mixerUpdate];
+    [_graph update:dt];
 }
 
 -(void)setGraph:(Graph *)graph
