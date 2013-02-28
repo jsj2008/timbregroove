@@ -11,6 +11,8 @@
 			<key>connections</key>
 			<array>
 				<dict>
+					<key>AudioFrame</key>
+					<string>AudioFrameDisplay</string>
 					<key>PanX</key>
 					<string>EQfreq</string>
 					<key>MainSlider</key>

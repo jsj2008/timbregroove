@@ -37,6 +37,7 @@ union _ParamValue {
     bool boool;
     struct { float x, y,  z;  };
     struct { float r,  g,  b,  a;  };
+    MixerUpdate mu;
 };
 
 typedef union _ParamValue ParamValue;

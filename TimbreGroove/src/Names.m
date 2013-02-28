@@ -80,3 +80,4 @@ NSString const * kTriggerFrequencyPeak   =   @"Changes in Treble/Bass";
 NSString const * kTriggerBeat            =   @"Beat";
 NSString const * kTriggerNote            =   @"Note";
 NSString const * kTriggerChord           =   @"Chords";
+NSString const * kTriggerAudioFrame      =   @"AudioFrame";

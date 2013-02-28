@@ -11,6 +11,9 @@
 #import "Mixer+Midi.h"
 #import "Mixer+Parameters.h"
 #import "Config.h"
+#import "Scene.h"
+#import "NSValue+Parameter.h"
+#import "Names.h"
 
 @interface Audio () {
 @protected
@@ -39,6 +42,11 @@
     return self;
 }
 
+-(void)dealloc
+{
+    NSLog(@"Audio object gone");
+}
+
 -(void)loadAudioFromConfig:(ConfigAudioProfile *)config
 {
     NSDictionary * instrumentConfigs = config.instruments;
@@ -53,9 +61,29 @@
 {
 }
 
--(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate
+-(void)play
 {
-    [_mixer update:mixerUpdate];
+    [_mixer resumeMidi];
+}
+
+-(void)pause
+{
+    [_mixer pauseMidiFile];
+}
+
+-(void)update:(NSTimeInterval)dt scene:(Scene *)scene
+{
+    MixerUpdate mu = {0};
+    [_mixer update:&mu];
+    if( mu.audioBufferList )
+    {
+        ParamPayload pv;
+        pv.v.mu = mu;
+        pv.type = TG_MIXERUPDATE;
+        pv.additive = false;
+        pv.duration = 0;
+        [scene setTrigger:kTriggerAudioFrame withValue:[NSValue valueWithPayload:pv]];
+    }
 }
 
 -(NSDictionary *)getParameters

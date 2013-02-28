@@ -51,7 +51,8 @@ enum MidiNotes {
 typedef enum ExpectedTriggerFlags {
     kNoOneExpectsNothin = 0,
     kExpectsPeak = 1,
-    kExpectsPeakHold = 1 << 1
+    kExpectsPeakHold = 1 << 1,
+    kExpectsCapture = 1 << 2,
 } ExpectedTriggerFlags;
 
 @interface Mixer : NSObject {
@@ -79,6 +80,7 @@ typedef enum ExpectedTriggerFlags {
     MusicSequence  _currentSequence;
     MusicPlayer    _musicPlayer;
     bool           _midiFilePlaying;
+    MusicTimeStamp _midiPauseTime;
 }
 
 +(Mixer *)sharedInstance;

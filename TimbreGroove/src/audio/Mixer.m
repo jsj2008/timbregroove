@@ -68,6 +68,10 @@ static Mixer * __sharedMixer;
     return self;
 }
 
+-(void)dealloc
+{
+    NSLog(@"Instrument gone");
+}
 -(AudioUnit)sampler
 {
     return _samplerUnit;
@@ -177,6 +181,8 @@ OSStatus renderCallback(
     RenderCBContext  _cbContext;
     
     AudioStreamBasicDescription _stdASBD;
+    
+    bool _capturing;
     void * _captureBuffer;
     UInt32 _captureByteSize;
 }
@@ -204,13 +210,24 @@ OSStatus renderCallback(
 -(void)dealloc
 {
     [self midiDealloc];
+    [self releaseCaptureResources];
 
-    if( _captureBuffer )
-        free(_captureBuffer);
-    if( _cbContext.rbo )
-        RingBufferRelease(_cbContext.rbo);
 }
 
+-(void)releaseCaptureResources
+{
+    if( _captureBuffer )
+    {
+        free(_captureBuffer);
+        _captureBuffer = NULL;
+    }
+    if( _cbContext.rbo )
+    {
+        RingBufferRelease(_cbContext.rbo);
+        _cbContext.rbo = NULL;
+    }
+    
+}
 -(void)setupStdASBD
 {
     size_t bytesPerSample = sizeof (AudioUnitSampleType);
@@ -240,43 +257,63 @@ OSStatus renderCallback(
 {
     mixerUpdate->audioBufferList = NULL;
 
-    RenderCBContext ctx = _cbContext; // copy in case AU callback writes while we do this
-    
-    if( ctx.fetchCount )
+    if( (_expectedTriggerFlags & kExpectsCapture) == 0 )
     {
-        if( !_captureBuffer )
+        if( _capturing )
         {
-            _captureByteSize = kFramesForDisplay * ctx.asbd.mBytesPerFrame * 2; // 2 channels
-            _captureBuffer = malloc(sizeof(AudioBufferList)+sizeof(AudioBuffer)+_captureByteSize);
-            AudioBufferList * abl = _captureBuffer;
-            Byte * dataBuff = ((Byte *)&abl->mBuffers[1].mData) + sizeof(void *);
-            UInt32 channelBufferSize = _captureByteSize / 2;
-            abl->mNumberBuffers = 2;
-            abl->mBuffers[0].mNumberChannels = 1;
-            abl->mBuffers[0].mDataByteSize = channelBufferSize;
-            abl->mBuffers[0].mData = dataBuff;
-            abl->mBuffers[1].mNumberChannels = 1;
-            abl->mBuffers[1].mDataByteSize = channelBufferSize;
-            abl->mBuffers[1].mData = dataBuff + channelBufferSize;
+            CheckError(AudioUnitRemoveRenderNotify(_masterEQUnit, renderCallback, &_cbContext), "Could not unset callback");
+            _capturing = false;
+            [self releaseCaptureResources];
         }
-
-        // Ringbuffer will return silence (all zeroes) if our fetch
-        // here is no longer available - iow, there was too much
-        // lag betweeen store vs. fetch
-        SInt64 ts = ctx.fetchCount * kFramesForDisplay;
-
-        RingBufferFetch(ctx.rbo, _captureBuffer, kFramesForDisplay, ts);
-
-        mixerUpdate->audioBufferList = _captureBuffer;
-        
-        OSAtomicCompareAndSwap32Barrier(_cbContext.fetchCount,
-                                        0,
-                                        (volatile int32_t *)&_cbContext.fetchCount);
+    }
+    else
+    {
+        if( _capturing )
+        {
+            RenderCBContext ctx = _cbContext; // copy in case AU callback writes while we do this
+            
+            if( ctx.fetchCount )
+            {
+                if( !_captureBuffer )
+                {
+                    _captureByteSize = kFramesForDisplay * ctx.asbd.mBytesPerFrame * 2; // 2 channels
+                    _captureBuffer = malloc(sizeof(AudioBufferList)+sizeof(AudioBuffer)+_captureByteSize);
+                    AudioBufferList * abl = _captureBuffer;
+                    Byte * dataBuff = ((Byte *)&abl->mBuffers[1].mData) + sizeof(void *);
+                    UInt32 channelBufferSize = _captureByteSize / 2;
+                    abl->mNumberBuffers = 2;
+                    abl->mBuffers[0].mNumberChannels = 1;
+                    abl->mBuffers[0].mDataByteSize = channelBufferSize;
+                    abl->mBuffers[0].mData = dataBuff;
+                    abl->mBuffers[1].mNumberChannels = 1;
+                    abl->mBuffers[1].mDataByteSize = channelBufferSize;
+                    abl->mBuffers[1].mData = dataBuff + channelBufferSize;
+                }
+                
+                // Ringbuffer will return silence (all zeroes) if our fetch
+                // here is no longer available - iow, there was too much
+                // lag betweeen store vs. fetch
+                SInt64 ts = ctx.fetchCount * kFramesForDisplay;
+                
+                RingBufferFetch(ctx.rbo, _captureBuffer, kFramesForDisplay, ts);
+                
+                mixerUpdate->audioBufferList = _captureBuffer;
+                
+                OSAtomicCompareAndSwap32Barrier(_cbContext.fetchCount,
+                                                0,
+                                                (volatile int32_t *)&_cbContext.fetchCount);
+            }
+        }
+        else
+        {
+            CheckError(AudioUnitAddRenderNotify(_masterEQUnit, renderCallback, &_cbContext), "Could not set callback");
+            _capturing = true;
+        }
     }
     
     [self isPlayerDone];
     
-    if( !( _expectedTriggerFlags == kNoOneExpectsNothin ) )
+    if( !( (_expectedTriggerFlags&~kExpectsCapture)== kNoOneExpectsNothin ) )
         [self triggerExpected];
     
 }
@@ -333,8 +370,7 @@ OSStatus renderCallback(
     
     [dict addEntriesFromDictionary:[self getAUParameters]];
     
-    return dict;
-    
+    return dict;    
 }
 
 

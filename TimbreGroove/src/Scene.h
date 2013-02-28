@@ -26,6 +26,9 @@
 @property (nonatomic,strong) Audio * audio;
 
 
+-(void)pause;
+-(void)play;
+
 -(void)setParameter:(NSString const *)name
               value:(float)value
                func:(TweenFunction)f
@@ -38,6 +41,7 @@
 -(void)setTrigger:(NSString const *)name value:(float)value;
 -(void)setTrigger:(NSString const *)name point:(CGPoint)pt;
 -(void)setTrigger:(NSString const *)name b:(bool)b;
+-(void)setTrigger:(NSString const *)name withValue:(NSValue *)value;
 
 -(void)tweakTrigger:(NSString const *)name by:(float)value;
 -(void)tweakTrigger:(NSString const *)name byPoint:(CGPoint)pt;

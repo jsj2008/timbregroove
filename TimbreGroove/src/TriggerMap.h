@@ -51,6 +51,7 @@
 @interface TriggerMap : NSObject
 
 -(id)initWithWatchee:(id)objectToWatch;
+-(void)detach:(id)objectNoLongerWatchWorthy;
 
 // @{ paramName1: paraBlock1, [paraName_n: paramBlock_n, ...]}
 -(void)addParameters:(NSDictionary *)paramKeyBlockValues;

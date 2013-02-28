@@ -295,6 +295,8 @@ static EQBandInfo _bandInfos[kNUM_EQ_BANDS] =
             _expectedTriggerFlags = kExpectsPeak;
         if( [scene somebodyExpectsTrigger:kTriggerDynamicHold] )
             _expectedTriggerFlags |= kExpectsPeakHold;
+        if( [scene somebodyExpectsTrigger:kTriggerAudioFrame] )
+            _expectedTriggerFlags |= kExpectsCapture;
     }
 }
 
@@ -495,7 +497,6 @@ static EQBandInfo _bandInfos[kNUM_EQ_BANDS] =
     self = [super initWithAU:au def:nil name:name];
     if( self )
     {
-        _debugDump = true;
         _knob = knob;
     }
     return self;

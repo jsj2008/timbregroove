@@ -75,7 +75,7 @@
     
     [_global addObserver:self
               forKeyPath:(NSString *)kGlobalScene
-                 options:NSKeyValueObservingOptionNew
+                 options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld
                  context:NULL];
 
 }
@@ -98,6 +98,10 @@
     }
     else if( [kGlobalScene isEqualToString:keyPath] )
     {
+        Scene *oldScene = change[NSKeyValueChangeOldKey];
+        if( oldScene && [oldScene isKindOfClass:[Scene class]])
+           [oldScene pause];
+        [_global.scene play];
         [self performSelector:@selector(performTransition:)
                    withObject:_global.scene.graph
                    afterDelay:0.12];
@@ -127,6 +131,7 @@
     Scene * scene = [Scene sceneWithConfig:config];
     [_scenes addObject:scene];
     _global.scene = scene;
+    _pager.numberOfPages = [_scenes count];
 }
 
 - (void)deleteScene
@@ -190,6 +195,7 @@
                          _graphVC.paused = YES;
                          ((GraphView *)_graphVC.view).graph = graph;
                          _graphVC.paused = NO;
+                         _pager.currentPage = [_scenes indexOfObject:_global.scene];
                          
                          [UIView animateWithDuration:speed
                                           animations:^{
@@ -295,6 +301,7 @@
     }
     else if( [segue.identifier isEqualToString:@"pause"] )
     {
+        [_global.scene pause];
         _graphVC.paused = YES;
         ((PauseViewController *)segue.destinationViewController).delegate = self;
     }
@@ -326,6 +333,7 @@
 
 -(void)PauseViewController:(PauseViewController *)pvc resume:(BOOL)ok
 {
+    [_global.scene play];
     _graphVC.paused = NO;
 }
 @end

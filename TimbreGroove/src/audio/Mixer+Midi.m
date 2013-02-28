@@ -96,7 +96,6 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
     
     CheckError(result,"MIDIClientCreate failed");
     
-    CheckError( NewMusicPlayer(&_musicPlayer), "NewMusicPlayer failed" );
 }
 
 -(void)playMidiFile:(NSString *)filename withInstrument:(Instrument *)instrument
@@ -105,7 +104,11 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
 }
 
 -(void)playMidiFile:(NSString *)filename throughSampler:(AudioUnit)sampler
-{    
+{
+    
+    if( !_musicPlayer )
+        CheckError( NewMusicPlayer(&_musicPlayer), "NewMusicPlayer failed" );
+    
 	NSURL *midiFileURL = [[NSBundle mainBundle] URLForResource:filename
                                                  withExtension: @"mid"];
 
@@ -133,6 +136,24 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
     CheckError( MusicPlayerStart(_musicPlayer), "MusicPlayerStart failed" );
     _midiFilePlaying = true;
     
+}
+
+-(void)pauseMidiFile
+{
+    if( _musicPlayer )
+    {
+        CheckError( MusicPlayerGetTime(_musicPlayer, &_midiPauseTime), "MusicPlayerGetTime failed");
+        CheckError( MusicPlayerStop(_musicPlayer), "MusicPlayerStop failed");
+    }
+}
+
+-(void)resumeMidi
+{
+    if( _musicPlayer )
+    {
+        CheckError( MusicPlayerSetTime(_musicPlayer, _midiPauseTime), "MusicPlayerSetTime failed");
+        CheckError( MusicPlayerStart(_musicPlayer), "MusicPlayerStart (resume) failed");
+    }
 }
 
 -(BOOL)isPlayerDone

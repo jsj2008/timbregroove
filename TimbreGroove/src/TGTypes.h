@@ -31,12 +31,15 @@ typedef enum {
     TG_BOOL,
     TG_TEXTURE,
     TG_BOOL_FLOAT,
-    TG_INT
+    TG_INT,
+    
+    TG_LAST_UTYPE = TG_INT
 } TGUniformType;
 
 #define TGParameterType TGUniformType
 #define TG_POINT        TG_VECTOR2
 #define TG_COLOR        TG_VECTOR4
+#define TG_MIXERUPDATE  TG_LAST_UTYPE+1
 
 typedef enum {
     TG_POINTS = GL_POINTS, // etc.

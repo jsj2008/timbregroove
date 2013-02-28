@@ -17,6 +17,8 @@
     // so we don't do any unnecessary ARC calls into _kids[]
     // during update and render
      __weak  TG3dObject * _single;
+    
+    bool _isPaused;
 }
 
 @end
@@ -31,6 +33,11 @@
     }
     
     return self;
+}
+
+-(void)dealloc
+{
+    NSLog(@"Graph object gone");
 }
 
 -(id)createTopLevelNodeWithConfig:(ConfigGraphicElement *)config andViewSize:(CGSize)viewSize;
@@ -51,9 +58,17 @@
     [super appendChild:child];
 }
 
--(void)play               { [self traverse:_cmd userObj:self.view]; }
--(void)pause              { [self traverse:_cmd userObj:self.view]; }
--(void)stop               { [self traverse:_cmd userObj:self.view]; }
+-(void)play
+{
+    _isPaused = false;
+//    [self traverse:_cmd userObj:self.view];
+}
+
+-(void)pause
+{
+    _isPaused = true;
+//    [self traverse:_cmd userObj:self.view];
+}
 
 +(void)_inner_update:(NSArray *)children dt:(NSTimeInterval)dt  mixerUpdate:(MixerUpdate *)mixerUpdate
 {
@@ -70,6 +85,9 @@
 
 -(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate
 {
+    if( _isPaused )
+        return;
+    
     if( _single )
     {
         _single->_totalTime += dt;
@@ -93,6 +111,9 @@
 
 -(void)render:(NSUInteger)w h:(NSUInteger)h
 {
+    if( _isPaused )
+        return;
+    
     if( _single )
     {
         [_single render:w h:h];

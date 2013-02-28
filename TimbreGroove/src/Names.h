@@ -123,6 +123,6 @@ extern NSString const * kTriggerFrequencyPeak;
 extern NSString const * kTriggerBeat;
 extern NSString const * kTriggerNote;
 extern NSString const * kTriggerChord;
-
+extern NSString const * kTriggerAudioFrame;
 
 

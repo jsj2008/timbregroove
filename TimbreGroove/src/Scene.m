@@ -68,7 +68,20 @@
 
 -(void)dealloc
 {
-    [_graph cleanChildren];
+    [_map detach:self];
+    NSLog(@"Scene dealloc");
+}
+
+-(void)pause
+{
+    [_audio pause];
+    [_graph pause];
+}
+
+-(void)play
+{
+    [_audio play];
+    [_graph play];
 }
 
 -(void)setParameter:(NSString const *)name
@@ -150,6 +163,11 @@
     [_map trigger:name withValue:[NSValue valueWithPayload:pv]];
 }
 
+-(void)setTrigger:(NSString const *)name withValue:(NSValue *)value
+{
+    [_map trigger:name withValue:value];
+}
+
 -(bool)somebodyExpectsTrigger:(NSString const *)triggerName
 {
     return [_map expectsTrigger:triggerName];
@@ -174,9 +192,8 @@
         return; // see you in 1/60th of a second!
     }
     
-    MixerUpdate mixerUpdate;
-    [_audio update:dt mixerUpdate:&mixerUpdate];
-    [view update:dt mixerUpdate:&mixerUpdate];
+    [_audio update:dt scene:self];
+    [view update:dt mixerUpdate:NULL];
     
     for( Parameter * param in _tweenQueue )
     {

@@ -10,6 +10,7 @@
 #import "Geometry.h"
 #import "Line.h"
 #import "Mixer.h"
+#import "NSValue+Parameter.h"
 
 @interface Oscilloscope () {
     float _data[kFramesForDisplay];
@@ -30,16 +31,28 @@
     [self addBuffer:mesh];
 }
 
+-(NSDictionary *)getParameters
+{
+    NSMutableDictionary * dict = (NSMutableDictionary *)[super getParameters];
+    
+    dict[@"AudioFrameDisplay"] = ^(NSValue *value ) {
+        MixerUpdate mu = [value MixerUpdateValue];
+        AudioBufferList * abl = mu.audioBufferList;
+        if( abl )
+        {
+            _lineMesh.heightOffsets = abl->mBuffers[0].mData;
+            [_lineMesh resetVertices];
+        }
+    };
+    
+    return dict;
+    
+}
+
 -(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate
 {
     [super update:dt mixerUpdate:mixerUpdate];
     
-    AudioBufferList * abl = mixerUpdate->audioBufferList;
-    if( abl )
-    {
-        _lineMesh.heightOffsets = abl->mBuffers[0].mData;
-        [_lineMesh resetVertices];
-    }
 }
 
 @end

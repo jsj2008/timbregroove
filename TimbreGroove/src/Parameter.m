@@ -13,6 +13,8 @@
 #import "Global.h"
 #import "Scene.h"
 
+typedef void (^NotifyBlock)(NSValue *);
+
 @interface Parameter () {
 
     bool _tweening;
@@ -114,11 +116,32 @@
      */
     float f;
     
-    if( _tweening )
-        _pd->currentValue = _targetValue;
-    
     switch (inValue.type)
     {
+        case TG_FLOAT:
+        {
+            switch (_pd->type)
+            {
+                case TG_FLOAT:
+                    newValue.f = inValue.v.f;
+                    break;
+                    
+                case TG_INT:
+                    newValue.i = (int)roundf(inValue.v.f);
+                    break;
+                case TG_BOOL:
+                    newValue.boool = inValue.v.f > 0.0 ? true : false;
+                    break;
+                default:
+                    newValue.r =
+                    newValue.g =
+                    newValue.b =
+                    newValue.a = inValue.v.f;
+            };
+            
+        }
+            break;
+            
         case TG_BOOL:
         {
             switch (_pd->type)
@@ -164,26 +187,6 @@
                     break;
             }
         }
-        case TG_FLOAT:
-        {
-            switch (_pd->type)
-            {
-                case TG_INT:
-                    newValue.i = (int)roundf(inValue.v.f);
-                    break;
-                case TG_BOOL:
-                    newValue.boool = inValue.v.f > 0.0 ? true : false;
-                    break;
-                default:
-                    newValue.r =
-                    newValue.g =
-                    newValue.b =
-                    newValue.a = inValue.v.f;
-            };
-            
-        }
-        break;
-            
         case TG_POINT:
         {
             switch (_pd->type)
@@ -250,11 +253,16 @@
     if( _duration == 0.0 )
     {
         _pd->currentValue = newValue;
-        void (^valNotify)(NSValue *) = _valueNotify;
-        valNotify( [NSValue valueWithParameter:_pd->currentValue]);
+        ((void (^)(NSValue *))_valueNotify)([NSValue valueWithParameter:_pd->currentValue]);
     }
     else
     {
+        if( _tweening )
+        {
+            _pd->currentValue = _targetValue;
+            ((void (^)(NSValue *))_valueNotify)([NSValue valueWithParameter:_pd->currentValue]);
+        }
+        
         _initValue = _pd->currentValue;
         _runningTime = 0.0;
         _targetValue = newValue;
@@ -321,9 +329,7 @@
     }
     
     _pd->currentValue = newValue;
-    void (^valNotify)(NSValue *) = _valueNotify;
-    valNotify( [NSValue valueWithParameter:_pd->currentValue]);
-    
+    ((void (^)(NSValue *))_valueNotify)([NSValue valueWithParameter:_pd->currentValue]);    
 }
 
 
@@ -417,7 +423,7 @@
 
 -(void)queue
 {
-    [[Global sharedInstance].scene  queue:self];
+    [[Global sharedInstance].scene queue:self];
 }
 
 @end

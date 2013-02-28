@@ -15,7 +15,7 @@
     NSMutableDictionary * _paramNames;
     NSMutableDictionary * _mappings;
     
-    id _targetObj;
+    __weak id _targetObj;
 }
 @end
 @implementation TriggerMap
@@ -27,6 +27,7 @@
         _targetObj = objectToWatch;
         _paramNames = [NSMutableDictionary new];
         _mappings = [NSMutableDictionary new];
+        NSLog(@"created trigger map %@ (for %@)", self.description, ((NSObject *)_targetObj).description);
     }
     return self;
 }
@@ -87,5 +88,9 @@
     }
 }
 
-
+-(void)detach:(id)objectNoLongerWatchWorthy
+{
+    for( NSString * name in _paramNames )
+        [objectNoLongerWatchWorthy removeObserver:self forKeyPath:name];
+}
 @end

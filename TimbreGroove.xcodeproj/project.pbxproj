@@ -777,23 +777,10 @@
 				572EB287167AAD1C0062F290 /* elements */,
 				57ED524E16C05DD100B38054 /* graph */,
 				575D9FFE1693C8A500A50C41 /* modalScreens */,
-				57E8E2B816C1BF7600CD39BC /* Global.h */,
-				57E8E2B916C1BF7600CD39BC /* Global.m */,
-				579AD1A716C40B670071AA9A /* Config.h */,
-				579AD1A816C40B670071AA9A /* Config.m */,
-				5751F2DB16D54C7E00144F2B /* ConfigNames.h */,
 				57E8E2BB16C1C7CE00CD39BC /* PointRecorder.h */,
 				57E8E2BC16C1C7CE00CD39BC /* PointRecorder.m */,
 				57E62B1D16C2BBC0007064A0 /* Gestures.h */,
 				57E62B1E16C2BBC0007064A0 /* Gestures.m */,
-				57D0EBDA16D4BA5200DBF457 /* Names.h */,
-				57D0EBDB16D4BA5300DBF457 /* Names.m */,
-				57D0EBD716D4B1C300DBF457 /* TriggerMap.h */,
-				57D0EBD816D4B1C400DBF457 /* TriggerMap.m */,
-				572098DF16DA9FA30075E584 /* Parameter.h */,
-				572098E016DA9FA40075E584 /* Parameter.m */,
-				5751F2DF16D5933B00144F2B /* Scene.h */,
-				5751F2E016D5933C00144F2B /* Scene.m */,
 			);
 			name = UI;
 			sourceTree = "<group>";
@@ -894,6 +881,26 @@
 			);
 			name = contrib;
 			path = src/contrib;
+			sourceTree = "<group>";
+		};
+		5722A1E816DEE51C007136B9 /* app */ = {
+			isa = PBXGroup;
+			children = (
+				5751F2DF16D5933B00144F2B /* Scene.h */,
+				5751F2E016D5933C00144F2B /* Scene.m */,
+				57E8E2B816C1BF7600CD39BC /* Global.h */,
+				57E8E2B916C1BF7600CD39BC /* Global.m */,
+				579AD1A716C40B670071AA9A /* Config.h */,
+				579AD1A816C40B670071AA9A /* Config.m */,
+				5751F2DB16D54C7E00144F2B /* ConfigNames.h */,
+				57D0EBDA16D4BA5200DBF457 /* Names.h */,
+				57D0EBDB16D4BA5300DBF457 /* Names.m */,
+				57D0EBD716D4B1C300DBF457 /* TriggerMap.h */,
+				57D0EBD816D4B1C400DBF457 /* TriggerMap.m */,
+				572098DF16DA9FA30075E584 /* Parameter.h */,
+				572098E016DA9FA40075E584 /* Parameter.m */,
+			);
+			name = app;
 			sourceTree = "<group>";
 		};
 		572D7F2B1683033D006D48BF /* generic */ = {
@@ -1014,6 +1021,7 @@
 		572EB1F816786C630062F290 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				5722A1E816DEE51C007136B9 /* app */,
 				578CB8FD16A6102C00088BA2 /* openGL */,
 				578CB8FC16A60F2D00088BA2 /* Cocoa */,
 				57019F761685C15B007FA38F /* audio */,

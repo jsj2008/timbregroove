@@ -13,6 +13,8 @@
 
 -(void)playMidiFile:(NSString *)filename withInstrument:(Instrument *)instrument;
 -(BOOL)isPlayerDone;
+-(void)pauseMidiFile;
+-(void)resumeMidi;
 
 -(void)midiDealloc;
 @end

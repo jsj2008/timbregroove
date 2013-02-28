@@ -10,6 +10,7 @@
 #import "TGTypes.h"
 
 @class ConfigAudioProfile;
+@class Scene;
 
 @interface Audio : NSObject {
     @protected
@@ -17,7 +18,13 @@
 }
 +(id)audioFromConfig:(ConfigAudioProfile *)config;
 -(void)loadAudioFromConfig:(ConfigAudioProfile *)config;
--(void)start;
 -(NSDictionary *)getParameters;
--(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate;
+-(void)update:(NSTimeInterval)dt scene:(Scene *)scene;
+
+-(void)play;
+-(void)pause;
+
+// derived classes
+-(void)start;
+
 @end

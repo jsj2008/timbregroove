@@ -153,7 +153,7 @@
         // we get a ton of 0 movement
         if( fabsf(spt.x) > FLT_EPSILON )
         {
-            NSLog(@"Pan x: %f for pt:%d,%d", spt.x, (int)pt.x, (int)pt.y);
+//            NSLog(@"Pan x: %f for pt:%d,%d", spt.x, (int)pt.x, (int)pt.y);
             [scene setTrigger:kTriggerPanX value:spt.x];
         }
         if( fabsf(spt.y) > FLT_EPSILON )
