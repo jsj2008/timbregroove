@@ -10,7 +10,7 @@
 #import "SettingsVC.h"
 #import "Texture.h"
 #import "GridPlane.h"
-#import "Mixer.h"
+#import "SoundSystem.h"
 
 static NSString * __str_pictureFieldName = @"picturePicker";
 
@@ -59,9 +59,8 @@ static NSString * __str_pictureFieldName = @"picturePicker";
     }
 }
 
--(NSArray *)getSettings
+- (void)getSettings:(NSMutableArray *)arr
 {
-    NSMutableArray * arr = [[NSMutableArray alloc] initWithArray:[super getSettings]];
     SettingsDescriptor * sd;
     sd = [[SettingsDescriptor alloc]  initWithControlType: SC_Picture
                                                memberName: __str_pictureFieldName
@@ -71,7 +70,5 @@ static NSString * __str_pictureFieldName = @"picturePicker";
                                                  priority: SHADER_SETTINGS];
     
     [arr addObject:sd];
-    return arr;
-    
 }
 @end

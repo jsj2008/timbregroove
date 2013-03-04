@@ -10,7 +10,7 @@
 #import "TGTypes.h"
 
 
-static inline TGVertexStride * StrideInit2f(TGVertexStride * s)
+static inline VertexStride * StrideInit2f(VertexStride * s)
 {
     s->glType = GL_FLOAT;
     s->numSize = sizeof(float);
@@ -21,7 +21,7 @@ static inline TGVertexStride * StrideInit2f(TGVertexStride * s)
     return s;
 }
 
-static inline TGVertexStride * StrideInit3f(TGVertexStride * s)
+static inline VertexStride * StrideInit3f(VertexStride * s)
 {
     StrideInit2f(s);
     s->numbersPerElement = 3;
@@ -29,7 +29,7 @@ static inline TGVertexStride * StrideInit3f(TGVertexStride * s)
     return s;
 }
 
-static inline TGVertexStride * StrideInit4f(TGVertexStride * s)
+static inline VertexStride * StrideInit4f(VertexStride * s)
 {
     StrideInit2f(s);
     s->numbersPerElement = 4;
@@ -37,7 +37,7 @@ static inline TGVertexStride * StrideInit4f(TGVertexStride * s)
     return s;
 }
 
-static inline TGVertexStride * StrideInit1f(TGVertexStride * s)
+static inline VertexStride * StrideInit1f(VertexStride * s)
 {
     StrideInit2f(s);
     s->numbersPerElement = 1;
@@ -58,12 +58,12 @@ static inline TGVertexStride * StrideInit1f(TGVertexStride * s)
 @property (nonatomic) GLuint      glVBuffer;
 @property (nonatomic) GLuint      glIBuffer;
 
-+(GLsizei)calcDataSize: (TGVertexStride *)strides
++(GLsizei)calcDataSize: (VertexStride *)strides
           countStrides: (unsigned int)countStrides
            numVertices: (unsigned int)numVertices;
 
 -(void)setData:(float *)data
-       strides:(TGVertexStride *)strides
+       strides:(VertexStride *)strides
   countStrides:(unsigned int)countStrides
    numVertices:(unsigned int)numVertices
      indexData:(unsigned int *)indexData

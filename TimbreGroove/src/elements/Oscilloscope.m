@@ -6,17 +6,21 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "Oscilloscope.h"
 #import "Geometry.h"
 #import "Line.h"
-#import "Mixer.h"
-#import "NSValue+Parameter.h"
+#import "SoundSystem.h"
+#import "Parameter.h"
+#import "Generic.h"
+
+@interface Oscilloscope : Generic
+
+@end
 
 @interface Oscilloscope () {
     float _data[kFramesForDisplay];
     __weak Line * _lineMesh;
 }
-
+@property (nonatomic) NSValue * frameCapture;
 @end
 
 @implementation Oscilloscope
@@ -31,28 +35,24 @@
     [self addBuffer:mesh];
 }
 
--(NSDictionary *)getParameters
+-(void)setFrameCapture:(NSValue *)nsv
 {
-    NSMutableDictionary * dict = (NSMutableDictionary *)[super getParameters];
+    AudioFrameCapture frameCapture = [nsv AudioFrameCaptureValue];
+    AudioBufferList * abl = frameCapture.audioBufferList;
+    if( abl )
+    {
+        _lineMesh.heightOffsets = abl->mBuffers[0].mData;
+        [_lineMesh resetVertices];
+    }
     
-    dict[@"AudioFrameDisplay"] = ^(NSValue *value ) {
-        MixerUpdate mu = [value MixerUpdateValue];
-        AudioBufferList * abl = mu.audioBufferList;
-        if( abl )
-        {
-            _lineMesh.heightOffsets = abl->mBuffers[0].mData;
-            [_lineMesh resetVertices];
-        }
-    };
-    
-    return dict;
-    
+}
+-(void)getParameters:(NSMutableDictionary *)putHere
+{
+    PropertyParameter * pp = [[NonAnimatingPropertyParameter alloc] initWithTarget:self
+                                                                           andName:@"frameCapture"];
+    [super getParameters:putHere];
+    [self appendParameters:putHere withProperties:@[pp]];
 }
 
--(void)update:(NSTimeInterval)dt
-{
-    [super update:dt];
-    
-}
 
 @end

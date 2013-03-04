@@ -51,27 +51,27 @@ typedef enum {
     TG_TRIANGLE_FAN
 } TGDrawType;
 
-typedef enum TGStrideType {
+typedef enum VertexStrideType {
     st_float1 = 900,
     st_float2 = 1000,
     st_float3,
     st_float4
-} TGStrideType;
+} VertexStrideType;
 
-typedef struct TGVertexStride {
+typedef struct VertexStride {
     unsigned int glType; // e.g. GL_FLOAT
     unsigned int numSize; // e.g. sizeof(float)
     unsigned int numbersPerElement;
-    TGStrideType strideType;
+    VertexStrideType strideType;
     int          indexIntoShaderNames;
     GLuint       location;
-} TGVertexStride;
+} VertexStride;
 
-typedef struct MixerUpdate {
+typedef struct AudioFrameCapture {
     void * audioBufferList;
     unsigned int numFrames;
     unsigned int droppedCaptureFrames;
-} MixerUpdate;
+} AudioFrameCapture;
 
 
 static inline NSMutableDictionary * d( NSDictionary * a )

@@ -12,8 +12,8 @@
 #import "FBO.h"
 #import "Light.h"
 #import "GraphView.h"
-#import "Mixer.h"
-#import "Mixer+Parameters.h"
+#import "SoundSystem.h"
+#import "SoundSystem+Parameters.h"
 #import "Global.h"
 #import "GenericWithTexture.h"
 #import "EventCapture.h"
@@ -49,7 +49,7 @@
 
     [self setupButtons];
     
-    int eqband = [Mixer sharedInstance].selectedEQBand;
+    int eqband = [SoundSystem sharedInstance].selectedEQBand;
     for( int b = 0; b < kNUM_EQ_BANDS+1; b++ )
     {
         _bands[b] = kEQDisabled + b;
@@ -139,7 +139,7 @@
 {
     eqBands band = _bands[_currentBand];
     _eqPanel.shapeEdit = band;
-    [Mixer sharedInstance].selectedEQBand = band;
+    [SoundSystem sharedInstance].selectedEQBand = band;
 }
 
 -(void)rotateToNextFace:(CGPoint)pt // pt is direction

@@ -225,20 +225,23 @@
 
 #pragma mark Options settings
 
--(NSArray *)getSettings
+- (void)getSettings:(NSMutableArray *)putHere
 {
-    return nil;
 }
 
--(NSDictionary *)getParameters
+- (void)appendParameters:(NSMutableDictionary *)dict withProperties:(NSArray *)propertyParams
+{
+    for( PropertyParameter * pp in propertyParams )
+        dict[pp.propName] = pp.myParamBlock;
+}
+
+-(void)getParameters:(NSMutableDictionary *)dict
 {
     Shader * shader = self.shader;
-    NSMutableDictionary * dict = [NSMutableDictionary new];
     for( ShaderParameter * param in _parameters )
     {
         param.shader = shader;
         dict[param.parameterName] = param.myParamBlock;
     }
-    return dict;
 }
 @end

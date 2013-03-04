@@ -46,6 +46,7 @@
 -(void)tweakTrigger:(NSString const *)name by:(float)value;
 -(void)tweakTrigger:(NSString const *)name byPoint:(CGPoint)pt;
 
+- (void)getSettings:(NSMutableArray *)putHere;
 
 -(void)queue:(Parameter *)parameter;
 -(void)update:(NSTimeInterval)dt view:(GraphView *)view;

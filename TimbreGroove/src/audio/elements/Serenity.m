@@ -9,9 +9,9 @@
 #import "Global.h"
 #import "Scene.h"
 #import "Names.h"
-#import "Mixer.h"
+#import "SoundSystem.h"
 #import "Audio.h"
-
+#import "Instrument.h"
 @interface Pentatonic : NSObject {
     int * _notes;
     int _count;
@@ -71,14 +71,13 @@
     [super start];
 }
 
--(NSDictionary *)getParameters
+-(void)getParameters:(NSMutableDictionary *)putHere
 {
-    NSDictionary * dict = [super getParameters];
+    [super getParameters:putHere];
     
-    NSMutableDictionary * mine = [NSMutableDictionary dictionaryWithDictionary:dict];
-    dict = nil;
     Instrument * synth = _instruments[@"vibes"];
-    mine[@"SwellSound"] = ^(NSValue *nsv){
+
+    putHere[@"SwellSound"] = ^(NSValue *nsv){
         //CGPoint pt = [nsv CGPointValue];
         Scene * scene = [Global sharedInstance].scene;
         [synth playNote:[_scale up] forDuration:3.0]; [_scale up]; [_scale up];
@@ -86,7 +85,5 @@
         [scene setParameter:kParamChannel value:synth.channel func:kTweenLinear duration:0];
         [scene setParameter:kParamChannelVolume value:1.0 func:kTweenSwellInOut duration:1.5];
     };
-    
-    return mine;
 }
 @end

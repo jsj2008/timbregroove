@@ -10,7 +10,7 @@
 #import "GridPlane.h"
 #import "Camera.h"
 #import "FBO.h"
-#import "Mixer.h"
+#import "SoundSystem.h"
 #import "PoolWater.h"
 
 
@@ -20,6 +20,7 @@ NSString const * kParamPoolMoveItem = @"MoveItem";
     NSMutableArray * _waters;
     CGSize _viewSz;
 }
+@property (nonatomic) CGPoint moveItem;
 @end
 
 //--------------------------------------------------------------------------------
@@ -170,7 +171,7 @@ NSString const * kParamPoolMoveItem = @"MoveItem";
     self.shader = shader;
 }
 
--(void)update:(NSTimeInterval)dt mixerUpdate:(MixerUpdate *)mixerUpdate
+-(void)update:(NSTimeInterval)dt audioFrameCapture:(AudioFrameCapture *)audioFrameCapture
 {
     if( _timer > 1.0/8.0 )
     {
@@ -237,11 +238,18 @@ NSString const * kParamPoolMoveItem = @"MoveItem";
     return nil;
 }
 
--(NSDictionary *)getParameters
+-(void)setMoveItem:(CGPoint)moveItemPt
 {
-    return @{
-             kParamPoolMoveItem: ^(NSValue * pt){ [_waters[0] moveTo:[self screenToPool:[pt CGPointValue]]]; }
-             };
+    [_waters[0] moveTo:[self screenToPool:moveItemPt]];
+}
+
+-(void)getParameters:(NSMutableDictionary *)putHere
+{
+    [super getParameters:putHere];
+    
+    PropertyParameter * pp = [[NonAnimatingPropertyParameter alloc] initWithTarget:self andName:@"moveItem"];
+    
+    [self appendParameters:putHere withProperties:@[pp]];
 }
 
 -(void)onLongTap:(UILongPressGestureRecognizer *)lpgr

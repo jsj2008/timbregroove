@@ -18,7 +18,8 @@
 }
 +(id)audioFromConfig:(ConfigAudioProfile *)config;
 -(void)loadAudioFromConfig:(ConfigAudioProfile *)config;
--(NSDictionary *)getParameters;
+-(void)getParameters:(NSMutableDictionary *)putHere;
+-(void)getSettings:(NSMutableArray *)putHere;
 -(void)update:(NSTimeInterval)dt scene:(Scene *)scene;
 
 -(void)play;

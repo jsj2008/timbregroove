@@ -22,6 +22,8 @@
 #import "PauseViewController.h"
 #import "NewSceneViewController.h"
 
+#import "SoundSystem+Diag.h"
+
 @interface ScreenViewController : UIViewController < NewSceneDelegate,
                                                         SettingVCDelegate,
                                                         PauseViewDelegate>
@@ -102,6 +104,8 @@
         if( oldScene && [oldScene isKindOfClass:[Scene class]])
            [oldScene pause];
         [_global.scene play];
+        [[SoundSystem sharedInstance] dumpGraph];
+
         [self performSelector:@selector(performTransition:)
                    withObject:_global.scene.graph
                    afterDelay:0.12];
@@ -313,7 +317,7 @@
 
 -(void)SettingsVC:(SettingsVC *)vc getSettings:(NSMutableArray *)array
 {
-    [array addObjectsFromArray:[(GraphView *)_graphVC.view getSettings]];
+    [[Global sharedInstance].scene getSettings:array];
 }
 
 -(void)SettingsVC:(SettingsVC *)vc commitChanges:(NSDictionary *)settings

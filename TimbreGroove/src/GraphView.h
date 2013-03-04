@@ -25,6 +25,5 @@
 -(void)update:(NSTimeInterval)dt;
 -(void)render;
 
--(NSArray *)getSettings;
 -(void)commitSettings;
 @end

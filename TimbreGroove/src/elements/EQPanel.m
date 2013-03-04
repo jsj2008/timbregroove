@@ -9,7 +9,7 @@
 
 
 #import "EQPanel.h"
-#import "Mixer.h"
+#import "SoundSystem.h"
 #import "Global.h"
 #import "GraphView.h"
 #import "FBO.h"
@@ -44,7 +44,8 @@ NSString const * kParamCurveWidth   = @"CurveWidth";
     
     EQOffText * _eqOff;
 }
-
+@property (nonatomic) CGPoint CurveShape;
+@property (nonatomic) float   CurveWidth;
 @end
 @implementation EQPanel
 
@@ -96,7 +97,7 @@ NSString const * kParamCurveWidth   = @"CurveWidth";
     }
     else
     {
-        int curve = [Mixer sharedInstance].selectedEQBand;
+        int curve = [SoundSystem sharedInstance].selectedEQBand;
         self.shapeDisplay = curve;
         self.shapeEdit = curve;        
     }
@@ -109,14 +110,27 @@ NSString const * kParamCurveWidth   = @"CurveWidth";
        [_eqOff didAttachToView:view];
 }
 
--(NSDictionary *)getParameters
+-(void)setCurveShape:(CGPoint)CurveShape
 {
-    CGPoint dmy;
+    _CurveShape = CurveShape;
+    [self updateCurve:0 pt:CurveShape scale:0];
+}
+
+-(void)setCurveWidth:(float)CurveWidth
+{
+    _CurveWidth = CurveWidth;
+    [self updateCurve:2 pt:(CGPoint){0,0} scale:CurveWidth];
+}
+     
+-(void)getParameters:(NSMutableDictionary *)putHere
+{
+    [super getParameters:putHere];
     
-    return @{
-             kParamCurveShape: ^(CGPoint pt){ [self updateCurve:0 pt:pt scale:0]; },
-             kParamCurveWidth: ^(float f){ [self updateCurve:2 pt:dmy scale:f]; }
-             };
+    [self appendParameters:putHere withProperties:
+           @[ [[NonAnimatingPropertyParameter alloc] initWithTarget:self
+                            andName:@"CurveWith"],
+              [[NonAnimatingPropertyParameter alloc] initWithTarget:self
+                            andName:@"CurveShape"]] ];
 }
 
 -(void)updateCurve:(int)knobNum pt:(CGPoint)pt scale:(float)scale

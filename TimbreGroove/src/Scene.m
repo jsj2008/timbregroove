@@ -52,12 +52,18 @@
         _dynamicProps = [NSMutableDictionary new];
         _map = [[TriggerMap alloc] initWithWatchee:self];
         _config = config;
+        
         _audio = [Audio audioFromConfig:config.audioElement];
+        
         _graph = [Graph new];
         Global * g = [Global sharedInstance];
         [_graph createTopLevelNodeWithConfig:config.graphicElement andViewSize:g.graphViewSize];
-        [_map addParameters:[_graph getParameters]];
-        [_map addParameters:[_audio getParameters]];
+
+        NSMutableDictionary * params = [NSMutableDictionary new];
+        [_graph getParameters:params];
+        [_audio getParameters:params];
+        [_map addParameters:params];
+
         NSArray * connectionMaps = config.connections;
         for( NSDictionary * map in connectionMaps )
             [_map addMappings:map];
@@ -83,6 +89,13 @@
     [_audio play];
     [_graph play];
 }
+
+- (void)getSettings:(NSMutableArray *)putHere
+{
+    [_graph getSettings:putHere];
+    [_audio getSettings:putHere];
+}
+
 
 -(void)setParameter:(NSString const *)name
               value:(float)value
@@ -205,8 +218,9 @@
 
 -(void)setValue:(id)value forUndefinedKey:(NSString *)key
 {
-    ParamPayload pl = [(NSValue *)value ParamPayloadValue];
-    _dynamicProps[key] = [NSValue valueWithPayload:pl];
+ //   ParamPayload pl = [(NSValue *)value ParamPayloadValue];
+ //   _dynamicProps[key] = [NSValue valueWithPayload:pl];
+    _dynamicProps[key] = value;
 }
 
 -(id)valueForUndefinedKey:(NSString *)key

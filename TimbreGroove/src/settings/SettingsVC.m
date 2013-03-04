@@ -356,6 +356,7 @@ didFinishPickingMediaWithInfo:(NSDictionary *)info
 	[self.view addSubview:picker];
     
     UIButton * button = [self createButtonHelper:sd title:sd.options[@"values"][sd.initialValue]];
+    [self setValue:picker forKey:[sd.memberName stringByAppendingString:@"_button"]];
     [button addTarget:self action:@selector(onPickerButton:) forControlEvents:UIControlEventTouchUpInside];
     return button;
 }

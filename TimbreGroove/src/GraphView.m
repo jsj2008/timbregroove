@@ -75,11 +75,6 @@
     [_graph render:w h:h];
 }
 
--(NSArray *)getSettings
-{
-    return [_graph getSettings];
-}
-
 -(void)commitSettings
 {
     [_graph settingsChanged];

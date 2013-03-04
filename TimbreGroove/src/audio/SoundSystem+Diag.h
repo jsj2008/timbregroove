@@ -6,9 +6,9 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "Mixer.h"
+#import "SoundSystem.h"
 
-@interface Mixer (Diag)
+@interface SoundSystem (Diag)
 -(void)dumpParameters:(AudioUnit)au forUnit:(NSString *)name;
 - (void) printASBD: (AudioStreamBasicDescription) asbd;
 -(void)dumpGraph;

@@ -37,7 +37,7 @@ union _ParamValue {
     bool boool;
     struct { float x, y,  z;  };
     struct { float r,  g,  b,  a;  };
-    MixerUpdate mu;
+    AudioFrameCapture mu;
 };
 
 typedef union _ParamValue ParamValue;
@@ -95,6 +95,23 @@ typedef struct ParameterDefintion {
 @property (nonatomic,strong) NSString const *  parameterName;
 -(void)calcScale;
 
+@end
+
+@interface PropertyParameter : Parameter {
+@protected
+    NSString * _propName;
+}
+
+-(id)initWithDef:(ParameterDefintion *)def
+            name:(NSString const *)name
+            prop:(NSString *)propName;
+-(id)initWithDef:(ParameterDefintion *)def
+            name:(NSString const *)name;
+@property (nonatomic,strong) NSString * propName;
+@end
+
+@interface NonAnimatingPropertyParameter : PropertyParameter
+-(id)initWithTarget:(id)target andName:(NSString *)name;
 @end
 
 #import "NSValue+Parameter.h"

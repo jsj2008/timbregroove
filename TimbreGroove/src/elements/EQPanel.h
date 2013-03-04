@@ -7,7 +7,7 @@
 //
 
 #import "Generic.h"
-#import "Mixer+Parameters.h"
+#import "SoundSystem+Parameters.h"
 
 #ifndef NO_EQPANEL_DECLS
 extern NSString const * kParamCurveShape;

@@ -6,27 +6,17 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "Mixer.h"
+#import "SoundSystem.h"
 #import <AVFoundation/AVFoundation.h>
 #import <AudioToolbox/AudioToolbox.h>
 #import "Config.h"
-#import "Mixer+Diag.h"
-#import "Mixer+Midi.h"
-#import "Mixer+Parameters.h"
+#import "SoundSystem+Diag.h"
+#import "SoundSystem+Parameters.h"
+#import "Midi.h"
 #import "RingBuffer.h"
 #import <libkern/OSAtomic.h>
 #import "Names.h"
-
-typedef struct NewSamplerInfo
-{
-    AudioUnit au;
-    int       channelNumber;
-} NewSamplerInfo;
-
-enum {
-    kMIDIMessage_NoteOn    = 0x9,
-    kMIDIMessage_NoteOff   = 0x8,
-};
+#import "Instrument.h"
 
 void _CheckError( OSStatus error, const char *operation) {
     char errorString[ 20];        // See if it appears to be a 4-char-code
@@ -44,74 +34,9 @@ void _CheckError( OSStatus error, const char *operation) {
 }
 
 
-static Mixer * __sharedMixer;
+static SoundSystem * __sharedSoundSystem;
 
-@interface Instrument () {
-    AudioUnit _samplerUnit;
-    MIDITimeStamp _prevTimeStamp;
-}
 
-@end
-@implementation Instrument
-
--(id)initWithNSI:(NewSamplerInfo)nsi andConfig:(ConfigInstrument *)config
-{
-    if( (self = [super init]) )
-    {
-        _samplerUnit = nsi.au;
-        _channel = nsi.channelNumber;
-        _lowestPlayable = config.low;
-        _highestPlayable = config.high;
-        _prevTimeStamp = 0;
-    }
-    
-    return self;
-}
-
--(void)dealloc
-{
-    NSLog(@"Instrument gone");
-}
--(AudioUnit)sampler
-{
-    return _samplerUnit;
-}
-
--(void)addNoteCache:(int)note ts:(MIDITimeStamp)ts
-{
-    
-}
--(OSStatus)playNote:(int)note forDuration:(NSTimeInterval)duration
-{
-    UInt32 noteNum = note;
-    UInt32 onVelocity = 127;
-    UInt32 noteCommand =     kMIDIMessage_NoteOn << 4 | 0;
-    
-    OSStatus result = noErr;
-    result = MusicDeviceMIDIEvent (_samplerUnit,
-                                   noteCommand,
-                                   noteNum, onVelocity, 0);
-    
-    CheckError(result,"Unable to start note.");
-    [self performSelector:@selector(stopNote:) withObject:@(note) afterDelay:duration];
-    return result;
-}
-
--(OSStatus)stopNote:(id)note
-{
-    UInt32 noteNum = [(NSNumber *)note unsignedIntegerValue];
-    UInt32 noteCommand = kMIDIMessage_NoteOff << 4 | 0;
-    
-    OSStatus result = noErr;
-    result = MusicDeviceMIDIEvent (_samplerUnit,
-                                   noteCommand,
-                                   noteNum, 0, 0);
-    
-    CheckError(result,"Unable to stop note.");
-    return result;
-}
-
-@end
 //..............................................................................
 //..............................................................................
 //..............................................................................
@@ -177,18 +102,21 @@ OSStatus renderCallback(
 //..............................................................................
 //..............................................................................
 
-@interface Mixer () {
+@interface SoundSystem () {
     RenderCBContext  _cbContext;
     
     AudioStreamBasicDescription _stdASBD;
     
-    bool _capturing;
-    void * _captureBuffer;
-    UInt32 _captureByteSize;
+    bool        _capturing;
+    void *      _captureBuffer;
+    UInt32      _captureByteSize;
+    AudioUnit   _buses[8];
+    int         _busCount;
 }
 @end
 
-@implementation Mixer
+@implementation SoundSystem
+
 
 -(id)init
 {
@@ -201,7 +129,6 @@ OSStatus renderCallback(
         [self setupStdASBD]; // assumes _graphSampleRate
         [self setupAUGraph];
         [self startGraph];
-        [self setupMidi];
         [self setupUI];
     }
     return self;
@@ -209,7 +136,6 @@ OSStatus renderCallback(
 
 -(void)dealloc
 {
-    [self midiDealloc];
     [self releaseCaptureResources];
 
 }
@@ -244,18 +170,18 @@ OSStatus renderCallback(
 }
 
 
-+(Mixer *)sharedInstance
++(SoundSystem *)sharedInstance
 {
     @synchronized (self) {
-        if( !__sharedMixer )
-            __sharedMixer = [Mixer new];
+        if( !__sharedSoundSystem )
+            __sharedSoundSystem = [SoundSystem new];
     }
-    return __sharedMixer;
+    return __sharedSoundSystem;
 }
 
--(void)update:(MixerUpdate *)mixerUpdate
+-(void)update:(AudioFrameCapture *)audioFrameCapture
 {
-    mixerUpdate->audioBufferList = NULL;
+    audioFrameCapture->audioBufferList = NULL;
 
     if( (_expectedTriggerFlags & kExpectsCapture) == 0 )
     {
@@ -297,7 +223,7 @@ OSStatus renderCallback(
                 
                 RingBufferFetch(ctx.rbo, _captureBuffer, kFramesForDisplay, ts);
                 
-                mixerUpdate->audioBufferList = _captureBuffer;
+                audioFrameCapture->audioBufferList = _captureBuffer;
                 
                 OSAtomicCompareAndSwap32Barrier(_cbContext.fetchCount,
                                                 0,
@@ -311,66 +237,9 @@ OSStatus renderCallback(
         }
     }
     
-    [self isPlayerDone];
-    
     if( !( (_expectedTriggerFlags&~kExpectsCapture)== kNoOneExpectsNothin ) )
         [self triggerExpected];
     
-}
-
--(Instrument *)loadInstrumentFromConfig:(ConfigInstrument *)config;
-{
-    NewSamplerInfo nsi = [self makeSampler];
-    [self loadSound:config sampler:nsi.au];
-    return [[Instrument alloc] initWithNSI:nsi andConfig:config];
-}
-
--(ConfigInstrument *)loadSound:(ConfigInstrument *)config sampler:(AudioUnit)sampler
-{
-    bool isSoundfont = config.isSoundFont;
-    NSString * ext = isSoundfont ? @"sf2" : @"aupreset";
-    
-    NSURL *presetURL = [[NSBundle mainBundle] URLForResource: config.preset
-                                               withExtension: ext];
-    
-    NSAssert(presetURL, @"preset path fail: %@",config.preset);
-    
-    if( isSoundfont )
-    {
-        [self loadSF2FromURL:presetURL withPatch:config.patch sampler:sampler];
-    }
-    else
-    {
-        [self loadSynthFromPresetURL: presetURL sampler:sampler];
-    }
-    
-    return config;
-}
-
--(void)handleParamChange:(NSString const *)paramName value:(NSValue *)value
-{
-    
-}
-
--(NSDictionary *)getParameters
-{
-    NSMutableDictionary * dict = [[NSMutableDictionary alloc] initWithDictionary:
-    @{
-      kParamTempo: ^(NSValue *v){ [self handleParamChange:kParamTempo value:v]; },
-      kParamPitch: ^(NSValue *v){ [self handleParamChange:kParamPitch value:v]; },
-      kParamInstrumentP1: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP1 value:v]; },
-      kParamInstrumentP2: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP2 value:v]; },
-      kParamInstrumentP3: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP3 value:v]; },
-      kParamInstrumentP4: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP4 value:v]; },
-      kParamInstrumentP5: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP5 value:v]; },
-      kParamInstrumentP6: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP6 value:v]; },
-      kParamInstrumentP7: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP7 value:v]; },
-      kParamInstrumentP8: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP8 value:v]; }
-      }];
-    
-    [dict addEntriesFromDictionary:[self getAUParameters]];
-    
-    return dict;    
 }
 
 
@@ -398,27 +267,42 @@ OSStatus renderCallback(
     return YES;
 }
 
-
--(NewSamplerInfo)makeSampler
+-(Instrument *)loadInstrumentFromConfig:(ConfigInstrument *)config
 {
-    OSStatus result = noErr;
-    
-    AudioComponentDescription cd = {};
-    cd.componentManufacturer     = kAudioUnitManufacturer_Apple;
-    cd.componentFlags            = 0;
-    cd.componentFlagsMask        = 0;
-    cd.componentType = kAudioUnitType_MusicDevice;
-    cd.componentSubType = kAudioUnitSubType_Sampler;
-    
-    AUNode samplerNode;
-    result = AUGraphAddNode(_processingGraph, &cd, &samplerNode);
-    CheckError(result,"Unable to add the Sampler unit to the audio processing graph.");
+    return [Instrument instrumentWithConfig:config andGraph:_processingGraph];
+}
 
-    AudioUnit samplerUnit;
-    result = AUGraphNodeInfo (_processingGraph, samplerNode, 0, &samplerUnit);
-    CheckError(result,"Unable to obtain a reference to the Sampler unit.");
-   
-    UInt32 busCount = self.numChannels + 1;
+-(int)findAvailableBus:(AudioUnit)au
+{
+    for( int i = 0; i < (sizeof(_buses)/sizeof(_buses[0])); ++i)
+    {
+        if( !_buses[i] )
+        {
+            _buses[i] = au;
+            ++_busCount;
+            return i;
+        }
+    }
+    
+    NSLog(@"All available buses taken");
+    exit(-1);
+    return -1;
+}
+
+-(void)clearAvailableBus:(int)bus
+{
+    _buses[bus] = 0;
+    --_busCount;
+}
+
+-(void)plugInstrumentIntoBus:(Instrument *)instrument
+{
+    OSStatus result;
+
+    int busNum = [self findAvailableBus:instrument.sampler];
+    instrument.channel = busNum;
+    
+    int busCount = busNum + 1;
     result = AudioUnitSetProperty (_mixerUnit,
                                    kAudioUnitProperty_ElementCount,
                                    kAudioUnitScope_Input,
@@ -427,21 +311,74 @@ OSStatus renderCallback(
                                    sizeof (busCount)
                                    );
     CheckError(result,"Unable to set buscount on mixer.");
+
+    if( !instrument.configured )
+    {
+        [self configUnit:instrument.sampler];
+        instrument.configured = true;
+    }
+
+    Boolean wasRunning = FALSE;
+    CheckError( AUGraphIsRunning(_processingGraph, &wasRunning), "Couldn't check for running graph");
     
-    self.numChannels = busCount;
+    if( wasRunning )
+        CheckError( AUGraphStop(_processingGraph), "Couldn't stop graph");
     
-    result = AUGraphConnectNodeInput (_processingGraph, samplerNode, 0, _mixerNode, busCount-1);
+    result = AUGraphConnectNodeInput (_processingGraph,
+                                      instrument.graphNode,
+                                      0,
+                                      _mixerNode,
+                                      busNum);
     CheckError(result,"Unable to interconnect the nodes in the audio processing graph.");
     
-    [self configUnit:samplerUnit];
     
     //Boolean isUpdated;
     result = AUGraphUpdate(_processingGraph, NULL); // NULL forces synchronous update &isUpdated);
     CheckError(result,"Unable to update graph.");
+
+    if( wasRunning )
+        CheckError( AUGraphStart(_processingGraph), "Couldn't restart graph");
     
-    [self dumpGraph];
+    NSLog(@"plugged %@ (%d) into bus: %d", instrument.description, (unsigned int)instrument.sampler, busNum);
+}
+
+-(void)unplugInstrumentFromBus:(Instrument *)instrument
+{
+    OSStatus result;
     
-    return (NewSamplerInfo){ samplerUnit, busCount-1 };
+    Boolean wasRunning;
+    CheckError( AUGraphIsRunning(_processingGraph, &wasRunning), "Couldn't check for running graph");
+    
+    if( wasRunning )
+        CheckError( AUGraphStop(_processingGraph), "Couldn't stop graph");
+    
+    AUNode node = _mixerNode;
+    UInt32 bus  = instrument.channel;
+    result = AUGraphDisconnectNodeInput(_processingGraph, node, bus);
+    CheckError(result, "Unable to disconnect node");
+    
+    result = AUGraphUpdate(_processingGraph, NULL); // NULL forces synchronous update &isUpdated);
+    CheckError(result,"Unable to update graph.");
+    
+    [self clearAvailableBus:instrument.channel];
+    
+    NSLog(@"UNplugged %@ (%d) from bus: %d", instrument.description, (unsigned int)instrument.sampler,
+          (unsigned int)bus);
+    
+    if( wasRunning )
+        CheckError( AUGraphStart(_processingGraph), "Couldn't restart graph");
+    
+}
+
+-(void)decomissionInstrument:(Instrument *)instrument
+{
+    [self unplugInstrumentFromBus:instrument];
+    AUGraphRemoveNode(_processingGraph, instrument.graphNode);
+}
+
+-(AudioUnit)mixer
+{
+    return _mixerUnit;
 }
 
 -(OSStatus)setupMasterEQ
@@ -516,48 +453,6 @@ OSStatus renderCallback(
     return result;
 }
 
-- (OSStatus) loadSynthFromPresetURL: (NSURL *) presetURL sampler:(AudioUnit)sampler
-{
-    OSStatus result = noErr;
-    
-    NSDictionary * presetPropertyList = [NSDictionary dictionaryWithContentsOfURL:presetURL];
-    
-    if (presetPropertyList != 0) {
-        
-        CFPropertyListRef plr = (__bridge CFPropertyListRef)presetPropertyList;
-        result = AudioUnitSetProperty(
-                                      sampler,
-                                      kAudioUnitProperty_ClassInfo,
-                                      kAudioUnitScope_Global,
-                                      0,
-                                      &plr,
-                                      sizeof(plr)
-                                      );
-        CheckError(result, "Unable to set the patch on a soundfont file");
-    }
-
-    return result;
-}
-
--(OSStatus) loadSF2FromURL: (NSURL *)bankURL withPatch: (int)presetNumber sampler:(AudioUnit)sampler
-{
-    OSStatus result = noErr;
-    
-    AUSamplerBankPresetData bpdata;
-    bpdata.bankURL  = (__bridge CFURLRef) bankURL;
-    bpdata.bankMSB  = kAUSampler_DefaultMelodicBankMSB;
-    bpdata.bankLSB  = kAUSampler_DefaultBankLSB;
-    bpdata.presetID = (UInt8) presetNumber;
-    
-    result = AudioUnitSetProperty(sampler,
-                                  kAUSamplerProperty_LoadPresetFromBank,
-                                  kAudioUnitScope_Global,
-                                  0,
-                                  &bpdata,
-                                  sizeof(bpdata));
-    CheckError(result, "Unable to set the preset property on the Sampler.");    
-    return result;
-}
 
 - (OSStatus) configUnit:(AudioUnit)unit
 {

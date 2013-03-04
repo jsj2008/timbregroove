@@ -41,8 +41,11 @@
         for( void (^pblock)(NSValue *) in _paramNames[keyPath] )
         {
             NSValue * v = change[NSKeyValueChangeNewKey];
+            /*
             ParamPayload pl = [v ParamPayloadValue];
             pblock([NSValue valueWithPayload:pl]);
+             */
+            pblock(v);
         }
 }
 

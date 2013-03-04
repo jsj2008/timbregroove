@@ -7,19 +7,21 @@
 //
 
 #import "Audio.h"
-#import "Mixer.h"
-#import "Mixer+Midi.h"
-#import "Mixer+Parameters.h"
+#import "SoundSystem.h"
+#import "Midi.h"
+#import "SoundSystem+Parameters.h"
 #import "Config.h"
 #import "Scene.h"
 #import "NSValue+Parameter.h"
 #import "Names.h"
+#import "Instrument.h"
 
 @interface Audio () {
 @protected
-    Mixer * _mixer;
-    NSString * _midiFile;
+    SoundSystem *        _soundSystem;
+    NSString *           _midiFile;
     ConfigAudioProfile * _config;
+    Midi *               _midi;
 }
 
 @end
@@ -37,13 +39,16 @@
 {
     self = [super init];
     if (self) {
-        _mixer = [Mixer sharedInstance];
+        _soundSystem = [SoundSystem sharedInstance];
     }
     return self;
 }
 
 -(void)dealloc
 {
+    for( Instrument * instrument in [_instruments allValues] )
+        [_soundSystem decomissionInstrument:instrument];
+    
     NSLog(@"Audio object gone");
 }
 
@@ -52,7 +57,7 @@
     NSDictionary * instrumentConfigs = config.instruments;
     _instruments = [NSMutableDictionary new];
     for( NSString * name in instrumentConfigs )
-        _instruments[name] = [_mixer loadInstrumentFromConfig:instrumentConfigs[name]];
+        _instruments[name] = [_soundSystem loadInstrumentFromConfig:instrumentConfigs[name]];
     _midiFile = config.midiFile;
     _config = config;
 }
@@ -63,18 +68,29 @@
 
 -(void)play
 {
-    [_mixer resumeMidi];
+    for( Instrument * instrument in [_instruments allValues] )
+    {
+        [_soundSystem plugInstrumentIntoBus:instrument];
+    }
+    if( _midi )
+        [_midi resume];
 }
 
 -(void)pause
 {
-    [_mixer pauseMidiFile];
+    if( _midi )
+        [_midi pause];
+    
+    for( Instrument * instrument in [_instruments allValues] )
+    {
+        [_soundSystem unplugInstrumentFromBus:instrument];
+    }
 }
 
 -(void)update:(NSTimeInterval)dt scene:(Scene *)scene
 {
-    MixerUpdate mu = {0};
-    [_mixer update:&mu];
+    AudioFrameCapture mu = {0};
+    [_soundSystem update:&mu];
     if( mu.audioBufferList )
     {
         ParamPayload pv;
@@ -82,25 +98,29 @@
         pv.type = TG_MIXERUPDATE;
         pv.additive = false;
         pv.duration = 0;
-        [scene setTrigger:kTriggerAudioFrame withValue:[NSValue valueWithPayload:pv]];
+        NSValue * nsv = [NSValue valueWithPayload:pv];
+        [scene setTrigger:kTriggerAudioFrame withValue:nsv];
     }
 }
 
--(NSDictionary *)getParameters
+-(void)getParameters:(NSMutableDictionary *)putHere;
 {
     // get parameters will configure the
     // defaults
-    NSDictionary * dict = [_mixer getParameters];
+    [_soundSystem getParameters:putHere];
     
     // so we have to do config work AFTER that
     NSString * eqName = _config.EQ;
     if( eqName )
-        _mixer.selectedEQBandName = eqName;
+        _soundSystem.selectedEQBandName = eqName;
     _config = nil; // ok, we're done now
+}
 
-    return dict;
+- (void)getSettings:(NSMutableArray *)putHere
+{
     
 }
+
 @end
 
 @interface AutoPlayMidiFile : Audio
@@ -111,13 +131,16 @@
 {
     if( _midiFile )
     {
-        Instrument * instrument = nil;
-        for( NSString * name in _instruments )
+        if( _midi )
         {
-            instrument = _instruments[name];
-            break;
+            [_midi resume];
         }
-        [_mixer playMidiFile:_midiFile withInstrument:instrument];
+        else
+        {
+            Instrument * instrument = [_instruments allValues][0];
+            _midi = [[Midi alloc] init];
+            [_midi playMidiFile:_midiFile withInstrument:instrument];
+        }
     }
 }
 

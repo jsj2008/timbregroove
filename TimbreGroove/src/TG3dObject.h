@@ -55,8 +55,10 @@
 
 - (GLKMatrix4) modelView; // based on position/rotation/scale
 - (GLKMatrix4) calcPVM;   // combine camera and model
-- (NSArray *)  getSettings;
-- (NSDictionary *)getParameters;
+- (void)getSettings:(NSMutableArray *)putHere;
+- (void)getParameters:(NSMutableDictionary *)putHere;
+
+- (void)appendParameters:(NSMutableDictionary *)dict withProperties:(NSArray *)propertyParams;
 
 -(void)didAttachToView:(GraphView *)view;
 -(void)didDetachFromView:(GraphView *)view;

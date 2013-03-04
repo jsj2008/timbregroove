@@ -1,12 +1,14 @@
 //
-//  Mixer+Midi.m
+//  Midi.m
 //  TimbreGroove
 //
 //  Created by victor on 2/10/13.
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "Mixer+Midi.h"
+#import "Midi.h"
+#import "Instrument.h"
+#import "Names.h"
 
 void MyMIDINotifyProc (const MIDINotification  *message, void *refCon)
 {
@@ -61,8 +63,46 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
     }
 }
 
-@implementation Mixer (Midi)
+@interface Midi () {
+    MIDIClientRef  _midiClient;
+    MusicTimeStamp _playerTrackLength;
+    MusicSequence  _currentSequence;
+    MusicPlayer    _musicPlayer;
+    bool           _midiFilePlaying;
+    MusicTimeStamp _midiPauseTime;
+}
+@end
 
+@implementation Midi
+
+-(id)init
+{
+    self = [super init];
+    if( self )
+    {
+        OSStatus result = noErr;
+        
+        // Create a client
+        // This provides general information about the state of the midi
+        // engine to the callback MyMIDINotifyProc
+        
+        result = MIDIClientCreate(CFSTR("TG Virtual Client"),
+                                  MyMIDINotifyProc,
+                                  NULL,
+                                  &_midiClient);
+        
+        CheckError(result,"MIDIClientCreate failed");
+        
+    }
+    return self;
+}
+
+-(void)dealloc
+{
+    DisposeMusicPlayer(_musicPlayer);
+    if( _currentSequence )
+        DisposeMusicSequence(_currentSequence);    
+}
 
 -(MIDIEndpointRef)attachMidiClientToSampler:(AudioUnit)sampler
 {
@@ -81,31 +121,31 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
     return virtualEndpoint;
 }
 
--(void)setupMidi
+-(void)handleParamChange:(NSString const *)paramName value:(NSValue *)value
 {
-    OSStatus result = noErr;
     
-    // Create a client
-    // This provides general information about the state of the midi
-    // engine to the callback MyMIDINotifyProc
+}
 
-    result = MIDIClientCreate(CFSTR("TG Virtual Client"),
-                              MyMIDINotifyProc,
-                              NULL,
-                              &_midiClient);
-    
-    CheckError(result,"MIDIClientCreate failed");
-    
+-(void)getParameters:(NSMutableDictionary *)putHere
+{
+    [putHere addEntriesFromDictionary:
+    @{
+      kParamTempo: ^(NSValue *v){ [self handleParamChange:kParamTempo value:v]; },
+      kParamPitch: ^(NSValue *v){ [self handleParamChange:kParamPitch value:v]; },
+      kParamInstrumentP1: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP1 value:v]; },
+      kParamInstrumentP2: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP2 value:v]; },
+      kParamInstrumentP3: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP3 value:v]; },
+      kParamInstrumentP4: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP4 value:v]; },
+      kParamInstrumentP5: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP5 value:v]; },
+      kParamInstrumentP6: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP6 value:v]; },
+      kParamInstrumentP7: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP7 value:v]; },
+      kParamInstrumentP8: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP8 value:v]; }
+      }];    
 }
 
 -(void)playMidiFile:(NSString *)filename withInstrument:(Instrument *)instrument
 {
-    [self playMidiFile:filename throughSampler:instrument.sampler];
-}
 
--(void)playMidiFile:(NSString *)filename throughSampler:(AudioUnit)sampler
-{
-    
     if( !_musicPlayer )
         CheckError( NewMusicPlayer(&_musicPlayer), "NewMusicPlayer failed" );
     
@@ -118,12 +158,12 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
     
     // MusicSequenceSetAUGraph(s, _processingGraph);
     
+    AudioUnit sampler = instrument.sampler;
+    
     MIDIEndpointRef endPoint = [self attachMidiClientToSampler:sampler];
     CheckError( MusicSequenceSetMIDIEndpoint(_currentSequence, endPoint), "MusicSeqSetEndPoint failed");
 
     CheckError( MusicPlayerSetSequence(_musicPlayer, _currentSequence), "MusicPlaySetSeq failed");
-    // reduces latency when MusicPlayerStart is called
-    CheckError( MusicPlayerPreroll(_musicPlayer), "MusicPlayerPreroll failed" );
 
     MusicTrack t;
     UInt32 sz = sizeof(MusicTimeStamp);
@@ -133,27 +173,37 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
     sz = sizeof(loop);
     CheckError( MusicTrackSetProperty(t, kSequenceTrackProperty_LoopInfo, &loop, sz), "MusicTrackGetProp(2) failed");
 
+    // reduces latency when MusicPlayerStart is called
+    CheckError( MusicPlayerPreroll(_musicPlayer), "MusicPlayerPreroll failed" );
+    
     CheckError( MusicPlayerStart(_musicPlayer), "MusicPlayerStart failed" );
     _midiFilePlaying = true;
     
 }
 
--(void)pauseMidiFile
+-(void)pause
 {
     if( _musicPlayer )
     {
         CheckError( MusicPlayerGetTime(_musicPlayer, &_midiPauseTime), "MusicPlayerGetTime failed");
+        NSLog(@"Pausing Midi at %f",_midiPauseTime);
         CheckError( MusicPlayerStop(_musicPlayer), "MusicPlayerStop failed");
     }
 }
 
--(void)resumeMidi
+-(void)resume
 {
     if( _musicPlayer )
     {
         CheckError( MusicPlayerSetTime(_musicPlayer, _midiPauseTime), "MusicPlayerSetTime failed");
         CheckError( MusicPlayerStart(_musicPlayer), "MusicPlayerStart (resume) failed");
+        NSLog(@"Resumed Midi at %f",_midiPauseTime);
     }
+}
+
+-(void)update:(NSTimeInterval)dt
+{
+    
 }
 
 -(BOOL)isPlayerDone
@@ -177,10 +227,4 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
     return NO;
 }
 
--(void)midiDealloc
-{
-    DisposeMusicPlayer(_musicPlayer);
-    if( _currentSequence )
-        DisposeMusicSequence(_currentSequence);
-}
 @end

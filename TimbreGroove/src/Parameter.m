@@ -427,3 +427,62 @@ typedef void (^NotifyBlock)(NSValue *);
 }
 
 @end
+
+@interface PropertyParameter () {
+    NSObject * _target;
+}
+@end
+@implementation PropertyParameter
+
+-(id)initWithDef:(ParameterDefintion *)def name:(NSString const *)name
+{
+    return [self initWithDef:def name:name prop:(NSString *)name];
+}
+
+-(id)initWithDef:(ParameterDefintion *)def name:(NSString const *)name prop:(NSString *)propName
+{
+    self = [super initWithDef:def valueNotify:nil];
+    if( self )
+    {
+        _propName = propName;
+        self.parameterName = name;
+    }
+    return self;
+}
+
+-(void)setTarget:(NSObject *)object
+{
+    _target = object;
+    NSString * name = _propName;
+    self.valueNotify = ^(NSValue *nsv){
+        [object setValue:nsv forKey:name];
+    };
+    
+    [object setValue:[NSValue valueWithParameter:_pd->def] forKey:_propName];
+}
+@end
+
+@interface NonAnimatingPropertyParameter() {
+    id _target;
+}
+@end
+
+@implementation NonAnimatingPropertyParameter
+-(id)initWithTarget:(id)target andName:(NSString *)name
+{
+    self = [super init];
+    if( self )
+    {
+        _target = target;
+        _propName = name;
+    }
+    return self;
+}
+
+-(id)myParamBlock
+{
+    return ^(NSValue *nsv) {
+        [_target setValue:nsv forKey:_propName];
+    };
+}
+@end

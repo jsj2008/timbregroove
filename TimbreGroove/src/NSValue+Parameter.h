@@ -17,7 +17,7 @@
 // but only for KVO, not block calls
 -(ParamPayload)ParamPayloadValue;
 -(ParamValue)ParamValueValue;
--(MixerUpdate)MixerUpdateValue;
+-(AudioFrameCapture)AudioFrameCaptureValue;
 -(CGPoint)CGPointValue;
 -(GLKVector3)GLKVector3Value;
 -(GLKVector4)GLKVector4Value;

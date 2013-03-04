@@ -6,7 +6,7 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "Mixer.h"
+#import "SoundSystem.h"
 #import "Parameter.h"
 
 typedef enum eqBands {
@@ -19,14 +19,14 @@ typedef enum eqBands {
 } eqBands;
 
 
-@interface Mixer (Parameters)
+@interface SoundSystem (Parameters)
 
 @property (nonatomic,strong) NSString * selectedEQBandName;
 @property (nonatomic) eqBands selectedEQBand; 
 @property (nonatomic) int     selectedChannel;
 @property (nonatomic) int     numChannels;
 
--(NSDictionary *)getAUParameters;
+-(void)getParameters:(NSMutableDictionary *)putHere;
 
 -(void)configureEQ;
 -(void)setupUI;

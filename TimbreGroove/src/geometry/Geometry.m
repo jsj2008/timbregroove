@@ -21,7 +21,7 @@
 
 -(NSArray *)getStrideTypes
 {
-    const TGStrideType st = st_float3;
+    const VertexStrideType st = st_float3;
 
     if( _UVs )
     {
@@ -44,7 +44,7 @@
     GeometryStats stats;
     [self getStats:&stats];
     
-    TGVertexStride * strides;
+    VertexStride * strides;
     unsigned int     numStrides;
     void *           vertexData;
     unsigned int     numVertices;
@@ -53,12 +53,12 @@
     
     numStrides = [strideTypes count];
     
-    strides = malloc(sizeof(TGVertexStride)*numStrides);
+    strides = malloc(sizeof(VertexStride)*numStrides);
     
     for( int i = 0; i < numStrides; i++ )
     {
-        TGVertexStride * stride = strides + i;
-        TGStrideType type = [strideTypes[i] intValue];
+        VertexStride * stride = strides + i;
+        VertexStrideType type = [strideTypes[i] intValue];
         switch (type) {
             case st_float1:
                 StrideInit1f(stride);

@@ -25,7 +25,15 @@
     return [NSValue valueWithBytes:&payload objCType:encodedName];
 }
 
--(ParamPayload)ParamPayloadValue { ParamPayload pp; [self getValue:&pp]; return pp; }
+-(ParamPayload)ParamPayloadValue
+{
+    unsigned char b[1000];
+    memset(b,1,sizeof(b));
+    ParamPayload *pp = (ParamPayload *)b;
+    [self getValue:b];
+    return *pp;
+}
+
 -(ParamValue)ParamValueValue     { ParamValue v; [self getValue:&v]; return v;}
 -(CGPoint)CGPointValue           { ParamValue v; [self getValue:&v]; return PvToPoint(v)  ; }
 -(GLKVector3)GLKVector3Value     { ParamValue v; [self getValue:&v]; return PvToV3(v); }
@@ -34,7 +42,7 @@
 -(float)floatValue               { ParamValue v; [self getValue:&v]; return v.f; }
 -(int)intValue                   { ParamValue v; [self getValue:&v]; return v.i; }
 
--(MixerUpdate)MixerUpdateValue
+-(AudioFrameCapture)AudioFrameCaptureValue
 {
     ParamPayload pp;
     [self getValue:&pp];

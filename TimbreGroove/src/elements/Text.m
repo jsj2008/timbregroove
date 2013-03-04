@@ -60,7 +60,7 @@ NSString * const __str_textFieldName = @"textTexture";
     [self getTextureLocations];
 }
 
--(NSArray *)getSettings
+- (void)getSettings:(NSMutableArray *)putHere
 {
     SettingsDescriptor * sd;
     sd = [[SettingsDescriptor alloc]  initWithControlType: SC_Text
@@ -70,7 +70,7 @@ NSString * const __str_textFieldName = @"textTexture";
                                              initialValue: _text
                                                  priority: SHADER_SETTINGS];
     
-    return @[sd];
+    [putHere addObject:sd];
     
 }
 

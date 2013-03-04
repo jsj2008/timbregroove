@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>default_scene</key>
-	<string>test</string>
+	<string>scope</string>
 	<key>scenes</key>
 	<dict>
 		<key>scope</key>
@@ -12,7 +12,7 @@
 			<array>
 				<dict>
 					<key>AudioFrame</key>
-					<string>AudioFrameDisplay</string>
+					<string>frameCapture</string>
 					<key>PanX</key>
 					<string>EQfreq</string>
 					<key>MainSlider</key>

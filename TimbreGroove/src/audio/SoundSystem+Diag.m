@@ -6,8 +6,8 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "Mixer+Diag.h"
-#import "Mixer+Parameters.h"
+#import "SoundSystem+Diag.h"
+#import "SoundSystem+Parameters.h"
 #import <AudioUnit/AudioUnit.h>
 
 typedef struct  tagAUFlagDump {
@@ -15,7 +15,7 @@ typedef struct  tagAUFlagDump {
     int e;
 } AUFlagDump;
 
-@implementation Mixer (Diag)
+@implementation SoundSystem (Diag)
 
 -(void)dumpParameters:(AudioUnit)inUnit forUnit:(NSString *)name
 {
@@ -147,6 +147,7 @@ typedef struct  tagAUFlagDump {
 
 -(void)dumpGraph
 {
+    NSLog(@"Audio graph update >>>>>>>>>>>>>>>");
     CAShow(_processingGraph);
 }
 

@@ -126,40 +126,24 @@
     }
 }
 
--(NSArray *)getSettings
+- (void)getSettings:(NSMutableArray *)settings
 {
-    NSMutableArray * settings = [NSMutableArray new];
     for( TG3dObject * child in self.children )
-    {
-        NSArray * arr = [child getSettings];
-        if( arr && [arr count] )
-           [settings addObjectsFromArray:arr];
-    }
-    
-    return settings;
+        [child getSettings:settings];
 }
 
 -(id)settingsChanged
 {
     for( TG3dObject * child in self.children )
-    {
         [child settingsChanged];
-    }
     
     return nil;
 }
 
--(NSDictionary *)getParameters
+-(void)getParameters:(NSMutableDictionary *)putHere;
 {
-    NSMutableDictionary * params = [NSMutableDictionary new];
     for( TG3dObject * child in self.children )
-    {
-        NSDictionary * dict = [child getParameters];
-        if( dict && [dict count] )
-           [params addEntriesFromDictionary:dict];
-    }
-    
-    return params;
+        [child getParameters:putHere];
 }
 
 @end

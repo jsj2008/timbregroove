@@ -16,7 +16,7 @@
 {
     unsigned int   _numVertices;
     unsigned int   _numIndices;
-    TGVertexStride _strides[MAX_STRIDES];
+    VertexStride _strides[MAX_STRIDES];
     unsigned int   _numStrides;
     unsigned int   _strideSize;
     GLsizei        _bufferSize;
@@ -46,7 +46,7 @@
         glDrawElements(_drawType,_numIndices,GL_UNSIGNED_INT,(void*)0);
 }
 
-+(GLsizei)calcDataSize: (TGVertexStride *)strides
++(GLsizei)calcDataSize: (VertexStride *)strides
           countStrides: (unsigned int)countStrides
            numVertices: (unsigned int)numVertices
 {
@@ -54,7 +54,7 @@
 
     for( int i = 0; i < countStrides; i++ )
     {
-        TGVertexStride * stride = strides + i;
+        VertexStride * stride = strides + i;
 
         size += (stride->numSize * stride->numbersPerElement * numVertices);
     }
@@ -71,7 +71,7 @@
 {
     for( int i = 0; i < _numStrides; i++ )
     {
-        TGVertexStride * stride = _strides + i;
+        VertexStride * stride = _strides + i;
         stride->location = [shader location:stride->indexIntoShaderNames];
     }    
 }
@@ -81,7 +81,7 @@
     NSMutableArray * arr = [NSMutableArray new];
     for( int i = 0; i < _numStrides; i++ )
     {
-        TGVertexStride * stride = _strides + i;
+        VertexStride * stride = _strides + i;
         [arr addObject:@(stride->indexIntoShaderNames)];
     }
     return arr;
@@ -94,7 +94,7 @@
 }
 
 -(void)setData: (float *)data
-       strides: (TGVertexStride *)strides
+       strides: (VertexStride *)strides
   countStrides: (unsigned int)countStrides
    numVertices: (unsigned int)numVertices
      indexData:(unsigned int *)indexData
@@ -112,7 +112,7 @@
     GLsizei strideSize = 0;
     for( int i = 0; i < countStrides; i++ )
     {
-        TGVertexStride * stride = strides + i;
+        VertexStride * stride = strides + i;
         strideSize += (stride->numSize * stride->numbersPerElement);
     }
 
@@ -125,7 +125,7 @@
     
     _strideSize = strideSize;
     _numVertices = numVertices;
-    memcpy(_strides, strides, countStrides * sizeof(TGVertexStride));
+    memcpy(_strides, strides, countStrides * sizeof(VertexStride));
     _numStrides = countStrides;
     
     if( indexData )
@@ -149,7 +149,7 @@
     
     for( int i = 0; i < _numStrides; i++ )
     {
-        TGVertexStride * stride = _strides + i;
+        VertexStride * stride = _strides + i;
         glEnableVertexAttribArray(stride->location);
         glVertexAttribPointer( stride->location,
                               stride->numbersPerElement,
@@ -184,7 +184,7 @@
 // TODO: this probably belongs somewhere else
 -(bool)bindToTempLocation:(GLuint)location
 {
-    TGVertexStride * stride = _strides; // WAHOO!! assume the first stride is position!!!    
+    VertexStride * stride = _strides; // WAHOO!! assume the first stride is position!!!    
     glBindBuffer(GL_ARRAY_BUFFER, _glVBuffer);
     glEnableVertexAttribArray(location);
     glVertexAttribPointer( location,
@@ -216,7 +216,7 @@
               numColors:(unsigned int)numColors
          indexIntoNames:(int)indexIntoNames
 {
-    TGVertexStride stride;
+    VertexStride stride;
     StrideInit4f(&stride);
     stride.indexIntoShaderNames = indexIntoNames;
     [self setData:rgba strides:&stride countStrides:1 numVertices:numColors indexData:NULL numIndices:0];

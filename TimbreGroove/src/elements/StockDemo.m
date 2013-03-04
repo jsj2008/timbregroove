@@ -156,9 +156,8 @@ typedef enum shaderType {
     [self addBuffer:buffer];    
 }
 
--(NSArray *)getSettings
+- (void)getSettings:(NSMutableArray *)arr
 {
-    NSArray * arr = [super getSettings];
     NSDictionary * shaders = @{ @"Cloud": @"Clouds", @"Fire":@"Fire", @"Pool": @"Pool" };    
     
     SettingsDescriptor * sd1;
@@ -182,7 +181,8 @@ typedef enum shaderType {
                                              initialValue: _geometryName
                                                  priority: SHADER_SETTINGS];
 
-    return [arr arrayByAddingObjectsFromArray:@[sd1,sd2]];
+    [arr addObject:sd1];
+    [arr addObject:sd2];
     
 }
 

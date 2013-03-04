@@ -257,9 +257,8 @@ static const float __bakeShakerTimes[] = {
     }
 }
 
--(NSArray *)getSettings
+- (void)getSettings:(NSMutableArray *)arr
 {
-    NSArray * arr = [super getSettings];
     NSDictionary * shaders = [ImageBaker getShaderModes];
     
     SettingsDescriptor * sd;
@@ -271,8 +270,8 @@ static const float __bakeShakerTimes[] = {
                                              initialValue: @(_mode)
                                                  priority: SHADER_SETTINGS];
     
-    return [arr arrayByAddingObject:sd];
-    
+
+    [arr addObject:sd];
 }
 
 @end

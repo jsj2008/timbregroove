@@ -16,6 +16,7 @@
 #import "Parameter.h"
 #import "Scene.h"
 #import "Names.h"
+#import "SettingsVC.h"
 
 @interface Ripple : GenericWithTexture {
 
@@ -25,20 +26,23 @@
     float _zRot;
     float _spotRadius;
 }
+@property (nonatomic,strong) NSString * background;
 @end
 
+
+#define DEFAULT_BACKGROUND @"stars.jpg"
 
 @implementation Ripple
 
 - (id)init
 {
-    self = [super initWithFileName:@"stars.jpg"];
+    self = [super initWithFileName:DEFAULT_BACKGROUND];
     if (self) {
         self.timerType = kSTT_CountDown;
         self.countDownBase = 3.4;
         _timer = self.countDownBase + 0.1;
         self.scale = (GLKVector3){ 1.5, 3.0, 0 };
-        
+        _background = DEFAULT_BACKGROUND;
         _ripplePt = (ShaderParameterDefinition){
             { TG_POINT, {{ 0.0, 0.0 }}, {{ -1.0,-1.0 }}, {{ 1.0,1.0 }}, kTweenEaseOutSine, 1.0  },
             gv_ripplePt
@@ -51,6 +55,12 @@
         
     }
     return self;
+}
+
+-(void)setBackground:(NSString *)background
+{
+    self.texture = [[Texture alloc] initWithFileName:background];
+    _background = background;
 }
 
 -(void)installParameters
@@ -84,6 +94,24 @@
 {
     [super getShaderFeatures:putHere];
     [putHere addObject:kShaderFeatureDistortTexture];
+}
+
+- (void)getSettings:(NSMutableArray *)arr
+{
+    NSDictionary * images = @{ @"stars.jpg": @"Star field",
+                                @"pool.png": @"Pool",
+                               @"gridtest.png": @"Grid" };
+    
+    SettingsDescriptor * sd;
+    sd = [[SettingsDescriptor alloc]  initWithControlType: SC_Picker
+                                               memberName: @"background"
+                                                labelText: @"Background"
+                                                  options: @{@"values":images,
+          @"target":self, @"key":@"background"}
+                                             initialValue: _background
+                                                 priority: SHADER_SETTINGS];
+    
+    [arr addObject:sd];    
 }
 
 @end

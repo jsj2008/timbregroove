@@ -108,7 +108,7 @@
 		570F416216ABBA0E000FCA7B /* GridPlane.m in Sources */ = {isa = PBXBuildFile; fileRef = 570F416116ABBA0E000FCA7B /* GridPlane.m */; };
 		570F416516ABDFFD000FCA7B /* Cloud.m in Sources */ = {isa = PBXBuildFile; fileRef = 570F416416ABDFFD000FCA7B /* Cloud.m */; };
 		5712FB4416B1B8B1004D62AE /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5712FB4316B1B8B1004D62AE /* Accelerate.framework */; };
-		5714713F16C8451E00CA2A69 /* Mixer+Midi.m in Sources */ = {isa = PBXBuildFile; fileRef = 5714713E16C8451E00CA2A69 /* Mixer+Midi.m */; };
+		5714713F16C8451E00CA2A69 /* Midi.m in Sources */ = {isa = PBXBuildFile; fileRef = 5714713E16C8451E00CA2A69 /* Midi.m */; };
 		5714714116C8464800CA2A69 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5714714016C8464800CA2A69 /* CoreMIDI.framework */; };
 		5714714316C86A4900CA2A69 /* ChildOfGod.mid in Resources */ = {isa = PBXBuildFile; fileRef = 5714714216C86A4900CA2A69 /* ChildOfGod.mid */; };
 		5716775F16A685A800F78B25 /* AssetLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 5716775E16A685A800F78B25 /* AssetLoader.m */; };
@@ -174,7 +174,7 @@
 		577368CE16CDBB320051551F /* bezier.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 577368CD16CDBB320051551F /* bezier.vsh */; };
 		577368D116CDC42D0051551F /* Line.m in Sources */ = {isa = PBXBuildFile; fileRef = 577368D016CDC42D0051551F /* Line.m */; };
 		577368D416CDCBF70051551F /* EQPanel.m in Sources */ = {isa = PBXBuildFile; fileRef = 577368D316CDCBF70051551F /* EQPanel.m */; };
-		577368D716CDEE380051551F /* Mixer+Parameters.m in Sources */ = {isa = PBXBuildFile; fileRef = 577368D616CDEE380051551F /* Mixer+Parameters.m */; };
+		577368D716CDEE380051551F /* SoundSystem+Parameters.m in Sources */ = {isa = PBXBuildFile; fileRef = 577368D616CDEE380051551F /* SoundSystem+Parameters.m */; };
 		577AE48816B35D1400B4FDF1 /* Fluid.m in Sources */ = {isa = PBXBuildFile; fileRef = 577AE48716B35D1400B4FDF1 /* Fluid.m */; };
 		577AE4B416B3969800B4FDF1 /* addForce.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 577AE4AA16B3969800B4FDF1 /* addForce.fsh */; };
 		577AE4B516B3969800B4FDF1 /* advect.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 577AE4AB16B3969800B4FDF1 /* advect.fsh */; };
@@ -196,6 +196,7 @@
 		5798B05916BA00F70093F473 /* pause.png in Resources */ = {isa = PBXBuildFile; fileRef = 5798B05716BA00F70093F473 /* pause.png */; };
 		5798B05A16BA00F70093F473 /* play.png in Resources */ = {isa = PBXBuildFile; fileRef = 5798B05816BA00F70093F473 /* play.png */; };
 		579AD1A916C40B670071AA9A /* Config.m in Sources */ = {isa = PBXBuildFile; fileRef = 579AD1A816C40B670071AA9A /* Config.m */; };
+		57A4C22016DFDCF10044B3C9 /* Instrument.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A4C21F16DFDCF10044B3C9 /* Instrument.m */; };
 		57A58EA816ADE68200C9FA53 /* Cube.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A58EA716ADE68200C9FA53 /* Cube.m */; };
 		57A58EB116AE020C00C9FA53 /* poolLines.png in Resources */ = {isa = PBXBuildFile; fileRef = 57A58EB016AE020C00C9FA53 /* poolLines.png */; };
 		57A66EED167B1D1C00B9EA75 /* Texture.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A66EEC167B1D1C00B9EA75 /* Texture.m */; };
@@ -212,7 +213,7 @@
 		57BE7FB316CAC9AA001972ED /* CARingBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57BE7FB116CAC9AA001972ED /* CARingBuffer.cpp */; };
 		57BE7FB616CACA0D001972ED /* RingBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57BE7FB416CACA0C001972ED /* RingBuffer.cpp */; };
 		57BF036716C61C2300148359 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57BF036616C61C2300148359 /* CoreAudio.framework */; };
-		57C3BB8516C6B5B000899F4B /* Mixer+Diag.m in Sources */ = {isa = PBXBuildFile; fileRef = 57C3BB8416C6B5B000899F4B /* Mixer+Diag.m */; };
+		57C3BB8516C6B5B000899F4B /* SoundSystem+Diag.m in Sources */ = {isa = PBXBuildFile; fileRef = 57C3BB8416C6B5B000899F4B /* SoundSystem+Diag.m */; };
 		57CAF78516891EDB00459353 /* libc++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 57CAF78416891EDA00459353 /* libc++.dylib */; };
 		57CB3B0716BE148A007C093C /* rabbit.png in Resources */ = {isa = PBXBuildFile; fileRef = 57CB3B0516BE148A007C093C /* rabbit.png */; };
 		57CB3B0816BE148A007C093C /* snail.png in Resources */ = {isa = PBXBuildFile; fileRef = 57CB3B0616BE148A007C093C /* snail.png */; };
@@ -225,7 +226,7 @@
 		57D0EBDC16D4BA5400DBF457 /* Names.m in Sources */ = {isa = PBXBuildFile; fileRef = 57D0EBDB16D4BA5300DBF457 /* Names.m */; };
 		57DF536A16DC1A6000990B8D /* Serenity.m in Sources */ = {isa = PBXBuildFile; fileRef = 57DF536916DC1A6000990B8D /* Serenity.m */; };
 		57DF9C8116B5B9AB00050635 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57DF9C8016B5B9AB00050635 /* AVFoundation.framework */; };
-		57DF9C8416B5BE2500050635 /* Mixer.m in Sources */ = {isa = PBXBuildFile; fileRef = 57DF9C8316B5BE2500050635 /* Mixer.m */; };
+		57DF9C8416B5BE2500050635 /* SoundSystem.m in Sources */ = {isa = PBXBuildFile; fileRef = 57DF9C8316B5BE2500050635 /* SoundSystem.m */; };
 		57E1954616ABECA50099514B /* PoolShader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 57E1954516ABECA50099514B /* PoolShader.vsh */; };
 		57E1954A16ABEEBD0099514B /* SphereOid.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E1954916ABEEBD0099514B /* SphereOid.m */; };
 		57E590A816BA2E3F00330F40 /* BlendState.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E590A716BA2E3F00330F40 /* BlendState.m */; };
@@ -424,8 +425,8 @@
 		570F416316ABDFF2000FCA7B /* Cloud.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Cloud.h; sourceTree = "<group>"; };
 		570F416416ABDFFD000FCA7B /* Cloud.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Cloud.m; sourceTree = "<group>"; };
 		5712FB4316B1B8B1004D62AE /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
-		5714713D16C8451E00CA2A69 /* Mixer+Midi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Mixer+Midi.h"; sourceTree = "<group>"; };
-		5714713E16C8451E00CA2A69 /* Mixer+Midi.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "Mixer+Midi.m"; sourceTree = "<group>"; };
+		5714713D16C8451E00CA2A69 /* Midi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Midi.h; sourceTree = "<group>"; };
+		5714713E16C8451E00CA2A69 /* Midi.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Midi.m; sourceTree = "<group>"; };
 		5714714016C8464800CA2A69 /* CoreMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = System/Library/Frameworks/CoreMIDI.framework; sourceTree = SDKROOT; };
 		5714714216C86A4900CA2A69 /* ChildOfGod.mid */ = {isa = PBXFileReference; lastKnownFileType = audio.midi; path = ChildOfGod.mid; sourceTree = "<group>"; };
 		5716775D16A685A800F78B25 /* AssetLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AssetLoader.h; path = src/AssetLoader.h; sourceTree = "<group>"; };
@@ -518,8 +519,8 @@
 		577368D016CDC42D0051551F /* Line.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Line.m; sourceTree = "<group>"; };
 		577368D216CDCBF70051551F /* EQPanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EQPanel.h; sourceTree = "<group>"; };
 		577368D316CDCBF70051551F /* EQPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EQPanel.m; sourceTree = "<group>"; };
-		577368D516CDEE380051551F /* Mixer+Parameters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Mixer+Parameters.h"; sourceTree = "<group>"; };
-		577368D616CDEE380051551F /* Mixer+Parameters.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "Mixer+Parameters.m"; sourceTree = "<group>"; };
+		577368D516CDEE380051551F /* SoundSystem+Parameters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SoundSystem+Parameters.h"; sourceTree = "<group>"; };
+		577368D616CDEE380051551F /* SoundSystem+Parameters.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "SoundSystem+Parameters.m"; sourceTree = "<group>"; };
 		577AE48716B35D1400B4FDF1 /* Fluid.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Fluid.m; path = fluid/Fluid.m; sourceTree = "<group>"; };
 		577AE4AA16B3969800B4FDF1 /* addForce.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = addForce.fsh; sourceTree = "<group>"; };
 		577AE4AB16B3969800B4FDF1 /* advect.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = advect.fsh; sourceTree = "<group>"; };
@@ -544,6 +545,8 @@
 		5798B05816BA00F70093F473 /* play.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = play.png; sourceTree = "<group>"; };
 		579AD1A716C40B670071AA9A /* Config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
 		579AD1A816C40B670071AA9A /* Config.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Config.m; sourceTree = "<group>"; };
+		57A4C21E16DFDCF10044B3C9 /* Instrument.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Instrument.h; sourceTree = "<group>"; };
+		57A4C21F16DFDCF10044B3C9 /* Instrument.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Instrument.m; sourceTree = "<group>"; };
 		57A58EA616ADE68200C9FA53 /* Cube.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Cube.h; sourceTree = "<group>"; };
 		57A58EA716ADE68200C9FA53 /* Cube.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Cube.m; sourceTree = "<group>"; };
 		57A58EB016AE020C00C9FA53 /* poolLines.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = poolLines.png; sourceTree = "<group>"; };
@@ -560,7 +563,6 @@
 		57ABE51E16C9FF3100A412E1 /* AudioUnitProperties.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AudioUnitProperties.h; path = System/Library/Frameworks/AudioUnit.framework/Headers/AudioUnitProperties.h; sourceTree = SDKROOT; };
 		57ABE51F16C9FF3100A412E1 /* MusicDevice.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MusicDevice.h; path = System/Library/Frameworks/AudioUnit.framework/Headers/MusicDevice.h; sourceTree = SDKROOT; };
 		57AE3BDC16D83B0A007ADC17 /* stars.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = stars.jpg; sourceTree = "<group>"; };
-		57B2098B16CAFABF007BE2A2 /* Oscilloscope.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Oscilloscope.h; sourceTree = "<group>"; };
 		57B2098C16CAFABF007BE2A2 /* Oscilloscope.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Oscilloscope.m; sourceTree = "<group>"; };
 		57B2098F16CB30FD007BE2A2 /* sin.aupreset */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = sin.aupreset; sourceTree = "<group>"; };
 		57B2099116CB3886007BE2A2 /* ChildOfGodSolo.mid */ = {isa = PBXFileReference; lastKnownFileType = audio.midi; path = ChildOfGodSolo.mid; sourceTree = "<group>"; };
@@ -575,8 +577,8 @@
 		57BE7FBB16CACE03001972ED /* CAAutoDisposer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CAAutoDisposer.h; sourceTree = "<group>"; };
 		57BE7FBC16CACE03001972ED /* CABitOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CABitOperations.h; sourceTree = "<group>"; };
 		57BF036616C61C2300148359 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
-		57C3BB8316C6B5B000899F4B /* Mixer+Diag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Mixer+Diag.h"; sourceTree = "<group>"; };
-		57C3BB8416C6B5B000899F4B /* Mixer+Diag.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "Mixer+Diag.m"; sourceTree = "<group>"; };
+		57C3BB8316C6B5B000899F4B /* SoundSystem+Diag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SoundSystem+Diag.h"; sourceTree = "<group>"; };
+		57C3BB8416C6B5B000899F4B /* SoundSystem+Diag.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "SoundSystem+Diag.m"; sourceTree = "<group>"; };
 		57CAF78416891EDA00459353 /* libc++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libc++.dylib"; path = "usr/lib/libc++.dylib"; sourceTree = SDKROOT; };
 		57CB3B0516BE148A007C093C /* rabbit.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = rabbit.png; sourceTree = "<group>"; };
 		57CB3B0616BE148A007C093C /* snail.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = snail.png; sourceTree = "<group>"; };
@@ -595,8 +597,8 @@
 		57D0EBDB16D4BA5300DBF457 /* Names.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Names.m; sourceTree = "<group>"; };
 		57DF536916DC1A6000990B8D /* Serenity.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Serenity.m; sourceTree = "<group>"; };
 		57DF9C8016B5B9AB00050635 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
-		57DF9C8216B5BE2500050635 /* Mixer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Mixer.h; sourceTree = "<group>"; };
-		57DF9C8316B5BE2500050635 /* Mixer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Mixer.m; sourceTree = "<group>"; };
+		57DF9C8216B5BE2500050635 /* SoundSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SoundSystem.h; sourceTree = "<group>"; };
+		57DF9C8316B5BE2500050635 /* SoundSystem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SoundSystem.m; sourceTree = "<group>"; };
 		57E1954516ABECA50099514B /* PoolShader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = PoolShader.vsh; sourceTree = "<group>"; };
 		57E1954816ABEEAC0099514B /* SphereOid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SphereOid.h; sourceTree = "<group>"; };
 		57E1954916ABEEBD0099514B /* SphereOid.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SphereOid.m; sourceTree = "<group>"; };
@@ -757,14 +759,16 @@
 				57DF536716DC19E400990B8D /* elements */,
 				5751F2DC16D569A700144F2B /* Audio.h */,
 				5751F2DD16D569A700144F2B /* Audio.m */,
-				57DF9C8216B5BE2500050635 /* Mixer.h */,
-				57DF9C8316B5BE2500050635 /* Mixer.m */,
-				57C3BB8316C6B5B000899F4B /* Mixer+Diag.h */,
-				57C3BB8416C6B5B000899F4B /* Mixer+Diag.m */,
-				5714713D16C8451E00CA2A69 /* Mixer+Midi.h */,
-				5714713E16C8451E00CA2A69 /* Mixer+Midi.m */,
-				577368D516CDEE380051551F /* Mixer+Parameters.h */,
-				577368D616CDEE380051551F /* Mixer+Parameters.m */,
+				57DF9C8216B5BE2500050635 /* SoundSystem.h */,
+				57DF9C8316B5BE2500050635 /* SoundSystem.m */,
+				57C3BB8316C6B5B000899F4B /* SoundSystem+Diag.h */,
+				57C3BB8416C6B5B000899F4B /* SoundSystem+Diag.m */,
+				577368D516CDEE380051551F /* SoundSystem+Parameters.h */,
+				577368D616CDEE380051551F /* SoundSystem+Parameters.m */,
+				57A4C21E16DFDCF10044B3C9 /* Instrument.h */,
+				57A4C21F16DFDCF10044B3C9 /* Instrument.m */,
+				5714713D16C8451E00CA2A69 /* Midi.h */,
+				5714713E16C8451E00CA2A69 /* Midi.m */,
 				57BE7FB516CACA0C001972ED /* RingBuffer.h */,
 				57BE7FB416CACA0C001972ED /* RingBuffer.cpp */,
 			);
@@ -1148,7 +1152,6 @@
 				570F40D816AB8EE0000FCA7B /* StockDemo.m */,
 				578292C6169879930053ADCD /* ImageBaker.m */,
 				575AA12D16ADBC6800635A76 /* PoolScreen.m */,
-				57B2098B16CAFABF007BE2A2 /* Oscilloscope.h */,
 				57B2098C16CAFABF007BE2A2 /* Oscilloscope.m */,
 				577368D216CDCBF70051551F /* EQPanel.h */,
 				577368D316CDCBF70051551F /* EQPanel.m */,
@@ -1643,7 +1646,7 @@
 				575AA12E16ADBC6800635A76 /* PoolScreen.m in Sources */,
 				57A58EA816ADE68200C9FA53 /* Cube.m in Sources */,
 				577AE48816B35D1400B4FDF1 /* Fluid.m in Sources */,
-				57DF9C8416B5BE2500050635 /* Mixer.m in Sources */,
+				57DF9C8416B5BE2500050635 /* SoundSystem.m in Sources */,
 				5780832616B73299002810BD /* PoolWater.m in Sources */,
 				57E590A816BA2E3F00330F40 /* BlendState.m in Sources */,
 				5707CA7416BCA18400B24818 /* GraphViewController.m in Sources */,
@@ -1659,14 +1662,14 @@
 				57E62B2216C30D9D007064A0 /* PVRImporter.m in Sources */,
 				5741C70716C32280009451C9 /* DistortedGeneric.m in Sources */,
 				579AD1A916C40B670071AA9A /* Config.m in Sources */,
-				57C3BB8516C6B5B000899F4B /* Mixer+Diag.m in Sources */,
-				5714713F16C8451E00CA2A69 /* Mixer+Midi.m in Sources */,
+				57C3BB8516C6B5B000899F4B /* SoundSystem+Diag.m in Sources */,
+				5714713F16C8451E00CA2A69 /* Midi.m in Sources */,
 				57BE7FB316CAC9AA001972ED /* CARingBuffer.cpp in Sources */,
 				57BE7FB616CACA0D001972ED /* RingBuffer.cpp in Sources */,
 				57B2098D16CAFAC0007BE2A2 /* Oscilloscope.m in Sources */,
 				577368D116CDC42D0051551F /* Line.m in Sources */,
 				577368D416CDCBF70051551F /* EQPanel.m in Sources */,
-				577368D716CDEE380051551F /* Mixer+Parameters.m in Sources */,
+				577368D716CDEE380051551F /* SoundSystem+Parameters.m in Sources */,
 				57CE24D716CF01CA0007BDD0 /* FivePointBezier.m in Sources */,
 				57B2737416D0C28C00E7F064 /* EQCube.m in Sources */,
 				57D0EBD616D43CD600DBF457 /* GraphView+Touches.m in Sources */,
@@ -1678,6 +1681,7 @@
 				572098E116DA9FA40075E584 /* Parameter.m in Sources */,
 				572098E516DABF390075E584 /* NSValue+Parameter.m in Sources */,
 				57DF536A16DC1A6000990B8D /* Serenity.m in Sources */,
+				57A4C22016DFDCF10044B3C9 /* Instrument.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

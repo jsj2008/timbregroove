@@ -1,20 +1,21 @@
 //
-//  Mixer+Midi.h
+//  Midi.h
 //  TimbreGroove
 //
 //  Created by victor on 2/10/13.
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "Mixer.h"
+#import "SoundSystem.h"
 
-@interface Mixer (Midi)
--(void)setupMidi;
+@interface Midi : NSObject
 
 -(void)playMidiFile:(NSString *)filename withInstrument:(Instrument *)instrument;
 -(BOOL)isPlayerDone;
--(void)pauseMidiFile;
--(void)resumeMidi;
+-(void)pause;
+-(void)resume;
 
--(void)midiDealloc;
+-(void)getParameters:(NSMutableDictionary *)putHere;
+-(void)update:(NSTimeInterval)dt;
+
 @end

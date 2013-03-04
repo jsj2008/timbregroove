@@ -24,6 +24,7 @@ extern const int kMaxChannels;
 void _CheckError( OSStatus error, const char *operation);
 
 @class ConfigInstrument;
+@class Instrument;
 
 enum MidiNotes {
     kC0 = 0,
@@ -39,15 +40,6 @@ enum MidiNotes {
 };
 
 
-@interface Instrument : NSObject
--(OSStatus)playNote:(int)note forDuration:(NSTimeInterval)duration;
-
-@property (nonatomic,readonly) int channel;
-@property (nonatomic,readonly) int lowestPlayable;
-@property (nonatomic,readonly) int highestPlayable;
-@property (nonatomic,readonly) AudioUnit sampler;
-@end
-
 typedef enum ExpectedTriggerFlags {
     kNoOneExpectsNothin = 0,
     kExpectsPeak = 1,
@@ -55,7 +47,7 @@ typedef enum ExpectedTriggerFlags {
     kExpectsCapture = 1 << 2,
 } ExpectedTriggerFlags;
 
-@interface Mixer : NSObject {
+@interface SoundSystem : NSObject {
 @private
     // here for categories
     AUGraph          _processingGraph;
@@ -73,22 +65,19 @@ typedef enum ExpectedTriggerFlags {
     
     NSArray *        _auParameters;
     
-    ExpectedTriggerFlags _expectedTriggerFlags;
-    
-    MIDIClientRef  _midiClient;
-    MusicTimeStamp _playerTrackLength;
-    MusicSequence  _currentSequence;
-    MusicPlayer    _musicPlayer;
-    bool           _midiFilePlaying;
-    MusicTimeStamp _midiPauseTime;
+    ExpectedTriggerFlags _expectedTriggerFlags;    
 }
 
-+(Mixer *)sharedInstance;
++(SoundSystem *)sharedInstance;
 
 -(Instrument *)loadInstrumentFromConfig:(ConfigInstrument *)config;
+-(void)plugInstrumentIntoBus:(Instrument *)instrument;
+-(void)unplugInstrumentFromBus:(Instrument *)instrument;
+-(void)decomissionInstrument:(Instrument *)instrument;
 
--(NSDictionary *)getParameters;
+@property (nonatomic,readonly) AudioUnit mixer;
 
--(void)update:(MixerUpdate *)mixerUpdate;
+-(void)update:(AudioFrameCapture *)audioFrameCapture;
+- (OSStatus) configUnit:(AudioUnit)unit;
 
 @end
