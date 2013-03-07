@@ -9,9 +9,7 @@
 #import "SoundSystem.h"
 
 @interface SoundSystem (Diag)
--(void)dumpParameters:(AudioUnit)au forUnit:(NSString *)name;
-- (void) printASBD: (AudioStreamBasicDescription) asbd;
--(void)dumpGraph;
--(void)dumpEQ;
-
+- (void)dumpParameters:(AudioUnit)au forUnit:(NSString *)name;
+- (void)printASBD: (AudioStreamBasicDescription) asbd;
+- (void)dumpGraph:(AUGraph)processingGraph;
 @end

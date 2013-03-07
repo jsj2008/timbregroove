@@ -9,8 +9,12 @@
 
 
 #import "EQPanel.h"
-#import "SoundSystem.h"
+
 #import "Global.h"
+#import "Scene.h"
+#import "Audio.h"
+#import "SoundSystemParameters.h"
+
 #import "GraphView.h"
 #import "FBO.h"
 #import "Texture.h"
@@ -42,11 +46,12 @@ NSString const * kParamCurveWidth   = @"CurveWidth";
     GLKVector3  *_hiPassRes;
     bool _IamATexture;
     
+    IntParamBlock _selectEQBand;
+    
     EQOffText * _eqOff;
 }
-@property (nonatomic) CGPoint CurveShape;
-@property (nonatomic) float   CurveWidth;
 @end
+
 @implementation EQPanel
 
 -(id)wireUp
@@ -97,7 +102,7 @@ NSString const * kParamCurveWidth   = @"CurveWidth";
     }
     else
     {
-        int curve = [SoundSystem sharedInstance].selectedEQBand;
+        int curve = [Global sharedInstance].scene.audio.ssp.selectedEQBand;
         self.shapeDisplay = curve;
         self.shapeEdit = curve;        
     }
@@ -109,28 +114,18 @@ NSString const * kParamCurveWidth   = @"CurveWidth";
     if( _eqOff )
        [_eqOff didAttachToView:view];
 }
-
--(void)setCurveShape:(CGPoint)CurveShape
-{
-    _CurveShape = CurveShape;
-    [self updateCurve:0 pt:CurveShape scale:0];
-}
-
--(void)setCurveWidth:(float)CurveWidth
-{
-    _CurveWidth = CurveWidth;
-    [self updateCurve:2 pt:(CGPoint){0,0} scale:CurveWidth];
-}
      
 -(void)getParameters:(NSMutableDictionary *)putHere
 {
     [super getParameters:putHere];
     
-    [self appendParameters:putHere withProperties:
-           @[ [[NonAnimatingPropertyParameter alloc] initWithTarget:self
-                            andName:@"CurveWith"],
-              [[NonAnimatingPropertyParameter alloc] initWithTarget:self
-                            andName:@"CurveShape"]] ];
+    putHere[kParamCurveShape] = ^(CGPoint pt) {
+        [self updateCurve:0 pt:pt scale:0];
+    };
+    
+    putHere[kParamCurveWidth] = ^(float f) {
+        [self updateCurve:2 pt:(CGPoint){0,0} scale:f];
+    };    
 }
 
 -(void)updateCurve:(int)knobNum pt:(CGPoint)pt scale:(float)scale

@@ -7,63 +7,45 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "TGTypes.h"
 
 
-/*
- 
- CONCEPTS and DEFINITIONS:
- --------------------------
- An object with tweakable (sp?) attributes is a 'target' or 'watchee'
- 
- The tweakable attributes are each exposed as a 'Paramater'
- 
- Each Parameter has two meta pieces of data: a name and an executable
- block that takes a single NSValue as a parameter.
 
- A event that arrives with a piece of data is called a 'Trigger'
- 
- Each Trigger can be mapped to one or more Parameter.
- 
- When a Trigger (with it's data) arrives here, each Parameter associated 
- with have its execution block invoked.
- 
- USAGE:
- -------
- 1. Initialize this class with the watchee.
- 2. Add the Parameters (these must be properties on the watchee, or at least
-    handled by watchee:valueForUndefinedKey and watchee:setValue:forUndefinedKey)
- 3. Add the mapping between Trigger names and Parameter names
- 4. Wait for triggers
- 
- REAL WORLD USAGE:
- -----------------
- See the Scene class.
- 
- IMPLEMENTATION
- ---------------
- This class will call :addObserver on the watchee for every Parameter. When a
- trigger happens, it will set the propery in the watchee. That will invoke
- this class's :observeValueForKeyPath which will call the Parameter's execution 
- block. 
- 
-*/
+@interface TriggerTween : NSObject
+-(void)update:(NSTimeInterval)dt;
+-(bool)isDone;
+@end
+
+@class TriggerMap;
+
+@protocol TriggerMapProtocol <NSObject>
+-(void)queue:(TriggerTween *)tweener;
+@end
 
 @interface TriggerMap : NSObject
 
--(id)initWithWatchee:(id)objectToWatch;
--(void)detach:(id)objectNoLongerWatchWorthy;
+-(id)initWithDelegate:(id<TriggerMapProtocol>)delegate;
 
-// @{ paramName1: paraBlock1, [paraName_n: paramBlock_n, ...]}
--(void)addParameters:(NSDictionary *)paramKeyBlockValues;
+// Step 1. Add settable parameters
+//
+// @{ paramName: [Parameter ..], ...}
+-(void)addParameters:(NSDictionary *)nameKeyParamValues;
 
-// @{ triggerName1: paramName1, [triggerName_n: paramName_n, ...]}
+// Step 2. Add mapping between trigger names and parameters
+//
+// @{ triggerName: paramName1, ...}
 -(void)addMappings:(NSDictionary *)triggerKeyParamValues;
 
--(void)trigger:(NSString const *)key withValue:(NSValue *)value;
+// Step 3. Retreive callable trigger(s)
+-(FloatParamBlock)getFloatTrigger:(NSString const *)triggerName;
+-(PointParamBlock)getPointTrigger:(NSString const *)triggerName;
+-(IntParamBlock)getIntTrigger:(NSString const *)triggerName;
+-(PointerParamBlock)getPointerTrigger:(NSString const *)triggerName;
 
-// optimization for modules that will only send trigger if
-// someone expects it
--(bool)expectsTrigger:(NSString const *)triggerName;
+// Step 4. Call through Trigger when appropriate
+
+// optional:
+-(void)removeMappings:(NSDictionary *)triggerKeyParamNameValues;
 
 @end
 

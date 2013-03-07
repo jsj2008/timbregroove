@@ -8,15 +8,15 @@
 
 #import "TGTypes.h"
 #import "Node.h"
-#import "Gestures.h"
 
 @class Camera;
 @class Shader;
 @class MeshBuffer;
 @class FBO;
 @class GraphView;
+@class Scene;
 
-@interface TG3dObject : Node<TapRecordGestureReceiver> {
+@interface TG3dObject : Node {
 @protected
     Shader * _shader;
     NSTimeInterval _totalTime;
@@ -47,7 +47,6 @@
 
 -(id)   wireUp;
 -(id)   wireUpWithViewSize:(CGSize)viewSize;
--(void) installParameters;
 
 -(void) clean;
 -(id)   settingsChanged;
@@ -57,8 +56,7 @@
 - (GLKMatrix4) calcPVM;   // combine camera and model
 - (void)getSettings:(NSMutableArray *)putHere;
 - (void)getParameters:(NSMutableDictionary *)putHere;
-
-- (void)appendParameters:(NSMutableDictionary *)dict withProperties:(NSArray *)propertyParams;
+- (void)triggersChanged:(Scene *)scene;
 
 -(void)didAttachToView:(GraphView *)view;
 -(void)didDetachFromView:(GraphView *)view;

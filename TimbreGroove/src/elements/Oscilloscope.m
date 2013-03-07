@@ -20,7 +20,6 @@
     float _data[kFramesForDisplay];
     __weak Line * _lineMesh;
 }
-@property (nonatomic) NSValue * frameCapture;
 @end
 
 @implementation Oscilloscope
@@ -35,23 +34,17 @@
     [self addBuffer:mesh];
 }
 
--(void)setFrameCapture:(NSValue *)nsv
-{
-    AudioFrameCapture frameCapture = [nsv AudioFrameCaptureValue];
-    AudioBufferList * abl = frameCapture.audioBufferList;
-    if( abl )
-    {
-        _lineMesh.heightOffsets = abl->mBuffers[0].mData;
-        [_lineMesh resetVertices];
-    }
-    
-}
 -(void)getParameters:(NSMutableDictionary *)putHere
 {
-    PropertyParameter * pp = [[NonAnimatingPropertyParameter alloc] initWithTarget:self
-                                                                           andName:@"frameCapture"];
     [super getParameters:putHere];
-    [self appendParameters:putHere withProperties:@[pp]];
+    
+    putHere[@"frameCapture"] = [Parameter withBlock:^(void *ptr) {
+        if( ptr )
+        {
+            _lineMesh.heightOffsets = ((AudioBufferList *)ptr)->mBuffers[0].mData;
+            [_lineMesh resetVertices];
+        }
+    }];
 }
 
 

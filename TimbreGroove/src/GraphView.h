@@ -9,15 +9,20 @@
 #import <GLKit/GLKit.h>
 #import "Graph.h"
 
-@class RecordGesture;
-@class TapRecordGesture;
 
 @interface GraphView : GLKView {
 @private // here for categories
     bool    _panTracking;
     CGPoint _panLast;
-    RecordGesture * _recordGesture;
-    TapRecordGesture * _tapRecordGesture;
+
+    PointParamBlock _triggerDirection;
+    FloatParamBlock _triggerPinch;
+    PointParamBlock _triggerTapPos;
+    PointParamBlock _triggerTap1;
+    FloatParamBlock _triggerPanX;
+    FloatParamBlock _triggerPanY;
+    PointParamBlock _triggerDrag1;
+    PointParamBlock _triggerDragPos;
 }
 @property (nonatomic) GLKVector4 backcolor;
 @property (nonatomic,strong) Graph * graph;

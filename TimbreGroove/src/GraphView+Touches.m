@@ -13,56 +13,59 @@
 #import "Names.h"
 
 @implementation GraphView (Touches)
-@dynamic recordGesture;
-@dynamic tapRecordGesture;
 
--(void)setRecordGesture:(RecordGesture *)recordGesture
+-(void)triggersChanged:(Scene *)scene
 {
-    _recordGesture = recordGesture;
-}
--(RecordGesture *)recordGesture
-{
-    return _recordGesture;
-}
--(void)setTapRecordGesture:(TapRecordGesture *)tapRecordGesture
-{
-    _tapRecordGesture = tapRecordGesture;
-}
--(TapRecordGesture *)tapRecordGesture
-{
-    return _tapRecordGesture;
+    TriggerMap * tm = scene.triggers;
+    _triggerDirection = [tm getPointTrigger:kTriggerDirection];
+    _triggerPinch     = [tm getFloatTrigger:kTriggerPinch];
+    _triggerTapPos    = [tm getPointTrigger:kTriggerTapPos];
+    _triggerTap1      = [tm getPointTrigger:kTriggerTap1];
+    _triggerPanX      = [tm getFloatTrigger:kTriggerPanX];
+    _triggerPanY      = [tm getFloatTrigger:kTriggerPanY];
+    _triggerDrag1     = [tm getPointTrigger:kTriggerDrag1];
+    _triggerDragPos   = [tm getPointTrigger:kTriggerDragPos];
 }
 
 -(void)setupTouches
 {
-    _recordGesture = [[RecordGesture alloc] initWithTarget:self action:@selector(record:)];
-    [self addGestureRecognizer:_recordGesture];
-    
-    _tapRecordGesture = [[TapRecordGesture alloc] initWithTarget:self action:@selector(tapRecord:)];
-    [self addGestureRecognizer:_tapRecordGesture];
-    
-    UITapGestureRecognizer * tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tap:)];
-    [self addGestureRecognizer:tap];
-    
-    UIPinchGestureRecognizer * pnch = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinch:)];
-    [self addGestureRecognizer:pnch];
-    
-    PannerGesture * pgr = [[PannerGesture alloc] initWithTarget:self action:@selector(panning:)];
-    [self addGestureRecognizer:pgr];
-    pgr.limitRC = self.frame;
-    
-    UISwipeGestureRecognizerDirection dirs[4] = {
-        UISwipeGestureRecognizerDirectionRight,
-        UISwipeGestureRecognizerDirectionLeft,
-        UISwipeGestureRecognizerDirectionUp,
-        UISwipeGestureRecognizerDirectionDown
-    };
-    UISwipeGestureRecognizer * sgr;
-    for( int i = 0; i < 4; i++ )
+    if( _triggerTap1 || _triggerTapPos )
     {
-        sgr = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipe:)];
-        sgr.direction = dirs[i];
-        [self addGestureRecognizer:sgr];
+        UITapGestureRecognizer * tap;
+        tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tap:)];
+        [self addGestureRecognizer:tap];
+    }
+    
+    if( _triggerPinch )
+    {
+        UIPinchGestureRecognizer * pnch;
+        pnch = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinch:)];
+        [self addGestureRecognizer:pnch];
+    }
+    
+    if( _triggerPanX || _triggerPanY || _triggerDrag1 || _triggerDragPos )
+    {
+        PannerGesture * pgr;
+        pgr = [[PannerGesture alloc] initWithTarget:self action:@selector(panning:)];
+        [self addGestureRecognizer:pgr];
+        pgr.limitRC = self.frame;
+    }
+    
+    if( _triggerDirection )
+    {
+        UISwipeGestureRecognizerDirection dirs[4] = {
+            UISwipeGestureRecognizerDirectionRight,
+            UISwipeGestureRecognizerDirectionLeft,
+            UISwipeGestureRecognizerDirectionUp,
+            UISwipeGestureRecognizerDirectionDown
+        };
+        UISwipeGestureRecognizer * sgr;
+        for( int i = 0; i < 4; i++ )
+        {
+            sgr = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipe:)];
+            sgr.direction = dirs[i];
+            [self addGestureRecognizer:sgr];
+        }
     }
 }
 
@@ -86,8 +89,7 @@
                 pt.y = -1;
                 break;
         }
-        Scene * scene = [Global sharedInstance].scene;
-        [scene setTrigger:kTriggerDirection point:pt];
+        _triggerDirection(pt);
     }
 }
 
@@ -107,7 +109,7 @@
             else
                 scale = 1.0;
         }
-        [[Global sharedInstance].scene setTrigger:kTriggerPinch value:scale];
+        _triggerPinch(scale);
     }
 }
 
@@ -125,10 +127,11 @@
 {
     if( tgr.state == UIGestureRecognizerStateEnded )
     {
-        Scene * scene   = [Global sharedInstance].scene;
         CGPoint pt      = [tgr locationInView:self];
-        [scene setTrigger:kTriggerTapPos point:pt];
-        [scene setTrigger:kTriggerTap1 point:[self nativeToTG:pt]];
+        if( _triggerTapPos )
+            _triggerTapPos(pt);
+        if( _triggerTap1 )
+            _triggerTap1([self nativeToTG:pt]);
     }
 }
 
@@ -145,21 +148,19 @@
             _panTracking = true;
         }
 
-        Scene * scene   = [Global sharedInstance].scene;
-        
         CGPoint spt = (CGPoint){ (pt.x - _panLast.x) / sz.width,
                                 -(pt.y - _panLast.y) / sz.height };
 
         // we get a ton of 0 movement
-        if( fabsf(spt.x) > FLT_EPSILON )
-        {
-//            NSLog(@"Pan x: %f for pt:%d,%d", spt.x, (int)pt.x, (int)pt.y);
-            [scene setTrigger:kTriggerPanX value:spt.x];
-        }
-        if( fabsf(spt.y) > FLT_EPSILON )
-            [scene setTrigger:kTriggerPanY value:spt.y];
-        [scene setTrigger:kTriggerDrag1 point:[self nativeToTG:pt]];
-        [scene setTrigger:kTriggerDragPos point:pt];
+        if( fabsf(spt.x) > FLT_EPSILON && _triggerPanX )
+            _triggerPanX(spt.x);
+        if( fabsf(spt.y) > FLT_EPSILON && _triggerPanY )
+            _triggerPanY(spt.y);
+
+        if( _triggerDrag1 )
+            _triggerDrag1([self nativeToTG:pt]);
+        if( _triggerDragPos )
+            _triggerDragPos(pt);
         
         _panLast = pt;
     }
@@ -167,15 +168,6 @@
     {
         _panTracking = false;
     }
-}
-
--(void)record:(RecordGesture *)upg
-{
-}
-
--(void)tapRecord:(TapRecordGesture *)trg
-{
-    
 }
 
 @end

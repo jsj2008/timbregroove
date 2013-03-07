@@ -19,7 +19,9 @@ typedef enum eqBands {
 } eqBands;
 
 
-@interface SoundSystem (Parameters)
+@interface SoundSystemParameters : NSObject
+
+-(id)initWithSoundSystem:(SoundSystem *)ss;
 
 @property (nonatomic,strong) NSString * selectedEQBandName;
 @property (nonatomic) eqBands selectedEQBand; 
@@ -27,10 +29,9 @@ typedef enum eqBands {
 @property (nonatomic) int     numChannels;
 
 -(void)getParameters:(NSMutableDictionary *)putHere;
+-(void)update:(NSTimeInterval)dt;
+-(void)triggersChanged:(Scene *)scene;
 
--(void)configureEQ;
--(void)setupUI;
--(void)triggerExpected;
-
++(void)configureEQ:(AudioUnit)masterEQUnit;
 
 @end

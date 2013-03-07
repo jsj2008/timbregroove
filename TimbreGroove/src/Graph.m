@@ -10,6 +10,7 @@
 #import "Camera.h"
 #import "Global.h"
 #import "Config.h"
+#import "GraphView+Touches.h"
 
 @interface Graph() {
     // as of this writing the majority of graphs (all?)
@@ -40,7 +41,7 @@
     NSLog(@"Graph object gone");
 }
 
--(id)createTopLevelNodeWithConfig:(ConfigGraphicElement *)config andViewSize:(CGSize)viewSize;
+-(id)loadFromConfig:(ConfigGraphicElement *)config andViewSize:(CGSize)viewSize;
 {
     Class klass = NSClassFromString(config.instanceClass);
     TG3dObject * node = [[klass alloc] init];
@@ -144,6 +145,14 @@
 {
     for( TG3dObject * child in self.children )
         [child getParameters:putHere];
+}
+
+-(void)triggersChanged:(Scene *)scene
+{
+    [((GraphView *)self.view) triggersChanged:scene];
+    
+    for( TG3dObject * child in self.children )
+        [child triggersChanged:scene];
 }
 
 @end

@@ -61,19 +61,10 @@
 - (GLint) location:(int)indexIntoNames;
 -(const char *)nameForIndex:(int)index;
 
+-(void)floatParameter:(NSMutableDictionary *)putHere idx:(int)idx value:(float)value range:(FloatRange)range;
+-(void)pointParameter:(NSMutableDictionary *)putHere idx:(int)idx;
+
 
 @property (nonatomic) bool acceptMissingVars;
 
-@end
-
-typedef struct ShaderParameterDefinition {
-    ParameterDefintion  pd;
-    int indexIntoNames;
-} ShaderParameterDefinition;
-
-@interface ShaderParameter : Parameter
-
--(id)initWithShaderDef:(ShaderParameterDefinition *)sdef;
-
-@property (nonatomic,weak) Shader *shader;
 @end

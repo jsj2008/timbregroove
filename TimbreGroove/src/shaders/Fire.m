@@ -45,6 +45,7 @@ const char * _fire_shader_name = "FireShader";
 
 -(void)prepareRender:(TG3dObject *)object
 {
+    [super prepareRender:object];
     GLKMatrix4 pvm = [object calcPVM];
     GLKMatrix4 modelView = object.modelView;
     GLKMatrix3 normalMat = GLKMatrix3InvertAndTranspose(GLKMatrix4GetMatrix3(pvm), NULL);

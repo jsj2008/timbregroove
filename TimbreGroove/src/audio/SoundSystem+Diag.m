@@ -7,7 +7,6 @@
 //
 
 #import "SoundSystem+Diag.h"
-#import "SoundSystem+Parameters.h"
 #import <AudioUnit/AudioUnit.h>
 
 typedef struct  tagAUFlagDump {
@@ -123,32 +122,11 @@ typedef struct  tagAUFlagDump {
     NSLog (@"  Bits per Channel:    %10d\n----------------------------\n",    (unsigned int)asbd.mBitsPerChannel);
 }
 
--(void)dumpEQ
-{
-    //    for( int i = 0; i < kNUM_EQ_BANDS; i++ )
-    {
-        //    if( i == 1 )
-        //    continue;
-        float bw, center, peak;
-        int i = _selectedEQBand;
-        if( i == kEQDisabled )
-        {
-            NSLog(@"Can't dump EQ because it is disabled");
-        }
-        else
-        {
-            AudioUnitGetParameter(_masterEQUnit, kAUNBandEQParam_Bandwidth+i, kAudioUnitScope_Global, 0, &bw);
-            AudioUnitGetParameter(_masterEQUnit, kAUNBandEQParam_Frequency +i, kAudioUnitScope_Global, 0, &center);
-            AudioUnitGetParameter(_masterEQUnit, kAUNBandEQParam_Gain+i, kAudioUnitScope_Global, 0, &peak);
-            NSLog(@"EQ[%d] center: %05.4f bw: %02.4f  peak:%02.4f", i, center, bw, peak);
-        }
-    }
-}
 
--(void)dumpGraph
+-(void)dumpGraph:(AUGraph)processingGraph
 {
     NSLog(@"Audio graph update >>>>>>>>>>>>>>>");
-    CAShow(_processingGraph);
+    CAShow(processingGraph);
 }
 
 @end

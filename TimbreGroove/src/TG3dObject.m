@@ -12,10 +12,8 @@
 #import "MeshBuffer.h"
 #import "FBO.h"
 #import "SettingsVC.h"
-#import "GraphView+Touches.h"
-
+#import "Scene.h"
 @interface TG3dObject () {
-    PointPlayer * _ptPlayer;
 }
 @end
 
@@ -38,18 +36,12 @@
 -(id)wireUp
 {
     self.settingsAreDirty = false;
-    [self installParameters];
     return self;
 }
 
 -(id)wireUpWithViewSize:(CGSize)viewSize
 {
     return [self wireUp];
-}
-
--(void)installParameters
-{
-    
 }
 
 -(void)clean
@@ -74,34 +66,11 @@
 
 -(void)didAttachToView:(GraphView *)view
 {
-    [view.tapRecordGesture addReceiver:self];
 }
 
 -(void)didDetachFromView:(GraphView *)view
 {
-    [view.tapRecordGesture removeReceiver:self];
 }
-
--(void)TapRecordGesture:(TapRecordGesture*)rg recordingWillBegin:(PointRecorder *)recorder
-{
-    _ptPlayer = nil;
-}
-
--(void)TapRecordGesture:(TapRecordGesture*)rg recordingBegan:(PointRecorder *)recorder
-{
-    _ptPlayer = nil;
-}
-
--(void)TapRecordGesture:(TapRecordGesture*)rg recordedPt:(GLKVector3)pt
-{
-//    [self playNoteAtPt:pt];
-}
-
--(void)TapRecordGesture:(TapRecordGesture*)rg recordingDone:(PointRecorder *)recorder
-{
-    _ptPlayer = [recorder makePlayer];
-}
-
 
 #pragma mark update render
 
@@ -229,19 +198,13 @@
 {
 }
 
-- (void)appendParameters:(NSMutableDictionary *)dict withProperties:(NSArray *)propertyParams
-{
-    for( PropertyParameter * pp in propertyParams )
-        dict[pp.propName] = pp.myParamBlock;
-}
-
 -(void)getParameters:(NSMutableDictionary *)dict
 {
-    Shader * shader = self.shader;
-    for( ShaderParameter * param in _parameters )
-    {
-        param.shader = shader;
-        dict[param.parameterName] = param.myParamBlock;
-    }
 }
+
+-(void)triggersChanged:(Scene *)scene
+{
+    
+}
+
 @end

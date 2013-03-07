@@ -201,6 +201,11 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
     }
 }
 
+-(void)triggersChanged:(Scene *)scene
+{
+    
+}
+
 -(void)update:(NSTimeInterval)dt
 {
     

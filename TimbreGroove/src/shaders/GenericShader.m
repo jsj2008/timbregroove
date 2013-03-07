@@ -82,6 +82,7 @@ static const char * _generic_shader_var_names[NUM_GENERIC_VARIABLES] = {
 
 - (void) prepareRender:(TG3dObject *)tgobj
 {
+    [super prepareRender:tgobj];
     GenericBase * object = (GenericBase *)tgobj;
     
     GLKMatrix4 pvm = [object calcPVM];

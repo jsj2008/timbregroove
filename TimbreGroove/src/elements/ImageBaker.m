@@ -83,6 +83,7 @@ static const char * __bakerShakerModes[] = {
 
 -(void)prepareRender:(TG3dObject *)object
 {
+    [super prepareRender:object];
     GLKMatrix4 pvm = [object calcPVM];
     [self writeToLocation:ibu_pvm type:TG_MATRIX4 data:pvm.m];
 }

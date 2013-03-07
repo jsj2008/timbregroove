@@ -48,37 +48,6 @@ NSString const * kParamPoolMoveItem = @"MoveItem";
     return distance <= _radius;
 }
 
--(void)doneResizingRadius
-{
-    _resizingRadius = false;
-}
-
--(void)animateRadius
-{
-    if( !_resizingRadius )
-    {
-        float radius = _radius;
-        if( _shrinkingRadius )
-            radius -= 0.2;
-        else
-            radius += 0.2;
-        
-        if( radius >= 1.0 )
-        {
-            _shrinkingRadius = true;
-            radius = 1.0;
-        }
-        else if( radius <= 0.2 )
-        {
-            _shrinkingRadius = false;
-            radius = 0.2;
-        }
-        
-        [self setAnimatedRadius:radius];
-        
-    }
-}
-
 -(void)setCenterX:(float)centerX
 {
     _centerX = centerX;
@@ -91,40 +60,9 @@ NSString const * kParamPoolMoveItem = @"MoveItem";
     _center = (GLKVector2){ _centerX, _centerY };
 }
 
--(void)setAnimatedRadius:(float)radius
+-(void)moveTo:(CGPoint)pt
 {
-    _resizingRadius = true;
-    /*
-    NSDictionary * params = @{    kTweenDuration: @0.2f,
-                                kTweenFunction: kTweenEaseInSine,
-                                    @"radius": @(radius),
-                                  kTweenCompleteBlock:  ^{ [self doneResizingRadius]; }
-    };
-    
-    [Tweener addTween:self withParameters:params];
-     */
-    
-}
-
--(void)moveTo:(GLKVector2)pt
-{
-    /*
-    NSLog(@"Moving to: %f, %f", pt.x, pt.y);
-    
-    NSDictionary * params = @{    kTweenDuration: @0.5f,
-                                kTweenFunction: kTweenEaseOutSine,
-                                    @"centerX": @(pt.x)
-                                    };
-    
-    [Tweener addTween:self withParameters:params];
-
-    NSDictionary * params2 = @{    kTweenDuration: @0.5f,
-                                kTweenFunction: kTweenEaseOutSine,
-                                    @"centerY": @(pt.y)
-                                    };
-    
-    [Tweener addTween:self withParameters:params2];    
-     */
+    _center = *(GLKVector2 *)&pt;
 }
 
 @end
@@ -171,7 +109,7 @@ NSString const * kParamPoolMoveItem = @"MoveItem";
     self.shader = shader;
 }
 
--(void)update:(NSTimeInterval)dt audioFrameCapture:(AudioFrameCapture *)audioFrameCapture
+-(void)update:(NSTimeInterval)dt
 {
     if( _timer > 1.0/8.0 )
     {
@@ -218,16 +156,6 @@ NSString const * kParamPoolMoveItem = @"MoveItem";
 }
 
 
--(GLKVector2)screenToPool:(CGPoint)pt
-{
-    CGSize sz = _viewSz;
-    float xsize = sz.width / 2.0; // (float)self.view.drawableWidth / 2.0;
-    float ysize = sz.height / 2.0; // (float)self.view.drawableHeight / 2.0;
-    float x = -(pt.x - xsize) / xsize;
-    float y = (pt.y - ysize) / ysize;
-    return (GLKVector2){x,y};
-}
-
 -(PoolWater *)waterFromPt:(GLKVector2)pt
 {
     for( PoolWater * water in _waters )
@@ -238,50 +166,20 @@ NSString const * kParamPoolMoveItem = @"MoveItem";
     return nil;
 }
 
--(void)setMoveItem:(CGPoint)moveItemPt
-{
-    [_waters[0] moveTo:[self screenToPool:moveItemPt]];
-}
-
 -(void)getParameters:(NSMutableDictionary *)putHere
 {
     [super getParameters:putHere];
     
-    PropertyParameter * pp = [[NonAnimatingPropertyParameter alloc] initWithTarget:self andName:@"moveItem"];
-    
-    [self appendParameters:putHere withProperties:@[pp]];
+    putHere[@"moveItem"] = ^(CGPoint pt) {
+        [_waters[0] moveTo:pt];
+    };
 }
 
--(void)onLongTap:(UILongPressGestureRecognizer *)lpgr
-{
-    GLKVector2 pt = [self screenToPool:[lpgr locationInView:self.view]];
-    PoolWater * water = [self waterFromPt:pt];
-    if( water )
-    {
-        [water animateRadius];
-    }
-}
-
--(void)onTap:(UITapGestureRecognizer *)tgr
-{
-    GLKVector2 pt = [self screenToPool:[tgr locationInView:self.view]];
-    PoolWater * water = [self waterFromPt:pt];
-    if( water )
-    {
-        //[water onTap:tgr];
-    }
-    else
-    {
-        PoolWater * water = [self addPoolChild];
-        water.center = pt;
-    }
-    
-}
 
 -(PoolWater *)addPoolChild
 {
     PoolWater * child = [PoolWater new];
-    [child setAnimatedRadius:0.2];
+    child.radius = 0.2;
     
     if( !_waters )
         _waters = [NSMutableArray new];

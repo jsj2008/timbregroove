@@ -8,6 +8,9 @@
 
 #import "Shader.h"
 #import "ShaderLocations.h"
+#import <libkern/OSAtomic.h>
+
+#define ATOMIC_INC(c) OSAtomicCompareAndSwap32Barrier(c,c+1,(volatile int32_t *)&c);
 
 static NSHashTable * __shaders;
 
@@ -185,6 +188,18 @@ static NSHashTable * __shaders;
 }
 @end
 
+typedef struct _VarQueueItem
+{
+    int indexIntoName;
+    TGUniformType type;
+    union {
+        float f;
+        int i;
+        CGPoint pt;
+        GLKVector3 v3;
+        GLKVector4 v4;
+    };
+} VarQueueItem;
 
 @interface Shader () {
     const char ** _names;
@@ -193,6 +208,10 @@ static NSHashTable * __shaders;
     int           _lastAttr;
     id            _poolKey;
     ShaderLocations * _locations;
+    
+    int _varQueueCount;
+    int _varQueueMax;
+    VarQueueItem * _varQueue;
 }
 
 @end
@@ -275,6 +294,10 @@ static NSHashTable * __shaders;
     _locations = [[ShaderLocations alloc] initWithShader:self];
     [self getLocationsForNames];
     
+    _varQueueMax = 50;
+    _varQueueCount = 0;
+    _varQueue = malloc(_varQueueMax * sizeof(VarQueueItem));
+    
     NSString * tag = [headers length] ? headers : @"default";
     _poolKey = [NSString stringWithFormat:@"%s-%s-%@",vert,frag,tag];
     if( !__shaders )
@@ -286,6 +309,7 @@ static NSHashTable * __shaders;
 -(void)dealloc
 {
     free(_vars);
+    free(_varQueue);
     [__shaders removeObject:self];
 }
 
@@ -332,41 +356,32 @@ static NSHashTable * __shaders;
 
 - (void) prepareRender:(TG3dObject *)object
 {
-    
+    @synchronized(self) {
+        VarQueueItem * vqi = _varQueue;
+        for( int i = 0; i < _varQueueCount; i++, vqi++ )
+        {
+            [_locations writeToLocation:_vars[vqi->indexIntoName]
+                                   type:vqi->type
+                                   data:&vqi->f];
+        }
+        _varQueueCount = 0;
+    }
 }
-@end
 
-
-@implementation ShaderParameter
-
--(id)initWithShaderDef:(ShaderParameterDefinition *)sdef
+-(void)floatParameter:(NSMutableDictionary *)putHere idx:(int)idx value:(float)value range:(FloatRange)range
 {
-    return [super initWithDef:(ParameterDefintion *)sdef valueNotify:nil];
+    putHere[ @(_names[idx]) ] = [FloatParameter withRange:range value:value block:^(float f){
+        _varQueue[_varQueueCount] = (VarQueueItem){ index, TG_FLOAT, { .f = f }};
+        ATOMIC_INC(_varQueueCount);
+    }];
 }
 
--(void)setShader:(Shader *)shader
+-(void)pointParameter:(NSMutableDictionary *)putHere idx:(int)idx
 {
-    // These are set of relatively unrelated tasks
-    // but they might as well be done here:
-    
-    // 1. set this instance's shader
-    //
-    _shader = shader;
-    
-    // 2. expose the shader variable name for setting up trigger maps
-    //
-    ShaderParameterDefinition * spd = (ShaderParameterDefinition *)_pd;
-    self.parameterName = @([shader nameForIndex:spd->indexIntoNames]);
-    
-    // 3. set up the trigger ParamBlock
-    //
-    self.valueNotify = ^{
-        [shader writeToLocation:spd->indexIntoNames type:spd->pd.type data:&spd->pd.currentValue];
-    };
-    
-    // 4. set the default value into the shader
-    //
-    [shader writeToLocation:spd->indexIntoNames type:spd->pd.type data:&spd->pd.def];
+    putHere[ @(_names[idx]) ] = [Parameter withBlock:^(CGPoint pt) {
+        _varQueue[_varQueueCount] = (VarQueueItem){ index, TG_POINT, { .pt = pt } };
+        ATOMIC_INC(_varQueueCount);        
+    }];
 }
 
 @end

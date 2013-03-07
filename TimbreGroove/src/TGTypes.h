@@ -9,6 +9,9 @@
 #ifndef TimbreGroove_TGTypes_h
 #define TimbreGroove_TGTypes_h
 
+#import "BKGlobals.h"
+#import "NSObject+BlockObservation.h"
+
 #define R0_1() (((float)(arc4random_uniform(0x1000000) % 255))/255.0)
 
 #define TG_MIN(a,b)            (((a) < (b)) ? (a) : (b))
@@ -19,6 +22,11 @@
 
 #define GL_ERROR_C { GLenum __e = glGetError(); if(__e) { NSLog(@"glError(%d/%04X) %s:%d",__e,__e,__FILE__,__LINE__); }}
 #define GL_CALL(f) { NSLog(@"calling: %s", f); }
+
+typedef void (^FloatParamBlock)(float);
+typedef void (^PointParamBlock)(CGPoint);
+typedef void (^IntParamBlock)(int);
+typedef void (^PointerParamBlock)(void *);
 
 
 typedef enum {
@@ -66,12 +74,6 @@ typedef struct VertexStride {
     int          indexIntoShaderNames;
     GLuint       location;
 } VertexStride;
-
-typedef struct AudioFrameCapture {
-    void * audioBufferList;
-    unsigned int numFrames;
-    unsigned int droppedCaptureFrames;
-} AudioFrameCapture;
 
 
 static inline NSMutableDictionary * d( NSDictionary * a )

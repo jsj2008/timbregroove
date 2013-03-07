@@ -37,6 +37,7 @@
 
     Graph * _utilityGraph;
     Graph * _stowedDisplayGraph;
+    FloatParamBlock _mainSliderTrigger;
     
 }
 
@@ -70,25 +71,7 @@
 
     _scenes = [NSMutableArray new];
     
-    [_global addObserver:self
-              forKeyPath:(NSString *)kGlobalRecording
-                 options:NSKeyValueObservingOptionNew
-                 context:NULL];
-    
-    [_global addObserver:self
-              forKeyPath:(NSString *)kGlobalScene
-                 options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld
-                 context:NULL];
-
-}
-
--(void)observeValueForKeyPath:(NSString *)keyPath
-                     ofObject:(id)object
-                       change:(NSDictionary *)change
-                      context:(void *)context
-{
-    if( [kGlobalRecording isEqualToString:keyPath] )
-    {
+    BKSenderBlock recordChanger = ^(id sender) {
         if( _global.recording )
         {
             _recordButton.tintColor = [UIColor redColor];
@@ -97,20 +80,32 @@
         {
             _recordButton.tintColor = [UIColor purpleColor];
         }
-    }
-    else if( [kGlobalScene isEqualToString:keyPath] )
-    {
+    };
+    
+    BKObservationBlock sceneChanger = ^(id obj, NSDictionary *change) {
         Scene *oldScene = change[NSKeyValueChangeOldKey];
         if( oldScene && [oldScene isKindOfClass:[Scene class]])
-           [oldScene pause];
-        [_global.scene play];
-        [[SoundSystem sharedInstance] dumpGraph];
-
+            [oldScene pause];
+        
+        Scene * newScene = _global.scene;
+        [newScene play];
+        
         [self performSelector:@selector(performTransition:)
-                   withObject:_global.scene.graph
+                   withObject:newScene.graph
                    afterDelay:0.12];
-    }
+        
+        _mainSliderTrigger = [newScene.triggers getFloatTrigger:kTriggerMainSlider];
+        
+    };
+    
+    [_global addObserverForKeyPath:(NSString *)kGlobalRecording
+                              task:recordChanger];
+    [_global addObserverForKeyPath:(NSString *)kGlobalScene
+                           options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld
+                              task:sceneChanger];
+    
 }
+
 
 -(void)viewDidLayoutSubviews
 {
@@ -255,7 +250,7 @@
 
 - (IBAction)toolbarSlider:(UISlider *)sender
 {
-    [_global.scene setTrigger:kTriggerMainSlider value:sender.value];
+    _mainSliderTrigger(sender.value);
 }
 
 - (IBAction)audioPanel:(UIButton *)sender
@@ -271,7 +266,7 @@
         _stowedDisplayGraph = _global.scene.graph;
         _utilityGraph = [[Graph alloc] init];
         ConfigGraphicElement * config = [[Config sharedInstance] getGraphicElement:kConfigEQPanel];
-        [_utilityGraph createTopLevelNodeWithConfig:config andViewSize:_global.graphViewSize];
+        [_utilityGraph loadFromConfig:config andViewSize:_global.graphViewSize];
         [self performUtilityTransitionWithGraph:_utilityGraph];
     }
 }

@@ -77,6 +77,7 @@ const char * _pool_shader_name = "PoolShader";
 
 -(void)prepareRender:(TG3dObject *)object
 {
+    [super prepareRender:object];
     GLKMatrix4 pvm = [object calcPVM];
     GLKMatrix4 modelView = object.modelView;
     GLKMatrix3 normalMat = GLKMatrix3InvertAndTranspose(GLKMatrix4GetMatrix3(pvm), NULL);

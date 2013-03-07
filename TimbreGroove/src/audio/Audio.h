@@ -11,19 +11,22 @@
 
 @class ConfigAudioProfile;
 @class Scene;
+@class SoundSystemParameters;
 
 @interface Audio : NSObject {
     @protected
     NSMutableDictionary * _instruments;
 }
-+(id)audioFromConfig:(ConfigAudioProfile *)config;
++(id)audioFromConfig:(ConfigAudioProfile *)config withScene:(Scene *)scene;
 -(void)loadAudioFromConfig:(ConfigAudioProfile *)config;
 -(void)getParameters:(NSMutableDictionary *)putHere;
 -(void)getSettings:(NSMutableArray *)putHere;
--(void)update:(NSTimeInterval)dt scene:(Scene *)scene;
-
+-(void)update:(NSTimeInterval)dt;
+-(void)triggersChanged:(Scene *)scene;
 -(void)play;
 -(void)pause;
+
+@property (nonatomic,strong) SoundSystemParameters * ssp;
 
 // derived classes
 -(void)start;

@@ -12,6 +12,8 @@
 #import "SoundSystem.h"
 #import "Audio.h"
 #import "Instrument.h"
+#import "TriggerMap.h"
+
 @interface Pentatonic : NSObject {
     int * _notes;
     int _count;
@@ -52,12 +54,16 @@
 }
 @end
 
+
 @interface Serenity : Audio
 
 @end
 
 @interface Serenity() {
     Pentatonic * _scale;
+    FloatParamBlock _channelVolume;
+    FloatParamBlock _channelVolumeDecay;
+    IntParamBlock   _selectChannel;
 }
 
 @end
@@ -66,9 +72,22 @@
 -(void)start
 {
     _scale = [Pentatonic new];
-    Scene * scene = [Global sharedInstance].scene;
-    [scene setParameter:kParamChannelVolume value:0 func:kTweenLinear duration:0];
     [super start];
+}
+
+-(void)triggersChanged:(Scene *)scene
+{
+    static NSString * kChannelVolumeDecay = nil;
+    
+    if( !kChannelVolumeDecay )
+        kChannelVolumeDecay = [kParamChannelVolume stringByAppendingString:@":EaseOutSine:1.5"];
+
+    TriggerMap * tm = scene.triggers;
+    _channelVolume      = [tm getFloatTrigger:kParamChannelVolume];
+    _channelVolumeDecay = [tm getFloatTrigger:kChannelVolumeDecay];
+    _selectChannel      = [tm getIntTrigger:kParamChannel];
+    
+    _channelVolume(0.0);
 }
 
 -(void)getParameters:(NSMutableDictionary *)putHere
@@ -77,13 +96,13 @@
     
     Instrument * synth = _instruments[@"vibes"];
 
-    putHere[@"SwellSound"] = ^(NSValue *nsv){
-        //CGPoint pt = [nsv CGPointValue];
-        Scene * scene = [Global sharedInstance].scene;
+    putHere[@"SwellSound"] = ^(CGPoint pt)
+    {
         [synth playNote:[_scale up] forDuration:3.0]; [_scale up]; [_scale up];
         [synth playNote:[_scale up] forDuration:3.0]; [_scale up];
-        [scene setParameter:kParamChannel value:synth.channel func:kTweenLinear duration:0];
-        [scene setParameter:kParamChannelVolume value:1.0 func:kTweenSwellInOut duration:1.5];
+        _selectChannel(synth.channel);
+        _channelVolume(1.0);
+        _channelVolumeDecay(0.0);
     };
 }
 @end

@@ -8,15 +8,25 @@
 
 #import <Foundation/Foundation.h>
 #import "Parameter.h"
+#import "TriggerMap.h"
 
 @class ConfigScene;
 @class GraphView;
 @class Graph;
 @class Audio;
+@class Scene;
 
+/*
+ Scene modules should implement:
+-(void)getParameters:(NSMutableDictionary)putHere;
+-(void)triggersChanged:(Scene *)scene;
+-(void)update:(NSTimeInterval)dt;
+-(void)play;
+-(void)pause;
+*/
 
+@interface Scene : NSObject<TriggerMapProtocol>
 
-@interface Scene : NSObject
 +(id)defaultScene;
 +(id)sceneWithName:(NSString *)name;
 +(id)sceneWithConfig:(ConfigScene *)config;
@@ -24,36 +34,19 @@
 
 @property (nonatomic,strong) Graph * graph;
 @property (nonatomic,strong) Audio * audio;
-
+@property (nonatomic,strong) TriggerMap * triggers;
 
 -(void)pause;
 -(void)play;
 
--(void)setParameter:(NSString const *)name
-              value:(float)value
-               func:(TweenFunction)f
-           duration:(NSTimeInterval)duration;
--(void)tweakParameter:(NSString const *)name
-                value:(float)value
-                 func:(TweenFunction)f
-             duration:(NSTimeInterval)duration;
-
--(void)setTrigger:(NSString const *)name value:(float)value;
--(void)setTrigger:(NSString const *)name point:(CGPoint)pt;
--(void)setTrigger:(NSString const *)name b:(bool)b;
--(void)setTrigger:(NSString const *)name withValue:(NSValue *)value;
-
--(void)tweakTrigger:(NSString const *)name by:(float)value;
--(void)tweakTrigger:(NSString const *)name byPoint:(CGPoint)pt;
-
 - (void)getSettings:(NSMutableArray *)putHere;
 
--(void)queue:(Parameter *)parameter;
--(void)update:(NSTimeInterval)dt view:(GraphView *)view;
+- (void)update:(NSTimeInterval)dt view:(GraphView *)view;
 
-// see TriggerMap
--(bool)somebodyExpectsTrigger:(NSString const *)triggerName;
+// For dynamic/modal operations (e.g. recording)
+-(void)addTriggers:(NSDictionary *)triggerKeyParamNameValue;
+-(void)removeTriggers:(NSDictionary *)triggerKeyParamNameValue;
 
-// for derivations (that don't exist yet)
+// for derivations
 -(NSDictionary *)getRuntimeConnections;
 @end

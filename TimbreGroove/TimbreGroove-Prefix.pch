@@ -12,4 +12,13 @@
     #import <UIKit/UIKit.h>
     #import <Foundation/Foundation.h>
     #import <GLKit/GLKit.h>
+
+#import "BKGlobals.h"
+#import "NSSet+BlocksKit.h"
+#import "NSArray+BlocksKit.h"
+#import "NSDictionary+BlocksKit.h"
+#import "NSIndexSet+BlocksKit.h"
+#import "NSObject+AssociatedObjects.h"
+#import "NSObject+BlockObservation.h"
+
 #endif

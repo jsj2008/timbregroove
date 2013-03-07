@@ -11,12 +11,13 @@
 #import <AudioToolbox/AudioToolbox.h>
 #import "Config.h"
 #import "SoundSystem+Diag.h"
-#import "SoundSystem+Parameters.h"
+#import "SoundSystemParameters.h"
 #import "Midi.h"
 #import "RingBuffer.h"
 #import <libkern/OSAtomic.h>
 #import "Names.h"
 #import "Instrument.h"
+#import "Scene.h"
 
 void _CheckError( OSStatus error, const char *operation) {
     char errorString[ 20];        // See if it appears to be a 4-char-code
@@ -103,16 +104,20 @@ OSStatus renderCallback(
 //..............................................................................
 
 @interface SoundSystem () {
-    RenderCBContext  _cbContext;
     
+    AUGraph          _processingGraph;
+    AudioUnit        _ioUnit;
+    AUNode           _mixerNode;
     AudioStreamBasicDescription _stdASBD;
     
-    bool        _capturing;
-    void *      _captureBuffer;
-    UInt32      _captureByteSize;
+    void *              _captureBuffer;
+    PointerParamBlock   _bufferTrigger;
+    RenderCBContext     _cbContext;
+
     AudioUnit   _buses[8];
-    int         _busCount;
+    int         _busCount;    
 }
+
 @end
 
 @implementation SoundSystem
@@ -129,7 +134,6 @@ OSStatus renderCallback(
         [self setupStdASBD]; // assumes _graphSampleRate
         [self setupAUGraph];
         [self startGraph];
-        [self setupUI];
     }
     return self;
 }
@@ -179,67 +183,67 @@ OSStatus renderCallback(
     return __sharedSoundSystem;
 }
 
--(void)update:(AudioFrameCapture *)audioFrameCapture
+-(void)triggersChanged:(Scene *)scene
 {
-    audioFrameCapture->audioBufferList = NULL;
-
-    if( (_expectedTriggerFlags & kExpectsCapture) == 0 )
+    PointerParamBlock newTrigger = [scene.triggers getPointerTrigger:kTriggerAudioFrame];
+    
+    if( _bufferTrigger )
     {
-        if( _capturing )
+        if( !newTrigger )
         {
             CheckError(AudioUnitRemoveRenderNotify(_masterEQUnit, renderCallback, &_cbContext), "Could not unset callback");
-            _capturing = false;
             [self releaseCaptureResources];
         }
     }
-    else
+    if( newTrigger )
     {
-        if( _capturing )
-        {
-            RenderCBContext ctx = _cbContext; // copy in case AU callback writes while we do this
-            
-            if( ctx.fetchCount )
-            {
-                if( !_captureBuffer )
-                {
-                    _captureByteSize = kFramesForDisplay * ctx.asbd.mBytesPerFrame * 2; // 2 channels
-                    _captureBuffer = malloc(sizeof(AudioBufferList)+sizeof(AudioBuffer)+_captureByteSize);
-                    AudioBufferList * abl = _captureBuffer;
-                    Byte * dataBuff = ((Byte *)&abl->mBuffers[1].mData) + sizeof(void *);
-                    UInt32 channelBufferSize = _captureByteSize / 2;
-                    abl->mNumberBuffers = 2;
-                    abl->mBuffers[0].mNumberChannels = 1;
-                    abl->mBuffers[0].mDataByteSize = channelBufferSize;
-                    abl->mBuffers[0].mData = dataBuff;
-                    abl->mBuffers[1].mNumberChannels = 1;
-                    abl->mBuffers[1].mDataByteSize = channelBufferSize;
-                    abl->mBuffers[1].mData = dataBuff + channelBufferSize;
-                }
-                
-                // Ringbuffer will return silence (all zeroes) if our fetch
-                // here is no longer available - iow, there was too much
-                // lag betweeen store vs. fetch
-                SInt64 ts = ctx.fetchCount * kFramesForDisplay;
-                
-                RingBufferFetch(ctx.rbo, _captureBuffer, kFramesForDisplay, ts);
-                
-                audioFrameCapture->audioBufferList = _captureBuffer;
-                
-                OSAtomicCompareAndSwap32Barrier(_cbContext.fetchCount,
-                                                0,
-                                                (volatile int32_t *)&_cbContext.fetchCount);
-            }
-        }
-        else
+        if( !_bufferTrigger )
         {
             CheckError(AudioUnitAddRenderNotify(_masterEQUnit, renderCallback, &_cbContext), "Could not set callback");
-            _capturing = true;
         }
     }
-    
-    if( !( (_expectedTriggerFlags&~kExpectsCapture)== kNoOneExpectsNothin ) )
-        [self triggerExpected];
-    
+    _bufferTrigger = newTrigger;
+}
+
+-(void)update:(NSTimeInterval)dt
+{
+    if( _bufferTrigger )
+    {
+        RenderCBContext ctx = _cbContext; // copy in case AU callback writes while we do this
+        
+        if( ctx.fetchCount )
+        {
+            if( !_captureBuffer )
+            {
+                UInt32 captureByteSize;
+                captureByteSize = kFramesForDisplay * ctx.asbd.mBytesPerFrame * 2; // 2 channels
+                _captureBuffer = malloc(sizeof(AudioBufferList)+sizeof(AudioBuffer)+captureByteSize);
+                AudioBufferList * abl = _captureBuffer;
+                Byte * dataBuff = ((Byte *)&abl->mBuffers[1].mData) + sizeof(void *);
+                UInt32 channelBufferSize = captureByteSize / 2;
+                abl->mNumberBuffers = 2;
+                abl->mBuffers[0].mNumberChannels = 1;
+                abl->mBuffers[0].mDataByteSize = channelBufferSize;
+                abl->mBuffers[0].mData = dataBuff;
+                abl->mBuffers[1].mNumberChannels = 1;
+                abl->mBuffers[1].mDataByteSize = channelBufferSize;
+                abl->mBuffers[1].mData = dataBuff + channelBufferSize;
+            }
+            
+            // Ringbuffer will return silence (all zeroes) if our fetch
+            // here is no longer available - iow, there was too much
+            // lag betweeen store vs. fetch
+            SInt64 ts = ctx.fetchCount * kFramesForDisplay;
+            
+            RingBufferFetch(ctx.rbo, _captureBuffer, kFramesForDisplay, ts);
+            
+            _bufferTrigger(_captureBuffer);
+            
+            OSAtomicCompareAndSwap32Barrier(_cbContext.fetchCount,
+                                            0,
+                                            (volatile int32_t *)&_cbContext.fetchCount);
+        }
+    }
 }
 
 
@@ -376,11 +380,6 @@ OSStatus renderCallback(
     AUGraphRemoveNode(_processingGraph, instrument.graphNode);
 }
 
--(AudioUnit)mixer
-{
-    return _mixerUnit;
-}
-
 -(OSStatus)setupMasterEQ
 {
     OSStatus result;
@@ -392,7 +391,7 @@ OSStatus renderCallback(
     
     CheckError(AudioUnitAddRenderNotify(_masterEQUnit, renderCallback, &_cbContext), "Could not set callback");
     
-    [self configureEQ];
+    [SoundSystemParameters configureEQ:_masterEQUnit];
     return result;
 }
 

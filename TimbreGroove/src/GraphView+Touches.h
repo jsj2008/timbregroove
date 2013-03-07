@@ -8,13 +8,10 @@
 
 #import "GraphView.h"
 
-@class RecordGesture;
-@class TapRecordGesture;
+@class Scene;
 
 @interface GraphView (Touches)
 -(void)setupTouches;
-
-@property (nonatomic,strong) RecordGesture * recordGesture;
-@property (nonatomic,strong) TapRecordGesture * tapRecordGesture;
+-(void)triggersChanged:(Scene *)scene;
 
 @end

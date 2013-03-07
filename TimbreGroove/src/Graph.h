@@ -14,5 +14,5 @@
 @interface Graph : TG3dObject
 -(void)pause;
 -(void)play;
--(id)createTopLevelNodeWithConfig:(ConfigGraphicElement *)config andViewSize:(CGSize)viewSize;
+-(id)loadFromConfig:(ConfigGraphicElement *)config andViewSize:(CGSize)viewSize;
 @end

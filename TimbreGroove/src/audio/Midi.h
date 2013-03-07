@@ -8,6 +8,8 @@
 
 #import "SoundSystem.h"
 
+@class Scene;
+
 @interface Midi : NSObject
 
 -(void)playMidiFile:(NSString *)filename withInstrument:(Instrument *)instrument;
@@ -17,5 +19,5 @@
 
 -(void)getParameters:(NSMutableDictionary *)putHere;
 -(void)update:(NSTimeInterval)dt;
-
+-(void)triggersChanged:(Scene *)scene;
 @end

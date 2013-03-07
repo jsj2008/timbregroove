@@ -6,18 +6,18 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "Generic.h"
 #import "Cube.h"
 #import "EQPanel.h"
 #import "FBO.h"
 #import "Light.h"
 #import "GraphView.h"
-#import "SoundSystem.h"
-#import "SoundSystem+Parameters.h"
-#import "Global.h"
 #import "GenericWithTexture.h"
 #import "EventCapture.h"
 
+#import "Global.h"
+#import "Scene.h"
+#import "Audio.h"
+#import "SoundSystemParameters.h"
 
 #define CUBE_TILT  0.1
 #define CUBE_SIZE 1.8
@@ -49,7 +49,7 @@
 
     [self setupButtons];
     
-    int eqband = [SoundSystem sharedInstance].selectedEQBand;
+    int eqband = [Global sharedInstance].scene.audio.ssp.selectedEQBand;
     for( int b = 0; b < kNUM_EQ_BANDS+1; b++ )
     {
         _bands[b] = kEQDisabled + b;
@@ -139,21 +139,11 @@
 {
     eqBands band = _bands[_currentBand];
     _eqPanel.shapeEdit = band;
-    [SoundSystem sharedInstance].selectedEQBand = band;
+    [Global sharedInstance].scene.audio.ssp.selectedEQBand = band;
 }
 
 -(void)rotateToNextFace:(CGPoint)pt // pt is direction
 {
-    /*
-     float rot = (_cubeRotation + (90.0*pt.x) );
-    NSDictionary * params = @{    kTweenDuration: @0.5f,
-                                  kTweenFunction: kTweenEaseInSine,
-                                  @"cubeRotation": @(rot),
-                                  kTweenCompleteBlock: ^{ [self doneRotation]; }
-                                  };
-    
-    [Tweener addTween:self withParameters:params];
-    */
     _currentBand = abs((_currentBand + (int)pt.x) % 4);
 }
 

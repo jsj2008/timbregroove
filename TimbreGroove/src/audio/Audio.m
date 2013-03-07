@@ -9,16 +9,16 @@
 #import "Audio.h"
 #import "SoundSystem.h"
 #import "Midi.h"
-#import "SoundSystem+Parameters.h"
+#import "SoundSystemParameters.h"
 #import "Config.h"
 #import "Scene.h"
-#import "NSValue+Parameter.h"
 #import "Names.h"
 #import "Instrument.h"
 
 @interface Audio () {
 @protected
     SoundSystem *        _soundSystem;
+    SoundSystemParameters * _parameters;
     NSString *           _midiFile;
     ConfigAudioProfile * _config;
     Midi *               _midi;
@@ -27,7 +27,7 @@
 @end
 @implementation Audio
 
-+(id)audioFromConfig:(ConfigAudioProfile *)config
++(id)audioFromConfig:(ConfigAudioProfile *)config withScene:(Scene *)scene
 {
     Class klass = NSClassFromString(config.instanceClass);
     Audio * audio = [klass new];
@@ -40,6 +40,7 @@
     self = [super init];
     if (self) {
         _soundSystem = [SoundSystem sharedInstance];
+        _parameters = [[SoundSystemParameters alloc] initWithSoundSystem:_soundSystem];
     }
     return self;
 }
@@ -54,10 +55,10 @@
 
 -(void)loadAudioFromConfig:(ConfigAudioProfile *)config
 {
-    NSDictionary * instrumentConfigs = config.instruments;
     _instruments = [NSMutableDictionary new];
-    for( NSString * name in instrumentConfigs )
-        _instruments[name] = [_soundSystem loadInstrumentFromConfig:instrumentConfigs[name]];
+    [config.instruments each:^(id name, id configInstrument) {
+        _instruments[name] = [_soundSystem loadInstrumentFromConfig:configInstrument];
+    }];
     _midiFile = config.midiFile;
     _config = config;
 }
@@ -68,10 +69,10 @@
 
 -(void)play
 {
-    for( Instrument * instrument in [_instruments allValues] )
-    {
+    [[_instruments allValues] each:^(id instrument) {
         [_soundSystem plugInstrumentIntoBus:instrument];
-    }
+    }];
+
     if( _midi )
         [_midi resume];
 }
@@ -81,38 +82,35 @@
     if( _midi )
         [_midi pause];
     
-    for( Instrument * instrument in [_instruments allValues] )
-    {
+    [[_instruments allValues] each:^(id instrument) {
         [_soundSystem unplugInstrumentFromBus:instrument];
-    }
+    }];
 }
 
--(void)update:(NSTimeInterval)dt scene:(Scene *)scene
+-(void)update:(NSTimeInterval)dt
 {
-    AudioFrameCapture mu = {0};
-    [_soundSystem update:&mu];
-    if( mu.audioBufferList )
-    {
-        ParamPayload pv;
-        pv.v.mu = mu;
-        pv.type = TG_MIXERUPDATE;
-        pv.additive = false;
-        pv.duration = 0;
-        NSValue * nsv = [NSValue valueWithPayload:pv];
-        [scene setTrigger:kTriggerAudioFrame withValue:nsv];
-    }
+    [_soundSystem update:dt];
+    [_parameters update:dt];
+    [_midi update:dt];
+}
+
+-(void)triggersChanged:(Scene *)scene
+{
+    [_parameters triggersChanged:scene];
+    [_soundSystem triggersChanged:scene];
+    [_midi triggersChanged:scene];
 }
 
 -(void)getParameters:(NSMutableDictionary *)putHere;
 {
     // get parameters will configure the
     // defaults
-    [_soundSystem getParameters:putHere];
+    [_parameters getParameters:putHere];
     
     // so we have to do config work AFTER that
     NSString * eqName = _config.EQ;
     if( eqName )
-        _soundSystem.selectedEQBandName = eqName;
+        _parameters.selectedEQBandName = eqName;
     _config = nil; // ok, we're done now
 }
 
