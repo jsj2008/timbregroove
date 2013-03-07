@@ -16,7 +16,6 @@
 #import "Parameter.h"
 
 @interface Scene () {
-    TriggerMap * _map;
     ConfigScene * _config;
     NSMutableArray * _tweenQueue;
     bool _started;
@@ -48,7 +47,7 @@
     if (self) {        
         _tweenQueue = [NSMutableArray new];
 
-        _map = [[TriggerMap alloc] initWithDelegate:self];
+        _triggers = [[TriggerMap alloc] initWithDelegate:self];
         _config = config;
         
         _audio = [Audio audioFromConfig:config.audioElement withScene:self];
@@ -60,25 +59,27 @@
         NSMutableDictionary * params = [NSMutableDictionary new];
         [_graph getParameters:params];
         [_audio getParameters:params];
-        [_map addParameters:params];
+        [_triggers addParameters:params];
 
-        [config.connections apply:^(id map) { [_map addMappings:map];}];
+        [config.connections apply:^(id map) { [_triggers addMappings:map];}];
+        [_graph triggersChanged:self];
+        [_audio triggersChanged:self];
         
-        [_map addMappings:[self getRuntimeConnections]];
+        [_triggers addMappings:[self getRuntimeConnections]];
     }
     return self;
 }
 
 -(void)addTriggers:(NSDictionary *)triggerKeyParamNameValue
 {
-    [_map addMappings:triggerKeyParamNameValue];
+    [_triggers addMappings:triggerKeyParamNameValue];
     [_graph triggersChanged:self];
     [_audio triggersChanged:self];
 }
 
 -(void)removeTriggers:(NSDictionary *)triggerKeyParamNameValue
 {
-    [_map removeMappings:triggerKeyParamNameValue];
+    [_triggers removeMappings:triggerKeyParamNameValue];
     [_graph triggersChanged:self];
     [_audio triggersChanged:self];
 }

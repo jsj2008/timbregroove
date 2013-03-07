@@ -129,30 +129,39 @@
 
 - (void)getSettings:(NSMutableArray *)settings
 {
-    for( TG3dObject * child in self.children )
-        [child getSettings:settings];
+    if( _single )
+        [_single getSettings:settings];
+    else
+        [self.children apply:^(TG3dObject * child) { [child getSettings:settings]; }];
 }
 
 -(id)settingsChanged
 {
-    for( TG3dObject * child in self.children )
-        [child settingsChanged];
-    
+    if( _single )
+        [_single settingsChanged];
+    else
+        [self.children apply:^(TG3dObject * child) { [child settingsChanged]; }];
     return nil;
 }
 
 -(void)getParameters:(NSMutableDictionary *)putHere;
 {
-    for( TG3dObject * child in self.children )
-        [child getParameters:putHere];
+    if( _single )
+        [_single getParameters:putHere];
+    else
+        [self.children apply:^(TG3dObject * child) { [child getParameters:putHere]; }];
 }
 
 -(void)triggersChanged:(Scene *)scene
 {
-    [((GraphView *)self.view) triggersChanged:scene];
-    
-    for( TG3dObject * child in self.children )
-        [child triggersChanged:scene];
+    if( _single )
+        [_single triggersChanged:scene];
+    else
+        [self.children apply:^(TG3dObject * child) { [child triggersChanged:scene]; }];
 }
 
+-(void)didAttachToView:(GraphView *)view
+{
+    [view triggersChanged:[Global sharedInstance].scene];
+}
 @end

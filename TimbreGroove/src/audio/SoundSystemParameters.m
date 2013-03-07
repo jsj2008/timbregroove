@@ -332,11 +332,16 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
         @{
           kParamEQBypass:    [EQAudioParameter withAU:_masterEQUnit knob:kEQKnobByPass    ss:self],
           kParamEQFrequency: [EQAudioParameter withAU:_masterEQUnit knob:kEQKnobFreq      ss:self],
-          kParamEQPeak:      [EQAudioParameter withAU:_masterEQUnit knob:kEQKnobPeak      ss:self],
           kParamEQBandwidth: [EQAudioParameter withAU:_masterEQUnit knob:kEQKnobBandwidth ss:self]
           };
+
+        TriggerMap * tm = [Global sharedInstance].scene.triggers;
+        [tm addParameters:eqDict];
+                           
+        AudioParameterDefinition * apd = [self definitionForEQKnob:kEQKnobPeak];
+        if( apd->aupid != -1 )
+            [tm addParameters:@{kParamEQPeak:[EQAudioParameter withAU:_masterEQUnit knob:kEQKnobPeak ss:self]}];
         
-        [[Global sharedInstance].scene.triggers addParameters:eqDict];
     }
 }
 
