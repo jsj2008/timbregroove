@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>default_scene</key>
-	<string>scope</string>
+	<string>test</string>
 	<key>scenes</key>
 	<dict>
 		<key>scope</key>
@@ -14,7 +14,7 @@
 					<key>AudioFrame</key>
 					<string>frameCapture</string>
 					<key>PanX</key>
-					<string>EQFreq:EaseInSine:0.3</string>
+					<string>EQfreq:EaseInSine:0.3</string>
 					<key>MainSlider</key>
 					<string>MasterVolume</string>
 				</dict>
@@ -77,8 +77,6 @@
 		<dict>
 			<key>instanceClass</key>
 			<string>Serenity</string>
-			<key>midifile</key>
-			<string>simpleMel</string>
 			<key>instruments</key>
 			<array>
 				<string>vibes</string>
@@ -102,8 +100,6 @@
 		<dict>
 			<key>instanceClass</key>
 			<string>Serenity</string>
-			<key>midifile</key>
-			<string>simpleMel</string>
 			<key>instruments</key>
 			<array>
 				<string>congas</string>

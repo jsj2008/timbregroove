@@ -25,6 +25,8 @@
     _triggerPanY      = [tm getFloatTrigger:kTriggerPanY];
     _triggerDrag1     = [tm getPointTrigger:kTriggerDrag1];
     _triggerDragPos   = [tm getPointTrigger:kTriggerDragPos];
+    
+    [self setupTouches];
 }
 
 -(void)setupTouches

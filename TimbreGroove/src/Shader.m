@@ -371,7 +371,7 @@ typedef struct _VarQueueItem
 -(void)floatParameter:(NSMutableDictionary *)putHere idx:(int)idx value:(float)value range:(FloatRange)range
 {
     putHere[ @(_names[idx]) ] = [FloatParameter withRange:range value:value block:^(float f){
-        _varQueue[_varQueueCount] = (VarQueueItem){ index, TG_FLOAT, { .f = f }};
+        _varQueue[_varQueueCount] = (VarQueueItem){ idx, TG_FLOAT, { .f = f }};
         ATOMIC_INC(_varQueueCount);
     }];
 }
@@ -379,7 +379,7 @@ typedef struct _VarQueueItem
 -(void)pointParameter:(NSMutableDictionary *)putHere idx:(int)idx
 {
     putHere[ @(_names[idx]) ] = [Parameter withBlock:^(CGPoint pt) {
-        _varQueue[_varQueueCount] = (VarQueueItem){ index, TG_POINT, { .pt = pt } };
+        _varQueue[_varQueueCount] = (VarQueueItem){ idx, TG_POINT, { .pt = pt } };
         ATOMIC_INC(_varQueueCount);        
     }];
 }

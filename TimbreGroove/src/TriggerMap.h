@@ -12,7 +12,7 @@
 
 
 @interface TriggerTween : NSObject
--(void)update:(NSTimeInterval)dt;
+-(BOOL)update:(NSTimeInterval)dt; // returns same as isDone
 -(bool)isDone;
 @end
 

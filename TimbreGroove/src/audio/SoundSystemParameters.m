@@ -52,7 +52,7 @@ enum EQParamKnobAliases {
 
 typedef struct AudioParameterDefinition {
     AudioUnitParameterID aupid;
-    float defaultValue;
+    float defaultValue;  // N.B.: This is NOT a native value, it's a knob turn between 0-1
     FloatRange range;
     AudioUnitScope scope;
     AudioUnitElement bus;
@@ -101,7 +101,7 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
             },
             {
                 kAUNBandEQParam_Frequency,
-                1000.0,
+                0.01,
                 { 220.0, kNyquistFixupNeeded },
                 kAudioUnitScope_Global,
                 kBusDontCare,
@@ -131,7 +131,7 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
             },
             {
                 kAUNBandEQParam_Frequency,
-                11000.0,
+                0.5,
                 { kLowestFreq, kNyquistFixupNeeded },
                 kAudioUnitScope_Global,
                 kBusDontCare,
@@ -168,7 +168,7 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
             },
             {
                 kAUNBandEQParam_Frequency,
-                1000.0,
+                0.3,
                 { kLowestFreq, 7000.0 /* kNyquistFixupNeeded */ },
                 kBusDontCare,
                 kAudioUnitScope_Global,
@@ -192,9 +192,19 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
 #pragma mark Parameter class decls ////////////////////
 
 @interface AudioParameter : FloatParameter
++(id)withFlatAU:(AudioUnit)au
+            def:(AudioParameterDefinition *)apd
+             ss:(SoundSystemParameters *)ss;
 +(id)withAU:(AudioUnit)au
         def:(AudioParameterDefinition *)apd
          ss:(SoundSystemParameters *)ss;
+-(id)initFlatWithAU:(AudioUnit)au
+                def:(AudioParameterDefinition *)apd
+                 ss:(SoundSystemParameters *)ss;
+-(id)initWithAU:(AudioUnit)au
+            def:(AudioParameterDefinition *)apd
+             ss:(SoundSystemParameters *)ss;
+
 @end
 
 @interface EQAudioParameter : AudioParameter
@@ -221,8 +231,8 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
 
 -(void)getParameters:(NSMutableDictionary *)pmap
 {
-    pmap[kParamMasterVolume]  = [AudioParameter withAU:_mixerUnit def:&_mixerOutVolume ss:self];
-    pmap[kParamChannelVolume] = [AudioParameter withAU:_mixerUnit def:&_mixerInVolume  ss:self];
+    pmap[kParamMasterVolume]  = [AudioParameter withFlatAU:_mixerUnit def:&_mixerOutVolume ss:self];
+    pmap[kParamChannelVolume] = [AudioParameter withFlatAU:_mixerUnit def:&_mixerInVolume  ss:self];
     
     pmap[kParamChannel] = [Parameter withBlock:^(int channel) { self.selectedChannel = channel; }];
     pmap[kParamEQBand]  = [Parameter withBlock:^(int eqBand)  { self.selectedEQBand = eqBand; }];
@@ -253,10 +263,23 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
                     _bandInfos[i].defs[n].range.max = graphSampleRate / 2.0;
                 }
             }
-        }
-        
+        }        
     }
     return self;
+}
+
+-(id)paramTweaker:(AudioParameterDefinition *)apd au:(AudioUnit)au
+{
+    return [^(float f) {
+        AudioUnitElement bus = apd->bus == kBusWhatBus ? _selectedChannel : apd->bus;
+        OSStatus result = AudioUnitSetParameter (au,
+                                                 apd->aupid + apd->band,
+                                                 apd->scope,
+                                                 bus,
+                                                 f,
+                                                 0);
+        CheckError(result, "Could not turn audio knob");
+    } copy];
 }
 
 -(void)triggersChanged:(Scene *)scene
@@ -330,8 +353,8 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
     {
         NSDictionary * eqDict =
         @{
-          kParamEQBypass:    [EQAudioParameter withAU:_masterEQUnit knob:kEQKnobByPass    ss:self],
           kParamEQFrequency: [EQAudioParameter withAU:_masterEQUnit knob:kEQKnobFreq      ss:self],
+          kParamEQBypass:    [EQAudioParameter withAU:_masterEQUnit knob:kEQKnobByPass    ss:self],
           kParamEQBandwidth: [EQAudioParameter withAU:_masterEQUnit knob:kEQKnobBandwidth ss:self]
           };
 
@@ -374,6 +397,13 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
 
 @implementation AudioParameter
 
++(id)withFlatAU:(AudioUnit)au
+            def:(AudioParameterDefinition *)apd
+             ss:(SoundSystemParameters *)ss
+{
+    return [[AudioParameter alloc] initFlatWithAU:au def:apd ss:ss];
+}
+
 +(id)withAU:(AudioUnit)au
         def:(AudioParameterDefinition *)apd
          ss:(SoundSystemParameters *)ss
@@ -381,22 +411,18 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
     return [[AudioParameter alloc] initWithAU:au def:apd ss:ss];
 }
 
+-(id)initFlatWithAU:(AudioUnit)au
+                def:(AudioParameterDefinition *)apd
+                 ss:(SoundSystemParameters *)ss
+{
+    return [super initWithValue:apd->defaultValue block:[ss paramTweaker:apd au:au]];
+}
+
 -(id)initWithAU:(AudioUnit)au
             def:(AudioParameterDefinition *)apd
              ss:(SoundSystemParameters *)ss
 {
-    self = [super initWithRange:apd->range value:apd->defaultValue block:^(float f) {
-        AudioUnitElement bus = apd->bus == kBusWhatBus ? ss.selectedChannel : apd->bus;
-        OSStatus result = AudioUnitSetParameter (au,
-                                                 apd->aupid + apd->band,
-                                                 apd->scope,
-                                                 bus,
-                                                 f,
-                                                 0);
-        
-        CheckError(result, "Could not turn audio knob");
-    }];
-    return self;
+    return [super initWithRange:apd->range value:apd->defaultValue block:[ss paramTweaker:apd au:au]];
 }
 @end
 

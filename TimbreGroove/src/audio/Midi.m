@@ -9,13 +9,15 @@
 #import "Midi.h"
 #import "Instrument.h"
 #import "Names.h"
+#import "Parameter.h"
+
 
 void MyMIDINotifyProc (const MIDINotification  *message, void *refCon)
 {
     NSLog(@"MIDI Notify, messageId=%ld,", message->messageID);
 }
 
-//#define SHOW_NOTES
+#define SHOW_NOTES 1
 
 static void MyMIDIReadProc(const MIDIPacketList *pktlist,
                            void *refCon,
@@ -23,16 +25,11 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
     
     // Cast our Sampler unit back to an audio unit
     AudioUnit player = (AudioUnit) refCon;
-
+    
 #ifdef SHOW_NOTES
     static char * _noteNames[] = {
-     "C", "C#", "D", "D#", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"
-     };
-    
-    const MIDITimeStamp kMillion = 1000 * 1000;
-    static MIDITimeStamp s_prevTS = 0;
-    MIDITimeStamp ts;
-    MIDITimeStamp diff;
+        "C", "C#", "D", "D#", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"
+    };
 #endif
     
     MIDIPacket *packet = (MIDIPacket *)pktlist->packet;
@@ -44,15 +41,8 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
             Byte note = packet->data[1] & 0x7F;
             Byte velocity = packet->data[2] & 0x7F;
 #ifdef SHOW_NOTES
-            if( !i )
-            {
-                ts = packet->timeStamp;
-                diff = s_prevTS ? ts - s_prevTS : 0;
-                s_prevTS = ts;
-            }
-
             int noteNumber = ((int) note) % 12;
-            NSLog(@"%s: %i - ts:%lld", _noteNames[noteNumber], noteNumber, diff/kMillion);
+            NSLog(@"%s: %i - ts", _noteNames[noteNumber], noteNumber);
 #endif
             OSStatus result = MusicDeviceMIDIEvent (player, midiStatus, note, velocity, 0);
             if( result != noErr ) // don't call CheckError unless it really is an error
@@ -63,13 +53,168 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
     }
 }
 
-@interface Midi () {
-    MIDIClientRef  _midiClient;
+
+@interface MidiFile () {
     MusicTimeStamp _playerTrackLength;
     MusicSequence  _currentSequence;
     MusicPlayer    _musicPlayer;
     bool           _midiFilePlaying;
     MusicTimeStamp _midiPauseTime;
+}
+@end
+
+@implementation MidiFile
+
+
+-(id)initWithMidi:(Midi *)midi
+      andFileName:(NSString *)fileName
+    andInstrument:(Instrument *)instrument
+{
+    self = [super init];
+    if( self)
+    {
+        [self setupMidiFile:fileName withInstrument:instrument];        
+    }
+    return self;
+}
+
+-(void)dealloc
+{
+    DisposeMusicPlayer(_musicPlayer);
+    if( _currentSequence )
+        DisposeMusicSequence(_currentSequence);
+}
+
+-(void)setupMidiFile:(NSString *)filename
+      withInstrument:(Instrument *)instrument
+{
+    
+    if( !_musicPlayer )
+        CheckError( NewMusicPlayer(&_musicPlayer), "NewMusicPlayer failed" );
+    
+	NSURL *midiFileURL = [[NSBundle mainBundle] URLForResource:filename
+                                                 withExtension: @"mid"];
+    
+    CheckError( NewMusicSequence(&_currentSequence), "NewMusicSequence failed");
+    
+    CheckError( MusicSequenceFileLoad(_currentSequence, (__bridge CFURLRef) midiFileURL, 0, 0), "MusicSeqFileLoad failed");
+    
+    // MusicSequenceSetAUGraph(s, _processingGraph);
+    
+    CheckError( MusicSequenceSetMIDIEndpoint(_currentSequence, instrument.midiEndPoint), "MusicSeqSetEndPoint failed");
+    
+    CheckError( MusicPlayerSetSequence(_musicPlayer, _currentSequence), "MusicPlaySetSeq failed");
+    
+    MusicTrack t;
+    UInt32 sz = sizeof(MusicTimeStamp);
+    CheckError( MusicSequenceGetIndTrack(_currentSequence, 0, &t), "MusicSeqGetIndTrack failed" );
+    CheckError( MusicTrackGetProperty(t, kSequenceTrackProperty_TrackLength, &_playerTrackLength, &sz), "MusicTrackGetProp failed");
+    MusicTrackLoopInfo loop = { _playerTrackLength, 0 };
+    sz = sizeof(loop);
+    CheckError( MusicTrackSetProperty(t, kSequenceTrackProperty_LoopInfo, &loop, sz), "MusicTrackGetProp(2) failed");
+    
+    // reduces latency when MusicPlayerStart is called
+    CheckError( MusicPlayerPreroll(_musicPlayer), "MusicPlayerPreroll failed" );
+}
+
+-(void) start
+{
+    if( _musicPlayer )
+    {
+        CheckError( MusicPlayerStart(_musicPlayer), "MusicPlayerStart failed" );
+        _midiFilePlaying = true;
+    }
+}
+
+-(void)pause
+{
+    if( _musicPlayer )
+    {
+        CheckError( MusicPlayerGetTime(_musicPlayer, &_midiPauseTime), "MusicPlayerGetTime failed");
+        NSLog(@"Pausing Midi at %f",_midiPauseTime);
+        CheckError( MusicPlayerStop(_musicPlayer), "MusicPlayerStop failed");
+    }
+}
+
+-(void)resume
+{
+    if( _musicPlayer )
+    {
+        CheckError( MusicPlayerSetTime(_musicPlayer, _midiPauseTime), "MusicPlayerSetTime failed");
+        CheckError( MusicPlayerStart(_musicPlayer), "MusicPlayerStart (resume) failed");
+        NSLog(@"Resumed Midi at %f",_midiPauseTime);
+    }
+}
+
+/*
+-(BOOL)isPlayerDone
+{
+     if( !_midiFilePlaying )
+     return YES;
+     
+     MusicTimeStamp now = 0;
+     MusicPlayerGetTime (_musicPlayer, &now);
+     if (now >= _playerTrackLength)
+     {
+     // Stop the player and dispose of the objects
+     MusicPlayerStop(_musicPlayer);
+     DisposeMusicSequence(_currentSequence);
+     _currentSequence = 0;
+     _midiFilePlaying = false;
+     return YES;
+     }
+    return NO;
+}
+*/
+
+@end
+
+@interface MidiFreeRange () {
+    MIDIPortRef _outPort;
+    MIDIEndpointRef _endRef;
+}
+
+@end
+@implementation MidiFreeRange
+
+-(id)initWithMidi:(Midi *)midi andInstrument:(Instrument *)instrument
+{
+    self = [super init];
+    if( self )
+    {
+        CheckError (MIDIOutputPortCreate (midi.midiClient,
+                                          CFSTR(" out port"),
+                                          &_outPort
+                                          ),
+                    " Couldn't create MIDI output port");
+        
+        _endRef = instrument.midiEndPoint;
+//        CheckError (MIDIPortConnectSource( _outPort, _endRef, NULL), " Couldn't connect MIDI port");
+    }
+    return self;
+}
+
+-(void)sendNote:(MIDINoteMessage *)noteMsg
+{
+    __block MIDIPacketList packetList;
+    packetList.numPackets = 1;
+    packetList.packet[ 0]. length = 3;
+    packetList.packet[ 0]. data[ 0] = 0x90;
+    packetList.packet[ 0]. data[ 1] = noteMsg->note & 0x7F;
+    packetList.packet[ 0]. data[ 2] = noteMsg->velocity & 0x7F;
+    packetList.packet[ 0]. timeStamp = 0;
+    
+    CheckError( MIDISend(_outPort, _endRef, &packetList), "Couldn't send note ON");
+    
+    [NSObject performBlock:[^{
+        packetList.packet[ 0]. data[ 0] = 0x80;
+        CheckError( MIDISend(_outPort, _endRef, &packetList), "Couldn't send note OFF");
+    } copy] afterDelay:noteMsg->duration];
+}
+@end
+
+@interface Midi () {
+    MidiFreeRange * _freeRange;
 }
 @end
 
@@ -97,109 +242,70 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
     return self;
 }
 
--(void)dealloc
-{
-    DisposeMusicPlayer(_musicPlayer);
-    if( _currentSequence )
-        DisposeMusicSequence(_currentSequence);    
-}
-
--(MIDIEndpointRef)attachMidiClientToSampler:(AudioUnit)sampler
+-(void)attachMidiClientToInstrument:(Instrument *)instrument
 {
     OSStatus result = noErr;
     
     MIDIEndpointRef virtualEndpoint;
     MIDIReadProc mrp = MyMIDIReadProc;
+
     result = MIDIDestinationCreate(_midiClient,
                                    CFSTR("TG Virtual Destination"),
                                    mrp,
-                                   (void *)sampler,
+                                   (void *)(instrument.sampler),
                                    &virtualEndpoint);
     
     CheckError(result,"MIDIDestinationCreate failed");
-    
-    return virtualEndpoint;
+
+    instrument.midiEndPoint = virtualEndpoint;
 }
 
--(void)handleParamChange:(NSString const *)paramName value:(NSValue *)value
+-(MidiFile *)setupMidiFile:(NSString *)filename withInstrument:(Instrument *)instrument
+{
+    [self attachMidiClientToInstrument:instrument];
+    return [[MidiFile alloc] initWithMidi:self andFileName:filename andInstrument:instrument];
+}
+
+-(MidiFreeRange *)setupMidiFreeRange:(Instrument *)instrument
+{
+    [self attachMidiClientToInstrument:instrument];
+    _freeRange = [[MidiFreeRange alloc] initWithMidi:self andInstrument:instrument];
+    return _freeRange;
+}
+
+-(void)handleParamChange:(NSString const *)paramName value:(float)value
 {
     
 }
 
 -(void)getParameters:(NSMutableDictionary *)putHere
 {
+    FloatParamBlock(^closure)(NSString const * name) =
+        ^FloatParamBlock(NSString const * name){
+        return ^(float f) {
+            [self handleParamChange:name value:f ];
+        };
+    };
+    
     [putHere addEntriesFromDictionary:
     @{
-      kParamTempo: ^(NSValue *v){ [self handleParamChange:kParamTempo value:v]; },
-      kParamPitch: ^(NSValue *v){ [self handleParamChange:kParamPitch value:v]; },
-      kParamInstrumentP1: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP1 value:v]; },
-      kParamInstrumentP2: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP2 value:v]; },
-      kParamInstrumentP3: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP3 value:v]; },
-      kParamInstrumentP4: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP4 value:v]; },
-      kParamInstrumentP5: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP5 value:v]; },
-      kParamInstrumentP6: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP6 value:v]; },
-      kParamInstrumentP7: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP7 value:v]; },
-      kParamInstrumentP8: ^(NSValue *v){ [self handleParamChange:kParamInstrumentP8 value:v]; }
-      }];    
+      kParamTempo: [Parameter withBlock:[closure(kParamTempo) copy]],
+      kParamPitch: [Parameter withBlock:[closure(kParamPitch) copy]],
+      kParamInstrumentP1: [Parameter withBlock:[closure(kParamInstrumentP1) copy]],
+      kParamInstrumentP2: [Parameter withBlock:[closure(kParamInstrumentP2) copy]],
+      kParamInstrumentP3: [Parameter withBlock:[closure(kParamInstrumentP3) copy]],
+      kParamInstrumentP4: [Parameter withBlock:[closure(kParamInstrumentP4) copy]],
+      kParamInstrumentP5: [Parameter withBlock:[closure(kParamInstrumentP5) copy]],
+      kParamInstrumentP6: [Parameter withBlock:[closure(kParamInstrumentP6) copy]],
+      kParamInstrumentP7: [Parameter withBlock:[closure(kParamInstrumentP7) copy]],
+      kParamInstrumentP8: [Parameter withBlock:[closure(kParamInstrumentP8) copy]],
+      kParamMIDINote: [Parameter withBlock:[^(MIDINoteMessage *msg){
+            if( _freeRange )
+               [_freeRange sendNote:msg];
+        } copy]]
+      }];
 }
 
--(void)playMidiFile:(NSString *)filename withInstrument:(Instrument *)instrument
-{
-
-    if( !_musicPlayer )
-        CheckError( NewMusicPlayer(&_musicPlayer), "NewMusicPlayer failed" );
-    
-	NSURL *midiFileURL = [[NSBundle mainBundle] URLForResource:filename
-                                                 withExtension: @"mid"];
-
-    CheckError( NewMusicSequence(&_currentSequence), "NewMusicSequence failed");
-    
-    CheckError( MusicSequenceFileLoad(_currentSequence, (__bridge CFURLRef) midiFileURL, 0, 0), "MusicSeqFileLoad failed");
-    
-    // MusicSequenceSetAUGraph(s, _processingGraph);
-    
-    AudioUnit sampler = instrument.sampler;
-    
-    MIDIEndpointRef endPoint = [self attachMidiClientToSampler:sampler];
-    CheckError( MusicSequenceSetMIDIEndpoint(_currentSequence, endPoint), "MusicSeqSetEndPoint failed");
-
-    CheckError( MusicPlayerSetSequence(_musicPlayer, _currentSequence), "MusicPlaySetSeq failed");
-
-    MusicTrack t;
-    UInt32 sz = sizeof(MusicTimeStamp);
-    CheckError( MusicSequenceGetIndTrack(_currentSequence, 0, &t), "MusicSeqGetIndTrack failed" );
-    CheckError( MusicTrackGetProperty(t, kSequenceTrackProperty_TrackLength, &_playerTrackLength, &sz), "MusicTrackGetProp failed");
-    MusicTrackLoopInfo loop = { _playerTrackLength, 0 };
-    sz = sizeof(loop);
-    CheckError( MusicTrackSetProperty(t, kSequenceTrackProperty_LoopInfo, &loop, sz), "MusicTrackGetProp(2) failed");
-
-    // reduces latency when MusicPlayerStart is called
-    CheckError( MusicPlayerPreroll(_musicPlayer), "MusicPlayerPreroll failed" );
-    
-    CheckError( MusicPlayerStart(_musicPlayer), "MusicPlayerStart failed" );
-    _midiFilePlaying = true;
-    
-}
-
--(void)pause
-{
-    if( _musicPlayer )
-    {
-        CheckError( MusicPlayerGetTime(_musicPlayer, &_midiPauseTime), "MusicPlayerGetTime failed");
-        NSLog(@"Pausing Midi at %f",_midiPauseTime);
-        CheckError( MusicPlayerStop(_musicPlayer), "MusicPlayerStop failed");
-    }
-}
-
--(void)resume
-{
-    if( _musicPlayer )
-    {
-        CheckError( MusicPlayerSetTime(_musicPlayer, _midiPauseTime), "MusicPlayerSetTime failed");
-        CheckError( MusicPlayerStart(_musicPlayer), "MusicPlayerStart (resume) failed");
-        NSLog(@"Resumed Midi at %f",_midiPauseTime);
-    }
-}
 
 -(void)triggersChanged:(Scene *)scene
 {
@@ -211,25 +317,5 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
     
 }
 
--(BOOL)isPlayerDone
-{
-    /*
-    if( !_midiFilePlaying )
-        return YES;
-    
-    MusicTimeStamp now = 0;
-    MusicPlayerGetTime (_musicPlayer, &now);
-    if (now >= _playerTrackLength)
-    {
-        // Stop the player and dispose of the objects
-        MusicPlayerStop(_musicPlayer);
-        DisposeMusicSequence(_currentSequence);
-        _currentSequence = 0;
-        _midiFilePlaying = false;
-        return YES;
-    }
-     */
-    return NO;
-}
 
 @end

@@ -30,5 +30,6 @@ enum {
 @property (nonatomic,readonly) AudioUnit sampler;
 @property (nonatomic,readonly) AUNode    graphNode;
 @property (nonatomic) bool configured;
+@property (nonatomic) MIDIEndpointRef midiEndPoint;
 @end
 

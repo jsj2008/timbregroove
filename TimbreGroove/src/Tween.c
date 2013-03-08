@@ -18,10 +18,11 @@ static char * _tween_names[] = {
     "EaseInBounce",
     "EaseOutBounce",
     "EaseInThrow",
-    "EaseOutThrow"
+    "EaseOutThrow",
+    "Swell"
 };
 
-TweenFunction funcForString(const char * str)
+TweenFunction tweenFuncForString(const char * str)
 {
     for( int i = 0; i < sizeof(_tween_names)/sizeof(_tween_names[0]); ++i)
     {
@@ -29,6 +30,11 @@ TweenFunction funcForString(const char * str)
             return i;
     }
     return -1;
+}
+
+const char * stringForTweenFunc(TweenFunction func)
+{
+    return _tween_names[func];
 }
 
 static float easeOutThrow( float progression )
@@ -99,6 +105,9 @@ float tweenFunc(TweenFunction func, float progression)
             
         case kTweenEaseInThrow:
             return 1.0 - easeOutThrow(1.0 - progression);
+            
+        case kTweenSwell:
+            return sin(progression * M_PI);
             
 	}
 	return progression;

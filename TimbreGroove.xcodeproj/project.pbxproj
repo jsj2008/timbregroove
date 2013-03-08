@@ -148,6 +148,8 @@
 		5737C4A3169277B700C12F2D /* fluid.png in Resources */ = {isa = PBXBuildFile; fileRef = 5737C4A2169277B700C12F2D /* fluid.png */; };
 		5737C4B41693206D00C12F2D /* imageBaker.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 5737C4AF1693090D00C12F2D /* imageBaker.fsh */; };
 		5737C4B51693206D00C12F2D /* imageBaker.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 5737C4AD169308DF00C12F2D /* imageBaker.vsh */; };
+		573CEEF216E997A200B02EE3 /* NSObject+BlocksKit.m in Sources */ = {isa = PBXBuildFile; fileRef = 573CEEF116E997A200B02EE3 /* NSObject+BlocksKit.m */; };
+		573CEEF516E99D8F00B02EE3 /* NSString+Tweening.m in Sources */ = {isa = PBXBuildFile; fileRef = 573CEEF416E99D8F00B02EE3 /* NSString+Tweening.m */; };
 		5741C70716C32280009451C9 /* DistortedGeneric.m in Sources */ = {isa = PBXBuildFile; fileRef = 5741C70616C32280009451C9 /* DistortedGeneric.m */; };
 		574B5FF9168D20BD008367D1 /* FBO.m in Sources */ = {isa = PBXBuildFile; fileRef = 574B5FF8168D20BD008367D1 /* FBO.m */; };
 		5751F2DE16D569A700144F2B /* Audio.m in Sources */ = {isa = PBXBuildFile; fileRef = 5751F2DD16D569A700144F2B /* Audio.m */; };
@@ -488,6 +490,10 @@
 		5737C4AD169308DF00C12F2D /* imageBaker.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = imageBaker.vsh; sourceTree = "<group>"; };
 		5737C4AF1693090D00C12F2D /* imageBaker.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = imageBaker.fsh; sourceTree = "<group>"; };
 		5737C4B216930BD500C12F2D /* FractalSphere.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FractalSphere.m; sourceTree = "<group>"; };
+		573CEEF016E997A100B02EE3 /* NSObject+BlocksKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+BlocksKit.h"; sourceTree = "<group>"; };
+		573CEEF116E997A200B02EE3 /* NSObject+BlocksKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+BlocksKit.m"; sourceTree = "<group>"; };
+		573CEEF316E99D8F00B02EE3 /* NSString+Tweening.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSString+Tweening.h"; path = "src/NSString+Tweening.h"; sourceTree = "<group>"; };
+		573CEEF416E99D8F00B02EE3 /* NSString+Tweening.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSString+Tweening.m"; path = "src/NSString+Tweening.m"; sourceTree = "<group>"; };
 		5741C70516C32280009451C9 /* DistortedGeneric.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = DistortedGeneric.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; wrapsLines = 0; };
 		5741C70616C32280009451C9 /* DistortedGeneric.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; path = DistortedGeneric.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; wrapsLines = 0; };
 		574B5FF7168D20BD008367D1 /* FBO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FBO.h; sourceTree = "<group>"; };
@@ -1127,6 +1133,7 @@
 		5781CAA816E57C43007C8EC2 /* BK */ = {
 			isa = PBXGroup;
 			children = (
+				5781CAA916E57CB1007C8EC2 /* BKGlobals.h */,
 				5781CAB916E581E6007C8EC2 /* NSSet+BlocksKit.h */,
 				5781CABA16E581E6007C8EC2 /* NSSet+BlocksKit.m */,
 				5781CAAD16E581B5007C8EC2 /* NSArray+BlocksKit.h */,
@@ -1137,7 +1144,8 @@
 				5781CAB216E581B5007C8EC2 /* NSIndexSet+BlocksKit.m */,
 				5781CAB316E581B5007C8EC2 /* NSObject+AssociatedObjects.h */,
 				5781CAB416E581B6007C8EC2 /* NSObject+AssociatedObjects.m */,
-				5781CAA916E57CB1007C8EC2 /* BKGlobals.h */,
+				573CEEF016E997A100B02EE3 /* NSObject+BlocksKit.h */,
+				573CEEF116E997A200B02EE3 /* NSObject+BlocksKit.m */,
 				5781CAAA16E57CB1007C8EC2 /* NSObject+BlockObservation.h */,
 				5781CAAB16E57CB1007C8EC2 /* NSObject+BlockObservation.m */,
 			);
@@ -1154,6 +1162,8 @@
 				570CE40516BDCACC00D67551 /* ScreenViewController.m */,
 				570220D7169B8E7F0028FE33 /* UIView+TGExtension.h */,
 				570220D8169B8E7F0028FE33 /* UIView+TGExtension.m */,
+				573CEEF316E99D8F00B02EE3 /* NSString+Tweening.h */,
+				573CEEF416E99D8F00B02EE3 /* NSString+Tweening.m */,
 			);
 			name = Cocoa;
 			path = ..;
@@ -1734,6 +1744,8 @@
 				5781CAB816E581B6007C8EC2 /* NSObject+AssociatedObjects.m in Sources */,
 				5781CABB16E581E6007C8EC2 /* NSSet+BlocksKit.m in Sources */,
 				5705DED916E5DA5300A80445 /* Tween.c in Sources */,
+				573CEEF216E997A200B02EE3 /* NSObject+BlocksKit.m in Sources */,
+				573CEEF516E99D8F00B02EE3 /* NSString+Tweening.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

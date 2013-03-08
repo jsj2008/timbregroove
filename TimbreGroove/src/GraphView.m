@@ -13,7 +13,6 @@
 #import "GraphView+Touches.h"
 
 @interface GraphView () {
-    NSMutableArray * _watchingGlobals;
 }
 @end
 
@@ -40,12 +39,7 @@
 -(void)wireUp
 {
     _backcolor = (GLKVector4){0, 0, 0, 1};
-
     self.opaque = YES;
-    
-    _watchingGlobals = [NSMutableArray new];
-    
-    [self setupTouches];
 }
 
 

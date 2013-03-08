@@ -18,6 +18,7 @@
 #import "NSArray+BlocksKit.h"
 #import "NSDictionary+BlocksKit.h"
 #import "NSIndexSet+BlocksKit.h"
+#import "NSObject+BlocksKit.h"
 #import "NSObject+AssociatedObjects.h"
 #import "NSObject+BlockObservation.h"
 

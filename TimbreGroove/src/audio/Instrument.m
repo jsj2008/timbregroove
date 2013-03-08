@@ -43,6 +43,9 @@
 
 -(void)dealloc
 {
+    if( _midiEndPoint )
+        CheckError(MIDIEndpointDispose(_midiEndPoint), "Error disposing endpoint");
+
     // "Calling this function deallocates the audio unit’s resources."
     AudioUnitUninitialize(_sampler);    
     NSLog(@"Instrument gone");

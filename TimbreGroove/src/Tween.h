@@ -17,9 +17,11 @@ typedef enum TweenFunction {
     kTweenEaseInBounce,
     kTweenEaseOutBounce,
     kTweenEaseInThrow,
-    kTweenEaseOutThrow
+    kTweenEaseOutThrow,
+    kTweenSwell
 } TweenFunction;
 
 float tweenFunc(TweenFunction func, float progression);
-TweenFunction funcForString(const char * str);
+TweenFunction tweenFuncForString(const char * str);
+const char * stringForTweenFunc(TweenFunction func);
 #endif

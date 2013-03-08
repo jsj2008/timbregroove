@@ -115,7 +115,8 @@
 
 -(void)queue:(TriggerTween *)tweener
 {
-    [_tweenQueue addObject:tweener];
+    if( [_tweenQueue indexOfObject:tweener] == NSNotFound )
+        [_tweenQueue addObject:tweener];
 }
 
 -(void)update:(NSTimeInterval)dt view:(GraphView *)view
@@ -130,11 +131,12 @@
     [_audio update:dt];
     [view update:dt];
     
-    for( TriggerTween * tween in _tweenQueue )
+    if( [_tweenQueue count] )
     {
-        [tween update:dt];
-        if( [tween isDone] )
-            [_tweenQueue removeObject:tween];
+        NSIndexSet * markedForDelete = [_tweenQueue indexesOfObjectsPassingTest:^BOOL(TriggerTween * tween, NSUInteger idx, BOOL *stop) {
+            return [tween update:dt];
+        }];
+        [_tweenQueue removeObjectsAtIndexes:markedForDelete];
     }
 }
 

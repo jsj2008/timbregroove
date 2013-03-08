@@ -60,9 +60,6 @@
 -(id)wireUp
 {
     [super wireUp];
-        
-    Scene * scene = [Global sharedInstance].scene;
-    [scene.triggers getFloatTrigger:kParamChannelVolume](1.0);
     
     NSTimeInterval initTime = self.countDownBase;
     [self.shader writeToLocation:gv_time type:TG_FLOAT data:&initTime];

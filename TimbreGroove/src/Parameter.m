@@ -28,6 +28,7 @@
     {
         _block = block;
         _paramType = GetBlockArgumentType(block);
+        _additive = true;
         
     }
     return self;
@@ -85,11 +86,38 @@
 @interface FloatParameter () {
     FloatRange _range;
     float _scale;
-    float _value;
 }
 @end
 
 @implementation FloatParameter
+
++(id)withValue:(float)value
+         block:(id)block;
+{
+    return [[FloatParameter alloc] initWithValue:value block:block];
+}
+
+-(id)initWithValue:(float)value
+            block:(id)block
+{
+    self = [super initWithBlock:^(float f) {
+        _value = f;
+        if( f < 0 )
+            f = 0;
+        else if( f > 1 )
+            f = 1;
+        ((FloatParamBlock)block)(f);
+    }];
+    
+    if( self )
+    {
+        _value = value;
+        self.additive = false;
+        ((FloatParamBlock)_block)(value);
+    }
+    return self;
+    
+}
 
 +(id)withRange:(FloatRange)frange
          value:(float)value
@@ -100,15 +128,25 @@
 
 -(id)initWithRange:(FloatRange)frange
              value:(float)value
-             block:(id)block;
+             block:(id)block
 {
-    self = [super initWithBlock:block];
+    self = [super initWithBlock:^(float f) {
+        _value = f;
+        if( _scale )
+            f = (f * _scale) + _range.min;
+        if( f < _range.min )
+            f = _range.min;
+        else if( f > _range.max )
+            f = _range.max;
+        ((FloatParamBlock)block)(f);
+    }];
+    
     if( self )
     {
         _value = value;
         _range = frange;
-        _scale = 1.0 / (frange.max - frange.min);
-        ((FloatParamBlock)_block)(value);
+        _scale = frange.max - frange.min;
+        ((FloatParamBlock)_block)(value); 
     }
     return self;
 }
@@ -125,18 +163,6 @@
     }
 }
 
--(FloatParamBlock)getFloatParamBlock
-{
-    return ^(float f) {
-        if( _scale )
-            f = (f * _scale) + _range.min;
-        if( f < _range.min )
-            f = _range.min;
-        else if( f > _range.max )
-            f = _range.max;
-        ((FloatParamBlock)_block)(f);
-    };
-}
 
 @end
 

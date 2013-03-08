@@ -9,15 +9,26 @@
 #import "SoundSystem.h"
 
 @class Scene;
+@class Midi;
+
+@interface MidiFile : NSObject
+-(void)start;
+-(void)pause;
+-(void)resume;
+@end
+
+@interface MidiFreeRange : NSObject
+
+@end
 
 @interface Midi : NSObject
 
--(void)playMidiFile:(NSString *)filename withInstrument:(Instrument *)instrument;
--(BOOL)isPlayerDone;
--(void)pause;
--(void)resume;
-
+-(MidiFile *)setupMidiFile:(NSString *)filename withInstrument:(Instrument *)instrument;
+-(MidiFreeRange *)setupMidiFreeRange:(Instrument *)instrument;
 -(void)getParameters:(NSMutableDictionary *)putHere;
 -(void)update:(NSTimeInterval)dt;
 -(void)triggersChanged:(Scene *)scene;
+
+
+@property (nonatomic) MIDIClientRef midiClient;
 @end

@@ -40,6 +40,12 @@
 
 -(bool)traverse:(SEL)selector userObj:(id)userObj
 {
+    
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+    [self performSelector:selector withObject:userObj];
+#pragma clang diagnostic pop
+    
     for( Node * node in _kids )
     {
 #if DEBUG

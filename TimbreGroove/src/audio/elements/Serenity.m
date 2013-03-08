@@ -13,6 +13,7 @@
 #import "Audio.h"
 #import "Instrument.h"
 #import "TriggerMap.h"
+#import "NSString+Tweening.h"
 
 @interface Pentatonic : NSObject {
     int * _notes;
@@ -64,6 +65,7 @@
     FloatParamBlock _channelVolume;
     FloatParamBlock _channelVolumeDecay;
     IntParamBlock   _selectChannel;
+    PointerParamBlock _midiNote;
 }
 
 @end
@@ -77,15 +79,16 @@
 
 -(void)triggersChanged:(Scene *)scene
 {
-    static NSString * kChannelVolumeDecay = nil;
+    static NSString const * kChannelVolumeDecay = nil;
     
     if( !kChannelVolumeDecay )
-        kChannelVolumeDecay = [kParamChannelVolume stringByAppendingString:@":EaseOutSine:1.5"];
+        kChannelVolumeDecay = [kParamChannelVolume stringByAppendingTween:kTweenEaseInSine len:0.5];
 
     TriggerMap * tm = scene.triggers;
-    _channelVolume      = [tm getFloatTrigger:kParamChannelVolume];
-    _channelVolumeDecay = [tm getFloatTrigger:kChannelVolumeDecay];
-    _selectChannel      = [tm getIntTrigger:kParamChannel];
+    _channelVolume      = [tm getFloatTrigger: kParamChannelVolume];
+    _channelVolumeDecay = [tm getFloatTrigger  :kChannelVolumeDecay];
+    _selectChannel      = [tm getIntTrigger    :kParamChannel];
+    _midiNote           = [tm getPointerTrigger:kParamMIDINote];
     
     _channelVolume(0.0);
 }
@@ -94,15 +97,20 @@
 {
     [super getParameters:putHere];
     
-    Instrument * synth = _instruments[@"vibes"];
-
-    putHere[@"SwellSound"] = ^(CGPoint pt)
-    {
-        [synth playNote:[_scale up] forDuration:3.0]; [_scale up]; [_scale up];
-        [synth playNote:[_scale up] forDuration:3.0]; [_scale up];
-        _selectChannel(synth.channel);
-        _channelVolume(1.0);
-        _channelVolumeDecay(0.0);
-    };
+    putHere[@"SwellSound"] = [Parameter withBlock:
+                              ^(CGPoint pt)
+                              {
+                                  MIDINoteMessage mnm;
+                                  _selectChannel(0); //_selectChannel(synth.channel);
+                                  _channelVolume(0);
+                                  mnm.note = [_scale up];
+                                  mnm.duration = 1.1;
+                                  mnm.velocity = 127;
+                                  _midiNote(&mnm);
+                                  mnm.note = [_scale up];
+                                  _midiNote(&mnm);
+                                  _channelVolumeDecay(1.0);
+                              //    [NSObject performBlock:^{_channelVolumeDecay(0);} afterDelay:0.5];
+                              }];
 }
 @end

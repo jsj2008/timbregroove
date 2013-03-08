@@ -18,6 +18,7 @@
 -(id)initWithBlock:(id)block;
 -(id)getParamBlockOfType:(char)paramType;
 -(void)getValue:(void *)p ofType:(char)type;
+@property (nonatomic) bool additive;
 @end
 
 
@@ -26,14 +27,25 @@ typedef struct _FloatRange {
     float max;
 } FloatRange;
 
-@interface FloatParameter : Parameter
+@interface FloatParameter : Parameter {
+@protected
+    float _value;
+}
+
 +(id)withRange:(FloatRange)frange
-         value:(float)value
+         value:(float)value // N.B. 'value' will be scaled
          block:(id)block;
+
++(id)withValue:(float)value
+         block:(id)block;
+
+-(id)initWithValue:(float)value
+             block:(id)block;
 
 -(id)initWithRange:(FloatRange)frange
              value:(float)value
              block:(id)block;
+
 @end
 
 

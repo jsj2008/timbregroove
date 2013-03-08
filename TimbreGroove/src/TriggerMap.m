@@ -38,11 +38,11 @@
 @public
     NSTimeInterval _runningTime;
     NSTimeInterval _duration;
-    bool _tweening;
-    TweenFunction _func;
-    bool _done;
-    id _block;
-    id _paramBlock;
+    bool           _tweening;
+    TweenFunction  _func;
+    bool           _done;
+    id             _block;
+    id             _paramBlock;
 }
 @end
 @implementation TriggerTween
@@ -56,6 +56,13 @@
     if( type == _C_FLT )
     {
         return [[FloatTriggerTween alloc] initWithParameter:parameter
+                                                       func:func
+                                                        len:len
+                                                      queue:queue];
+    }
+    if( type == TGC_POINT )
+    {
+        return [[PointTriggerTween alloc] initWithParameter:parameter
                                                        func:func
                                                         len:len
                                                       queue:queue];
@@ -84,23 +91,24 @@
 -(void)applyTarget {}
 -(void)applyDelta:(float)delta {}
 
--(void)update:(NSTimeInterval)dt
+-(BOOL)update:(NSTimeInterval)dt
 {
     _runningTime += dt;
     
 	if (_runningTime >= _duration )
     {
-		_runningTime = _duration;
 		_done = true;
-        _tweening = false;
         [self applyTarget];
+		_runningTime = _duration;
+        _tweening = false;
 	}
     else
     {
         float delta = tweenFunc(_func, _runningTime / _duration);
         [self applyDelta:delta];
     }
-    
+ 
+    return _done;
 }
 
 -(bool)isDone
@@ -125,14 +133,44 @@
     
     if( self )
     {
-        __weak FloatTriggerTween * weakMe = self;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-retain-cycles"
         _block = ^(float f) {
-            FloatTriggerTween * me = weakMe;
-            [parameter getValue:&me->_initial ofType:_C_FLT];
-            me->_target = f;
-            me->_runningTime = 0.0;
-            [queue queue:me];
+            bool additive = parameter.additive;
+            float current;
+            [parameter getValue:&current ofType:_C_FLT];
+            if( _tweening )
+            {
+                /*
+                    This can happen when a new animation of this
+                 parameter starts before a previous one ends. In
+                 that case we simply jump to the current target
+                 value (hopefully not to harsh on the ears/eyes!)
+                 and roll on.
+                 */
+                if( additive )
+                {
+                    [self applyTarget];
+                    _initial = _target;
+                }
+                else
+                {
+                    _initial = current;
+                }
+            }
+            else
+            {
+                _tweening = true;
+                _initial = current;
+            }
+            [queue queue:self];
+            _target = f;
+            if( additive )
+                _target += _initial;
+            _runningTime = 0.0;
+            _done = false;
         };
+#pragma clang diagnostic pop
     }
     return self;
 }
@@ -146,7 +184,6 @@
 {
     float newValue = _initial + ((_target - _initial) * delta);
     ((FloatParamBlock)_paramBlock)(newValue);
-    
 }
 @end
 
@@ -165,14 +202,27 @@
     
     if( self )
     {
-        __weak PointTriggerTween * weakMe = self;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-retain-cycles"
         _block = ^(CGPoint pt) {
-            PointTriggerTween * me = weakMe;
-            [parameter getValue:&me->_initial ofType:TGC_POINT];
-            me->_target = pt;
-            me->_runningTime = 0.0;
-            [queue queue:me];
+            _done = false;
+            if( _tweening )
+            {
+                [self applyTarget];
+                _initial = _target;
+            }
+            else
+            {
+                [parameter getValue:&_initial ofType:TGC_POINT];
+                _tweening = true;
+            }
+            [queue queue:self];
+            _target = pt;
+            if( parameter.additive )
+                _target = (CGPoint){ _target.x + _initial.x, _target.y + _initial.y };
+            _runningTime = 0.0;
         };
+#pragma clang diagnostic pop
     }
     return self;
 }
@@ -259,7 +309,7 @@
             Parameter * param = _parameters[name];
             if( !param )
                 return nil;
-            TweenFunction func = funcForString([((NSString *)pieces[1]) UTF8String]);
+            TweenFunction func = tweenFuncForString([((NSString *)pieces[1]) UTF8String]);
             float duration = [((NSString *)pieces[2]) floatValue];
             TriggerTween * tt = [TriggerTween ttWithParameter:param func:func len:duration queue:_delegate type:type];
             return tt->_block;

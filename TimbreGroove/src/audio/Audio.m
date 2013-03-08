@@ -17,11 +17,14 @@
 
 @interface Audio () {
 @protected
-    SoundSystem *        _soundSystem;
+    SoundSystem *           _soundSystem;
     SoundSystemParameters * _parameters;
-    NSString *           _midiFile;
-    ConfigAudioProfile * _config;
-    Midi *               _midi;
+    
+    NSString * _eqName;
+    
+    Midi *     _midi;
+    MidiFile * _midiSequence;
+    NSString * _midiFileName;
 }
 
 @end
@@ -41,14 +44,16 @@
     if (self) {
         _soundSystem = [SoundSystem sharedInstance];
         _parameters = [[SoundSystemParameters alloc] initWithSoundSystem:_soundSystem];
+        _midi = [[Midi alloc] init];
     }
     return self;
 }
 
 -(void)dealloc
 {
-    for( Instrument * instrument in [_instruments allValues] )
+    [_instruments each:^(id name, id instrument) {
         [_soundSystem decomissionInstrument:instrument];
+    }];
     
     NSLog(@"Audio object gone");
 }
@@ -59,30 +64,42 @@
     [config.instruments each:^(id name, id configInstrument) {
         _instruments[name] = [_soundSystem loadInstrumentFromConfig:configInstrument];
     }];
-    _midiFile = config.midiFile;
-    _config = config;
+    _midiFileName = config.midiFile;
+    _eqName = config.EQ;
 }
 
 -(void)start
 {
+    if( _midiSequence )
+    {
+        [_midiSequence start];
+    }
+    else
+    {
+        Instrument * instrument = [_instruments allValues][0];
+        [_midi setupMidiFreeRange:instrument];
+    }
+
+    if( _eqName )
+        _parameters.selectedEQBandName = _eqName;
 }
 
 -(void)play
 {
-    [[_instruments allValues] each:^(id instrument) {
+    [_instruments each:^(id name, id instrument) {
         [_soundSystem plugInstrumentIntoBus:instrument];
     }];
 
-    if( _midi )
-        [_midi resume];
+    if( _midiSequence )
+        [_midiSequence resume];
 }
 
 -(void)pause
 {
-    if( _midi )
-        [_midi pause];
+    if( _midiSequence )
+        [_midiSequence pause];
     
-    [[_instruments allValues] each:^(id instrument) {
+    [_instruments each:^(id name, id instrument) {
         [_soundSystem unplugInstrumentFromBus:instrument];
     }];
 }
@@ -106,12 +123,7 @@
     // get parameters will configure the
     // defaults
     [_parameters getParameters:putHere];
-    
-    // so we have to do config work AFTER that
-    NSString * eqName = _config.EQ;
-    if( eqName )
-        _parameters.selectedEQBandName = eqName;
-    _config = nil; // ok, we're done now
+    [_midi getParameters:putHere];
 }
 
 - (void)getSettings:(NSMutableArray *)putHere
@@ -127,19 +139,13 @@
 
 -(void)start
 {
-    if( _midiFile )
+    if( _midiFileName && !_midiSequence )
     {
-        if( _midi )
-        {
-            [_midi resume];
-        }
-        else
-        {
-            Instrument * instrument = [_instruments allValues][0];
-            _midi = [[Midi alloc] init];
-            [_midi playMidiFile:_midiFile withInstrument:instrument];
-        }
+        Instrument * instrument = [_instruments allValues][0];
+        _midiSequence = [_midi setupMidiFile:_midiFileName withInstrument:instrument];
     }
+    [super start];
+    
 }
 
 
