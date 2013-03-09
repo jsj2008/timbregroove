@@ -97,6 +97,8 @@ extern NSString const * kTriggerVPad3;
 extern NSString const * kTriggerVPad4;
 extern NSString const * kTriggerVPad5;
 
+extern NSString const * kTriggerTimer;
+
 extern NSString const * kTriggerTapPos;
 extern NSString const * kTriggerTap1;
 extern NSString const * kTriggerTap2;

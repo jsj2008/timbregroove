@@ -61,6 +61,7 @@
 - (GLint) location:(int)indexIntoNames;
 -(const char *)nameForIndex:(int)index;
 
+-(void)floatParameter:(NSMutableDictionary *)putHere idx:(int)idx;
 -(void)floatParameter:(NSMutableDictionary *)putHere idx:(int)idx value:(float)value range:(FloatRange)range;
 -(void)pointParameter:(NSMutableDictionary *)putHere idx:(int)idx;
 

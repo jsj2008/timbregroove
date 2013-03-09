@@ -12,6 +12,11 @@
 #import "Config.h"
 #import "GraphView+Touches.h"
 
+#import "Parameter.h"
+#import "TriggerMap.h"
+#import "Scene.h"
+#import "Names.h"
+
 @interface Graph() {
     // as of this writing the majority of graphs (all?)
     // only have one top level node. Keep a pointer
@@ -19,7 +24,9 @@
     // during update and render
      __weak  TG3dObject * _single;
     
+    NSTimeInterval _runningTime;
     bool _isPaused;
+    FloatParamBlock _timerTrigger;
 }
 
 @end
@@ -89,6 +96,12 @@
     if( _isPaused )
         return;
     
+    if( _timerTrigger )
+    {
+        _runningTime += dt;
+        _timerTrigger(_runningTime);
+    }
+    
     if( _single )
     {
         _single->_totalTime += dt;
@@ -154,6 +167,8 @@
 
 -(void)triggersChanged:(Scene *)scene
 {
+    _timerTrigger = [scene.triggers getFloatTrigger:kTriggerTimer];
+    
     if( _single )
         [_single triggersChanged:scene];
     else

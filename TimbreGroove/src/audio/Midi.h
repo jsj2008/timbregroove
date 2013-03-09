@@ -24,7 +24,7 @@
 @interface Midi : NSObject
 
 -(MidiFile *)setupMidiFile:(NSString *)filename withInstrument:(Instrument *)instrument;
--(MidiFreeRange *)setupMidiFreeRange:(Instrument *)instrument;
+-(MidiFreeRange *)setupMidiFreeRange:(NSArray *)instruments;
 -(void)getParameters:(NSMutableDictionary *)putHere;
 -(void)update:(NSTimeInterval)dt;
 -(void)triggersChanged:(Scene *)scene;

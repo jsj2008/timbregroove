@@ -56,10 +56,10 @@ vec4 texture_dist(vec2 center)
     float length    = length(position);   // sqroot( x-sqr + y-sqr + z+sqr )
     vec2  direction = position / length;
     
-    float t = v_time;
-    float ripple     = (length * (rippleSize*2.0)) - (v_time * rippleSize);
+    float t = v_time * 0.1;
+    float ripple     = (length * (rippleSize*2.0)) - (t * rippleSize);
     vec2 diff = ((direction * cos(ripple))/100.0);
-    float max = 0.0153;
+    float max = 0.15;
     float alpha = ((max - length(diff)) / max);
     return vec4( texture2D(u_sampler, v_texCoordOut + diff).rgb, alpha );
 }

@@ -61,9 +61,14 @@
 -(void)loadAudioFromConfig:(ConfigAudioProfile *)config
 {
     _instruments = [NSMutableDictionary new];
-    [config.instruments each:^(id name, id configInstrument) {
-        _instruments[name] = [_soundSystem loadInstrumentFromConfig:configInstrument];
-    }];
+    NSDictionary * configInstruments = config.instruments; // don't make me look it up every time
+    int count = [configInstruments count];
+    for( int i = 0; i < count; i++ )
+    {
+        ConfigInstrument * configInstrument = configInstruments[@(i)];
+        _instruments[@(i)] = [_soundSystem loadInstrumentFromConfig:configInstrument intoChannel:i];
+    }
+
     _midiFileName = config.midiFile;
     _eqName = config.EQ;
 }
@@ -76,8 +81,7 @@
     }
     else
     {
-        Instrument * instrument = [_instruments allValues][0];
-        [_midi setupMidiFreeRange:instrument];
+        [_midi setupMidiFreeRange:[_instruments allValues]];
     }
 
     if( _eqName )
@@ -141,7 +145,7 @@
 {
     if( _midiFileName && !_midiSequence )
     {
-        Instrument * instrument = [_instruments allValues][0];
+        Instrument * instrument = _instruments[@(0)];
         _midiSequence = [_midi setupMidiFile:_midiFileName withInstrument:instrument];
     }
     [super start];

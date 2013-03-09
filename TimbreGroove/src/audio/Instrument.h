@@ -20,7 +20,8 @@ enum {
 @interface Instrument : NSObject
 
 +(id)instrumentWithConfig:(ConfigInstrument *)config
-                 andGraph:(AUGraph)graph;
+                 andGraph:(AUGraph)graph
+                atChannel:(int)channel;
 
 -(OSStatus)playNote:(int)note forDuration:(NSTimeInterval)duration;
 

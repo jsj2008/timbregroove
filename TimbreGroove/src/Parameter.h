@@ -19,6 +19,10 @@
 -(id)getParamBlockOfType:(char)paramType;
 -(void)getValue:(void *)p ofType:(char)type;
 @property (nonatomic) bool additive;
+
+// only need this for non-float possibly animated parameters
+-(void)setNativeValue:(void *)p ofType:(char)type size:(size_t)size;
+
 @end
 
 

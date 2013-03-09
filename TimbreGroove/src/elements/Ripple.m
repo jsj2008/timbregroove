@@ -26,7 +26,7 @@
 @end
 
 
-#define DEFAULT_BACKGROUND @"stars.jpg"
+#define DEFAULT_BACKGROUND @"aotk-ass-outline-512.tif"
 
 @implementation Ripple
 
@@ -49,11 +49,19 @@
     _background = background;
 }
 
--(void)getParameters:(NSMutableDictionary *)putHere
+-(void)getParameters:(NSMutableDictionary *)parameters
 {
+    [super getParameters:parameters];
+    
     Shader * shader = self.shader;
-    [shader floatParameter:putHere idx:gv_rippleSize value:1.5 range:(FloatRange){1.5,15}];
-    [shader pointParameter:putHere idx:gv_ripplePt];
+    [shader floatParameter:parameters idx:gv_rippleSize value:1.5 range:(FloatRange){1.5,15}];
+    [shader pointParameter:parameters idx:gv_ripplePt];
+    [shader floatParameter:parameters idx:gv_time];
+    
+    parameters[@"zRotation"] = [Parameter withBlock:^(float f) {
+        _zRot += 0.04;
+        self.rotation = (GLKVector3){ 0, 0, GLKMathDegreesToRadians(_zRot) };
+    }];
 }
 
 
@@ -70,28 +78,35 @@
 -(void)update:(NSTimeInterval)dt
 {
     [super update:dt];
-    _zRot += 0.04;
-    self.rotation = (GLKVector3){ 0, 0, GLKMathDegreesToRadians(_zRot) };
 }
 
--(void)getShaderFeatures:(NSMutableArray *)putHere
+-(void)getShaderFeatures:(NSMutableArray *)features
 {
-    [super getShaderFeatures:putHere];
-    [putHere addObject:kShaderFeatureDistortTexture];
+    [super getShaderFeatures:features];
+    
+    [features addObject:kShaderFeatureDistortTexture];
+    [features addObject:kShaderFeatureTime];
 }
 
 - (void)getSettings:(NSMutableArray *)arr
 {
-    NSDictionary * images = @{ @"stars.jpg": @"Star field",
-                                @"pool.png": @"Pool",
-                               @"gridtest.png": @"Grid" };
+    [super getSettings:arr];
     
+    NSDictionary * images = @{ @"stars.jpg"   : @"Star field",
+                               @"pool.png"    : @"Pool",
+                               @"gridtest.png": @"Grid",
+                               @"aotk-ass-outline-512.tif" : @"Logo"
+                               };
+    
+    NSDictionary * options = @{@"values" : images,
+                               @"target" : self,
+                               @"key"    : @"background"};
+
     SettingsDescriptor * sd;
     sd = [[SettingsDescriptor alloc]  initWithControlType: SC_Picker
                                                memberName: @"background"
                                                 labelText: @"Background"
-                                                  options: @{@"values":images,
-          @"target":self, @"key":@"background"}
+                                                  options: options
                                              initialValue: _background
                                                  priority: SHADER_SETTINGS];
     

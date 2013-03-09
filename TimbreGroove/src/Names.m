@@ -54,6 +54,8 @@ NSString const * kTriggerVPad3       =   @"VirtualPad3";
 NSString const * kTriggerVPad4       =   @"VirtualPad4";
 NSString const * kTriggerVPad5       =   @"VirtualPad5";
 
+NSString const * kTriggerTimer       =   @"Timer";
+
 NSString const * kTriggerTapPos      =   @"TapNative";
 NSString const * kTriggerTap1        =   @"Tap";
 NSString const * kTriggerTap2        =   @"Tap2";

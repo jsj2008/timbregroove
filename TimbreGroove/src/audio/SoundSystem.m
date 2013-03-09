@@ -114,8 +114,7 @@ OSStatus renderCallback(
     PointerParamBlock   _bufferTrigger;
     RenderCBContext     _cbContext;
 
-    AudioUnit   _buses[8];
-    int         _busCount;    
+    int _busCount;
 }
 
 @end
@@ -271,51 +270,18 @@ OSStatus renderCallback(
     return YES;
 }
 
--(Instrument *)loadInstrumentFromConfig:(ConfigInstrument *)config
+-(Instrument *)loadInstrumentFromConfig:(ConfigInstrument *)config intoChannel:(int)channel
 {
-    return [Instrument instrumentWithConfig:config andGraph:_processingGraph];
-}
-
--(int)findAvailableBus:(AudioUnit)au
-{
-    for( int i = 0; i < (sizeof(_buses)/sizeof(_buses[0])); ++i)
-    {
-        if( !_buses[i] )
-        {
-            _buses[i] = au;
-            ++_busCount;
-            return i;
-        }
-    }
-    
-    NSLog(@"All available buses taken");
-    exit(-1);
-    return -1;
-}
-
--(void)clearAvailableBus:(int)bus
-{
-    _buses[bus] = 0;
-    --_busCount;
+    return [Instrument instrumentWithConfig:config andGraph:_processingGraph atChannel:channel];
 }
 
 -(void)plugInstrumentIntoBus:(Instrument *)instrument
 {
     OSStatus result;
 
-    int busNum = [self findAvailableBus:instrument.sampler];
-    instrument.channel = busNum;
+    ++_busCount;
+    [self setupMasterMixer];
     
-    int busCount = busNum + 1;
-    result = AudioUnitSetProperty (_mixerUnit,
-                                   kAudioUnitProperty_ElementCount,
-                                   kAudioUnitScope_Input,
-                                   0,
-                                   &busCount,
-                                   sizeof (busCount)
-                                   );
-    CheckError(result,"Unable to set buscount on mixer.");
-
     if( !instrument.configured )
     {
         [self configUnit:instrument.sampler];
@@ -332,7 +298,7 @@ OSStatus renderCallback(
                                       instrument.graphNode,
                                       0,
                                       _mixerNode,
-                                      busNum);
+                                      instrument.channel);
     CheckError(result,"Unable to interconnect the nodes in the audio processing graph.");
     
     
@@ -343,7 +309,7 @@ OSStatus renderCallback(
     if( wasRunning )
         CheckError( AUGraphStart(_processingGraph), "Couldn't restart graph");
     
-    NSLog(@"plugged %@ (%d) into bus: %d", instrument.description, (unsigned int)instrument.sampler, busNum);
+    NSLog(@"plugged %@ (%d) into bus: %d", instrument.description, (unsigned int)instrument.sampler, instrument.channel);
 }
 
 -(void)unplugInstrumentFromBus:(Instrument *)instrument
@@ -364,14 +330,14 @@ OSStatus renderCallback(
     result = AUGraphUpdate(_processingGraph, NULL); // NULL forces synchronous update &isUpdated);
     CheckError(result,"Unable to update graph.");
     
-    [self clearAvailableBus:instrument.channel];
-    
     NSLog(@"UNplugged %@ (%d) from bus: %d", instrument.description, (unsigned int)instrument.sampler,
           (unsigned int)bus);
     
     if( wasRunning )
         CheckError( AUGraphStart(_processingGraph), "Couldn't restart graph");
     
+    --_busCount;
+    [self setupMasterMixer];
 }
 
 -(void)decomissionInstrument:(Instrument *)instrument
@@ -452,6 +418,19 @@ OSStatus renderCallback(
     return result;
 }
 
+-(void)setupMasterMixer
+{
+    OSStatus result;
+    result = AudioUnitSetProperty (_mixerUnit,
+                                   kAudioUnitProperty_ElementCount,
+                                   kAudioUnitScope_Input,
+                                   0,
+                                   &_busCount,
+                                   sizeof (_busCount)
+                                   );
+    CheckError(result,"Unable to set buscount on mixer.");
+    
+}
 
 - (OSStatus) configUnit:(AudioUnit)unit
 {

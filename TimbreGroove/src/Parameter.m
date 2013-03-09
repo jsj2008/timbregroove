@@ -11,6 +11,9 @@
 
 @interface Parameter () {
     char _paramType;
+    void * _nativeValue;
+    char _nativeValueType;
+    size_t _nativeValueSize;
 }
 
 @end
@@ -36,7 +39,15 @@
 
 -(void)getValue:(void *)p ofType:(char)type
 {
-    
+    if( _nativeValue && (type == _nativeValueType) )
+        memcpy(p, _nativeValue, _nativeValueSize);
+}
+
+-(void)setNativeValue:(void *)p ofType:(char)type size:(size_t)size
+{
+    _nativeValue = p;
+    _nativeValueType = type;
+    _nativeValueSize = size;
 }
 
 -(id)getParamBlockOfType:(char)paramType

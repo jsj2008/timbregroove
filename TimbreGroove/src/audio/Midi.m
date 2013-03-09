@@ -11,7 +11,6 @@
 #import "Names.h"
 #import "Parameter.h"
 
-
 void MyMIDINotifyProc (const MIDINotification  *message, void *refCon)
 {
     NSLog(@"MIDI Notify, messageId=%ld,", message->messageID);
@@ -37,17 +36,20 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
         Byte midiStatus = packet->data[0];
         Byte midiCommand = midiStatus >> 4;
         
-        if (midiCommand == 0x09) {
+        if (midiCommand == 0x09 || midiCommand == 0x08) {
             Byte note = packet->data[1] & 0x7F;
             Byte velocity = packet->data[2] & 0x7F;
-#ifdef SHOW_NOTES
-            int noteNumber = ((int) note) % 12;
-            NSLog(@"%s: %i - ts", _noteNames[noteNumber], noteNumber);
-#endif
+            
             OSStatus result = MusicDeviceMIDIEvent (player, midiStatus, note, velocity, 0);
-            if( result != noErr ) // don't call CheckError unless it really is an error
                 CheckError(result, "Error sending note");
             
+#ifdef SHOW_NOTES
+            if( midiCommand == 0x09 )
+            {
+                int noteNumber = ((int) note);
+                NSLog(@"%s: %i", _noteNames[noteNumber %12], noteNumber);
+            }
+#endif
         }
         packet = MIDIPacketNext(packet);
     }
@@ -171,25 +173,24 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
 
 @interface MidiFreeRange () {
     MIDIPortRef _outPort;
-    MIDIEndpointRef _endRef;
+    NSArray * _midiRefs;
 }
 
 @end
 @implementation MidiFreeRange
 
--(id)initWithMidi:(Midi *)midi andInstrument:(Instrument *)instrument
+-(id)initWithMidi:(Midi *)midi andMidiRefs:(NSArray *)midiRefs
 {
     self = [super init];
     if( self )
     {
         CheckError (MIDIOutputPortCreate (midi.midiClient,
-                                          CFSTR(" out port"),
+                                          CFSTR("out port"),
                                           &_outPort
                                           ),
                     " Couldn't create MIDI output port");
-        
-        _endRef = instrument.midiEndPoint;
-//        CheckError (MIDIPortConnectSource( _outPort, _endRef, NULL), " Couldn't connect MIDI port");
+
+        _midiRefs = midiRefs;
     }
     return self;
 }
@@ -204,11 +205,12 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
     packetList.packet[ 0]. data[ 2] = noteMsg->velocity & 0x7F;
     packetList.packet[ 0]. timeStamp = 0;
     
-    CheckError( MIDISend(_outPort, _endRef, &packetList), "Couldn't send note ON");
+    MIDIEndpointRef endRef = [_midiRefs[noteMsg->channel] pointerValue];
+    CheckError( MIDISend(_outPort, endRef, &packetList), "Couldn't send note ON");
     
     [NSObject performBlock:[^{
         packetList.packet[ 0]. data[ 0] = 0x80;
-        CheckError( MIDISend(_outPort, _endRef, &packetList), "Couldn't send note OFF");
+        CheckError( MIDISend(_outPort, endRef, &packetList), "Couldn't send note OFF");
     } copy] afterDelay:noteMsg->duration];
 }
 @end
@@ -266,10 +268,14 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
     return [[MidiFile alloc] initWithMidi:self andFileName:filename andInstrument:instrument];
 }
 
--(MidiFreeRange *)setupMidiFreeRange:(Instrument *)instrument
+-(MidiFreeRange *)setupMidiFreeRange:(NSArray *)instruments
 {
-    [self attachMidiClientToInstrument:instrument];
-    _freeRange = [[MidiFreeRange alloc] initWithMidi:self andInstrument:instrument];
+    NSArray * midiRefs = [instruments map:^id(Instrument * instrument) {
+        [self attachMidiClientToInstrument:instrument];
+        return [NSValue valueWithPointer:(const void *)instrument.midiEndPoint];
+    }];
+
+    _freeRange = [[MidiFreeRange alloc] initWithMidi:self andMidiRefs:midiRefs];
     return _freeRange;
 }
 

@@ -14,54 +14,18 @@
 #import "Instrument.h"
 #import "TriggerMap.h"
 #import "NSString+Tweening.h"
+#import "NoteGenerator.h"
 
-@interface Pentatonic : NSObject {
-    int * _notes;
-    int _count;
-}
-@end
-
-@implementation Pentatonic
-
-- (id)init
-{
-    self = [super init];
-    if (self) {
-        static int notes[8] = {
-            kMiddleC,
-            kMiddleC + 3,
-            kMiddleC + 5,
-            kMiddleC + 7,
-            kMiddleC + 9,
-            kMiddleC + 11,
-            kMiddleC + 14,
-            kMiddleC + 16
-        };
-        _notes = notes;
-    }
-    return self;
-}
-
--(int)up
-{
-    return _notes[ _count++ % 8 ] - 5;
-}
-
--(int)note:(int)num
-{
-    int note = _notes[ abs(num % 6) ] - 11;
-    NSLog(@"i:%d  note:%d",num,note);
-    return note;
-}
-@end
-
+#define AMBIENCE_CHANNEL 1
+#define CONGAS_CHANNEL   0
 
 @interface Serenity : Audio
 
 @end
 
 @interface Serenity() {
-    Pentatonic * _scale;
+    NoteGenerator * _congasScale;
+    NoteGenerator * _ambientScale;
     FloatParamBlock _channelVolume;
     FloatParamBlock _channelVolumeDecay;
     IntParamBlock   _selectChannel;
@@ -73,7 +37,12 @@
 
 -(void)start
 {
-    _scale = [Pentatonic new];
+    Instrument * congas = _instruments[@(CONGAS_CHANNEL)];
+    NoteRange congasRange = (NoteRange){ congas.lowestPlayable, congas.highestPlayable };
+    _congasScale = [[NoteGenerator alloc] initWithScale:kScaleSemitones isRandom:false andRange:congasRange];
+    
+    _ambientScale = [[NoteGenerator alloc] initWithScale:kScalePentatonic isRandom:true];
+    _ambientScale.range = (NoteRange){ 45, 80 };
     [super start];
 }
 
@@ -101,16 +70,16 @@
                               ^(CGPoint pt)
                               {
                                   MIDINoteMessage mnm;
-                                  _selectChannel(0); //_selectChannel(synth.channel);
+                                  _selectChannel(AMBIENCE_CHANNEL);
                                   _channelVolume(0);
-                                  mnm.note = [_scale up];
+                                  mnm.note = [_ambientScale next];
                                   mnm.duration = 1.1;
                                   mnm.velocity = 127;
+                                  mnm.channel = AMBIENCE_CHANNEL;
                                   _midiNote(&mnm);
-                                  mnm.note = [_scale up];
+                                  mnm.note = [_ambientScale next];
                                   _midiNote(&mnm);
                                   _channelVolumeDecay(1.0);
-                              //    [NSObject performBlock:^{_channelVolumeDecay(0);} afterDelay:0.5];
                               }];
 }
 @end

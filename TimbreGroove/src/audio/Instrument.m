@@ -20,13 +20,15 @@
 
 +(id)instrumentWithConfig:(ConfigInstrument *)config
                  andGraph:(AUGraph)graph
+                atChannel:(int)channel
 {
-    return [[Instrument alloc] initWithConfig:config andGraph:graph];
+    return [[Instrument alloc] initWithConfig:config andGraph:graph atChannel:channel];
 }
 
 
 -(id)initWithConfig:(ConfigInstrument *)config
            andGraph:(AUGraph)graph
+          atChannel:(int)channel
 {
     if( (self = [super init]) )
     {
@@ -36,6 +38,7 @@
         _lowestPlayable = config.low;
         _highestPlayable = config.high;
         _prevTimeStamp = 0;
+        _channel = channel;
     }
     
     return self;

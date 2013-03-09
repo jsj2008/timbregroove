@@ -138,8 +138,11 @@ static Config * __sharedConfig;
 {
     NSMutableDictionary * dict = [NSMutableDictionary new];
     NSArray * names = [_me valueForKey:kConfigAudioInstruments];
-    for( NSString * name in names )
-        dict[name] = [__sharedConfig getInstrument:name];
+    __block int channel = 0;
+    [names each:^(id name) {
+        dict[@(channel)] = [__sharedConfig getInstrument:name];
+        ++channel;
+    }];
     return dict;
 }
 @end

@@ -172,6 +172,7 @@
 		57647571167D619800D5A431 /* Generic.m in Sources */ = {isa = PBXBuildFile; fileRef = 57647570167D619800D5A431 /* Generic.m */; };
 		57647577167D97EC00D5A431 /* generic.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 57647574167D7C4A00D5A431 /* generic.fsh */; };
 		57647578167D97EC00D5A431 /* generic.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 57647572167D7C3C00D5A431 /* generic.vsh */; };
+		57677D9D16EAEE8100C3BA58 /* NoteGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = 57677D9C16EAEE8100C3BA58 /* NoteGenerator.m */; };
 		577368CC16CDBAF40051551F /* bezier.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 577368CB16CDBAF40051551F /* bezier.fsh */; };
 		577368CE16CDBB320051551F /* bezier.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 577368CD16CDBB320051551F /* bezier.vsh */; };
 		577368D116CDC42D0051551F /* Line.m in Sources */ = {isa = PBXBuildFile; fileRef = 577368D016CDC42D0051551F /* Line.m */; };
@@ -526,6 +527,8 @@
 		57647572167D7C3C00D5A431 /* generic.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = generic.vsh; sourceTree = "<group>"; };
 		57647574167D7C4A00D5A431 /* generic.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = generic.fsh; sourceTree = "<group>"; };
 		57647576167D8AC100D5A431 /* TGTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = TGTypes.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		57677D9B16EAEE8000C3BA58 /* NoteGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoteGenerator.h; sourceTree = "<group>"; };
+		57677D9C16EAEE8100C3BA58 /* NoteGenerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NoteGenerator.m; sourceTree = "<group>"; };
 		577368CB16CDBAF40051551F /* bezier.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = bezier.fsh; sourceTree = "<group>"; };
 		577368CD16CDBB320051551F /* bezier.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = bezier.vsh; sourceTree = "<group>"; };
 		577368CF16CDC42D0051551F /* Line.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Line.h; sourceTree = "<group>"; };
@@ -799,6 +802,8 @@
 				5714713E16C8451E00CA2A69 /* Midi.m */,
 				57BE7FB516CACA0C001972ED /* RingBuffer.h */,
 				57BE7FB416CACA0C001972ED /* RingBuffer.cpp */,
+				57677D9B16EAEE8000C3BA58 /* NoteGenerator.h */,
+				57677D9C16EAEE8100C3BA58 /* NoteGenerator.m */,
 			);
 			path = audio;
 			sourceTree = "<group>";
@@ -1746,6 +1751,7 @@
 				5705DED916E5DA5300A80445 /* Tween.c in Sources */,
 				573CEEF216E997A200B02EE3 /* NSObject+BlocksKit.m in Sources */,
 				573CEEF516E99D8F00B02EE3 /* NSString+Tweening.m in Sources */,
+				57677D9D16EAEE8100C3BA58 /* NoteGenerator.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

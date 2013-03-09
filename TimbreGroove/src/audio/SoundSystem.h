@@ -44,7 +44,7 @@ enum MidiNotes {
 @interface SoundSystem : NSObject 
 +(SoundSystem *)sharedInstance;
 
--(Instrument *)loadInstrumentFromConfig:(ConfigInstrument *)config;
+-(Instrument *)loadInstrumentFromConfig:(ConfigInstrument *)config intoChannel:(int)channel;
 -(void)plugInstrumentIntoBus:(Instrument *)instrument;
 -(void)unplugInstrumentFromBus:(Instrument *)instrument;
 -(void)decomissionInstrument:(Instrument *)instrument;

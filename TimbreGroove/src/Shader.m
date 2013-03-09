@@ -201,6 +201,8 @@ typedef struct _VarQueueItem
     };
 } VarQueueItem;
 
+typedef struct _VarQueueItem VarStoreItem;
+
 @interface Shader () {
     const char ** _names;
     
@@ -212,6 +214,8 @@ typedef struct _VarQueueItem
     int _varQueueCount;
     int _varQueueMax;
     VarQueueItem * _varQueue;
+    VarStoreItem * _currentValues;
+    int _nextCurrentValue;
 }
 
 @end
@@ -298,6 +302,9 @@ typedef struct _VarQueueItem
     _varQueueCount = 0;
     _varQueue = malloc(_varQueueMax * sizeof(VarQueueItem));
     
+    _nextCurrentValue = 0;
+    _currentValues = malloc(_varQueueMax * sizeof(VarStoreItem));
+    
     NSString * tag = [headers length] ? headers : @"default";
     _poolKey = [NSString stringWithFormat:@"%s-%s-%@",vert,frag,tag];
     if( !__shaders )
@@ -310,6 +317,7 @@ typedef struct _VarQueueItem
 {
     free(_vars);
     free(_varQueue);
+    free(_currentValues);
     [__shaders removeObject:self];
 }
 
@@ -368,6 +376,14 @@ typedef struct _VarQueueItem
     }
 }
 
+-(void)floatParameter:(NSMutableDictionary *)putHere idx:(int)idx 
+{
+    putHere[ @(_names[idx]) ] = [Parameter withBlock:^(float f){
+        _varQueue[_varQueueCount] = (VarQueueItem){ idx, TG_FLOAT, { .f = f }};
+        ATOMIC_INC(_varQueueCount);
+    }];
+}
+
 -(void)floatParameter:(NSMutableDictionary *)putHere idx:(int)idx value:(float)value range:(FloatRange)range
 {
     putHere[ @(_names[idx]) ] = [FloatParameter withRange:range value:value block:^(float f){
@@ -378,10 +394,20 @@ typedef struct _VarQueueItem
 
 -(void)pointParameter:(NSMutableDictionary *)putHere idx:(int)idx
 {
-    putHere[ @(_names[idx]) ] = [Parameter withBlock:^(CGPoint pt) {
+    int myCurrentValueIndex = _nextCurrentValue;
+    Parameter * parameter = [Parameter withBlock:[^(CGPoint pt) {
         _varQueue[_varQueueCount] = (VarQueueItem){ idx, TG_POINT, { .pt = pt } };
+        _currentValues[myCurrentValueIndex].pt = pt;
         ATOMIC_INC(_varQueueCount);        
-    }];
+    } copy]];
+    
+    _currentValues[_nextCurrentValue].pt = (CGPoint){0,0};
+    parameter.additive = false;
+    [parameter setNativeValue:&_currentValues[_nextCurrentValue].pt ofType:TGC_POINT size:sizeof(CGPoint)];
+    
+    putHere[ @(_names[idx]) ] = parameter;
+    
+    ++_nextCurrentValue;
 }
 
 @end

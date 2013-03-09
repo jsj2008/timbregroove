@@ -33,16 +33,18 @@
 			<key>connections</key>
 			<array>
 				<dict>
+					<key>Timer</key>
+					<string>u_time</string>
 					<key>Tap</key>
 					<string>SwellSound</string>
 				</dict>
 				<dict>
+					<key>Timer</key>
+					<string>zRotation</string>
 					<key>MainSlider</key>
 					<string>MasterVolume</string>
 					<key>Tap</key>
-					<string>u_ripplePt</string>
-					<key>Drag</key>
-					<string>u_ripplePt</string>
+					<string>u_ripplePt:EaseOutSine:2.3</string>
 				</dict>
 			</array>
 			<key>icon</key>
@@ -52,7 +54,7 @@
 			<key>3d_element</key>
 			<string>ripple</string>
 			<key>audio_element</key>
-			<string>jazz</string>
+			<string>tranquility</string>
 		</dict>
 		<key>tranquility</key>
 		<dict>
@@ -179,7 +181,7 @@
 			<key>lo</key>
 			<integer>68</integer>
 			<key>hi</key>
-			<string>73</string>
+			<string>71</string>
 			<key>preset</key>
 			<string>CONGAS_3</string>
 		</dict>

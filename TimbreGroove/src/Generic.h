@@ -60,7 +60,7 @@ typedef enum ShaderTimeType {
 -(void)getTextureLocations;
 -(void)addBuffer:(MeshBuffer *)buffer;
 
--(void)getShaderFeatures:(NSMutableArray *)putHere;
+-(void)getShaderFeatures:(NSMutableArray *)features;
 
 @end
 

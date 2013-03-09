@@ -23,10 +23,10 @@
     _distortionFactor = distortionFactor;
 }
 
--(void)getShaderFeatures:(NSMutableArray *)putHere
+-(void)getShaderFeatures:(NSMutableArray *)features
 {
-    [super getShaderFeatures:putHere];
-    [putHere addObject:kShaderFeatureDistort];
+    [super getShaderFeatures:features];
+    [features addObject:kShaderFeatureDistort];
 }
 
 
