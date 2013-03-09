@@ -17,6 +17,7 @@ NSString const * kMoodSexy = @"Sexy";
 NSString const * kParamMasterVolume   =   @"MasterVolume";
 NSString const * kParamTempo          =   @"Tempo";
 NSString const * kParamMIDINote       =   @"Note";
+NSString const * kParamRandomNote     =   @"RandomNote";
 NSString const * kParamPitch          =   @"Pitch";
 
 NSString const * kParamChannel        =   @"Channel";

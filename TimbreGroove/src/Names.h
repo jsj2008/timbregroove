@@ -62,6 +62,7 @@ extern NSString const * kMoodSexy;
 extern NSString const * kParamMasterVolume;
 extern NSString const * kParamTempo;
 extern NSString const * kParamMIDINote;
+extern NSString const * kParamRandomNote;
 extern NSString const * kParamPitch;
 
 extern NSString const * kParamChannel;

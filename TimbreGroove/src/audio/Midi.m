@@ -10,13 +10,14 @@
 #import "Instrument.h"
 #import "Names.h"
 #import "Parameter.h"
+#import "NoteGenerator.h"
 
 void MyMIDINotifyProc (const MIDINotification  *message, void *refCon)
 {
     NSLog(@"MIDI Notify, messageId=%ld,", message->messageID);
 }
 
-#define SHOW_NOTES 1
+//#define SHOW_NOTES 1
 
 static void MyMIDIReadProc(const MIDIPacketList *pktlist,
                            void *refCon,
@@ -217,6 +218,7 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
 
 @interface Midi () {
     MidiFreeRange * _freeRange;
+    NoteGenerator * _noteGenerator;
 }
 @end
 
@@ -305,10 +307,23 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
       kParamInstrumentP6: [Parameter withBlock:[closure(kParamInstrumentP6) copy]],
       kParamInstrumentP7: [Parameter withBlock:[closure(kParamInstrumentP7) copy]],
       kParamInstrumentP8: [Parameter withBlock:[closure(kParamInstrumentP8) copy]],
-      kParamMIDINote: [Parameter withBlock:[^(MIDINoteMessage *msg){
-            if( _freeRange )
-               [_freeRange sendNote:msg];
-        } copy]]
+      kParamMIDINote: [Parameter withBlock:[^(MIDINoteMessage *msg) {
+        if( _freeRange )
+            [_freeRange sendNote:msg];
+        } copy]],
+      kParamRandomNote: [Parameter withBlock:[^(CGPoint pt) {
+        if( _freeRange )
+        {
+            if( !_noteGenerator )
+                _noteGenerator = [[NoteGenerator alloc] initWithScale:kScalePentatonic isRandom:true];
+            MIDINoteMessage mnm;
+            mnm.note = [_noteGenerator next];
+            mnm.duration = 1.1;
+            mnm.velocity = 127;
+            mnm.channel = 0;
+            [_freeRange sendNote:&mnm];
+        }
+    } copy]]
       }];
 }
 

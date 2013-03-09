@@ -41,13 +41,15 @@
     NoteRange congasRange = (NoteRange){ congas.lowestPlayable, congas.highestPlayable };
     _congasScale = [[NoteGenerator alloc] initWithScale:kScaleSemitones isRandom:false andRange:congasRange];
     
-    _ambientScale = [[NoteGenerator alloc] initWithScale:kScalePentatonic isRandom:true];
+    _ambientScale = [[NoteGenerator alloc] initWithScale:kScaleMinor isRandom:true];
     _ambientScale.range = (NoteRange){ 45, 80 };
     [super start];
 }
 
 -(void)triggersChanged:(Scene *)scene
 {
+    [super triggersChanged:scene];
+    
     static NSString const * kChannelVolumeDecay = nil;
     
     if( !kChannelVolumeDecay )

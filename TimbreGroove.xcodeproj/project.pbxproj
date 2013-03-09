@@ -119,6 +119,7 @@
 		571ECFC4167BEC3B00727A30 /* aotk-ass-bare-512.tif in Resources */ = {isa = PBXBuildFile; fileRef = 571ECFC3167BEC3B00727A30 /* aotk-ass-bare-512.tif */; };
 		572098E116DA9FA40075E584 /* Parameter.m in Sources */ = {isa = PBXBuildFile; fileRef = 572098E016DA9FA40075E584 /* Parameter.m */; };
 		5721989616853F9E0062C36F /* GraphView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5721989516853F9D0062C36F /* GraphView.m */; };
+		572AD0E016EBC1870070AE6A /* FFTScope.m in Sources */ = {isa = PBXBuildFile; fileRef = 572AD0DF16EBC1870070AE6A /* FFTScope.m */; };
 		572D7F2E16832749006D48BF /* GenericWithTexture.m in Sources */ = {isa = PBXBuildFile; fileRef = 572D7F2D16832749006D48BF /* GenericWithTexture.m */; };
 		572EB1FD16786C630062F290 /* Alex.png in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1E316786C630062F290 /* Alex.png */; };
 		572EB1FE16786C630062F290 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1E416786C630062F290 /* Default-568h@2x.png */; };
@@ -452,6 +453,7 @@
 		572098E016DA9FA40075E584 /* Parameter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Parameter.m; sourceTree = "<group>"; };
 		5721989416853F9D0062C36F /* GraphView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = GraphView.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		5721989516853F9D0062C36F /* GraphView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = GraphView.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		572AD0DF16EBC1870070AE6A /* FFTScope.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FFTScope.m; sourceTree = "<group>"; };
 		572D7F2C16832749006D48BF /* GenericWithTexture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenericWithTexture.h; sourceTree = "<group>"; };
 		572D7F2D16832749006D48BF /* GenericWithTexture.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GenericWithTexture.m; sourceTree = "<group>"; };
 		572EB1E316786C630062F290 /* Alex.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Alex.png; sourceTree = "<group>"; };
@@ -1217,6 +1219,7 @@
 				577368D316CDCBF70051551F /* EQPanel.m */,
 				57B2737316D0C28C00E7F064 /* EQCube.m */,
 				5751F2E516D5FACB00144F2B /* Ripple.m */,
+				572AD0DF16EBC1870070AE6A /* FFTScope.m */,
 			);
 			name = misc;
 			sourceTree = "<group>";
@@ -1752,6 +1755,7 @@
 				573CEEF216E997A200B02EE3 /* NSObject+BlocksKit.m in Sources */,
 				573CEEF516E99D8F00B02EE3 /* NSString+Tweening.m in Sources */,
 				57677D9D16EAEE8100C3BA58 /* NoteGenerator.m in Sources */,
+				572AD0E016EBC1870070AE6A /* FFTScope.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

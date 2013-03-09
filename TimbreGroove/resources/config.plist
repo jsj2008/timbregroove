@@ -3,9 +3,31 @@
 <plist version="1.0">
 <dict>
 	<key>default_scene</key>
-	<string>test</string>
+	<string>fft</string>
 	<key>scenes</key>
 	<dict>
+		<key>fft</key>
+		<dict>
+			<key>connections</key>
+			<array>
+				<dict>
+					<key>Tap</key>
+					<string>SwellSound</string>
+					<key>AudioFrame</key>
+					<string>frameCapture</string>
+					<key>MainSlider</key>
+					<string>MasterVolume</string>
+				</dict>
+			</array>
+			<key>icon</key>
+			<string>fractalSphere.png</string>
+			<key>display</key>
+			<string>FFT</string>
+			<key>3d_element</key>
+			<string>fft</string>
+			<key>audio_element</key>
+			<string>tranquility</string>
+		</dict>
 		<key>scope</key>
 		<dict>
 			<key>connections</key>
@@ -201,6 +223,15 @@
 	</dict>
 	<key>3d_elements</key>
 	<dict>
+		<key>fft</key>
+		<dict>
+			<key>instanceClass</key>
+			<string>FFTScope</string>
+			<key>order</key>
+			<integer>40</integer>
+			<key>icon</key>
+			<string>newModel.png</string>
+		</dict>
 		<key>pool</key>
 		<dict>
 			<key>instanceClass</key>

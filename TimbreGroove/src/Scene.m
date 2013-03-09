@@ -62,8 +62,6 @@
         [_triggers addParameters:params];
 
         [config.connections apply:^(id map) { [_triggers addMappings:map];}];
-        [_graph triggersChanged:self];
-        [_audio triggersChanged:self];
         
         [_triggers addMappings:[self getRuntimeConnections]];
     }
@@ -98,6 +96,8 @@
 
 -(void)play
 {
+    [_graph triggersChanged:self];
+    [_audio triggersChanged:self];
     [_audio play];
     [_graph play];
 }
