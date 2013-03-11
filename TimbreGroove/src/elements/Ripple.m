@@ -18,15 +18,12 @@
 #import "Names.h"
 #import "SettingsVC.h"
 
-@interface Ripple : GenericWithTexture {
-    float _zRot;
-    float _spotRadius;
-}
+@interface Ripple : GenericWithTexture
 @property (nonatomic,strong) NSString * background;
 @end
 
 
-#define DEFAULT_BACKGROUND @"aotk-ass-outline-512.tif"
+#define DEFAULT_BACKGROUND @"pool.png"
 
 @implementation Ripple
 
@@ -57,27 +54,8 @@
     [shader floatParameter:parameters idx:gv_rippleSize value:1.5 range:(FloatRange){1.5,15}];
     [shader pointParameter:parameters idx:gv_ripplePt];
     [shader floatParameter:parameters idx:gv_time];
-    
-    parameters[@"zRotation"] = [Parameter withBlock:^(float f) {
-        _zRot += 0.04;
-        self.rotation = (GLKVector3){ 0, 0, GLKMathDegreesToRadians(_zRot) };
-    }];
-}
-
-
--(id)wireUp
-{
-    [super wireUp];
-    
-    NSTimeInterval initTime = self.countDownBase;
-    [self.shader writeToLocation:gv_time type:TG_FLOAT data:&initTime];
-    return self;
-}
-
-
--(void)update:(NSTimeInterval)dt
-{
-    [super update:dt];
+ 
+    self.rotationScale = (GLKVector3){ 0, 0, M_PI_2 };
 }
 
 -(void)getShaderFeatures:(NSMutableArray *)features

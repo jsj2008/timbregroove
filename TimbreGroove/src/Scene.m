@@ -68,6 +68,16 @@
     return self;
 }
 
+-(void)updateParameters:(NSDictionary *)parameters renewTriggers:(bool)renew
+{
+    [_triggers addParameters:parameters];
+    if( renew )
+    {
+        [_graph triggersChanged:self];
+        [_audio triggersChanged:self];
+    }
+}
+
 -(void)addTriggers:(NSDictionary *)triggerKeyParamNameValue
 {
     [_triggers addMappings:triggerKeyParamNameValue];
@@ -100,6 +110,11 @@
     [_audio triggersChanged:self];
     [_audio play];
     [_graph play];
+    if( !_started )
+    {
+        _started = true;
+        [_audio start];
+    }
 }
 
 - (void)getSettings:(NSMutableArray *)putHere
@@ -121,13 +136,6 @@
 
 -(void)update:(NSTimeInterval)dt view:(GraphView *)view
 {
-    if( !_started )
-    {
-        _started = true;
-        [_audio start];
-        return; // see you in 1/60th of a second!
-    }
-    
     [_audio update:dt];
     [view update:dt];
     

@@ -15,7 +15,7 @@
 
 @interface Audio : NSObject {
     @protected
-    NSMutableDictionary * _instruments;
+    NSArray * _instruments;
 }
 +(id)audioFromConfig:(ConfigAudioProfile *)config withScene:(Scene *)scene;
 -(void)loadAudioFromConfig:(ConfigAudioProfile *)config;

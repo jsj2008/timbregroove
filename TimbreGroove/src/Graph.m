@@ -27,6 +27,7 @@
     NSTimeInterval _runningTime;
     bool _isPaused;
     FloatParamBlock _timerTrigger;
+    FloatParamBlock _updateTrigger;
 }
 
 @end
@@ -102,6 +103,9 @@
         _timerTrigger(_runningTime);
     }
     
+    if( _updateTrigger )
+        _updateTrigger(dt);
+    
     if( _single )
     {
         _single->_totalTime += dt;
@@ -167,7 +171,8 @@
 
 -(void)triggersChanged:(Scene *)scene
 {
-    _timerTrigger = [scene.triggers getFloatTrigger:kTriggerTimer];
+    _timerTrigger  = [scene.triggers getFloatTrigger:kTriggerTimer];
+    _updateTrigger = [scene.triggers getFloatTrigger:kTriggerUpdate];
     
     if( _single )
         [_single triggersChanged:scene];

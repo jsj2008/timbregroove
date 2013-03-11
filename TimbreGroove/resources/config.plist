@@ -3,14 +3,42 @@
 <plist version="1.0">
 <dict>
 	<key>default_scene</key>
-	<string>fft</string>
+	<string>eqCube</string>
 	<key>scenes</key>
 	<dict>
+		<key>eqCube</key>
+		<dict>
+			<key>connections</key>
+			<array>
+				<dict>
+					<key>Pinch</key>
+					<string>CurveWidth</string>
+					<key>MainSlider</key>
+					<string>MasterVolume</string>
+					<key>PanX</key>
+					<string>CurveCutoff</string>
+					<key>TapNative</key>
+					<string>Buttons</string>
+					<key>Tap</key>
+					<string>SwellSound</string>
+				</dict>
+			</array>
+			<key>icon</key>
+			<string>test.png</string>
+			<key>display</key>
+			<string>EQ Cube</string>
+			<key>3d_element</key>
+			<string>eqcube</string>
+			<key>audio_element</key>
+			<string>funky</string>
+		</dict>
 		<key>fft</key>
 		<dict>
 			<key>connections</key>
 			<array>
 				<dict>
+					<key>PanX</key>
+					<string>EQfreq:EaseInSine:0.3</string>
 					<key>Tap</key>
 					<string>SwellSound</string>
 					<key>AudioFrame</key>
@@ -26,7 +54,7 @@
 			<key>3d_element</key>
 			<string>fft</string>
 			<key>audio_element</key>
-			<string>tranquility</string>
+			<string>funky</string>
 		</dict>
 		<key>scope</key>
 		<dict>
@@ -50,7 +78,7 @@
 			<key>audio_element</key>
 			<string>funky</string>
 		</dict>
-		<key>test</key>
+		<key>ripple</key>
 		<dict>
 			<key>connections</key>
 			<array>
@@ -72,7 +100,7 @@
 			<key>icon</key>
 			<string>test.png</string>
 			<key>display</key>
-			<string>test</string>
+			<string>ripples</string>
 			<key>3d_element</key>
 			<string>ripple</string>
 			<key>audio_element</key>
@@ -109,15 +137,13 @@
 		</dict>
 		<key>funky</key>
 		<dict>
-			<key>EQ</key>
-			<string>LowPass</string>
 			<key>instanceClass</key>
 			<string>AutoPlayMidiFile</string>
 			<key>midifile</key>
 			<string>funkRiff1</string>
 			<key>instruments</key>
 			<array>
-				<string>clav</string>
+				<string>vibes</string>
 			</array>
 		</dict>
 		<key>tranquility</key>

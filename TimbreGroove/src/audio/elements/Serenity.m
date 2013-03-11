@@ -37,7 +37,7 @@
 
 -(void)start
 {
-    Instrument * congas = _instruments[@(CONGAS_CHANNEL)];
+    Instrument * congas = _instruments[CONGAS_CHANNEL];
     NoteRange congasRange = (NoteRange){ congas.lowestPlayable, congas.highestPlayable };
     _congasScale = [[NoteGenerator alloc] initWithScale:kScaleSemitones isRandom:false andRange:congasRange];
     

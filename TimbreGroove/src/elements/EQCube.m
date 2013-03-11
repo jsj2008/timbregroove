@@ -16,8 +16,8 @@
 
 #import "Global.h"
 #import "Scene.h"
-#import "Audio.h"
-#import "SoundSystemParameters.h"
+#import "Names.h"
+#import "Tween.h"
 
 #define CUBE_TILT  0.1
 #define CUBE_SIZE 1.8
@@ -25,44 +25,36 @@
 #define CUBE_GUTTER_PADDING (CUBE_SIZE * 0.09)
 #define EQ_PANEL_HEIGHT 256
 
+NSString const * kParamRotateCube  = @"RotateCube";
+
 @interface EQCube : Generic  {
     EQPanel * _eqPanel;
-    FBO * _fbo;
+    
     GenericWithTexture * _next;
     GenericWithTexture * _prev;
+    
+    FloatParameter  * _rotateParam;
+    FloatParamBlock   _rotateTrigger;
+    
+    IntParamBlock _eqLowEnable;
+    IntParamBlock _eqMidEnable;
+    IntParamBlock _eqHighEnable;
+    
     int _currentBand;
-    eqBands _bands[kNUM_EQ_BANDS+1];
 }
-@property (nonatomic) float cubeRotation;
+
 @end
 
 @implementation EQCube
 
 -(id)wireUp
 {
-    _fbo = [[FBO alloc] initWithWidth:EQ_PANEL_HEIGHT * 4 height:EQ_PANEL_HEIGHT];
-    _eqPanel = [[EQPanel alloc] init];
-    _eqPanel.fbo = _fbo;
-    [_eqPanel wireUp];
-    
     [super wireUp];
 
     [self setupButtons];
     
-    int eqband = [Global sharedInstance].scene.audio.ssp.selectedEQBand;
-    for( int b = 0; b < kNUM_EQ_BANDS+1; b++ )
-    {
-        _bands[b] = kEQDisabled + b;
-        if( _bands[b] == eqband )
-            _currentBand = b;
-    }
-    _eqPanel.shapeEdit = eqband;
-
-    self.cubeRotation = 90 * eqband;
-    
     self.position = (GLKVector3){ 0, CUBE_TILT/2.0, 0 };
     
-
     return self;
 }
 
@@ -88,7 +80,12 @@
 
 -(void)createTexture
 {
-    self.texture = _fbo; // [[Texture alloc] initWithFileName:@"uvWrap.png"];
+    _eqPanel = [[EQPanel alloc] init];
+    
+    self.texture = [[FBO alloc] initWithObject:_eqPanel
+                                         width:EQ_PANEL_HEIGHT * 4
+                                        height:EQ_PANEL_HEIGHT];
+    
 }
 
 -(void)createBuffer
@@ -110,43 +107,83 @@
     self.light.direction = (GLKVector3){ 0.5, 1, -0.5 };
 }
 
--(void)isPrevNext
+-(void)isPrevNext:(CGPoint) pt
 {
-    UIView * view;
-    CGPoint screenPt;
+    UIView * view = self.view;
     GenericWithTexture * button = [EventCapture getGraphViewTapChildElementOf:self
                                                                        inView:view
-                                                                         atPt:screenPt];
+                                                                         atPt:pt];
+    NSLog(@"Got button request: %f,%f at %@",pt.x,pt.y,button);
+
     if( button == _prev )
-        [self rotateToNextFace:(CGPoint){-1,0}];
+        [self rotateToNextFace:-1];
     else if( button == _next )
-        [self rotateToNextFace:(CGPoint){1,0}];
+        [self rotateToNextFace:1];
 }
 
--(void)didAttachToView:(GraphView *)view
+-(void)getParameters:(NSMutableDictionary *)parameters
 {
-    [_eqPanel didAttachToView:view];    
+    [super    getParameters:parameters];
+    [_eqPanel getParameters:parameters];
+    
+    parameters[@"Buttons"] = [Parameter withBlock:^(CGPoint pt){
+        [self isPrevNext:pt];
+    }];
+
+    // -90 is where 'EQ OFF' is
+    parameters[kParamRotateCube]  = [FloatParameter withValue:-90
+                                                        block:^(float f){
+                                                            self.rotation =
+                                                            (GLKVector3){ CUBE_TILT, -GLKMathDegreesToRadians(f), 0 };
+                                                        }];;
 }
 
--(void)setCubeRotation:(float)cubeRotation
+-(void)triggersChanged:(Scene *)scene
 {
-    float rot = GLKMathDegreesToRadians(cubeRotation);
-    self.rotation = (GLKVector3){ CUBE_TILT, -rot, 0 };
-    _cubeRotation = cubeRotation;
+    [super    triggersChanged:scene];
+    [_eqPanel triggersChanged:scene];
+    
+    TriggerMap * tm = scene.triggers;
+    
+    _rotateTrigger = [tm getFloatTrigger:[kParamRotateCube stringByAppendingTween:kTweenEaseOutThrow len:0.5]];
+    
+    _eqLowEnable = [tm getIntTrigger:kParamEQLowPassEnable];
+    _eqMidEnable = [tm getIntTrigger:kParamEQParametricEnable];
+    _eqHighEnable = [tm getIntTrigger:kParamEQHiPassEnable];
+            
 }
 
--(void)doneRotation
+-(void)rotateToNextFace:(int)direction
 {
-    eqBands band = _bands[_currentBand];
-    _eqPanel.shapeEdit = band;
-    [Global sharedInstance].scene.audio.ssp.selectedEQBand = band;
+    int band = _currentBand;
+    band += direction;
+    if( band < eqbNone )
+        band = eqbHigh;
+    if( band > eqbHigh )
+        band = eqbNone;
+    [self enableEQ:_currentBand value:0];
+    _currentBand = band;
+    [self enableEQ:_currentBand value:1];
+    _eqPanel.band = _currentBand;
+    _rotateTrigger( direction * 90 );
 }
 
--(void)rotateToNextFace:(CGPoint)pt // pt is direction
+-(void)enableEQ:(int)band value:(int)value
 {
-    _currentBand = abs((_currentBand + (int)pt.x) % 4);
+    switch (band) {
+        case eqbLow:
+            _eqLowEnable(value);
+            break;
+        case eqbMid:
+            _eqMidEnable(value);
+            break;
+        case eqbHigh:
+            _eqHighEnable(value);
+            break;
+        default:
+            break;
+    }
 }
-
 
 -(void)update:(NSTimeInterval)dt
 {

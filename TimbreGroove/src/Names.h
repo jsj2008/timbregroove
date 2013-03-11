@@ -68,11 +68,17 @@ extern NSString const * kParamPitch;
 extern NSString const * kParamChannel;
 extern NSString const * kParamChannelVolume;
 
-extern NSString const * kParamEQBand;
-extern NSString const * kParamEQFrequency;
-extern NSString const * kParamEQBandwidth;
-extern NSString const * kParamEQPeak;
-extern NSString const * kParamEQBypass;
+extern NSString const * kParamEQLowPassEnable;
+extern NSString const * kParamEQParametricEnable;
+extern NSString const * kParamEQHiPassEnable;
+
+extern NSString const * kParamEQLowCutoff;
+extern NSString const * kParamEQLowResonance;
+extern NSString const * kParamEQMidCenterFrequency;
+extern NSString const * kParamEQMidBandwidth;
+extern NSString const * kParamEQMidGain;
+extern NSString const * kParamEQHighCutoff;
+extern NSString const * kParamEQHighResonance;
 
 extern NSString const * kParamInstrumentP1;
 extern NSString const * kParamInstrumentP2;
@@ -99,6 +105,7 @@ extern NSString const * kTriggerVPad4;
 extern NSString const * kTriggerVPad5;
 
 extern NSString const * kTriggerTimer;
+extern NSString const * kTriggerUpdate;
 
 extern NSString const * kTriggerTapPos;
 extern NSString const * kTriggerTap1;

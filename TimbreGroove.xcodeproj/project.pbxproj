@@ -113,6 +113,7 @@
 		5714714116C8464800CA2A69 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5714714016C8464800CA2A69 /* CoreMIDI.framework */; };
 		5714714316C86A4900CA2A69 /* ChildOfGod.mid in Resources */ = {isa = PBXBuildFile; fileRef = 5714714216C86A4900CA2A69 /* ChildOfGod.mid */; };
 		5716775F16A685A800F78B25 /* AssetLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 5716775E16A685A800F78B25 /* AssetLoader.m */; };
+		57188E2316EBFC40002DA307 /* fft.c in Sources */ = {isa = PBXBuildFile; fileRef = 57188E2216EBFC3F002DA307 /* fft.c */; };
 		571A42FE167C315700CD7E8F /* Graph.m in Sources */ = {isa = PBXBuildFile; fileRef = 571A42FD167C315600CD7E8F /* Graph.m */; };
 		571B4C2816D0561100C1F88F /* rhodes_small.sf2 in Resources */ = {isa = PBXBuildFile; fileRef = 571B4C2716D0561100C1F88F /* rhodes_small.sf2 */; };
 		571ECFC2167BEA5E00727A30 /* aotk-ass-outline-512.tif in Resources */ = {isa = PBXBuildFile; fileRef = 571ECFC1167BEA5E00727A30 /* aotk-ass-outline-512.tif */; };
@@ -444,6 +445,7 @@
 		5714714216C86A4900CA2A69 /* ChildOfGod.mid */ = {isa = PBXFileReference; lastKnownFileType = audio.midi; path = ChildOfGod.mid; sourceTree = "<group>"; };
 		5716775D16A685A800F78B25 /* AssetLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AssetLoader.h; path = src/AssetLoader.h; sourceTree = "<group>"; };
 		5716775E16A685A800F78B25 /* AssetLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AssetLoader.m; path = src/AssetLoader.m; sourceTree = "<group>"; };
+		57188E2216EBFC3F002DA307 /* fft.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fft.c; sourceTree = "<group>"; };
 		571A42FC167C315600CD7E8F /* Graph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Graph.h; sourceTree = "<group>"; };
 		571A42FD167C315600CD7E8F /* Graph.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Graph.m; sourceTree = "<group>"; };
 		571B4C2716D0561100C1F88F /* rhodes_small.sf2 */ = {isa = PBXFileReference; lastKnownFileType = file; path = rhodes_small.sf2; sourceTree = "<group>"; };
@@ -489,6 +491,7 @@
 		572EB2331679EAE40062F290 /* ShaderLocations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShaderLocations.h; sourceTree = "<group>"; };
 		572EB2341679EAE40062F290 /* ShaderLocations.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ShaderLocations.m; sourceTree = "<group>"; };
 		572EB27E167A9B160062F290 /* config.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = config.plist; sourceTree = "<group>"; };
+		573560EE16EDB34C001EEA83 /* EQNames.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EQNames.h; sourceTree = "<group>"; };
 		5737C4A2169277B700C12F2D /* fluid.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fluid.png; sourceTree = "<group>"; };
 		5737C4AD169308DF00C12F2D /* imageBaker.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = imageBaker.vsh; sourceTree = "<group>"; };
 		5737C4AF1693090D00C12F2D /* imageBaker.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = imageBaker.fsh; sourceTree = "<group>"; };
@@ -806,6 +809,7 @@
 				57BE7FB416CACA0C001972ED /* RingBuffer.cpp */,
 				57677D9B16EAEE8000C3BA58 /* NoteGenerator.h */,
 				57677D9C16EAEE8100C3BA58 /* NoteGenerator.m */,
+				57188E2216EBFC3F002DA307 /* fft.c */,
 			);
 			path = audio;
 			sourceTree = "<group>";
@@ -944,6 +948,7 @@
 				5781CAA516E55B46007C8EC2 /* Block.m */,
 				5705DEDA16E5DA7E00A80445 /* Tween.h */,
 				5705DED816E5DA5200A80445 /* Tween.c */,
+				573560EE16EDB34C001EEA83 /* EQNames.h */,
 			);
 			name = app;
 			sourceTree = "<group>";
@@ -1756,6 +1761,7 @@
 				573CEEF516E99D8F00B02EE3 /* NSString+Tweening.m in Sources */,
 				57677D9D16EAEE8100C3BA58 /* NoteGenerator.m in Sources */,
 				572AD0E016EBC1870070AE6A /* FFTScope.m in Sources */,
+				57188E2316EBFC40002DA307 /* fft.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -45,6 +45,8 @@
 @property (nonatomic)        GLKVector3 scale;
 @property (nonatomic)             float scaleXYZ;
 
+@property (nonatomic)        GLKVector3 rotationScale;
+
 -(id)   wireUp;
 -(id)   wireUpWithViewSize:(CGSize)viewSize;
 

@@ -44,6 +44,7 @@
     if (self) {
         _soundSystem = [SoundSystem sharedInstance];
         _parameters = [[SoundSystemParameters alloc] initWithSoundSystem:_soundSystem];
+        _ssp = _parameters;
         _midi = [[Midi alloc] init];
     }
     return self;
@@ -51,7 +52,7 @@
 
 -(void)dealloc
 {
-    [_instruments each:^(id name, id instrument) {
+    [_instruments each:^(id instrument) {
         [_soundSystem decomissionInstrument:instrument];
     }];
     
@@ -60,15 +61,10 @@
 
 -(void)loadAudioFromConfig:(ConfigAudioProfile *)config
 {
-    _instruments = [NSMutableDictionary new];
-    NSDictionary * configInstruments = config.instruments; // don't make me look it up every time
-    int count = [configInstruments count];
-    for( int i = 0; i < count; i++ )
-    {
-        ConfigInstrument * configInstrument = configInstruments[@(i)];
-        _instruments[@(i)] = [_soundSystem loadInstrumentFromConfig:configInstrument intoChannel:i];
-    }
-
+    __block int channel = 0;
+    _instruments = [config.instruments map:^id(id instrumentConfig) {
+        return [_soundSystem loadInstrumentFromConfig:instrumentConfig intoChannel:channel++];
+    }];
     _midiFileName = config.midiFile;
     _eqName = config.EQ;
 }
@@ -76,21 +72,14 @@
 -(void)start
 {
     if( _midiSequence )
-    {
         [_midiSequence start];
-    }
     else
-    {
-        [_midi setupMidiFreeRange:[_instruments allValues]];
-    }
-
-    if( _eqName )
-        _parameters.selectedEQBandName = _eqName;
+        [_midi setupMidiFreeRange:_instruments];
 }
 
 -(void)play
 {
-    [_instruments each:^(id name, id instrument) {
+    [_instruments each:^(id instrument) {
         [_soundSystem plugInstrumentIntoBus:instrument];
     }];
 
@@ -103,7 +92,7 @@
     if( _midiSequence )
         [_midiSequence pause];
     
-    [_instruments each:^(id name, id instrument) {
+    [_instruments each:^(id instrument) {
         [_soundSystem unplugInstrumentFromBus:instrument];
     }];
 }
@@ -145,7 +134,7 @@
 {
     if( _midiFileName && !_midiSequence )
     {
-        Instrument * instrument = _instruments[@(0)];
+        Instrument * instrument = _instruments[0];
         _midiSequence = [_midi setupMidiFile:_midiFileName withInstrument:instrument];
     }
     [super start];

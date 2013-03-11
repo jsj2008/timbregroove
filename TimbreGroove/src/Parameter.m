@@ -50,9 +50,13 @@
     _nativeValueSize = size;
 }
 
--(id)getParamBlockOfType:(char)paramType
+-(id)getParamBlockOfType:(char)requestParamType
 {
-    if( paramType == _C_FLT )
+    if( _paramType == _C_VOID )
+    {
+        return _block;
+    }
+    if( requestParamType == _C_FLT )
     {
         if( _paramType == _C_FLT )
             return _block;
@@ -64,12 +68,12 @@
             };
         }
     }
-    else if( paramType == _C_INT )
+    else if( requestParamType == _C_INT )
     {
-        if( paramType == _C_INT )
+        if( requestParamType == _C_INT )
             return  _block;
     }
-    else if( paramType == TGC_POINT )
+    else if( requestParamType == TGC_POINT )
     {
         if( _paramType == TGC_POINT )
             return _block;
@@ -82,12 +86,12 @@
             };
         }
     }
-    else if( paramType == _C_PTR )
+    else if( requestParamType == _C_PTR )
     {
         if( _paramType == _C_PTR )
             return _block;
     }
-    NSLog(@"Unsupported param trigger: %c requested on a %c type",paramType,_paramType);
+    NSLog(@"Unsupported param trigger: %c requested on a %c type",requestParamType,_paramType);
     exit(-1);
     return nil;
 }
@@ -103,20 +107,42 @@
 @implementation FloatParameter
 
 +(id)withValue:(float)value
-         block:(id)block;
+           block:(id)block;
 {
     return [[FloatParameter alloc] initWithValue:value block:block];
 }
 
 -(id)initWithValue:(float)value
-            block:(id)block
+               block:(id)block
 {
     self = [super initWithBlock:^(float f) {
         _value = f;
+        ((FloatParamBlock)block)(f);
+    }];
+    
+    if( self )
+    {
+        _value = value;
+        ((FloatParamBlock)_block)(value);
+    }
+    return self;
+}
+
++(id)with01Value:(float)value
+         block:(id)block;
+{
+    return [[FloatParameter alloc] initWith01Value:value block:block];
+}
+
+-(id)initWith01Value:(float)value
+            block:(id)block
+{
+    self = [super initWithBlock:^(float f) {
         if( f < 0 )
             f = 0;
         else if( f > 1 )
             f = 1;
+        _value = f;
         ((FloatParamBlock)block)(f);
     }];
     
@@ -154,10 +180,10 @@
     
     if( self )
     {
-        _value = value;
         _range = frange;
         _scale = frange.max - frange.min;
-        ((FloatParamBlock)_block)(value); 
+        _value = value / _scale; // is this right?
+        ((FloatParamBlock)_block)(value);
     }
     return self;
 }

@@ -9,12 +9,18 @@
 #import <Foundation/Foundation.h>
 #import "Texture.h"
 
+@class TG3dObject;
+
 @interface FBO : Texture
 @property (nonatomic) GLuint width;
 @property (nonatomic) GLuint height;
 
 - (id) initWithWidth:(GLuint)width
               height:(GLuint)height;
+
+-(id)initWithObject:(TG3dObject *)object
+              width:(GLuint)width
+             height:(GLuint)height;
 
 - (void)bindToRender;
 - (void)unbindFromRender;

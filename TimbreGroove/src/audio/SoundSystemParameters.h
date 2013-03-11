@@ -9,22 +9,10 @@
 #import "SoundSystem.h"
 #import "Parameter.h"
 
-typedef enum eqBands {
-    kEQDisabled = -1,
-    kEQLow,
-    kEQMid,
-    kEQHigh,
-    
-    kNUM_EQ_BANDS
-} eqBands;
-
-
 @interface SoundSystemParameters : NSObject
 
 -(id)initWithSoundSystem:(SoundSystem *)ss;
 
-@property (nonatomic,strong) NSString * selectedEQBandName;
-@property (nonatomic) eqBands selectedEQBand; 
 @property (nonatomic) int     selectedChannel;
 @property (nonatomic) int     numChannels;
 

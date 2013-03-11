@@ -350,7 +350,7 @@ OSStatus renderCallback(
 {
     OSStatus result;
     
-    UInt32 numBands = kNUM_EQ_BANDS;
+    UInt32 numBands = 3; // kNUM_EQ_BANDS;
     result = AudioUnitSetProperty(_masterEQUnit, kAUNBandEQProperty_NumberOfBands,
                                   kAudioUnitScope_Global, 0, &numBands, sizeof(numBands));
     CheckError(result, "Could not set number of EQ bands");

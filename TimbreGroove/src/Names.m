@@ -6,6 +6,8 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
+#import "EQNames.h"
+
 NSString const * kMoodPeace = @"Peace";
 NSString const * kMoodHappy = @"Happiness";
 NSString const * kMoodTroubling = @"Troubles";
@@ -23,14 +25,30 @@ NSString const * kParamPitch          =   @"Pitch";
 NSString const * kParamChannel        =   @"Channel";
 NSString const * kParamChannelVolume  =   @"ChannelVolume";
 
-NSString const * kParamEQBand         =   @"EQBand";
+NSString const * kParamEQLowPassEnable    = @"EQEnableLowPass";
+NSString const * kParamEQParametricEnable = @"EQEnableParametric";
+NSString const * kParamEQHiPassEnable     = @"EQEnableHiPass";
 
-NSString const * kParamEQFrequency    =   @"EQfreq";
-NSString const * kParamEQBandwidth    =   @"EQbw";
-NSString const * kParamEQPeak         =   @"EQpeak";
-NSString const * kParamEQBypass       =   @"EQBypass";
+NSString const * kParamEQLowCutoff = @_kEQLowCutoff;
+NSString const * kParamEQLowResonance = @_kEQLowResonance;
+NSString const * kParamEQMidCenterFrequency = @_kEQMidCenterFrequency;
+NSString const * kParamEQMidBandwidth = @_kEQMidBandwidth;
+NSString const * kParamEQMidGain = @_kEQMidGain;
+NSString const * kParamEQHighCutoff= @_kEQHighCutoff;
+NSString const * kParamEQHighResonance = @_kEQHighResonance;
 
-
+/*
+ These are also usable: (after you enable the EQ)
+ 
+ "EQLowCutoff",
+ "EQLowResonance",
+ "EQMidCenterFrequency",
+ "EQMidBandwidth",
+ "EQMidGain",
+ "EQHighCutoff",
+ "EQHighResonance",
+ 
+*/
 NSString const * kParamInstrumentP1  = @"PerformanceParameter1";
 NSString const * kParamInstrumentP2  = @"PerformanceParameter2";
 NSString const * kParamInstrumentP3  = @"PerformanceParameter3";
@@ -56,6 +74,7 @@ NSString const * kTriggerVPad4       =   @"VirtualPad4";
 NSString const * kTriggerVPad5       =   @"VirtualPad5";
 
 NSString const * kTriggerTimer       =   @"Timer";
+NSString const * kTriggerUpdate      =   @"Update";
 
 NSString const * kTriggerTapPos      =   @"TapNative";
 NSString const * kTriggerTap1        =   @"Tap";
@@ -79,7 +98,7 @@ NSString const * kTriggerMainSlider  =   @"MainSlider";
 
 NSString const * kTriggerDynamicPeak     =   @"Loudness";
 NSString const * kTriggerDynamicHold     =   @"LoudnessHold";
-NSString const * kTriggerFrequencyPeak   =   @"Changes in Treble/Bass";
+NSString const * kTriggerFrequencyPeak   =   @"FrequencyPeak";
 NSString const * kTriggerBeat            =   @"Beat";
 NSString const * kTriggerNote            =   @"Note";
 NSString const * kTriggerChord           =   @"Chords";

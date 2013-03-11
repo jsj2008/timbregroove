@@ -12,15 +12,15 @@
 
 #import "Global.h"
 #import "Scene.h"
-#import "Audio.h"
-#import "SoundSystemParameters.h"
+#import "Parameter.h"
+#import "Names.h"
 
 #import "GraphView.h"
 #import "FBO.h"
 #import "Texture.h"
 #import "GenericWithTexture.h"
 
-NSString const * kParamCurveShape   = @"CurveShape";
+NSString const * kParamCurveCutoff   = @"CurveCutoff";
 NSString const * kParamCurveWidth   = @"CurveWidth";
 
 @interface EQOffText : GenericWithTexture
@@ -32,23 +32,18 @@ NSString const * kParamCurveWidth   = @"CurveWidth";
 }
 @end
 
-//#define TEST_WITH_SQUARE
-
-#ifdef TEST_WITH_SQUARE
-#import "GridPlane.h"
-#else
 #import "FivePointBezier.h"
-#endif
 
 @interface EQPanel () {
     GLKVector3  *_parametric;
     GLKVector3  *_lowPassRes;
     GLKVector3  *_hiPassRes;
     bool _IamATexture;
-    
-    IntParamBlock _selectEQBand;
-    
     EQOffText * _eqOff;
+    
+    FloatParamBlock _eqLowFreq;
+    FloatParamBlock _eqHighFreq;
+    FloatParamBlock _eqMidWidth;
 }
 @end
 
@@ -58,7 +53,6 @@ NSString const * kParamCurveWidth   = @"CurveWidth";
 {
     [super wireUp];
     
-#ifndef TEST_WITH_SQUARE
     static GLKVector3 parametric[5] = {
          { -1.00,  0.00, 0 },
          { -0.30,  0.50, 0 },
@@ -85,8 +79,6 @@ NSString const * kParamCurveWidth   = @"CurveWidth";
     _lowPassRes = lowpass;
     _hiPassRes  = hipass;
     
-#endif
-    
     _IamATexture = self.fbo != nil;
     
     if( _IamATexture )
@@ -95,111 +87,95 @@ NSString const * kParamCurveWidth   = @"CurveWidth";
         self.fbo.clearColor = (GLKVector4){0.3, 0.3, 0.3, 1.0};
         self.scale = (GLKVector3){ 0.25, 1, 1 };
         
-        _eqOff = [[EQOffText new] wireUp]; // [[[Text alloc] initWithString:@"EQ off"] wireUp];
+        _eqOff = [[EQOffText new] wireUp]; 
         _eqOff.position = (GLKVector3){0.75, 0, 0 };
         _eqOff.scale = self.scale;
         [self appendChild:_eqOff];
     }
-    else
-    {
-        int curve = [Global sharedInstance].scene.audio.ssp.selectedEQBand;
-        self.shapeDisplay = curve;
-        self.shapeEdit = curve;        
-    }
     return self;
 }
 
--(void)didAttachToView:(GraphView *)view
-{
-    if( _eqOff )
-       [_eqOff didAttachToView:view];
-}
-     
 -(void)getParameters:(NSMutableDictionary *)putHere
 {
     [super getParameters:putHere];
     
-    putHere[kParamCurveShape] = ^(CGPoint pt) {
-        [self updateCurve:0 pt:pt scale:0];
-    };
+    putHere[kParamCurveCutoff] = [Parameter withBlock:^(float x) {
+        if( _band == eqbLow || _band == eqbHigh )
+            [self moveCurve:x band:_band];
+    }];
     
-    putHere[kParamCurveWidth] = ^(float f) {
-        [self updateCurve:2 pt:(CGPoint){0,0} scale:f];
-    };    
+    putHere[kParamCurveWidth] = [Parameter withBlock:^(float f) {
+        if( _band == eqbMid )
+            [self updateCurve:f];
+    }];
 }
 
--(void)updateCurve:(int)knobNum pt:(CGPoint)pt scale:(float)scale
+-(void)triggersChanged:(Scene *)scene
 {
-#ifndef TEST_WITH_SQUARE
+    [super triggersChanged:scene];
     
-    if( _shapeEdit == kBezShape_NONE )
-        return;
+    TriggerMap * tm = scene.triggers;
     
-    if(knobNum == 2 && _shapeEdit != kBezShape_Parametric)
-        return;
-    
-    self.shapeDisplay = _shapeEdit;
-    
-    FivePointBezier *  fpb    = (FivePointBezier *)self.shader;
+    _eqLowFreq  = [tm getFloatTrigger:[kParamEQLowCutoff    stringByAppendingTween:kTweenEaseInSine len:0.2]];
+    _eqHighFreq = [tm getFloatTrigger:[kParamEQHighCutoff   stringByAppendingTween:kTweenEaseInSine len:0.2]];
+    _eqMidWidth = [tm getFloatTrigger:[kParamEQMidBandwidth stringByAppendingTween:kTweenEaseInSine len:0.2]];
+}
 
-    CGPoint left    = fpb.left;
-    CGPoint right   = fpb.right;
+-(void)moveCurve:(float) xmove band:(int)band
+{
+    FivePointBezier *  fpb = (FivePointBezier *)self.shader;
+    
+    if( band == eqbLow )
+        fpb.controlPoints = _lowPassRes;
+    else if( band == eqbHigh )
+        fpb.controlPoints = _hiPassRes;
+    
     CGPoint rCntrl  = fpb.rightController;
     CGPoint lCntrl  = fpb.leftController;
     CGPoint hiPoint = fpb.hiPoint;
- 
-    if( knobNum == 2 )
-    {
-        float xmove2 = scale;
-        left.x -= xmove2;
-        right.x += xmove2;
-    }
-    else
-    {
-        float xmove = pt.x;
-        float ymove = pt.y;
-        
-        rCntrl.x += xmove;
-        lCntrl.x += xmove;
-        hiPoint.x += xmove;
-        if( _shapeEdit == kBezShape_LowPassRes )
-        {
-            right.x += xmove;
-        }
-        else if( _shapeEdit == kBezShape_HiPassRes )
-        {
-            left.x += xmove;
-        }
-        
-        hiPoint.y += ymove;
-    }
     
+    rCntrl.x += xmove;
+    lCntrl.x += xmove;
+    hiPoint.x += xmove;
+    
+    if( band == eqbLow )
+    {
+        CGPoint right = fpb.right;
+        right.x += xmove;
+        fpb.right = right;
+        _eqLowFreq(xmove);
+    }
+    else if( band == eqbHigh )
+    {
+        CGPoint left = fpb.left;
+        left.x += xmove;
+        fpb.left = left;
+        _eqHighFreq(xmove);
+    }
 
-    fpb.left              = left;
-    fpb.right             = right;
     fpb.rightController   = rCntrl;
     fpb.leftController    = lCntrl;
     fpb.hiPoint           = hiPoint;
-#endif
 }
 
--(void)setShapeDisplay:(BezShapes)shapeDisplay
+-(void)updateCurve:(float)scale
 {
-#ifndef TEST_WITH_SQUARE
-    FivePointBezier * fpb = (FivePointBezier *)self.shader;
+    FivePointBezier *  fpb    = (FivePointBezier *)self.shader;
+    fpb.controlPoints = _parametric;
 
-    if( shapeDisplay == kBezShape_Parametric )
-        fpb.controlPoints = _parametric;
-    else if( shapeDisplay == kBezShape_LowPassRes )
-        fpb.controlPoints = _lowPassRes;
-    else if( shapeDisplay == kBezShape_HiPassRes )
-        fpb.controlPoints = _hiPassRes;
+    CGPoint left    = fpb.left;
+    CGPoint right   = fpb.right;
+ 
+    float xmove2 = scale;
+    left.x -= scale;
+    right.x += scale;
+
+    _eqMidWidth(scale);
     
-    _shapeDisplay = shapeDisplay;
-#endif
+    fpb.left              = left;
+    fpb.right             = right;
 }
 
-#ifndef TEST_WITH_SQUARE
 -(void)createShader
 {
     self.shader = [FivePointBezier new];
@@ -210,17 +186,10 @@ NSString const * kParamCurveWidth   = @"CurveWidth";
     FivePointBezier * fpb = (FivePointBezier *)self.shader;
     fpb.color = color;
 }
-#endif
 
 -(void)createBuffer
 {
-#ifdef TEST_WITH_SQUARE
-    MeshBuffer * mb = [GridPlane gridWithWidth:0.5 andGrids:1 andIndicesIntoNames:@[@(gv_pos)]
-                                      andDoUVs:false andDoNormals:false];
-    [self addBuffer:mb];
-#else
     [self addBuffer:[[FivePointBezierMesh alloc] init]];
-#endif
 }
 
 -(void)update:(NSTimeInterval)dt
@@ -234,32 +203,25 @@ NSString const * kParamCurveWidth   = @"CurveWidth";
 {
     if( _IamATexture )
     {
+        FivePointBezier * fpb = (FivePointBezier *)self.shader;        
         GLKVector3 pos = (GLKVector3){ -0.75, -0.5, -0.1 };
-        self.shapeDisplay = kBezShape_LowPassRes;
+        fpb.controlPoints = _lowPassRes;
         self.color = (GLKVector4){1,0.5,0.5,1};
         self.position = pos;
         [super render:w h:h];
-        self.shapeDisplay = kBezShape_Parametric;
+        fpb.controlPoints = _parametric;
         self.color = (GLKVector4){1,1,0,1};
         pos.x = -0.25;
         self.position = pos;
         [super render:w h:h];
-        self.shapeDisplay = kBezShape_HiPassRes;
+        fpb.controlPoints = _hiPassRes;
         self.color = (GLKVector4){0.5,1,1,1};
         pos.x = 0.25;
         self.position = pos;
         [super render:w h:h];
         
-#ifdef TEST_WITH_SQUARE
-        self.color = (GLKVector4){1,1,0.5,1};
-        pos.x = 0.75;
-        self.position = pos;
-        [super render:w h:h];
-#else
         if( _eqOff )
            [_eqOff render:w h:h];
-#endif
-
     }
     else
     {

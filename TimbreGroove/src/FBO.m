@@ -7,6 +7,7 @@
 //
 
 #import "FBO.h"
+#import "TG3dObject.h"
 
 @interface FBO() { 
     GLuint _fbo;
@@ -25,6 +26,16 @@
               height:(GLuint)height
 {
     return [self initWithWidth:width height:height type:0 format:0];
+}
+
+-(id)initWithObject:(TG3dObject *)object width:(GLuint)width height:(GLuint)height
+{
+    if( (self = [self initWithWidth:width height:height type:0 format:0]) )
+    {
+        object.fbo = self;
+        [object wireUp];
+    }
+    return self;
 }
 
 - (id) initWithWidth:(GLuint)width

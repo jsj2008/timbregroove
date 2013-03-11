@@ -13,6 +13,8 @@
     #import <Foundation/Foundation.h>
     #import <GLKit/GLKit.h>
 
+#import "NSString+Tweening.h"
+
 #import "BKGlobals.h"
 #import "NSSet+BlocksKit.h"
 #import "NSArray+BlocksKit.h"

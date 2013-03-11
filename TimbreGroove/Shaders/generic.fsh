@@ -59,9 +59,13 @@ vec4 texture_dist(vec2 center)
     float t = v_time * 0.1;
     float ripple     = (length * (rippleSize*2.0)) - (t * rippleSize);
     vec2 diff = ((direction * cos(ripple))/100.0);
+    /*
     float max = 0.15;
     float alpha = ((max - length(diff)) / max);
-    return vec4( texture2D(u_sampler, v_texCoordOut + diff).rgb, alpha );
+    */
+    vec3 coord = texture2D(u_sampler, v_texCoordOut + diff).rgb;
+    float alpha = clamp( sin(coord.x) * cos(coord.y) * 1.2, 0.0, 1.0 );
+    return vec4( coord, alpha );
 }
 #endif
 

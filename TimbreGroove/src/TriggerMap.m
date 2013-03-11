@@ -145,7 +145,7 @@
                     This can happen when a new animation of this
                  parameter starts before a previous one ends. In
                  that case we simply jump to the current target
-                 value (hopefully not to harsh on the ears/eyes!)
+                 value (hopefully not too harsh on the ears/eyes!)
                  and roll on.
                  */
                 if( additive )
@@ -334,6 +334,7 @@
     
     id retBlock;
     
+    // N.B. the apply method will fire these off conconurrently
     if( type == _C_FLT )
     {
         retBlock =  ^(float f) {[arrayOfBlocks apply:^(FloatParamBlock blk) { blk(f);}];};

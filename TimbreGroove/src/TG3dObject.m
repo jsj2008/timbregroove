@@ -198,8 +198,17 @@
 {
 }
 
--(void)getParameters:(NSMutableDictionary *)dict
+-(void)getParameters:(NSMutableDictionary *)parameters
 {
+    parameters[@"xRotation"] = [Parameter withBlock:^(float f) {
+        self.rotation = (GLKVector3){ GLKMathDegreesToRadians(f * self.rotationScale.x), 0, 0 };
+    }];
+    parameters[@"yRotation"] = [Parameter withBlock:^(float f) {
+        self.rotation = (GLKVector3){ 0, GLKMathDegreesToRadians(f * self.rotationScale.y), 0 };
+    }];
+    parameters[@"zRotation"] = [Parameter withBlock:^(float f) {
+        self.rotation = (GLKVector3){ 0, 0, GLKMathDegreesToRadians(f * self.rotationScale.z) };
+    }];
 }
 
 -(void)triggersChanged:(Scene *)scene

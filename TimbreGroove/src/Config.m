@@ -77,13 +77,10 @@ static Config * __sharedConfig;
 }
 -(ConfigScene *)defaultScene { return [self getScene:_plistConfig[kConfigDefaultScene]]; }
 -(NSDictionary *)getScenes {
-    NSMutableDictionary * sceneDict = [NSMutableDictionary new];
-    NSDictionary * scenes = _plistConfig[kConfigScenes];
-    for( NSString * name in scenes )
-    {
-        sceneDict[name] = [[ConfigScene alloc] initWithD:scenes[name]];
-    }
-    return sceneDict;
+    NSDictionary * scenConfigs = _plistConfig[kConfigScenes];
+   return [scenConfigs map:^id(id name, id sceneDict) {
+        return [[ConfigScene alloc] initWithD:sceneDict];
+    }];
 }
 -(ConfigScene *)getScene:(NSString *)name {
     NSDictionary * scenes = _plistConfig[kConfigScenes];
@@ -134,16 +131,11 @@ static Config * __sharedConfig;
 -(NSString *)EQ { return [_me valueForKey:kConfigAudioEQ]; }
 -(NSString *)instanceClass { return [_me valueForKey:kConfigAudioInstanceClass]; }
 -(NSDictionary *)customProperties { return [_me valueForKey:kConfig3dCustomProperties]; }
--(NSDictionary*)instruments
-{
-    NSMutableDictionary * dict = [NSMutableDictionary new];
+-(NSArray*)instruments {
     NSArray * names = [_me valueForKey:kConfigAudioInstruments];
-    __block int channel = 0;
-    [names each:^(id name) {
-        dict[@(channel)] = [__sharedConfig getInstrument:name];
-        ++channel;
+    return [names map:^id(id name) {
+        return [__sharedConfig getInstrument:name];
     }];
-    return dict;
 }
 @end
 

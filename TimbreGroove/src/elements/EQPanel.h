@@ -7,23 +7,14 @@
 //
 
 #import "Generic.h"
-#import "SoundSystemParameters.h"
 
-#ifndef NO_EQPANEL_DECLS
-extern NSString const * kParamCurveShape;
-extern NSString const * kParamCurveWidth;
-#endif
-
-typedef enum BezShapes {
-    kBezShape_NONE = kEQDisabled,
-    kBezShape_LowPassRes = kEQLow,
-    kBezShape_Parametric = kEQMid,
-    kBezShape_HiPassRes = kEQHigh
-} BezShapes;
-
-
+typedef enum EQband {
+    eqbNone,
+    eqbLow,
+    eqbMid,
+    eqbHigh
+} EQBand;
 
 @interface EQPanel : Generic
-@property (nonatomic) BezShapes shapeDisplay;
-@property (nonatomic) BezShapes shapeEdit;
+@property (nonatomic) int band; 
 @end
