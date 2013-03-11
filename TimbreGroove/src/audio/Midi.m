@@ -12,9 +12,64 @@
 #import "Parameter.h"
 #import "NoteGenerator.h"
 
+static const char * _getMidiObjectType( MIDIObjectType type, bool *ex )
+{
+    *ex = false;
+    if( type == -1 )
+        return "'Other'";
+    
+    static const char * types[] = {
+        "Device", "Entity", "Source", "Destination"
+    };
+    
+    *ex = (type & kMIDIObjectType_ExternalMask) != 0 ;
+    type &= ~kMIDIObjectType_ExternalMask;
+    return types[type];
+}
+
 void MyMIDINotifyProc (const MIDINotification  *message, void *refCon)
 {
-    NSLog(@"MIDI Notify, messageId=%ld,", message->messageID);
+    static const char * _midiMsgs[8] = {
+        "eh, wha?",
+        "SetupChanged",
+        "ObjectAdded",
+        "ObjectRemoved",
+        "PropertyChanged",
+        "ThruConnectionsChanged",
+        "SerialPortOwnerChanged",
+        "IOError"
+    };
+    
+    NSMutableString * ms = [NSMutableString stringWithFormat:@"MIDI %p: %s: ", refCon, _midiMsgs[message->messageID]];
+    
+    if (message->messageID == kMIDIMsgObjectAdded || message->messageID == kMIDIMsgObjectRemoved ) {
+        MIDIObjectAddRemoveNotification * arn = (MIDIObjectAddRemoveNotification *)message;
+        if( arn->parent )
+        {
+            bool parentExternal, childExternal;
+            const char * parentType = _getMidiObjectType(arn->parentType, &parentExternal);
+            const char * childType  = _getMidiObjectType(arn->childType, &childExternal);
+            [ms appendFormat:@"Parent: %s%s %p Child: %s%s %p", parentExternal ? "external-" : "", parentType, arn->parent,
+              childExternal ? "external-" : "", childType, arn->child];
+        }
+        else
+        {
+            bool childExternal;
+            const char * childType  = _getMidiObjectType(arn->childType, &childExternal);
+            [ms appendFormat:@"%s%s %p", childExternal ? "external-" : "", childType, arn->child];
+        }
+    }
+    else if( message->messageID == kMIDIMsgPropertyChanged )
+    {
+        MIDIObjectPropertyChangeNotification * pcn = (MIDIObjectPropertyChangeNotification *)message;
+        bool isExternal;
+        const char * objType = _getMidiObjectType(pcn->objectType, &isExternal);
+        char buffer[512];
+        CFStringGetCString(pcn->propertyName, buffer, 512, kCFStringEncodingUTF8);
+        [ms appendFormat:@"Object: %s%s %p Property: %s", isExternal ? "External-" : "", objType, pcn->object, buffer];
+    }
+    
+    NSLog(@"%@",ms);
 }
 
 //#define SHOW_NOTES 1
@@ -251,16 +306,17 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
     OSStatus result = noErr;
     
     MIDIEndpointRef virtualEndpoint;
-    MIDIReadProc mrp = MyMIDIReadProc;
 
     result = MIDIDestinationCreate(_midiClient,
                                    CFSTR("TG Virtual Destination"),
-                                   mrp,
+                                   MyMIDIReadProc,
                                    (void *)(instrument.sampler),
                                    &virtualEndpoint);
     
     CheckError(result,"MIDIDestinationCreate failed");
 
+    NSLog(@"Created endpoint: %p", virtualEndpoint);
+    
     instrument.midiEndPoint = virtualEndpoint;
 }
 

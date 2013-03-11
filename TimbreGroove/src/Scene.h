@@ -29,8 +29,11 @@
 
 +(id)defaultScene;
 +(id)sceneWithName:(NSString *)name;
++(id)systemSceneWithName:(NSString *)name;
 +(id)sceneWithConfig:(ConfigScene *)config;
 -(id)initWithConfig:(ConfigScene *)config;
+
+-(void)decomission;
 
 @property (nonatomic,strong) Graph * graph;
 @property (nonatomic,strong) Audio * audio;
@@ -43,12 +46,8 @@
 
 - (void)update:(NSTimeInterval)dt view:(GraphView *)view;
 
--(void)updateParameters:(NSDictionary *)parameters renewTriggers:(bool)renew;
-
 // For dynamic/modal operations (e.g. recording)
 -(void)addTriggers:(NSDictionary *)triggerKeyParamNameValue;
 -(void)removeTriggers:(NSDictionary *)triggerKeyParamNameValue;
 
-// for derivations
--(NSDictionary *)getRuntimeConnections;
 @end

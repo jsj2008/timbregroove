@@ -11,6 +11,8 @@
 
 
 extern NSString * const kConfigDefaultScene;
+extern NSString * const kConfigSystemScenes;
+extern NSString * const kConfigEQPanelScene;
 
 extern NSString * const kConfigScenes;
 extern NSString * const kConfigSceneIcon;

@@ -39,6 +39,9 @@
     Graph * _stowedDisplayGraph;
     FloatParamBlock _mainSliderTrigger;
     
+    NSString * _sceneObserver;
+    NSString * _recordObserver;
+    
 }
 
 @property (weak, nonatomic) IBOutlet UIView *graphContainer;
@@ -98,11 +101,12 @@
         
     };
     
-    [_global addObserverForKeyPath:(NSString *)kGlobalRecording
-                              task:recordChanger];
-    [_global addObserverForKeyPath:(NSString *)kGlobalScene
-                           options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld
-                              task:sceneChanger];
+    _recordObserver = [_global addObserverForKeyPath:(NSString *)kGlobalRecording
+                                                task:recordChanger];
+    
+    _sceneObserver = [_global addObserverForKeyPath:(NSString *)kGlobalScene
+                                            options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld
+                                               task:sceneChanger];
     
 }
 
@@ -135,7 +139,11 @@
 
 - (void)deleteScene
 {
-    [_scenes removeObject:_scenes[_postDeleteSceneIndex]];
+    Scene * scene = _scenes[_postDeleteSceneIndex];
+    [_scenes removeObject:scene];
+    [scene decomission];
+    scene = nil;
+    
     _pager.numberOfPages = [_scenes count];
     _pager.currentPage = 0;
     _postDeleteSceneIndex = -1;

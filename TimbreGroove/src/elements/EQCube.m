@@ -143,6 +143,8 @@ NSString const * kParamRotateCube  = @"RotateCube";
     [super    triggersChanged:scene];
     [_eqPanel triggersChanged:scene];
     
+    if( scene )
+    {
     TriggerMap * tm = scene.triggers;
     
     _rotateTrigger = [tm getFloatTrigger:[kParamRotateCube stringByAppendingTween:kTweenEaseOutThrow len:0.5]];
@@ -150,7 +152,15 @@ NSString const * kParamRotateCube  = @"RotateCube";
     _eqLowEnable = [tm getIntTrigger:kParamEQLowPassEnable];
     _eqMidEnable = [tm getIntTrigger:kParamEQParametricEnable];
     _eqHighEnable = [tm getIntTrigger:kParamEQHiPassEnable];
-            
+    }
+    else
+    {
+        _rotateTrigger = nil;
+        _eqLowEnable = nil;
+        _eqMidEnable = nil;
+        _eqHighEnable = nil;
+    }
+    
 }
 
 -(void)rotateToNextFace:(int)direction

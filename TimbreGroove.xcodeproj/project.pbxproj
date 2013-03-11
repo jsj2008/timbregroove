@@ -491,7 +491,7 @@
 		572EB2331679EAE40062F290 /* ShaderLocations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShaderLocations.h; sourceTree = "<group>"; };
 		572EB2341679EAE40062F290 /* ShaderLocations.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ShaderLocations.m; sourceTree = "<group>"; };
 		572EB27E167A9B160062F290 /* config.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = config.plist; sourceTree = "<group>"; };
-		573560EE16EDB34C001EEA83 /* EQNames.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EQNames.h; sourceTree = "<group>"; };
+		573560EE16EDB34C001EEA83 /* EQNames.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = EQNames.h; path = ../EQNames.h; sourceTree = "<group>"; };
 		5737C4A2169277B700C12F2D /* fluid.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fluid.png; sourceTree = "<group>"; };
 		5737C4AD169308DF00C12F2D /* imageBaker.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = imageBaker.vsh; sourceTree = "<group>"; };
 		5737C4AF1693090D00C12F2D /* imageBaker.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = imageBaker.fsh; sourceTree = "<group>"; };
@@ -800,6 +800,7 @@
 				57DF9C8316B5BE2500050635 /* SoundSystem.m */,
 				57C3BB8316C6B5B000899F4B /* SoundSystem+Diag.h */,
 				57C3BB8416C6B5B000899F4B /* SoundSystem+Diag.m */,
+				573560EE16EDB34C001EEA83 /* EQNames.h */,
 				577368D516CDEE380051551F /* SoundSystemParameters.h */,
 				577368D616CDEE380051551F /* SoundSystemParameters.m */,
 				57A4C21E16DFDCF10044B3C9 /* Instrument.h */,
@@ -949,7 +950,6 @@
 				5781CAA516E55B46007C8EC2 /* Block.m */,
 				5705DEDA16E5DA7E00A80445 /* Tween.h */,
 				5705DED816E5DA5200A80445 /* Tween.c */,
-				573560EE16EDB34C001EEA83 /* EQNames.h */,
 			);
 			name = app;
 			sourceTree = "<group>";

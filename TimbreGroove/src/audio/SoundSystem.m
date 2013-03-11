@@ -155,8 +155,9 @@ OSStatus renderCallback(
         RingBufferRelease(_cbContext.rbo);
         _cbContext.rbo = NULL;
     }
-    
+    _cbContext.fetchCount = 0;
 }
+
 -(void)setupStdASBD
 {
     size_t bytesPerSample = sizeof (AudioUnitSampleType);
@@ -184,6 +185,8 @@ OSStatus renderCallback(
 
 -(void)triggersChanged:(Scene *)scene
 {
+    // scene might be nil, still works out ok
+    
     PointerParamBlock newTrigger = [scene.triggers getPointerTrigger:kTriggerAudioFrame];
     
     if( _bufferTrigger )
@@ -309,7 +312,7 @@ OSStatus renderCallback(
     if( wasRunning )
         CheckError( AUGraphStart(_processingGraph), "Couldn't restart graph");
     
-    NSLog(@"plugged %@ (%d) into bus: %d", instrument.description, (unsigned int)instrument.sampler, instrument.channel);
+    NSLog(@"plugged %@ (%p) into bus: %d", instrument.description, instrument.sampler, instrument.channel);
 }
 
 -(void)unplugInstrumentFromBus:(Instrument *)instrument
@@ -330,7 +333,7 @@ OSStatus renderCallback(
     result = AUGraphUpdate(_processingGraph, NULL); // NULL forces synchronous update &isUpdated);
     CheckError(result,"Unable to update graph.");
     
-    NSLog(@"UNplugged %@ (%d) from bus: %d", instrument.description, (unsigned int)instrument.sampler,
+    NSLog(@"UNplugged %@ (%p) from bus: %d", instrument.description, instrument.sampler,
           (unsigned int)bus);
     
     if( wasRunning )
@@ -342,7 +345,7 @@ OSStatus renderCallback(
 
 -(void)decomissionInstrument:(Instrument *)instrument
 {
-    [self unplugInstrumentFromBus:instrument];
+    //[self unplugInstrumentFromBus:instrument];
     AUGraphRemoveNode(_processingGraph, instrument.graphNode);
 }
 

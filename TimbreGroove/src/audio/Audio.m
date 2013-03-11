@@ -25,6 +25,7 @@
     Midi *     _midi;
     MidiFile * _midiSequence;
     NSString * _midiFileName;
+    bool _started;
 }
 
 @end
@@ -66,11 +67,11 @@
         return [_soundSystem loadInstrumentFromConfig:instrumentConfig intoChannel:channel++];
     }];
     _midiFileName = config.midiFile;
-    _eqName = config.EQ;
 }
 
 -(void)start
 {
+    _started = true;
     if( _midiSequence )
         [_midiSequence start];
     else
@@ -83,8 +84,15 @@
         [_soundSystem plugInstrumentIntoBus:instrument];
     }];
 
-    if( _midiSequence )
-        [_midiSequence resume];
+    if( _started )
+    {
+        if( _midiSequence )
+            [_midiSequence resume];
+    }
+    else
+    {
+        [self start];
+    }
 }
 
 -(void)pause

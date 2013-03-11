@@ -23,12 +23,12 @@
 -(void)getSettings:(NSMutableArray *)putHere;
 -(void)update:(NSTimeInterval)dt;
 -(void)triggersChanged:(Scene *)scene;
+
+-(void)start;
 -(void)play;
 -(void)pause;
 
 @property (nonatomic,strong) SoundSystemParameters * ssp;
 
-// derived classes
--(void)start;
 
 @end

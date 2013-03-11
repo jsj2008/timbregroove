@@ -18,7 +18,6 @@
 @interface Scene () {
     ConfigScene * _config;
     NSMutableArray * _tweenQueue;
-    bool _started;
 }
 
 @end
@@ -33,6 +32,12 @@
 +(id)sceneWithName:(NSString *)name
 {
     ConfigScene * config = [[Config sharedInstance] getScene:name];
+    return [[Scene alloc] initWithConfig:config];
+}
+
++(id)systemSceneWithName:(NSString *)name
+{
+    ConfigScene * config = [[Config sharedInstance] getSystemScene:name];
     return [[Scene alloc] initWithConfig:config];
 }
 
@@ -63,19 +68,8 @@
 
         [config.connections apply:^(id map) { [_triggers addMappings:map];}];
         
-        [_triggers addMappings:[self getRuntimeConnections]];
     }
     return self;
-}
-
--(void)updateParameters:(NSDictionary *)parameters renewTriggers:(bool)renew
-{
-    [_triggers addParameters:parameters];
-    if( renew )
-    {
-        [_graph triggersChanged:self];
-        [_audio triggersChanged:self];
-    }
 }
 
 -(void)addTriggers:(NSDictionary *)triggerKeyParamNameValue
@@ -92,6 +86,12 @@
     [_audio triggersChanged:self];
 }
 
+-(void)decomission
+{
+    _triggers = nil;
+  //  [_graph triggersChanged:nil];
+  //  [_audio triggersChanged:nil];
+}
 
 -(void)dealloc
 {
@@ -110,11 +110,6 @@
     [_audio triggersChanged:self];
     [_audio play];
     [_graph play];
-    if( !_started )
-    {
-        _started = true;
-        [_audio start];
-    }
 }
 
 - (void)getSettings:(NSMutableArray *)putHere

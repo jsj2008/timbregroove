@@ -16,17 +16,31 @@
 
 -(void)triggersChanged:(Scene *)scene
 {
-    TriggerMap * tm = scene.triggers;
-    _triggerDirection = [tm getPointTrigger:kTriggerDirection];
-    _triggerPinch     = [tm getFloatTrigger:kTriggerPinch];
-    _triggerTapPos    = [tm getPointTrigger:kTriggerTapPos];
-    _triggerTap1      = [tm getPointTrigger:kTriggerTap1];
-    _triggerPanX      = [tm getFloatTrigger:kTriggerPanX];
-    _triggerPanY      = [tm getFloatTrigger:kTriggerPanY];
-    _triggerDrag1     = [tm getPointTrigger:kTriggerDrag1];
-    _triggerDragPos   = [tm getPointTrigger:kTriggerDragPos];
+    if( scene )
+    {
+        TriggerMap * tm = scene.triggers;
+        _triggerDirection = [tm getPointTrigger:kTriggerDirection];
+        _triggerPinch     = [tm getFloatTrigger:kTriggerPinch];
+        _triggerTapPos    = [tm getPointTrigger:kTriggerTapPos];
+        _triggerTap1      = [tm getPointTrigger:kTriggerTap1];
+        _triggerPanX      = [tm getFloatTrigger:kTriggerPanX];
+        _triggerPanY      = [tm getFloatTrigger:kTriggerPanY];
+        _triggerDrag1     = [tm getPointTrigger:kTriggerDrag1];
+        _triggerDragPos   = [tm getPointTrigger:kTriggerDragPos];
+        [self setupTouches];
+    }
+    else
+    {
+        _triggerDirection = nil;
+        _triggerPinch     = nil;
+        _triggerTapPos    = nil;
+        _triggerTap1      = nil;
+        _triggerPanX      = nil;
+        _triggerPanY      = nil;
+        _triggerDrag1     = nil;
+        _triggerDragPos   = nil;
+    }
     
-    [self setupTouches];
 }
 
 -(void)setupTouches

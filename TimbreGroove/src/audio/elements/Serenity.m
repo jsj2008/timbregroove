@@ -37,6 +37,8 @@
 
 -(void)start
 {
+    [super start];
+    
     Instrument * congas = _instruments[CONGAS_CHANNEL];
     NoteRange congasRange = (NoteRange){ congas.lowestPlayable, congas.highestPlayable };
     _congasScale = [[NoteGenerator alloc] initWithScale:kScaleSemitones isRandom:false andRange:congasRange];
@@ -55,13 +57,23 @@
     if( !kChannelVolumeDecay )
         kChannelVolumeDecay = [kParamChannelVolume stringByAppendingTween:kTweenEaseInSine len:0.5];
 
-    TriggerMap * tm = scene.triggers;
-    _channelVolume      = [tm getFloatTrigger: kParamChannelVolume];
-    _channelVolumeDecay = [tm getFloatTrigger  :kChannelVolumeDecay];
-    _selectChannel      = [tm getIntTrigger    :kParamChannel];
-    _midiNote           = [tm getPointerTrigger:kParamMIDINote];
-    
-    _channelVolume(0.0);
+    if( scene )
+    {
+        TriggerMap * tm = scene.triggers;
+        _channelVolume      = [tm getFloatTrigger: kParamChannelVolume];
+        _channelVolumeDecay = [tm getFloatTrigger  :kChannelVolumeDecay];
+        _selectChannel      = [tm getIntTrigger    :kParamChannel];
+        _midiNote           = [tm getPointerTrigger:kParamMIDINote];
+        
+        _channelVolume(0.0);
+    }
+    else
+    {
+        _channelVolume = nil;
+        _channelVolumeDecay = nil;
+        _selectChannel = nil;
+        _midiNote = nil;
+    }
 }
 
 -(void)getParameters:(NSMutableDictionary *)putHere
@@ -73,7 +85,7 @@
                               {
                                   MIDINoteMessage mnm;
                                   _selectChannel(AMBIENCE_CHANNEL);
-                                  _channelVolume(0);
+                                  _channelVolume(1);
                                   mnm.note = [_ambientScale next];
                                   mnm.duration = 1.1;
                                   mnm.velocity = 127;

@@ -3,10 +3,10 @@
 <plist version="1.0">
 <dict>
 	<key>default_scene</key>
-	<string>eqCube</string>
-	<key>scenes</key>
+	<string>ripple</string>
+	<key>system_scenes</key>
 	<dict>
-		<key>eqCube</key>
+		<key>EQPanel</key>
 		<dict>
 			<key>connections</key>
 			<array>
@@ -23,15 +23,14 @@
 					<string>SwellSound</string>
 				</dict>
 			</array>
-			<key>icon</key>
-			<string>test.png</string>
-			<key>display</key>
-			<string>EQ Cube</string>
 			<key>3d_element</key>
 			<string>eqcube</string>
 			<key>audio_element</key>
-			<string>funky</string>
+			<string>noop</string>
 		</dict>
+	</dict>
+	<key>scenes</key>
+	<dict>
 		<key>fft</key>
 		<dict>
 			<key>connections</key>
@@ -125,6 +124,13 @@
 	</dict>
 	<key>audio_elements</key>
 	<dict>
+		<key>noop</key>
+		<dict>
+			<key>instanceClass</key>
+			<string>Audio</string>
+			<key>instruments</key>
+			<array/>
+		</dict>
 		<key>jazz</key>
 		<dict>
 			<key>instanceClass</key>

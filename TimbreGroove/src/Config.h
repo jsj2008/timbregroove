@@ -52,5 +52,6 @@
 -(ConfigScene *)defaultScene;
 -(NSDictionary *)getScenes;
 -(ConfigScene *)getScene:(NSString *)name;
+-(ConfigScene *)getSystemScene:(NSString *)name;
 -(ConfigGraphicElement *)getGraphicElement:(NSString *)name;
 @end

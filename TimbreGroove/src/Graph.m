@@ -171,8 +171,16 @@
 
 -(void)triggersChanged:(Scene *)scene
 {
-    _timerTrigger  = [scene.triggers getFloatTrigger:kTriggerTimer];
-    _updateTrigger = [scene.triggers getFloatTrigger:kTriggerUpdate];
+    if( scene )
+    {
+        _timerTrigger  = [scene.triggers getFloatTrigger:kTriggerTimer];
+        _updateTrigger = [scene.triggers getFloatTrigger:kTriggerUpdate];
+    }
+    else
+    {
+        _timerTrigger = nil;
+        _updateTrigger = nil;
+    }
     
     if( _single )
         [_single triggersChanged:scene];

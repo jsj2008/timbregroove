@@ -289,10 +289,18 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
 
 -(void)triggersChanged:(Scene *)scene
 {
-    TriggerMap * tm = scene.triggers;
-    
-    _peakTrigger = [tm getFloatTrigger:kTriggerDynamicPeak];
-    _holdLevelTrigger = [tm getFloatTrigger:kTriggerDynamicHold];
+    if( scene )
+    {
+        TriggerMap * tm = scene.triggers;
+        
+        _peakTrigger = [tm getFloatTrigger:kTriggerDynamicPeak];
+        _holdLevelTrigger = [tm getFloatTrigger:kTriggerDynamicHold];
+    }
+    else
+    {
+        _peakTrigger = nil;
+        _holdLevelTrigger = nil;
+    }
 }
 
 -(void)update:(NSTimeInterval)dt

@@ -114,11 +114,20 @@ NSString const * kParamCurveWidth   = @"CurveWidth";
 {
     [super triggersChanged:scene];
     
+    if( scene )
+    {
     TriggerMap * tm = scene.triggers;
     
     _eqLowFreq  = [tm getFloatTrigger:[kParamEQLowCutoff    stringByAppendingTween:kTweenEaseInSine len:0.2]];
     _eqHighFreq = [tm getFloatTrigger:[kParamEQHighCutoff   stringByAppendingTween:kTweenEaseInSine len:0.2]];
     _eqMidWidth = [tm getFloatTrigger:[kParamEQMidBandwidth stringByAppendingTween:kTweenEaseInSine len:0.2]];
+    }
+    else
+    {
+        _eqLowFreq = nil;
+        _eqHighFreq = nil;
+        _eqMidWidth = nil;
+    }
 }
 
 -(void)moveCurve:(float) xmove band:(int)band
@@ -166,7 +175,6 @@ NSString const * kParamCurveWidth   = @"CurveWidth";
     CGPoint left    = fpb.left;
     CGPoint right   = fpb.right;
  
-    float xmove2 = scale;
     left.x -= scale;
     right.x += scale;
 

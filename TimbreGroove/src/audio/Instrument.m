@@ -50,7 +50,8 @@
         CheckError(MIDIEndpointDispose(_midiEndPoint), "Error disposing endpoint");
 
     // "Calling this function deallocates the audio unit’s resources."
-    AudioUnitUninitialize(_sampler);    
+    // AND CRASHES THE APP
+  //  AudioUnitUninitialize(_sampler);
     NSLog(@"Instrument gone");
 }
 
@@ -90,6 +91,8 @@
     
     result = AUGraphNodeInfo (_graph, _graphNode, 0, &_sampler);
     CheckError(result,"Unable to obtain a reference to the Sampler unit.");
+    
+    NSLog(@"Created sampler: %ld",(long)_sampler);
 }
 
 - (OSStatus) loadSynthFromPresetURL: (NSURL *) presetURL 
