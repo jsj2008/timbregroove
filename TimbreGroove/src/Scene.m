@@ -165,7 +165,10 @@
     if( [_tweenQueue count] )
     {
         NSIndexSet * markedForDelete = [_tweenQueue indexesOfObjectsPassingTest:^BOOL(TriggerTween * tween, NSUInteger idx, BOOL *stop) {
-            return [tween update:dt];
+            bool done = [tween update:dt];
+            if( done )
+                [tween decommission];
+            return done;
         }];
         [_tweenQueue removeObjectsAtIndexes:markedForDelete];
     }

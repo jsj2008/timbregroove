@@ -40,22 +40,31 @@
 typedef enum TweenOps
 {
     kTweenOpApplyTarget,
+    kTweenOpApplyTargetToInitial,
     kTweenOpApplyDelta,
     kTweenOpGetBlock,
+    kTweenOpReverse
 } TweenOps;
 
 typedef id (^TweenBlock)(TweenOps,float);
 
-static int sizeForType(char type)
-{
-    static int __twSizes[] = { _C_FLT, sizeof(float), _C_INT, sizeof(int), TGC_POINT, sizeof(CGPoint) };
-    for( int i = 0; i < (sizeof(__twSizes)/2*sizeof(int)); i += 2 )
-        if( type == __twSizes[i] )
-            return __twSizes[i+1];
-    return -1;
-}
-
-
+typedef union _TweenData {
+    struct {
+        float current;
+        float initial;
+        float target;
+    }f;
+    struct {
+        int current;
+        int initial;
+        int target;
+    }i;
+    struct {
+        CGPoint current;
+        CGPoint initial;
+        CGPoint target;
+    }pt;
+} TweenData;
 
 //--------------------------------------------------------------------------------
 @interface TriggerTween () {
@@ -65,16 +74,11 @@ static int sizeForType(char type)
     bool           _tweening;
     TweenFunction  _func;
     bool           _done;
-    id             _block;
     id             _paramBlock;
     TweenCallback  _callBack;
     TweenBlock     _ops;
     char           _type;
-    float          _buf[12];
-    void *         _current;
-    void *         _initial;
-    void *         _target;
-    int            _size;
+    TweenData      _d;
     
     Parameter * _parameter;
     __weak id<TriggerMapProtocol> _queue;
@@ -105,107 +109,157 @@ static int sizeForType(char type)
     if( self )
     {
         _type = type;
-        _current = _buf;
-        _initial = &_buf[4];
-        _target  = &_buf[8];
-        _size = sizeForType(type);
         _parameter = parameter;
         _paramBlock = [parameter getParamBlockOfType:type];
         _func = func;
         _duration = len;
         _queue = queue;
         
-        TweenBlock FloatTweenBlock = ^id(TweenOps op, float delta)
-        {
-            if( op == kTweenOpApplyTarget )
-            {
-                ((FloatParamBlock)_paramBlock)(*(float *)_target);
-            }
-            else if( op == kTweenOpApplyDelta )
-            {
-                float initial = *(float *)_initial;
-                float newValue = initial + ((*(float *)_target - initial) * delta);
-                ((FloatParamBlock)_paramBlock)(newValue);
-            }
-            else if( op == kTweenOpGetBlock )
-            {
-                return ^(float f) {
-                    [self reset];
-                    if( _parameter.additive )
-                        *(float *)_target = f + *(float *)_initial;
-                    else
-                        *(float *)_target = f;
-                };
-            }
-            return nil;
-        };
-        
-        TweenBlock IntTweenBlock = ^id(TweenOps op, float delta)
-        {
-            if( op == kTweenOpApplyTarget )
-            {
-                ((IntParamBlock)_paramBlock)(*(int *)_target);
-            }
-            else if( op == kTweenOpApplyDelta )
-            {
-                float initial = *(int *)_initial;
-                float newValue = initial + ((*(int *)_target - initial) * delta);
-                ((IntParamBlock)_paramBlock)((int)roundf(newValue));
-            }
-            else if( op == kTweenOpGetBlock )
-            {
-                return ^(float f) {
-                    [self reset];
-                    if( _parameter.additive )
-                        *(float *)_target = f + *(float *)_initial;
-                    else
-                        *(float *)_target = f;
-                };
-            }
-            return nil;
-        };
-        
-        TweenBlock PointTweenBlock = ^id(TweenOps op, float delta )
-        {
-            if( op == kTweenOpApplyTarget )
-            {
-                ((PointParamBlock)_paramBlock)(*(CGPoint *)_target);
-            }
-            else if( op == kTweenOpApplyDelta )
-            {
-                CGPoint initial = *(CGPoint *)_initial;
-                CGPoint target = *(CGPoint *)_target;
-                CGPoint newValue;
-                newValue.x = initial.x + ((target.x - initial.x) * delta);
-                newValue.y = initial.y + ((target.y - initial.y) * delta);
-                ((PointParamBlock)_paramBlock)(newValue);
-            }
-            else if( op == kTweenOpGetBlock )
-            {
-                return ^(CGPoint pt) {
-                    [self reset];
-                    if( _parameter.additive )
-                    {
-                        CGPoint initial = *(CGPoint *)_initial;
-                        pt.x += initial.x;
-                        pt.y += initial.y;
-                    }
-                    *(CGPoint *)_target = pt;
-                };
-            }
-            return nil;
-        };
+        id ops;
         
         if( type == _C_FLT )
-            _ops = FloatTweenBlock;
+        {
+            ops = ^id(TweenOps op, float delta)
+            {
+                switch (op) {
+                    case kTweenOpApplyTarget:
+                    {
+                        ((FloatParamBlock)_paramBlock)(_d.f.target);
+                        break;
+                    }
+                    case kTweenOpApplyTargetToInitial:
+                    {
+                        _d.f.initial = _d.f.target;
+                        break;
+                    }
+                    case kTweenOpReverse:
+                    {
+                        float tmp = _d.f.initial;
+                        _d.f.initial = _d.f.target;
+                        _d.f.target = tmp;
+                        break;
+                    }
+                    case kTweenOpApplyDelta:
+                    {
+                        float newValue = _d.f.initial + ((_d.f.target - _d.f.initial) * delta);
+                        ((FloatParamBlock)_paramBlock)(newValue);
+                        break;
+                    }
+                    case kTweenOpGetBlock:
+                    {
+                        return ^(float f) {
+                            [self reset];
+                            if( _parameter.additive )
+                                _d.f.target = f + _d.f.initial;
+                            else
+                                _d.f.target = f;
+                        };
+                    }
+                }
+                return nil;
+            };
+        }
         else if( type == _C_INT )
-            _ops = IntTweenBlock;
+        {
+            ops = ^id(TweenOps op, float delta)
+            {
+                switch (op) {
+                    case kTweenOpApplyTarget:
+                    {
+                        ((IntParamBlock)_paramBlock)(_d.i.target);
+                        break;
+                    }
+                    case kTweenOpApplyTargetToInitial:
+                    {
+                        _d.i.initial = _d.i.target;
+                        break;
+                    }
+                    case kTweenOpReverse:
+                    {
+                        int tmp = _d.i.initial;
+                        _d.i.initial = _d.i.target;
+                        _d.i.target = tmp;
+                        break;
+                    }
+                    case kTweenOpApplyDelta:
+                    {
+                        float newValue = (float)_d.i.initial + ((_d.i.target - _d.i.initial) * delta);
+                        ((FloatParamBlock)_paramBlock)((int) roundf(newValue));
+                        break;
+                    }
+                    case kTweenOpGetBlock:
+                    {
+                        return ^(int i) {
+                            [self reset];
+                            if( _parameter.additive )
+                                _d.i.target = i + _d.i.initial;
+                            else
+                                _d.i.target = i;
+                        };
+                    }
+                }
+                return nil;
+            };
+        }
         else if( type == TGC_POINT )
-            _ops = PointTweenBlock;
+        {
+            ops = ^id(TweenOps op, float delta )
+            {
+                switch (op) {
+                    case kTweenOpApplyTarget:
+                    {
+                        ((PointParamBlock)_paramBlock)(_d.pt.target);
+                        break;
+                    }
+                    case kTweenOpApplyTargetToInitial:
+                    {
+                        _d.pt.initial = _d.pt.target;
+                        break;
+                    }
+                    case kTweenOpReverse:
+                    {
+                        CGPoint tmp = _d.pt.initial;
+                        _d.pt.initial = _d.pt.target;
+                        _d.pt.target = tmp;
+                        break;
+                    }
+                    case kTweenOpApplyDelta:
+                    {
+                        CGPoint newValue;
+                        newValue.x = _d.pt.initial.x + ((_d.pt.target.x - _d.pt.initial.x) * delta);
+                        newValue.y = _d.pt.initial.y + ((_d.pt.target.y - _d.pt.initial.y) * delta);
+                        ((PointParamBlock)_paramBlock)(newValue);
+                        break;
+                    }
+                    case kTweenOpGetBlock:
+                    {
+                        return ^(CGPoint pt) {
+                            [self reset];
+                            if( _parameter.additive )
+                                _d.pt.target = (CGPoint){ pt.x + _d.pt.initial.x, pt.y + _d.pt.initial.y };
+                            else
+                                _d.pt.target = pt;
+                        };
+                    }
+                }
+                return nil;
+            };
+        }
+        
+        _ops = ops;
         
     }
     return self;
 }
+
+-(void)decommission
+{
+    _paramBlock = nil;
+    _callBack = nil;
+    _ops = nil;
+    _parameter = nil;
+}
+
 
 -(id) block
 {
@@ -237,7 +291,6 @@ static int sizeForType(char type)
 -(void)reset
 {
     bool additive = _parameter.additive;
-    [_parameter getValue:_current ofType:_type];
     if( _tweening )
     {
         /*
@@ -250,17 +303,17 @@ static int sizeForType(char type)
         if( additive )
         {
             _ops(kTweenOpApplyTarget,0);
-            memcpy(_initial, _target, _size);
+            _ops(kTweenOpApplyTargetToInitial,0);
         }
         else
         {
-            memcpy(_initial, _current, _size);
+            [_parameter getValue:&_d ofType:_type];
         }
     }
     else
     {
         _tweening = true;
-        memcpy(_initial, _current, _size);
+        [_parameter getValue:&_d ofType:_type];
     }
     [_queue queue:self];
     _runningTime = 0.0;
@@ -269,10 +322,7 @@ static int sizeForType(char type)
 
 -(void)reverse
 {
-    float tmp[4];
-    memcpy(tmp, _initial, _size);
-    memcpy(_initial, _target, _size);
-    memcpy(_target, tmp, _size);
+    _ops(kTweenOpReverse,0);
     _runningTime = 0.0;
     _done = false;
     _tweening = true;

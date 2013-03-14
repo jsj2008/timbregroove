@@ -23,6 +23,7 @@ extern TweenCallback TweenLooper;
 -(bool)isDone;
 -(void)reset;
 -(void)reverse;
+-(void)decommission;
 @end
 
 @class TriggerMap;
