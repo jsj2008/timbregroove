@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>default_scene</key>
-	<string>ripple</string>
+	<string>tranquility</string>
 	<key>system_scenes</key>
 	<dict>
 		<key>EQPanel</key>
@@ -112,18 +112,36 @@
 			<key>display</key>
 			<string>tranquility...</string>
 			<key>connections</key>
-			<dict>
-				<key>Tappos</key>
-				<string>MoveItem</string>
-			</dict>
+			<array>
+				<dict>
+					<key>Loudness</key>
+					<string>ItemRadius</string>
+					<key>DblTap</key>
+					<string>NewItem</string>
+					<key>Tap</key>
+					<string>MoveItem:EaseOutSine:0.6</string>
+				</dict>
+			</array>
 			<key>3d_element</key>
 			<string>pool</string>
 			<key>audio_element</key>
-			<string>tranquility</string>
+			<string>poolside</string>
 		</dict>
 	</dict>
 	<key>audio_elements</key>
 	<dict>
+		<key>poolside</key>
+		<dict>
+			<key>midifile</key>
+			<string>ChildOfGod</string>
+			<key>instanceClass</key>
+			<string>PoolsideAudio</string>
+			<key>instruments</key>
+			<array>
+				<string>ambience</string>
+				<string>congas</string>
+			</array>
+		</dict>
 		<key>noop</key>
 		<dict>
 			<key>instanceClass</key>

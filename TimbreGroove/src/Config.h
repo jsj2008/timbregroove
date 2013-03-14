@@ -49,7 +49,9 @@
 
 @interface Config : NSObject
 +(Config*)sharedInstance;
--(ConfigScene *)defaultScene;
++(ConfigScene *)defaultScene;
++(ConfigScene *)systemScene:(NSString *)name;
+
 -(NSDictionary *)getScenes;
 -(ConfigScene *)getScene:(NSString *)name;
 -(ConfigScene *)getSystemScene:(NSString *)name;

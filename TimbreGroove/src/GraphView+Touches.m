@@ -27,6 +27,7 @@
         _triggerPanY      = [tm getFloatTrigger:kTriggerPanY];
         _triggerDrag1     = [tm getPointTrigger:kTriggerDrag1];
         _triggerDragPos   = [tm getPointTrigger:kTriggerDragPos];
+        _triggerDblTap    = [tm getPointTrigger:kTriggerDblTap];
         [self setupTouches];
     }
     else
@@ -39,16 +40,32 @@
         _triggerPanY      = nil;
         _triggerDrag1     = nil;
         _triggerDragPos   = nil;
+        _triggerDblTap    = nil;
+        
+        [[self gestureRecognizers] each:^(UIGestureRecognizer * gr) {
+            [self removeGestureRecognizer:gr];
+        }];
     }
     
 }
 
 -(void)setupTouches
 {
+    UITapGestureRecognizer * dblTap = nil;
+    
+    if( _triggerDblTap )
+    {
+        dblTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dblTap:)];
+        dblTap.numberOfTapsRequired = 2;
+        [self addGestureRecognizer:dblTap];
+    }
+    
     if( _triggerTap1 || _triggerTapPos )
     {
         UITapGestureRecognizer * tap;
         tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tap:)];
+        if( dblTap )
+           [tap requireGestureRecognizerToFail:dblTap];
         [self addGestureRecognizer:tap];
     }
     
@@ -148,6 +165,16 @@
             _triggerTapPos(pt);
         if( _triggerTap1 )
             _triggerTap1([self nativeToTG:pt]);
+    }
+}
+
+-(void)dblTap:(UITapGestureRecognizer *)tgr
+{
+    if( tgr.state == UIGestureRecognizerStateEnded )
+    {
+        CGPoint pt = [tgr locationInView:self];
+        if( _triggerDblTap )
+            _triggerDblTap([self nativeToTG:pt]);
     }
 }
 

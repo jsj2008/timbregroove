@@ -118,6 +118,8 @@
 		571B4C2816D0561100C1F88F /* rhodes_small.sf2 in Resources */ = {isa = PBXBuildFile; fileRef = 571B4C2716D0561100C1F88F /* rhodes_small.sf2 */; };
 		571ECFC2167BEA5E00727A30 /* aotk-ass-outline-512.tif in Resources */ = {isa = PBXBuildFile; fileRef = 571ECFC1167BEA5E00727A30 /* aotk-ass-outline-512.tif */; };
 		571ECFC4167BEC3B00727A30 /* aotk-ass-bare-512.tif in Resources */ = {isa = PBXBuildFile; fileRef = 571ECFC3167BEC3B00727A30 /* aotk-ass-bare-512.tif */; };
+		571FD90416F02B69007DB564 /* MathStuff.c in Sources */ = {isa = PBXBuildFile; fileRef = 571FD90316F02B69007DB564 /* MathStuff.c */; };
+		571FD90816F037E3007DB564 /* PoolsideAudio.m in Sources */ = {isa = PBXBuildFile; fileRef = 571FD90716F037E3007DB564 /* PoolsideAudio.m */; };
 		572098E116DA9FA40075E584 /* Parameter.m in Sources */ = {isa = PBXBuildFile; fileRef = 572098E016DA9FA40075E584 /* Parameter.m */; };
 		5721989616853F9E0062C36F /* GraphView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5721989516853F9D0062C36F /* GraphView.m */; };
 		572AD0E016EBC1870070AE6A /* FFTScope.m in Sources */ = {isa = PBXBuildFile; fileRef = 572AD0DF16EBC1870070AE6A /* FFTScope.m */; };
@@ -241,7 +243,7 @@
 		57DF9C8416B5BE2500050635 /* SoundSystem.m in Sources */ = {isa = PBXBuildFile; fileRef = 57DF9C8316B5BE2500050635 /* SoundSystem.m */; };
 		57E1954616ABECA50099514B /* PoolShader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 57E1954516ABECA50099514B /* PoolShader.vsh */; };
 		57E1954A16ABEEBD0099514B /* SphereOid.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E1954916ABEEBD0099514B /* SphereOid.m */; };
-		57E590A816BA2E3F00330F40 /* BlendState.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E590A716BA2E3F00330F40 /* BlendState.m */; };
+		57E590A816BA2E3F00330F40 /* State.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E590A716BA2E3F00330F40 /* State.m */; };
 		57E62B1F16C2BBC0007064A0 /* Gestures.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E62B1E16C2BBC0007064A0 /* Gestures.m */; };
 		57E62B2216C30D9D007064A0 /* PVRImporter.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E62B2116C30D9D007064A0 /* PVRImporter.m */; };
 		57E62E67168433100030908E /* Photo.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E62E66168433100030908E /* Photo.m */; };
@@ -451,6 +453,9 @@
 		571B4C2716D0561100C1F88F /* rhodes_small.sf2 */ = {isa = PBXFileReference; lastKnownFileType = file; path = rhodes_small.sf2; sourceTree = "<group>"; };
 		571ECFC1167BEA5E00727A30 /* aotk-ass-outline-512.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = "aotk-ass-outline-512.tif"; sourceTree = "<group>"; };
 		571ECFC3167BEC3B00727A30 /* aotk-ass-bare-512.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = "aotk-ass-bare-512.tif"; sourceTree = "<group>"; };
+		571FD90316F02B69007DB564 /* MathStuff.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = MathStuff.c; sourceTree = "<group>"; };
+		571FD90516F02C07007DB564 /* MathStuff.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MathStuff.h; sourceTree = "<group>"; };
+		571FD90716F037E3007DB564 /* PoolsideAudio.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PoolsideAudio.m; sourceTree = "<group>"; };
 		572098DF16DA9FA30075E584 /* Parameter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Parameter.h; sourceTree = "<group>"; };
 		572098E016DA9FA40075E584 /* Parameter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Parameter.m; sourceTree = "<group>"; };
 		5721989416853F9D0062C36F /* GraphView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = GraphView.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
@@ -639,8 +644,8 @@
 		57E1954516ABECA50099514B /* PoolShader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = PoolShader.vsh; sourceTree = "<group>"; };
 		57E1954816ABEEAC0099514B /* SphereOid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SphereOid.h; sourceTree = "<group>"; };
 		57E1954916ABEEBD0099514B /* SphereOid.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SphereOid.m; sourceTree = "<group>"; };
-		57E590A616BA2E3F00330F40 /* BlendState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BlendState.h; sourceTree = "<group>"; };
-		57E590A716BA2E3F00330F40 /* BlendState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BlendState.m; sourceTree = "<group>"; };
+		57E590A616BA2E3F00330F40 /* State.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = State.h; sourceTree = "<group>"; };
+		57E590A716BA2E3F00330F40 /* State.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = State.m; sourceTree = "<group>"; };
 		57E62B1D16C2BBC0007064A0 /* Gestures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Gestures.h; sourceTree = "<group>"; };
 		57E62B1E16C2BBC0007064A0 /* Gestures.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Gestures.m; sourceTree = "<group>"; };
 		57E62B2016C30D9D007064A0 /* PVRImporter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRImporter.h; sourceTree = "<group>"; };
@@ -950,6 +955,8 @@
 				5781CAA516E55B46007C8EC2 /* Block.m */,
 				5705DEDA16E5DA7E00A80445 /* Tween.h */,
 				5705DED816E5DA5200A80445 /* Tween.c */,
+				571FD90516F02C07007DB564 /* MathStuff.h */,
+				571FD90316F02B69007DB564 /* MathStuff.c */,
 			);
 			name = app;
 			sourceTree = "<group>";
@@ -1187,8 +1194,8 @@
 			children = (
 				570F415C16ABB736000FCA7B /* geometry */,
 				570F40D316AB8B96000FCA7B /* shaders */,
-				57E590A616BA2E3F00330F40 /* BlendState.h */,
-				57E590A716BA2E3F00330F40 /* BlendState.m */,
+				57E590A616BA2E3F00330F40 /* State.h */,
+				57E590A716BA2E3F00330F40 /* State.m */,
 				572EB2271678BF740062F290 /* Camera.h */,
 				572EB2281678BF740062F290 /* Camera.m */,
 				57E7465C1680438300C1D4FF /* EventCapture.h */,
@@ -1352,6 +1359,7 @@
 			isa = PBXGroup;
 			children = (
 				57DF536916DC1A6000990B8D /* Serenity.m */,
+				571FD90716F037E3007DB564 /* PoolsideAudio.m */,
 			);
 			path = elements;
 			sourceTree = "<group>";
@@ -1718,7 +1726,7 @@
 				577AE48816B35D1400B4FDF1 /* Fluid.m in Sources */,
 				57DF9C8416B5BE2500050635 /* SoundSystem.m in Sources */,
 				5780832616B73299002810BD /* PoolWater.m in Sources */,
-				57E590A816BA2E3F00330F40 /* BlendState.m in Sources */,
+				57E590A816BA2E3F00330F40 /* State.m in Sources */,
 				5707CA7416BCA18400B24818 /* GraphViewController.m in Sources */,
 				570CE40616BDCACC00D67551 /* ScreenViewController.m in Sources */,
 				57CB3B0B16BE2BC5007C093C /* NewScenePicker.m in Sources */,
@@ -1764,6 +1772,8 @@
 				57677D9D16EAEE8100C3BA58 /* NoteGenerator.m in Sources */,
 				572AD0E016EBC1870070AE6A /* FFTScope.m in Sources */,
 				57188E2316EBFC40002DA307 /* fft.c in Sources */,
+				571FD90416F02B69007DB564 /* MathStuff.c in Sources */,
+				571FD90816F037E3007DB564 /* PoolsideAudio.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

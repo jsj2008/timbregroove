@@ -78,7 +78,7 @@
         [_midi setupMidiFreeRange:_instruments];
 }
 
--(void)play
+-(void)activate
 {
     [_instruments each:^(id instrument) {
         [_soundSystem plugInstrumentIntoBus:instrument];
@@ -132,6 +132,15 @@
     
 }
 
+-(void)startMidiFile
+{
+    if( _midiFileName && !_midiSequence )
+    {
+        Instrument * instrument = _instruments[0];
+        _midiSequence = [_midi setupMidiFile:_midiFileName withInstrument:instrument];
+    }
+}
+
 @end
 
 @interface AutoPlayMidiFile : Audio
@@ -140,13 +149,8 @@
 
 -(void)start
 {
-    if( _midiFileName && !_midiSequence )
-    {
-        Instrument * instrument = _instruments[0];
-        _midiSequence = [_midi setupMidiFile:_midiFileName withInstrument:instrument];
-    }
+    [super startMidiFile];
     [super start];
-    
 }
 
 

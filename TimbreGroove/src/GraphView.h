@@ -9,6 +9,7 @@
 #import <GLKit/GLKit.h>
 #import "Graph.h"
 
+@class Scene;
 
 @interface GraphView : GLKView {
 @private // here for categories
@@ -23,9 +24,11 @@
     FloatParamBlock _triggerPanY;
     PointParamBlock _triggerDrag1;
     PointParamBlock _triggerDragPos;
+    PointParamBlock _triggerDblTap;
 }
 @property (nonatomic) GLKVector4 backcolor;
 @property (nonatomic,strong) Graph * graph;
+@property (nonatomic,weak)   Scene * scene;
 
 -(void)update:(NSTimeInterval)dt;
 -(void)render;

@@ -40,12 +40,16 @@ NSString const * kParamRotateCube  = @"RotateCube";
     IntParamBlock _eqMidEnable;
     IntParamBlock _eqHighEnable;
     
-    int _currentBand;
 }
-
+@property (nonatomic) int currentBand;
 @end
 
 @implementation EQCube
+
+-(void)dealloc
+{
+    NSLog(@"EQCube gone");
+}
 
 -(id)wireUp
 {
@@ -85,7 +89,6 @@ NSString const * kParamRotateCube  = @"RotateCube";
     self.texture = [[FBO alloc] initWithObject:_eqPanel
                                          width:EQ_PANEL_HEIGHT * 4
                                         height:EQ_PANEL_HEIGHT];
-    
 }
 
 -(void)createBuffer
@@ -124,6 +127,7 @@ NSString const * kParamRotateCube  = @"RotateCube";
 -(void)getParameters:(NSMutableDictionary *)parameters
 {
     [super    getParameters:parameters];
+    
     [_eqPanel getParameters:parameters];
     
     parameters[@"Buttons"] = [Parameter withBlock:^(CGPoint pt){
@@ -133,9 +137,9 @@ NSString const * kParamRotateCube  = @"RotateCube";
     // -90 is where 'EQ OFF' is
     parameters[kParamRotateCube]  = [FloatParameter withValue:-90
                                                         block:^(float f){
-                                                            self.rotation =
-                                                            (GLKVector3){ CUBE_TILT, -GLKMathDegreesToRadians(f), 0 };
-                                                        }];;
+                                                            [self setRotation:
+                                                            (GLKVector3){ CUBE_TILT, -GLKMathDegreesToRadians(f), 0 }];
+                                                        }];
 }
 
 -(void)triggersChanged:(Scene *)scene
@@ -143,15 +147,15 @@ NSString const * kParamRotateCube  = @"RotateCube";
     [super    triggersChanged:scene];
     [_eqPanel triggersChanged:scene];
     
-    if( scene )
-    {
     TriggerMap * tm = scene.triggers;
     
-    _rotateTrigger = [tm getFloatTrigger:[kParamRotateCube stringByAppendingTween:kTweenEaseOutThrow len:0.5]];
-    
-    _eqLowEnable = [tm getIntTrigger:kParamEQLowPassEnable];
-    _eqMidEnable = [tm getIntTrigger:kParamEQParametricEnable];
-    _eqHighEnable = [tm getIntTrigger:kParamEQHiPassEnable];
+    if( scene )
+    {
+        _rotateTrigger = [tm getFloatTrigger:[kParamRotateCube stringByAppendingTween:kTweenEaseOutThrow len:0.5]];
+        
+        _eqLowEnable = [tm getIntTrigger:kParamEQLowPassEnable];
+        _eqMidEnable = [tm getIntTrigger:kParamEQParametricEnable];
+        _eqHighEnable = [tm getIntTrigger:kParamEQHiPassEnable];
     }
     else
     {

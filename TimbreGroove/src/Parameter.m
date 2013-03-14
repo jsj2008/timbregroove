@@ -36,6 +36,10 @@
     }
     return self;
 }
+-(void)releaseBlock
+{
+    _block = nil;
+}
 
 -(void)getValue:(void *)p ofType:(char)type
 {

@@ -17,6 +17,10 @@
 #import "TriggerMap.h"
 #import "ConfigNames.h"
 
+#ifdef DEBUG_POWER
+float g_last_power, g_last_radius;
+#endif
+
 //////////////////////////////////////////////////////////////////
 #pragma mark consts and typedefs
 
@@ -284,7 +288,26 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
                                                  f,
                                                  0);
         CheckError(result, "Could not turn audio knob");
+#ifdef DEBUG_POWER
+        if( au == _mixerUnit && !apd->aupid )
+        {
+            printf("%f,%f,%f,%f\n", f, (g_last_power+120)/120.0, g_last_radius,g_last_power);
+        }
+#endif
     } copy];
+}
+
+- (void) enableMetering:(bool)enable
+{
+    // turn on metering
+    UInt32 meteringMode = enable ? 1 : 0;
+    OSStatus err = AudioUnitSetProperty(_mixerUnit,
+                                        kAudioUnitProperty_MeteringMode,
+                                        kAudioUnitScope_Output,
+                                        0,
+                                        &meteringMode,
+                                        sizeof(meteringMode) );
+    CheckError(err, "Error tweaking metering mode");
 }
 
 -(void)triggersChanged:(Scene *)scene
@@ -301,6 +324,9 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
         _peakTrigger = nil;
         _holdLevelTrigger = nil;
     }
+    
+    [self enableMetering:_peakTrigger || _holdLevelTrigger ];
+    
 }
 
 -(void)update:(NSTimeInterval)dt
@@ -310,15 +336,21 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
     
     if( _peakTrigger )
     {
-        result = AudioUnitGetParameter(_mixerUnit, kMultiChannelMixerParam_PostAveragePower,
-                                       kAudioUnitScope_Global, 0, &value);
+        result = AudioUnitGetParameter(_mixerUnit,
+                                       kMultiChannelMixerParam_PostAveragePower,
+                                       kAudioUnitScope_Output,
+                                       0,
+                                       &value);
+        if( result )
+            NSLog(@"wups");
+        
         CheckError(result, "Error getting peak value");
         _peakTrigger(value);
     }
     if( _holdLevelTrigger )
     {
         result = AudioUnitGetParameter(_mixerUnit, kMultiChannelMixerParam_PostPeakHoldLevel,
-                                       kAudioUnitScope_Global, 0, &value);
+                                       kAudioUnitScope_Output, 0, &value);
         CheckError(result, "Error getting peak hold value");
         _holdLevelTrigger(value);
     }

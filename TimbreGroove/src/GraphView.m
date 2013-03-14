@@ -11,6 +11,7 @@
 #import "Camera.h"
 #import "Gestures.h"
 #import "GraphView+Touches.h"
+#import "Scene.h"
 
 @interface GraphView () {
 }
@@ -55,6 +56,14 @@
     _graph = graph;
     _graph.view = self;
     [_graph traverse:@selector(didAttachToView:) userObj:self];
+}
+
+-(void)setScene:(Scene *)scene
+{
+    [self triggersChanged:nil];
+    _scene = scene;
+    self.graph = scene.graph;
+    [self triggersChanged:scene];
 }
 
 -(void)render // drawRect:(CGRect)rect

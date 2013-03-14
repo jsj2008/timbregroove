@@ -16,7 +16,6 @@
 @end
 
 @interface GraphViewController () {
-    Global * _global;
 }
 
 @end
@@ -39,8 +38,6 @@
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
-    _global = [Global sharedInstance];
-    
     [self setPreferredFramesPerSecond:40];
 }
 
@@ -54,7 +51,8 @@
 
 - (void)update
 {
-    [_global.scene update:self.timeSinceLastUpdate view:(GraphView *)self.view];
+    GraphView * gview = (GraphView *)self.view;
+    [gview.scene update:self.timeSinceLastUpdate view:gview];
 }
 
 - (void)glkView:(GLKView *)glkView drawInRect:(CGRect)rect

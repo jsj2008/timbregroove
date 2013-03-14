@@ -32,15 +32,15 @@
 +(id)systemSceneWithName:(NSString *)name;
 +(id)sceneWithConfig:(ConfigScene *)config;
 -(id)initWithConfig:(ConfigScene *)config;
-
--(void)decomission;
+-(id)initWithConfig:(ConfigScene *)config andProxyAudio:(Audio *)audio;
 
 @property (nonatomic,strong) Graph * graph;
 @property (nonatomic,strong) Audio * audio;
 @property (nonatomic,strong) TriggerMap * triggers;
 
+-(void)activate;
 -(void)pause;
--(void)play;
+-(void)decomission;
 
 - (void)getSettings:(NSMutableArray *)putHere;
 

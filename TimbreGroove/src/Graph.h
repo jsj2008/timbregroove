@@ -13,6 +13,6 @@
 
 @interface Graph : TG3dObject
 -(void)pause;
--(void)play;
+-(void)activate;
 -(id)loadFromConfig:(ConfigGraphicElement *)config andViewSize:(CGSize)viewSize;
 @end

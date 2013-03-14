@@ -12,16 +12,14 @@
 #import "FBO.h"
 #import "SoundSystem.h"
 #import "PoolWater.h"
-
+#import "State.h"
+#import "MathStuff.h"
 
 NSString const * kParamPoolMoveItem = @"MoveItem";
+NSString const * kParamPoolNewItem  = @"NewItem";
+NSString const * kParamPoolItemRadius = @"ItemRadius";
 
-@interface PoolScreen : Generic {
-    NSMutableArray * _waters;
-    CGSize _viewSz;
-}
-@property (nonatomic) CGPoint moveItem;
-@end
+extern float g_last_power, g_last_radius;
 
 //--------------------------------------------------------------------------------
 #pragma mark Pool Water Object
@@ -32,42 +30,80 @@ NSString const * kParamPoolMoveItem = @"MoveItem";
     float _nativePitch;
 }
 
-@property (nonatomic) float centerX;
-@property (nonatomic) float centerY;
 @property (nonatomic) float radius;
 @property (nonatomic) float meteredRadius;
-@property (nonatomic) GLKVector2 center;
+@property (nonatomic) CGPoint center;
 
 @end
 
 @implementation PoolWater
 
--(bool)isOnCenter:(GLKVector2)pt
+-(bool)isOnCenter:(CGPoint)pt
 {
-    float distance = GLKVector2Distance(_center, pt);
+    float distance = GLKVector2Distance(*(GLKVector2 *)&_center, *(GLKVector2 *)&pt);
     return distance <= _radius;
-}
-
--(void)setCenterX:(float)centerX
-{
-    _centerX = centerX;
-    _center = (GLKVector2){ _centerX, _centerY };
-}
-
--(void)setCenterY:(float)centerY
-{
-    _centerY = centerY;
-    _center = (GLKVector2){ _centerX, _centerY };
 }
 
 -(void)moveTo:(CGPoint)pt
 {
-    _center = *(GLKVector2 *)&pt;
+    _center = pt;
 }
 
 @end
 
-#pragma mark PoolScreen implementation
+//--------------------------------------------------------------------------------
+
+@interface PoolScreen : Generic {
+    NSMutableArray * _waters;
+    CGSize _viewSz;
+    DepthTestState * _dts;
+    int _movingItemIndex;
+    float _maxF;
+    float _minF;
+}
+-(void)getMovingPoint:(CGPoint *)ppt;
+@end
+
+
+//--------------------------------------------------------------------------------
+#pragma mark Parameter
+
+@interface PoolMoveItemParameter : Parameter {
+    CGPoint _initialAnimationPt;
+    __weak PoolScreen * _ps;
+}
+
+@end
+
+@implementation PoolMoveItemParameter
+
++(id)withPoolScreen:(PoolScreen *)ps block:(id)block
+{
+    return [[PoolMoveItemParameter alloc] initWithPoolScreen:ps block:block];
+}
+
+-(id)initWithPoolScreen:(PoolScreen *)ps block:(id)block
+{
+    self = [super initWithBlock:block];
+    if( self )
+    {
+        _ps = ps;
+        self.additive = false;
+    }
+    return self;
+}
+
+-(void)getValue:(void *)p ofType:(char)type
+{
+    [_ps getMovingPoint:p];
+}
+
+@end
+
+//--------------------------------------------------------------------------------
+
+#pragma mark PoolScreen
+
 
 @implementation PoolScreen
 
@@ -77,7 +113,16 @@ NSString const * kParamPoolMoveItem = @"MoveItem";
     self.camera = [IdentityCamera new];
     [super wireUpWithViewSize:viewSize];
     
-    [self addPoolChild].center = (GLKVector2){0.4,0.4};
+    _dts = [DepthTestState new];
+    
+    for( int i =0; i < 4; i++ )
+        [self addPoolChild];
+
+    [self shuffle];
+    
+    _maxF = -20 + 120;
+    _minF = -60 + 120;
+    
     return self;
 }
 
@@ -140,11 +185,12 @@ NSString const * kParamPoolMoveItem = @"MoveItem";
     MeshBuffer * b = _buffers[0];
     [b bind];
 
-    glDisable(GL_DEPTH_TEST);
+    [_dts enable:false];
     
     for( PoolWater * water in _waters )
     {
-        shader.center = water.center;
+        CGPoint pt = water.center;
+        shader.center = *(GLKVector2 *)&pt;
         shader.radius = water.radius;
         [b draw];
     }
@@ -152,11 +198,11 @@ NSString const * kParamPoolMoveItem = @"MoveItem";
     [b unbind];
     [self.texture unbind];
 
-    glEnable(GL_DEPTH_TEST);
+    [_dts restore];
 }
 
 
--(PoolWater *)waterFromPt:(GLKVector2)pt
+-(PoolWater *)waterFromPt:(CGPoint)pt
 {
     for( PoolWater * water in _waters )
     {
@@ -166,20 +212,75 @@ NSString const * kParamPoolMoveItem = @"MoveItem";
     return nil;
 }
 
--(void)getParameters:(NSMutableDictionary *)putHere
+-(void)getMovingPoint:(CGPoint *)ppt
 {
-    [super getParameters:putHere];
-    
-    putHere[@"moveItem"] = ^(CGPoint pt) {
-        [_waters[0] moveTo:pt];
-    };
+    int count = [_waters count];
+    if( !count )
+        return;
+    _movingItemIndex = count == 1 ? 0 : R0_n(count);
+    CGPoint pt = ((PoolWater *)_waters[_movingItemIndex]).center;
+    *ppt = (CGPoint){-pt.x, -pt.y};
 }
 
+-(void)getParameters:(NSMutableDictionary *)parameters
+{
+    [super getParameters:parameters];
+    
+    parameters[kParamPoolMoveItem] = [PoolMoveItemParameter withPoolScreen:self block:^(CGPoint pt) {
+        [_waters[_movingItemIndex] moveTo:(CGPoint){-pt.x,-pt.y}];
+    }];
+    
+    parameters[kParamPoolNewItem] = [Parameter withBlock:^(CGPoint pt) {
+        PoolWater * pw = [self addPoolChild];
+        pw.center = (CGPoint){-pt.x,-pt.y};
+    }];
+    
+    parameters[kParamPoolItemRadius] = [Parameter withBlock:^(float f) {
+#ifdef DEBUG_POWER
+        float org = f, explodedF = f;
+#endif
+        int count = [_waters count];
+        int index = count == 1 ? 0 : R0_n(count);
+        PoolWater * pw = (PoolWater *)_waters[index];
+        if( f < -90 || f > -10 )
+        {
+            
+        }
+        else
+        {
+            f = ( ((120+f)-_minF) / ((_maxF-_minF)*0.5)) - 1.0;
+            f = (f + (f * expf(-f*f)));
+            
+#ifdef DEBUG_POWER
+            explodedF = f;
+#endif
+            f =  f * 0.2;
+            if( f < 0.02 )
+            {
+                if( f < 0.005 )
+                    [self shuffle];
+                f = 0.0002;
+            }
+            pw.radius = f;
+        }
+#ifdef DEBUG_POWER
+        g_last_power = org;
+        g_last_radius = explodedF;
+#endif
+    }];
+}
+
+-(void)shuffle
+{
+    [_waters each:^(PoolWater * pw) {
+        pw.center = (CGPoint){ (R0_1() * 2.0) - 1.0, (R0_1() * 2.0) - 1.0 };
+    }];
+}
 
 -(PoolWater *)addPoolChild
 {
     PoolWater * child = [PoolWater new];
-    child.radius = 0.2;
+    child.radius = 0.0001;
     
     if( !_waters )
         _waters = [NSMutableArray new];

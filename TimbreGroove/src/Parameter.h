@@ -36,7 +36,7 @@
 -(id)initWithBlock:(id)block;
 -(id)getParamBlockOfType:(char)paramType;
 -(void)getValue:(void *)p ofType:(char)type;
-
+-(void)releaseBlock;
 /*
  Used by tweener:
  true  - incoming tweener values will be added to current value

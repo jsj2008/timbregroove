@@ -37,18 +37,6 @@ NSString const * kParamEQMidGain = @_kEQMidGain;
 NSString const * kParamEQHighCutoff= @_kEQHighCutoff;
 NSString const * kParamEQHighResonance = @_kEQHighResonance;
 
-/*
- These are also usable: (after you enable the EQ)
- 
- "EQLowCutoff",
- "EQLowResonance",
- "EQMidCenterFrequency",
- "EQMidBandwidth",
- "EQMidGain",
- "EQHighCutoff",
- "EQHighResonance",
- 
-*/
 NSString const * kParamInstrumentP1  = @"PerformanceParameter1";
 NSString const * kParamInstrumentP2  = @"PerformanceParameter2";
 NSString const * kParamInstrumentP3  = @"PerformanceParameter3";

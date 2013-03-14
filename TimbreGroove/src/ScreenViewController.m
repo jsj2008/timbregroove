@@ -16,6 +16,8 @@
 #import "TGTypes.h"
 #import "Graph.h"
 #import "GraphView.h"
+#import "GraphView+Touches.h"
+#import "Audio.h"
 
 #import "NewScenePicker.h"
 #import "SettingsVC.h"
@@ -35,14 +37,16 @@
     GLKViewController * _graphVC;
     Global * _global;
 
-    Graph * _utilityGraph;
-    Graph * _stowedDisplayGraph;
+    Scene * _eqScene;
+    int _lastEQBand;
+    
     FloatParamBlock _mainSliderTrigger;
     
-    NSString * _sceneObserver;
     NSString * _recordObserver;
     
 }
+
+@property (nonatomic,strong) Scene * currentScene;
 
 @property (weak, nonatomic) IBOutlet UIView *graphContainer;
 @property (weak, nonatomic) IBOutlet UIView *audioToolbar;
@@ -85,35 +89,31 @@
         }
     };
     
-    BKObservationBlock sceneChanger = ^(id obj, NSDictionary *change) {
-        Scene *oldScene = change[NSKeyValueChangeOldKey];
-        if( oldScene && [oldScene isKindOfClass:[Scene class]])
-            [oldScene pause];
-        
-        Scene * newScene = _global.scene;
-        [newScene play];
-        
-        [self performSelector:@selector(performTransition:)
-                   withObject:newScene.graph
-                   afterDelay:0.12];
-        
-        _mainSliderTrigger = [newScene.triggers getFloatTrigger:kTriggerMainSlider];
-        
-    };
-    
     _recordObserver = [_global addObserverForKeyPath:(NSString *)kGlobalRecording
                                                 task:recordChanger];
     
-    _sceneObserver = [_global addObserverForKeyPath:(NSString *)kGlobalScene
-                                            options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld
-                                               task:sceneChanger];
-    
 }
 
+-(void)setCurrentScene:(Scene *)currentScene
+{
+    if( _currentScene )
+        [_currentScene pause];
+    
+    _currentScene = currentScene;
+    
+    if( currentScene )
+       [currentScene activate];
+    
+    [self performSelector:@selector(performTransition:)
+               withObject:currentScene
+               afterDelay:0.12];
+    
+    _mainSliderTrigger = [currentScene.triggers getFloatTrigger:kTriggerMainSlider];
+}
 
 -(void)viewDidLayoutSubviews
 {
-    if( !_global.scene )
+    if( !_currentScene )
     {
         for( UIViewController * vc in self.childViewControllers )
         {
@@ -122,7 +122,7 @@
                 _graphVC = (GLKViewController*)vc;
                 _graphVC.view.frame = _graphContainer.bounds;
                 _global.graphViewSize = _graphVC.view.frame.size;
-                [self createAScene:[Config sharedInstance].defaultScene];
+                [self createAScene:[Config defaultScene]];
                 break;
             }
         }
@@ -133,7 +133,7 @@
 {
     Scene * scene = [Scene sceneWithConfig:config];
     [_scenes addObject:scene];
-    _global.scene = scene;
+    self.currentScene = scene;
     _pager.numberOfPages = [_scenes count];
 }
 
@@ -186,7 +186,7 @@
 }
 
 
-- (void)performTransition:(Graph*)graph
+- (void)performTransition:(Scene *)scene
 {
     CGRect org = _graphContainer.frame;
     CGRect offscreen = org;
@@ -200,9 +200,10 @@
                      }
                      completion:^(BOOL finished){
                          _graphVC.paused = YES;
-                         ((GraphView *)_graphVC.view).graph = graph;
+                         GraphView * gview = (GraphView *)_graphVC.view;
+                         gview.scene = scene;
                          _graphVC.paused = NO;
-                         _pager.currentPage = [_scenes indexOfObject:_global.scene];
+                         _pager.currentPage = [_scenes indexOfObject:_currentScene];
                          
                          [UIView animateWithDuration:speed
                                           animations:^{
@@ -220,7 +221,7 @@
                      }];
 }
 
-- (void)performUtilityTransitionWithGraph:(Graph*)graph
+- (void)performUtilityTransitionWithScene:(Scene *)scene
 {
     CGRect org = _graphContainer.frame;
     CGRect offscreen = org;
@@ -233,14 +234,13 @@
                          _graphContainer.frame = offscreen;
                      }
                      completion:^(BOOL finished){
-                         Graph * g = graph;
-                         ((GraphView *)_graphVC.view).graph = g;
+                         GraphView * gview = (GraphView *)_graphVC.view;
+                         gview.scene = scene;
                          [UIView animateWithDuration:speed
                                           animations:^{
                                               _graphContainer.frame = org;
                                           }
                                           completion:^(BOOL finished){
-                                              _global.scene.graph = g;
                                           }];
                          
                      }];
@@ -253,29 +253,30 @@
 
 - (IBAction)changePage:(id)sender
 {
-    _global.scene = _scenes[_pager.currentPage];
+    self.currentScene = _scenes[_pager.currentPage];
 }
 
 - (IBAction)toolbarSlider:(UISlider *)sender
 {
-    _mainSliderTrigger(sender.value);
+    if( _mainSliderTrigger )
+        _mainSliderTrigger(sender.value);
 }
 
 - (IBAction)audioPanel:(UIButton *)sender
 {
-    if( _utilityGraph )
+    if( _eqScene )
     {
-        [self performUtilityTransitionWithGraph:_stowedDisplayGraph];
-        _utilityGraph = nil;
-        _stowedDisplayGraph = nil;
+        [self performUtilityTransitionWithScene:_currentScene];
+        [_eqScene decomission];
+        [_currentScene.audio triggersChanged:_currentScene];
+        _eqScene = nil;
     }
     else
     {
-        _stowedDisplayGraph = _global.scene.graph;
-        _utilityGraph = [[Graph alloc] init];
-        ConfigGraphicElement * config = [[Config sharedInstance] getGraphicElement:kConfigEQPanel];
-        [_utilityGraph loadFromConfig:config andViewSize:_global.graphViewSize];
-        [self performUtilityTransitionWithGraph:_utilityGraph];
+        _eqScene = [[Scene alloc] initWithConfig:[Config systemScene:kConfigEQPanelScene]
+                                   andProxyAudio:nil]; // _currentScene.audio];
+        [_eqScene activate];
+        [self performUtilityTransitionWithScene:_eqScene];
     }
 }
 
@@ -283,7 +284,7 @@
 {
     _postDeleteSceneIndex = _pager.currentPage;
     int i = _postDeleteSceneIndex ? 0 : 1;
-    _global.scene = _scenes[i];
+    self.currentScene = _scenes[i];
 }
 
 - (IBAction)record:(UIBarButtonItem *)sender {
@@ -308,7 +309,7 @@
     }
     else if( [segue.identifier isEqualToString:@"pause"] )
     {
-        [_global.scene pause];
+        [_currentScene pause];
         _graphVC.paused = YES;
         ((PauseViewController *)segue.destinationViewController).delegate = self;
     }
@@ -320,7 +321,7 @@
 
 -(void)SettingsVC:(SettingsVC *)vc getSettings:(NSMutableArray *)array
 {
-    [[Global sharedInstance].scene getSettings:array];
+    [_currentScene getSettings:array];
 }
 
 -(void)SettingsVC:(SettingsVC *)vc commitChanges:(NSDictionary *)settings
@@ -340,7 +341,7 @@
 
 -(void)PauseViewController:(PauseViewController *)pvc resume:(BOOL)ok
 {
-    [_global.scene play];
+    [_currentScene activate];
     _graphVC.paused = NO;
 }
 @end

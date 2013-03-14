@@ -6,34 +6,58 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
+#define SKIP_TRIGGER_DECLS
 #import "TriggerMap.h"
 #import "Parameter.h"
 #import "Block.h"
 #import "Tween.h"
 
-@interface FloatTriggerTween : TriggerTween {
-    float _initial;
-    float _target;
-}
+//--------------------------------------------------------------------------------
+@interface NSArray (reducer)
 
--(id)initWithParameter:(Parameter *)parameter
-                  func:(TweenFunction)func
-                   len:(NSTimeInterval)len
-                 queue:(id<TriggerMapProtocol>)queue;
 @end
 
-@interface PointTriggerTween : TriggerTween {
-    CGPoint _initial;
-    CGPoint _target;
+@implementation NSArray (reducer)
+
+- (NSArray *)reduce:(BKTransformBlock)block {
+	NSParameterAssert(block != nil);
+	
+	NSMutableArray *result = [NSMutableArray arrayWithCapacity:self.count];
+	
+	[self enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+		id value = block(obj);
+		if (value)
+            [result addObject:value];
+	}];
+	
+	return result;
 }
 
--(id)initWithParameter:(Parameter *)parameter
-                  func:(TweenFunction)func
-                   len:(NSTimeInterval)len
-                 queue:(id<TriggerMapProtocol>)queue;
 @end
 
+//--------------------------------------------------------------------------------
 
+typedef enum TweenOps
+{
+    kTweenOpApplyTarget,
+    kTweenOpApplyDelta,
+    kTweenOpGetBlock,
+} TweenOps;
+
+typedef id (^TweenBlock)(TweenOps,float);
+
+static int sizeForType(char type)
+{
+    static int __twSizes[] = { _C_FLT, sizeof(float), _C_INT, sizeof(int), TGC_POINT, sizeof(CGPoint) };
+    for( int i = 0; i < (sizeof(__twSizes)/2*sizeof(int)); i += 2 )
+        if( type == __twSizes[i] )
+            return __twSizes[i+1];
+    return -1;
+}
+
+
+
+//--------------------------------------------------------------------------------
 @interface TriggerTween () {
 @public
     NSTimeInterval _runningTime;
@@ -43,6 +67,14 @@
     bool           _done;
     id             _block;
     id             _paramBlock;
+    TweenCallback  _callBack;
+    TweenBlock     _ops;
+    char           _type;
+    float          _buf[12];
+    void *         _current;
+    void *         _initial;
+    void *         _target;
+    int            _size;
     
     Parameter * _parameter;
     __weak id<TriggerMapProtocol> _queue;
@@ -50,56 +82,135 @@
 @end
 @implementation TriggerTween
 
-+(id)ttWithParameter:(Parameter *)parameter
++(id)withParameter:(Parameter *)parameter
                   func:(TweenFunction)func
                    len:(NSTimeInterval)len
                  queue:(id<TriggerMapProtocol>)queue
                   type:(char)type
 {
-    if( type == _C_FLT )
-    {
-        return [[FloatTriggerTween alloc] initWithParameter:parameter
-                                                       func:func
-                                                        len:len
-                                                      queue:queue];
-    }
-    if( type == TGC_POINT )
-    {
-        return [[PointTriggerTween alloc] initWithParameter:parameter
-                                                       func:func
-                                                        len:len
-                                                      queue:queue];
-    }
-    
-    NSLog(@"Unsupported trigger tween type: %c",type);
-    exit(-1);
-    return nil;
+    return [[TriggerTween alloc] initWithParameter:parameter
+                                              func:func
+                                               len:len
+                                              type:type
+                                             queue:queue];
 }
 
 -(id)initWithParameter:(Parameter *)parameter
                   func:(TweenFunction)func
                    len:(NSTimeInterval)len
                   type:(char)type
+                 queue:(id<TriggerMapProtocol>)queue
 {
     self = [super init];
     if( self )
     {
+        _type = type;
+        _current = _buf;
+        _initial = &_buf[4];
+        _target  = &_buf[8];
+        _size = sizeForType(type);
         _parameter = parameter;
         _paramBlock = [parameter getParamBlockOfType:type];
         _func = func;
         _duration = len;
+        _queue = queue;
+        
+        TweenBlock FloatTweenBlock = ^id(TweenOps op, float delta)
+        {
+            if( op == kTweenOpApplyTarget )
+            {
+                ((FloatParamBlock)_paramBlock)(*(float *)_target);
+            }
+            else if( op == kTweenOpApplyDelta )
+            {
+                float initial = *(float *)_initial;
+                float newValue = initial + ((*(float *)_target - initial) * delta);
+                ((FloatParamBlock)_paramBlock)(newValue);
+            }
+            else if( op == kTweenOpGetBlock )
+            {
+                return ^(float f) {
+                    [self reset];
+                    if( _parameter.additive )
+                        *(float *)_target = f + *(float *)_initial;
+                    else
+                        *(float *)_target = f;
+                };
+            }
+            return nil;
+        };
+        
+        TweenBlock IntTweenBlock = ^id(TweenOps op, float delta)
+        {
+            if( op == kTweenOpApplyTarget )
+            {
+                ((IntParamBlock)_paramBlock)(*(int *)_target);
+            }
+            else if( op == kTweenOpApplyDelta )
+            {
+                float initial = *(int *)_initial;
+                float newValue = initial + ((*(int *)_target - initial) * delta);
+                ((IntParamBlock)_paramBlock)((int)roundf(newValue));
+            }
+            else if( op == kTweenOpGetBlock )
+            {
+                return ^(float f) {
+                    [self reset];
+                    if( _parameter.additive )
+                        *(float *)_target = f + *(float *)_initial;
+                    else
+                        *(float *)_target = f;
+                };
+            }
+            return nil;
+        };
+        
+        TweenBlock PointTweenBlock = ^id(TweenOps op, float delta )
+        {
+            if( op == kTweenOpApplyTarget )
+            {
+                ((PointParamBlock)_paramBlock)(*(CGPoint *)_target);
+            }
+            else if( op == kTweenOpApplyDelta )
+            {
+                CGPoint initial = *(CGPoint *)_initial;
+                CGPoint target = *(CGPoint *)_target;
+                CGPoint newValue;
+                newValue.x = initial.x + ((target.x - initial.x) * delta);
+                newValue.y = initial.y + ((target.y - initial.y) * delta);
+                ((PointParamBlock)_paramBlock)(newValue);
+            }
+            else if( op == kTweenOpGetBlock )
+            {
+                return ^(CGPoint pt) {
+                    [self reset];
+                    if( _parameter.additive )
+                    {
+                        CGPoint initial = *(CGPoint *)_initial;
+                        pt.x += initial.x;
+                        pt.y += initial.y;
+                    }
+                    *(CGPoint *)_target = pt;
+                };
+            }
+            return nil;
+        };
+        
+        if( type == _C_FLT )
+            _ops = FloatTweenBlock;
+        else if( type == _C_INT )
+            _ops = IntTweenBlock;
+        else if( type == TGC_POINT )
+            _ops = PointTweenBlock;
+        
     }
     return self;
 }
 
--(void)dealloc
+-(id) block
 {
-    NSLog(@"Tweener is gone");
+    return _ops(kTweenOpGetBlock,0);
 }
-
--(id) block { return nil; }
--(void)applyTarget {}
--(void)applyDelta:(float)delta {}
 
 -(BOOL)update:(NSTimeInterval)dt
 {
@@ -108,17 +219,63 @@
 	if (_runningTime >= _duration )
     {
 		_done = true;
-        [self applyTarget];
+        _ops(kTweenOpApplyTarget,0);
 		_runningTime = _duration;
         _tweening = false;
+        if( _callBack )
+            _done = _callBack(self);
 	}
     else
     {
         float delta = tweenFunc(_func, _runningTime / _duration);
-        [self applyDelta:delta];
+        _ops(kTweenOpApplyDelta,delta);
     }
  
     return _done;
+}
+
+-(void)reset
+{
+    bool additive = _parameter.additive;
+    [_parameter getValue:_current ofType:_type];
+    if( _tweening )
+    {
+        /*
+         This can happen when a new animation of this
+         parameter starts before a previous one ends. In
+         that case we simply jump to the current target
+         value (hopefully not too harsh on the ears/eyes!)
+         and roll on.
+         */
+        if( additive )
+        {
+            _ops(kTweenOpApplyTarget,0);
+            memcpy(_initial, _target, _size);
+        }
+        else
+        {
+            memcpy(_initial, _current, _size);
+        }
+    }
+    else
+    {
+        _tweening = true;
+        memcpy(_initial, _current, _size);
+    }
+    [_queue queue:self];
+    _runningTime = 0.0;
+    _done = false;
+}
+
+-(void)reverse
+{
+    float tmp[4];
+    memcpy(tmp, _initial, _size);
+    memcpy(_initial, _target, _size);
+    memcpy(_target, tmp, _size);
+    _runningTime = 0.0;
+    _done = false;
+    _tweening = true;
 }
 
 -(bool)isDone
@@ -127,134 +284,21 @@
 }
 @end
 
+//--------------------------------------------------------------------------------
 
-@implementation FloatTriggerTween
 
--(id)initWithParameter:(Parameter *)parameter
-                  func:(TweenFunction)func
-                   len:(NSTimeInterval)len
-                 queue:(id<TriggerMapProtocol>)queue
-{
-    
-    self = [super initWithParameter:parameter
-                               func:func
-                                len:len
-                               type:_C_FLT];
-    
-    if( self )
-    {
-        _queue = queue;
-    }
-    return self;
-}
 
--(id)block
-{
-    return ^(float f) {
-        bool additive = _parameter.additive;
-        float current;
-        [_parameter getValue:&current ofType:_C_FLT];
-        if( _tweening )
-        {
-            /*
-             This can happen when a new animation of this
-             parameter starts before a previous one ends. In
-             that case we simply jump to the current target
-             value (hopefully not too harsh on the ears/eyes!)
-             and roll on.
-             */
-            if( additive )
-            {
-                [self applyTarget];
-                _initial = _target;
-            }
-            else
-            {
-                _initial = current;
-            }
-        }
-        else
-        {
-            _tweening = true;
-            _initial = current;
-        }
-        [_queue queue:self];
-        _target = f;
-        if( additive )
-            _target += _initial;
-        _runningTime = 0.0;
-        _done = false;
-    };
 
-}
--(void)applyTarget
-{
-    ((FloatParamBlock)_paramBlock)(_target);
-}
+//--------------------------------------------------------------------------------
 
--(void)applyDelta:(float)delta
-{
-    float newValue = _initial + ((_target - _initial) * delta);
-    ((FloatParamBlock)_paramBlock)(newValue);
-}
-@end
 
-@implementation PointTriggerTween
+TweenCallback TweenLooper = ^TweenDoneIndicator(TriggerTween *tt) {
+    [tt reverse];
+    return false;
+};
 
--(id)initWithParameter:(Parameter *)parameter
-                  func:(TweenFunction)func
-                   len:(NSTimeInterval)len
-                 queue:(id<TriggerMapProtocol>)queue
-{
-    
-    self = [super initWithParameter:parameter
-                               func:func
-                                len:len
-                               type:TGC_POINT];
-    
-    if( self )
-    {
-        _queue = queue;
-    }
-    return self;
-}
+//--------------------------------------------------------------------------------
 
--(id)block
-{
-    return ^(CGPoint pt) {
-        _done = false;
-        if( _tweening )
-        {
-            [self applyTarget];
-            _initial = _target;
-        }
-        else
-        {
-            [_parameter getValue:&_initial ofType:TGC_POINT];
-            _tweening = true;
-        }
-        [_queue queue:self];
-        _target = pt;
-        if( _parameter.additive )
-            _target = (CGPoint){ _target.x + _initial.x, _target.y + _initial.y };
-        _runningTime = 0.0;
-    };
-}
-
--(void)applyTarget
-{
-    ((PointParamBlock)_paramBlock)(_target);
-}
-
--(void)applyDelta:(float)delta
-{
-    CGPoint newValue;
-    newValue.x = _initial.x + ((_target.x - _initial.x) * delta);
-    newValue.y = _initial.y + ((_target.y - _initial.y) * delta);
-    ((PointParamBlock)_paramBlock)(newValue);
-    
-}
-@end
 
 @interface TriggerMap () {
     // NSString name : NSArray[] Parameter
@@ -279,6 +323,17 @@
         _delegate = delegate;
     }
     return self;
+}
+
+-(void)dealloc
+{
+    // got to do this to eliminate circular references
+    // to objects returning blocks that point to
+    // themselves with self.* and ivars.
+    // This seems to do the trick:
+    [_parameters each:^(id key, Parameter * obj) {
+        [obj releaseBlock];
+    }];
 }
 
 -(void)addParameters:(NSDictionary *)nameKeyParamValues
@@ -311,7 +366,7 @@
     }];
 }
 
--(id)getTrigger:(NSString const *)triggerName ofType:(char)type
+-(id)getTrigger:(NSString const *)triggerName ofType:(char)type cb:(id)callback
 {
     BKTransformBlock blockForParamName =
     ^id (id _name)
@@ -327,8 +382,8 @@
                 return nil;
             TweenFunction func = tweenFuncForString([((NSString *)pieces[1]) UTF8String]);
             float duration = [((NSString *)pieces[2]) floatValue];
-            TriggerTween * tt = [TriggerTween ttWithParameter:param func:func len:duration queue:_delegate type:type];
-//            [_tweeners addObject:tt];
+            TriggerTween * tt = [TriggerTween withParameter:param func:func len:duration queue:_delegate type:type];
+            tt->_callBack = callback;
             return [tt block];
         }
         
@@ -344,8 +399,11 @@
     if( !paramNames ) // maybe it's not a trigger, but a param name?
         return blockForParamName(triggerName);
 
-    NSArray * arrayOfBlocks = [paramNames map:blockForParamName];
+    NSArray * arrayOfBlocks = [paramNames reduce:blockForParamName];
 
+    if( [arrayOfBlocks count] == 0 )
+        return nil; // hey, YOU MISSPELLED THE PARAM NAME IN config.plist
+    
     if( [arrayOfBlocks count] == 1 )
         return arrayOfBlocks[0];
     
@@ -374,21 +432,42 @@
 }
 -(FloatParamBlock)getFloatTrigger:(NSString const *)triggerName
 {
-    return [self getTrigger:triggerName ofType:_C_FLT];
+    return [self getTrigger:triggerName ofType:_C_FLT cb:nil];
 }
 
 -(PointParamBlock)getPointTrigger:(NSString const *)triggerName
 {
-    return [self getTrigger:triggerName ofType:TGC_POINT];
+    return [self getTrigger:triggerName ofType:TGC_POINT cb:nil];
 }
 
 -(PointerParamBlock)getPointerTrigger:(NSString const *)triggerName
 {
-    return [self getTrigger:triggerName ofType:_C_PTR];
+    return [self getTrigger:triggerName ofType:_C_PTR  cb:nil];
 }
 
 -(IntParamBlock)getIntTrigger:(const NSString *)triggerName
 {
-    return [self getTrigger:triggerName ofType:_C_INT];
+    return [self getTrigger:triggerName ofType:_C_INT cb:nil];
 }
+
+-(FloatParamBlock)getFloatTrigger:(NSString const *)triggerName cb:(TweenCallback)cb
+{
+    return [self getTrigger:triggerName ofType:_C_FLT cb:cb];
+}
+
+-(PointParamBlock)getPointTrigger:(NSString const *)triggerName cb:(TweenCallback)cb
+{
+    return [self getTrigger:triggerName ofType:TGC_POINT cb:cb];
+}
+
+-(IntParamBlock)getIntTrigger:(NSString const *)triggerName cb:(TweenCallback)cb
+{
+    return [self getTrigger:triggerName ofType:_C_INT cb:cb];
+}
+
+-(PointerParamBlock)getPointerTrigger:(NSString const *)triggerName cb:(TweenCallback)cb
+{
+    return [self getTrigger:triggerName ofType:_C_PTR  cb:cb];
+}
+
 @end

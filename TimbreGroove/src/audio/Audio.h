@@ -25,8 +25,10 @@
 -(void)triggersChanged:(Scene *)scene;
 
 -(void)start;
--(void)play;
+-(void)activate;
 -(void)pause;
+
+-(void)startMidiFile;
 
 @property (nonatomic,strong) SoundSystemParameters * ssp;
 

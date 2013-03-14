@@ -46,6 +46,8 @@
 
 -(void)dealloc
 {
+    self.view = nil;
+    _single = nil;
     NSLog(@"Graph object gone");
 }
 
@@ -67,7 +69,7 @@
     [super appendChild:child];
 }
 
--(void)play
+-(void)activate
 {
     _isPaused = false;
 //    [self traverse:_cmd userObj:self.view];
@@ -181,15 +183,11 @@
         _timerTrigger = nil;
         _updateTrigger = nil;
     }
-    
+
     if( _single )
         [_single triggersChanged:scene];
     else
         [self.children apply:^(TG3dObject * child) { [child triggersChanged:scene]; }];
 }
 
--(void)didAttachToView:(GraphView *)view
-{
-    [view triggersChanged:[Global sharedInstance].scene];
-}
 @end

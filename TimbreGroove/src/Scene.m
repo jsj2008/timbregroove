@@ -16,8 +16,10 @@
 #import "Parameter.h"
 
 @interface Scene () {
-    ConfigScene * _config;
     NSMutableArray * _tweenQueue;
+    bool _paused;
+    bool _useProxy;
+    Audio * _proxyAudio;
 }
 
 @end
@@ -25,7 +27,7 @@
 
 +(id)defaultScene
 {
-    ConfigScene * config = [[Config sharedInstance] defaultScene];
+    ConfigScene * config = [Config defaultScene];
     return [[Scene alloc] initWithConfig:config];
 }
 
@@ -45,31 +47,49 @@
 {
     return [[Scene alloc] initWithConfig:config];
 }
-
+-(id)initWithConfig:(ConfigScene *)config andProxyAudio:(Audio *)audio
+{
+    self = [super init];
+    if (self) {
+        _proxyAudio = audio;
+        _useProxy = true;
+        [self doInitWithConfig:config];
+    }
+    return self;
+}
 -(id)initWithConfig:(ConfigScene *)config
 {
     self = [super init];
-    if (self) {        
-        _tweenQueue = [NSMutableArray new];
-
-        _triggers = [[TriggerMap alloc] initWithDelegate:self];
-        _config = config;
-        
-        _audio = [Audio audioFromConfig:config.audioElement withScene:self];
-        
-        _graph = [Graph new];
-        Global * g = [Global sharedInstance];
-        [_graph loadFromConfig:config.graphicElement andViewSize:g.graphViewSize];
-
-        NSMutableDictionary * params = [NSMutableDictionary new];
-        [_graph getParameters:params];
-        [_audio getParameters:params];
-        [_triggers addParameters:params];
-
-        [config.connections apply:^(id map) { [_triggers addMappings:map];}];
-        
+    if (self) {
+        [self doInitWithConfig:config];
     }
     return self;
+}
+
+-(void)doInitWithConfig:(ConfigScene *)config
+{
+    _tweenQueue = [NSMutableArray new];
+    
+    _triggers = [[TriggerMap alloc] initWithDelegate:self];
+    
+    if( _useProxy )
+        _audio = _proxyAudio;
+    else
+        _audio = [Audio audioFromConfig:config.audioElement withScene:self];
+    
+    _graph = [Graph new];
+    Global * g = [Global sharedInstance];
+    [_graph loadFromConfig:config.graphicElement andViewSize:g.graphViewSize];
+    
+    NSMutableDictionary * params = [NSMutableDictionary new];
+    [_graph getParameters:params];
+    [_audio getParameters:params];
+    [_triggers addParameters:params];
+    
+    [config.connections apply:^(id map)
+     {
+         [_triggers addMappings:map];
+     }];
 }
 
 -(void)addTriggers:(NSDictionary *)triggerKeyParamNameValue
@@ -89,8 +109,9 @@
 -(void)decomission
 {
     _triggers = nil;
-  //  [_graph triggersChanged:nil];
-  //  [_audio triggersChanged:nil];
+    _tweenQueue = nil;
+    [_graph triggersChanged:nil];
+    [_audio triggersChanged:nil];
 }
 
 -(void)dealloc
@@ -100,16 +121,20 @@
 
 -(void)pause
 {
+    _paused = true;
     [_audio pause];
     [_graph pause];
+    [_graph triggersChanged:nil];
+    [_audio triggersChanged:nil];
 }
 
--(void)play
+-(void)activate
 {
     [_graph triggersChanged:self];
     [_audio triggersChanged:self];
-    [_audio play];
-    [_graph play];
+    [_audio activate];
+    [_graph activate];
+    _paused = false;
 }
 
 - (void)getSettings:(NSMutableArray *)putHere
@@ -131,6 +156,9 @@
 
 -(void)update:(NSTimeInterval)dt view:(GraphView *)view
 {
+    if( _paused )
+        return;
+    
     [_audio update:dt];
     [view update:dt];
     

@@ -9,8 +9,6 @@
 #import "NoteGenerator.h"
 #import "TGTypes.h"
 
-#define R0_n(n) (int)(arc4random_uniform(n))
-
 @interface NoteGenerator () {
     Byte * _notes;
     int _numNotes;

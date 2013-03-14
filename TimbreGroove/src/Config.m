@@ -77,7 +77,11 @@ static Config * __sharedConfig;
     }
     return __sharedConfig;
 }
--(ConfigScene *)defaultScene { return [self getScene:_plistConfig[kConfigDefaultScene]]; }
++(ConfigScene *)defaultScene
+{ return [__sharedConfig getScene:__sharedConfig->_plistConfig[kConfigDefaultScene]]; }
++(ConfigScene *)systemScene:(NSString *)name
+{ return [__sharedConfig getSystemScene:name]; }
+
 -(NSDictionary *)getScenes {
     NSDictionary * scenConfigs = _plistConfig[kConfigScenes];
    return [scenConfigs map:^id(id name, id sceneDict) {

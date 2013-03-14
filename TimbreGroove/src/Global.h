@@ -19,7 +19,6 @@ extern NSString const * kGlobalRecording;
 @interface Global : NSObject
 +(Global *)sharedInstance;
 
-@property (nonatomic,strong) Scene * scene;
 @property (nonatomic) bool recording;
 
 // ugh

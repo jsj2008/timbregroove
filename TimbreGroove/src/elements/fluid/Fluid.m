@@ -14,7 +14,7 @@
 #import "GraphView.h"
 #import "Texture.h"
 #import "Geometry.h"
-#import "BlendState.h"
+#import "State.h"
 
 #pragma mark -
 #pragma mark Options settings
@@ -301,6 +301,7 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     MeshBuffer * _buffer;
     FluidShader * _shader;
     NSMutableDictionary * _keyedTextures; // key=uSamplerName value=FBO*
+    BlendState * _bs;
 }
 @property (nonatomic) bool blend;
 @property (nonatomic) bool bindFBO;
@@ -321,6 +322,7 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     _keyedTextures = [textures mutableCopy];
     _bindFBO = true;
     _unbindFBO = true;
+    _bs = [BlendState new];
 }
 
 -(void)setFloat:(FluidVariableName)fname value:(float)value
@@ -353,16 +355,7 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     
     [_shader writeUValues];
     
-    BlendState * bs;
-
-    if( _blend )
-    {
-        bs = [BlendState enable:true srcFactor:GL_SRC_ALPHA dstFactor:GL_ONE];
-    }
-    else
-    {
-        bs = [BlendState enable:false];
-    }
+    [_bs enable:_blend srcFactor:GL_SRC_ALPHA dstFactor:GL_ONE];
     
     if( _fbo && _bindFBO )
        [_fbo bindToRender];
@@ -381,7 +374,7 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
         [t unbind];
     }
 
-    [bs restore];
+    [_bs restore];
 }
 
 @end

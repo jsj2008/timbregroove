@@ -12,7 +12,9 @@
 #import "BKGlobals.h"
 #import "NSObject+BlockObservation.h"
 
-#define R0_1() (((float)(arc4random_uniform(0x1000000) % 255))/255.0)
+#define R0_1()      (((float)(arc4random_uniform(0x1000000) % 255))/255.0)
+#define R0_n(n)     (int)(arc4random_uniform(n))
+
 
 #define TG_MIN(a,b)            (((a) < (b)) ? (a) : (b))
 #define TG_MAX(a,b)            (((a) > (b)) ? (a) : (b))

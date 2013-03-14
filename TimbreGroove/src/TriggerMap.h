@@ -9,11 +9,20 @@
 #import <Foundation/Foundation.h>
 #import "TGTypes.h"
 
+typedef bool TweenDoneIndicator;
+@class TriggerTween;
 
+typedef TweenDoneIndicator (^TweenCallback)(TriggerTween *);
+
+#ifndef SKIP_TRIGGER_DECLS
+extern TweenCallback TweenLooper;
+#endif
 
 @interface TriggerTween : NSObject
 -(BOOL)update:(NSTimeInterval)dt; // returns same as isDone
 -(bool)isDone;
+-(void)reset;
+-(void)reverse;
 @end
 
 @class TriggerMap;
@@ -41,6 +50,11 @@
 -(PointParamBlock)getPointTrigger:(NSString const *)triggerName;
 -(IntParamBlock)getIntTrigger:(NSString const *)triggerName;
 -(PointerParamBlock)getPointerTrigger:(NSString const *)triggerName;
+
+-(FloatParamBlock)getFloatTrigger:(NSString const *)triggerName cb:(TweenCallback)cb;
+-(PointParamBlock)getPointTrigger:(NSString const *)triggerName cb:(TweenCallback)cb;
+-(IntParamBlock)getIntTrigger:(NSString const *)triggerName cb:(TweenCallback)cb;
+-(PointerParamBlock)getPointerTrigger:(NSString const *)triggerName cb:(TweenCallback)cb;
 
 // Step 4. Call through Trigger when appropriate
 
