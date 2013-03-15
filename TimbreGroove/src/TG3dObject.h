@@ -35,10 +35,12 @@
 @property (nonatomic) NSTimeInterval totalTime;
 @property (nonatomic) NSTimeInterval timer;
 
-@property (nonatomic,strong) Camera  * camera;
-@property (nonatomic,strong) Shader  * shader;
-@property (nonatomic,strong) GLKView * view;
-@property (nonatomic,strong) FBO     * fbo;
+@property (nonatomic,strong) Camera    * camera;
+@property (nonatomic,strong) Shader    * shader;
+@property (nonatomic,strong) GraphView * view;
+@property (nonatomic,strong) FBO       * fbo;
+
+-(GraphView *)hasView;
 
 @property (nonatomic)        GLKVector3 position;
 @property (nonatomic)        GLKVector3 rotation;
@@ -58,9 +60,7 @@
 - (GLKMatrix4) calcPVM;   // combine camera and model
 - (void)getSettings:(NSMutableArray *)putHere;
 - (void)getParameters:(NSMutableDictionary *)putHere;
+- (void)getTriggerMap:(NSMutableArray *)putHere;
 - (void)triggersChanged:(Scene *)scene;
-
--(void)didAttachToView:(GraphView *)view;
--(void)didDetachFromView:(GraphView *)view;
 
 @end

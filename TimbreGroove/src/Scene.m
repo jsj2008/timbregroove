@@ -20,6 +20,7 @@
     bool _paused;
     bool _useProxy;
     Audio * _proxyAudio;
+    NSArray * _configConnections;
 }
 
 @end
@@ -47,16 +48,7 @@
 {
     return [[Scene alloc] initWithConfig:config];
 }
--(id)initWithConfig:(ConfigScene *)config andProxyAudio:(Audio *)audio
-{
-    self = [super init];
-    if (self) {
-        _proxyAudio = audio;
-        _useProxy = true;
-        [self doInitWithConfig:config];
-    }
-    return self;
-}
+
 -(id)initWithConfig:(ConfigScene *)config
 {
     self = [super init];
@@ -68,42 +60,49 @@
 
 -(void)doInitWithConfig:(ConfigScene *)config
 {
-    _tweenQueue = [NSMutableArray new];
-    
-    _triggers = [[TriggerMap alloc] initWithDelegate:self];
-    
-    if( _useProxy )
-        _audio = _proxyAudio;
-    else
-        _audio = [Audio audioFromConfig:config.audioElement withScene:self];
+    _audio = [Audio audioFromConfig:config.audioElement withScene:self];
     
     _graph = [Graph new];
     Global * g = [Global sharedInstance];
-    [_graph loadFromConfig:config.graphicElement andViewSize:g.graphViewSize];
+    [_graph loadFromConfig:config.graphicElement andViewSize:g.graphViewSize modal:false];
+    _configConnections = config.connections;
+    [self wireUp:false];
+}
+
+-(void)wireUp:(bool)getTriggers
+{
+    bool wasPaused = _paused;
+    _paused = true;
+    
+    _tweenQueue = [NSMutableArray new];
+    _triggers = [[TriggerMap alloc] initWithDelegate:self];
     
     NSMutableDictionary * params = [NSMutableDictionary new];
     [_graph getParameters:params];
     [_audio getParameters:params];
     [_triggers addParameters:params];
     
-    [config.connections apply:^(id map)
+    [_configConnections apply:^(id map)
      {
          [_triggers addMappings:map];
      }];
-}
-
--(void)addTriggers:(NSDictionary *)triggerKeyParamNameValue
-{
-    [_triggers addMappings:triggerKeyParamNameValue];
-    [_graph triggersChanged:self];
-    [_audio triggersChanged:self];
-}
-
--(void)removeTriggers:(NSDictionary *)triggerKeyParamNameValue
-{
-    [_triggers removeMappings:triggerKeyParamNameValue];
-    [_graph triggersChanged:self];
-    [_audio triggersChanged:self];
+    
+    NSMutableArray * maps = [NSMutableArray new];
+    [_graph getTriggerMap:maps];
+    [_audio getTriggerMap:maps];
+    if( [maps count] )
+    {
+        [maps apply:^(id map) {
+            [_triggers addMappings:map];
+        }];
+    }
+    
+    if( getTriggers )
+    {
+        [_graph triggersChanged:self];
+        [_audio triggersChanged:self];
+    }
+    _paused = wasPaused;
 }
 
 -(void)decomission
@@ -165,10 +164,7 @@
     if( [_tweenQueue count] )
     {
         NSIndexSet * markedForDelete = [_tweenQueue indexesOfObjectsPassingTest:^BOOL(TriggerTween * tween, NSUInteger idx, BOOL *stop) {
-            bool done = [tween update:dt];
-            if( done )
-                [tween decommission];
-            return done;
+            return [tween update:dt];
         }];
         [_tweenQueue removeObjectsAtIndexes:markedForDelete];
     }

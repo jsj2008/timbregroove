@@ -21,6 +21,7 @@
     SoundSystemParameters * _parameters;
     
     NSString * _eqName;
+    NSArray * _myTriggerMap;
     
     Midi *     _midi;
     MidiFile * _midiSequence;
@@ -66,6 +67,7 @@
     _instruments = [config.instruments map:^id(id instrumentConfig) {
         return [_soundSystem loadInstrumentFromConfig:instrumentConfig intoChannel:channel++];
     }];
+    _myTriggerMap = config.connections;
     _midiFileName = config.midiFile;
 }
 
@@ -125,6 +127,12 @@
     // defaults
     [_parameters getParameters:putHere];
     [_midi getParameters:putHere];
+}
+
+-(void)getTriggerMap:(NSMutableArray *)putHere
+{
+    if( _myTriggerMap )
+       [putHere addObjectsFromArray:_myTriggerMap];
 }
 
 - (void)getSettings:(NSMutableArray *)putHere

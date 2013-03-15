@@ -311,6 +311,20 @@
 		</dict>
 		<key>eqcube</key>
 		<dict>
+			<key>userData</key>
+			<dict>
+				<key>connections</key>
+				<array>
+					<dict>
+						<key>Pinch</key>
+						<string>CurveWidth</string>
+						<key>PanX</key>
+						<string>CurveCutoff</string>
+						<key>TapNative</key>
+						<string>Buttons</string>
+					</dict>
+				</array>
+			</dict>
 			<key>instanceClass</key>
 			<string>EQCube</string>
 		</dict>

@@ -37,6 +37,7 @@
 @property (nonatomic,readonly) NSArray * instruments;
 @property (nonatomic,readonly) NSString * instanceClass;
 @property (nonatomic,readonly) NSDictionary * customProperties;
+@property (nonatomic,readonly) NSArray * connections;
 @end
 
 @interface ConfigScene : ConfigBase

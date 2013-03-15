@@ -23,6 +23,7 @@
 -(void)getSettings:(NSMutableArray *)putHere;
 -(void)update:(NSTimeInterval)dt;
 -(void)triggersChanged:(Scene *)scene;
+-(void)getTriggerMap:(NSMutableArray *)putHere;
 
 -(void)start;
 -(void)activate;

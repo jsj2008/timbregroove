@@ -13,6 +13,7 @@
 #import "GraphView+Touches.h"
 #import "Scene.h"
 
+
 @interface GraphView () {
 }
 @end
@@ -43,6 +44,11 @@
     self.opaque = YES;
 }
 
+-(void)graphChanged
+{
+    [_scene wireUp:true];
+    [self triggersChanged:_scene];
+}
 
 - (void)update:(NSTimeInterval)dt
 {
@@ -51,11 +57,8 @@
 
 -(void)setGraph:(Graph *)graph
 {
-    if( _graph )
-        [_graph traverse:@selector(didDetachFromView:) userObj:self];
     _graph = graph;
     _graph.view = self;
-    [_graph traverse:@selector(didAttachToView:) userObj:self];
 }
 
 -(void)setScene:(Scene *)scene

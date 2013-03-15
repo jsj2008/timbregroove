@@ -12,8 +12,21 @@
 #import "Scene.h"
 #import "Names.h"
 
-@implementation GraphView (Touches)
 
+@interface ViewTriggers : NSObject {
+@public
+    PointParamBlock _triggerDirection;
+    FloatParamBlock _triggerPinch;
+    PointParamBlock _triggerTapPos;
+    PointParamBlock _triggerTap1;
+    FloatParamBlock _triggerPanX;
+    FloatParamBlock _triggerPanY;
+    PointParamBlock _triggerDrag1;
+    PointParamBlock _triggerDragPos;
+    PointParamBlock _triggerDblTap;
+}
+@end
+@implementation ViewTriggers
 -(void)triggersChanged:(Scene *)scene
 {
     if( scene )
@@ -28,7 +41,6 @@
         _triggerDrag1     = [tm getPointTrigger:kTriggerDrag1];
         _triggerDragPos   = [tm getPointTrigger:kTriggerDragPos];
         _triggerDblTap    = [tm getPointTrigger:kTriggerDblTap];
-        [self setupTouches];
     }
     else
     {
@@ -41,26 +53,58 @@
         _triggerDrag1     = nil;
         _triggerDragPos   = nil;
         _triggerDblTap    = nil;
-        
+    }
+}
+@end
+
+@implementation GraphView (Touches)
+
+-(void)pushTriggers
+{
+    _currentTriggers = [ViewTriggers new];
+    if( !_triggerStack )
+        _triggerStack = [NSMutableArray new];
+    [_triggerStack addObject:_currentTriggers];
+}
+
+-(void)popTriggers
+{
+    [_currentTriggers triggersChanged:nil];
+    [_triggerStack removeLastObject];
+    _currentTriggers = [_triggerStack lastObject];
+}
+
+-(void)triggersChanged:(Scene *)scene
+{
+    if( !_currentTriggers )
+        [self pushTriggers];
+    
+    [_currentTriggers triggersChanged:scene];
+    
+    if( scene )
+    {
+        [self setupTouches];
+    }
+    else
+    {
         [[self gestureRecognizers] each:^(UIGestureRecognizer * gr) {
             [self removeGestureRecognizer:gr];
         }];
     }
-    
 }
 
 -(void)setupTouches
 {
     UITapGestureRecognizer * dblTap = nil;
     
-    if( _triggerDblTap )
+    if( _currentTriggers->_triggerDblTap )
     {
         dblTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dblTap:)];
         dblTap.numberOfTapsRequired = 2;
         [self addGestureRecognizer:dblTap];
     }
     
-    if( _triggerTap1 || _triggerTapPos )
+    if( _currentTriggers->_triggerTap1 || _currentTriggers->_triggerTapPos )
     {
         UITapGestureRecognizer * tap;
         tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tap:)];
@@ -69,14 +113,15 @@
         [self addGestureRecognizer:tap];
     }
     
-    if( _triggerPinch )
+    if( _currentTriggers->_triggerPinch )
     {
         UIPinchGestureRecognizer * pnch;
         pnch = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinch:)];
         [self addGestureRecognizer:pnch];
     }
     
-    if( _triggerPanX || _triggerPanY || _triggerDrag1 || _triggerDragPos )
+    if( _currentTriggers->_triggerPanX || _currentTriggers->_triggerPanY ||
+       _currentTriggers->_triggerDrag1 || _currentTriggers->_triggerDragPos )
     {
         PannerGesture * pgr;
         pgr = [[PannerGesture alloc] initWithTarget:self action:@selector(panning:)];
@@ -84,7 +129,7 @@
         pgr.limitRC = self.frame;
     }
     
-    if( _triggerDirection )
+    if( _currentTriggers->_triggerDirection )
     {
         UISwipeGestureRecognizerDirection dirs[4] = {
             UISwipeGestureRecognizerDirectionRight,
@@ -122,7 +167,7 @@
                 pt.y = -1;
                 break;
         }
-        _triggerDirection(pt);
+        _currentTriggers->_triggerDirection(pt);
     }
 }
 
@@ -142,7 +187,7 @@
             else
                 scale = 1.0;
         }
-        _triggerPinch(scale);
+        _currentTriggers->_triggerPinch(scale);
     }
 }
 
@@ -161,10 +206,10 @@
     if( tgr.state == UIGestureRecognizerStateEnded )
     {
         CGPoint pt      = [tgr locationInView:self];
-        if( _triggerTapPos )
-            _triggerTapPos(pt);
-        if( _triggerTap1 )
-            _triggerTap1([self nativeToTG:pt]);
+        if( _currentTriggers->_triggerTapPos )
+            _currentTriggers->_triggerTapPos(pt);
+        if( _currentTriggers->_triggerTap1 )
+            _currentTriggers->_triggerTap1([self nativeToTG:pt]);
     }
 }
 
@@ -173,8 +218,7 @@
     if( tgr.state == UIGestureRecognizerStateEnded )
     {
         CGPoint pt = [tgr locationInView:self];
-        if( _triggerDblTap )
-            _triggerDblTap([self nativeToTG:pt]);
+        _currentTriggers->_triggerDblTap([self nativeToTG:pt]);
     }
 }
 
@@ -195,15 +239,15 @@
                                 -(pt.y - _panLast.y) / sz.height };
 
         // we get a ton of 0 movement
-        if( fabsf(spt.x) > FLT_EPSILON && _triggerPanX )
-            _triggerPanX(spt.x);
-        if( fabsf(spt.y) > FLT_EPSILON && _triggerPanY )
-            _triggerPanY(spt.y);
+        if( fabsf(spt.x) > FLT_EPSILON && _currentTriggers->_triggerPanX )
+            _currentTriggers->_triggerPanX(spt.x);
+        if( fabsf(spt.y) > FLT_EPSILON && _currentTriggers->_triggerPanY )
+            _currentTriggers->_triggerPanY(spt.y);
 
-        if( _triggerDrag1 )
-            _triggerDrag1([self nativeToTG:pt]);
-        if( _triggerDragPos )
-            _triggerDragPos(pt);
+        if( _currentTriggers->_triggerDrag1 )
+            _currentTriggers->_triggerDrag1([self nativeToTG:pt]);
+        if( _currentTriggers->_triggerDragPos )
+            _currentTriggers->_triggerDragPos(pt);
         
         _panLast = pt;
     }

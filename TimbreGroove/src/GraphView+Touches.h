@@ -13,5 +13,6 @@
 @interface GraphView (Touches)
 -(void)setupTouches;
 -(void)triggersChanged:(Scene *)scene;
-
+-(void)pushTriggers;
+-(void)popTriggers;
 @end

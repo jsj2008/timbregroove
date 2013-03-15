@@ -13,6 +13,8 @@
 #import "FBO.h"
 #import "SettingsVC.h"
 #import "Scene.h"
+#import "ConfigNames.h"
+
 @interface TG3dObject () {
 }
 @end
@@ -60,16 +62,6 @@
     }
     
     return self;
-}
-
-#pragma mark record stuff
-
--(void)didAttachToView:(GraphView *)view
-{
-}
-
--(void)didDetachFromView:(GraphView *)view
-{
 }
 
 #pragma mark update render
@@ -175,7 +167,16 @@
     return e ? e->_camera : nil;
 }
 
--(GLKView *)view
+-(GraphView *)hasView
+{
+    TG3dObject * e = self;
+    
+    while( e && e->_view == nil )
+        e = (TG3dObject *)e.parent;
+    return e ? e->_view : nil;
+}
+
+-(GraphView *)view
 {
     TG3dObject * e = self;
     
@@ -209,6 +210,13 @@
     parameters[@"zRotation"] = [Parameter withBlock:^(float f) {
         self.rotation = (GLKVector3){ 0, 0, GLKMathDegreesToRadians(f * self.rotationScale.z) };
     }];
+}
+
+- (void)getTriggerMap:(NSMutableArray *)putHere
+{
+    NSArray * maps = [self valueForKey:kConfigSceneConnections];
+    if( maps && [maps count])
+        [putHere addObjectsFromArray:maps];
 }
 
 -(void)triggersChanged:(Scene *)scene

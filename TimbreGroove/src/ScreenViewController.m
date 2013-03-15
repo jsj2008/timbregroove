@@ -37,7 +37,7 @@
     GLKViewController * _graphVC;
     Global * _global;
 
-    Scene * _eqScene;
+    id _eqScene;
     int _lastEQBand;
     
     FloatParamBlock _mainSliderTrigger;
@@ -266,17 +266,13 @@
 {
     if( _eqScene )
     {
-        [self performUtilityTransitionWithScene:_currentScene];
-        [_eqScene decomission];
-        [_currentScene.audio triggersChanged:_currentScene];
+        [_currentScene.graph removeChild:_eqScene];
         _eqScene = nil;
     }
     else
     {
-        _eqScene = [[Scene alloc] initWithConfig:[Config systemScene:kConfigEQPanelScene]
-                                   andProxyAudio:nil]; // _currentScene.audio];
-        [_eqScene activate];
-        [self performUtilityTransitionWithScene:_eqScene];
+        ConfigGraphicElement * cge = [[Config sharedInstance] getGraphicElement:@"eqcube"];
+        _eqScene = [_currentScene.graph loadFromConfig:cge andViewSize:_graphContainer.frame.size modal:true];
     }
 }
 

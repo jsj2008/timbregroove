@@ -141,6 +141,7 @@ static Config * __sharedConfig;
 -(NSString *)EQ { return [_me valueForKey:kConfigAudioEQ]; }
 -(NSString *)instanceClass { return [_me valueForKey:kConfigAudioInstanceClass]; }
 -(NSDictionary *)customProperties { return [_me valueForKey:kConfig3dCustomProperties]; }
+-(NSArray *)connections { return [_me valueForKey:kConfigSceneConnections]; };
 -(NSArray*)instruments {
     NSArray * names = [_me valueForKey:kConfigAudioInstruments];
     return [names map:^id(id name) {

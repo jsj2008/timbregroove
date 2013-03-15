@@ -252,6 +252,11 @@ typedef union _TweenData {
     return self;
 }
 
+-(void)dealloc
+{
+    NSLog(@"Tweener died");
+}
+
 -(void)decommission
 {
     _paramBlock = nil;
@@ -393,20 +398,19 @@ TweenCallback TweenLooper = ^TweenDoneIndicator(TriggerTween *tt) {
 
 -(void)addMappings:(NSDictionary *)triggerKeyParamNameValues
 {
-    for( NSString * triggerName in triggerKeyParamNameValues )
-    {
+    [triggerKeyParamNameValues each:^(NSString *triggerName, NSString * paramName) {
         if( !_mappings[triggerName] )
             _mappings[triggerName] = [NSMutableArray new];
-        [_mappings[triggerName] addObject:triggerKeyParamNameValues[triggerName]];
-    }
+        [_mappings[triggerName] addObject:paramName];
+    }];
 }
 
 -(void)removeMappings:(NSDictionary *)triggerKeyParamNameValues
 {
-    [triggerKeyParamNameValues apply:^(id triggerName, id triggerObj)
+    [triggerKeyParamNameValues apply:^(id triggerName, id paramName)
     {
         NSArray * stillValid = [(NSArray *)_mappings[triggerName] reject:^BOOL(id obj) {
-            return [triggerObj isEqualToString:obj];
+            return [paramName isEqualToString:obj];
         }];
         
         if( stillValid && [stillValid count])

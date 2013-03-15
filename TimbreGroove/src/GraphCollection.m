@@ -21,7 +21,7 @@
 -(id)createGraphBasedOnConfig:(ConfigGraphicElement *)config withViewSize:(CGSize)viewSize;
 {
     Graph * graph = [Graph new];
-    [graph loadFromConfig:config andViewSize:viewSize];
+    [graph loadFromConfig:config andViewSize:viewSize modal:false];
     if( !_graphs )
         _graphs = [NSMutableArray new];
     [_graphs addObject:graph];

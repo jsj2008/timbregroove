@@ -80,6 +80,11 @@
     child->_parent = self;
 }
 
+-(void)removeChild:(Node *)child
+{
+    [_kids removeObject:child];
+}
+
 -(void)setValue:(id)value forUndefinedKey:(NSString *)key
 {
     if( !_dynamicVars )

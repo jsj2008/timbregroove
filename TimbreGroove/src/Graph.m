@@ -17,159 +17,15 @@
 #import "Scene.h"
 #import "Names.h"
 
-@interface Graph() {
-    // as of this writing the majority of graphs (all?)
-    // only have one top level node. Keep a pointer
-    // so we don't do any unnecessary ARC calls into _kids[]
-    // during update and render
-     __weak  TG3dObject * _single;
-    
-    NSTimeInterval _runningTime;
-    bool _isPaused;
+typedef void (^RecurseBlock)(TG3dObject *);
+
+@interface GraphTriggers : NSObject {
+    @public
     FloatParamBlock _timerTrigger;
     FloatParamBlock _updateTrigger;
 }
-
 @end
-@implementation Graph
-
--(id)init
-{
-    self = [super init];
-    if( self )
-    {
-        self.camera = [Camera new];        
-    }
-    
-    return self;
-}
-
--(void)dealloc
-{
-    self.view = nil;
-    _single = nil;
-    NSLog(@"Graph object gone");
-}
-
--(id)loadFromConfig:(ConfigGraphicElement *)config andViewSize:(CGSize)viewSize;
-{
-    Class klass = NSClassFromString(config.instanceClass);
-    TG3dObject * node = [[klass alloc] init];
-    [self appendChild:node];
-    NSDictionary * userData = config.customProperties;
-    if( userData )
-        [node setValuesForKeysWithDictionary:userData];
-    [node wireUpWithViewSize:viewSize];
-    return node;
-}
-
--(void)appendChild:(Node *)child
-{    
-    _single = _kids == nil ? (TG3dObject*)child : nil;
-    [super appendChild:child];
-}
-
--(void)activate
-{
-    _isPaused = false;
-//    [self traverse:_cmd userObj:self.view];
-}
-
--(void)pause
-{
-    _isPaused = true;
-//    [self traverse:_cmd userObj:self.view];
-}
-
-+(void)_inner_update:(NSArray *)children dt:(NSTimeInterval)dt
-{
-    for( TG3dObject * child in children )
-    {
-        child->_totalTime += dt;
-        child->_timer += dt;
-        [child update:dt];
-        NSArray * c = child.children;
-        if( c )
-            [self _inner_update:c dt:dt];
-    }
-}
-
--(void)update:(NSTimeInterval)dt
-{
-    if( _isPaused )
-        return;
-    
-    if( _timerTrigger )
-    {
-        _runningTime += dt;
-        _timerTrigger(_runningTime);
-    }
-    
-    if( _updateTrigger )
-        _updateTrigger(dt);
-    
-    if( _single )
-    {
-        _single->_totalTime += dt;
-        _single->_timer += dt;
-        [_single update:dt];
-    }
-    else
-        [Graph _inner_update:self.children dt:dt];
-}
-
-+(void)_inner_render:(NSArray *)children w:(NSUInteger)w h:(NSUInteger)h
-{
-    for( TG3dObject * child in children )
-    {
-        [child render:w h:h];
-        NSArray * c = child.children;
-        if( c )
-            [self _inner_render:c w:w h:h];
-    }
-}
-
--(void)render:(NSUInteger)w h:(NSUInteger)h
-{
-    if( _isPaused )
-        return;
-    
-    if( _single )
-    {
-        [_single render:w h:h];
-        if( _single.autoRenderChildren && _single.children )
-            [Graph _inner_render:_single.children w:w h:h];
-    }
-    else
-    {
-        [Graph _inner_render:self.children w:w h:h];
-    }
-}
-
-- (void)getSettings:(NSMutableArray *)settings
-{
-    if( _single )
-        [_single getSettings:settings];
-    else
-        [self.children apply:^(TG3dObject * child) { [child getSettings:settings]; }];
-}
-
--(id)settingsChanged
-{
-    if( _single )
-        [_single settingsChanged];
-    else
-        [self.children apply:^(TG3dObject * child) { [child settingsChanged]; }];
-    return nil;
-}
-
--(void)getParameters:(NSMutableDictionary *)putHere;
-{
-    if( _single )
-        [_single getParameters:putHere];
-    else
-        [self.children apply:^(TG3dObject * child) { [child getParameters:putHere]; }];
-}
+@implementation GraphTriggers
 
 -(void)triggersChanged:(Scene *)scene
 {
@@ -183,11 +39,264 @@
         _timerTrigger = nil;
         _updateTrigger = nil;
     }
+}
 
-    if( _single )
-        [_single triggersChanged:scene];
+@end
+@interface Graph() {
+    // as of this writing the majority of graphs (all?)
+    // only have one top level node. Keep a pointer
+    // so we don't do any unnecessary ARC calls into _kids[]
+    // during update and render
+     __weak  TG3dObject * _single;
+    
+    NSTimeInterval _runningTime;
+    bool _isPaused;
+    NSMutableArray * _triggerStack;
+    GraphTriggers *  _currentTriggers;
+}
+
+@property (nonatomic,weak) TG3dObject * modal;
+@end
+@implementation Graph
+
+-(id)init
+{
+    self = [super init];
+    if( self )
+    {
+        self.camera = [Camera new];
+    }
+    
+    return self;
+}
+
+-(void)dealloc
+{
+    self.view = nil;
+    _single = nil;
+    NSLog(@"Graph object gone");
+}
+
+-(void)traverseWithObj:(id)param selector:(SEL)selector
+{
+    static RecurseBlock generalIter;
+
+    generalIter = ^(TG3dObject * obj)
+    {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+        if( param )
+            [obj performSelector:selector withObject:param];
+        else
+            [obj performSelector:selector];
+#pragma clang diagnostic pop
+        [obj->_kids each:generalIter];
+    };
+
+    if( _modal )
+        generalIter(_modal);
+    else if( _single )
+        generalIter(_single);
     else
-        [self.children apply:^(TG3dObject * child) { [child triggersChanged:scene]; }];
+        generalIter(self);
+    
+    generalIter = nil;
+}
+
+-(void)pushTriggers
+{
+    _currentTriggers = [GraphTriggers new];
+    if( !_triggerStack )
+        _triggerStack = [NSMutableArray new];
+    [_triggerStack addObject:_currentTriggers];
+}
+
+-(void)popTriggers
+{
+    [_currentTriggers triggersChanged:nil];
+    [_triggerStack removeLastObject];
+    _currentTriggers = [_triggerStack lastObject];
+}
+
+-(id)loadFromConfig:(ConfigGraphicElement *)config andViewSize:(CGSize)viewSize modal:(bool)modal
+{
+    Class klass = NSClassFromString(config.instanceClass);
+    TG3dObject * node = [[klass alloc] init];
+    [self appendChild:node];
+    NSDictionary * userData = config.customProperties;
+    if( userData )
+        [node setValuesForKeysWithDictionary:userData];
+    [node wireUpWithViewSize:viewSize];
+    if( modal )
+        self.modal = node;
+    return node;
+}
+
+-(void)setModal:(TG3dObject *)modal
+{
+    GraphView * view = [self hasView];
+    
+    if( _modal )
+    {
+        if( view )
+           [view popTriggers];
+        
+        [self popTriggers];
+    }
+    
+    bool either = !!_modal || !!modal;
+    
+    _modal = modal;
+    
+    if( view )
+    {
+        if( modal )
+        {
+            [view pushTriggers];
+            [self pushTriggers];
+        }
+        
+        if( either ) 
+            [view graphChanged];
+    }
+    else if( modal )
+    {
+        [self pushTriggers];
+    }
+}
+
+-(void)setView:(GraphView *)view
+{
+    [super setView:view];
+    if( _modal )
+    {
+        [view pushTriggers];
+        [view graphChanged];
+    }
+}
+
+-(void)appendChild:(Node *)child
+{    
+    _single = _kids == nil ? (TG3dObject*)child : nil;
+    [super appendChild:child];
+}
+
+-(void)removeChild:(Node *)child
+{
+    [super removeChild:child];
+    if( [_kids count] == 1 )
+        _single = _kids[0];
+    if( child == _modal )
+    {
+        self.modal = nil;
+    }
+    else
+    {
+        GraphView * view = [self hasView];
+        if( view )
+            [view graphChanged];
+    }
+}
+
+-(void)activate
+{
+    _isPaused = false;
+}
+
+-(void)pause
+{
+    _isPaused = true;
+}
+
+-(void)update:(NSTimeInterval)dt
+{
+    if( _isPaused )
+        return;
+    
+    if( _currentTriggers->_timerTrigger )
+    {
+        _runningTime += dt;
+        _currentTriggers->_timerTrigger(_runningTime);
+    }
+    
+    if( _currentTriggers->_updateTrigger )
+        _currentTriggers->_updateTrigger(dt);
+
+    static RecurseBlock updateBlock;
+    
+    if( !updateBlock )
+    {
+        updateBlock = ^(TG3dObject *n)
+        {
+            n->_totalTime += dt;
+            n->_timer += dt;
+            [n update:dt];
+            [n->_kids each:updateBlock];
+        };
+    }
+    
+    if( _modal )
+        updateBlock(_modal);
+    else if( _single )
+        updateBlock(_single);
+    else
+        updateBlock(self);
+    
+}
+
+-(void)render:(NSUInteger)w h:(NSUInteger)h
+{
+    if( _isPaused )
+        return;
+    
+    static RecurseBlock renderBlock;
+    
+    if( !renderBlock )
+    {
+        renderBlock = ^(TG3dObject *n)
+        {
+            [n render:w h:h];
+            [n->_kids each:renderBlock];
+        };
+    }
+    
+    if( _modal )
+        renderBlock(_modal);
+    else if( _single )
+        renderBlock(_single);
+    else
+        renderBlock(self);
+}
+
+- (void)getSettings:(NSMutableArray *)settings
+{
+    [self traverseWithObj:settings selector:@selector(getSettings:)];
+}
+
+-(id)settingsChanged
+{
+    [self traverseWithObj:nil selector:@selector(settingsChanged)];
+    return nil;
+}
+
+-(void)getParameters:(NSMutableDictionary *)putHere;
+{
+    [self traverseWithObj:putHere selector:@selector(getParameters:)];
+}
+
+-(void)triggersChanged:(Scene *)scene
+{
+    if( !_currentTriggers )
+        [self pushTriggers];
+    
+    [_currentTriggers triggersChanged:scene];
+    
+    [self traverseWithObj:scene selector:@selector(triggersChanged:)];
+}
+
+- (void)getTriggerMap:(NSMutableArray *)putHere
+{
+    [self traverseWithObj:putHere selector:@selector(getTriggerMap:)];
 }
 
 @end
