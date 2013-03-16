@@ -30,7 +30,7 @@ const unsigned int kDisplayFrames = 512;
 
 const AudioUnitParameterValue kBottomOfOctiveRange = 0.05;
 const AudioUnitParameterValue kTopOfOctiveRange = 5.0;
-const AudioUnitParameterValue kLowestFreq = 20.0;
+const AudioUnitParameterValue kLowestFreq = 100.0;
 const AudioUnitParameterValue kNyquistFixupNeeded = -120619.58;
 const AudioUnitParameterValue kMinDb = -96.0;
 const AudioUnitParameterValue kMaxDb = 24.0;
@@ -41,27 +41,15 @@ const AudioUnitElement kBusWhatBus = -1;
 
 #define kNUM_EQ_BANDS 3
 
-typedef enum EQParamKnob {
-    kEQKnobFreq,
-    kEQKnobBandwidth,
-    kEQKnobGain,
-    
-    kPK_NUM_EQ_KNOBS
-} EQParamKnob;
-
-enum EQParamKnobAliases {
-    kEQKnobCutoff    = kEQKnobFreq,
-    kEQKnobResonance = kEQKnobBandwidth,
-    kEQKnobPeak      = kEQKnobGain
-};
 
 typedef struct AudioParameterDefinition {
     AudioUnitParameterID aupid;
-    float defaultValue;  // N.B.: This is NOT a native value, it's a knob turn between 0-1
     FloatRange range;
+    float defaultValue;  // N.B.: This is NOT a native value, it's a knob turn between 0-1
     AudioUnitScope scope;
     AudioUnitElement bus;
     int band; // if applicable
+    float valueCap; 
 } AudioParameterDefinition;
 
 typedef struct EQAudioParameterDefinition {
@@ -81,16 +69,16 @@ typedef struct EQBandInfo
 static AudioParameterDefinition _g_mixerOutVolume =
 {
     kMultiChannelMixerParam_Volume,
-    0.5,
     { 0.0, 1.0 },
+    0.5,
     kAudioUnitScope_Output
 };
 
 static AudioParameterDefinition _g_mixerInVolume =
 {
     kMultiChannelMixerParam_Volume,
-    1.0,
     { 0.0, 1.0 },
+    0.2,
     kAudioUnitScope_Input,
     kBusWhatBus
 };
@@ -104,15 +92,13 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
                 _kEQLowCutoff,
                 {
                     kAUNBandEQParam_Frequency,
-                    0.01,
-                    { 220.0, kNyquistFixupNeeded }
+                    { kLowestFreq, kNyquistFixupNeeded }
                 }
             },
             {
                 _kEQLowResonance,
                 {
                     kAUNBandEQParam_Bandwidth,
-                    0.5,
                     { 0.2, 4.0 }
                 }
             }
@@ -125,7 +111,6 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
                 _kEQMidCenterFrequency,
                 {
                     kAUNBandEQParam_Frequency,
-                    0.5,
                     { kLowestFreq, kNyquistFixupNeeded }
                 }
             },
@@ -133,7 +118,6 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
                 _kEQMidBandwidth,
                 {
                     kAUNBandEQParam_Bandwidth,
-                    0.5,
                     { kBottomOfOctiveRange, kTopOfOctiveRange }
                 }
             },
@@ -141,7 +125,6 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
                 _kEQMidGain,
                 {
                     kAUNBandEQParam_Gain,
-                    0.0,
                     { kMinDb, kMaxDb }
                 }
             }
@@ -154,7 +137,6 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
                 _kEQHighCutoff,
                 {
                     kAUNBandEQParam_Frequency,
-                    0.3,
                     { kLowestFreq, 7000.0 /* kNyquistFixupNeeded */ }
                 }
             },
@@ -162,7 +144,6 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
                 _kEQHighResonance,
                 {
                     kAUNBandEQParam_Bandwidth,
-                    0.5,
                     { 0.5, 1.2 }
                 }
             }
@@ -176,17 +157,23 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
 
 @interface AudioParameter : FloatParameter
 +(id)with01AU:(AudioUnit)au
-            def:(AudioParameterDefinition *)apd
-             ss:(SoundSystemParameters *)ss;
+          def:(AudioParameterDefinition *)apd
+           ss:(SoundSystemParameters *)ss;
++(id)withNeg11AU:(AudioUnit)au
+             def:(AudioParameterDefinition *)apd
+              ss:(SoundSystemParameters *)ss;
 +(id)withAU:(AudioUnit)au
         def:(AudioParameterDefinition *)apd
          ss:(SoundSystemParameters *)ss;
--(id)init01WithAU:(AudioUnit)au
-                def:(AudioParameterDefinition *)apd
-                 ss:(SoundSystemParameters *)ss;
--(id)initWithAU:(AudioUnit)au
-            def:(AudioParameterDefinition *)apd
-             ss:(SoundSystemParameters *)ss;
+-(id)init01AU:(AudioUnit)au
+          def:(AudioParameterDefinition *)apd
+           ss:(SoundSystemParameters *)ss;
+-(id)initNeg11AU:(AudioUnit)au
+             def:(AudioParameterDefinition *)apd
+              ss:(SoundSystemParameters *)ss;
+-(id)initAU:(AudioUnit)au
+        def:(AudioParameterDefinition *)apd
+         ss:(SoundSystemParameters *)ss;
 
 @end
 
@@ -223,9 +210,9 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
             if( epd->name )
             {
                 epd->def.band = i;
-                pmap[@(epd->name)] = [AudioParameter withAU:_masterEQUnit
-                                                        def:&epd->def
-                                                         ss:self];
+                pmap[@(epd->name)] = [AudioParameter withNeg11AU:_masterEQUnit
+                                                             def:&epd->def
+                                                              ss:self];
             }
         }
     }
@@ -245,22 +232,25 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
             NSLog(@"EQ for %d Enable: %d", idx, enable);
         } copy]];        
     }];
-    
 }
-
 
 -(id)initWithSoundSystem:(SoundSystem *)ss
 {
     self = [super init];
     if( self )
     {
+        _ss = ss;
+        _mixerUnit = ss.mixerUnit;
+        _masterEQUnit = ss.masterEQUnit;
+        _selectedChannel = 0;
+        
         memcpy(_bandInfos, _g_bandInfos, sizeof(_bandInfos));
         memcpy(&_mixerOutVolume, &_g_mixerOutVolume, sizeof(_mixerOutVolume));
         memcpy(&_mixerInVolume, &_g_mixerInVolume, sizeof(_mixerInVolume));
         
-        _mixerUnit = ss.mixerUnit;
-        _masterEQUnit = ss.masterEQUnit;
-        _selectedChannel = 0;
+        _mixerOutVolume.valueCap = _mixerOutVolume.defaultValue;
+        _mixerInVolume.valueCap  = _mixerInVolume.defaultValue;
+        
         Float64 graphSampleRate  = ss.graphSampleRate;
         
         for (int i = 0; i < kNUM_EQ_BANDS; i++ )
@@ -269,15 +259,17 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
             {
                 if( _bandInfos[i].defs[n].def.range.max == kNyquistFixupNeeded )
                 {
-                    _bandInfos[i].defs[n].def.range.max = graphSampleRate / 2.0;
+                    // 0.81 for -3db roll off - WAG
+                    _bandInfos[i].defs[n].def.range.max = (graphSampleRate / 2.0) * 0.81;
                 }
+                _bandInfos[i].defs[n].def.valueCap = _bandInfos[i].defs[n].def.defaultValue;
             }
         }        
     }
     return self;
 }
 
--(id)paramTweaker:(AudioParameterDefinition *)apd au:(AudioUnit)au
+-(id)paramTweaker:(AudioParameterDefinition *)apd au:(AudioUnit)au param:(FloatParameter *)param
 {
     return [^(float f) {
         AudioUnitElement bus = apd->bus == kBusWhatBus ? _selectedChannel : apd->bus;
@@ -288,15 +280,45 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
                                                  f,
                                                  0);
         CheckError(result, "Could not turn audio knob");
+        apd->valueCap = param->_value;
 #ifdef DEBUG_POWER
         if( au == _mixerUnit && !apd->aupid )
         {
             printf("%f,%f,%f,%f\n", f, (g_last_power+120)/120.0, g_last_radius,g_last_power);
         }
 #endif
+#if 1
+        NSLog(@"audio tweak[%p] param: %ld scope:%ld bus:%ld band:%d -> %.4f (%.2f/%.2f)",(void *)au,
+              apd->aupid,(long)apd->scope,(long)bus,apd->band,f,apd->range.min,apd->range.max);
+#endif
     } copy];
 }
 
+-(float)getCurrentEQValue:(EQParamKnob)knob band:(int)band
+{
+    return _bandInfos[band].defs[knob].def.valueCap;
+}
+
+-(int)whichEQBandisEnabled
+{
+    for( int i = 0; i < kNUM_EQ_BANDS; i++ )
+    {
+        OSStatus result;
+        AudioUnitParameterValue isBypass;
+        result = AudioUnitGetParameter (_masterEQUnit,
+                                        kAUNBandEQParam_BypassBand + i,
+                                        kAudioUnitScope_Global,
+                                        0,
+                                        &isBypass);
+        
+        CheckError(result,"Unable to get eq bypass");
+        if( !isBypass )
+            return i;
+    }
+    
+    return -1;
+    
+}
 - (void) enableMetering:(bool)enable
 {
     // turn on metering
@@ -382,29 +404,46 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
 
 +(id)with01AU:(AudioUnit)au
             def:(AudioParameterDefinition *)apd
-             ss:(SoundSystemParameters *)ss
+            ss:(SoundSystemParameters *)ssp
 {
-    return [[AudioParameter alloc] init01WithAU:au def:apd ss:ss];
+    return [[AudioParameter alloc] init01AU:au def:apd ss:ssp];
 }
 
 +(id)withAU:(AudioUnit)au
         def:(AudioParameterDefinition *)apd
-         ss:(SoundSystemParameters *)ss
+         ss:(SoundSystemParameters *)ssp
 {
-    return [[AudioParameter alloc] initWithAU:au def:apd ss:ss];
+    return [[AudioParameter alloc] initAU:au def:apd ss:ssp];
 }
 
--(id)init01WithAU:(AudioUnit)au
-                def:(AudioParameterDefinition *)apd
-                 ss:(SoundSystemParameters *)ss
++(id)withNeg11AU:(AudioUnit)au
+             def:(AudioParameterDefinition *)apd
+              ss:(SoundSystemParameters *)ssp
 {
-    return [super initWith01Value:apd->defaultValue block:[ss paramTweaker:apd au:au]];
+    return [[AudioParameter alloc] initNeg11AU:au def:apd ss:ssp];
 }
 
--(id)initWithAU:(AudioUnit)au
-            def:(AudioParameterDefinition *)apd
-             ss:(SoundSystemParameters *)ss
+-(id)init01AU:(AudioUnit)au
+          def:(AudioParameterDefinition *)apd
+           ss:(SoundSystemParameters *)ssp
 {
-    return [super initWithRange:apd->range value:apd->defaultValue block:[ss paramTweaker:apd au:au]];
+    return [super initWith01Value:apd->valueCap block:[ssp paramTweaker:apd au:au param:self]];
+}
+
+-(id)initNeg11AU:(AudioUnit)au
+              def:(AudioParameterDefinition *)apd
+               ss:(SoundSystemParameters *)ssp
+{
+    self  = [super initWithNeg11Scaling:apd->range value:apd->valueCap block:[ssp paramTweaker:apd au:au param:self]];
+    if( self )
+        self.additive = false;
+    return self;
+}
+
+-(id)initAU:(AudioUnit)au
+        def:(AudioParameterDefinition *)apd
+         ss:(SoundSystemParameters *)ssp
+{
+    return [super initWithScaling:apd->range value:apd->valueCap block:[ssp paramTweaker:apd au:au param:self]];
 }
 @end

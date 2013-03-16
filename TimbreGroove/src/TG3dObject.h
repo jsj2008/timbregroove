@@ -29,7 +29,6 @@
 -(void)renderToFBO;
 -(void)renderToCaptureAtBufferLocation:(GLint)location;
 
-@property (nonatomic) bool autoRenderChildren;
 @property (nonatomic) bool interactive;
 
 @property (nonatomic) NSTimeInterval totalTime;
@@ -58,6 +57,9 @@
 
 - (GLKMatrix4) modelView; // based on position/rotation/scale
 - (GLKMatrix4) calcPVM;   // combine camera and model
+
+@property (nonatomic) bool disableStandarParameters;
+
 - (void)getSettings:(NSMutableArray *)putHere;
 - (void)getParameters:(NSMutableDictionary *)putHere;
 - (void)getTriggerMap:(NSMutableArray *)putHere;

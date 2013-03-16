@@ -12,7 +12,6 @@
 // is way too many warning messages at this point
 
 NSString * const kConfigDefaultScene  = @"default_scene";
-NSString * const kConfigSystemScenes  = @"system_scenes";
 NSString * const kConfigEQPanelScene  = @"EQPanel";
 
 NSString * const kConfigScenes           = @"scenes";
@@ -79,18 +78,12 @@ static Config * __sharedConfig;
 }
 +(ConfigScene *)defaultScene
 { return [__sharedConfig getScene:__sharedConfig->_plistConfig[kConfigDefaultScene]]; }
-+(ConfigScene *)systemScene:(NSString *)name
-{ return [__sharedConfig getSystemScene:name]; }
 
 -(NSDictionary *)getScenes {
     NSDictionary * scenConfigs = _plistConfig[kConfigScenes];
    return [scenConfigs map:^id(id name, id sceneDict) {
         return [[ConfigScene alloc] initWithD:sceneDict];
     }];
-}
--(ConfigScene *)getSystemScene:(NSString *)name {
-    NSDictionary * scenes = _plistConfig[kConfigSystemScenes];
-    return [[ConfigScene alloc] initWithD:[scenes valueForKey:name]];    
 }
 -(ConfigScene *)getScene:(NSString *)name {
     NSDictionary * scenes = _plistConfig[kConfigScenes];

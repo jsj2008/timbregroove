@@ -47,6 +47,8 @@
 // only need this for non-float possibly animated parameters
 -(void)setNativeValue:(void *)p ofType:(char)type size:(size_t)size;
 
+// for self-referential blocks
+@property (nonatomic) bool forceDecommision;
 @end
 
 
@@ -64,11 +66,11 @@ typedef struct _FloatRange {
  Things that might happen to incoming trigger/tween values before
  your block is called:
  
- Additive:
+ Additive (only applies when tweening):
   yes - incoming values are added the last value seen before. The sum
         is what shows up at your block
   no  - incoming values are passed to block "as is"
-  default: YES - settable with .additive property
+  default: depends on which init: is used (settable with .additive property)
  
  Scaling: 
   yes - incoming values are expected to be 0:1 (sometimes -1:1) and
@@ -83,23 +85,33 @@ typedef struct _FloatRange {
  
  */
 @interface FloatParameter : Parameter {
-@protected
+@public
     float _value;
 }
 
 /*
- Use this for floats that require scaling.
+ Use this for floats that require scaling from 0:1.
 
- scaling: yes, clamping: yes
+ scaling: yes, clamping: yes additive: yes
  */
-+(id)withRange:(FloatRange)frange
++(id)withScaling:(FloatRange)frange
          value:(float)value // N.B. native 'value'
          block:(id)block;
 
 /*
+ Use this for floats that require scaling from -1:1.
+ 
+ scaling: yes, clamping: yes additive: yes
+ */
++(id)withNeg11Scaling:(FloatRange)frange
+         value:(float)value // N.B. native 'value'
+         block:(id)block;
+
+
+/*
  A float that is between 0-1
  
- scaling no, clamping: yes.
+ scaling no, clamping: yes,  additive: no
  */
 +(id)with01Value:(float)value // range 0-1
          block:(id)block;
@@ -107,19 +119,25 @@ typedef struct _FloatRange {
 /*
  A straight up float. 
  
- scaling: no, clamping: no
+ scaling: no, clamping: no,  additive: yes
  */
 +(id)withValue:(float)value
          block:(id)block;
 
+
+-(id)initWithScaling:(FloatRange)frange
+             value:(float)value
+             block:(id)block;
+
+-(id)initWithNeg11Scaling:(FloatRange)frange
+                    value:(float)value // N.B. native 'value'
+                    block:(id)block;
+
 -(id)initWithValue:(float)value
              block:(id)block;
 
--(id)initWith01Value:(float)value
-             block:(id)block;
 
--(id)initWithRange:(FloatRange)frange
-             value:(float)value
+-(id)initWith01Value:(float)value
              block:(id)block;
 
 @end

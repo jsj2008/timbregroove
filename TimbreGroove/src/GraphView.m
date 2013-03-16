@@ -9,7 +9,6 @@
 #import "GraphView.h"
 #import "Global.h"
 #import "Camera.h"
-#import "Gestures.h"
 #import "GraphView+Touches.h"
 #import "Scene.h"
 

@@ -9,30 +9,30 @@
 #import "Shader.h"
 #import "Geometry.h"
 
+#define BEZ_LEFT_PT       0
+#define BEZ_LEFT_CTRL_PT  1
+#define BEZ_HI_PT         2
+#define BEZ_RIGHT_CTRL_PT 3
+#define BEZ_RIGHT_PT      4
+
 @interface FivePointBezier : Shader
 
 /*
  
-                -[3]-
+                -[2]-
                /     \
              /         \
-          [2]          [4]
+          [1]          [3]
          /                \
-     [1]/                  \[5]
+     [0]/                  \[4]
  
-   [1]   left
-   [2]   leftController
-   [3]   hiPoint
-   [4]   rightController
-   [5]   right
+   [0]   left
+   [1]   leftController
+   [2]   hiPoint
+   [3]   rightController
+   [4]   right
  
 */
-
-@property (nonatomic) CGPoint left;
-@property (nonatomic) CGPoint leftController;
-@property (nonatomic) CGPoint hiPoint;
-@property (nonatomic) CGPoint rightController;
-@property (nonatomic) CGPoint right;
 
 @property (nonatomic) GLKVector4 color;
 @property (nonatomic) GLKMatrix4 pvm;

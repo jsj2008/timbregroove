@@ -3,32 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>default_scene</key>
-	<string>tranquility</string>
-	<key>system_scenes</key>
-	<dict>
-		<key>EQPanel</key>
-		<dict>
-			<key>connections</key>
-			<array>
-				<dict>
-					<key>Pinch</key>
-					<string>CurveWidth</string>
-					<key>MainSlider</key>
-					<string>MasterVolume</string>
-					<key>PanX</key>
-					<string>CurveCutoff</string>
-					<key>TapNative</key>
-					<string>Buttons</string>
-					<key>Tap</key>
-					<string>SwellSound</string>
-				</dict>
-			</array>
-			<key>3d_element</key>
-			<string>eqcube</string>
-			<key>audio_element</key>
-			<string>noop</string>
-		</dict>
-	</dict>
+	<string>fft</string>
 	<key>scenes</key>
 	<dict>
 		<key>fft</key>
@@ -84,16 +59,10 @@
 				<dict>
 					<key>Timer</key>
 					<string>u_time</string>
-					<key>Tap</key>
-					<string>SwellSound</string>
 				</dict>
 				<dict>
 					<key>Timer</key>
 					<string>zRotation</string>
-					<key>MainSlider</key>
-					<string>MasterVolume</string>
-					<key>Tap</key>
-					<string>u_ripplePt:EaseOutSine:2.3</string>
 				</dict>
 			</array>
 			<key>icon</key>
@@ -167,7 +136,7 @@
 			<string>funkRiff1</string>
 			<key>instruments</key>
 			<array>
-				<string>vibes</string>
+				<string>clav</string>
 			</array>
 		</dict>
 		<key>tranquility</key>
@@ -293,6 +262,22 @@
 		</dict>
 		<key>ripple</key>
 		<dict>
+			<key>userData</key>
+			<dict>
+				<key>connections</key>
+				<array>
+					<dict>
+						<key>Tap</key>
+						<string>SwellSound</string>
+					</dict>
+					<dict>
+						<key>MainSlider</key>
+						<string>MasterVolume</string>
+						<key>Tap</key>
+						<string>u_ripplePt:EaseOutSine:2.3</string>
+					</dict>
+				</array>
+			</dict>
 			<key>instanceClass</key>
 			<string>Ripple</string>
 			<key>order</key>

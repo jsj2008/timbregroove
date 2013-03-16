@@ -244,7 +244,6 @@
 		57E1954616ABECA50099514B /* PoolShader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 57E1954516ABECA50099514B /* PoolShader.vsh */; };
 		57E1954A16ABEEBD0099514B /* SphereOid.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E1954916ABEEBD0099514B /* SphereOid.m */; };
 		57E590A816BA2E3F00330F40 /* State.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E590A716BA2E3F00330F40 /* State.m */; };
-		57E62B1F16C2BBC0007064A0 /* Gestures.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E62B1E16C2BBC0007064A0 /* Gestures.m */; };
 		57E62B2216C30D9D007064A0 /* PVRImporter.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E62B2116C30D9D007064A0 /* PVRImporter.m */; };
 		57E62E67168433100030908E /* Photo.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E62E66168433100030908E /* Photo.m */; };
 		57E7465E1680438300C1D4FF /* EventCapture.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E7465D1680438300C1D4FF /* EventCapture.m */; };
@@ -258,7 +257,6 @@
 		57E8E2B616C1BC5000CD39BC /* recordPink.png in Resources */ = {isa = PBXBuildFile; fileRef = 57E8E2B416C1BC5000CD39BC /* recordPink.png */; };
 		57E8E2B716C1BC5000CD39BC /* recordRed.png in Resources */ = {isa = PBXBuildFile; fileRef = 57E8E2B516C1BC5000CD39BC /* recordRed.png */; };
 		57E8E2BA16C1BF7600CD39BC /* Global.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E8E2B916C1BF7600CD39BC /* Global.m */; };
-		57E8E2BD16C1C7CE00CD39BC /* PointRecorder.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E8E2BC16C1C7CE00CD39BC /* PointRecorder.m */; };
 		57ED524A16BEE2EF00B38054 /* NewSceneViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 57ED524916BEE2EF00B38054 /* NewSceneViewController.m */; };
 		57ED524D16BEF92D00B38054 /* GraphCollection.m in Sources */ = {isa = PBXBuildFile; fileRef = 57ED524C16BEF92D00B38054 /* GraphCollection.m */; };
 		57ED525116C0A00900B38054 /* PauseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 57ED525016C0A00800B38054 /* PauseViewController.m */; };
@@ -646,8 +644,6 @@
 		57E1954916ABEEBD0099514B /* SphereOid.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SphereOid.m; sourceTree = "<group>"; };
 		57E590A616BA2E3F00330F40 /* State.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = State.h; sourceTree = "<group>"; };
 		57E590A716BA2E3F00330F40 /* State.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = State.m; sourceTree = "<group>"; };
-		57E62B1D16C2BBC0007064A0 /* Gestures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Gestures.h; sourceTree = "<group>"; };
-		57E62B1E16C2BBC0007064A0 /* Gestures.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Gestures.m; sourceTree = "<group>"; };
 		57E62B2016C30D9D007064A0 /* PVRImporter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRImporter.h; sourceTree = "<group>"; };
 		57E62B2116C30D9D007064A0 /* PVRImporter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PVRImporter.m; sourceTree = "<group>"; };
 		57E62E65168433100030908E /* Photo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Photo.h; sourceTree = "<group>"; };
@@ -667,8 +663,6 @@
 		57E8E2B516C1BC5000CD39BC /* recordRed.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = recordRed.png; sourceTree = "<group>"; };
 		57E8E2B816C1BF7600CD39BC /* Global.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Global.h; sourceTree = "<group>"; };
 		57E8E2B916C1BF7600CD39BC /* Global.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Global.m; sourceTree = "<group>"; };
-		57E8E2BB16C1C7CE00CD39BC /* PointRecorder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PointRecorder.h; sourceTree = "<group>"; };
-		57E8E2BC16C1C7CE00CD39BC /* PointRecorder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PointRecorder.m; sourceTree = "<group>"; };
 		57ED524816BEE2EF00B38054 /* NewSceneViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NewSceneViewController.h; path = ../NewSceneViewController.h; sourceTree = "<group>"; };
 		57ED524916BEE2EF00B38054 /* NewSceneViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NewSceneViewController.m; path = ../NewSceneViewController.m; sourceTree = "<group>"; };
 		57ED524B16BEF92D00B38054 /* GraphCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GraphCollection.h; sourceTree = "<group>"; };
@@ -827,10 +821,6 @@
 				572EB287167AAD1C0062F290 /* elements */,
 				57ED524E16C05DD100B38054 /* graph */,
 				575D9FFE1693C8A500A50C41 /* modalScreens */,
-				57E8E2BB16C1C7CE00CD39BC /* PointRecorder.h */,
-				57E8E2BC16C1C7CE00CD39BC /* PointRecorder.m */,
-				57E62B1D16C2BBC0007064A0 /* Gestures.h */,
-				57E62B1E16C2BBC0007064A0 /* Gestures.m */,
 			);
 			name = UI;
 			sourceTree = "<group>";
@@ -1735,8 +1725,6 @@
 				57ED524D16BEF92D00B38054 /* GraphCollection.m in Sources */,
 				57ED525116C0A00900B38054 /* PauseViewController.m in Sources */,
 				57E8E2BA16C1BF7600CD39BC /* Global.m in Sources */,
-				57E8E2BD16C1C7CE00CD39BC /* PointRecorder.m in Sources */,
-				57E62B1F16C2BBC0007064A0 /* Gestures.m in Sources */,
 				57E62B2216C30D9D007064A0 /* PVRImporter.m in Sources */,
 				5741C70716C32280009451C9 /* DistortedGeneric.m in Sources */,
 				579AD1A916C40B670071AA9A /* Config.m in Sources */,

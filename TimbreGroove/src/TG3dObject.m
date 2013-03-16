@@ -14,6 +14,7 @@
 #import "SettingsVC.h"
 #import "Scene.h"
 #import "ConfigNames.h"
+#import "State.h"
 
 @interface TG3dObject () {
 }
@@ -29,7 +30,6 @@
     if( (self = [super init]) )
     {
         self.scaleXYZ = 1.0;
-        _autoRenderChildren = true;
         _parameters = [NSMutableArray new];
     }
     return self;
@@ -81,17 +81,11 @@
     _camera = [IdentityCamera new];
     [_fbo bindToRender];
     glViewport(0, 0, _fbo.width, _fbo.height);
-    GLboolean prevDT;
-    if( !_fbo.allowDepthCheck )
-    {
-        prevDT = glIsEnabled(GL_DEPTH_TEST);
-        glDisable(GL_DEPTH_TEST);
-    }
+    DepthTestState *dts = [DepthTestState enable:_fbo.allowDepthCheck];
     glClearColor(_fbo.clearColor.r,_fbo.clearColor.g,_fbo.clearColor.b,_fbo.clearColor.a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     [self render:_fbo.width h:_fbo.height];
-    if( !_fbo.allowDepthCheck  && prevDT == GL_TRUE )
-        glEnable(GL_DEPTH_TEST);
+    [dts restore];
     [_fbo unbindFromRender];
     _camera = saveCamera;
 }
@@ -201,15 +195,18 @@
 
 -(void)getParameters:(NSMutableDictionary *)parameters
 {
-    parameters[@"xRotation"] = [Parameter withBlock:^(float f) {
-        self.rotation = (GLKVector3){ GLKMathDegreesToRadians(f * self.rotationScale.x), 0, 0 };
-    }];
-    parameters[@"yRotation"] = [Parameter withBlock:^(float f) {
-        self.rotation = (GLKVector3){ 0, GLKMathDegreesToRadians(f * self.rotationScale.y), 0 };
-    }];
-    parameters[@"zRotation"] = [Parameter withBlock:^(float f) {
-        self.rotation = (GLKVector3){ 0, 0, GLKMathDegreesToRadians(f * self.rotationScale.z) };
-    }];
+    if( !_disableStandarParameters )
+    {
+        parameters[@"xRotation"] = [Parameter withBlock:^(float f) {
+            self.rotation = (GLKVector3){ GLKMathDegreesToRadians(f * self.rotationScale.x), 0, 0 };
+        }];
+        parameters[@"yRotation"] = [Parameter withBlock:^(float f) {
+            self.rotation = (GLKVector3){ 0, GLKMathDegreesToRadians(f * self.rotationScale.y), 0 };
+        }];
+        parameters[@"zRotation"] = [Parameter withBlock:^(float f) {
+            self.rotation = (GLKVector3){ 0, 0, GLKMathDegreesToRadians(f * self.rotationScale.z) };
+        }];
+    }
 }
 
 - (void)getTriggerMap:(NSMutableArray *)putHere

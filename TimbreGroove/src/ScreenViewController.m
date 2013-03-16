@@ -37,8 +37,7 @@
     GLKViewController * _graphVC;
     Global * _global;
 
-    id _eqScene;
-    int _lastEQBand;
+    id _modalUtility;
     
     FloatParamBlock _mainSliderTrigger;
     
@@ -221,7 +220,7 @@
                      }];
 }
 
-- (void)performUtilityTransitionWithScene:(Scene *)scene
+- (void)performUtilityTransitionWithConfig:(ConfigGraphicElement *)cge
 {
     CGRect org = _graphContainer.frame;
     CGRect offscreen = org;
@@ -234,8 +233,17 @@
                          _graphContainer.frame = offscreen;
                      }
                      completion:^(BOOL finished){
-                         GraphView * gview = (GraphView *)_graphVC.view;
-                         gview.scene = scene;
+                         if( cge )
+                         {
+                             _modalUtility = [_currentScene.graph loadFromConfig:cge
+                                                                     andViewSize:_graphContainer.frame.size
+                                                                           modal:true];
+                         }
+                         else
+                         {
+                             [_currentScene.graph removeChild:_modalUtility];
+                             _modalUtility = nil;
+                         }
                          [UIView animateWithDuration:speed
                                           animations:^{
                                               _graphContainer.frame = org;
@@ -264,16 +272,10 @@
 
 - (IBAction)audioPanel:(UIButton *)sender
 {
-    if( _eqScene )
-    {
-        [_currentScene.graph removeChild:_eqScene];
-        _eqScene = nil;
-    }
-    else
-    {
-        ConfigGraphicElement * cge = [[Config sharedInstance] getGraphicElement:@"eqcube"];
-        _eqScene = [_currentScene.graph loadFromConfig:cge andViewSize:_graphContainer.frame.size modal:true];
-    }
+    ConfigGraphicElement * cge = nil;
+    if( !_modalUtility )
+        cge = [[Config sharedInstance] getGraphicElement:@"eqcube"];
+    [self performUtilityTransitionWithConfig:cge];
 }
 
 - (IBAction)trash:(UIBarButtonItem *)sender

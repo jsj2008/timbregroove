@@ -386,7 +386,7 @@ typedef struct _VarQueueItem VarStoreItem;
 
 -(void)floatParameter:(NSMutableDictionary *)putHere idx:(int)idx value:(float)value range:(FloatRange)range
 {
-    putHere[ @(_names[idx]) ] = [FloatParameter withRange:range value:value block:^(float f){
+    putHere[ @(_names[idx]) ] = [FloatParameter withScaling:range value:value block:^(float f){
         _varQueue[_varQueueCount] = (VarQueueItem){ idx, TG_FLOAT, { .f = f }};
         ATOMIC_INC(_varQueueCount);
     }];

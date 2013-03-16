@@ -41,8 +41,8 @@
     self = [super init];
     if( self )
     {
-        _notes = malloc( numNotes * sizeof(int));
-        memcpy(_notes, notes, numNotes * sizeof(int));
+        _notes = malloc( numNotes * sizeof(*_notes));
+        memcpy(_notes, notes, numNotes * sizeof(*_notes));
         _numNotes = numNotes;
         _scale = kScaleCustom;
         self.range = (NoteRange){0,127};

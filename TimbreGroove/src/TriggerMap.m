@@ -66,6 +66,8 @@ typedef union _TweenData {
     }pt;
 } TweenData;
 
+#define _ops(a,b) [self ops:a f:b]
+
 //--------------------------------------------------------------------------------
 @interface TriggerTween () {
 @public
@@ -76,7 +78,6 @@ typedef union _TweenData {
     bool           _done;
     id             _paramBlock;
     TweenCallback  _callBack;
-    TweenBlock     _ops;
     char           _type;
     TweenData      _d;
     
@@ -115,141 +116,136 @@ typedef union _TweenData {
         _duration = len;
         _queue = queue;
         
-        id ops;
-        
-        if( type == _C_FLT )
-        {
-            ops = ^id(TweenOps op, float delta)
-            {
-                switch (op) {
-                    case kTweenOpApplyTarget:
-                    {
-                        ((FloatParamBlock)_paramBlock)(_d.f.target);
-                        break;
-                    }
-                    case kTweenOpApplyTargetToInitial:
-                    {
-                        _d.f.initial = _d.f.target;
-                        break;
-                    }
-                    case kTweenOpReverse:
-                    {
-                        float tmp = _d.f.initial;
-                        _d.f.initial = _d.f.target;
-                        _d.f.target = tmp;
-                        break;
-                    }
-                    case kTweenOpApplyDelta:
-                    {
-                        float newValue = _d.f.initial + ((_d.f.target - _d.f.initial) * delta);
-                        ((FloatParamBlock)_paramBlock)(newValue);
-                        break;
-                    }
-                    case kTweenOpGetBlock:
-                    {
-                        return ^(float f) {
-                            [self reset];
-                            if( _parameter.additive )
-                                _d.f.target = f + _d.f.initial;
-                            else
-                                _d.f.target = f;
-                        };
-                    }
-                }
-                return nil;
-            };
-        }
-        else if( type == _C_INT )
-        {
-            ops = ^id(TweenOps op, float delta)
-            {
-                switch (op) {
-                    case kTweenOpApplyTarget:
-                    {
-                        ((IntParamBlock)_paramBlock)(_d.i.target);
-                        break;
-                    }
-                    case kTweenOpApplyTargetToInitial:
-                    {
-                        _d.i.initial = _d.i.target;
-                        break;
-                    }
-                    case kTweenOpReverse:
-                    {
-                        int tmp = _d.i.initial;
-                        _d.i.initial = _d.i.target;
-                        _d.i.target = tmp;
-                        break;
-                    }
-                    case kTweenOpApplyDelta:
-                    {
-                        float newValue = (float)_d.i.initial + ((_d.i.target - _d.i.initial) * delta);
-                        ((FloatParamBlock)_paramBlock)((int) roundf(newValue));
-                        break;
-                    }
-                    case kTweenOpGetBlock:
-                    {
-                        return ^(int i) {
-                            [self reset];
-                            if( _parameter.additive )
-                                _d.i.target = i + _d.i.initial;
-                            else
-                                _d.i.target = i;
-                        };
-                    }
-                }
-                return nil;
-            };
-        }
-        else if( type == TGC_POINT )
-        {
-            ops = ^id(TweenOps op, float delta )
-            {
-                switch (op) {
-                    case kTweenOpApplyTarget:
-                    {
-                        ((PointParamBlock)_paramBlock)(_d.pt.target);
-                        break;
-                    }
-                    case kTweenOpApplyTargetToInitial:
-                    {
-                        _d.pt.initial = _d.pt.target;
-                        break;
-                    }
-                    case kTweenOpReverse:
-                    {
-                        CGPoint tmp = _d.pt.initial;
-                        _d.pt.initial = _d.pt.target;
-                        _d.pt.target = tmp;
-                        break;
-                    }
-                    case kTweenOpApplyDelta:
-                    {
-                        CGPoint newValue;
-                        newValue.x = _d.pt.initial.x + ((_d.pt.target.x - _d.pt.initial.x) * delta);
-                        newValue.y = _d.pt.initial.y + ((_d.pt.target.y - _d.pt.initial.y) * delta);
-                        ((PointParamBlock)_paramBlock)(newValue);
-                        break;
-                    }
-                    case kTweenOpGetBlock:
-                    {
-                        return ^(CGPoint pt) {
-                            [self reset];
-                            if( _parameter.additive )
-                                _d.pt.target = (CGPoint){ pt.x + _d.pt.initial.x, pt.y + _d.pt.initial.y };
-                            else
-                                _d.pt.target = pt;
-                        };
-                    }
-                }
-                return nil;
-            };
-        }
-        
-        _ops = ops;
-        
     }
     return self;
+}
+
+-(id)ops:(TweenOps) op  f:(float)delta
+{
+    if( _type == _C_FLT )
+    {
+        switch (op) {
+            case kTweenOpApplyTarget:
+            {
+                NSLog(@"%@ Target float: %f",_parameter,_d.f.target);
+                
+                ((FloatParamBlock)_paramBlock)(_d.f.target);
+                break;
+            }
+            case kTweenOpApplyTargetToInitial:
+            {
+                _d.f.initial = _d.f.target;
+                break;
+            }
+            case kTweenOpReverse:
+            {
+                float tmp = _d.f.initial;
+                _d.f.initial = _d.f.target;
+                _d.f.target = tmp;
+                break;
+            }
+            case kTweenOpApplyDelta:
+            {
+                float newValue = _d.f.initial + ((_d.f.target - _d.f.initial) * delta);
+                ((FloatParamBlock)_paramBlock)(newValue);
+                break;
+            }
+            case kTweenOpGetBlock:
+            {
+                return ^(float f) {
+                    [self reset];
+                    _d.f.initial = _d.f.current;
+//                    NSLog(@"%@ Current float: %f + %f",_parameter,_d.f.current,f);
+                    if( _parameter.additive )
+                        _d.f.target = f + _d.f.initial;
+                    else
+                        _d.f.target = f;
+                };
+            }
+        }
+    }
+    else if( _type == _C_INT )
+    {
+        switch (op) {
+            case kTweenOpApplyTarget:
+            {
+                ((IntParamBlock)_paramBlock)(_d.i.target);
+                break;
+            }
+            case kTweenOpApplyTargetToInitial:
+            {
+                _d.i.initial = _d.i.target;
+                break;
+            }
+            case kTweenOpReverse:
+            {
+                int tmp = _d.i.initial;
+                _d.i.initial = _d.i.target;
+                _d.i.target = tmp;
+                break;
+            }
+            case kTweenOpApplyDelta:
+            {
+                float newValue = (float)_d.i.initial + ((_d.i.target - _d.i.initial) * delta);
+                ((FloatParamBlock)_paramBlock)((int) roundf(newValue));
+                break;
+            }
+            case kTweenOpGetBlock:
+            {
+                return ^(int i) {
+                    [self reset];
+                    _d.i.initial = _d.i.current;
+                    if( _parameter.additive )
+                        _d.i.target = i + _d.i.initial;
+                    else
+                        _d.i.target = i;
+                };
+            }
+        }
+    }
+    else if( _type == TGC_POINT )
+    {
+        switch (op) {
+            case kTweenOpApplyTarget:
+            {
+                ((PointParamBlock)_paramBlock)(_d.pt.target);
+                break;
+            }
+            case kTweenOpApplyTargetToInitial:
+            {
+                _d.pt.initial = _d.pt.target;
+                break;
+            }
+            case kTweenOpReverse:
+            {
+                CGPoint tmp = _d.pt.initial;
+                _d.pt.initial = _d.pt.target;
+                _d.pt.target = tmp;
+                break;
+            }
+            case kTweenOpApplyDelta:
+            {
+                CGPoint newValue;
+                newValue.x = _d.pt.initial.x + ((_d.pt.target.x - _d.pt.initial.x) * delta);
+                newValue.y = _d.pt.initial.y + ((_d.pt.target.y - _d.pt.initial.y) * delta);
+                ((PointParamBlock)_paramBlock)(newValue);
+                break;
+            }
+            case kTweenOpGetBlock:
+            {
+                return ^(CGPoint pt) {
+                    [self reset];
+                    _d.pt.initial = _d.pt.current;
+                    if( _parameter.additive )
+                        _d.pt.target = (CGPoint){ pt.x + _d.pt.initial.x, pt.y + _d.pt.initial.y };
+                    else
+                        _d.pt.target = pt;
+                };
+            }
+        }
+    }
+    
+    return nil;
 }
 
 -(void)dealloc
@@ -261,7 +257,6 @@ typedef union _TweenData {
 {
     _paramBlock = nil;
     _callBack = nil;
-    _ops = nil;
     _parameter = nil;
 }
 
@@ -295,31 +290,8 @@ typedef union _TweenData {
 
 -(void)reset
 {
-    bool additive = _parameter.additive;
-    if( _tweening )
-    {
-        /*
-         This can happen when a new animation of this
-         parameter starts before a previous one ends. In
-         that case we simply jump to the current target
-         value (hopefully not too harsh on the ears/eyes!)
-         and roll on.
-         */
-        if( additive )
-        {
-            _ops(kTweenOpApplyTarget,0);
-            _ops(kTweenOpApplyTargetToInitial,0);
-        }
-        else
-        {
-            [_parameter getValue:&_d ofType:_type];
-        }
-    }
-    else
-    {
-        _tweening = true;
-        [_parameter getValue:&_d ofType:_type];
-    }
+    _tweening = true;
+    [_parameter getValue:&_d ofType:_type];
     [_queue queue:self];
     _runningTime = 0.0;
     _done = false;
@@ -362,7 +334,7 @@ TweenCallback TweenLooper = ^TweenDoneIndicator(TriggerTween *tt) {
     // NSString name : NSArray[] names (from above)
     NSMutableDictionary * _mappings;
     
-    NSMutableArray * _tweeners;
+    NSMutableSet * _tweenerReleasePool;
     
     __weak id<TriggerMapProtocol> _delegate;
 }
@@ -389,6 +361,14 @@ TweenCallback TweenLooper = ^TweenDoneIndicator(TriggerTween *tt) {
     [_parameters each:^(id key, Parameter * obj) {
         [obj releaseBlock];
     }];
+    
+    // it's even worse for these
+    if( _tweenerReleasePool )
+        [_tweenerReleasePool each:^(TriggerTween * tweener) {
+            [tweener decommission];
+        }];
+    
+    NSLog(@"Trigger map dealloc");
 }
 
 -(void)addParameters:(NSDictionary *)nameKeyParamValues
@@ -438,6 +418,12 @@ TweenCallback TweenLooper = ^TweenDoneIndicator(TriggerTween *tt) {
             float duration = [((NSString *)pieces[2]) floatValue];
             TriggerTween * tt = [TriggerTween withParameter:param func:func len:duration queue:_delegate type:type];
             tt->_callBack = callback;
+            if( callback || param.forceDecommision )
+            {
+                if( !_tweenerReleasePool )
+                    _tweenerReleasePool = [NSMutableSet new];
+                [_tweenerReleasePool addObject:tt];
+            }
             return [tt block];
         }
         

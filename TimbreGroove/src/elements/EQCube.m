@@ -14,10 +14,10 @@
 #import "GenericWithTexture.h"
 #import "EventCapture.h"
 
-#import "Global.h"
 #import "Scene.h"
 #import "Names.h"
-#import "Tween.h"
+#import "Audio.h"
+#import "SoundSystemParameters.h"
 
 #define CUBE_TILT  0.1
 #define CUBE_SIZE 1.8
@@ -39,17 +39,11 @@ NSString const * kParamRotateCube  = @"RotateCube";
     IntParamBlock _eqLowEnable;
     IntParamBlock _eqMidEnable;
     IntParamBlock _eqHighEnable;
-    
 }
 @property (nonatomic) int currentBand;
 @end
 
 @implementation EQCube
-
--(void)dealloc
-{
-    NSLog(@"EQCube gone");
-}
 
 -(id)wireUp
 {
@@ -135,11 +129,20 @@ NSString const * kParamRotateCube  = @"RotateCube";
     }];
 
     // -90 is where 'EQ OFF' is
-    parameters[kParamRotateCube]  = [FloatParameter withValue:-90
-                                                        block:^(float f){
-                                                            [self setRotation:
-                                                            (GLKVector3){ CUBE_TILT, -GLKMathDegreesToRadians(f), 0 }];
-                                                        }];
+    Parameter * param = [FloatParameter withValue:-90
+                                       block:^(float f){
+                                           [self setRotation:
+                                            (GLKVector3){ CUBE_TILT, -GLKMathDegreesToRadians(f), 0 }];
+ 
+                                       }];
+    
+    // I have to say: I don't know why his param needs a 'force'
+    // and the one above here doesn't. (Hint: it has something
+    // to do with wrapping a tweener around it below)
+    param.forceDecommision = true;
+    
+    parameters[kParamRotateCube] = param;
+    
 }
 
 -(void)triggersChanged:(Scene *)scene
@@ -152,10 +155,16 @@ NSString const * kParamRotateCube  = @"RotateCube";
     if( scene )
     {
         _rotateTrigger = [tm getFloatTrigger:[kParamRotateCube stringByAppendingTween:kTweenEaseOutThrow len:0.5]];
-        
-        _eqLowEnable = [tm getIntTrigger:kParamEQLowPassEnable];
-        _eqMidEnable = [tm getIntTrigger:kParamEQParametricEnable];
+ 
+        _eqLowEnable  = [tm getIntTrigger:kParamEQLowPassEnable];
+        _eqMidEnable  = [tm getIntTrigger:kParamEQParametricEnable];
         _eqHighEnable = [tm getIntTrigger:kParamEQHiPassEnable];
+        
+        SoundSystemParameters * ssp = scene.audio.ssp;
+        // we're at -90 right now
+        _currentBand = [ssp whichEQBandisEnabled] + 1;
+        if( _currentBand )
+            _rotateTrigger( _currentBand * 90 );
     }
     else
     {

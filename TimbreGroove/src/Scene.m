@@ -38,12 +38,6 @@
     return [[Scene alloc] initWithConfig:config];
 }
 
-+(id)systemSceneWithName:(NSString *)name
-{
-    ConfigScene * config = [[Config sharedInstance] getSystemScene:name];
-    return [[Scene alloc] initWithConfig:config];
-}
-
 +(id)sceneWithConfig:(ConfigScene *)config
 {
     return [[Scene alloc] initWithConfig:config];

@@ -32,7 +32,7 @@
     
     if( scene )
     {
-        TriggerMap * tm = scene.triggers;
+         TriggerMap * tm = scene.triggers;
         
         FloatParamBlock volTurn = [tm getFloatTrigger:kParamMasterVolume];
         volTurn(0.005);

@@ -7,7 +7,6 @@
 //
 
 #import "GraphView+Touches.h"
-#import "Gestures.h"
 #import "Global.h"
 #import "Scene.h"
 #import "Names.h"
@@ -123,10 +122,9 @@
     if( _currentTriggers->_triggerPanX || _currentTriggers->_triggerPanY ||
        _currentTriggers->_triggerDrag1 || _currentTriggers->_triggerDragPos )
     {
-        PannerGesture * pgr;
-        pgr = [[PannerGesture alloc] initWithTarget:self action:@selector(panning:)];
+        UIPanGestureRecognizer * pgr;
+        pgr = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panning:)];
         [self addGestureRecognizer:pgr];
-        pgr.limitRC = self.frame;
     }
     
     if( _currentTriggers->_triggerDirection )
@@ -224,20 +222,25 @@
 
 -(void)panning:(UIPanGestureRecognizer *)pgr
 {
-    if( pgr.state == UIGestureRecognizerStateChanged )
+    if( pgr.state == UIGestureRecognizerStateBegan )
+    {
+        _panLast = [pgr locationInView:self];
+        _panTracking = true;
+    }
+    else if( pgr.state == UIGestureRecognizerStateChanged )
     {
         CGSize sz       = self.frame.size;
         CGPoint pt      = [pgr locationInView:self];
         
-        if( !_panTracking )
-        {
-            _panLast = pt;
-            _panTracking = true;
-        }
-
+        /*
         CGPoint spt = (CGPoint){ (pt.x - _panLast.x) / sz.width,
                                 -(pt.y - _panLast.y) / sz.height };
+         */
+        
+        CGPoint spt = (CGPoint){   (pt.x / sz.width  * 2) - 1.0,
+                                 -((pt.y / sz.height * 2) - 1.0)  };
 
+        NSLog(@"pt: { %f,%f } scaled: { %f,%f } ",pt.x, pt.y, spt.x,spt.y);
         // we get a ton of 0 movement
         if( fabsf(spt.x) > FLT_EPSILON && _currentTriggers->_triggerPanX )
             _currentTriggers->_triggerPanX(spt.x);
@@ -249,9 +252,9 @@
         if( _currentTriggers->_triggerDragPos )
             _currentTriggers->_triggerDragPos(pt);
         
-        _panLast = pt;
+        //_panLast = pt;
     }
-    else
+    else if( pgr.state == UIGestureRecognizerStateEnded || pgr.state == UIGestureRecognizerStateCancelled )
     {
         _panTracking = false;
     }

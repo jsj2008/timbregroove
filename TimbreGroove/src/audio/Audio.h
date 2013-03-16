@@ -11,6 +11,7 @@
 
 @class ConfigAudioProfile;
 @class Scene;
+@class SoundSystem;
 @class SoundSystemParameters;
 
 @interface Audio : NSObject {
@@ -31,6 +32,7 @@
 
 -(void)startMidiFile;
 
+@property (nonatomic,weak)  SoundSystem * soundSystem;
 @property (nonatomic,strong) SoundSystemParameters * ssp;
 
 

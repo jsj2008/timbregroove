@@ -17,7 +17,6 @@
 
 @interface Audio () {
 @protected
-    SoundSystem *           _soundSystem;
     SoundSystemParameters * _parameters;
     
     NSString * _eqName;

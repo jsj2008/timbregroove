@@ -29,7 +29,6 @@
 
 +(id)defaultScene;
 +(id)sceneWithName:(NSString *)name;
-+(id)systemSceneWithName:(NSString *)name;
 +(id)sceneWithConfig:(ConfigScene *)config;
 -(id)initWithConfig:(ConfigScene *)config;
 

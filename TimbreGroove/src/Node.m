@@ -15,9 +15,14 @@
 {
     if( (self = [super init]))
     {
-        NSLog(@"created node of type: %@ (%@)", NSStringFromClass([self class]),self.description);
+        NSLog(@"created node of type: %@",self);
     }
     return self;
+}
+
+-(void)dealloc
+{
+    NSLog(@"released node of type: %@", self);
 }
 #endif
 

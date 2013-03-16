@@ -24,6 +24,7 @@
     return [[Parameter alloc] initWithBlock:block];
 }
 
+
 -(id)initWithBlock:(id)block
 {
     self = [super init];
@@ -36,10 +37,18 @@
     }
     return self;
 }
+
 -(void)releaseBlock
 {
     _block = nil;
 }
+
+#if 0
+-(void)dealloc
+{
+    NSLog(@"Parameter %@ died",self);
+}
+#endif
 
 -(void)getValue:(void *)p ofType:(char)type
 {
@@ -105,31 +114,39 @@
 @interface FloatParameter () {
     FloatRange _range;
     float _scale;
+    float _scaleShift;
 }
 @end
 
 @implementation FloatParameter
 
-+(id)withValue:(float)value
-           block:(id)block;
++(id)withScaling:(FloatRange)frange
+           value:(float)value
+           block:(id)block
 {
-    return [[FloatParameter alloc] initWithValue:value block:block];
+    return [[FloatParameter alloc] initWithScaling:frange value:value block:block scaleShift:0];
 }
 
--(id)initWithValue:(float)value
-               block:(id)block
+
+-(id)initWithScaling:(FloatRange)frange
+             value:(float)value
+             block:(id)block
 {
-    self = [super initWithBlock:^(float f) {
-        _value = f;
-        ((FloatParamBlock)block)(f);
-    }];
-    
-    if( self )
-    {
-        _value = value;
-        ((FloatParamBlock)_block)(value);
-    }
-    return self;
+    return [self initWithScaling:frange value:value block:block scaleShift:0];
+}
+
++(id)withNeg11Scaling:(FloatRange)frange
+                value:(float)value // N.B. native 'value'
+                block:(id)block
+{
+    return [[FloatParameter alloc] initWithScaling:frange value:value block:block scaleShift:1];
+}
+
+-(id)initWithNeg11Scaling:(FloatRange)frange
+                    value:(float)value // N.B. native 'value'
+                    block:(id)block;
+{
+    return [self initWithScaling:frange value:value block:block scaleShift:1];
 }
 
 +(id)with01Value:(float)value
@@ -160,42 +177,70 @@
     
 }
 
-+(id)withRange:(FloatRange)frange
-         value:(float)value
-         block:(id)block
++(id)withValue:(float)value
+         block:(id)block;
 {
-    return [[FloatParameter alloc] initWithRange:frange value:value block:block];
+    return [[FloatParameter alloc] initWithValue:value block:block];
 }
 
--(id)initWithRange:(FloatRange)frange
-             value:(float)value
+-(id)initWithValue:(float)value
              block:(id)block
 {
     self = [super initWithBlock:^(float f) {
         _value = f;
-        if( _scale )
-            f = (f * _scale) + _range.min;
-        if( f < _range.min )
-            f = _range.min;
-        else if( f > _range.max )
-            f = _range.max;
         ((FloatParamBlock)block)(f);
     }];
     
     if( self )
     {
-        _range = frange;
-        _scale = frange.max - frange.min;
-        _value = value / _scale; // is this right?
+        _value = value;
         ((FloatParamBlock)_block)(value);
     }
     return self;
 }
 
+
+-(id)initWithScaling:(FloatRange)frange
+             value:(float)value
+             block:(id)block
+        scaleShift:(float)scaleShift
+{
+    self = [super initWithBlock:^(float f) {
+        _value = f;
+        if( _scale )
+            f = ((f + _scaleShift) * _scale) + _range.min;
+        if( f < _range.min )
+        {
+            f = _range.min;
+            _value = 0;
+        }
+        else if( f > _range.max )
+        {
+            f = _range.max;
+            _value = 1.0;
+        }
+        ((FloatParamBlock)block)(f);
+    }];
+    
+    if( self )
+    {
+        _scaleShift = scaleShift;
+        _range = frange;
+        _scale = frange.max - frange.min;
+        if( scaleShift )
+            _scale *= _scaleShift * 0.5;
+        _value = value;
+        ((FloatParamBlock)_block)(value);
+    }
+    return self;
+}
+
+
 -(void)getValue:(void *)p ofType:(char)type
 {
     if( type == _C_FLT )
     {
+        NSLog(@"%@ return value: %f",self,_value);
         *(float *)p = _value;
     }
     else if( type == TGC_POINT )

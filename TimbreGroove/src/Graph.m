@@ -77,20 +77,18 @@ typedef void (^RecurseBlock)(TG3dObject *);
     NSLog(@"Graph object gone");
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
 -(void)traverseWithObj:(id)param selector:(SEL)selector
 {
     static RecurseBlock generalIter;
 
     generalIter = ^(TG3dObject * obj)
     {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
-        if( param )
+        if( obj != self )
             [obj performSelector:selector withObject:param];
-        else
-            [obj performSelector:selector];
-#pragma clang diagnostic pop
-        [obj->_kids each:generalIter];
+        if( obj->_kids )
+            [obj->_kids each:generalIter];
     };
 
     if( _modal )
@@ -102,6 +100,7 @@ typedef void (^RecurseBlock)(TG3dObject *);
     
     generalIter = nil;
 }
+#pragma clang diagnostic pop
 
 -(void)pushTriggers
 {
@@ -196,6 +195,19 @@ typedef void (^RecurseBlock)(TG3dObject *);
         if( view )
             [view graphChanged];
     }
+    
+   static RecurseBlock wipeTriggers;
+    
+    wipeTriggers = ^(TG3dObject * obj)
+    {
+        [obj triggersChanged:nil];
+        if( obj->_kids )
+            [obj->_kids each:wipeTriggers];
+    };
+    
+    wipeTriggers((TG3dObject *)child);
+    wipeTriggers = nil;
+    child = nil;
 }
 
 -(void)activate
@@ -224,16 +236,14 @@ typedef void (^RecurseBlock)(TG3dObject *);
 
     static RecurseBlock updateBlock;
     
-    if( !updateBlock )
+    updateBlock = ^(TG3dObject *n)
     {
-        updateBlock = ^(TG3dObject *n)
-        {
-            n->_totalTime += dt;
-            n->_timer += dt;
-            [n update:dt];
+        n->_totalTime += dt;
+        n->_timer += dt;
+        [n update:dt];
+        if( n->_kids )
             [n->_kids each:updateBlock];
-        };
-    }
+    };
     
     if( _modal )
         updateBlock(_modal);
@@ -242,6 +252,7 @@ typedef void (^RecurseBlock)(TG3dObject *);
     else
         updateBlock(self);
     
+    updateBlock = nil;
 }
 
 -(void)render:(NSUInteger)w h:(NSUInteger)h
@@ -251,21 +262,21 @@ typedef void (^RecurseBlock)(TG3dObject *);
     
     static RecurseBlock renderBlock;
     
-    if( !renderBlock )
+    renderBlock = ^(TG3dObject *n)
     {
-        renderBlock = ^(TG3dObject *n)
-        {
-            [n render:w h:h];
+        [n render:w h:h];
+        if( n->_kids )
             [n->_kids each:renderBlock];
-        };
-    }
-    
+    };
+
     if( _modal )
         renderBlock(_modal);
     else if( _single )
         renderBlock(_single);
     else
         renderBlock(self);
+    
+    renderBlock = nil;
 }
 
 - (void)getSettings:(NSMutableArray *)settings
@@ -284,6 +295,7 @@ typedef void (^RecurseBlock)(TG3dObject *);
     [self traverseWithObj:putHere selector:@selector(getParameters:)];
 }
 
+
 -(void)triggersChanged:(Scene *)scene
 {
     if( !_currentTriggers )
@@ -296,7 +308,7 @@ typedef void (^RecurseBlock)(TG3dObject *);
 
 - (void)getTriggerMap:(NSMutableArray *)putHere
 {
-    [self traverseWithObj:putHere selector:@selector(getTriggerMap:)];
+   [self traverseWithObj:putHere selector:@selector(getTriggerMap:)];
 }
 
 @end

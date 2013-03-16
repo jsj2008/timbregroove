@@ -6,7 +6,6 @@
 //
 //
 #import "Generic.h"
-#import "Gestures.h"
 
 @interface DistortedGeneric : Generic
 @property (nonatomic) float distortionFactor;
