@@ -11,6 +11,18 @@
 #import "Names.h"
 #import "Parameter.h"
 #import "NoteGenerator.h"
+#import "SoundSystem.h"
+
+#import "SoundSystem+Diag.h"
+
+@interface Midi () {
+    MidiFreeRange * _freeRange;
+    NoteGenerator * _noteGenerator;
+}
+-(void)attachMidiClientToInstrument:(Instrument *)instrument;
+
+@end
+
 
 static const char * _getMidiObjectType( MIDIObjectType type, bool *ex )
 {
@@ -69,10 +81,10 @@ void MyMIDINotifyProc (const MIDINotification  *message, void *refCon)
         [ms appendFormat:@"Object: %s%s %p Property: %s", isExternal ? "External-" : "", objType, pcn->object, buffer];
     }
     
-    NSLog(@"%@",ms);
+    TGLog(LLKindaImportant, @"%@",ms);
 }
 
-//#define SHOW_NOTES 1
+#define SHOW_NOTES 1
 
 static void MyMIDIReadProc(const MIDIPacketList *pktlist,
                            void *refCon,
@@ -103,7 +115,7 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
             if( midiCommand == 0x09 )
             {
                 int noteNumber = ((int) note);
-                NSLog(@"%s: %i", _noteNames[noteNumber %12], noteNumber);
+                TGLog(LLKindaImportant, @"%p %s: %i", (void *)player,_noteNames[noteNumber %12], noteNumber);
             }
 #endif
         }
@@ -113,11 +125,15 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
 
 
 @interface MidiFile () {
+    NSString *     _midiFileName;
     MusicTimeStamp _playerTrackLength;
     MusicSequence  _currentSequence;
     MusicPlayer    _musicPlayer;
     bool           _midiFilePlaying;
     MusicTimeStamp _midiPauseTime;
+    MIDIEndpointRef _myEndPoint;
+    
+    SoundSystem * _ss;
 }
 @end
 
@@ -127,11 +143,12 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
 -(id)initWithMidi:(Midi *)midi
       andFileName:(NSString *)fileName
     andInstrument:(Instrument *)instrument
+ss:(SoundSystem *)ss
 {
     self = [super init];
     if( self)
     {
-        [self setupMidiFile:fileName withInstrument:instrument];        
+        [self setupMidiFile:fileName withInstrument:instrument ss:ss];
     }
     return self;
 }
@@ -145,7 +162,11 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
 
 -(void)setupMidiFile:(NSString *)filename
       withInstrument:(Instrument *)instrument
+ss:(SoundSystem *)ss
 {
+    _ss = ss;
+    _myEndPoint = instrument.midiEndPoint;
+    _midiFileName = filename;
     
     if( !_musicPlayer )
         CheckError( NewMusicPlayer(&_musicPlayer), "NewMusicPlayer failed" );
@@ -157,10 +178,13 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
     
     CheckError( MusicSequenceFileLoad(_currentSequence, (__bridge CFURLRef) midiFileURL, 0, 0), "MusicSeqFileLoad failed");
     
-    // MusicSequenceSetAUGraph(s, _processingGraph);
+//    MusicSequenceSetAUGraph(_currentSequence, ss.processGraph);
     
-    CheckError( MusicSequenceSetMIDIEndpoint(_currentSequence, instrument.midiEndPoint), "MusicSeqSetEndPoint failed");
+    CheckError( MusicSequenceSetMIDIEndpoint(_currentSequence, _myEndPoint), "MusicSeqSetEndPoint failed");
     
+    TGLog(LLKindaImportant, @"MIDI Sequence targeting endPoint: %p", _myEndPoint);
+    
+
     CheckError( MusicPlayerSetSequence(_musicPlayer, _currentSequence), "MusicPlaySetSeq failed");
     
     MusicTrack t;
@@ -189,7 +213,7 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
     if( _musicPlayer )
     {
         CheckError( MusicPlayerGetTime(_musicPlayer, &_midiPauseTime), "MusicPlayerGetTime failed");
-        NSLog(@"Pausing Midi at %f",_midiPauseTime);
+        TGLog(LLKindaImportant, @"Pausing Midi at %f",_midiPauseTime);
         CheckError( MusicPlayerStop(_musicPlayer), "MusicPlayerStop failed");
     }
 }
@@ -198,9 +222,11 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
 {
     if( _musicPlayer )
     {
+        [_ss dumpGraph:_ss.processGraph];
+        
         CheckError( MusicPlayerSetTime(_musicPlayer, _midiPauseTime), "MusicPlayerSetTime failed");
         CheckError( MusicPlayerStart(_musicPlayer), "MusicPlayerStart (resume) failed");
-        NSLog(@"Resumed Midi at %f",_midiPauseTime);
+        TGLog(LLKindaImportant, @"Resumed Midi at %f",_midiPauseTime);
     }
 }
 
@@ -227,15 +253,20 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
 
 @end
 
+typedef struct _ChannelToEndPoint {
+    int             channel;
+    MIDIEndpointRef endPoint;
+} ChannelToEndPoint;
+
 @interface MidiFreeRange () {
     MIDIPortRef _outPort;
-    NSArray * _midiRefs;
+    ChannelToEndPoint _channelMap[16];
 }
 
 @end
 @implementation MidiFreeRange
 
--(id)initWithMidi:(Midi *)midi andMidiRefs:(NSArray *)midiRefs
+-(id)initWithMidi:(Midi *)midi andInstruments:(NSArray *)instruments
 {
     self = [super init];
     if( self )
@@ -246,7 +277,15 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
                                           ),
                     " Couldn't create MIDI output port");
 
-        _midiRefs = midiRefs;
+        memset(_channelMap, -1, sizeof(_channelMap));
+        
+        int i = 0;
+        [instruments each:^(Instrument * instrument) {
+            _channelMap[i].channel = instrument.channel;
+            if( !instrument.midiEndPoint )
+               [midi attachMidiClientToInstrument:instrument];
+            _channelMap[i].endPoint = instrument.midiEndPoint;
+        }];
     }
     return self;
 }
@@ -261,19 +300,24 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
     packetList.packet[ 0]. data[ 2] = noteMsg->velocity & 0x7F;
     packetList.packet[ 0]. timeStamp = 0;
     
-    MIDIEndpointRef endRef = [_midiRefs[noteMsg->channel] pointerValue];
+    MIDIEndpointRef endRef = 0;
+    int i;
+    for( i = 0; i < (sizeof(_channelMap)/sizeof(_channelMap[0])); i++ )
+    {
+        if( _channelMap[i].channel == noteMsg->channel )
+        {
+            endRef = _channelMap[i].endPoint;
+            break;
+        }
+        i++;
+    }
+
     CheckError( MIDISend(_outPort, endRef, &packetList), "Couldn't send note ON");
     
     [NSObject performBlock:[^{
         packetList.packet[ 0]. data[ 0] = 0x80;
         CheckError( MIDISend(_outPort, endRef, &packetList), "Couldn't send note OFF");
     } copy] afterDelay:noteMsg->duration];
-}
-@end
-
-@interface Midi () {
-    MidiFreeRange * _freeRange;
-    NoteGenerator * _noteGenerator;
 }
 @end
 
@@ -292,7 +336,7 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
         
         result = MIDIClientCreate(CFSTR("TG Virtual Client"),
                                   MyMIDINotifyProc,
-                                  NULL,
+                                  (__bridge void *)self,
                                   &_midiClient);
         
         CheckError(result,"MIDIClientCreate failed");
@@ -315,25 +359,18 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
     
     CheckError(result,"MIDIDestinationCreate failed");
 
-    NSLog(@"Created endpoint: %p", virtualEndpoint);
-    
     instrument.midiEndPoint = virtualEndpoint;
 }
 
--(MidiFile *)setupMidiFile:(NSString *)filename withInstrument:(Instrument *)instrument
+-(MidiFile *)setupMidiFile:(NSString *)filename withInstrument:(Instrument *)instrument ss:(SoundSystem *)ss
 {
     [self attachMidiClientToInstrument:instrument];
-    return [[MidiFile alloc] initWithMidi:self andFileName:filename andInstrument:instrument];
+    return [[MidiFile alloc] initWithMidi:self andFileName:filename andInstrument:instrument ss:ss];
 }
 
 -(MidiFreeRange *)setupMidiFreeRange:(NSArray *)instruments
 {
-    NSArray * midiRefs = [instruments map:^id(Instrument * instrument) {
-        [self attachMidiClientToInstrument:instrument];
-        return [NSValue valueWithPointer:(const void *)instrument.midiEndPoint];
-    }];
-
-    _freeRange = [[MidiFreeRange alloc] initWithMidi:self andMidiRefs:midiRefs];
+    _freeRange = [[MidiFreeRange alloc] initWithMidi:self andInstruments:instruments];
     return _freeRange;
 }
 

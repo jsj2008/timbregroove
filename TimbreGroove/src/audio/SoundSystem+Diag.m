@@ -28,7 +28,7 @@ typedef struct  tagAUFlagDump {
     
     CheckError(result, "Error getting parameters");
     
-    NSLog(@"\n ***** UNIT: %@ ******\nParaminfo size: %d Writable: %d", name, (unsigned int)outDataSize, (int)outWritable);
+    TGLog(LLShitsOnFire, @"\n ***** UNIT: %@ ******\nParaminfo size: %d Writable: %d", name, (unsigned int)outDataSize, (int)outWritable);
     if( outDataSize )
     {
         int nparams = outDataSize / sizeof(AudioUnitPropertyID);
@@ -59,7 +59,7 @@ typedef struct  tagAUFlagDump {
             else
                 *str = 0;
             
-            NSLog(@"parameter: %lu - %04lX %s / %s", auIDs[i], auIDs[i], (char *)auinfo.name, str);
+            TGLog(LLShitsOnFire, @"parameter: %lu - %04lX %s / %s", auIDs[i], auIDs[i], (char *)auinfo.name, str);
             
             if (auinfo.flags & kAudioUnitParameterFlag_CFNameRelease) {
                 if (auinfo.flags & kAudioUnitParameterFlag_HasCFNameString && auinfo.cfNameString != NULL)
@@ -75,13 +75,13 @@ typedef struct  tagAUFlagDump {
     result = AudioUnitGetProperty(inUnit, kAudioUnitProperty_StreamFormat,
                                   kAudioUnitScope_Output, 0, &asbd, &sizeASBD);
     
-    NSLog(@"Output format (bus: 0):-----------------");
+    TGLog(LLShitsOnFire, @"Output format (bus: 0):-----------------");
     [self printASBD:asbd];
 
     result = AudioUnitGetProperty(inUnit, kAudioUnitProperty_StreamFormat,
                                   kAudioUnitScope_Input, 0, &asbd, &sizeASBD);
     
-    NSLog(@"Input format:-----------------");
+    TGLog(LLShitsOnFire, @"Input format:-----------------");
     [self printASBD:asbd];
 
 }
@@ -112,20 +112,20 @@ typedef struct  tagAUFlagDump {
             flagstr = [flagstr stringByAppendingString:@(flags[i].name)];
         }
     }
-    NSLog (@"  Sample Rate:         %10.0f",  asbd.mSampleRate);
-    NSLog (@"  Format ID:           %10s",    formatIDString);
-    NSLog (@"  Format Flags: %@ (%X)",  flagstr,  (unsigned int)asbd.mFormatFlags);
-    NSLog (@"  Bytes per Packet:    %10d",    (unsigned int)asbd.mBytesPerPacket);
-    NSLog (@"  Frames per Packet:   %10d",    (unsigned int)asbd.mFramesPerPacket);
-    NSLog (@"  Bytes per Frame:     %10d",    (unsigned int)asbd.mBytesPerFrame);
-    NSLog (@"  Channels per Frame:  %10d",    (unsigned int)asbd.mChannelsPerFrame);
-    NSLog (@"  Bits per Channel:    %10d\n----------------------------\n",    (unsigned int)asbd.mBitsPerChannel);
+    TGLog(LLShitsOnFire, @"  Sample Rate:         %10.0f",  asbd.mSampleRate);
+    TGLog(LLShitsOnFire, @"  Format ID:           %10s",    formatIDString);
+    TGLog(LLShitsOnFire, @"  Format Flags: %@ (%X)",  flagstr,  (unsigned int)asbd.mFormatFlags);
+    TGLog(LLShitsOnFire, @"  Bytes per Packet:    %10d",    (unsigned int)asbd.mBytesPerPacket);
+    TGLog(LLShitsOnFire, @"  Frames per Packet:   %10d",    (unsigned int)asbd.mFramesPerPacket);
+    TGLog(LLShitsOnFire, @"  Bytes per Frame:     %10d",    (unsigned int)asbd.mBytesPerFrame);
+    TGLog(LLShitsOnFire, @"  Channels per Frame:  %10d",    (unsigned int)asbd.mChannelsPerFrame);
+    TGLog(LLShitsOnFire, @"  Bits per Channel:    %10d\n----------------------------\n",    (unsigned int)asbd.mBitsPerChannel);
 }
 
 
 -(void)dumpGraph:(AUGraph)processingGraph
 {
-    NSLog(@"Audio graph update >>>>>>>>>>>>>>>");
+    TGLog(LLShitsOnFire, @"Audio graph update >>>>>>>>>>>>>>>");
     CAShow(processingGraph);
 }
 

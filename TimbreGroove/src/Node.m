@@ -15,14 +15,14 @@
 {
     if( (self = [super init]))
     {
-        NSLog(@"created node of type: %@",self);
+        TGLog(LLJustSayin, @"created node of type: %@",self);
     }
     return self;
 }
 
 -(void)dealloc
 {
-    NSLog(@"released node of type: %@", self);
+    TGLog(LLJustSayin, @"released node of type: %@", self);
 }
 #endif
 
@@ -56,7 +56,7 @@
 #if DEBUG
         if ( ![node respondsToSelector:selector] )
         {
-            NSLog(@"%@ can’t be placed\n", node);
+            TGLog(LLJustSayin, @"%@ can’t be placed\n", node);
             exit(1);
         }
 #endif

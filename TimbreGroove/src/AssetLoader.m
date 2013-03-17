@@ -8,6 +8,7 @@
 
 #import "AssetLoader.h"
 #import <AssetsLibrary/AssetsLibrary.h>
+#import "TGTypes.h"
 
 @interface AssetLoader ()
 - (void) loadData;
@@ -25,7 +26,7 @@
 
 -(void)loadData
 {
-    NSLog(@"don't know how to load data. use AsstoTo* class");
+    TGLog(LLJustSayin, @"don't know how to load data. use AsstoTo* class");
     exit(1);
 }
 @end
@@ -58,9 +59,9 @@
 	
     ALAssetsLibraryAccessFailureBlock failureblock  = ^(NSError *myerror)
     {
-		NSLog(@"NOT GOT ASSET");
+		TGLog(LLJustSayin, @"NOT GOT ASSET");
 		
-        NSLog(@"Error '%@' getting asset from library", [myerror localizedDescription]);
+        TGLog(LLJustSayin, @"Error '%@' getting asset from library", [myerror localizedDescription]);
     };
 	
 	// schedules the asset read
@@ -97,9 +98,9 @@
 	
     ALAssetsLibraryAccessFailureBlock failureblock  = ^(NSError *myerror)
     {
-		NSLog(@"NOT GOT ASSET");
+		TGLog(LLJustSayin, @"NOT GOT ASSET");
 		
-        NSLog(@"Error '%@' getting asset from library", [myerror localizedDescription]);
+        TGLog(LLJustSayin, @"Error '%@' getting asset from library", [myerror localizedDescription]);
     };
 	
 	// schedules the asset read

@@ -6,18 +6,16 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "Global.h"
 #import "Scene.h"
 #import "Names.h"
-#import "SoundSystem.h"
 #import "Audio.h"
 #import "Instrument.h"
 #import "TriggerMap.h"
 #import "NSString+Tweening.h"
 #import "NoteGenerator.h"
 
-#define AMBIENCE_CHANNEL 1
-#define CONGAS_CHANNEL   0
+#define AMBIENCE_VIRTUAL_CHANNEL 1
+#define CONGAS_VIRTUAL_CHANNEL   0
 
 @interface Serenity : Audio
 
@@ -30,6 +28,8 @@
     FloatParamBlock _channelVolumeDecay;
     IntParamBlock   _selectChannel;
     PointerParamBlock _midiNote;
+    UInt32 _ambienceChannel;
+    UInt32 _congasChannel;
 }
 
 @end
@@ -39,13 +39,15 @@
 {
     [super start];
     
-    Instrument * congas = _instruments[CONGAS_CHANNEL];
+    _ambienceChannel = [self realChannelFromVirtual:AMBIENCE_VIRTUAL_CHANNEL];
+    
+    Instrument * congas = _instruments[CONGAS_VIRTUAL_CHANNEL];
+    _congasChannel = congas.channel;
     NoteRange congasRange = (NoteRange){ congas.lowestPlayable, congas.highestPlayable };
     _congasScale = [[NoteGenerator alloc] initWithScale:kScaleSemitones isRandom:false andRange:congasRange];
     
     _ambientScale = [[NoteGenerator alloc] initWithScale:kScaleMinor isRandom:true];
     _ambientScale.range = (NoteRange){ 45, 80 };
-    [super start];
 }
 
 -(void)triggersChanged:(Scene *)scene
@@ -84,12 +86,12 @@
                               ^(CGPoint pt)
                               {
                                   MIDINoteMessage mnm;
-                                  _selectChannel(AMBIENCE_CHANNEL);
+                                  _selectChannel(_ambienceChannel);
                                   _channelVolume(1);
                                   mnm.note = [_ambientScale next];
                                   mnm.duration = 1.1;
                                   mnm.velocity = 127;
-                                  mnm.channel = AMBIENCE_CHANNEL;
+                                  mnm.channel = _ambienceChannel;
                                   _midiNote(&mnm);
                                   mnm.note = [_ambientScale next];
                                   _midiNote(&mnm);

@@ -115,7 +115,7 @@
             viewWidth:(float)viewWidth
            viewHeight:(float)viewHeight
 {
-    NSLog(@"Wups - set perspective on Identify Camera");
+    TGLog(LLJustSayin, @"Wups - set perspective on Identify Camera");
     exit(1);
 }
 #endif

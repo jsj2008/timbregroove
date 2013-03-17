@@ -69,6 +69,8 @@
 {
     [super viewDidLoad];
 
+    TGSetLogLevel(LLKindaImportant);
+    
     _postDeleteSceneIndex = -1;
     // force some global instializations
     [Config sharedInstance];
@@ -313,7 +315,7 @@
     }
     else
     {
-        NSLog(@"Doing seque called; %@", segue.identifier);
+        TGLog(LLJustSayin, @"Doing seque called; %@", segue.identifier);
     }
 }
 

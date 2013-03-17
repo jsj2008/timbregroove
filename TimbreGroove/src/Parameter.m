@@ -46,7 +46,7 @@
 #if 0
 -(void)dealloc
 {
-    NSLog(@"Parameter %@ died",self);
+    TGLog(LLJustSayin, @"Parameter %@ died",self);
 }
 #endif
 
@@ -104,7 +104,7 @@
         if( _paramType == _C_PTR )
             return _block;
     }
-    NSLog(@"Unsupported param trigger: %c requested on a %c type",requestParamType,_paramType);
+    TGLog(LLJustSayin, @"Unsupported param trigger: %c requested on a %c type",requestParamType,_paramType);
     exit(-1);
     return nil;
 }
@@ -240,7 +240,7 @@
 {
     if( type == _C_FLT )
     {
-        NSLog(@"%@ return value: %f",self,_value);
+        TGLog(LLJustSayin, @"%@ return value: %f",self,_value);
         *(float *)p = _value;
     }
     else if( type == TGC_POINT )

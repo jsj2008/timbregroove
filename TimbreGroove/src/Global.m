@@ -8,6 +8,8 @@
 
 #define NO_GLOBAL_DECLS
 #import "Global.h"
+#import "TGTypes.h"
+#import <stdarg.h>
 
 NSString const * kGlobalScene        = @"scene";
 NSString const * kGlobalRecording    = @"recording";
@@ -36,3 +38,27 @@ static Global * __sharedGlobal;
     return __sharedGlobal;
 }
 @end
+
+static LogLevel _currentLL = LLShitsOnFire;
+
+void TGLog(LogLevel loglevel,NSString *format, ...)
+{
+    if( loglevel <= _currentLL  )
+    {
+        va_list ap;
+        va_start (ap, format);
+#if 0
+        char buf[1000];
+        strcpy(buf,[format UTF8String]);
+        strcat(buf, "\n");
+        vprintf(buf, ap);
+#else
+        NSLogv(format,ap);
+#endif
+        va_end (ap);
+    }
+}
+void TGSetLogLevel(LogLevel logLevel)
+{
+    _currentLL = logLevel;
+}

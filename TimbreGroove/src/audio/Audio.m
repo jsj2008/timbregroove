@@ -54,37 +54,44 @@
 -(void)dealloc
 {
     [_instruments each:^(id instrument) {
+        [_soundSystem unplugInstrumentFromBus:instrument];
         [_soundSystem decomissionInstrument:instrument];
     }];
     
-    NSLog(@"Audio object gone");
+    TGLog(LLJustSayin, @"Audio object gone");
 }
 
 -(void)loadAudioFromConfig:(ConfigAudioProfile *)config
 {
-    __block int channel = 0;
     _instruments = [config.instruments map:^id(id instrumentConfig) {
-        return [_soundSystem loadInstrumentFromConfig:instrumentConfig intoChannel:channel++];
+        return [_soundSystem loadInstrumentFromConfig:instrumentConfig];
     }];
     _myTriggerMap = config.connections;
     _midiFileName = config.midiFile;
 }
 
+-(UInt32)realChannelFromVirtual:(UInt32)virtualChannel
+{
+    return ((Instrument *)_instruments[virtualChannel]).channel;
+}
+
 -(void)start
 {
     _started = true;
+    
+    [_instruments each:^(id instrument) {
+        [_soundSystem plugInstrumentIntoBus:instrument];
+    }];
+    
     if( _midiSequence )
         [_midiSequence start];
     else
         [_midi setupMidiFreeRange:_instruments];
+    
 }
 
 -(void)activate
 {
-    [_instruments each:^(id instrument) {
-        [_soundSystem plugInstrumentIntoBus:instrument];
-    }];
-
     if( _started )
     {
         if( _midiSequence )
@@ -101,9 +108,6 @@
     if( _midiSequence )
         [_midiSequence pause];
     
-    [_instruments each:^(id instrument) {
-        [_soundSystem unplugInstrumentFromBus:instrument];
-    }];
 }
 
 -(void)update:(NSTimeInterval)dt
@@ -144,7 +148,7 @@
     if( _midiFileName && !_midiSequence )
     {
         Instrument * instrument = _instruments[0];
-        _midiSequence = [_midi setupMidiFile:_midiFileName withInstrument:instrument];
+        _midiSequence = [_midi setupMidiFile:_midiFileName withInstrument:instrument ss:_soundSystem];
     }
 }
 

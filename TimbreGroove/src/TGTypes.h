@@ -22,8 +22,18 @@
 
 #define CLAMP_TO_0_1(x) (x < 0.0 ? 0.0 : x > 1.0 ? 1.0 : x)
 
-#define GL_ERROR_C { GLenum __e = glGetError(); if(__e) { NSLog(@"glError(%d/%04X) %s:%d",__e,__e,__FILE__,__LINE__); }}
-#define GL_CALL(f) { NSLog(@"calling: %s", f); }
+#define GL_ERROR_C { GLenum __e = glGetError(); if(__e) { TGLog(LLJustSayin, @"glError(%d/%04X) %s:%d",__e,__e,__FILE__,__LINE__); }}
+#define GL_CALL(f) { TGLog(LLJustSayin, @"calling: %s", f); }
+
+typedef enum LogLevel {
+    LLShitsOnFire = 0,
+    LLKindaImportant = 20,
+    LLSumpinYouShoudKnow = 50,
+    LLArentYaGladIToldYa = 125,
+    LLJustSayin = 200
+} LogLevel;
+void TGLog(LogLevel,NSString *format, ...);
+void TGSetLogLevel(LogLevel);
 
 typedef void (^FloatParamBlock)(float);
 typedef void (^PointParamBlock)(CGPoint);
@@ -90,6 +100,6 @@ static inline NSMutableArray * a(NSArray *a)
 
 static inline void DumpRect(const char *s, CGRect rc)
 {
-    NSLog(@"%s: %f, %f - %f x %f", s, rc.origin.x, rc.origin.y, rc.size.width, rc.size.height);
+    TGLog(LLJustSayin, @"%s: %f, %f - %f x %f", s, rc.origin.x, rc.origin.y, rc.size.width, rc.size.height);
 }
 #endif

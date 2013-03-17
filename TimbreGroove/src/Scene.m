@@ -109,7 +109,7 @@
 
 -(void)dealloc
 {
-    NSLog(@"Scene dealloc");
+    TGLog(LLJustSayin, @"Scene dealloc");
 }
 
 -(void)pause

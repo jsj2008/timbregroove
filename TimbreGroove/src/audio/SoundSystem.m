@@ -105,7 +105,6 @@ OSStatus renderCallback(
 
 @interface SoundSystem () {
     
-    AUGraph          _processingGraph;
     AudioUnit        _ioUnit;
     AUNode           _mixerNode;
     AudioStreamBasicDescription _stdASBD;
@@ -114,19 +113,55 @@ OSStatus renderCallback(
     PointerParamBlock   _bufferTrigger;
     RenderCBContext     _cbContext;
 
-    int _busCount;
+    AudioUnit _channelMap[16];
 }
 
 @end
 
+#define EMPTY_CHANNEL (AudioUnit)-1
+
 @implementation SoundSystem
 
+
+-(UInt32)assignChannel:(AudioUnit)au
+{
+    for( int i = 0; i < (sizeof(_channelMap)/sizeof(_channelMap[0])); i++ )
+    {
+        if( _channelMap[i] == EMPTY_CHANNEL )
+        {
+            _channelMap[i] = au;
+            return i;
+        }
+    }
+    TGLog(LLShitsOnFire,@"Ran out of channels");
+    exit(-1);
+    return -1;
+}
+
+-(int)channelCount
+{
+    int highestChannel = 0;
+    for( int i = 0; i < (sizeof(_channelMap)/sizeof(_channelMap[0])); i++ )
+    {
+        if( _channelMap[i] != EMPTY_CHANNEL )
+            highestChannel = i;
+    }
+    return highestChannel + 1;
+}
+
+-(void)freeChannel:(UInt32)channel
+{
+    _channelMap[channel] = EMPTY_CHANNEL;
+}
 
 -(id)init
 {
     self = [super init];
     if( self )
     {
+        for( int i = 0; i < (sizeof(_channelMap)/sizeof(_channelMap[0])); i++ )
+            _channelMap[i] = EMPTY_CHANNEL;
+        
         _cbContext.rbo = 0;
         
         [self setupAVSession];
@@ -258,32 +293,32 @@ OSStatus renderCallback(
 
     NSError *audioSessionError = nil;
     [mySession setCategory: AVAudioSessionCategoryPlayback error: &audioSessionError];
-    if (audioSessionError != nil) {NSLog (@"Error setting audio session category."); return NO;}
+    if (audioSessionError != nil) {TGLog(LLShitsOnFire, @"Error setting audio session category."); return NO;}
     
     _graphSampleRate = 44100.0;
     
     [mySession setPreferredSampleRate: _graphSampleRate error: &audioSessionError];
-    if (audioSessionError != nil) {NSLog (@"Error setting preferred hardware sample rate."); return NO;}
+    if (audioSessionError != nil) {TGLog(LLShitsOnFire, @"Error setting preferred hardware sample rate."); return NO;}
     
     [mySession setActive: YES error: &audioSessionError];
-    if (audioSessionError != nil) {NSLog (@"Error activating the audio session."); return NO;}
+    if (audioSessionError != nil) {TGLog(LLShitsOnFire, @"Error activating the audio session."); return NO;}
     
     _graphSampleRate = mySession.sampleRate;
     
     return YES;
 }
 
--(Instrument *)loadInstrumentFromConfig:(ConfigInstrument *)config intoChannel:(int)channel
+-(Instrument *)loadInstrumentFromConfig:(ConfigInstrument *)config
 {
-    return [Instrument instrumentWithConfig:config andGraph:_processingGraph atChannel:channel];
+    return [Instrument instrumentWithConfig:config andGraph:_processGraph];
 }
 
 -(void)plugInstrumentIntoBus:(Instrument *)instrument
 {
     OSStatus result;
 
-    ++_busCount;
-    [self setupMasterMixer];
+    instrument.channel = [self assignChannel:instrument.sampler];
+    [self setMixerBusCount];
     
     if( !instrument.configured )
     {
@@ -292,12 +327,12 @@ OSStatus renderCallback(
     }
 
     Boolean wasRunning = FALSE;
-    CheckError( AUGraphIsRunning(_processingGraph, &wasRunning), "Couldn't check for running graph");
+    CheckError( AUGraphIsRunning(_processGraph, &wasRunning), "Couldn't check for running graph");
     
     if( wasRunning )
-        CheckError( AUGraphStop(_processingGraph), "Couldn't stop graph");
+        CheckError( AUGraphStop(_processGraph), "Couldn't stop graph");
     
-    result = AUGraphConnectNodeInput (_processingGraph,
+    result = AUGraphConnectNodeInput (_processGraph,
                                       instrument.graphNode,
                                       0,
                                       _mixerNode,
@@ -306,13 +341,13 @@ OSStatus renderCallback(
     
     
     //Boolean isUpdated;
-    result = AUGraphUpdate(_processingGraph, NULL); // NULL forces synchronous update &isUpdated);
+    result = AUGraphUpdate(_processGraph, NULL); // NULL forces synchronous update &isUpdated);
     CheckError(result,"Unable to update graph.");
 
     if( wasRunning )
-        CheckError( AUGraphStart(_processingGraph), "Couldn't restart graph");
+        CheckError( AUGraphStart(_processGraph), "Couldn't restart graph");
     
-    NSLog(@"plugged %@ (%p) into bus: %d", instrument.description, instrument.sampler, instrument.channel);
+    TGLog(LLKindaImportant, @"plugged %@ (%p) into bus: %d", instrument.description, instrument.sampler, instrument.channel);
 }
 
 -(void)unplugInstrumentFromBus:(Instrument *)instrument
@@ -320,33 +355,33 @@ OSStatus renderCallback(
     OSStatus result;
     
     Boolean wasRunning;
-    CheckError( AUGraphIsRunning(_processingGraph, &wasRunning), "Couldn't check for running graph");
+    CheckError( AUGraphIsRunning(_processGraph, &wasRunning), "Couldn't check for running graph");
     
     if( wasRunning )
-        CheckError( AUGraphStop(_processingGraph), "Couldn't stop graph");
+        CheckError( AUGraphStop(_processGraph), "Couldn't stop graph");
     
     AUNode node = _mixerNode;
     UInt32 bus  = instrument.channel;
-    result = AUGraphDisconnectNodeInput(_processingGraph, node, bus);
+    result = AUGraphDisconnectNodeInput(_processGraph, node, bus);
     CheckError(result, "Unable to disconnect node");
     
-    result = AUGraphUpdate(_processingGraph, NULL); // NULL forces synchronous update &isUpdated);
+    result = AUGraphUpdate(_processGraph, NULL); // NULL forces synchronous update &isUpdated);
     CheckError(result,"Unable to update graph.");
     
-    NSLog(@"UNplugged %@ (%p) from bus: %d", instrument.description, instrument.sampler,
+    TGLog(LLKindaImportant, @"UNplugged %@ (%p) from bus: %d", instrument.description, instrument.sampler,
           (unsigned int)bus);
     
     if( wasRunning )
-        CheckError( AUGraphStart(_processingGraph), "Couldn't restart graph");
+        CheckError( AUGraphStart(_processGraph), "Couldn't restart graph");
     
-    --_busCount;
-    [self setupMasterMixer];
+    [self freeChannel:bus];
+    [self setMixerBusCount];
 }
 
 -(void)decomissionInstrument:(Instrument *)instrument
 {
     //[self unplugInstrumentFromBus:instrument];
-    AUGraphRemoveNode(_processingGraph, instrument.graphNode);
+    AUGraphRemoveNode(_processGraph, instrument.graphNode);
 }
 
 -(OSStatus)setupMasterEQ
@@ -370,7 +405,7 @@ OSStatus renderCallback(
     AUNode ioNode, eqNode, cvNode;
     AudioUnit cvUnit;
 
-    CheckError(NewAUGraph (&_processingGraph),"Unable to create an AUGraph object.");
+    CheckError(NewAUGraph (&_processGraph),"Unable to create an AUGraph object.");
     
     AudioComponentDescription cd = {};
     cd.componentManufacturer     = kAudioUnitManufacturer_Apple;
@@ -378,25 +413,25 @@ OSStatus renderCallback(
     cd.componentFlagsMask        = 0;
     cd.componentType             = kAudioUnitType_Mixer;
     cd.componentSubType          = kAudioUnitSubType_MultiChannelMixer;
-    CheckError(AUGraphAddNode (_processingGraph, &cd, &_mixerNode),"Unable to add the Mixer unit to the audio processing graph.");
+    CheckError(AUGraphAddNode (_processGraph, &cd, &_mixerNode),"Unable to add the Mixer unit to the audio processing graph.");
 
     cd.componentType    = kAudioUnitType_Effect;
     cd.componentSubType = kAudioUnitSubType_NBandEQ;
-    CheckError(AUGraphAddNode (_processingGraph, &cd, &eqNode),"Unable to add the master EQ unit to the audio processing graph.");
+    CheckError(AUGraphAddNode (_processGraph, &cd, &eqNode),"Unable to add the master EQ unit to the audio processing graph.");
 
     cd.componentType    = kAudioUnitType_FormatConverter;
     cd.componentSubType = kAudioUnitSubType_AUConverter;
-    CheckError(AUGraphAddNode (_processingGraph, &cd, &cvNode),"Unable to add the master EQ unit to the audio processing graph.");
+    CheckError(AUGraphAddNode (_processGraph, &cd, &cvNode),"Unable to add the master EQ unit to the audio processing graph.");
 
     cd.componentType    = kAudioUnitType_Output;
     cd.componentSubType = kAudioUnitSubType_RemoteIO;
-    CheckError(AUGraphAddNode (_processingGraph, &cd, &ioNode),"Unable to add the Output unit to the audio processing graph.");
+    CheckError(AUGraphAddNode (_processGraph, &cd, &ioNode),"Unable to add the Output unit to the audio processing graph.");
 
-    CheckError(AUGraphOpen (_processingGraph),                                    "Unable to open the audio processing graph.");
-    CheckError(AUGraphNodeInfo (_processingGraph, _mixerNode, 0, &_mixerUnit),    "Unable to obtain a reference to the mixer unit.");
-    CheckError(AUGraphNodeInfo (_processingGraph, eqNode,     0, &_masterEQUnit), "Unable to obtain a reference to the master EQ unit.");
-    CheckError(AUGraphNodeInfo (_processingGraph, cvNode,     0, &cvUnit),        "Unable to obtain a reference to the master EQ unit.");
-    CheckError(AUGraphNodeInfo (_processingGraph, ioNode,     0, &_ioUnit),       "Unable to obtain a reference to the I/O unit.");
+    CheckError(AUGraphOpen (_processGraph),                                    "Unable to open the audio processing graph.");
+    CheckError(AUGraphNodeInfo (_processGraph, _mixerNode, 0, &_mixerUnit),    "Unable to obtain a reference to the mixer unit.");
+    CheckError(AUGraphNodeInfo (_processGraph, eqNode,     0, &_masterEQUnit), "Unable to obtain a reference to the master EQ unit.");
+    CheckError(AUGraphNodeInfo (_processGraph, cvNode,     0, &cvUnit),        "Unable to obtain a reference to the master EQ unit.");
+    CheckError(AUGraphNodeInfo (_processGraph, ioNode,     0, &_ioUnit),       "Unable to obtain a reference to the I/O unit.");
 
     AudioStreamBasicDescription fasbd = {0};
     AudioStreamBasicDescription iasbd = {0};
@@ -409,27 +444,28 @@ OSStatus renderCallback(
     
     [self setupMasterEQ];
     
-    result = AUGraphConnectNodeInput (_processingGraph, _mixerNode, 0, cvNode, 0);
+    result = AUGraphConnectNodeInput (_processGraph, _mixerNode, 0, cvNode, 0);
     CheckError(result,"Unable to interconnect the mixer/conv nodes in the audio processing graph.");
 
-    result = AUGraphConnectNodeInput (_processingGraph, cvNode, 0, eqNode, 0);
+    result = AUGraphConnectNodeInput (_processGraph, cvNode, 0, eqNode, 0);
     CheckError(result,"Unable to interconnect the conv/eq nodes in the audio processing graph.");
     
-    result = AUGraphConnectNodeInput (_processingGraph, eqNode, 0, ioNode, 0);
+    result = AUGraphConnectNodeInput (_processGraph, eqNode, 0, ioNode, 0);
     CheckError(result,"Unable to interconnect the eq/rio nodes in the audio processing graph.");
 
     return result;
 }
 
--(void)setupMasterMixer
+-(void)setMixerBusCount
 {
+    int busCount = [self channelCount];
     OSStatus result;
     result = AudioUnitSetProperty (_mixerUnit,
                                    kAudioUnitProperty_ElementCount,
                                    kAudioUnitScope_Input,
                                    0,
-                                   &_busCount,
-                                   sizeof (_busCount)
+                                   &busCount,
+                                   sizeof (busCount)
                                    );
     CheckError(result,"Unable to set buscount on mixer.");
     
@@ -477,10 +513,10 @@ OSStatus renderCallback(
     [self configUnit:_masterEQUnit];
     [self configUnit:_ioUnit];
     
-    result = AUGraphInitialize (_processingGraph);
+    result = AUGraphInitialize (_processGraph);
     CheckError(result,"Unable to initialze AUGraph object.");
     
-    result = AUGraphStart (_processingGraph);
+    result = AUGraphStart (_processGraph);
     CheckError(result,"Unable to start audio processing graph.");
 
     return result;

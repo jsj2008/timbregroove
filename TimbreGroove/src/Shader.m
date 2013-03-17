@@ -38,14 +38,14 @@ static NSHashTable * __shaders;
     GLuint vshader;
     NSString * path = [[NSBundle mainBundle] pathForResource:@(vert) ofType:@"vsh"];
     if (![self compileShader:&vshader type:GL_VERTEX_SHADER file:path headers:headers]) {
-        NSLog(@"Failed to compile vertex shader");
+        TGLog(LLJustSayin, @"Failed to compile vertex shader");
         exit(1);
     }
     
     GLuint fshader;
     path = [[NSBundle mainBundle] pathForResource:@(frag) ofType:@"fsh"];
     if (![self compileShader:&fshader type:GL_FRAGMENT_SHADER file:path headers:headers]) {
-        NSLog(@"Failed to compile fragment shader");
+        TGLog(LLJustSayin, @"Failed to compile fragment shader");
         exit(1);
     }
     
@@ -65,7 +65,7 @@ static NSHashTable * __shaders;
             _program = 0;
         }
         
-        NSLog(@"Failed to link program: %d", _program);
+        TGLog(LLJustSayin, @"Failed to link program: %d", _program);
         exit(1);
     }
     
@@ -79,7 +79,7 @@ static NSHashTable * __shaders;
         glDeleteShader(fshader);
     }
 #if DEBUG
-    NSLog(@"created shader: %@ (%d)" ,self.description,_program);
+    TGLog(LLJustSayin, @"created shader: %@ (%d)" ,self.description,_program);
 #endif
     return YES;
     
@@ -90,7 +90,7 @@ static NSHashTable * __shaders;
                                                encoding:NSUTF8StringEncoding
                                                   error:nil] ;
     if (!src) {
-        NSLog(@"Failed to load vertex shader %@",file);
+        TGLog(LLJustSayin, @"Failed to load vertex shader %@",file);
         exit(1);
     }
     
@@ -109,7 +109,7 @@ static NSHashTable * __shaders;
     if (logLength > 0) {
         GLchar *log = (GLchar *)malloc(logLength);
         glGetShaderInfoLog(*shader, logLength, &logLength, log);
-        NSLog(@"Shader %@ compile log:\n%s", file, log);
+        TGLog(LLJustSayin, @"Shader %@ compile log:\n%s", file, log);
         free(log);
     }
 #endif
@@ -118,7 +118,7 @@ static NSHashTable * __shaders;
     glGetShaderiv(*shader, GL_COMPILE_STATUS, &status);
     if (status == 0) {
         glDeleteShader(*shader);
-        NSLog(@"Bad compile status: %d",status);
+        TGLog(LLJustSayin, @"Bad compile status: %d",status);
         exit(1);
     }
     
@@ -136,14 +136,14 @@ static NSHashTable * __shaders;
     if (logLength > 0) {
         GLchar *log = (GLchar *)malloc(logLength);
         glGetProgramInfoLog(prog, logLength, &logLength, log);
-        NSLog(@"Program link log:\n%s", log);
+        TGLog(LLJustSayin, @"Program link log:\n%s", log);
         free(log);
     }
 #endif
     
     glGetProgramiv(prog, GL_LINK_STATUS, &status);
     if (status == 0) {
-        NSLog(@"Bad link status: %d",status);
+        TGLog(LLJustSayin, @"Bad link status: %d",status);
         exit(1);
     }
     
@@ -159,7 +159,7 @@ static NSHashTable * __shaders;
     if (logLength > 0) {
         GLchar *log = (GLchar *)malloc(logLength);
         glGetProgramInfoLog(prog, logLength, &logLength, log);
-        NSLog(@"Program validate log:\n%s", log);
+        TGLog(LLJustSayin, @"Program validate log:\n%s", log);
         free(log);
     }
     
@@ -181,7 +181,7 @@ static NSHashTable * __shaders;
     
     if( _program )
     {
-        NSLog(@"Deleting program: %d",_program);
+        TGLog(LLJustSayin, @"Deleting program: %d",_program);
         glDeleteProgram(_program);
         _program = 0;
     }
@@ -269,7 +269,7 @@ typedef struct _VarQueueItem VarStoreItem;
     }
 #ifdef DEBUG
     if( foundShader )
-        NSLog(@"reusing shader %d - %@",foundShader.program,shaderId);
+        TGLog(LLJustSayin, @"reusing shader %d - %@",foundShader.program,shaderId);
 #endif
     return foundShader;
 }
@@ -341,7 +341,7 @@ typedef struct _VarQueueItem VarStoreItem;
 #if DEBUG
         if( !_acceptMissingVars && _vars[indexIntoNames] == -1 )
         {
-            NSLog(@"Can't find attr/uniform for (%d) %s in program %d", indexIntoNames, _names[indexIntoNames],_program);
+            TGLog(LLJustSayin, @"Can't find attr/uniform for (%d) %s in program %d", indexIntoNames, _names[indexIntoNames],_program);
             exit(1);
         }
 #endif

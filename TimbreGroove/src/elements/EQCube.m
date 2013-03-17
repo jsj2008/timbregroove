@@ -110,8 +110,6 @@ NSString const * kParamRotateCube  = @"RotateCube";
     GenericWithTexture * button = [EventCapture getGraphViewTapChildElementOf:self
                                                                        inView:view
                                                                          atPt:pt];
-    NSLog(@"Got button request: %f,%f at %@",pt.x,pt.y,button);
-
     if( button == _prev )
         [self rotateToNextFace:-1];
     else if( button == _next )

@@ -229,7 +229,7 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
                                             0);
             
             CheckError(result,"Unable to set eq bypass");
-            NSLog(@"EQ for %d Enable: %d", idx, enable);
+            TGLog(LLJustSayin, @"EQ for %d Enable: %d", idx, enable);
         } copy]];        
     }];
 }
@@ -287,8 +287,8 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
             printf("%f,%f,%f,%f\n", f, (g_last_power+120)/120.0, g_last_radius,g_last_power);
         }
 #endif
-#if 1
-        NSLog(@"audio tweak[%p] param: %ld scope:%ld bus:%ld band:%d -> %.4f (%.2f/%.2f)",(void *)au,
+#if 0
+        TGLog(LLJustSayin, @"audio tweak[%p] param: %ld scope:%ld bus:%ld band:%d -> %.4f (%.2f/%.2f)",(void *)au,
               apd->aupid,(long)apd->scope,(long)bus,apd->band,f,apd->range.min,apd->range.max);
 #endif
     } copy];
@@ -364,7 +364,7 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
                                        0,
                                        &value);
         if( result )
-            NSLog(@"wups");
+            TGLog(LLJustSayin, @"wups");
         
         CheckError(result, "Error getting peak value");
         _peakTrigger(value);

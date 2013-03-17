@@ -127,8 +127,6 @@ typedef union _TweenData {
         switch (op) {
             case kTweenOpApplyTarget:
             {
-                NSLog(@"%@ Target float: %f",_parameter,_d.f.target);
-                
                 ((FloatParamBlock)_paramBlock)(_d.f.target);
                 break;
             }
@@ -155,7 +153,6 @@ typedef union _TweenData {
                 return ^(float f) {
                     [self reset];
                     _d.f.initial = _d.f.current;
-//                    NSLog(@"%@ Current float: %f + %f",_parameter,_d.f.current,f);
                     if( _parameter.additive )
                         _d.f.target = f + _d.f.initial;
                     else
@@ -248,10 +245,12 @@ typedef union _TweenData {
     return nil;
 }
 
+#if 0
 -(void)dealloc
 {
-    NSLog(@"Tweener died");
+    TGLog(LLJustSayin, @"Tweener died");
 }
+#endif
 
 -(void)decommission
 {
@@ -367,8 +366,9 @@ TweenCallback TweenLooper = ^TweenDoneIndicator(TriggerTween *tt) {
         [_tweenerReleasePool each:^(TriggerTween * tweener) {
             [tweener decommission];
         }];
-    
-    NSLog(@"Trigger map dealloc");
+#if 0
+    TGLog(LLJustSayin, @"Trigger map dealloc");
+#endif
 }
 
 -(void)addParameters:(NSDictionary *)nameKeyParamValues

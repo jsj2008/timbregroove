@@ -23,7 +23,7 @@
 
 @interface Midi : NSObject
 
--(MidiFile *)setupMidiFile:(NSString *)filename withInstrument:(Instrument *)instrument;
+-(MidiFile *)setupMidiFile:(NSString *)filename withInstrument:(Instrument *)instrument ss:(SoundSystem *)ss;
 -(MidiFreeRange *)setupMidiFreeRange:(NSArray *)instruments;
 -(void)getParameters:(NSMutableDictionary *)putHere;
 -(void)update:(NSTimeInterval)dt;

@@ -136,7 +136,7 @@
 #if DEBUG
     if( !e || !e->_shader )
     {
-        NSLog(@"Missing shader (did you call wireUp?)");
+        TGLog(LLJustSayin, @"Missing shader (did you call wireUp?)");
         exit(1);
     }
 #endif
@@ -154,7 +154,7 @@
 #if DEBUG
     if( !e || !e->_camera )
     {
-        NSLog(@"Missing camera  (did you call wireUp?)");
+        TGLog(LLJustSayin, @"Missing camera  (did you call wireUp?)");
         exit(1);
     }
 #endif
@@ -180,7 +180,7 @@
 #if DEBUG
     if( !e || !e->_view )
     {
-        NSLog(@"Missing graph view member  (did you call wireUp?)");
+        TGLog(LLJustSayin, @"Missing graph view member  (did you call wireUp?)");
         exit(1);
     }
 #endif

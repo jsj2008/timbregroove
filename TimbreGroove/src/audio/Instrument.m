@@ -20,15 +20,13 @@
 
 +(id)instrumentWithConfig:(ConfigInstrument *)config
                  andGraph:(AUGraph)graph
-                atChannel:(int)channel
 {
-    return [[Instrument alloc] initWithConfig:config andGraph:graph atChannel:channel];
+    return [[Instrument alloc] initWithConfig:config andGraph:graph];
 }
 
 
 -(id)initWithConfig:(ConfigInstrument *)config
            andGraph:(AUGraph)graph
-          atChannel:(int)channel
 {
     if( (self = [super init]) )
     {
@@ -38,7 +36,6 @@
         _lowestPlayable = config.low;
         _highestPlayable = config.high;
         _prevTimeStamp = 0;
-        _channel = channel;
     }
     
     return self;
@@ -52,7 +49,7 @@
     // "Calling this function deallocates the audio unit’s resources."
     // AND CRASHES THE APP
   //  AudioUnitUninitialize(_sampler);
-    NSLog(@"Instrument gone");
+    TGLog(LLJustSayin, @"Instrument gone");
 }
 
 -(void)loadSound:(ConfigInstrument *)config
@@ -92,7 +89,7 @@
     result = AUGraphNodeInfo (_graph, _graphNode, 0, &_sampler);
     CheckError(result,"Unable to obtain a reference to the Sampler unit.");
     
-    NSLog(@"Created sampler: %ld",(long)_sampler);
+    TGLog(LLJustSayin, @"Created sampler: %ld",(long)_sampler);
 }
 
 - (OSStatus) loadSynthFromPresetURL: (NSURL *) presetURL 
@@ -136,41 +133,6 @@
                                   &bpdata,
                                   sizeof(bpdata));
     CheckError(result, "Unable to set the preset property on the Sampler.");
-    return result;
-}
-
--(void)addNoteCache:(int)note ts:(MIDITimeStamp)ts
-{
-    
-}
-
--(OSStatus)playNote:(int)note forDuration:(NSTimeInterval)duration
-{
-    UInt32 noteNum = note;
-    UInt32 onVelocity = 127;
-    UInt32 noteCommand =     kMIDIMessage_NoteOn << 4 | 0;
-    
-    OSStatus result = noErr;
-    result = MusicDeviceMIDIEvent (_sampler,
-                                   noteCommand,
-                                   noteNum, onVelocity, 0);
-    
-    CheckError(result,"Unable to start note.");
-    [self performSelector:@selector(stopNote:) withObject:@(note) afterDelay:duration];
-    return result;
-}
-
--(OSStatus)stopNote:(id)note
-{
-    UInt32 noteNum = [(NSNumber *)note unsignedIntegerValue];
-    UInt32 noteCommand = kMIDIMessage_NoteOff << 4 | 0;
-    
-    OSStatus result = noErr;
-    result = MusicDeviceMIDIEvent (_sampler,
-                                   noteCommand,
-                                   noteNum, 0, 0);
-    
-    CheckError(result,"Unable to stop note.");
     return result;
 }
 

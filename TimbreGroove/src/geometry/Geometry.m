@@ -74,7 +74,7 @@
                 break;
 #if DEBUG
             default:
-                NSLog(@"Unknown StrideType");
+                TGLog(LLJustSayin, @"Unknown StrideType");
                 exit(1);
                 break;
 #endif

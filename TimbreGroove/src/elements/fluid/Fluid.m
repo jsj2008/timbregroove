@@ -135,7 +135,7 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     
     if( self )
     {
-        NSLog(@"Creating shader for %s/%s",vert,frag);
+        TGLog(LLJustSayin, @"Creating shader for %s/%s",vert,frag);
         memcpy(&_fvars, &__kVariables, sizeof(__kVariables));
     }
     
@@ -637,7 +637,7 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
         _input_x = newX;
         _input_y = newY;
         
-         NSLog(@"drag at: %f, %f", _input_x, _input_y);
+         TGLog(LLJustSayin, @"drag at: %f, %f", _input_x, _input_y);
     }
 }
 

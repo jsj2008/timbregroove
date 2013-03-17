@@ -66,7 +66,7 @@ static int smbFft(float *fftBuffer, long fftFrameSize, long sign)
 	}
     
     return k;
-    //    NSLog(@"done fft");
+    //    TGLog(LLJustSayin, @"done fft");
 }
 
 void fft(float *in_out, int len)

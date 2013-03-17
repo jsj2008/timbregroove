@@ -194,7 +194,7 @@
     controller.delegate = self;
     if( !controller.view )
     {
-        NSLog(@"wups, no view");
+        TGLog(LLJustSayin, @"wups, no view");
     }
     else
     {
@@ -372,7 +372,7 @@ didFinishPickingMediaWithInfo:(NSDictionary *)info
         ++count;
     }
 #if DEBUG
-    NSLog(@"Can't find key %@ in values array",sd.initialValue);
+    TGLog(LLJustSayin, @"Can't find key %@ in values array",sd.initialValue);
     exit(1);
 #endif
     return 0;
@@ -517,7 +517,7 @@ didFinishPickingMediaWithInfo:(NSDictionary *)info
     
     if(newImage == nil)
     {
-        NSLog(@"could not scale image");
+        TGLog(LLJustSayin, @"could not scale image");
     }
     
     //pop the context to get back to the default

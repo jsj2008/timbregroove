@@ -74,7 +74,7 @@ typedef void (^RecurseBlock)(TG3dObject *);
 {
     self.view = nil;
     _single = nil;
-    NSLog(@"Graph object gone");
+    TGLog(LLJustSayin, @"Graph object gone");
 }
 
 #pragma clang diagnostic push

@@ -10,6 +10,7 @@
 #import "UIView+TGExtension.h"
 #import <MobileCoreServices/MobileCoreServices.h>
 #import "AssetLoader.h"
+#import "TGTypes.h"
 
 // for SettingsDescriptor.priority
 #define SHADER_SETTINGS    0

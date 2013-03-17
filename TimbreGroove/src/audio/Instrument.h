@@ -20,10 +20,7 @@ enum {
 @interface Instrument : NSObject
 
 +(id)instrumentWithConfig:(ConfigInstrument *)config
-                 andGraph:(AUGraph)graph
-                atChannel:(int)channel;
-
--(OSStatus)playNote:(int)note forDuration:(NSTimeInterval)duration;
+                 andGraph:(AUGraph)graph;
 
 @property (nonatomic) int channel;
 @property (nonatomic,readonly) int lowestPlayable;

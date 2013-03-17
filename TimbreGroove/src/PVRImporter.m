@@ -84,7 +84,7 @@
 
 void EnvExitMsg( const char * msg )
 {
-    NSLog(@"%s",msg);
+    TGLog(LLJustSayin, @"%s",msg);
     exit(-1);
 }
 

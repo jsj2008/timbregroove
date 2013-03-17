@@ -44,13 +44,14 @@ enum MidiNotes {
 @interface SoundSystem : NSObject 
 +(SoundSystem *)sharedInstance;
 
--(Instrument *)loadInstrumentFromConfig:(ConfigInstrument *)config intoChannel:(int)channel;
+-(Instrument *)loadInstrumentFromConfig:(ConfigInstrument *)config;
 -(void)plugInstrumentIntoBus:(Instrument *)instrument;
 -(void)unplugInstrumentFromBus:(Instrument *)instrument;
 -(void)decomissionInstrument:(Instrument *)instrument;
 
 @property (nonatomic,readonly) AudioUnit mixerUnit;
 @property (nonatomic,readonly) AudioUnit masterEQUnit;
+@property (nonatomic,readonly) AUGraph processGraph;
 @property (nonatomic) Float64 graphSampleRate;
 -(void)update:(NSTimeInterval)dt;
 -(void)triggersChanged:(Scene *)scene;

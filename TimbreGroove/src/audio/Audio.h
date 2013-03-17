@@ -32,6 +32,8 @@
 
 -(void)startMidiFile;
 
+-(UInt32)realChannelFromVirtual:(UInt32)virtualChannel;
+
 @property (nonatomic,weak)  SoundSystem * soundSystem;
 @property (nonatomic,strong) SoundSystemParameters * ssp;
 

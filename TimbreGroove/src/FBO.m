@@ -79,7 +79,7 @@
     GLint fbs = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if(  fbs != GL_FRAMEBUFFER_COMPLETE )
     {
-        NSLog(@"Framebuffer status blowed up: 0x%04X", fbs);
+        TGLog(LLJustSayin, @"Framebuffer status blowed up: 0x%04X", fbs);
         return nil;
     }
 #endif
@@ -91,7 +91,7 @@
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     
-    NSLog(@"created frame/render buffers %d/%d",_fbo,_render);
+    TGLog(LLJustSayin, @"created frame/render buffers %d/%d",_fbo,_render);
     
     return [super initWithGlTextureId:texture];
 }
@@ -110,7 +110,7 @@
 {
     glDeleteFramebuffers(1, &_fbo);
     glDeleteRenderbuffers(1, &_render);
-    NSLog(@"Delete fbo %d and render %d buffers",_fbo,_render);
+    TGLog(LLJustSayin, @"Delete fbo %d and render %d buffers",_fbo,_render);
     _fbo = _render = 0;
 }
 @end
