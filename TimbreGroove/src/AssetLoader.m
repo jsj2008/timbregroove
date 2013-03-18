@@ -26,7 +26,7 @@
 
 -(void)loadData
 {
-    TGLog(LLJustSayin, @"don't know how to load data. use AsstoTo* class");
+    TGLog(LLShitsOnFire, @"don't know how to load data. use AsstoTo* class");
     exit(1);
 }
 @end
@@ -59,9 +59,7 @@
 	
     ALAssetsLibraryAccessFailureBlock failureblock  = ^(NSError *myerror)
     {
-		TGLog(LLJustSayin, @"NOT GOT ASSET");
-		
-        TGLog(LLJustSayin, @"Error '%@' getting asset from library", [myerror localizedDescription]);
+        TGLog(LLShitsOnFire, @"Error '%@' getting asset from library", [myerror localizedDescription]);
     };
 	
 	// schedules the asset read
@@ -98,9 +96,7 @@
 	
     ALAssetsLibraryAccessFailureBlock failureblock  = ^(NSError *myerror)
     {
-		TGLog(LLJustSayin, @"NOT GOT ASSET");
-		
-        TGLog(LLJustSayin, @"Error '%@' getting asset from library", [myerror localizedDescription]);
+        TGLog(LLShitsOnFire, @"Error '%@' getting asset from library", [myerror localizedDescription]);
     };
 	
 	// schedules the asset read

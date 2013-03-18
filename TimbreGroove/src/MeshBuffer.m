@@ -104,7 +104,7 @@
 #if DEBUG
     if( countStrides > MAX_STRIDES )
     {
-        TGLog(LLJustSayin, @"Too many strides");
+        TGLog(LLShitsOnFire, @"Too many strides");
         exit(1);
     }
 #endif
@@ -119,7 +119,7 @@
     GLsizei bufferSize = _bufferSize = strideSize * numVertices;
     
     glGenBuffers(1, &_glVBuffer);
-    TGLog(LLJustSayin, @"created vertex buffer: %@ (%d)",self.description, _glVBuffer);
+    TGLog(LLGLResource, @"created vertex buffer: %@ (%d)",self.description, _glVBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, _glVBuffer);
     glBufferData(GL_ARRAY_BUFFER, bufferSize, data, _usage);
     
@@ -138,7 +138,7 @@
 {
     _numIndices = numIndices;
     glGenBuffers(1, &_glIBuffer);
-    TGLog(LLJustSayin, @"created index buffer: %d",_glIBuffer);
+    TGLog(LLGLResource, @"created index buffer: %d",_glIBuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glIBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof(unsigned int), data, _usage);
 }
@@ -204,9 +204,7 @@
         glDeleteBuffers(1, &_glVBuffer);
     if( glIsBuffer(_glIBuffer))
         glDeleteBuffers(1, &_glIBuffer);
-    TGLog(LLJustSayin, @"Deleted buffers index (%d) and vertex (%d)",_glIBuffer,_glVBuffer);
-    _glIBuffer = -1;
-    _glVBuffer = 0;
+    TGLog(LLGLResource | LLObjLifetime, @"%@ Deleted buffers index (%d) and vertex (%d)",self,_glIBuffer,_glVBuffer);
 }
 @end
 

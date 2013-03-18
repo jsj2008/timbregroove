@@ -109,13 +109,12 @@ typedef union _TweenData {
     self = [super init];
     if( self )
     {
-        _type = type;
-        _parameter = parameter;
+        _type       = type;
+        _parameter  = parameter;
         _paramBlock = [parameter getParamBlockOfType:type];
-        _func = func;
-        _duration = len;
-        _queue = queue;
-        
+        _func       = func;
+        _duration   = len;
+        _queue      = queue;
     }
     return self;
 }
@@ -245,12 +244,10 @@ typedef union _TweenData {
     return nil;
 }
 
-#if 0
 -(void)dealloc
 {
-    TGLog(LLJustSayin, @"Tweener died");
+    TGLog(LLObjLifetime, @"Tweener died");
 }
-#endif
 
 -(void)decommission
 {
@@ -366,9 +363,7 @@ TweenCallback TweenLooper = ^TweenDoneIndicator(TriggerTween *tt) {
         [_tweenerReleasePool each:^(TriggerTween * tweener) {
             [tweener decommission];
         }];
-#if 0
-    TGLog(LLJustSayin, @"Trigger map dealloc");
-#endif
+    TGLog(LLObjLifetime, @"Trigger map dealloc");
 }
 
 -(void)addParameters:(NSDictionary *)nameKeyParamValues

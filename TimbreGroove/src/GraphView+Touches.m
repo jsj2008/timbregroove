@@ -240,7 +240,6 @@
         CGPoint spt = (CGPoint){   (pt.x / sz.width  * 2) - 1.0,
                                  -((pt.y / sz.height * 2) - 1.0)  };
 
-        TGLog(LLJustSayin, @"pt: { %f,%f } scaled: { %f,%f } ",pt.x, pt.y, spt.x,spt.y);
         // we get a ton of 0 movement
         if( fabsf(spt.x) > FLT_EPSILON && _currentTriggers->_triggerPanX )
             _currentTriggers->_triggerPanX(spt.x);

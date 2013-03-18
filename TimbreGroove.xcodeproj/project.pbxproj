@@ -210,7 +210,7 @@
 		5798B05916BA00F70093F473 /* pause.png in Resources */ = {isa = PBXBuildFile; fileRef = 5798B05716BA00F70093F473 /* pause.png */; };
 		5798B05A16BA00F70093F473 /* play.png in Resources */ = {isa = PBXBuildFile; fileRef = 5798B05816BA00F70093F473 /* play.png */; };
 		579AD1A916C40B670071AA9A /* Config.m in Sources */ = {isa = PBXBuildFile; fileRef = 579AD1A816C40B670071AA9A /* Config.m */; };
-		57A4C22016DFDCF10044B3C9 /* Instrument.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A4C21F16DFDCF10044B3C9 /* Instrument.m */; };
+		57A4C22016DFDCF10044B3C9 /* Sampler.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A4C21F16DFDCF10044B3C9 /* Sampler.m */; };
 		57A58EA816ADE68200C9FA53 /* Cube.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A58EA716ADE68200C9FA53 /* Cube.m */; };
 		57A58EB116AE020C00C9FA53 /* poolLines.png in Resources */ = {isa = PBXBuildFile; fileRef = 57A58EB016AE020C00C9FA53 /* poolLines.png */; };
 		57A66EED167B1D1C00B9EA75 /* Texture.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A66EEC167B1D1C00B9EA75 /* Texture.m */; };
@@ -585,8 +585,8 @@
 		5798B05816BA00F70093F473 /* play.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = play.png; sourceTree = "<group>"; };
 		579AD1A716C40B670071AA9A /* Config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
 		579AD1A816C40B670071AA9A /* Config.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Config.m; sourceTree = "<group>"; };
-		57A4C21E16DFDCF10044B3C9 /* Instrument.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Instrument.h; sourceTree = "<group>"; };
-		57A4C21F16DFDCF10044B3C9 /* Instrument.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = Instrument.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		57A4C21E16DFDCF10044B3C9 /* Sampler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sampler.h; sourceTree = "<group>"; };
+		57A4C21F16DFDCF10044B3C9 /* Sampler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = Sampler.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		57A58EA616ADE68200C9FA53 /* Cube.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Cube.h; sourceTree = "<group>"; };
 		57A58EA716ADE68200C9FA53 /* Cube.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Cube.m; sourceTree = "<group>"; };
 		57A58EB016AE020C00C9FA53 /* poolLines.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = poolLines.png; sourceTree = "<group>"; };
@@ -804,8 +804,8 @@
 				573560EE16EDB34C001EEA83 /* EQNames.h */,
 				577368D516CDEE380051551F /* SoundSystemParameters.h */,
 				577368D616CDEE380051551F /* SoundSystemParameters.m */,
-				57A4C21E16DFDCF10044B3C9 /* Instrument.h */,
-				57A4C21F16DFDCF10044B3C9 /* Instrument.m */,
+				57A4C21E16DFDCF10044B3C9 /* Sampler.h */,
+				57A4C21F16DFDCF10044B3C9 /* Sampler.m */,
 				5714713D16C8451E00CA2A69 /* Midi.h */,
 				5714713E16C8451E00CA2A69 /* Midi.m */,
 				57BE7FB516CACA0C001972ED /* RingBuffer.h */,
@@ -1749,7 +1749,7 @@
 				5751F2E616D5FACB00144F2B /* Ripple.m in Sources */,
 				572098E116DA9FA40075E584 /* Parameter.m in Sources */,
 				57DF536A16DC1A6000990B8D /* Serenity.m in Sources */,
-				57A4C22016DFDCF10044B3C9 /* Instrument.m in Sources */,
+				57A4C22016DFDCF10044B3C9 /* Sampler.m in Sources */,
 				5781CAA616E55B46007C8EC2 /* Block.m in Sources */,
 				5781CAAC16E57CB1007C8EC2 /* NSObject+BlockObservation.m in Sources */,
 				5781CAB516E581B6007C8EC2 /* NSArray+BlocksKit.m in Sources */,

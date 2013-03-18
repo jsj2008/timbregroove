@@ -69,7 +69,7 @@
 {
     [super viewDidLoad];
 
-    TGSetLogLevel(LLKindaImportant);
+    TGSetLogLevel(LLCaptureOps);
     
     _postDeleteSceneIndex = -1;
     // force some global instializations

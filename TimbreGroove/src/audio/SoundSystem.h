@@ -25,8 +25,9 @@ extern const AudioUnitParameterValue kEQBypassOFF;
 void _CheckError( OSStatus error, const char *operation);
 
 @class ConfigInstrument;
-@class Instrument;
+@class Sampler;
 @class SoundSystemParameters;
+@class Midi;
 
 enum MidiNotes {
     kC0 = 0,
@@ -44,16 +45,15 @@ enum MidiNotes {
 @interface SoundSystem : NSObject 
 +(SoundSystem *)sharedInstance;
 
--(Instrument *)loadInstrumentFromConfig:(ConfigInstrument *)config;
--(void)plugInstrumentIntoBus:(Instrument *)instrument;
--(void)unplugInstrumentFromBus:(Instrument *)instrument;
--(void)decomissionInstrument:(Instrument *)instrument;
+-(Sampler *)loadInstrumentFromConfig:(ConfigInstrument *)config;
 
 @property (nonatomic,readonly) AudioUnit mixerUnit;
 @property (nonatomic,readonly) AudioUnit masterEQUnit;
 @property (nonatomic,readonly) AUGraph processGraph;
 @property (nonatomic) Float64 graphSampleRate;
+@property (nonatomic,strong) Midi * midi;
 -(void)update:(NSTimeInterval)dt;
+-(void)getParameters:(NSMutableDictionary *)putHere;
 -(void)triggersChanged:(Scene *)scene;
 - (OSStatus) configUnit:(AudioUnit)unit;
 

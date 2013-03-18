@@ -84,7 +84,7 @@
 
 void EnvExitMsg( const char * msg )
 {
-    TGLog(LLJustSayin, @"%s",msg);
+    TGLog(LLShitsOnFire, @"%s",msg);
     exit(-1);
 }
 

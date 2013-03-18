@@ -9,7 +9,7 @@
 #import "Scene.h"
 #import "Names.h"
 #import "Audio.h"
-#import "Instrument.h"
+#import "Sampler.h"
 #import "TriggerMap.h"
 #import "NSString+Tweening.h"
 #import "NoteGenerator.h"
@@ -41,7 +41,7 @@
     
     _ambienceChannel = [self realChannelFromVirtual:AMBIENCE_VIRTUAL_CHANNEL];
     
-    Instrument * congas = _instruments[CONGAS_VIRTUAL_CHANNEL];
+    Sampler * congas = _instruments[CONGAS_VIRTUAL_CHANNEL];
     _congasChannel = congas.channel;
     NoteRange congasRange = (NoteRange){ congas.lowestPlayable, congas.highestPlayable };
     _congasScale = [[NoteGenerator alloc] initWithScale:kScaleSemitones isRandom:false andRange:congasRange];
@@ -66,8 +66,6 @@
         _channelVolumeDecay = [tm getFloatTrigger  :kChannelVolumeDecay];
         _selectChannel      = [tm getIntTrigger    :kParamChannel];
         _midiNote           = [tm getPointerTrigger:kParamMIDINote];
-        
-        _channelVolume(0.0);
     }
     else
     {
@@ -95,7 +93,7 @@
                                   _midiNote(&mnm);
                                   mnm.note = [_ambientScale next];
                                   _midiNote(&mnm);
-                                  _channelVolumeDecay(1.0);
+                                  _channelVolumeDecay(0.2);
                               }];
 }
 @end

@@ -6,25 +6,36 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "Instrument.h"
+#import "Sampler.h"
 #import "Config.h"
 #import "SoundSystem.h"
+#import "Midi.h"
 
-@interface Instrument () {
-    MIDITimeStamp   _prevTimeStamp;
+@interface Sampler () {
     AUGraph         _graph;
 }
 
 @end
-@implementation Instrument
+@implementation Sampler
 
 +(id)instrumentWithConfig:(ConfigInstrument *)config
                  andGraph:(AUGraph)graph
 {
-    return [[Instrument alloc] initWithConfig:config andGraph:graph];
+    return [[Sampler alloc] initWithConfig:config andGraph:graph];
 }
 
 
+-(id)initWithGraph:(AUGraph)graph
+{
+    if( (self = [super init]) )
+    {
+        _graph = graph;
+        _available = true;
+        [self makeSampler];
+    }
+    
+    return self;
+}
 -(id)initWithConfig:(ConfigInstrument *)config
            andGraph:(AUGraph)graph
 {
@@ -33,9 +44,6 @@
         _graph = graph;
         [self makeSampler];
         [self loadSound:config];
-        _lowestPlayable = config.low;
-        _highestPlayable = config.high;
-        _prevTimeStamp = 0;
     }
     
     return self;
@@ -45,11 +53,16 @@
 {
     if( _midiEndPoint )
         CheckError(MIDIEndpointDispose(_midiEndPoint), "Error disposing endpoint");
-
+    
     // "Calling this function deallocates the audio unit’s resources."
     // AND CRASHES THE APP
-  //  AudioUnitUninitialize(_sampler);
-    TGLog(LLJustSayin, @"Instrument gone");
+    //  AudioUnitUninitialize(_sampler);
+    TGLog(LLObjLifetime, @"Instrument gone");
+}
+
+-(void)releaseSound
+{
+    _available = true;
 }
 
 -(void)loadSound:(ConfigInstrument *)config
@@ -70,6 +83,9 @@
     {
         [self loadSynthFromPresetURL: presetURL];
     }
+    _lowestPlayable = config.low;
+    _highestPlayable = config.high;
+    _available = false;
 }
 
 -(void)makeSampler
@@ -85,14 +101,67 @@
     
     result = AUGraphAddNode(_graph, &cd, &_graphNode);
     CheckError(result,"Unable to add the Sampler unit to the audio processing graph.");
-    
-    result = AUGraphNodeInfo (_graph, _graphNode, 0, &_sampler);
-    CheckError(result,"Unable to obtain a reference to the Sampler unit.");
-    
-    TGLog(LLJustSayin, @"Created sampler: %ld",(long)_sampler);
 }
 
-- (OSStatus) loadSynthFromPresetURL: (NSURL *) presetURL 
+-(void)setNodeIntoGraph
+{
+    OSStatus result = AUGraphNodeInfo (_graph, _graphNode, 0, &_sampler);
+    CheckError(result,"Unable to obtain a reference to the Sampler unit.");
+    TGLog(LLMidiStuff, @"Created sampler: %ld",(long)_sampler);
+}
+
+-(void)setupMidi:(Midi *)midi
+{
+    OSStatus result = noErr;
+    
+    result = MIDIOutputPortCreate (midi.midiClient, CFSTR("out port"), &_outPort );
+
+    CheckError(result, " Couldn't create MIDI output port");
+    
+    MIDIEndpointRef virtualEndpoint;
+    
+    result = MIDIDestinationCreate(midi.midiClient,
+                                   CFSTR("TG Virtual Destination"),
+                                   midi.readProc,
+                                   (void *)(_sampler),
+                                   &virtualEndpoint);
+    
+    CheckError(result,"MIDIDestinationCreate failed");
+    
+    _midiEndPoint = virtualEndpoint;
+}
+
+-(void)sendNote:(MIDINoteMessage *)noteMsg
+{
+    __block MIDIPacketList packetList;
+    packetList.numPackets = 1;
+    packetList.packet[ 0]. length = 3;
+    packetList.packet[ 0]. data[ 0] = 0x90;
+    packetList.packet[ 0]. data[ 1] = noteMsg->note & 0x7F;
+    packetList.packet[ 0]. data[ 2] = noteMsg->velocity & 0x7F;
+    packetList.packet[ 0]. timeStamp = 0;
+  
+/*
+    OSStatus
+	result = MusicDeviceMIDIEvent(_sampler, 0x90, noteMsg->note & 0x7,  noteMsg->velocity & 0x7F, 0);
+    CheckError(result, "Couldn't send note directly to sampler");
+    
+    [NSObject performBlock:[^{
+        OSStatus
+        result = MusicDeviceMIDIEvent(_sampler, 0x80, noteMsg->note & 0x7,  0, 0);
+    } copy] afterDelay:noteMsg->duration];
+
+*/
+    CheckError( MIDISend(_outPort, _midiEndPoint, &packetList), "Couldn't send note ON");
+ 
+    [NSObject performBlock:[^{
+        packetList.packet[ 0]. data[ 0] = 0x80;
+        CheckError( MIDISend(_outPort, _midiEndPoint, &packetList), "Couldn't send note OFF");
+    } copy] afterDelay:noteMsg->duration];
+
+}
+
+- (OSStatus) loadSynthFromPresetURL: (NSURL *) presetURL
 {
     OSStatus result = noErr;
     

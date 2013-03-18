@@ -23,12 +23,10 @@
 
 @interface Midi : NSObject
 
--(MidiFile *)setupMidiFile:(NSString *)filename withInstrument:(Instrument *)instrument ss:(SoundSystem *)ss;
--(MidiFreeRange *)setupMidiFreeRange:(NSArray *)instruments;
--(void)getParameters:(NSMutableDictionary *)putHere;
+-(MidiFile *)setupMidiFile:(NSString *)filename withInstrument:(Sampler *)instrument ss:(SoundSystem *)ss;
 -(void)update:(NSTimeInterval)dt;
--(void)triggersChanged:(Scene *)scene;
 
 
+@property (nonatomic) MIDIReadProc  readProc;
 @property (nonatomic) MIDIClientRef midiClient;
 @end

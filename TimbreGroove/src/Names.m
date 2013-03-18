@@ -37,6 +37,8 @@ NSString const * kParamEQMidGain = @_kEQMidGain;
 NSString const * kParamEQHighCutoff= @_kEQHighCutoff;
 NSString const * kParamEQHighResonance = @_kEQHighResonance;
 
+NSString const * kParamAudioFrameCapture = @"AudioFrameCapture";
+
 NSString const * kParamInstrumentP1  = @"PerformanceParameter1";
 NSString const * kParamInstrumentP2  = @"PerformanceParameter2";
 NSString const * kParamInstrumentP3  = @"PerformanceParameter3";

@@ -10,6 +10,7 @@
 #import <AVFoundation/AVFoundation.h>
 
 @class ConfigInstrument;
+@class Midi;
 
 enum {
     kMIDIMessage_NoteOn    = 0x9,
@@ -17,17 +18,28 @@ enum {
 };
 
 
-@interface Instrument : NSObject
+@interface Sampler : NSObject
 
 +(id)instrumentWithConfig:(ConfigInstrument *)config
                  andGraph:(AUGraph)graph;
 
-@property (nonatomic) int channel;
+-(void)loadSound:(ConfigInstrument *)config;
+-(void)releaseSound;
+
+-(id)initWithGraph:(AUGraph)graph;
+-(void)setNodeIntoGraph;
+-(void)setupMidi:(Midi *)midi;
+
+-(void)sendNote:(MIDINoteMessage *)noteMsg;
+
 @property (nonatomic,readonly) int lowestPlayable;
 @property (nonatomic,readonly) int highestPlayable;
 @property (nonatomic,readonly) AudioUnit sampler;
 @property (nonatomic,readonly) AUNode    graphNode;
 @property (nonatomic) bool configured;
+@property (nonatomic) MIDIPortRef     outPort;
 @property (nonatomic) MIDIEndpointRef midiEndPoint;
+@property (nonatomic) int channel;
+@property (nonatomic,readonly) bool available;
 @end
 

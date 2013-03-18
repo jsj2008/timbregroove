@@ -103,13 +103,13 @@
 {
     _triggers = nil;
     _tweenQueue = nil;
-    [_graph triggersChanged:nil];
-    [_audio triggersChanged:nil];
+    if( !_paused )
+        [self pause];
 }
 
 -(void)dealloc
 {
-    TGLog(LLJustSayin, @"Scene dealloc");
+    TGLog(LLObjLifetime, @"Scene dealloc");
 }
 
 -(void)pause

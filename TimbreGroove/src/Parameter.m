@@ -43,12 +43,10 @@
     _block = nil;
 }
 
-#if 0
 -(void)dealloc
 {
-    TGLog(LLJustSayin, @"Parameter %@ died",self);
+    TGLog(LLObjLifetime, @"Parameter %@ died",self);
 }
-#endif
 
 -(void)getValue:(void *)p ofType:(char)type
 {
@@ -104,7 +102,7 @@
         if( _paramType == _C_PTR )
             return _block;
     }
-    TGLog(LLJustSayin, @"Unsupported param trigger: %c requested on a %c type",requestParamType,_paramType);
+    TGLog(LLShitsOnFire, @"Unsupported param trigger: %c requested on a %c type",requestParamType,_paramType);
     exit(-1);
     return nil;
 }
@@ -240,7 +238,6 @@
 {
     if( type == _C_FLT )
     {
-        TGLog(LLJustSayin, @"%@ return value: %f",self,_value);
         *(float *)p = _value;
     }
     else if( type == TGC_POINT )

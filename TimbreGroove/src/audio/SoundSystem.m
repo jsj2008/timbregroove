@@ -16,7 +16,7 @@
 #import "RingBuffer.h"
 #import <libkern/OSAtomic.h>
 #import "Names.h"
-#import "Instrument.h"
+#import "Sampler.h"
 #import "Scene.h"
 
 void _CheckError( OSStatus error, const char *operation) {
@@ -113,7 +113,9 @@ OSStatus renderCallback(
     PointerParamBlock   _bufferTrigger;
     RenderCBContext     _cbContext;
 
-    AudioUnit _channelMap[16];
+    NSMutableArray * _samplers;
+    
+    UInt32 _ioFramesPerSlice;
 }
 
 @end
@@ -122,46 +124,12 @@ OSStatus renderCallback(
 
 @implementation SoundSystem
 
-
--(UInt32)assignChannel:(AudioUnit)au
-{
-    for( int i = 0; i < (sizeof(_channelMap)/sizeof(_channelMap[0])); i++ )
-    {
-        if( _channelMap[i] == EMPTY_CHANNEL )
-        {
-            _channelMap[i] = au;
-            return i;
-        }
-    }
-    TGLog(LLShitsOnFire,@"Ran out of channels");
-    exit(-1);
-    return -1;
-}
-
--(int)channelCount
-{
-    int highestChannel = 0;
-    for( int i = 0; i < (sizeof(_channelMap)/sizeof(_channelMap[0])); i++ )
-    {
-        if( _channelMap[i] != EMPTY_CHANNEL )
-            highestChannel = i;
-    }
-    return highestChannel + 1;
-}
-
--(void)freeChannel:(UInt32)channel
-{
-    _channelMap[channel] = EMPTY_CHANNEL;
-}
-
 -(id)init
 {
     self = [super init];
     if( self )
     {
-        for( int i = 0; i < (sizeof(_channelMap)/sizeof(_channelMap[0])); i++ )
-            _channelMap[i] = EMPTY_CHANNEL;
-        
+        _midi = [[Midi alloc] init];
         _cbContext.rbo = 0;
         
         [self setupAVSession];
@@ -205,7 +173,6 @@ OSStatus renderCallback(
     _stdASBD.mChannelsPerFrame  = 2;                    // 2 indicates stereo
     _stdASBD.mBitsPerChannel    = 8 * bytesPerSample;
     _stdASBD.mSampleRate        = _graphSampleRate;
-    
 }
 
 
@@ -216,6 +183,39 @@ OSStatus renderCallback(
             __sharedSoundSystem = [SoundSystem new];
     }
     return __sharedSoundSystem;
+}
+
+-(void)handleParamChange:(NSString const *)paramName value:(float)value
+{
+    
+}
+
+-(void)getParameters:(NSMutableDictionary *)putHere
+{
+    FloatParamBlock(^closure)(NSString const * name) =
+    ^FloatParamBlock(NSString const * name){
+        return ^(float f) {
+            [self handleParamChange:name value:f ];
+        };
+    };
+    
+    [putHere addEntriesFromDictionary:
+     @{
+              kParamTempo: [Parameter withBlock:[closure(kParamTempo) copy]],
+              kParamPitch: [Parameter withBlock:[closure(kParamPitch) copy]],
+       kParamInstrumentP1: [Parameter withBlock:[closure(kParamInstrumentP1) copy]],
+       kParamInstrumentP2: [Parameter withBlock:[closure(kParamInstrumentP2) copy]],
+       kParamInstrumentP3: [Parameter withBlock:[closure(kParamInstrumentP3) copy]],
+       kParamInstrumentP4: [Parameter withBlock:[closure(kParamInstrumentP4) copy]],
+       kParamInstrumentP5: [Parameter withBlock:[closure(kParamInstrumentP5) copy]],
+       kParamInstrumentP6: [Parameter withBlock:[closure(kParamInstrumentP6) copy]],
+       kParamInstrumentP7: [Parameter withBlock:[closure(kParamInstrumentP7) copy]],
+       kParamInstrumentP8: [Parameter withBlock:[closure(kParamInstrumentP8) copy]],
+           kParamMIDINote: [Parameter withBlock:[^(MIDINoteMessage *msg) {
+        Sampler * sampler = _samplers[msg->channel];
+        [sampler sendNote:msg];
+    } copy]]
+     }];
 }
 
 -(void)triggersChanged:(Scene *)scene
@@ -240,6 +240,8 @@ OSStatus renderCallback(
         }
     }
     _bufferTrigger = newTrigger;
+    
+    TGLog(LLCaptureOps, @"Buffer trigger: %p for %@",(__bridge void *)_bufferTrigger,scene);
 }
 
 -(void)update:(NSTimeInterval)dt
@@ -274,6 +276,11 @@ OSStatus renderCallback(
             
             RingBufferFetch(ctx.rbo, _captureBuffer, kFramesForDisplay, ts);
             
+#ifdef DEBUG
+            static int capCount = 0;
+            if( capCount++ % 120 == 0 )
+                TGLog(LLCaptureOps, @"Sending cap buffer: %p",_captureBuffer);
+#endif
             _bufferTrigger(_captureBuffer);
             
             OSAtomicCompareAndSwap32Barrier(_cbContext.fetchCount,
@@ -308,29 +315,24 @@ OSStatus renderCallback(
     return YES;
 }
 
--(Instrument *)loadInstrumentFromConfig:(ConfigInstrument *)config
+-(Sampler *)loadInstrumentFromConfig:(ConfigInstrument *)config
 {
-    return [Instrument instrumentWithConfig:config andGraph:_processGraph];
+    for( Sampler * sampler in _samplers )
+    {
+        if( sampler.available )
+        {
+            [sampler loadSound:config];
+            return sampler;
+        }
+    }
+    return nil;
 }
 
--(void)plugInstrumentIntoBus:(Instrument *)instrument
+-(void)plugInstrumentIntoBus:(Sampler *)instrument atChannel:(int)channel
 {
     OSStatus result;
 
-    instrument.channel = [self assignChannel:instrument.sampler];
-    [self setMixerBusCount];
-    
-    if( !instrument.configured )
-    {
-        [self configUnit:instrument.sampler];
-        instrument.configured = true;
-    }
-
-    Boolean wasRunning = FALSE;
-    CheckError( AUGraphIsRunning(_processGraph, &wasRunning), "Couldn't check for running graph");
-    
-    if( wasRunning )
-        CheckError( AUGraphStop(_processGraph), "Couldn't stop graph");
+    instrument.channel = channel;
     
     result = AUGraphConnectNodeInput (_processGraph,
                                       instrument.graphNode,
@@ -338,51 +340,8 @@ OSStatus renderCallback(
                                       _mixerNode,
                                       instrument.channel);
     CheckError(result,"Unable to interconnect the nodes in the audio processing graph.");
-    
-    
-    //Boolean isUpdated;
-    result = AUGraphUpdate(_processGraph, NULL); // NULL forces synchronous update &isUpdated);
-    CheckError(result,"Unable to update graph.");
-
-    if( wasRunning )
-        CheckError( AUGraphStart(_processGraph), "Couldn't restart graph");
-    
-    TGLog(LLKindaImportant, @"plugged %@ (%p) into bus: %d", instrument.description, instrument.sampler, instrument.channel);
 }
 
--(void)unplugInstrumentFromBus:(Instrument *)instrument
-{
-    OSStatus result;
-    
-    Boolean wasRunning;
-    CheckError( AUGraphIsRunning(_processGraph, &wasRunning), "Couldn't check for running graph");
-    
-    if( wasRunning )
-        CheckError( AUGraphStop(_processGraph), "Couldn't stop graph");
-    
-    AUNode node = _mixerNode;
-    UInt32 bus  = instrument.channel;
-    result = AUGraphDisconnectNodeInput(_processGraph, node, bus);
-    CheckError(result, "Unable to disconnect node");
-    
-    result = AUGraphUpdate(_processGraph, NULL); // NULL forces synchronous update &isUpdated);
-    CheckError(result,"Unable to update graph.");
-    
-    TGLog(LLKindaImportant, @"UNplugged %@ (%p) from bus: %d", instrument.description, instrument.sampler,
-          (unsigned int)bus);
-    
-    if( wasRunning )
-        CheckError( AUGraphStart(_processGraph), "Couldn't restart graph");
-    
-    [self freeChannel:bus];
-    [self setMixerBusCount];
-}
-
--(void)decomissionInstrument:(Instrument *)instrument
-{
-    //[self unplugInstrumentFromBus:instrument];
-    AUGraphRemoveNode(_processGraph, instrument.graphNode);
-}
 
 -(OSStatus)setupMasterEQ
 {
@@ -427,12 +386,22 @@ OSStatus renderCallback(
     cd.componentSubType = kAudioUnitSubType_RemoteIO;
     CheckError(AUGraphAddNode (_processGraph, &cd, &ioNode),"Unable to add the Output unit to the audio processing graph.");
 
+    _samplers = [NSMutableArray new];
+    for( int i = 0; i < 8; i++ )
+    {
+        [_samplers addObject:[[Sampler alloc] initWithGraph:_processGraph]];
+    }
+    
     CheckError(AUGraphOpen (_processGraph),                                    "Unable to open the audio processing graph.");
     CheckError(AUGraphNodeInfo (_processGraph, _mixerNode, 0, &_mixerUnit),    "Unable to obtain a reference to the mixer unit.");
     CheckError(AUGraphNodeInfo (_processGraph, eqNode,     0, &_masterEQUnit), "Unable to obtain a reference to the master EQ unit.");
     CheckError(AUGraphNodeInfo (_processGraph, cvNode,     0, &cvUnit),        "Unable to obtain a reference to the master EQ unit.");
     CheckError(AUGraphNodeInfo (_processGraph, ioNode,     0, &_ioUnit),       "Unable to obtain a reference to the I/O unit.");
 
+    [self setMixerBusCount:[_samplers count]];
+    
+    [_samplers each:^(Sampler * sampler) { [sampler setNodeIntoGraph]; }];
+    
     AudioStreamBasicDescription fasbd = {0};
     AudioStreamBasicDescription iasbd = {0};
     unsigned long asbdSize = sizeof(fasbd);
@@ -456,9 +425,8 @@ OSStatus renderCallback(
     return result;
 }
 
--(void)setMixerBusCount
+-(void)setMixerBusCount:(int)busCount
 {
-    int busCount = [self channelCount];
     OSStatus result;
     result = AudioUnitSetProperty (_mixerUnit,
                                    kAudioUnitProperty_ElementCount,
@@ -487,7 +455,7 @@ OSStatus renderCallback(
     
     CheckError(result,"AudioUnitSetProperty (set unit output stream sample rate).");
     
-    UInt32 framesPerSlice = 4096;
+    UInt32 framesPerSlice = _ioFramesPerSlice; // 4096;
     result =    AudioUnitSetProperty (
                                       unit,
                                       kAudioUnitProperty_MaximumFramesPerSlice,
@@ -509,9 +477,27 @@ OSStatus renderCallback(
     result = AudioUnitInitialize(_ioUnit); // sampling rate is otherwise not writable
     CheckError(result, "Could not initialize ioUnit");
     
+    UInt32 fpsSize = sizeof(_ioFramesPerSlice);
+    result = AudioUnitGetProperty(_ioUnit,
+                                  kAudioUnitProperty_MaximumFramesPerSlice,
+                                  kAudioUnitScope_Global,
+                                  0, &_ioFramesPerSlice, &fpsSize);
+    CheckError(result, "Could not get frames per slice");    
+    
     [self configUnit:_mixerUnit];
     [self configUnit:_masterEQUnit];
     [self configUnit:_ioUnit];
+    
+    [_samplers each:^(Sampler * sampler) {
+        [self configUnit:sampler.sampler];
+        OSStatus result = AudioUnitInitialize(sampler.sampler);
+        CheckError(result, "Could not initialize sampler");
+    }];
+    
+    [_samplers enumerateObjectsUsingBlock:^(Sampler * sampler, NSUInteger idx, BOOL *stop) {
+        [sampler setupMidi:_midi];
+        [self plugInstrumentIntoBus:sampler atChannel:idx];
+	}];
     
     result = AUGraphInitialize (_processGraph);
     CheckError(result,"Unable to initialze AUGraph object.");

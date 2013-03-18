@@ -80,6 +80,8 @@ extern NSString const * kParamEQMidGain;
 extern NSString const * kParamEQHighCutoff;
 extern NSString const * kParamEQHighResonance;
 
+extern NSString const * kParamAudioFrameCapture;
+
 extern NSString const * kParamInstrumentP1;
 extern NSString const * kParamInstrumentP2;
 extern NSString const * kParamInstrumentP3;

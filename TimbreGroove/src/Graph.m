@@ -70,13 +70,6 @@ typedef void (^RecurseBlock)(TG3dObject *);
     return self;
 }
 
--(void)dealloc
-{
-    self.view = nil;
-    _single = nil;
-    TGLog(LLJustSayin, @"Graph object gone");
-}
-
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
 -(void)traverseWithObj:(id)param selector:(SEL)selector
@@ -238,9 +231,12 @@ typedef void (^RecurseBlock)(TG3dObject *);
     
     updateBlock = ^(TG3dObject *n)
     {
-        n->_totalTime += dt;
-        n->_timer += dt;
-        [n update:dt];
+        if( n != self )
+        {
+            n->_totalTime += dt;
+            n->_timer += dt;
+            [n update:dt];
+        }
         if( n->_kids )
             [n->_kids each:updateBlock];
     };
@@ -264,7 +260,8 @@ typedef void (^RecurseBlock)(TG3dObject *);
     
     renderBlock = ^(TG3dObject *n)
     {
-        [n render:w h:h];
+        if( n != self )
+            [n render:w h:h];
         if( n->_kids )
             [n->_kids each:renderBlock];
     };

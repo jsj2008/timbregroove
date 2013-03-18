@@ -7,7 +7,7 @@
 //
 
 #import "Midi.h"
-#import "Instrument.h"
+#import "Sampler.h"
 #import "Names.h"
 #import "Parameter.h"
 #import "NoteGenerator.h"
@@ -19,8 +19,6 @@
     MidiFreeRange * _freeRange;
     NoteGenerator * _noteGenerator;
 }
--(void)attachMidiClientToInstrument:(Instrument *)instrument;
-
 @end
 
 
@@ -81,7 +79,7 @@ void MyMIDINotifyProc (const MIDINotification  *message, void *refCon)
         [ms appendFormat:@"Object: %s%s %p Property: %s", isExternal ? "External-" : "", objType, pcn->object, buffer];
     }
     
-    TGLog(LLKindaImportant, @"%@",ms);
+    TGLog(LLMidiStuff, @"%@",ms);
 }
 
 #define SHOW_NOTES 1
@@ -115,7 +113,7 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
             if( midiCommand == 0x09 )
             {
                 int noteNumber = ((int) note);
-                TGLog(LLKindaImportant, @"%p %s: %i", (void *)player,_noteNames[noteNumber %12], noteNumber);
+                TGLog(LLMidiStuff, @"%p %s: %i", (void *)player,_noteNames[noteNumber %12], noteNumber);
             }
 #endif
         }
@@ -142,7 +140,7 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
 
 -(id)initWithMidi:(Midi *)midi
       andFileName:(NSString *)fileName
-    andInstrument:(Instrument *)instrument
+    andInstrument:(Sampler *)instrument
 ss:(SoundSystem *)ss
 {
     self = [super init];
@@ -161,7 +159,7 @@ ss:(SoundSystem *)ss
 }
 
 -(void)setupMidiFile:(NSString *)filename
-      withInstrument:(Instrument *)instrument
+      withInstrument:(Sampler *)instrument
 ss:(SoundSystem *)ss
 {
     _ss = ss;
@@ -175,16 +173,8 @@ ss:(SoundSystem *)ss
                                                  withExtension: @"mid"];
     
     CheckError( NewMusicSequence(&_currentSequence), "NewMusicSequence failed");
-    
     CheckError( MusicSequenceFileLoad(_currentSequence, (__bridge CFURLRef) midiFileURL, 0, 0), "MusicSeqFileLoad failed");
-    
-//    MusicSequenceSetAUGraph(_currentSequence, ss.processGraph);
-    
     CheckError( MusicSequenceSetMIDIEndpoint(_currentSequence, _myEndPoint), "MusicSeqSetEndPoint failed");
-    
-    TGLog(LLKindaImportant, @"MIDI Sequence targeting endPoint: %p", _myEndPoint);
-    
-
     CheckError( MusicPlayerSetSequence(_musicPlayer, _currentSequence), "MusicPlaySetSeq failed");
     
     MusicTrack t;
@@ -213,8 +203,8 @@ ss:(SoundSystem *)ss
     if( _musicPlayer )
     {
         CheckError( MusicPlayerGetTime(_musicPlayer, &_midiPauseTime), "MusicPlayerGetTime failed");
-        TGLog(LLKindaImportant, @"Pausing Midi at %f",_midiPauseTime);
         CheckError( MusicPlayerStop(_musicPlayer), "MusicPlayerStop failed");
+        TGLog(LLMidiStuff, @"Pausing Midi at %f",_midiPauseTime);
     }
 }
 
@@ -222,11 +212,9 @@ ss:(SoundSystem *)ss
 {
     if( _musicPlayer )
     {
-        [_ss dumpGraph:_ss.processGraph];
-        
         CheckError( MusicPlayerSetTime(_musicPlayer, _midiPauseTime), "MusicPlayerSetTime failed");
         CheckError( MusicPlayerStart(_musicPlayer), "MusicPlayerStart (resume) failed");
-        TGLog(LLKindaImportant, @"Resumed Midi at %f",_midiPauseTime);
+        TGLog(LLMidiStuff, @"Resumed Midi at %f",_midiPauseTime);
     }
 }
 
@@ -253,74 +241,6 @@ ss:(SoundSystem *)ss
 
 @end
 
-typedef struct _ChannelToEndPoint {
-    int             channel;
-    MIDIEndpointRef endPoint;
-} ChannelToEndPoint;
-
-@interface MidiFreeRange () {
-    MIDIPortRef _outPort;
-    ChannelToEndPoint _channelMap[16];
-}
-
-@end
-@implementation MidiFreeRange
-
--(id)initWithMidi:(Midi *)midi andInstruments:(NSArray *)instruments
-{
-    self = [super init];
-    if( self )
-    {
-        CheckError (MIDIOutputPortCreate (midi.midiClient,
-                                          CFSTR("out port"),
-                                          &_outPort
-                                          ),
-                    " Couldn't create MIDI output port");
-
-        memset(_channelMap, -1, sizeof(_channelMap));
-        
-        int i = 0;
-        [instruments each:^(Instrument * instrument) {
-            _channelMap[i].channel = instrument.channel;
-            if( !instrument.midiEndPoint )
-               [midi attachMidiClientToInstrument:instrument];
-            _channelMap[i].endPoint = instrument.midiEndPoint;
-        }];
-    }
-    return self;
-}
-
--(void)sendNote:(MIDINoteMessage *)noteMsg
-{
-    __block MIDIPacketList packetList;
-    packetList.numPackets = 1;
-    packetList.packet[ 0]. length = 3;
-    packetList.packet[ 0]. data[ 0] = 0x90;
-    packetList.packet[ 0]. data[ 1] = noteMsg->note & 0x7F;
-    packetList.packet[ 0]. data[ 2] = noteMsg->velocity & 0x7F;
-    packetList.packet[ 0]. timeStamp = 0;
-    
-    MIDIEndpointRef endRef = 0;
-    int i;
-    for( i = 0; i < (sizeof(_channelMap)/sizeof(_channelMap[0])); i++ )
-    {
-        if( _channelMap[i].channel == noteMsg->channel )
-        {
-            endRef = _channelMap[i].endPoint;
-            break;
-        }
-        i++;
-    }
-
-    CheckError( MIDISend(_outPort, endRef, &packetList), "Couldn't send note ON");
-    
-    [NSObject performBlock:[^{
-        packetList.packet[ 0]. data[ 0] = 0x80;
-        CheckError( MIDISend(_outPort, endRef, &packetList), "Couldn't send note OFF");
-    } copy] afterDelay:noteMsg->duration];
-}
-@end
-
 @implementation Midi
 
 -(id)init
@@ -330,10 +250,6 @@ typedef struct _ChannelToEndPoint {
     {
         OSStatus result = noErr;
         
-        // Create a client
-        // This provides general information about the state of the midi
-        // engine to the callback MyMIDINotifyProc
-        
         result = MIDIClientCreate(CFSTR("TG Virtual Client"),
                                   MyMIDINotifyProc,
                                   (__bridge void *)self,
@@ -341,90 +257,17 @@ typedef struct _ChannelToEndPoint {
         
         CheckError(result,"MIDIClientCreate failed");
         
+        _readProc = MyMIDIReadProc;
+        
     }
     return self;
 }
 
--(void)attachMidiClientToInstrument:(Instrument *)instrument
+-(MidiFile *)setupMidiFile:(NSString *)filename withInstrument:(Sampler *)instrument ss:(SoundSystem *)ss
 {
-    OSStatus result = noErr;
-    
-    MIDIEndpointRef virtualEndpoint;
-
-    result = MIDIDestinationCreate(_midiClient,
-                                   CFSTR("TG Virtual Destination"),
-                                   MyMIDIReadProc,
-                                   (void *)(instrument.sampler),
-                                   &virtualEndpoint);
-    
-    CheckError(result,"MIDIDestinationCreate failed");
-
-    instrument.midiEndPoint = virtualEndpoint;
-}
-
--(MidiFile *)setupMidiFile:(NSString *)filename withInstrument:(Instrument *)instrument ss:(SoundSystem *)ss
-{
-    [self attachMidiClientToInstrument:instrument];
     return [[MidiFile alloc] initWithMidi:self andFileName:filename andInstrument:instrument ss:ss];
 }
 
--(MidiFreeRange *)setupMidiFreeRange:(NSArray *)instruments
-{
-    _freeRange = [[MidiFreeRange alloc] initWithMidi:self andInstruments:instruments];
-    return _freeRange;
-}
-
--(void)handleParamChange:(NSString const *)paramName value:(float)value
-{
-    
-}
-
--(void)getParameters:(NSMutableDictionary *)putHere
-{
-    FloatParamBlock(^closure)(NSString const * name) =
-        ^FloatParamBlock(NSString const * name){
-        return ^(float f) {
-            [self handleParamChange:name value:f ];
-        };
-    };
-    
-    [putHere addEntriesFromDictionary:
-    @{
-      kParamTempo: [Parameter withBlock:[closure(kParamTempo) copy]],
-      kParamPitch: [Parameter withBlock:[closure(kParamPitch) copy]],
-      kParamInstrumentP1: [Parameter withBlock:[closure(kParamInstrumentP1) copy]],
-      kParamInstrumentP2: [Parameter withBlock:[closure(kParamInstrumentP2) copy]],
-      kParamInstrumentP3: [Parameter withBlock:[closure(kParamInstrumentP3) copy]],
-      kParamInstrumentP4: [Parameter withBlock:[closure(kParamInstrumentP4) copy]],
-      kParamInstrumentP5: [Parameter withBlock:[closure(kParamInstrumentP5) copy]],
-      kParamInstrumentP6: [Parameter withBlock:[closure(kParamInstrumentP6) copy]],
-      kParamInstrumentP7: [Parameter withBlock:[closure(kParamInstrumentP7) copy]],
-      kParamInstrumentP8: [Parameter withBlock:[closure(kParamInstrumentP8) copy]],
-      kParamMIDINote: [Parameter withBlock:[^(MIDINoteMessage *msg) {
-        if( _freeRange )
-            [_freeRange sendNote:msg];
-        } copy]],
-      kParamRandomNote: [Parameter withBlock:[^(CGPoint pt) {
-        if( _freeRange )
-        {
-            if( !_noteGenerator )
-                _noteGenerator = [[NoteGenerator alloc] initWithScale:kScalePentatonic isRandom:true];
-            MIDINoteMessage mnm;
-            mnm.note = [_noteGenerator next];
-            mnm.duration = 1.1;
-            mnm.velocity = 127;
-            mnm.channel = 0;
-            [_freeRange sendNote:&mnm];
-        }
-    } copy]]
-      }];
-}
-
-
--(void)triggersChanged:(Scene *)scene
-{
-    
-}
 
 -(void)update:(NSTimeInterval)dt
 {

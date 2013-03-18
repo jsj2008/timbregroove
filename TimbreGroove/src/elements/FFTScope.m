@@ -11,7 +11,7 @@
 #import "SoundSystem.h"
 #import "Parameter.h"
 #import "Generic.h"
-
+#import "Names.h"
 
 extern void fft(float *in_out, int len);
 
@@ -48,7 +48,12 @@ extern void fft(float *in_out, int len);
 {
     [super getParameters:putHere];
     
-    putHere[@"frameCapture"] = [Parameter withBlock:^(void *ptr) {
+    putHere[kParamAudioFrameCapture] = [Parameter withBlock:^(void *ptr) {
+#ifdef DEBUG
+        static int capCount = 0;
+        if( capCount++ % 120 == 0 )
+            TGLog(LLCaptureOps, @"Capture buffer: %p",ptr);
+#endif
         if( ptr )
         {
             AudioBufferList * abl = (AudioBufferList *)ptr;
@@ -66,6 +71,17 @@ extern void fft(float *in_out, int len);
             [_lineMesh resetVertices];
         }
     }];
+    
+#ifdef DEBUG
+    TGLog(LLCaptureOps, @"Posting cap parameter: %@", (__bridge void *)putHere[kParamAudioFrameCapture]);
+#endif
 }
+
+#ifdef DEBUG
+-(void)triggersChanged:(Scene *)scene
+{
+    TGLog(LLCaptureOps, @"Capturing for %@ in %@",self,scene);
+}
+#endif
 
 @end

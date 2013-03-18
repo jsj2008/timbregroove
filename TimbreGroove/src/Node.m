@@ -15,14 +15,14 @@
 {
     if( (self = [super init]))
     {
-        TGLog(LLJustSayin, @"created node of type: %@",self);
+        TGLog(LLObjLifetime, @"created node of type: %@",self);
     }
     return self;
 }
 
 -(void)dealloc
 {
-    TGLog(LLJustSayin, @"released node of type: %@", self);
+    TGLog(LLObjLifetime, @"released node of type: %@", self);
 }
 #endif
 
@@ -49,28 +49,17 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
     [self performSelector:selector withObject:userObj];
-#pragma clang diagnostic pop
     
     for( Node * node in _kids )
     {
-#if DEBUG
-        if ( ![node respondsToSelector:selector] )
-        {
-            TGLog(LLJustSayin, @"%@ can’t be placed\n", node);
-            exit(1);
-        }
-#endif
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
         [node performSelector:selector withObject:userObj];
-#pragma clang diagnostic pop
         
         if( ![node traverse:selector userObj:userObj] )
         {
             return false;
         }
-        
     }
+#pragma clang diagnostic pop
     
     return true;
 }

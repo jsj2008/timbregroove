@@ -74,7 +74,7 @@
                 break;
 #if DEBUG
             default:
-                TGLog(LLJustSayin, @"Unknown StrideType");
+                TGLog(LLShitsOnFire, @"Unknown StrideType");
                 exit(1);
                 break;
 #endif

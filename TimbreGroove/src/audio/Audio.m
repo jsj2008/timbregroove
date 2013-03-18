@@ -13,7 +13,7 @@
 #import "Config.h"
 #import "Scene.h"
 #import "Names.h"
-#import "Instrument.h"
+#import "Sampler.h"
 
 @interface Audio () {
 @protected
@@ -46,21 +46,17 @@
         _soundSystem = [SoundSystem sharedInstance];
         _parameters = [[SoundSystemParameters alloc] initWithSoundSystem:_soundSystem];
         _ssp = _parameters;
-        _midi = [[Midi alloc] init];
+        _midi = _soundSystem.midi;
     }
     return self;
 }
 
 -(void)dealloc
 {
-    [_instruments each:^(id instrument) {
-        [_soundSystem unplugInstrumentFromBus:instrument];
-        [_soundSystem decomissionInstrument:instrument];
+    [_instruments each:^(Sampler * sampler) {
+        [sampler releaseSound];
     }];
-    
-    TGLog(LLJustSayin, @"Audio object gone");
 }
-
 -(void)loadAudioFromConfig:(ConfigAudioProfile *)config
 {
     _instruments = [config.instruments map:^id(id instrumentConfig) {
@@ -72,22 +68,15 @@
 
 -(UInt32)realChannelFromVirtual:(UInt32)virtualChannel
 {
-    return ((Instrument *)_instruments[virtualChannel]).channel;
+    return ((Sampler *)_instruments[virtualChannel]).channel;
 }
 
 -(void)start
 {
     _started = true;
     
-    [_instruments each:^(id instrument) {
-        [_soundSystem plugInstrumentIntoBus:instrument];
-    }];
-    
     if( _midiSequence )
         [_midiSequence start];
-    else
-        [_midi setupMidiFreeRange:_instruments];
-    
 }
 
 -(void)activate
@@ -121,7 +110,6 @@
 {
     [_parameters triggersChanged:scene];
     [_soundSystem triggersChanged:scene];
-    [_midi triggersChanged:scene];
 }
 
 -(void)getParameters:(NSMutableDictionary *)putHere;
@@ -129,7 +117,7 @@
     // get parameters will configure the
     // defaults
     [_parameters getParameters:putHere];
-    [_midi getParameters:putHere];
+    [_soundSystem getParameters:putHere];
 }
 
 -(void)getTriggerMap:(NSMutableArray *)putHere
@@ -147,7 +135,7 @@
 {
     if( _midiFileName && !_midiSequence )
     {
-        Instrument * instrument = _instruments[0];
+        Sampler * instrument = _instruments[0];
         _midiSequence = [_midi setupMidiFile:_midiFileName withInstrument:instrument ss:_soundSystem];
     }
 }

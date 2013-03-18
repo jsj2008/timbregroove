@@ -12,7 +12,7 @@
 			<array>
 				<dict>
 					<key>AudioFrame</key>
-					<string>frameCapture</string>
+					<string>AudioFrameCapture</string>
 					<key>MainSlider</key>
 					<string>MasterVolume</string>
 				</dict>
@@ -32,7 +32,7 @@
 			<array>
 				<dict>
 					<key>AudioFrame</key>
-					<string>frameCapture</string>
+					<string>AudioFrameCapture</string>
 					<key>Tap</key>
 					<string>RandomVibeNote</string>
 					<key>MainSlider</key>

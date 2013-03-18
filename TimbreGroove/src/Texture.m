@@ -46,7 +46,7 @@
     if( (self = [super init]) )
     {
         _glTexture = glTextureId;
-        TGLog(LLJustSayin, @"assigned texture for (%d)",_glTexture);        
+        TGLog(LLGLResource, @"assigned texture for (%d)",_glTexture);
         _uLocation = -1;
     }
     
@@ -95,11 +95,11 @@
              _glTexture  = textureInfo.name;
              _target     = textureInfo.target;
              _origin     = textureInfo.textureOrigin;
-            TGLog(LLJustSayin, @"created texture for %@ (%d)",text,_glTexture);
+            TGLog(LLGLResource, @"created texture for %@ (%d)",text,_glTexture);
         }
         else
         {
-            TGLog(LLJustSayin, @"FAILURE: %@\nDESCRIPTION: %@", [err localizedFailureReason],
+            TGLog(LLShitsOnFire, @"FAILURE: %@\nDESCRIPTION: %@", [err localizedFailureReason],
                                                    [err localizedDescription]);
         }
         
@@ -115,7 +115,7 @@
     NSString * path = [[NSBundle mainBundle] pathForResource:[fileName stringByDeletingPathExtension] ofType:[fileName pathExtension]];
     UIImage * image = [UIImage imageWithContentsOfFile:path];
     bool ok = [self loadFromImage:image];
-    TGLog(LLJustSayin, @"created texture for %@ (%d)",fileName,_glTexture);
+    TGLog(LLGLResource, @"created texture for %@ (%d)",fileName,_glTexture);
     return ok;
 }
 
@@ -145,7 +145,7 @@
     }
     else
     {
-        TGLog(LLJustSayin, @"FAILURE: %@\nDESCRIPTION: %@", [err localizedFailureReason], [err localizedDescription]);
+        TGLog(LLShitsOnFire, @"FAILURE: %@\nDESCRIPTION: %@", [err localizedFailureReason], [err localizedDescription]);
         ok = false;
     }
     
@@ -174,7 +174,7 @@
 -(void)dealloc
 {
     glDeleteTextures(1, &_glTexture);
-    TGLog(LLJustSayin, @"Deleted texture: %d",_glTexture);
+    TGLog(LLGLResource | LLObjLifetime, @"Deleted texture: %d",_glTexture);
     _glTexture = 0;
 }
 

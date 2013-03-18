@@ -136,8 +136,8 @@
 #if DEBUG
     if( !e || !e->_shader )
     {
-        TGLog(LLJustSayin, @"Missing shader (did you call wireUp?)");
-        exit(1);
+        TGLog(LLShitsOnFire, @"Missing shader (did you call wireUp?)");
+        exit(-1);
     }
 #endif
     return e ? e->_shader : nil;
@@ -154,7 +154,7 @@
 #if DEBUG
     if( !e || !e->_camera )
     {
-        TGLog(LLJustSayin, @"Missing camera  (did you call wireUp?)");
+        TGLog(LLShitsOnFire, @"Missing camera  (did you call wireUp?)");
         exit(1);
     }
 #endif
@@ -180,7 +180,7 @@
 #if DEBUG
     if( !e || !e->_view )
     {
-        TGLog(LLJustSayin, @"Missing graph view member  (did you call wireUp?)");
+        TGLog(LLShitsOnFire, @"Missing graph view member  (did you call wireUp?)");
         exit(1);
     }
 #endif

@@ -43,7 +43,7 @@ static LogLevel _currentLL = LLShitsOnFire;
 
 void TGLog(LogLevel loglevel,NSString *format, ...)
 {
-    if( loglevel <= _currentLL  )
+    if( (loglevel == LLShitsOnFire) || ((loglevel & _currentLL) != 0)  )
     {
         va_list ap;
         va_start (ap, format);

@@ -38,14 +38,14 @@ static NSHashTable * __shaders;
     GLuint vshader;
     NSString * path = [[NSBundle mainBundle] pathForResource:@(vert) ofType:@"vsh"];
     if (![self compileShader:&vshader type:GL_VERTEX_SHADER file:path headers:headers]) {
-        TGLog(LLJustSayin, @"Failed to compile vertex shader");
+        TGLog(LLShitsOnFire, @"Failed to compile vertex shader");
         exit(1);
     }
     
     GLuint fshader;
     path = [[NSBundle mainBundle] pathForResource:@(frag) ofType:@"fsh"];
     if (![self compileShader:&fshader type:GL_FRAGMENT_SHADER file:path headers:headers]) {
-        TGLog(LLJustSayin, @"Failed to compile fragment shader");
+        TGLog(LLShitsOnFire, @"Failed to compile fragment shader");
         exit(1);
     }
     
@@ -65,7 +65,7 @@ static NSHashTable * __shaders;
             _program = 0;
         }
         
-        TGLog(LLJustSayin, @"Failed to link program: %d", _program);
+        TGLog(LLShitsOnFire, @"Failed to link program: %d", _program);
         exit(1);
     }
     
@@ -78,9 +78,7 @@ static NSHashTable * __shaders;
         glDetachShader(_program, fshader);
         glDeleteShader(fshader);
     }
-#if DEBUG
-    TGLog(LLJustSayin, @"created shader: %@ (%d)" ,self.description,_program);
-#endif
+    TGLog(LLGLResource, @"created shader: %@ (%d)" ,self.description,_program);
     return YES;
     
 }
@@ -90,7 +88,7 @@ static NSHashTable * __shaders;
                                                encoding:NSUTF8StringEncoding
                                                   error:nil] ;
     if (!src) {
-        TGLog(LLJustSayin, @"Failed to load vertex shader %@",file);
+        TGLog(LLShitsOnFire, @"Failed to load vertex shader %@",file);
         exit(1);
     }
     
@@ -109,7 +107,7 @@ static NSHashTable * __shaders;
     if (logLength > 0) {
         GLchar *log = (GLchar *)malloc(logLength);
         glGetShaderInfoLog(*shader, logLength, &logLength, log);
-        TGLog(LLJustSayin, @"Shader %@ compile log:\n%s", file, log);
+        TGLog(LLShitsOnFire, @"Shader %@ compile log:\n%s", file, log);
         free(log);
     }
 #endif
@@ -118,7 +116,7 @@ static NSHashTable * __shaders;
     glGetShaderiv(*shader, GL_COMPILE_STATUS, &status);
     if (status == 0) {
         glDeleteShader(*shader);
-        TGLog(LLJustSayin, @"Bad compile status: %d",status);
+        TGLog(LLShitsOnFire, @"Bad compile status: %d",status);
         exit(1);
     }
     
@@ -136,14 +134,14 @@ static NSHashTable * __shaders;
     if (logLength > 0) {
         GLchar *log = (GLchar *)malloc(logLength);
         glGetProgramInfoLog(prog, logLength, &logLength, log);
-        TGLog(LLJustSayin, @"Program link log:\n%s", log);
+        TGLog(LLShitsOnFire, @"Program link log:\n%s", log);
         free(log);
     }
 #endif
     
     glGetProgramiv(prog, GL_LINK_STATUS, &status);
     if (status == 0) {
-        TGLog(LLJustSayin, @"Bad link status: %d",status);
+        TGLog(LLShitsOnFire, @"Bad link status: %d",status);
         exit(1);
     }
     
@@ -159,7 +157,7 @@ static NSHashTable * __shaders;
     if (logLength > 0) {
         GLchar *log = (GLchar *)malloc(logLength);
         glGetProgramInfoLog(prog, logLength, &logLength, log);
-        TGLog(LLJustSayin, @"Program validate log:\n%s", log);
+        TGLog(LLShitsOnFire, @"Program validate log:\n%s", log);
         free(log);
     }
     
@@ -181,7 +179,7 @@ static NSHashTable * __shaders;
     
     if( _program )
     {
-        TGLog(LLJustSayin, @"Deleting program: %d",_program);
+        TGLog(LLGLResource, @"Deleting program: %d",_program);
         glDeleteProgram(_program);
         _program = 0;
     }
@@ -267,10 +265,10 @@ typedef struct _VarQueueItem VarStoreItem;
             }
         }
     }
-#ifdef DEBUG
     if( foundShader )
-        TGLog(LLJustSayin, @"reusing shader %d - %@",foundShader.program,shaderId);
-#endif
+    {
+        TGLog(LLGLResource, @"reusing shader %d - %@",foundShader.program,shaderId);
+    }
     return foundShader;
 }
 
@@ -341,7 +339,7 @@ typedef struct _VarQueueItem VarStoreItem;
 #if DEBUG
         if( !_acceptMissingVars && _vars[indexIntoNames] == -1 )
         {
-            TGLog(LLJustSayin, @"Can't find attr/uniform for (%d) %s in program %d", indexIntoNames, _names[indexIntoNames],_program);
+            TGLog(LLShitsOnFire, @"Can't find attr/uniform for (%d) %s in program %d", indexIntoNames, _names[indexIntoNames],_program);
             exit(1);
         }
 #endif
