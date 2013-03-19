@@ -13,7 +13,8 @@
 #import "TriggerMap.h"
 
 @interface PoolsideAudio : Audio {
-    FloatParamBlock _volume;
+    FloatParamBlock _channelVolume;
+    FloatParamBlock _channelVolumeAnimated;
 }
 
 @end
@@ -24,6 +25,10 @@
 {
     [super startMidiFile];
     [super start];
+    
+    _channelVolume(0.2);         // <-- start here
+    _channelVolumeAnimated(1.0); // <-- animate to here, then loop
+    
 }
 
 -(void)triggersChanged:(Scene *)scene
@@ -34,17 +39,14 @@
     {
          TriggerMap * tm = scene.triggers;
         
-        FloatParamBlock volTurn = [tm getFloatTrigger:kParamMasterVolume];
-        volTurn(0.005);
-        volTurn = nil;
-        
-        _volume = [tm getFloatTrigger:[kParamMasterVolume stringByAppendingTween:kTweenEaseOutSine len:5]
-                                   cb:TweenLooper];
-        _volume(0.9);
+        _channelVolume = [tm getFloatTrigger:kParamChannelVolume];
+        _channelVolumeAnimated = [tm getFloatTrigger:[kParamChannelVolume stringByAppendingTween:kTweenEaseOutSine len:5]
+                                   cb:TweenReverseLooper];
     }
     else
     {
-        _volume = nil;
+        _channelVolume = nil;
+        _channelVolumeAnimated = nil;
     }
 }
 

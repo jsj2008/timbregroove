@@ -15,7 +15,7 @@ typedef bool TweenDoneIndicator;
 typedef TweenDoneIndicator (^TweenCallback)(TriggerTween *);
 
 #ifndef SKIP_TRIGGER_DECLS
-extern TweenCallback TweenLooper;
+extern TweenCallback TweenReverseLooper;
 #endif
 
 @interface TriggerTween : NSObject

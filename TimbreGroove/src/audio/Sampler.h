@@ -8,29 +8,18 @@
 
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
+#import "Midi.h"
 
 @class ConfigInstrument;
-@class Midi;
 
-enum {
-    kMIDIMessage_NoteOn    = 0x9,
-    kMIDIMessage_NoteOff   = 0x8,
-};
+@interface Sampler : NSObject <MidiCapableProtocol>
 
++(id)samplerWithAUGraph:(AUGraph)graph;
 
-@interface Sampler : NSObject
+-(void)loadSound:(ConfigInstrument *)config midi:(Midi *)midi;
+-(void)unloadSound;
 
-+(id)instrumentWithConfig:(ConfigInstrument *)config
-                 andGraph:(AUGraph)graph;
-
--(void)loadSound:(ConfigInstrument *)config;
--(void)releaseSound;
-
--(id)initWithGraph:(AUGraph)graph;
 -(void)setNodeIntoGraph;
--(void)setupMidi:(Midi *)midi;
-
--(void)sendNote:(MIDINoteMessage *)noteMsg;
 
 @property (nonatomic,readonly) int lowestPlayable;
 @property (nonatomic,readonly) int highestPlayable;
@@ -38,7 +27,7 @@ enum {
 @property (nonatomic,readonly) AUNode    graphNode;
 @property (nonatomic) bool configured;
 @property (nonatomic) MIDIPortRef     outPort;
-@property (nonatomic) MIDIEndpointRef midiEndPoint;
+@property (nonatomic) MIDIEndpointRef endPoint;
 @property (nonatomic) int channel;
 @property (nonatomic,readonly) bool available;
 @end

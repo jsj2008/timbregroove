@@ -246,7 +246,7 @@ typedef union _TweenData {
 
 -(void)dealloc
 {
-    TGLog(LLObjLifetime, @"Tweener died");
+    TGLog(LLObjLifetime, @"%@ released",self);
 }
 
 -(void)decommission
@@ -315,7 +315,7 @@ typedef union _TweenData {
 //--------------------------------------------------------------------------------
 
 
-TweenCallback TweenLooper = ^TweenDoneIndicator(TriggerTween *tt) {
+TweenCallback TweenReverseLooper = ^TweenDoneIndicator(TriggerTween *tt) {
     [tt reverse];
     return false;
 };
@@ -363,7 +363,7 @@ TweenCallback TweenLooper = ^TweenDoneIndicator(TriggerTween *tt) {
         [_tweenerReleasePool each:^(TriggerTween * tweener) {
             [tweener decommission];
         }];
-    TGLog(LLObjLifetime, @"Trigger map dealloc");
+    TGLog(LLObjLifetime, @"%@ released",self);
 }
 
 -(void)addParameters:(NSDictionary *)nameKeyParamValues

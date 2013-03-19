@@ -16,7 +16,6 @@
 #import "SoundSystem+Diag.h"
 
 @interface Midi () {
-    MidiFreeRange * _freeRange;
     NoteGenerator * _noteGenerator;
 }
 @end
@@ -86,10 +85,9 @@ void MyMIDINotifyProc (const MIDINotification  *message, void *refCon)
 
 static void MyMIDIReadProc(const MIDIPacketList *pktlist,
                            void *refCon,
-                           void *connRefCon) {
-    
-    // Cast our Sampler unit back to an audio unit
-    AudioUnit player = (AudioUnit) refCon;
+                           void *connRefCon)
+{
+    MIDISendBlock block = (__bridge MIDISendBlock)refCon;
     
 #ifdef SHOW_NOTES
     static char * _noteNames[] = {
@@ -99,23 +97,29 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
     
     MIDIPacket *packet = (MIDIPacket *)pktlist->packet;
     for (int i=0; i < pktlist->numPackets; i++) {
+        TGLog(LLMidiStuff, @"Midi packet: %d of %d : len:%d ts:%lu", i+1, pktlist->numPackets, packet->length, packet->timeStamp);
         Byte midiStatus = packet->data[0];
         Byte midiCommand = midiStatus >> 4;
         
-        if (midiCommand == 0x09 || midiCommand == 0x08) {
+        if (midiCommand == 0x09 || midiCommand == 0x08)
+        {
             Byte note = packet->data[1] & 0x7F;
             Byte velocity = packet->data[2] & 0x7F;
             
-            OSStatus result = MusicDeviceMIDIEvent (player, midiStatus, note, velocity, 0);
-                CheckError(result, "Error sending note");
+            if(!velocity)
+                midiStatus &= ~0x10;
+            
+            OSStatus result = block(midiStatus,note,velocity,0);
+            CheckError(result, "Error sending note");
             
 #ifdef SHOW_NOTES
-            if( midiCommand == 0x09 )
-            {
                 int noteNumber = ((int) note);
-                TGLog(LLMidiStuff, @"%p %s: %i", (void *)player,_noteNames[noteNumber %12], noteNumber);
-            }
+                TGLog(LLMidiStuff, @"%p Status: %04X %s: %i vel:%d", refCon, midiStatus, _noteNames[noteNumber %12], noteNumber, velocity);
 #endif
+        }
+        else
+        {
+            TGLog(LLMidiStuff, @"Midi status: %04X",midiStatus);
         }
         packet = MIDIPacketNext(packet);
     }
@@ -140,8 +144,8 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
 
 -(id)initWithMidi:(Midi *)midi
       andFileName:(NSString *)fileName
-    andInstrument:(Sampler *)instrument
-ss:(SoundSystem *)ss
+    andInstrument:(id<MidiCapableProtocol>)instrument
+               ss:(SoundSystem *)ss
 {
     self = [super init];
     if( self)
@@ -159,11 +163,11 @@ ss:(SoundSystem *)ss
 }
 
 -(void)setupMidiFile:(NSString *)filename
-      withInstrument:(Sampler *)instrument
-ss:(SoundSystem *)ss
+      withInstrument:(id<MidiCapableProtocol>)instrument
+                  ss:(SoundSystem *)ss
 {
     _ss = ss;
-    _myEndPoint = instrument.midiEndPoint;
+    _myEndPoint = [instrument endPoint];
     _midiFileName = filename;
     
     if( !_musicPlayer )
@@ -175,6 +179,7 @@ ss:(SoundSystem *)ss
     CheckError( NewMusicSequence(&_currentSequence), "NewMusicSequence failed");
     CheckError( MusicSequenceFileLoad(_currentSequence, (__bridge CFURLRef) midiFileURL, 0, 0), "MusicSeqFileLoad failed");
     CheckError( MusicSequenceSetMIDIEndpoint(_currentSequence, _myEndPoint), "MusicSeqSetEndPoint failed");
+    TGLog(LLMidiStuff, @"Connect MusicSequence %p into endpoint: %p",(void *)_currentSequence,(void *)_myEndPoint);
     CheckError( MusicPlayerSetSequence(_musicPlayer, _currentSequence), "MusicPlaySetSeq failed");
     
     MusicTrack t;
@@ -241,6 +246,11 @@ ss:(SoundSystem *)ss
 
 @end
 
+@interface Midi () {
+    MIDIClientRef _midiClient;
+}
+
+@end
 @implementation Midi
 
 -(id)init
@@ -256,18 +266,77 @@ ss:(SoundSystem *)ss
                                   &_midiClient);
         
         CheckError(result,"MIDIClientCreate failed");
-        
-        _readProc = MyMIDIReadProc;
-        
+        TGLog(LLAudioResource, @"Created midi client %d for %@",_midiClient,self);
     }
     return self;
 }
 
--(MidiFile *)setupMidiFile:(NSString *)filename withInstrument:(Sampler *)instrument ss:(SoundSystem *)ss
+-(MidiFile *)setupMidiFile:(NSString *)filename
+            withInstrument:(id<MidiCapableProtocol>)instrument
+                        ss:(SoundSystem *)ss
 {
-    return [[MidiFile alloc] initWithMidi:self andFileName:filename andInstrument:instrument ss:ss];
+    return [[MidiFile alloc] initWithMidi:self
+                              andFileName:filename
+                            andInstrument:instrument
+                                       ss:ss];
 }
 
+
+-(void)makeDestination:(id<MidiCapableProtocol>)instrument
+{
+    MIDIPortRef outPort;
+    
+    OSStatus result = MIDIOutputPortCreate (_midiClient, CFSTR("out port"), &outPort );
+    
+    CheckError(result, " Couldn't create MIDI output port");
+    
+    MIDIEndpointRef virtualEndpoint;
+    MIDIReadProc mrp = MyMIDIReadProc;
+    id callback = [instrument callback];
+    result = MIDIDestinationCreate(_midiClient,
+                                   CFSTR("TG Virtual Destination"),
+                                   mrp,
+                                   (__bridge void *)callback,
+                                   &virtualEndpoint);
+    
+    CheckError(result,"MIDIDestinationCreate failed");
+    
+    TGLog(LLAudioResource, @"Created midi endPoint dest. %p (outport %p) for %@",(void *)virtualEndpoint,(void *)outPort,instrument);
+    
+    [instrument setEndPoint:virtualEndpoint];
+    [instrument setOutPort:outPort];
+}
+
+-(void)releaseDestination:(id<MidiCapableProtocol>)instrument
+{
+    CheckError( MIDIEndpointDispose([instrument endPoint]), "Could not dispose endpoint");
+    CheckError( MIDIPortDispose([instrument outPort]), "Could not dispose port");
+    [instrument setEndPoint:(MIDIEndpointRef)0];
+    [instrument setOutPort:(MIDIPortRef)0];
+    TGLog(LLAudioResource, @"Released destination/port for %@",instrument);
+}
+
+-(void)sendNote:(MIDINoteMessage *)noteMsg destination:(id<MidiCapableProtocol>)instrument
+{
+    __block MIDIPacketList packetList;
+    packetList.numPackets = 1;
+    packetList.packet[ 0]. length = 3;
+    packetList.packet[ 0]. data[ 0] = 0x90;
+    packetList.packet[ 0]. data[ 1] = noteMsg->note & 0x7F;
+    packetList.packet[ 0]. data[ 2] = noteMsg->velocity & 0x7F;
+    packetList.packet[ 0]. timeStamp = 0;
+    
+    MIDIEndpointRef endPoint = [instrument endPoint];
+    MIDIPortRef     outPort  = [instrument outPort];
+    instrument = nil;
+    
+    CheckError( MIDISend(outPort, endPoint, &packetList), "Couldn't send note ON");
+    
+    [NSObject performBlock:[^{
+        packetList.packet[ 0]. data[ 0] = 0x80;
+        CheckError( MIDISend(outPort, endPoint, &packetList), "Couldn't send note OFF");
+    } copy] afterDelay:noteMsg->duration];
+}
 
 -(void)update:(NSTimeInterval)dt
 {

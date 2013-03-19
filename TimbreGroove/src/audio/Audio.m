@@ -57,12 +57,14 @@
 -(void)dealloc
 {
     [_instruments each:^(Sampler * sampler) {
-        [sampler releaseSound];
+        [sampler unloadSound];
     }];
-    [_generators each:^(ToneGeneratorProxy * proxy) {
-        [proxy.generator releaseRenderProc];
+    [_generators each:^(ToneGeneratorProxy * tgp) {
+        [tgp unloadGenerator];
     }];
+    TGLog(LLObjLifetime, @"%@ released",self);
 }
+
 -(void)loadAudioFromConfig:(ConfigAudioProfile *)config
 {
     _instruments = [config.instruments map:^id(id instrumentConfig) {
@@ -152,7 +154,7 @@
 {
     if( _midiFileName && !_midiSequence )
     {
-        Sampler * instrument = _instruments[0];
+        id<MidiCapableProtocol>  instrument = _instruments ? _instruments[0] : _generators[0];
         _midiSequence = [_midi setupMidiFile:_midiFileName withInstrument:instrument ss:_soundSystem];
     }
 }

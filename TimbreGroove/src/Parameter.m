@@ -45,7 +45,7 @@
 
 -(void)dealloc
 {
-    TGLog(LLObjLifetime, @"Parameter %@ died",self);
+    TGLog(LLObjLifetime, @"%@ released",self);
 }
 
 -(void)getValue:(void *)p ofType:(char)type

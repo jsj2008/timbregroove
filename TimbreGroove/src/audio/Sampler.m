@@ -12,20 +12,21 @@
 #import "Midi.h"
 
 @interface Sampler () {
-    AUGraph         _graph;
+    AUGraph       _graph;
+     Midi * _midi;
+    id _myBlock;
 }
 
 @end
 @implementation Sampler
 
-+(id)instrumentWithConfig:(ConfigInstrument *)config
-                 andGraph:(AUGraph)graph
++(id)samplerWithAUGraph:(AUGraph)graph
 {
-    return [[Sampler alloc] initWithConfig:config andGraph:graph];
+    return [[Sampler alloc] initWithAUGraph:graph];
 }
 
 
--(id)initWithGraph:(AUGraph)graph
+-(id)initWithAUGraph:(AUGraph)graph
 {
     if( (self = [super init]) )
     {
@@ -36,37 +37,22 @@
     
     return self;
 }
--(id)initWithConfig:(ConfigInstrument *)config
-           andGraph:(AUGraph)graph
-{
-    if( (self = [super init]) )
-    {
-        _graph = graph;
-        [self makeSampler];
-        [self loadSound:config];
-    }
-    
-    return self;
-}
 
 -(void)dealloc
 {
-    if( _midiEndPoint )
-        CheckError(MIDIEndpointDispose(_midiEndPoint), "Error disposing endpoint");
+    [self unloadSound];
     
     // "Calling this function deallocates the audio unit’s resources."
     // AND CRASHES THE APP
     //  AudioUnitUninitialize(_sampler);
-    TGLog(LLObjLifetime, @"Instrument gone");
+    TGLog(LLObjLifetime, @"%@ released",self);
 }
 
--(void)releaseSound
+-(void)loadSound:(ConfigInstrument *)config midi:(Midi *)midi
 {
-    _available = true;
-}
-
--(void)loadSound:(ConfigInstrument *)config
-{
+    _available = false;
+    _midi = midi;
+    
     bool isSoundfont = config.isSoundFont;
     NSString * ext = isSoundfont ? @"sf2" : @"aupreset";
     
@@ -83,9 +69,28 @@
     {
         [self loadSynthFromPresetURL: presetURL];
     }
+    
     _lowestPlayable = config.low;
     _highestPlayable = config.high;
-    _available = false;
+    
+    TGLog(LLAudioResource, @"Loaded sound of type %@",ext);
+    
+    [_midi makeDestination:self];
+}
+
+-(void)unloadSound
+{
+    if( _midi )
+    {
+        [_midi releaseDestination:self];
+    }
+    else
+    {
+        TGLog(LLAudioResource, @"Unloading sound (without Midi resource)");
+    }
+    _midi = nil;
+    _available = true;
+    
 }
 
 -(void)makeSampler
@@ -107,58 +112,12 @@
 {
     OSStatus result = AUGraphNodeInfo (_graph, _graphNode, 0, &_sampler);
     CheckError(result,"Unable to obtain a reference to the Sampler unit.");
-    TGLog(LLMidiStuff, @"Created sampler: %ld",(long)_sampler);
-}
-
--(void)setupMidi:(Midi *)midi
-{
-    OSStatus result = noErr;
+    TGLog(LLAudioResource, @"Created sampler AU: %p",(void *)_sampler);
+    AudioUnit sampler = _sampler;
+    _myBlock = [^ OSStatus( UInt32 inStatus, UInt32 inData1, UInt32 inData2, UInt32 inOffsetSampleFrame) {
+        return MusicDeviceMIDIEvent( sampler, inStatus, inData1, inData2, inOffsetSampleFrame);
+    } copy];
     
-    result = MIDIOutputPortCreate (midi.midiClient, CFSTR("out port"), &_outPort );
-
-    CheckError(result, " Couldn't create MIDI output port");
-    
-    MIDIEndpointRef virtualEndpoint;
-    
-    result = MIDIDestinationCreate(midi.midiClient,
-                                   CFSTR("TG Virtual Destination"),
-                                   midi.readProc,
-                                   (void *)(_sampler),
-                                   &virtualEndpoint);
-    
-    CheckError(result,"MIDIDestinationCreate failed");
-    
-    _midiEndPoint = virtualEndpoint;
-}
-
--(void)sendNote:(MIDINoteMessage *)noteMsg
-{
-    __block MIDIPacketList packetList;
-    packetList.numPackets = 1;
-    packetList.packet[ 0]. length = 3;
-    packetList.packet[ 0]. data[ 0] = 0x90;
-    packetList.packet[ 0]. data[ 1] = noteMsg->note & 0x7F;
-    packetList.packet[ 0]. data[ 2] = noteMsg->velocity & 0x7F;
-    packetList.packet[ 0]. timeStamp = 0;
-  
-/*
-    OSStatus
-	result = MusicDeviceMIDIEvent(_sampler, 0x90, noteMsg->note & 0x7,  noteMsg->velocity & 0x7F, 0);
-    CheckError(result, "Couldn't send note directly to sampler");
-    
-    [NSObject performBlock:[^{
-        OSStatus
-        result = MusicDeviceMIDIEvent(_sampler, 0x80, noteMsg->note & 0x7,  0, 0);
-    } copy] afterDelay:noteMsg->duration];
-
-*/
-    CheckError( MIDISend(_outPort, _midiEndPoint, &packetList), "Couldn't send note ON");
- 
-    [NSObject performBlock:[^{
-        packetList.packet[ 0]. data[ 0] = 0x80;
-        CheckError( MIDISend(_outPort, _midiEndPoint, &packetList), "Couldn't send note OFF");
-    } copy] afterDelay:noteMsg->duration];
-
 }
 
 - (OSStatus) loadSynthFromPresetURL: (NSURL *) presetURL
@@ -203,6 +162,11 @@
                                   sizeof(bpdata));
     CheckError(result, "Unable to set the preset property on the Sampler.");
     return result;
+}
+
+-(MIDISendBlock)callback
+{
+    return _myBlock;
 }
 
 @end

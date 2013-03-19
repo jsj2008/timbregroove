@@ -33,6 +33,7 @@ typedef enum LogLevel {
     LLGLResource = 1 << 4,
     LLMidiStuff = 1 << 5,
     LLCaptureOps = 1 << 6,
+    LLAudioResource = 1 << 7,
 } LogLevel;
 void TGLog(LogLevel,NSString *format, ...);
 void TGSetLogLevel(LogLevel);

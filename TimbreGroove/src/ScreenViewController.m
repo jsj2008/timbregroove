@@ -69,7 +69,7 @@
 {
     [super viewDidLoad];
 
-    TGSetLogLevel(LLShitsOnFire);
+    TGSetLogLevel(LLAudioTweaks);
     
     _postDeleteSceneIndex = -1;
     // force some global instializations

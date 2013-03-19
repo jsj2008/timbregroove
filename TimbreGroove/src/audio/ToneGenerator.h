@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
+#import "Midi.h"
 
 @class Scene;
 @class ToneGeneratorProxy;
@@ -15,22 +16,25 @@
 
 @protocol ToneGeneratorProtocol <NSObject>
 
--(void)renderProcForToneGenerator:(ToneGeneratorProxy *)generator;
+-(MIDISendBlock)renderProcForToneGenerator:(ToneGeneratorProxy *)generator;
 -(void)getParameters:(NSMutableDictionary *)parameters;
 -(void)triggersChanged:(Scene *)scene;
--(void)releaseRenderProc;
--(void)sendNote:(MIDINoteMessage *)noteMsg;
 
 @end
 
-@interface ToneGeneratorProxy : NSObject
+@interface ToneGeneratorProxy : NSObject<MidiCapableProtocol>
 
--(id)initWithChannel:(int)channel andAU:(AudioUnit)au;
--(id<ToneGeneratorProtocol>)loadGenerator:(ConfigToneGenerator *)generatorConfig;
++(id)toneGeneratorWithChannel:(int)channel andUI:(AudioUnit)au;
+
+-(id<ToneGeneratorProtocol>)loadGenerator:(ConfigToneGenerator *)generatorConfig
+                                                         midi:(Midi *)midi;
+-(void)unloadGenerator;
 
 @property (nonatomic,strong) id<ToneGeneratorProtocol> generator;
 @property (nonatomic) AudioUnit au;
 @property (nonatomic) int channel;
+@property (nonatomic) MIDIPortRef     outPort;
+@property (nonatomic) MIDIEndpointRef endPoint;
 
 @end
 

@@ -28,7 +28,7 @@
 {
     [super start];
     _oscChannel = [self generatorChannelFromVirtual:0];
-    _notes = [[NoteGenerator alloc] initWithScale:kScaleDiatonic isRandom:false andRange:(NoteRange){55,81}];
+    _notes = [[NoteGenerator alloc] initWithScale:kScalePentatonic isRandom:true andRange:(NoteRange){55,81}];
 }
 
 -(void)getParameters:(NSMutableDictionary *)parameters
@@ -40,6 +40,10 @@
         mnm.note = [_notes next];
         mnm.duration = 0.4;
         mnm.velocity = 127;
+        mnm.channel = _oscChannel + _currentChannel;
+        _midiNote(&mnm);
+        mnm.note = [_notes next];
+        _currentChannel = (_currentChannel + mnm.note) % 3;
         mnm.channel = _oscChannel + _currentChannel;
         _midiNote(&mnm);
         _currentChannel = ++_currentChannel % 3;

@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>default_scene</key>
-	<string>scope</string>
+	<string>tranquility</string>
 	<key>scenes</key>
 	<dict>
 		<key>fft</key>
@@ -24,7 +24,7 @@
 			<key>3d_element</key>
 			<string>fft</string>
 			<key>audio_element</key>
-			<string>funky</string>
+			<string>synthOfGod</string>
 		</dict>
 		<key>scope</key>
 		<dict>
@@ -79,6 +79,8 @@
 			<key>connections</key>
 			<array>
 				<dict>
+					<key>MainSlider</key>
+					<string>MasterVolume</string>
 					<key>Loudness</key>
 					<string>ItemRadius</string>
 					<key>DblTap</key>
@@ -95,6 +97,17 @@
 	</dict>
 	<key>audio_elements</key>
 	<dict>
+		<key>synthOfGod</key>
+		<dict>
+			<key>generators</key>
+			<array>
+				<string>saw</string>
+			</array>
+			<key>instanceClass</key>
+			<string>AutoPlayMidiFile</string>
+			<key>midifile</key>
+			<string>ChildOfGodSolo</string>
+		</dict>
 		<key>electro</key>
 		<dict>
 			<key>connections</key>

@@ -15,14 +15,14 @@
 {
     if( (self = [super init]))
     {
-        TGLog(LLObjLifetime, @"created node of type: %@",self);
+        TGLog(LLObjLifetime, @"%@ created",self);
     }
     return self;
 }
 
 -(void)dealloc
 {
-    TGLog(LLObjLifetime, @"released node of type: %@", self);
+    TGLog(LLObjLifetime, @"%@ released", self);
 }
 #endif
 

@@ -244,6 +244,7 @@
 		57DF9C8416B5BE2500050635 /* SoundSystem.m in Sources */ = {isa = PBXBuildFile; fileRef = 57DF9C8316B5BE2500050635 /* SoundSystem.m */; };
 		57E1954616ABECA50099514B /* PoolShader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 57E1954516ABECA50099514B /* PoolShader.vsh */; };
 		57E1954A16ABEEBD0099514B /* SphereOid.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E1954916ABEEBD0099514B /* SphereOid.m */; };
+		57E27F0416F9166600282F9A /* m.mid in Resources */ = {isa = PBXBuildFile; fileRef = 57E27F0316F9166600282F9A /* m.mid */; };
 		57E590A816BA2E3F00330F40 /* State.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E590A716BA2E3F00330F40 /* State.m */; };
 		57E62B2216C30D9D007064A0 /* PVRImporter.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E62B2116C30D9D007064A0 /* PVRImporter.m */; };
 		57E62E67168433100030908E /* Photo.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E62E66168433100030908E /* Photo.m */; };
@@ -647,6 +648,7 @@
 		57E1954516ABECA50099514B /* PoolShader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = PoolShader.vsh; sourceTree = "<group>"; };
 		57E1954816ABEEAC0099514B /* SphereOid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SphereOid.h; sourceTree = "<group>"; };
 		57E1954916ABEEBD0099514B /* SphereOid.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SphereOid.m; sourceTree = "<group>"; };
+		57E27F0316F9166600282F9A /* m.mid */ = {isa = PBXFileReference; lastKnownFileType = audio.midi; path = m.mid; sourceTree = "<group>"; };
 		57E590A616BA2E3F00330F40 /* State.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = State.h; sourceTree = "<group>"; };
 		57E590A716BA2E3F00330F40 /* State.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = State.m; sourceTree = "<group>"; };
 		57E62B2016C30D9D007064A0 /* PVRImporter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRImporter.h; sourceTree = "<group>"; };
@@ -1242,6 +1244,7 @@
 		57A10E961685E08300B80314 /* audio */ = {
 			isa = PBXGroup;
 			children = (
+				57E27F0316F9166600282F9A /* m.mid */,
 				57B2737016D0BDCB00E7F064 /* Clavinet (21KB).sf2 */,
 				5758FDEC16D06648003913D1 /* funkRiff1.mid */,
 				571B4C2716D0561100C1F88F /* rhodes_small.sf2 */,
@@ -1658,6 +1661,7 @@
 				57AA0AC516D12B9100BCA4A0 /* uvWrap.png in Resources */,
 				5751F2E316D5FA6B00144F2B /* gridtest.png in Resources */,
 				57AE3BDD16D83B0A007ADC17 /* stars.jpg in Resources */,
+				57E27F0416F9166600282F9A /* m.mid in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

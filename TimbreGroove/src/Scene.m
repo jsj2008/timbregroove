@@ -109,7 +109,7 @@
 
 -(void)dealloc
 {
-    TGLog(LLObjLifetime, @"Scene dealloc");
+    TGLog(LLObjLifetime, @"%@ released",self);
 }
 
 -(void)pause

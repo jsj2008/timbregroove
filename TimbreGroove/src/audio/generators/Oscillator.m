@@ -18,9 +18,9 @@ typedef enum _OscWaveType {
 
 typedef struct _OscillatorRef
 {
-	AudioUnit outputUnit;
     OscWaveType waveType;
     float frequency;
+    int cmd;
 	double startingFrameCount;
 } OscillatorRef;
 
@@ -46,6 +46,8 @@ OSStatus OscillatorRenderProc(void *inRefCon,
         double cycleLength = 44100.0 / ref->frequency;
         bool bSine = ref->waveType == OWT_Sine;
         bool bSquare = ref->waveType == OWT_Square;
+        bool bRampUp   = ref->cmd == kMIDIMessage_NoteOn;
+        bool bRampDown = ref->cmd == kMIDIMessage_NoteOff;
         for (frame = 0; frame < inNumberFrames; ++frame)
         {
             float f;
@@ -57,6 +59,11 @@ OSStatus OscillatorRenderProc(void *inRefCon,
             else // saw
                 f = (float)( ((j / cycleLength) * 2.0) - 1.0 );
             
+            if( bRampUp )
+                f *= (float)frame / (float)inNumberFrames;
+            else if( bRampDown )
+                f *= 1.0 - ((float)frame / (float)inNumberFrames);
+            
             left[frame] = right[frame] = f;
             
             j += 1.0;
@@ -65,19 +72,29 @@ OSStatus OscillatorRenderProc(void *inRefCon,
         }
         
         ref->startingFrameCount = j;
+        if( bRampDown )
+            ref->frequency = 0;
+        ref->cmd = 0;
     }
     else
     {
+        FrameType fzero = (FrameType)0;
+        int zero = *(int *)&fzero;
+        memset(left,  zero, ioData->mBuffers[0].mDataByteSize);
+        memset(right, zero, ioData->mBuffers[0].mDataByteSize);
+        /*
         for (frame = 0; frame < inNumberFrames; ++frame)
         {
             left[frame] = right[frame] = (FrameType)0;
-        }        
+        } 
+        */
     }
 	return noErr;
 }
 
 @interface Oscillator : NSObject <ToneGeneratorProtocol> {
     __weak ToneGeneratorProxy * _proxy;
+    __weak Midi * _midi;
     OscillatorRef _oref;
 }
 @property (nonatomic,strong) NSString * waveType;
@@ -85,7 +102,13 @@ OSStatus OscillatorRenderProc(void *inRefCon,
 
 @implementation Oscillator
 
--(void)renderProcForToneGenerator:(ToneGeneratorProxy *)generatorProxy
+-(void)dealloc
+{
+    [self releaseRenderProc];
+    TGLog(LLObjLifetime, @"%@ released",self);
+}
+
+-(MIDISendBlock)renderProcForToneGenerator:(ToneGeneratorProxy *)generatorProxy
 {
     _proxy = generatorProxy;
     
@@ -107,15 +130,31 @@ OSStatus OscillatorRenderProc(void *inRefCon,
 									&input,
 									sizeof(input)),
 			   "Set render callback failed");
-}
 
--(void)sendNote:(MIDINoteMessage *)noteMsg
-{
-    _oref.frequency = 8.1758 * pow(2,(double)noteMsg->note/12.0);
-    TGLog(LLShitsOnFire, @"Note: %d  Frequency:%f type:%@",noteMsg->note,_oref.frequency,_waveType);
-    [NSObject performBlock:^{
-        _oref.frequency = 0;
-    } afterDelay:noteMsg->duration];
+    return ^ OSStatus( UInt32 inStatus, UInt32 inData1, UInt32 inData2, UInt32 inOffsetSampleFrame) {
+        Byte midiCommand = inStatus >> 4;
+        
+        if( midiCommand == kMIDIMessage_NoteOn )
+        {
+            _oref.startingFrameCount = 0;
+            _oref.cmd = midiCommand;
+            _oref.frequency = 8.1758 * pow(2,(double)inData1/12.0);
+            TGLog(LLMidiStuff, @"Oscillator: Note: %d  Frequency:%f type:%@",inData1,_oref.frequency,_waveType);
+        }
+        else if( midiCommand == kMIDIMessage_NoteOff )
+        {
+            _oref.cmd = midiCommand;
+//            _oref.frequency = 0;
+            TGLog(LLMidiStuff, @"Oscillator: Note OFF: %d  Frequency:%f type:%@",inData1,_oref.frequency,_waveType);
+        }
+        else
+        {
+            TGLog(LLMidiStuff, @"What MIDI: %d",midiCommand);
+            
+        }
+        return noErr;
+    };
+    
 }
 
 -(void)releaseRenderProc
