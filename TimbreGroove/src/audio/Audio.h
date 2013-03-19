@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <AVFoundation/AVFoundation.h>
 #import "TGTypes.h"
 
 @class ConfigAudioProfile;
@@ -17,6 +18,7 @@
 @interface Audio : NSObject {
     @protected
     NSArray * _instruments;
+    NSArray * _generators;
 }
 +(id)audioFromConfig:(ConfigAudioProfile *)config withScene:(Scene *)scene;
 -(void)loadAudioFromConfig:(ConfigAudioProfile *)config;
@@ -33,6 +35,7 @@
 -(void)startMidiFile;
 
 -(UInt32)realChannelFromVirtual:(UInt32)virtualChannel;
+-(UInt32)generatorChannelFromVirtual:(UInt32)virtualChannel;
 
 @property (nonatomic,weak)  SoundSystem * soundSystem;
 @property (nonatomic,strong) SoundSystemParameters * ssp;

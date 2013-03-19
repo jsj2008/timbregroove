@@ -18,6 +18,7 @@
 #import "Names.h"
 #import "Sampler.h"
 #import "Scene.h"
+#import "ToneGenerator.h"
 
 void _CheckError( OSStatus error, const char *operation) {
     char errorString[ 20];        // See if it appears to be a 4-char-code
@@ -71,12 +72,17 @@ OSStatus renderCallback(
                     UInt32                         inNumberFrames,
                     AudioBufferList *              ioData)
 {
-    if( (*ioActionFlags & kAudioUnitRenderAction_PostRender) == 0 ||
-            inNumberFrames < kFramesForDisplay )
+    if( (*ioActionFlags & kAudioUnitRenderAction_PostRender) == 0 )
     {
         return noErr;
     }
-    
+
+    if( inNumberFrames < kFramesForDisplay )
+    {
+        TGLog(LLShitsOnFire, @"Expecting: %d frame - got: %d",kFramesForDisplay,inNumberFrames);
+        return noErr;
+    }
+
     RenderCBContext * context = inRefCon;
     
     if( !context->rbo )
@@ -114,6 +120,9 @@ OSStatus renderCallback(
     RenderCBContext     _cbContext;
 
     NSMutableArray * _samplers;
+    NSMutableArray * _toneGenerators;
+    
+    int _numSamplers;
     
     UInt32 _ioFramesPerSlice;
 }
@@ -136,6 +145,7 @@ OSStatus renderCallback(
         [self setupStdASBD]; // assumes _graphSampleRate
         [self setupAUGraph];
         [self startGraph];
+        [self dumpGraph:_processGraph];
     }
     return self;
 }
@@ -212,8 +222,16 @@ OSStatus renderCallback(
        kParamInstrumentP7: [Parameter withBlock:[closure(kParamInstrumentP7) copy]],
        kParamInstrumentP8: [Parameter withBlock:[closure(kParamInstrumentP8) copy]],
            kParamMIDINote: [Parameter withBlock:[^(MIDINoteMessage *msg) {
-        Sampler * sampler = _samplers[msg->channel];
-        [sampler sendNote:msg];
+        if( msg->channel < _numSamplers )
+        {
+            Sampler * sampler = _samplers[msg->channel];
+            [sampler sendNote:msg];
+        }
+        else
+        {
+            ToneGeneratorProxy * tgp = _toneGenerators[msg->channel - _numSamplers];
+            [tgp.generator sendNote:msg];
+        }
     } copy]]
      }];
 }
@@ -228,7 +246,11 @@ OSStatus renderCallback(
     {
         if( !newTrigger )
         {
+#ifdef AUDIO_BUFFER_NATIVE_FLOATS
             CheckError(AudioUnitRemoveRenderNotify(_masterEQUnit, renderCallback, &_cbContext), "Could not unset callback");
+#else
+            CheckError(AUGraphRemoveRenderNotify( _processGraph, renderCallback, &_cbContext), "Could not remove graph render notify");
+#endif
             [self releaseCaptureResources];
         }
     }
@@ -236,7 +258,11 @@ OSStatus renderCallback(
     {
         if( !_bufferTrigger )
         {
+#ifdef AUDIO_BUFFER_NATIVE_FLOATS
             CheckError(AudioUnitAddRenderNotify(_masterEQUnit, renderCallback, &_cbContext), "Could not set callback");
+#else
+            CheckError(AUGraphAddRenderNotify( _processGraph, renderCallback, &_cbContext), "Could not add graph render notify");
+#endif
         }
     }
     _bufferTrigger = newTrigger;
@@ -328,6 +354,19 @@ OSStatus renderCallback(
     return nil;
 }
 
+-(ToneGeneratorProxy *)loadToneGeneratorFromConfig:(ConfigToneGenerator *)config
+{
+    for( ToneGeneratorProxy * tgProxy in _toneGenerators )
+    {
+        if( !tgProxy.generator )
+        {
+            tgProxy.generator = [tgProxy loadGenerator:config];
+            return tgProxy;
+        }
+    }
+    return nil;
+}
+
 -(void)plugInstrumentIntoBus:(Sampler *)instrument atChannel:(int)channel
 {
     OSStatus result;
@@ -398,7 +437,14 @@ OSStatus renderCallback(
     CheckError(AUGraphNodeInfo (_processGraph, cvNode,     0, &cvUnit),        "Unable to obtain a reference to the master EQ unit.");
     CheckError(AUGraphNodeInfo (_processGraph, ioNode,     0, &_ioUnit),       "Unable to obtain a reference to the I/O unit.");
 
-    [self setMixerBusCount:[_samplers count]];
+    _toneGenerators = [NSMutableArray new];
+    for( int t = 8; t < 16; t++ )
+    {
+        [_toneGenerators addObject:[[ToneGeneratorProxy alloc] initWithChannel:t andAU:_mixerUnit]];
+    }
+    
+    _numSamplers = [_samplers count];
+    [self setMixerBusCount:_numSamplers+[_toneGenerators count]];
     
     [_samplers each:^(Sampler * sampler) { [sampler setNodeIntoGraph]; }];
     
@@ -410,6 +456,11 @@ OSStatus renderCallback(
     CheckError(AudioUnitSetProperty(cvUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input,  0, &iasbd, asbdSize), "ugh fmt 3");
     CheckError(AudioUnitSetProperty(cvUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &fasbd, asbdSize), "ugh fmt 4");
     _cbContext.asbd = fasbd;
+
+    for( int m = 8; m < 16; m++ )
+    {
+        CheckError(AudioUnitSetProperty(_mixerUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input,  m, &fasbd, asbdSize), "ugh tg fmt fail");
+    }
     
     [self setupMasterEQ];
     
@@ -502,9 +553,6 @@ OSStatus renderCallback(
     result = AUGraphInitialize (_processGraph);
     CheckError(result,"Unable to initialze AUGraph object.");
     
-    result = AUGraphStart (_processGraph);
-    CheckError(result,"Unable to start audio processing graph.");
-
     return result;
 }
 

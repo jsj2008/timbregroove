@@ -14,6 +14,7 @@
 #import "Scene.h"
 #import "Names.h"
 #import "Sampler.h"
+#import "ToneGenerator.h"
 
 @interface Audio () {
 @protected
@@ -34,6 +35,8 @@
 +(id)audioFromConfig:(ConfigAudioProfile *)config withScene:(Scene *)scene
 {
     Class klass = NSClassFromString(config.instanceClass);
+    if( !klass )
+        klass = [Audio class];
     Audio * audio = [klass new];
     [audio loadAudioFromConfig:config];
     return audio;
@@ -56,11 +59,17 @@
     [_instruments each:^(Sampler * sampler) {
         [sampler releaseSound];
     }];
+    [_generators each:^(ToneGeneratorProxy * proxy) {
+        [proxy.generator releaseRenderProc];
+    }];
 }
 -(void)loadAudioFromConfig:(ConfigAudioProfile *)config
 {
     _instruments = [config.instruments map:^id(id instrumentConfig) {
         return [_soundSystem loadInstrumentFromConfig:instrumentConfig];
+    }];
+    _generators = [config.generators map:^id(id generatorConfig) {
+        return [_soundSystem loadToneGeneratorFromConfig:generatorConfig];
     }];
     _myTriggerMap = config.connections;
     _midiFileName = config.midiFile;
@@ -69,6 +78,11 @@
 -(UInt32)realChannelFromVirtual:(UInt32)virtualChannel
 {
     return ((Sampler *)_instruments[virtualChannel]).channel;
+}
+
+-(UInt32)generatorChannelFromVirtual:(UInt32)virtualChannel
+{
+    return ((ToneGeneratorProxy *)_generators[virtualChannel]).channel;
 }
 
 -(void)start
@@ -90,6 +104,8 @@
     {
         [self start];
     }
+    CheckError(AUGraphStart(_soundSystem.processGraph),"Unable to start audio processing graph.");
+    
 }
 
 -(void)pause
@@ -97,6 +113,7 @@
     if( _midiSequence )
         [_midiSequence pause];
     
+    CheckError(AUGraphStop(_soundSystem.processGraph),"Unable to stop audio processing graph.");
 }
 
 -(void)update:(NSTimeInterval)dt

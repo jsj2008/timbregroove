@@ -46,7 +46,7 @@
 			<key>3d_element</key>
 			<string>oscilloscope</string>
 			<key>audio_element</key>
-			<string>jazz</string>
+			<string>electro</string>
 		</dict>
 		<key>ripple</key>
 		<dict>
@@ -95,6 +95,24 @@
 	</dict>
 	<key>audio_elements</key>
 	<dict>
+		<key>electro</key>
+		<dict>
+			<key>connections</key>
+			<array>
+				<dict>
+					<key>Tap</key>
+					<string>TapNote</string>
+				</dict>
+			</array>
+			<key>instanceClass</key>
+			<string>Synth</string>
+			<key>generators</key>
+			<array>
+				<string>sine</string>
+				<string>square</string>
+				<string>saw</string>
+			</array>
+		</dict>
 		<key>poolside</key>
 		<dict>
 			<key>midifile</key>
@@ -113,7 +131,7 @@
 			<string>VibesPlayer</string>
 			<key>instruments</key>
 			<array>
-				<string>vibes</string>
+				<string>rhodes</string>
 			</array>
 		</dict>
 		<key>funky</key>
@@ -136,6 +154,39 @@
 				<string>congas</string>
 				<string>ambience</string>
 			</array>
+		</dict>
+	</dict>
+	<key>generators</key>
+	<dict>
+		<key>saw</key>
+		<dict>
+			<key>instanceClass</key>
+			<string>Oscillator</string>
+			<key>userData</key>
+			<dict>
+				<key>waveType</key>
+				<string>Saw</string>
+			</dict>
+		</dict>
+		<key>square</key>
+		<dict>
+			<key>instanceClass</key>
+			<string>Oscillator</string>
+			<key>userData</key>
+			<dict>
+				<key>waveType</key>
+				<string>Square</string>
+			</dict>
+		</dict>
+		<key>sine</key>
+		<dict>
+			<key>instanceClass</key>
+			<string>Oscillator</string>
+			<key>userData</key>
+			<dict>
+				<key>waveType</key>
+				<string>Sine</string>
+			</dict>
 		</dict>
 	</dict>
 	<key>instruments</key>

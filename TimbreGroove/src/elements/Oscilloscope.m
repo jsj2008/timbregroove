@@ -25,6 +25,13 @@
 
 @implementation Oscilloscope
 
+-(id)wireUp
+{
+    [super wireUp];
+ //   self.scale = (GLKVector3) { 1.0, 1.0/60.0, 1.0 };
+    return self;
+}
+
 -(void)createBuffer
 {
     self.color = (GLKVector4){ 0.4, 1, 0.4, 1};
@@ -47,7 +54,17 @@
 #endif
         if( ptr )
         {
+#ifdef AUDIO_BUFFER_NATIVE_FLOATS
             _lineMesh.heightOffsets = ((AudioBufferList *)ptr)->mBuffers[0].mData;
+#else
+            UInt32 * intData = ((AudioBufferList *)ptr)->mBuffers[0].mData;
+            for( int i = 0; i < kFramesForDisplay; i++ )
+            {
+                SInt16 i16 = (SInt16)(intData[i] >> 9);
+                _data[i] = (float)i16 / (float)0x10000;
+            }
+            _lineMesh.heightOffsets = _data;
+#endif
             [_lineMesh resetVertices];
         }
     }];

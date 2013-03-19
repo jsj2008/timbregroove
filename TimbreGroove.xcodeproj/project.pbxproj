@@ -210,6 +210,7 @@
 		5798B05916BA00F70093F473 /* pause.png in Resources */ = {isa = PBXBuildFile; fileRef = 5798B05716BA00F70093F473 /* pause.png */; };
 		5798B05A16BA00F70093F473 /* play.png in Resources */ = {isa = PBXBuildFile; fileRef = 5798B05816BA00F70093F473 /* play.png */; };
 		579AD1A916C40B670071AA9A /* Config.m in Sources */ = {isa = PBXBuildFile; fileRef = 579AD1A816C40B670071AA9A /* Config.m */; };
+		57A0BB4C16F7D57C0063305D /* Synth.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A0BB4B16F7D57C0063305D /* Synth.m */; };
 		57A4C22016DFDCF10044B3C9 /* Sampler.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A4C21F16DFDCF10044B3C9 /* Sampler.m */; };
 		57A58EA816ADE68200C9FA53 /* Cube.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A58EA716ADE68200C9FA53 /* Cube.m */; };
 		57A58EB116AE020C00C9FA53 /* poolLines.png in Resources */ = {isa = PBXBuildFile; fileRef = 57A58EB016AE020C00C9FA53 /* poolLines.png */; };
@@ -258,6 +259,8 @@
 		57E8E2B716C1BC5000CD39BC /* recordRed.png in Resources */ = {isa = PBXBuildFile; fileRef = 57E8E2B516C1BC5000CD39BC /* recordRed.png */; };
 		57E8E2BA16C1BF7600CD39BC /* Global.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E8E2B916C1BF7600CD39BC /* Global.m */; };
 		57EABEA216F64EAF00EC4F59 /* VibesPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 57EABEA116F64EAF00EC4F59 /* VibesPlayer.m */; };
+		57EABEA516F6C29B00EC4F59 /* ToneGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = 57EABEA416F6C29A00EC4F59 /* ToneGenerator.m */; };
+		57EABEA916F6CF1A00EC4F59 /* Oscillator.m in Sources */ = {isa = PBXBuildFile; fileRef = 57EABEA816F6CF1A00EC4F59 /* Oscillator.m */; };
 		57ED524A16BEE2EF00B38054 /* NewSceneViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 57ED524916BEE2EF00B38054 /* NewSceneViewController.m */; };
 		57ED524D16BEF92D00B38054 /* GraphCollection.m in Sources */ = {isa = PBXBuildFile; fileRef = 57ED524C16BEF92D00B38054 /* GraphCollection.m */; };
 		57ED525116C0A00900B38054 /* PauseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 57ED525016C0A00800B38054 /* PauseViewController.m */; };
@@ -585,6 +588,7 @@
 		5798B05816BA00F70093F473 /* play.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = play.png; sourceTree = "<group>"; };
 		579AD1A716C40B670071AA9A /* Config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
 		579AD1A816C40B670071AA9A /* Config.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Config.m; sourceTree = "<group>"; };
+		57A0BB4B16F7D57C0063305D /* Synth.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Synth.m; sourceTree = "<group>"; };
 		57A4C21E16DFDCF10044B3C9 /* Sampler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sampler.h; sourceTree = "<group>"; };
 		57A4C21F16DFDCF10044B3C9 /* Sampler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = Sampler.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		57A58EA616ADE68200C9FA53 /* Cube.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Cube.h; sourceTree = "<group>"; };
@@ -665,6 +669,9 @@
 		57E8E2B816C1BF7600CD39BC /* Global.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Global.h; sourceTree = "<group>"; };
 		57E8E2B916C1BF7600CD39BC /* Global.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Global.m; sourceTree = "<group>"; };
 		57EABEA116F64EAF00EC4F59 /* VibesPlayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VibesPlayer.m; sourceTree = "<group>"; };
+		57EABEA316F6C29900EC4F59 /* ToneGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ToneGenerator.h; sourceTree = "<group>"; };
+		57EABEA416F6C29A00EC4F59 /* ToneGenerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ToneGenerator.m; sourceTree = "<group>"; };
+		57EABEA816F6CF1A00EC4F59 /* Oscillator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Oscillator.m; sourceTree = "<group>"; };
 		57ED524816BEE2EF00B38054 /* NewSceneViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NewSceneViewController.h; path = ../NewSceneViewController.h; sourceTree = "<group>"; };
 		57ED524916BEE2EF00B38054 /* NewSceneViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NewSceneViewController.m; path = ../NewSceneViewController.m; sourceTree = "<group>"; };
 		57ED524B16BEF92D00B38054 /* GraphCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GraphCollection.h; sourceTree = "<group>"; };
@@ -794,6 +801,7 @@
 		57019F761685C15B007FA38F /* audio */ = {
 			isa = PBXGroup;
 			children = (
+				57EABEA616F6CED200EC4F59 /* generators */,
 				57DF536716DC19E400990B8D /* elements */,
 				5751F2DC16D569A700144F2B /* Audio.h */,
 				5751F2DD16D569A700144F2B /* Audio.m */,
@@ -804,6 +812,8 @@
 				573560EE16EDB34C001EEA83 /* EQNames.h */,
 				577368D516CDEE380051551F /* SoundSystemParameters.h */,
 				577368D616CDEE380051551F /* SoundSystemParameters.m */,
+				57EABEA316F6C29900EC4F59 /* ToneGenerator.h */,
+				57EABEA416F6C29A00EC4F59 /* ToneGenerator.m */,
 				57A4C21E16DFDCF10044B3C9 /* Sampler.h */,
 				57A4C21F16DFDCF10044B3C9 /* Sampler.m */,
 				5714713D16C8451E00CA2A69 /* Midi.h */,
@@ -1353,6 +1363,7 @@
 				57DF536916DC1A6000990B8D /* Serenity.m */,
 				57EABEA116F64EAF00EC4F59 /* VibesPlayer.m */,
 				571FD90716F037E3007DB564 /* PoolsideAudio.m */,
+				57A0BB4B16F7D57C0063305D /* Synth.m */,
 			);
 			path = elements;
 			sourceTree = "<group>";
@@ -1417,6 +1428,14 @@
 				57E8750916782894008243B2 /* TimbreGroove-Prefix.pch */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		57EABEA616F6CED200EC4F59 /* generators */ = {
+			isa = PBXGroup;
+			children = (
+				57EABEA816F6CF1A00EC4F59 /* Oscillator.m */,
+			);
+			path = generators;
 			sourceTree = "<group>";
 		};
 		57ED524E16C05DD100B38054 /* graph */ = {
@@ -1766,6 +1785,9 @@
 				571FD90416F02B69007DB564 /* MathStuff.c in Sources */,
 				571FD90816F037E3007DB564 /* PoolsideAudio.m in Sources */,
 				57EABEA216F64EAF00EC4F59 /* VibesPlayer.m in Sources */,
+				57EABEA516F6C29B00EC4F59 /* ToneGenerator.m in Sources */,
+				57EABEA916F6CF1A00EC4F59 /* Oscillator.m in Sources */,
+				57A0BB4C16F7D57C0063305D /* Synth.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

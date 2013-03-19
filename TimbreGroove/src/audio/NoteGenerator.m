@@ -73,8 +73,9 @@
         static Byte pentatonic[] = { 3, 2, 2, 3, 2 };
         static Byte minor[]      = { 2, 1, 2, 2, 1, 2, 1 };
         static Byte semitones[]  = { 1 };
-        static Byte * known[] = { diatonic, pentatonic, minor, semitones };
-        static int counts[]  = { 7,        5,          7,     1         };
+        static Byte bluespen[]   = { 3, 2, 1, 1, 3, 1, 1 };
+        static Byte * known[] = { diatonic, pentatonic, minor, semitones, bluespen };
+        static int counts[]  = { 7,        5,          7,     1,          7        };
         
         Byte * intervals = known[_scale];
         int numIntervals  = counts[_scale];
@@ -97,7 +98,7 @@
 
 -(int)next
 {
-    int n = _random ? R0_n(_numNotes) : _counter++;
+    int n = _random ? R0_n(_numNotes) : _counter++ % _numNotes;
     return _notes[n];
 }
 

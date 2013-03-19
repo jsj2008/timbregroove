@@ -18,6 +18,7 @@ extern void fft(float *in_out, int len);
 @interface FFTScope : Generic {
     __weak Line * _lineMesh;
     float _data[kFramesForDisplay];
+
 }
 
 @end
@@ -29,7 +30,7 @@ extern void fft(float *in_out, int len);
     [super wireUp];
     
     self.scale = (GLKVector3){ 1, 1.0/(M_PI_2), 1 };
-    self.position = (GLKVector3){ 0, -1.0, 0 };
+    self.position = (GLKVector3){ 0, -M_PI_2, 0 };
     return self;
     
 }
@@ -52,22 +53,30 @@ extern void fft(float *in_out, int len);
 #ifdef DEBUG
         static int capCount = 0;
         if( capCount++ % 120 == 0 )
-            TGLog(LLCaptureOps, @"Capture buffer: %p",ptr);
+            TGLog(LLCaptureOps, @"FFT Capture buffer: %p",ptr);
 #endif
         if( ptr )
         {
+#ifdef AUDIO_BUFFER_NATIVE_FLOATS
             AudioBufferList * abl = (AudioBufferList *)ptr;
             memcpy( _data,abl->mBuffers[0].mData, sizeof(_data) );
+#else
+            UInt32 * intData = ((AudioBufferList *)ptr)->mBuffers[0].mData;
+            for( int i = 0; i < kFramesForDisplay; i++ )
+            {
+                SInt16 i16 = (SInt16)(intData[i] >> 9);
+                _data[i] = ((float)i16 / 32768.0) * 0.2;
+            }
+            
+#endif
             fft(_data, kFramesForDisplay);
             
-            float scaled[kFramesForDisplay];
-            float * p = scaled;
             for( int i = 0; i < kFramesForDisplay; i++ )
             {
                 float arct = atanf(_data[i]);
-                *p++ = arct * arct;
+                _data[i] = arct * arct;
             }
-            _lineMesh.heightOffsets = scaled;
+            _lineMesh.heightOffsets = _data;
             [_lineMesh resetVertices];
         }
     }];

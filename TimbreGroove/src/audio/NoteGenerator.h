@@ -13,6 +13,7 @@ typedef enum _Scales {
     kScalePentatonic,
     kScaleMinor,
     kScaleSemitones,
+    kScaleBluesPen,
     kScaleCustom
 } Scales;
 

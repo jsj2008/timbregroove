@@ -24,6 +24,7 @@ extern NSString * const kConfigAudioInstanceClass;
 extern NSString * const kConfigAudioProfiles;
 extern NSString * const kConfigAudioMidiFile;
 extern NSString * const kConfigAudioInstruments;
+extern NSString * const kConfigAudioGenerators;
 
 extern NSString const * kConfigAudioEQ        ;
 extern NSString const * kConfigEQBandLowPass  ;
@@ -39,6 +40,9 @@ extern NSString * const kConfigInstrumentPreset;
 extern NSString * const kConfigInstrumentLowNote;
 extern NSString * const kConfigInstrumentHighNote;
 
+extern NSString * const kConfigToneGenerator;
+extern NSString * const kConfigToneInstanceClass;
+extern NSString * const kConfigToneCustomProperties;
 
 extern NSString * const kConfig3dElements;
 extern NSString * const kConfig3dInstanceClass;

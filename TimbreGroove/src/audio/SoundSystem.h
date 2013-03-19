@@ -11,6 +11,9 @@
 #import <CoreMIDI/CoreMIDI.h>
 #import "TGTypes.h"
 
+
+#define AUDIO_BUFFER_NATIVE_FLOATS 1
+
 @class Scene;
 
 #ifndef SKIP_MIXER_DECLS
@@ -26,6 +29,8 @@ void _CheckError( OSStatus error, const char *operation);
 
 @class ConfigInstrument;
 @class Sampler;
+@class ConfigToneGenerator;
+@class ToneGeneratorProxy;
 @class SoundSystemParameters;
 @class Midi;
 
@@ -46,6 +51,7 @@ enum MidiNotes {
 +(SoundSystem *)sharedInstance;
 
 -(Sampler *)loadInstrumentFromConfig:(ConfigInstrument *)config;
+-(ToneGeneratorProxy *)loadToneGeneratorFromConfig:(ConfigToneGenerator *)config;
 
 @property (nonatomic,readonly) AudioUnit mixerUnit;
 @property (nonatomic,readonly) AudioUnit masterEQUnit;

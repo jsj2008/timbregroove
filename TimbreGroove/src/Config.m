@@ -25,6 +25,7 @@ NSString * const kConfigAudioProfiles      = @"audio_elements";
 NSString * const kConfigAudioInstanceClass = @"instanceClass";
 NSString * const kConfigAudioMidiFile      = @"midifile";
 NSString * const kConfigAudioInstruments   = @"instruments";
+NSString * const kConfigAudioGenerators    = @"generators";
 
 NSString * const kConfigAudioEQ        =   @"EQ";
 NSString * const kConfigEQBandLowPass  =   @"LowPass";
@@ -40,6 +41,9 @@ NSString * const kConfigInstrumentPreset      = @"preset";
 NSString * const kConfigInstrumentLowNote     = @"lo";
 NSString * const kConfigInstrumentHighNote    = @"hi";
 
+NSString * const kConfigToneGenerators        = @"generators";
+NSString * const kConfigToneInstanceClass     = @"instanceClass";
+NSString * const kConfigToneCustomProperties  = @"userData";
 
 NSString * const kConfig3dElements      = @"3d_elements";
 NSString * const kConfig3dInstanceClass = @"instanceClass";
@@ -92,6 +96,9 @@ static Config * __sharedConfig;
 -(ConfigInstrument *)getInstrument:(NSString *)name {
     return [[ConfigInstrument alloc] initWithD:[_plistConfig[kConfigInstruments] valueForKey:name]];
 }
+-(ConfigToneGenerator *)getToneGenerator:(NSString *)name {
+    return [[ConfigToneGenerator alloc] initWithD:[_plistConfig[kConfigToneGenerators] valueForKey:name]];
+}
 -(ConfigAudioProfile *)getAudioProfile:(NSString *)name {
     return [[ConfigAudioProfile alloc] initWithD:[_plistConfig[kConfigAudioProfiles] valueForKey:name]];
 }
@@ -112,6 +119,11 @@ static Config * __sharedConfig;
     return self;
 }
 
+@end
+
+@implementation ConfigToneGenerator
+-(NSString *)instanceClass { return [_me valueForKey:kConfigToneInstanceClass]; }
+-(NSDictionary *)customProperties { return [_me valueForKey:kConfigToneCustomProperties]; }
 @end
 
 @implementation ConfigGraphicElement
@@ -139,6 +151,12 @@ static Config * __sharedConfig;
     NSArray * names = [_me valueForKey:kConfigAudioInstruments];
     return [names map:^id(id name) {
         return [__sharedConfig getInstrument:name];
+    }];
+}
+-(NSArray *)generators {
+    NSArray * names = [_me valueForKey:kConfigAudioGenerators];
+    return [names map:^id(id name) {
+        return [__sharedConfig getToneGenerator:name];
     }];
 }
 @end

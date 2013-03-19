@@ -16,6 +16,11 @@
 -(id)initWithD:(NSDictionary *)d;
 @end
 
+@interface ConfigToneGenerator : ConfigBase
+@property (nonatomic,readonly) NSString * instanceClass;
+@property (nonatomic,readonly) NSDictionary * customProperties;
+@end
+
 @interface ConfigGraphicElement : ConfigBase
 @property (nonatomic,readonly) NSString * icon;
 @property (nonatomic,readonly) int menuOrder;
@@ -35,6 +40,7 @@
 @property (nonatomic,readonly) NSString * midiFile;
 @property (nonatomic,readonly) NSString * EQ;
 @property (nonatomic,readonly) NSArray * instruments;
+@property (nonatomic,readonly) NSArray * generators;
 @property (nonatomic,readonly) NSString * instanceClass;
 @property (nonatomic,readonly) NSDictionary * customProperties;
 @property (nonatomic,readonly) NSArray * connections;
