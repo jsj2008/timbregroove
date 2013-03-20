@@ -27,6 +27,7 @@
     MidiFile * _midiSequence;
     NSString * _midiFileName;
     bool _started;
+    
 }
 
 @end
@@ -38,6 +39,9 @@
     if( !klass )
         klass = [Audio class];
     Audio * audio = [klass new];
+    NSDictionary * userData = config.customProperties;
+    if( userData )
+        [audio setValuesForKeysWithDictionary:userData];
     [audio loadAudioFromConfig:config];
     return audio;
 }
@@ -101,11 +105,22 @@
     {
         if( _midiSequence )
             [_midiSequence resume];
+        
     }
     else
     {
         [self start];
     }
+
+    if( _channelVolumes )
+    {
+        NSArray * arr = _instruments ? _instruments : _generators;
+        [_channelVolumes enumerateObjectsUsingBlock:^(NSNumber * value, NSUInteger idx, BOOL *stop) {
+            _channelSelector( [ (id<ChannelProtocol>)arr[idx] channel] );
+            _channelVolume( [value floatValue] );
+        }];
+    }
+    
     CheckError(AUGraphStart(_soundSystem.processGraph),"Unable to start audio processing graph.");
     
 }
@@ -129,6 +144,18 @@
 {
     [_parameters triggersChanged:scene];
     [_soundSystem triggersChanged:scene];
+    
+    if( scene )
+    {
+        TriggerMap * tm = scene.triggers;
+        _channelSelector = [tm getIntTrigger:kParamChannel];
+        _channelVolume   = [tm getFloatTrigger:kParamChannelVolume];
+    }
+    else
+    {
+        _channelSelector = nil;
+        _channelVolume   = nil;
+    }
 }
 
 -(void)getParameters:(NSMutableDictionary *)putHere;

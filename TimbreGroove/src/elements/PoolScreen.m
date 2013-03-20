@@ -235,38 +235,17 @@ extern float g_last_power, g_last_radius;
         pw.center = (CGPoint){-pt.x,-pt.y};
     }];
     
-    parameters[kParamPoolItemRadius] = [Parameter withBlock:^(float f) {
-#ifdef DEBUG_POWER
-        float org = f, explodedF = f;
-#endif
+    parameters[kParamPoolItemRadius] = [Parameter withBlock:^(float fp) {
         int count = [_waters count];
         int index = count == 1 ? 0 : R0_n(count);
         PoolWater * pw = (PoolWater *)_waters[index];
-        if( f < -90 || f > -10 )
-        {
-            
-        }
-        else
-        {
-            f = ( ((120+f)-_minF) / ((_maxF-_minF)*0.5)) - 1.0;
-            f = (f + (f * expf(-f*f)));
-            
-#ifdef DEBUG_POWER
-            explodedF = f;
-#endif
-            f =  f * 0.2;
-            if( f < 0.02 )
-            {
-                if( f < 0.005 )
-                    [self shuffle];
-                f = 0.0002;
-            }
+        
+        float f = _explodeFromCenter(fp, 0.4, 0.7, 1);
+        if( f < 0.0 )
+            f = 0.01;
+        f *= 0.1;
+        if( f <= 1.0 )
             pw.radius = f;
-        }
-#ifdef DEBUG_POWER
-        g_last_power = org;
-        g_last_radius = explodedF;
-#endif
     }];
 }
 

@@ -10,6 +10,6 @@
 #define TimbreGroove_MathStuff_h
 
 
-float _explodeFromCenter(float f, float minRange, float maxRange);
+float _explodeFromCenter(float f, float minRange, float maxRange, float bendFactor);
 
 #endif

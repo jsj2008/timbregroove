@@ -13,22 +13,30 @@
 #import "TriggerMap.h"
 
 @interface PoolsideAudio : Audio {
-    FloatParamBlock _channelVolume;
     FloatParamBlock _channelVolumeAnimated;
+    int             _ambientChannel;
 }
 
 @end
 
 @implementation PoolsideAudio
 
+-(void)loadAudioFromConfig:(ConfigAudioProfile *)config
+{
+    [super loadAudioFromConfig:config];
+    self.channelVolumes = @[ @(0.2) ]; // this gets set every activate
+}
 -(void)start
 {
     [super startMidiFile];
     [super start];
-    
-    _channelVolume(0.2);         // <-- start here
-    _channelVolumeAnimated(1.0); // <-- animate to here, then loop
-    
+}
+
+-(void)activate
+{
+    [super activate];
+    // our channel is already selected in base class
+    _channelVolumeAnimated(0.6); // <-- animate to here, then loop
 }
 
 -(void)triggersChanged:(Scene *)scene
@@ -39,13 +47,11 @@
     {
          TriggerMap * tm = scene.triggers;
         
-        _channelVolume = [tm getFloatTrigger:kParamChannelVolume];
-        _channelVolumeAnimated = [tm getFloatTrigger:[kParamChannelVolume stringByAppendingTween:kTweenEaseOutSine len:5]
+        _channelVolumeAnimated = [tm getFloatTrigger:[kParamChannelVolume stringByAppendingTween:kTweenEaseOutSine len:3.2]
                                    cb:TweenReverseLooper];
     }
     else
     {
-        _channelVolume = nil;
         _channelVolumeAnimated = nil;
     }
 }

@@ -19,6 +19,9 @@
     @protected
     NSArray * _instruments;
     NSArray * _generators;
+    
+    IntParamBlock   _channelSelector;
+    FloatParamBlock _channelVolume;    
 }
 +(id)audioFromConfig:(ConfigAudioProfile *)config withScene:(Scene *)scene;
 -(void)loadAudioFromConfig:(ConfigAudioProfile *)config;
@@ -40,5 +43,7 @@
 @property (nonatomic,weak)  SoundSystem * soundSystem;
 @property (nonatomic,strong) SoundSystemParameters * ssp;
 
+// from config.properties
+@property (nonatomic,strong) NSArray * channelVolumes;
 
 @end

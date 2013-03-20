@@ -16,6 +16,7 @@
     PointerParamBlock _midiNote;
     int _oscChannel;
     int _currentChannel;
+
     NoteGenerator * _notes;
 }
 
@@ -24,6 +25,11 @@
 @implementation Synth
 
 
+-(void)loadAudioFromConfig:(ConfigAudioProfile *)config
+{
+    [super loadAudioFromConfig:config];
+    self.channelVolumes = @[ @(0.25), @(0.1), @(0.1) ];
+}
 -(void)start
 {
     [super start];
@@ -49,6 +55,8 @@
         _currentChannel = ++_currentChannel % 3;
     }];
 }
+
+
 -(void)triggersChanged:(Scene *)scene
 {
     [super triggersChanged:scene];

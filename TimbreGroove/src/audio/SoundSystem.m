@@ -242,11 +242,7 @@ OSStatus renderCallback(
     {
         if( !newTrigger )
         {
-#ifdef AUDIO_BUFFER_NATIVE_FLOATS
             CheckError(AudioUnitRemoveRenderNotify(_masterEQUnit, renderCallback, &_cbContext), "Could not unset callback");
-#else
-            CheckError(AUGraphRemoveRenderNotify( _processGraph, renderCallback, &_cbContext), "Could not remove graph render notify");
-#endif
             [self releaseCaptureResources];
         }
     }
@@ -254,11 +250,7 @@ OSStatus renderCallback(
     {
         if( !_bufferTrigger )
         {
-#ifdef AUDIO_BUFFER_NATIVE_FLOATS
             CheckError(AudioUnitAddRenderNotify(_masterEQUnit, renderCallback, &_cbContext), "Could not set callback");
-#else
-            CheckError(AUGraphAddRenderNotify( _processGraph, renderCallback, &_cbContext), "Could not add graph render notify");
-#endif
         }
     }
     _bufferTrigger = newTrigger;

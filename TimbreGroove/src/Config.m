@@ -26,6 +26,7 @@ NSString * const kConfigAudioInstanceClass = @"instanceClass";
 NSString * const kConfigAudioMidiFile      = @"midifile";
 NSString * const kConfigAudioInstruments   = @"instruments";
 NSString * const kConfigAudioGenerators    = @"generators";
+NSString * const kConfigAudioCustomProperties  = @"properties";
 
 NSString * const kConfigAudioEQ        =   @"EQ";
 NSString * const kConfigEQBandLowPass  =   @"LowPass";
@@ -43,13 +44,13 @@ NSString * const kConfigInstrumentHighNote    = @"hi";
 
 NSString * const kConfigToneGenerators        = @"generators";
 NSString * const kConfigToneInstanceClass     = @"instanceClass";
-NSString * const kConfigToneCustomProperties  = @"userData";
+NSString * const kConfigToneCustomProperties  = @"properties";
 
 NSString * const kConfig3dElements      = @"3d_elements";
 NSString * const kConfig3dInstanceClass = @"instanceClass";
 NSString * const kConfig3dMenuOrder     = @"order";
 NSString * const kConfig3dIcon          = @"icon";
-NSString * const kConfig3dCustomProperties = @"userData";
+NSString * const kConfig3dCustomProperties = @"properties";
 
 static Config * __sharedConfig;
 
@@ -145,7 +146,7 @@ static Config * __sharedConfig;
 -(NSString *)midiFile { return [_me valueForKey:kConfigAudioMidiFile]; }
 -(NSString *)EQ { return [_me valueForKey:kConfigAudioEQ]; }
 -(NSString *)instanceClass { return [_me valueForKey:kConfigAudioInstanceClass]; }
--(NSDictionary *)customProperties { return [_me valueForKey:kConfig3dCustomProperties]; }
+-(NSDictionary *)customProperties { return [_me valueForKey:kConfigAudioCustomProperties]; }
 -(NSArray *)connections { return [_me valueForKey:kConfigSceneConnections]; };
 -(NSArray*)instruments {
     NSArray * names = [_me valueForKey:kConfigAudioInstruments];

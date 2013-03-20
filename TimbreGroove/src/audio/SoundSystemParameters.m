@@ -280,12 +280,7 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
                                                  0);
         CheckError(result, "Could not turn audio knob");
         apd->valueCap = param->_value;
-#ifdef DEBUG_POWER
-        if( au == _mixerUnit && !apd->aupid )
-        {
-            printf("%f,%f,%f,%f\n", f, (g_last_power+120)/120.0, g_last_radius,g_last_power);
-        }
-#endif
+
 #if 1
         TGLog(LLAudioTweaks, @"audio tweak[%p] param: %ld scope:%ld bus:%ld band:%d -> %.4f (%.2f/%.2f)",(void *)au,
               apd->aupid,(long)apd->scope,(long)bus,apd->band,f,apd->range.min,apd->range.max);
@@ -363,7 +358,8 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
                                        0,
                                        &value);
         CheckError(result, "Error getting peak value");
-        _peakTrigger(value);
+        float f = (120.0+value) / 120.0;
+        _peakTrigger(f);
     }
     if( _holdLevelTrigger )
     {

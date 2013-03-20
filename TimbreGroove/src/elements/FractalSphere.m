@@ -54,29 +54,37 @@
 {
     if( !self.light )
         self.light = [Light new]; // defaults are good
-    self.peakVal = 0.2;
+    float subColor = 0;
+    self.light.ambientColor = (GLKVector4){subColor, subColor, 1.0, 1.0};
+    
+    GLKVector3 lDir = self.light.direction;
+    GLKMatrix4 mx = GLKMatrix4MakeTranslation( lDir.x, lDir.y, lDir.z );
+    self.light.direction = GLKMatrix4MultiplyVector3(mx,(GLKVector3){-1, 0, -1});
 }
 
--(void)setPeakVal:(float)peakVal
+-(void)getParameters:(NSMutableDictionary *)putHere
 {
-    _peakVal = peakVal;
-    float subColor = TG_CLAMP(peakVal*0.7,0.3,0.6);
-    self.light.ambientColor = (GLKVector4){subColor, subColor, peakVal, 1};
-}
+    [super getParameters:putHere];
 
--(void)tweenDone
-{
-    _tweening = false;
+    // override the default
+    putHere[@"Ping!"] = [Parameter withBlock:^(float f) {
+        _myRot += f * 45.0;
+        self.rotation = (GLKVector3){ 0, GLKMathDegreesToRadians(_myRot), 0 };
+        self.light.ambientColor = (GLKVector4){f, f*0.7, f, 1.0};
+    }];
+    
 }
 -(void)update:(NSTimeInterval)dt
 {
    // self.lightRotation += 0.03;
     [super update:dt];
+    [_texRenderer update:dt];
+    [_texRenderer renderToFBO];
+}
 
+/*
     if( self.timer > 1.0/8.0 )
     {
-        [_texRenderer update:self.timer/2.0];
-        [_texRenderer renderToFBO];
         
         _myRot += 0.4; // (peakVal * 5.0);
         float rads = GLKMathDegreesToRadians(_myRot);
@@ -85,4 +93,5 @@
         self.timer = 0.0;
     }
 }
+ */
 @end

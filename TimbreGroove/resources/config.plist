@@ -3,9 +3,53 @@
 <plist version="1.0">
 <dict>
 	<key>default_scene</key>
-	<string>tranquility</string>
+	<string>running</string>
 	<key>scenes</key>
 	<dict>
+		<key>running</key>
+		<dict>
+			<key>connections</key>
+			<array>
+				<dict>
+					<key>Loudness</key>
+					<string>Ping!</string>
+					<key>Tap</key>
+					<string>RandomVibesNote</string>
+					<key>MainSlider</key>
+					<string>MasterVolume</string>
+				</dict>
+			</array>
+			<key>icon</key>
+			<string>runner.png</string>
+			<key>display</key>
+			<string>Running</string>
+			<key>3d_element</key>
+			<string>meshImporter</string>
+			<key>audio_element</key>
+			<string>jazz</string>
+		</dict>
+		<key>fractal</key>
+		<dict>
+			<key>connections</key>
+			<array>
+				<dict>
+					<key>Loudness</key>
+					<string>Ping!</string>
+					<key>Tap</key>
+					<string>RandomVibesNote</string>
+					<key>MainSlider</key>
+					<string>MasterVolume</string>
+				</dict>
+			</array>
+			<key>icon</key>
+			<string>fractalSphere.png</string>
+			<key>display</key>
+			<string>fractal</string>
+			<key>3d_element</key>
+			<string>fractalSphere</string>
+			<key>audio_element</key>
+			<string>jazz</string>
+		</dict>
 		<key>fft</key>
 		<dict>
 			<key>connections</key>
@@ -99,6 +143,13 @@
 	<dict>
 		<key>synthOfGod</key>
 		<dict>
+			<key>properties</key>
+			<dict>
+				<key>channelVolumes</key>
+				<array>
+					<real>0.1</real>
+				</array>
+			</dict>
 			<key>generators</key>
 			<array>
 				<string>saw</string>
@@ -144,7 +195,7 @@
 			<string>VibesPlayer</string>
 			<key>instruments</key>
 			<array>
-				<string>rhodes</string>
+				<string>vibes</string>
 			</array>
 		</dict>
 		<key>funky</key>
@@ -175,7 +226,7 @@
 		<dict>
 			<key>instanceClass</key>
 			<string>Oscillator</string>
-			<key>userData</key>
+			<key>properties</key>
 			<dict>
 				<key>waveType</key>
 				<string>Saw</string>
@@ -185,7 +236,7 @@
 		<dict>
 			<key>instanceClass</key>
 			<string>Oscillator</string>
-			<key>userData</key>
+			<key>properties</key>
 			<dict>
 				<key>waveType</key>
 				<string>Square</string>
@@ -195,7 +246,7 @@
 		<dict>
 			<key>instanceClass</key>
 			<string>Oscillator</string>
-			<key>userData</key>
+			<key>properties</key>
 			<dict>
 				<key>waveType</key>
 				<string>Sine</string>
@@ -306,7 +357,7 @@
 		</dict>
 		<key>ripple</key>
 		<dict>
-			<key>userData</key>
+			<key>properties</key>
 			<dict>
 				<key>connections</key>
 				<array>
@@ -332,7 +383,7 @@
 		</dict>
 		<key>eqcube</key>
 		<dict>
-			<key>userData</key>
+			<key>properties</key>
 			<dict>
 				<key>connections</key>
 				<array>
@@ -362,9 +413,7 @@
 		<dict>
 			<key>instanceClass</key>
 			<string>MeshImporter</string>
-			<key>order</key>
-			<integer>30</integer>
-			<key>userData</key>
+			<key>properties</key>
 			<dict>
 				<key>knownPODs</key>
 				<dict>
@@ -379,17 +428,11 @@
 					</dict>
 				</dict>
 			</dict>
-			<key>icon</key>
-			<string>meshImporter.png</string>
 		</dict>
 		<key>fractalSphere</key>
 		<dict>
 			<key>instanceClass</key>
 			<string>FractalSphere</string>
-			<key>order</key>
-			<integer>20</integer>
-			<key>icon</key>
-			<string>fractalSphere.png</string>
 		</dict>
 		<key>fluid</key>
 		<dict>

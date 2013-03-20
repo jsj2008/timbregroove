@@ -8,8 +8,14 @@
 
 #include <math.h>
 
-float _explodeFromCenter(float f, float minRange, float maxRange)
+float _explodeFromCenter(float f, float minRange, float maxRange, float bendFactor)
 {
-    f = ( f / ((maxRange-minRange)*0.5)) - 1.0;
-    return (f + (f * expf(-f*f)));
+    if( f < minRange )
+        f = minRange;
+    if( f > maxRange )
+        f = maxRange;
+    f = ( (f-minRange) / ((maxRange-minRange)*0.5)) - 1.0;
+    if( !bendFactor )
+        bendFactor = 1;
+    return (f + (f * bendFactor * expf(-f*f)));
 }

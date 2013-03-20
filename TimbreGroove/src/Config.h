@@ -38,7 +38,6 @@
 
 @interface ConfigAudioProfile : ConfigBase
 @property (nonatomic,readonly) NSString * midiFile;
-@property (nonatomic,readonly) NSString * EQ;
 @property (nonatomic,readonly) NSArray * instruments;
 @property (nonatomic,readonly) NSArray * generators;
 @property (nonatomic,readonly) NSString * instanceClass;

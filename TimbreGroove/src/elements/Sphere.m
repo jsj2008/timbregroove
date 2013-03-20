@@ -27,9 +27,11 @@
 }
 
 
+/*
 -(void)update:(NSTimeInterval)dt
 {
     [super update:dt];
+    
     if( self.light )
     {
         GLKVector3 lDir = self.light.direction;
@@ -39,6 +41,7 @@
         self.light.direction = GLKMatrix4MultiplyVector3(mx,GLKVector3Make(-1, 0, -1));
     }
 }
+*/
 
 -(void)createBuffer
 {

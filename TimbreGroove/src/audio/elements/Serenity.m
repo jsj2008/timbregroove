@@ -24,9 +24,7 @@
 @interface Serenity() {
     NoteGenerator * _congasScale;
     NoteGenerator * _ambientScale;
-    FloatParamBlock _channelVolume;
     FloatParamBlock _channelVolumeDecay;
-    IntParamBlock   _selectChannel;
     PointerParamBlock _midiNote;
     UInt32 _ambienceChannel;
     UInt32 _congasChannel;
@@ -62,16 +60,12 @@
     if( scene )
     {
         TriggerMap * tm = scene.triggers;
-        _channelVolume      = [tm getFloatTrigger: kParamChannelVolume];
         _channelVolumeDecay = [tm getFloatTrigger  :kChannelVolumeDecay];
-        _selectChannel      = [tm getIntTrigger    :kParamChannel];
         _midiNote           = [tm getPointerTrigger:kParamMIDINote];
     }
     else
     {
-        _channelVolume = nil;
         _channelVolumeDecay = nil;
-        _selectChannel = nil;
         _midiNote = nil;
     }
 }
@@ -84,7 +78,7 @@
                               ^(CGPoint pt)
                               {
                                   MIDINoteMessage mnm;
-                                  _selectChannel(_ambienceChannel);
+                                  _channelSelector(_ambienceChannel);
                                   _channelVolume(1);
                                   mnm.note = [_ambientScale next];
                                   mnm.duration = 1.1;

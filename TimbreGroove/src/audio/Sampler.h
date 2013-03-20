@@ -9,10 +9,11 @@
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 #import "Midi.h"
+#import "ChannelProtocol.h"
 
 @class ConfigInstrument;
 
-@interface Sampler : NSObject <MidiCapableProtocol>
+@interface Sampler : NSObject <MidiCapableProtocol,ChannelProtocol>
 
 +(id)samplerWithAUGraph:(AUGraph)graph;
 

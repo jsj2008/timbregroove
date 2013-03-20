@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 #import "Midi.h"
+#import "ChannelProtocol.h"
 
 @class Scene;
 @class ToneGeneratorProxy;
@@ -22,7 +23,7 @@
 
 @end
 
-@interface ToneGeneratorProxy : NSObject<MidiCapableProtocol>
+@interface ToneGeneratorProxy : NSObject<MidiCapableProtocol,ChannelProtocol>
 
 +(id)toneGeneratorWithChannel:(int)channel andUI:(AudioUnit)au;
 

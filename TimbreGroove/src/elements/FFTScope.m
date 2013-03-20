@@ -57,18 +57,8 @@ extern void fft(float *in_out, int len);
 #endif
         if( ptr )
         {
-#ifdef AUDIO_BUFFER_NATIVE_FLOATS
             AudioBufferList * abl = (AudioBufferList *)ptr;
             memcpy( _data,abl->mBuffers[0].mData, sizeof(_data) );
-#else
-            UInt32 * intData = ((AudioBufferList *)ptr)->mBuffers[0].mData;
-            for( int i = 0; i < kFramesForDisplay; i++ )
-            {
-                SInt16 i16 = (SInt16)(intData[i] >> 9);
-                _data[i] = ((float)i16 / 32768.0) * 0.2;
-            }
-            
-#endif
             fft(_data, kFramesForDisplay);
             
             for( int i = 0; i < kFramesForDisplay; i++ )

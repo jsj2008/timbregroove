@@ -12,8 +12,6 @@
 #import "TGTypes.h"
 
 
-#define AUDIO_BUFFER_NATIVE_FLOATS 1
-
 @class Scene;
 
 #ifndef SKIP_MIXER_DECLS

@@ -1,13 +1,15 @@
 
 #include "PVRImporter.h"
 #include "SkinnedPVR.h"
+#include "Scene.h"
 
 @class View;
 
 @interface MeshImporter () {
     PVR_SKINNER _skinnerThingy;
     float _rotation;
-    NSTimeInterval _time;
+@public
+    NSTimeInterval _runningTime;
 }
 @property (nonatomic,readonly,getter = getPods) NSDictionary * pods;
 @property (nonatomic,weak) NSDictionary * podInfo;
@@ -47,7 +49,7 @@
         ++count;
     }
     
-    _skinnerThingy = Skinner_Get(name, textureFiles, textureNames, numTextures);
+    _skinnerThingy = Skinner_Get(name, textureFiles, textureNames, numTextures,(__bridge void *)self);
     
     free(textureFiles);
     free(textureNames);
@@ -55,14 +57,17 @@
     return [super wireUp];
 }
 
+-(void)getParameters:(NSMutableDictionary *)putHere
+{
+    [super getParameters:putHere];
+    
+    putHere[@"Ping!"] = [Parameter withBlock:^(float f) {
+        _runningTime += f * 0.05;
+        _rotation += f * 3.0;
+    }];
+}
 -(void)update:(NSTimeInterval)dt
 {
-    _time += dt;
-    if( _time > 0.3f )
-    {
-        _rotation += 1.0;
-        _time = 0;
-    }
     self.rotation = GLKVector3Make(0, GLKMathDegreesToRadians(_rotation), 0);
 }
 
@@ -71,6 +76,7 @@
     Skinner_Render(_skinnerThingy,self.modelView.m);
 }
 
+/*
 -(void)tgViewIsFullyVisible:(View *)view
 {
     Skinner_Resume(_skinnerThingy);
@@ -80,6 +86,7 @@
 {
     Skinner_Pause(_skinnerThingy);
 }
+ */
 @end
 
 void EnvExitMsg( const char * msg )
@@ -105,8 +112,12 @@ void * EnvGet(int param)
     return (void *)[[[[NSBundle mainBundle] resourcePath] stringByAppendingString:@"/"] UTF8String];
 }
 
-unsigned long EnvGetTime()
+unsigned long EnvGetTime(void * context)
 {
-    return (unsigned long)( /*floor*/(CACurrentMediaTime()*1000.0) );
+    MeshImporter * mi = (__bridge MeshImporter *)context;
+//    return (unsigned long)( /*floor*/(CACurrentMediaTime()*1000.0) );
+    
+    return (unsigned long)( /*floor*/(mi->_runningTime*1000.0) );
+    
 }
 

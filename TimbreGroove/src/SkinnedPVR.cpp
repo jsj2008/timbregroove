@@ -77,16 +77,18 @@ class OGLES2Skinning
     bool m_paused;
     
 public:
-    OGLES2Skinning( char *psSceneFile, char **ppTextureFiles, char **ppTextureName, int numTextures );
+    OGLES2Skinning( char *psSceneFile, char **ppTextureFiles, char **ppTextureName, int numTextures, void *context );
     ~OGLES2Skinning();
     bool RenderScene(float *modelMatrix);
     void Pause() { m_paused = true; }
     void Resume() { m_paused = false; }
+    
+    void * m_refCon;
 };
 
-PVR_SKINNER Skinner_Get(char *psSceneFile, char **ppTextureFiles, char **ppTextureName, int numTextures )
+PVR_SKINNER Skinner_Get(char *psSceneFile, char **ppTextureFiles, char **ppTextureName, int numTextures, void *context )
 {
-    return (PVR_SKINNER) new OGLES2Skinning(psSceneFile,ppTextureFiles,ppTextureName,numTextures);
+    return (PVR_SKINNER) new OGLES2Skinning(psSceneFile,ppTextureFiles,ppTextureName,numTextures,context);
 }
 
 void Skinner_Render(PVR_SKINNER skinner, float * modelMatrix)
@@ -109,11 +111,12 @@ void Skinner_Resume(PVR_SKINNER skinner)
     ((OGLES2Skinning *)skinner)->Resume();
 }
 
-OGLES2Skinning::OGLES2Skinning( char *psSceneFile, char **ppTextureFiles, char **ppTextureName, int numTextures )
+OGLES2Skinning::OGLES2Skinning( char *psSceneFile, char **ppTextureFiles, char **ppTextureName, int numTextures, void *refCon )
 :   m_psSceneFile(psSceneFile),
     m_psFragShaderSrcFile("skinned.fsh"),
     m_psVertShaderSrcFile("skinned.vsh"),
-    m_paused(false)
+    m_paused(false),
+    m_refCon(refCon)
 {
     m_numTextures = numTextures;
     if( numTextures )
@@ -280,7 +283,7 @@ bool OGLES2Skinning::InitApplication()
 #endif
     
 	m_fFrame = 0;
-	m_iTimePrev = EnvGetTime();
+	m_iTimePrev = EnvGetTime(m_refCon);
 	m_Transform = PVRTMat4::Identity();
 	m_fAngle = 0.0f;
 	m_fDistance = 0.0f;
@@ -359,7 +362,7 @@ bool OGLES2Skinning::RenderScene(float *modelMatrix)
      Calculates the frame number to animate in a time-based manner.
      Uses the shell function EnvGetTime() to get the time in milliseconds.
      */
-	unsigned long iTime = EnvGetTime();
+	unsigned long iTime = EnvGetTime(m_refCon);
     
 	if(iTime > m_iTimePrev)
 	{

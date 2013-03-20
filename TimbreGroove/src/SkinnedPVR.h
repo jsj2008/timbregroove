@@ -17,7 +17,7 @@ extern "C" {
 
 typedef void * PVR_SKINNER;
 
-PVR_SKINNER Skinner_Get(char *psSceneFile, char **ppTextureFiles, char **ppTextureName, int numTextures );
+PVR_SKINNER Skinner_Get(char *psSceneFile, char **ppTextureFiles, char **ppTextureName, int numTextures,void *context );
 void        Skinner_Render(PVR_SKINNER skinner, float * modelMatrix);
 void        Skinner_Destroy(PVR_SKINNER skinner);
 void        Skinner_Pause(PVR_SKINNER skinner);
@@ -36,7 +36,7 @@ void          EnvExitMsg( const char * msg );
 int           EnvGeti(int pref);
 void *        EnvGet(int param);
 int           EnvSet(int param,void *);
-unsigned long EnvGetTime();
+unsigned long EnvGetTime(void *context);
 
 #ifdef __cplusplus
 }
