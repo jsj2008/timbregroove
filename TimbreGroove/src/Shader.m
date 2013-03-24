@@ -7,10 +7,10 @@
 //
 
 #import "Shader.h"
-#import "ShaderLocations.h"
 #import <libkern/OSAtomic.h>
 
 #define ATOMIC_INC(c) OSAtomicCompareAndSwap32Barrier(c,c+1,(volatile int32_t *)&c);
+#define EMPTY_RANGE (FloatRange){0,0}
 
 static NSHashTable * __shaders;
 
@@ -186,7 +186,10 @@ static NSHashTable * __shaders;
 }
 @end
 
-typedef struct _VarQueueItem
+
+#pragma mark Types for Shader
+
+typedef struct _ValueQueueItem
 {
     int indexIntoName;
     TGUniformType type;
@@ -194,26 +197,50 @@ typedef struct _VarQueueItem
         float f;
         int i;
         CGPoint pt;
-        GLKVector3 v3;
-        GLKVector4 v4;
+        GLKVector3 gv3;
+        GLKVector4 gv4;
+        TGVector3 v3;
+        
     };
-} VarQueueItem;
+} ValueQueueItem;
 
-typedef struct _VarQueueItem VarStoreItem;
+typedef struct _ValueQueueItem ValueCacheItem;
+
+typedef enum _sfpType {
+    sfpt_straightUp,
+    sfpt_scaling,
+    sfpt_neg11,
+    sfpt_01
+} sfpType;
 
 @interface Shader () {
     const char ** _names;
     
-    int           _numVars;
+    int           _numLocations;
     int           _lastAttr;
     id            _poolKey;
-    ShaderLocations * _locations;
     
-    int _varQueueCount;
-    int _varQueueMax;
-    VarQueueItem * _varQueue;
-    VarStoreItem * _currentValues;
-    int _nextCurrentValue;
+    // Values that have been set by other parts
+    // of the app wait in the queue for the
+    // display thread to pick them up and write
+    // to the shader before render:w:h:
+    // The lifetime of these values is exactly
+    // one update:/render: cycle
+    int _valueQueueIndex;
+    int _valueQueueMax;
+    ValueQueueItem * _valueQueue;
+    
+    // Still a work in progress:
+    // Values that have been set by other parts
+    // of the app will be stored here so that
+    // tweeners can query them. This is only
+    // needed for Parameter objects that do have
+    // storage for their values.
+    int _valueCacheIndex;
+    int _valueCacheMax;
+    ValueCacheItem * _valueCache;
+    
+    FloatParamBlock _fparam;
 }
 
 @end
@@ -284,24 +311,24 @@ typedef struct _VarQueueItem VarStoreItem;
 
     _names = names;
     _lastAttr = lastAttr;
-    _numVars = numNames;
-    _vars = (GLint *)malloc(sizeof(GLint)*_numVars);
+    _numLocations = numNames;
+    _locations = (GLint *)malloc(sizeof(GLint)*_numLocations);
     
-    for( int i = 0; i < _numVars; i++ )
-        _vars[i] = -1;
+    for( int i = 0; i < _numLocations; i++ )
+        _locations[i] = -1;
     
     if( ![self loadAndCompile:vert andFragment:frag andHeaders:headers] )
         return nil;
 
-    _locations = [[ShaderLocations alloc] initWithShader:self];
     [self getLocationsForNames];
     
-    _varQueueMax = 50;
-    _varQueueCount = 0;
-    _varQueue = malloc(_varQueueMax * sizeof(VarQueueItem));
+    _valueQueueMax = 50;
+    _valueQueueIndex = 0;
+    _valueQueue = malloc(_valueQueueMax * sizeof(ValueQueueItem));
     
-    _nextCurrentValue = 0;
-    _currentValues = malloc(_varQueueMax * sizeof(VarStoreItem));
+    _valueCacheMax = _valueQueueMax;
+    _valueCacheIndex = 0;
+    _valueCache = malloc(_valueCacheMax * sizeof(ValueCacheItem));
     
     NSString * tag = [headers length] ? headers : @"default";
     _poolKey = [NSString stringWithFormat:@"%s-%s-%@",vert,frag,tag];
@@ -313,9 +340,9 @@ typedef struct _VarQueueItem VarStoreItem;
 
 -(void)dealloc
 {
-    free(_vars);
-    free(_varQueue);
-    free(_currentValues);
+    free(_locations);
+    free(_valueQueue);
+    free(_valueCache);
     [__shaders removeObject:self];
 }
 
@@ -324,88 +351,259 @@ typedef struct _VarQueueItem VarStoreItem;
 - (void)getLocationsForNames
 {
     [self use];
-    for( int i = 0; i < _numVars; i++ )
+    for( int i = 0; i < _numLocations; i++ )
         [self location:i];
 }
 
 - (GLint)location:(int)indexIntoNames
 {
-    if( _vars[indexIntoNames] == -1 )
+    if( _locations[indexIntoNames] == -1 )
     {
         if( indexIntoNames > _lastAttr )
-            _vars[indexIntoNames] = glGetUniformLocation(_program, _names[indexIntoNames]);
+            _locations[indexIntoNames] = glGetUniformLocation(_program, _names[indexIntoNames]);
         else
-            _vars[indexIntoNames] = glGetAttribLocation(_program, _names[indexIntoNames]);
+            _locations[indexIntoNames] = glGetAttribLocation(_program, _names[indexIntoNames]);
 #if DEBUG
-        if( !_acceptMissingVars && _vars[indexIntoNames] == -1 )
+        
+        if( _locations[indexIntoNames] == -1 )
         {
-            TGLog(LLShitsOnFire, @"Can't find attr/uniform for (%d) %s in program %d", indexIntoNames, _names[indexIntoNames],_program);
-            exit(1);
+            LogLevel logl = _acceptMissingVars ? LLShaderStuff : LLShitsOnFire;
+            TGLog(logl, @"Can't find attr/uniform for (%d) %s in program %d",
+                  indexIntoNames, _names[indexIntoNames],_program);
+            if( !_acceptMissingVars )
+                exit(-1);
         }
+        
 #endif
     }
     
-    return _vars[indexIntoNames];
+    return _locations[indexIntoNames];
 }
 
 - (void)writeToLocation:(int)indexIntoNames type:(TGUniformType)type data:(void*)data
 {
-    if( _acceptMissingVars && _vars[indexIntoNames] == -1 )
+    if(  _locations[indexIntoNames] == -1 )
+    {
+        TGLog(LLShaderStuff, @"Trying to write to %s (%d) but doesn't exist",_names[indexIntoNames],indexIntoNames);
         return;
-    [_locations writeToLocation:_vars[indexIntoNames] type:type data:data];
+    }
+    
+    GLint location = _locations[indexIntoNames];
+    GLint i;
+    
+    switch(type)
+    {
+        case TG_FLOAT:
+        case TG_BOOL_FLOAT:
+            glUniform1f(location, *(GLfloat *)data);
+            break;
+            
+        case TG_VECTOR2:
+            glUniform2fv(location, 1, data);
+            break;
+            
+        case TG_VECTOR3:
+            glUniform3fv(location, 1, data);
+            break;
+            
+        case TG_VECTOR4:
+            glUniform4fv(location, 1, data);
+            break;
+            
+        case TG_MATRIX3:
+            glUniformMatrix3fv(location, 1, 0, data);
+            break;
+            
+        case TG_MATRIX4:
+            glUniformMatrix4fv(location, 1, 0, data);
+            break;
+            
+        case TG_INT:
+        case TG_TEXTURE:
+        case TG_BOOL:
+            i = *(GLint *)data ? 1 : 0;
+            glUniform1i(location, i);
+            break;
+    }
 }
 
--(const char *)nameForIndex:(int)index
+-(const char *)nameForIndex:(int)indexIntoNames
 {
-    return _names[index];
+    return _names[indexIntoNames];
 }
 
 - (void) prepareRender:(TG3dObject *)object
 {
     @synchronized(self) {
-        VarQueueItem * vqi = _varQueue;
-        for( int i = 0; i < _varQueueCount; i++, vqi++ )
+        ValueQueueItem * vqi = _valueQueue;
+        for( int i = 0; i < _valueQueueIndex; i++, vqi++ )
         {
-            [_locations writeToLocation:_vars[vqi->indexIntoName]
-                                   type:vqi->type
-                                   data:&vqi->f];
+            TGLog(LLShaderStuff, @"Writing: %s (%d) loc:%d type:%d (%f, %f, %f)",_names[vqi->indexIntoName], vqi->indexIntoName,
+                  _locations[vqi->indexIntoName],
+                  vqi->type, vqi->gv3.x, vqi->gv3.y, vqi->gv3.z);
+            
+            [self writeToLocation:vqi->indexIntoName
+                             type:vqi->type
+                             data:&vqi->f];
         }
-        _varQueueCount = 0;
+        _valueQueueIndex = 0;
     }
 }
 
--(void)floatParameter:(NSMutableDictionary *)putHere idx:(int)idx 
+-(Parameter *)floatParam:(NSMutableDictionary *)putHere
+          indexIntoNames:(int)idx
+                   value:(float)value
+                   range:(FloatRange)range
+               forObject:(id)target
+                    type:(sfpType)type
 {
-    putHere[ @(_names[idx]) ] = [Parameter withBlock:^(float f){
-        _varQueue[_varQueueCount] = (VarQueueItem){ idx, TG_FLOAT, { .f = f }};
-        ATOMIC_INC(_varQueueCount);
-    }];
-}
-
--(void)floatParameter:(NSMutableDictionary *)putHere idx:(int)idx value:(float)value range:(FloatRange)range
-{
-    putHere[ @(_names[idx]) ] = [FloatParameter withScaling:range value:value block:^(float f){
-        _varQueue[_varQueueCount] = (VarQueueItem){ idx, TG_FLOAT, { .f = f }};
-        ATOMIC_INC(_varQueueCount);
-    }];
-}
-
--(void)pointParameter:(NSMutableDictionary *)putHere idx:(int)idx
-{
-    int myCurrentValueIndex = _nextCurrentValue;
-    Parameter * parameter = [Parameter withBlock:[^(CGPoint pt) {
-        _varQueue[_varQueueCount] = (VarQueueItem){ idx, TG_POINT, { .pt = pt } };
-        _currentValues[myCurrentValueIndex].pt = pt;
-        ATOMIC_INC(_varQueueCount);        
-    } copy]];
+    FloatParamBlock fpb = [^(float f)
+    {
+        _valueQueue[_valueQueueIndex] = (ValueQueueItem){ idx, TG_FLOAT, { .f = f }};
+        ATOMIC_INC(_valueQueueIndex);
+    } copy];
     
-    _currentValues[_nextCurrentValue].pt = (CGPoint){0,0};
-    parameter.additive = false;
-    [parameter setNativeValue:&_currentValues[_nextCurrentValue].pt ofType:TGC_POINT size:sizeof(CGPoint)];
+    Parameter * parameter;
     
+    switch (type) {
+        case sfpt_straightUp:
+            parameter = [Parameter withBlock:fpb];
+            break;
+            
+        case sfpt_scaling:
+            parameter = [FloatParameter withScaling:range value:value block:fpb];
+            break;
+            
+        case sfpt_neg11:
+            parameter = [FloatParameter withNeg11Scaling:range value:value block:fpb];
+            break;
+            
+        case sfpt_01:
+            parameter = [FloatParameter with01Value:value block:fpb];
+            break;
+    }
+    
+    parameter.targetObject = target;
     putHere[ @(_names[idx]) ] = parameter;
+    return parameter;
+}
+
+-(Parameter *)floatParameter:(NSMutableDictionary *)putHere
+       indexIntoNames:(int)idx
+{
+    return [self floatParam:putHere indexIntoNames:idx value:0 range:EMPTY_RANGE forObject:nil type:sfpt_straightUp];
+}
+
+-(Parameter *)floatParameter:(NSMutableDictionary *)putHere
+       indexIntoNames:(int)idx
+            forObject:(TG3dObject *)target
+{
+    return [self floatParam:putHere indexIntoNames:idx value:0 range:EMPTY_RANGE forObject:target type:sfpt_straightUp];
+}
+
+-(Parameter *)floatParameter:(NSMutableDictionary *)putHere
+       indexIntoNames:(int)idx
+                value:(float)value
+                range:(FloatRange)range
+{
+    return [self floatParam:putHere indexIntoNames:idx value:value range:range forObject:nil type:sfpt_scaling];
+}
+
+-(Parameter *)floatParameter:(NSMutableDictionary *)putHere
+       indexIntoNames:(int)idx
+                value:(float)value
+                range:(FloatRange)range
+            forObject:(TG3dObject *)target
+{
+    return [self floatParam:putHere indexIntoNames:idx value:value range:range forObject:target type:sfpt_scaling];
+}
+
+-(Parameter *)floatParameter:(NSMutableDictionary *)putHere
+              indexIntoNames:(int)idx
+                       value:(float)value
+                  neg11range:(FloatRange)range
+{
+    return [self floatParam:putHere indexIntoNames:idx value:value range:range forObject:nil type:sfpt_neg11];
+}
+
+-(Parameter *)floatParameter:(NSMutableDictionary *)putHere
+              indexIntoNames:(int)idx
+                       value:(float)value
+                  neg11range:(FloatRange)range
+                   forObject:(TG3dObject *)target
+{
+    return [self floatParam:putHere indexIntoNames:idx value:value range:range forObject:target type:sfpt_neg11];
+}
+
+-(Parameter *)vecParameter:(NSMutableDictionary *)putHere
+            indexIntoNames:(int)idx
+                 forObject:(TG3dObject *)target
+                      type:(char)type
+{
+    id block = nil;
+    size_t sz = 0;
+    int myCurrentValueIndex = _valueCacheIndex;
     
-    ++_nextCurrentValue;
+    if( type == TGC_POINT )
+    {
+        block = [^(CGPoint pt)
+                 {
+                     _valueQueue[_valueQueueIndex] = (ValueQueueItem){ idx, TG_POINT, { .pt = pt } };
+                     _valueCache[myCurrentValueIndex].pt = pt;
+                     ATOMIC_INC(_valueQueueIndex);
+                 } copy];
+        
+        sz = sizeof(CGPoint);
+    }
+    else if( type == TGC_VECTOR3 )
+    {
+        block = [^(TGVector3 vec3)
+                 {
+                     _valueQueue[_valueQueueIndex] = (ValueQueueItem){ idx, TG_VECTOR3, { .v3 = vec3 } };
+                     _valueCache[myCurrentValueIndex].v3 = vec3;
+                     ATOMIC_INC(_valueQueueIndex);
+                 } copy];
+        
+        sz = sizeof(GLKVector3);
+    }
+    
+    Parameter * parameter = [Parameter withBlock:block];
+    _valueCache[_valueCacheIndex].gv3 = (GLKVector3){0,0,0};
+    parameter.additive = false;
+    [parameter setNativeValue:&_valueCache[_valueCacheIndex].pt ofType:type size:sz];
+    parameter.targetObject = target;
+    putHere[ @(_names[idx]) ] = parameter;
+    ++_valueCacheIndex;
+    return parameter;
+    
+}
+
+-(Parameter *)pointParameter:(NSMutableDictionary *)putHere
+              indexIntoNames:(int)idx
+{
+    return [self vecParameter:putHere indexIntoNames:idx forObject:nil type:TGC_POINT];
+}
+
+
+-(Parameter *)pointParameter:(NSMutableDictionary *)putHere
+       indexIntoNames:(int)idx
+            forObject:(TG3dObject *)target
+{
+    
+    return [self vecParameter:putHere indexIntoNames:idx forObject:target type:TGC_POINT];
+}
+
+-(Parameter *)vec3Parameter :(NSMutableDictionary *)putHere
+       indexIntoNames:(int)idx
+{
+    return [self vecParameter:putHere indexIntoNames:idx forObject:nil type:TGC_VECTOR3];
+}
+
+-(Parameter *)vec3Parameter :(NSMutableDictionary *)putHere
+       indexIntoNames:(int)idx
+            forObject:(TG3dObject *)target
+{
+    return [self vecParameter:putHere indexIntoNames:idx forObject:target type:TGC_VECTOR3];
 }
 
 @end

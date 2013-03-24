@@ -45,5 +45,6 @@
 - (void)update:(NSTimeInterval)dt view:(GraphView *)view;
 
 - (void)wireUp:(bool)getTriggers;
+- (void)triggersChanged;
 
 @end

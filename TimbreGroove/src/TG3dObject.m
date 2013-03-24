@@ -15,6 +15,7 @@
 #import "Scene.h"
 #import "ConfigNames.h"
 #import "State.h"
+#import "Names.h"
 
 @interface TG3dObject () {
 }
@@ -197,14 +198,17 @@
 {
     if( !_disableStandarParameters )
     {
-        parameters[@"xRotation"] = [Parameter withBlock:^(float f) {
-            self.rotation = (GLKVector3){ GLKMathDegreesToRadians(f * self.rotationScale.x), 0, 0 };
+        parameters[kParamRotationX] = [Parameter withBlock:^(float f) {
+            GLKVector3 r = self.rotation;
+            self.rotation = (GLKVector3){ GLKMathDegreesToRadians(f * 360), r.y, r.z };
         }];
-        parameters[@"yRotation"] = [Parameter withBlock:^(float f) {
-            self.rotation = (GLKVector3){ 0, GLKMathDegreesToRadians(f * self.rotationScale.y), 0 };
+        parameters[kParamRotationY] = [Parameter withBlock:^(float f) {
+            GLKVector3 r = self.rotation;
+            self.rotation = (GLKVector3){ r.x, GLKMathDegreesToRadians(f * 360), r.z };
         }];
-        parameters[@"zRotation"] = [Parameter withBlock:^(float f) {
-            self.rotation = (GLKVector3){ 0, 0, GLKMathDegreesToRadians(f * self.rotationScale.z) };
+        parameters[kParamRotationZ] = [Parameter withBlock:^(float f) {
+            GLKVector3 r = self.rotation;
+            self.rotation = (GLKVector3){ r.x, r.y, GLKMathDegreesToRadians(f * 360) };
         }];
     }
 }

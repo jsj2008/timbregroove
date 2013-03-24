@@ -9,7 +9,6 @@
 #import "GraphView.h"
 #import "Global.h"
 #import "Camera.h"
-#import "GraphView+Touches.h"
 #import "Scene.h"
 
 
@@ -65,6 +64,14 @@
     [self triggersChanged:nil];
     _scene = scene;
     self.graph = scene.graph;
+    if( _graph.viewBasedParameters )
+    {
+        NSDictionary * wrappedParams = [_graph.viewBasedParameters map:^id(NSString *name, Parameter * parameter) {
+            return [self paramWrapperForObject:parameter.targetObject parameter:parameter];
+        }];
+        [scene.triggers addParameters:wrappedParams];
+        [scene triggersChanged];
+    }
     [self triggersChanged:scene];
 }
 

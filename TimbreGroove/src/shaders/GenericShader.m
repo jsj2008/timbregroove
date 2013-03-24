@@ -31,7 +31,7 @@ static const char * _generic_shader_var_names[NUM_GENERIC_VARIABLES] = {
     
     "u_time",
     
-    "u_distortionPoint",
+    "u_distortionPoint", 
     "u_distortionFactor",
     "u_rippleSize",
     "u_ripplePt",

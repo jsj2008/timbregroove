@@ -84,6 +84,8 @@
             *data++ = _radius * y;
             *data++ = _radius * z;
 			         
+            //printf("{ %.4f, %.4f, %.4f }\n", _radius * x, _radius * y, _radius * z);
+            
             float u,v;
             if( wUV )
             {

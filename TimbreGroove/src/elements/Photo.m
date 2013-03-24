@@ -25,7 +25,6 @@ static NSString * __str_pictureFieldName = @"picturePicker";
     if( !self.textureFileName )
         self.textureFileName = @"Alex.png";
     [super wireUp];
-    self.distortionFactor = 1.0;
     return self;
 }
 

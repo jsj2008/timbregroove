@@ -63,12 +63,17 @@
     [self wireUp:false];
 }
 
+-(void)triggersChanged
+{
+    [_graph triggersChanged:self];
+    [_audio triggersChanged:self];
+}
+
 -(void)wireUp:(bool)getTriggers
 {
     bool wasPaused = _paused;
     _paused = true;
     
-    _tweenQueue = [NSMutableArray new];
     _triggers = [[TriggerMap alloc] initWithDelegate:self];
     
     NSMutableDictionary * params = [NSMutableDictionary new];
@@ -92,10 +97,8 @@
     }
     
     if( getTriggers )
-    {
-        [_graph triggersChanged:self];
-        [_audio triggersChanged:self];
-    }
+        [self triggersChanged];
+
     _paused = wasPaused;
 }
 
@@ -123,8 +126,7 @@
 
 -(void)activate
 {
-    [_graph triggersChanged:self];
-    [_audio triggersChanged:self];
+    [self triggersChanged];
     [_audio activate];
     [_graph activate];
     _paused = false;
@@ -143,8 +145,12 @@
 
 -(void)queue:(TriggerTween *)tweener
 {
-    if( [_tweenQueue indexOfObject:tweener] == NSNotFound )
+    if(!_tweenQueue || [_tweenQueue indexOfObject:tweener] == NSNotFound )
+    {
+        if( !_tweenQueue )
+            _tweenQueue = [NSMutableArray new];
         [_tweenQueue addObject:tweener];
+    }
 }
 
 -(void)update:(NSTimeInterval)dt view:(GraphView *)view
@@ -155,12 +161,11 @@
     [_audio update:dt];
     [view update:dt];
     
-    if( [_tweenQueue count] )
+    if( _tweenQueue )
     {
-        NSIndexSet * markedForDelete = [_tweenQueue indexesOfObjectsPassingTest:^BOOL(TriggerTween * tween, NSUInteger idx, BOOL *stop) {
-            return [tween update:dt];
+        _tweenQueue = [_tweenQueue reduce:^id(TriggerTween * tween) {
+            return [tween update:dt] ? nil : tween;
         }];
-        [_tweenQueue removeObjectsAtIndexes:markedForDelete];
     }
 }
 

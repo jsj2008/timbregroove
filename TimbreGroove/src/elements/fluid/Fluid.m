@@ -155,7 +155,7 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
 {
     for( FluidVariableName i = FL_LAST_ATTR+1; i < fl_LAST_SCALAR_UNIFORM; i++ )
     {
-        if( _vars[i] != -1 )
+        if( _locations[i] != -1 )
         {
             FluidVariable * fv = _fvars + i;
             [self writeToLocation:i type:fv->utype data:&fv->data];

@@ -27,7 +27,7 @@ uniform vec3 u_ambient;
 varying vec3 v_lightFilter;
 #endif
 
-#ifdef DISTORTION
+#ifdef MESH_DISTORT
 uniform vec3 u_distortionPoint;
 uniform float u_distortionFactor;
 #endif
@@ -61,16 +61,25 @@ void main()
     v_time = u_time;
 #endif
 
-#ifdef MESH_DISTORTION
+#ifdef MESH_DISTORT
     /*
     float dist = sin(distance(pos,u_distortionPoint));
     pos += vec3(dist,dist,0) * u_distortionFactor;
     gl_Position = u_pvm * vec4( pos, a_position.w );
      */
-    float maxDistance = 1.0;
-    float length = clamp( abs(distance(pos.xyz,u_distortionPoint)), 0.0, maxDistance );
-    float distortion = sin(length*5.0) * (maxDistance - length);
-    gl_Position = u_pvm * vec4(pos*(1.0+distortion),a_position.w);
+    /*
+    float length = distance(u_distortionPoint,pos.xyz);
+    pos.x *= 1.0 + length/2.0;
+    pos.y += length/2.0;
+     */
+    vec3 jointPt = vec3(1.0,0.0,0.0);
+    if( abs(distance(pos,jointPt)) < 0.3 )
+    {        
+        float distToDistPt = distance(pos,u_distortionPoint);
+        pos += distToDistPt * u_distortionFactor;
+    }
+    
+    gl_Position = u_pvm * vec4(pos,a_position.w);
 #else
 	gl_Position   = u_pvm * vec4(pos,a_position.w);
 #endif

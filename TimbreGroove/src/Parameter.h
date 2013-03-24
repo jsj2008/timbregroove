@@ -44,11 +44,17 @@
  */
 @property (nonatomic) bool additive;
 
+// used by wrappers
+@property (nonatomic,readonly) char nativeType;
+
 // only need this for non-float possibly animated parameters
 -(void)setNativeValue:(void *)p ofType:(char)type size:(size_t)size;
 
 // for self-referential blocks
 @property (nonatomic) bool forceDecommision;
+
+// parameter only applies to object 
+@property (nonatomic,strong) id targetObject;
 @end
 
 

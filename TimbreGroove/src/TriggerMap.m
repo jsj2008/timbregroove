@@ -13,29 +13,6 @@
 #import "Tween.h"
 
 //--------------------------------------------------------------------------------
-@interface NSArray (reducer)
-
-@end
-
-@implementation NSArray (reducer)
-
-- (NSArray *)reduce:(BKTransformBlock)block {
-	NSParameterAssert(block != nil);
-	
-	NSMutableArray *result = [NSMutableArray arrayWithCapacity:self.count];
-	
-	[self enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-		id value = block(obj);
-		if (value)
-            [result addObject:value];
-	}];
-	
-	return result;
-}
-
-@end
-
-//--------------------------------------------------------------------------------
 
 typedef enum TweenOps
 {
@@ -398,14 +375,16 @@ TweenCallback TweenReverseLooper = ^TweenDoneIndicator(TriggerTween *tt) {
 -(id)getTrigger:(NSString const *)triggerName ofType:(char)type cb:(id)callback
 {
     BKTransformBlock blockForParamName =
-    ^id (id _name)
+    ^id (id _annontated)
     {
-        NSString const * name = _name;
-        // name:tweenfunc:duration
+        NSString * name = _annontated;
+        
+        // name[:tweenfunc:duration]
+        
         NSArray * pieces = [name componentsSeparatedByString:@":"];
         if( [pieces count] > 1 )
         {
-            NSString * name = pieces[0];
+            name = pieces[0];
             Parameter * param = _parameters[name];
             if( !param )
                 return nil;
@@ -428,7 +407,6 @@ TweenCallback TweenReverseLooper = ^TweenDoneIndicator(TriggerTween *tt) {
         return [param getParamBlockOfType:type];
     };
     
-    
     NSArray * paramNames = _mappings[triggerName];
     
     if( !paramNames ) // maybe it's not a trigger, but a param name?
@@ -436,7 +414,7 @@ TweenCallback TweenReverseLooper = ^TweenDoneIndicator(TriggerTween *tt) {
 
     NSArray * arrayOfBlocks = [paramNames reduce:blockForParamName];
 
-    if( [arrayOfBlocks count] == 0 )
+    if( !arrayOfBlocks )
         return nil; // hey, YOU MISSPELLED THE PARAM NAME IN config.plist
     
     if( [arrayOfBlocks count] == 1 )

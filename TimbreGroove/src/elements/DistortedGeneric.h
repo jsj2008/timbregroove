@@ -8,5 +8,4 @@
 #import "Generic.h"
 
 @interface DistortedGeneric : Generic
-@property (nonatomic) float distortionFactor;
 @end

@@ -97,7 +97,7 @@ static const char * _sbp_var_names[] = {
     GLKMatrix4 pvm = [object calcPVM];
     [self writeToLocation:spb_pvm type:TG_MATRIX4 data:pvm.m];
     [self writeToLocation:spb_color type:TG_VECTOR4 data:_color.v];
-    glUniform3fv(_vars[spb_controlPoints], 5, _controlPoints[0].v);
+    glUniform3fv(_locations[spb_controlPoints], 5, _controlPoints[0].v);
 }
 
 @end

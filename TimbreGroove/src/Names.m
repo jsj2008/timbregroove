@@ -53,6 +53,10 @@ NSString const * kParamPlacement        =   @"Position";
 NSString const * kParamScale            =   @"Size";
 NSString const * kParamShape            =   @"Shape";
 NSString const * kParamRotation         =   @"Rotation";
+NSString const * kParamRotationX        =   @"xRotation";
+NSString const * kParamRotationY        =   @"yRotation";
+NSString const * kParamRotationZ        =   @"zRotation";
+
 NSString const * kParamLightDirection   =   @"Light Direction";
 NSString const * kParamLightColor       =   @"Color of Light";
 NSString const * kParamNewElement       =   @"Create";

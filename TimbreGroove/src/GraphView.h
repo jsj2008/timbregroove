@@ -11,13 +11,15 @@
 
 @class Scene;
 @class ViewTriggers;
+@class Parameter;
 
 @interface GraphView : GLKView {
 @private // here for categories
-    bool    _panTracking;
+    bool    _objectResponded;
     CGPoint _panLast;
     NSMutableArray * _triggerStack;
     ViewTriggers * _currentTriggers;
+    id _targetedObject;
 }
 @property (nonatomic) GLKVector4 backcolor;
 @property (nonatomic,strong) Graph * graph;
@@ -29,3 +31,12 @@
 
 -(void)commitSettings;
 @end
+
+@interface GraphView (Touches)
+-(void)setupTouches;
+-(void)triggersChanged:(Scene *)scene;
+-(void)pushTriggers;
+-(void)popTriggers;
+-(Parameter *)paramWrapperForObject:(TG3dObject *)targetObject parameter:(Parameter *)parameterToWrap;
+@end
+

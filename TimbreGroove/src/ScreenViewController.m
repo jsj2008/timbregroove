@@ -16,7 +16,6 @@
 #import "TGTypes.h"
 #import "Graph.h"
 #import "GraphView.h"
-#import "GraphView+Touches.h"
 #import "Audio.h"
 
 #import "NewScenePicker.h"
@@ -69,7 +68,7 @@
 {
     [super viewDidLoad];
 
-    TGSetLogLevel(LLShitsOnFire);
+    TGSetLogLevel(LLShitsOnFire | LLShaderStuff);
     
     _postDeleteSceneIndex = -1;
     // force some global instializations
@@ -101,10 +100,7 @@
         [_currentScene pause];
     
     _currentScene = currentScene;
-    
-    if( currentScene )
-       [currentScene activate];
-    
+    [_currentScene activate];
     [self performSelector:@selector(performTransition:)
                withObject:currentScene
                afterDelay:0.12];

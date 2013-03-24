@@ -48,6 +48,11 @@
     TGLog(LLObjLifetime, @"%@ released",self);
 }
 
+-(char)nativeType
+{
+    return _paramType;
+}
+
 -(void)getValue:(void *)p ofType:(char)type
 {
     if( _nativeValue && (type == _nativeValueType) )
@@ -89,10 +94,37 @@
         if( _paramType == TGC_POINT )
             return _block;
         
+        if( _paramType == TGC_VECTOR3 )
+        {
+            return ^(CGPoint pt) {
+                return ((Vector3ParamBlock)_block)((GLKVector3){pt.x,pt.y,0});
+            };
+        }
+        
         if( _paramType == _C_FLT )
         {
             return ^(CGPoint pt) {
                 float len = GLKVector2Length((GLKVector2){pt.x,pt.y});
+                ((FloatParamBlock)_block)(len);
+            };
+        }
+    }
+    else if( requestParamType == TGC_VECTOR3 )
+    {
+        if( _paramType == TGC_VECTOR3 )
+            return _block;
+        
+        if( _paramType == TGC_POINT )
+        {
+            return ^(GLKVector3 vec3) {
+                return ((PointParamBlock)_block)((CGPoint){vec3.x,vec3.y});
+            };
+        }
+        
+        if( _paramType == _C_FLT )
+        {
+            return ^(GLKVector3 vec3) {
+                float len = GLKVector3Length(vec3);
                 ((FloatParamBlock)_block)(len);
             };
         }
@@ -243,6 +275,10 @@
     else if( type == TGC_POINT )
     {
         *(CGPoint *)p = (CGPoint){_value,_value};
+    }
+    else if( type == TGC_VECTOR3 )
+    {
+        *(GLKVector3 *)p = (GLKVector3){_value,_value,_value};
     }
 }
 

@@ -51,9 +51,9 @@
     [super getParameters:parameters];
     
     Shader * shader = self.shader;
-    [shader floatParameter:parameters idx:gv_rippleSize value:1.5 range:(FloatRange){1.5,15}];
-    [shader pointParameter:parameters idx:gv_ripplePt];
-    [shader floatParameter:parameters idx:gv_time];
+    [shader floatParameter:parameters indexIntoNames:gv_rippleSize value:1.5 range:(FloatRange){1.5,15}];
+    [shader pointParameter:parameters indexIntoNames:gv_ripplePt];
+    [shader floatParameter:parameters indexIntoNames:gv_time];
  
     self.rotationScale = (GLKVector3){ 0, 0, M_PI_2 };
 }

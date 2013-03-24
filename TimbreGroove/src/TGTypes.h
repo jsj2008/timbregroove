@@ -10,7 +10,6 @@
 #define TimbreGroove_TGTypes_h
 
 #import "BKGlobals.h"
-#import "NSObject+BlockObservation.h"
 
 #define R0_1()      (((float)(arc4random_uniform(0x1000000) % 255))/255.0)
 #define R0_n(n)     (int)(arc4random_uniform(n))
@@ -34,15 +33,23 @@ typedef enum LogLevel {
     LLMidiStuff = 1 << 5,
     LLCaptureOps = 1 << 6,
     LLAudioResource = 1 << 7,
+    LLShaderStuff = 1 << 8
 } LogLevel;
 void TGLog(LogLevel,NSString *format, ...);
-void TGSetLogLevel(LogLevel);
+LogLevel TGSetLogLevel(LogLevel);
 
 typedef void (^FloatParamBlock)(float);
 typedef void (^PointParamBlock)(CGPoint);
 typedef void (^IntParamBlock)(int);
 typedef void (^PointerParamBlock)(void *);
+typedef void (^Vector3ParamBlock)(GLKVector3);
 
+typedef struct _TGVector3 {
+    float x;
+    float y;
+    float z;
+} TGVector3; // use this instead of GLKVector3 for param blocks
+// because the block signature detection code rejects unions
 
 typedef enum {
     TG_FLOAT,

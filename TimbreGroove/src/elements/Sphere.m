@@ -22,7 +22,6 @@
     [super wireUp];
     if( !self.hasTexture )
         self.color = GLKVector4Make(0, 1, 0, 1);
-    self.distortionFactor = 0.8;
     return self;
 }
 

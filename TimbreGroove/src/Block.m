@@ -7,6 +7,7 @@
 //
 
 #import "Block.h"
+#import "TGTypes.h"
 
 typedef NS_ENUM(int, BKBlockFlags) {
 	BKBlockFlagsHasCopyDisposeHelpers	= (1 << 25),
@@ -35,6 +36,7 @@ typedef struct _BKBlock {
 } *BKBlockRef;
 
 static NSMethodSignature *a2_blockGetSignature(id block) {
+    
 	BKBlockRef layout = (__bridge void *)block;
     
 	if (!(layout->flags & BKBlockFlagsHasSignature))
@@ -55,9 +57,10 @@ static NSMethodSignature *a2_blockGetSignature(id block) {
 
 static char typeForSignature(const char *argumentType)
 {
-    static const char * sizeEncoded = @encode(CGSize);
+    static const char * sizeEncoded  = @encode(CGSize);
     static const char * pointEncoded = @encode(CGPoint);
     static const char * rectEncoded  = @encode(CGRect);
+    static const char * vec3Encoded  = @encode(TGVector3);
     
     switch (*argumentType) {
         case _C_STRUCT_B:
@@ -72,6 +75,10 @@ static char typeForSignature(const char *argumentType)
 			else if (!strcmp(argumentType, rectEncoded)) 
 			{
 				return TGC_RECT;
+			}
+			else if (!strcmp(argumentType, vec3Encoded))
+			{
+				return TGC_VECTOR3;
 			}
             break;
             

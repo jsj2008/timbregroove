@@ -7,27 +7,17 @@
 //
 
 #import "DistortedGeneric.h"
-#import "GraphView+Touches.h"
 
 
-@interface DistortedGeneric () {
-    NSTimeInterval _dTimer;
-}
+@interface DistortedGeneric ()
 @end
 
 @implementation DistortedGeneric
-
--(void)setDistortionFactor:(float)distortionFactor
-{
-    [self.shader writeToLocation:gv_distortionFactor type:TG_FLOAT data:&distortionFactor];
-    _distortionFactor = distortionFactor;
-}
 
 -(void)getShaderFeatures:(NSMutableArray *)features
 {
     [super getShaderFeatures:features];
     [features addObject:kShaderFeatureDistort];
 }
-
 
 @end

@@ -32,6 +32,10 @@ extern TweenCallback TweenReverseLooper;
 -(void)queue:(TriggerTween *)tweener;
 @end
 
+@protocol TriggerTargetableObject <NSObject>
+-(NSString *)targetObjectName;
+@end
+
 @interface TriggerMap : NSObject
 
 -(id)initWithDelegate:(id<TriggerMapProtocol>)delegate;

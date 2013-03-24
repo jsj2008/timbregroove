@@ -6,11 +6,11 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "GraphView+Touches.h"
+#import "GraphView.h"
 #import "Global.h"
 #import "Scene.h"
 #import "Names.h"
-
+#import "EventCapture.h"
 
 @interface ViewTriggers : NSObject {
 @public
@@ -23,6 +23,8 @@
     PointParamBlock _triggerDrag1;
     PointParamBlock _triggerDragPos;
     PointParamBlock _triggerDblTap;
+    
+    NSDictionary * _targetedParams;
 }
 @end
 @implementation ViewTriggers
@@ -92,6 +94,11 @@
     }
 }
 
+-(void)setTargetedParam:(NSDictionary *)targetedParams
+{
+    _currentTriggers->_targetedParams = targetedParams;
+}
+
 -(void)setupTouches
 {
     UITapGestureRecognizer * dblTap = nil;
@@ -143,6 +150,59 @@
             [self addGestureRecognizer:sgr];
         }
     }
+}
+
+-(Parameter *)paramWrapperForObject:(TG3dObject *)targetObject parameter:(Parameter *)parameterToWrap
+{
+    char nativeType = parameterToWrap.nativeType;
+
+    targetObject.interactive = true;
+
+    if( nativeType == TGC_POINT || nativeType == TGC_VECTOR3 )
+    {
+        PointParamBlock orgBlock = [parameterToWrap getParamBlockOfType:TGC_POINT];
+        
+        return [Parameter withBlock:[^(CGPoint pt) {            
+            if( _targetedObject == targetObject )
+            {
+                orgBlock(pt);
+                //_objectResponded = true;
+            }
+        } copy]];
+    }
+    else if( nativeType == _C_FLT )
+    {
+        FloatParamBlock orgBlock = [parameterToWrap getParamBlockOfType:_C_FLT];
+        
+        return [Parameter withBlock:[^(float f) {
+            if( _targetedObject == targetObject )
+            {
+                orgBlock(f);
+                //_objectResponded = true;
+            }
+        } copy ]];
+    }
+    
+    TGLog(LLShitsOnFire, @"Only CGPoint, Vector3 or float parameters can be targeted for specific objects");
+    exit(-1);
+    return nil;
+}
+
+-(void)checkTargetObject:(CGPoint)pt
+{
+    if( self.graph.viewBasedParameters )
+    {
+        _objectResponded = false;
+        _targetedObject = [EventCapture getGraphViewTapChildElementOf:self.graph inView:self atPt:pt];
+        if( !_targetedObject )
+            _targetedObject = self.graph;
+    }
+}
+
+-(void)clearTargetObject
+{
+    _objectResponded = false;
+    _targetedObject = nil;
 }
 
 -(void)swipe:(UISwipeGestureRecognizer *)sgr
@@ -204,10 +264,14 @@
     if( tgr.state == UIGestureRecognizerStateEnded )
     {
         CGPoint pt      = [tgr locationInView:self];
+        [self checkTargetObject:pt];
+        
         if( _currentTriggers->_triggerTapPos )
             _currentTriggers->_triggerTapPos(pt);
         if( _currentTriggers->_triggerTap1 )
             _currentTriggers->_triggerTap1([self nativeToTG:pt]);
+        
+        [self clearTargetObject];
     }
 }
 
@@ -216,7 +280,9 @@
     if( tgr.state == UIGestureRecognizerStateEnded )
     {
         CGPoint pt = [tgr locationInView:self];
+        [self checkTargetObject:pt];
         _currentTriggers->_triggerDblTap([self nativeToTG:pt]);
+        [self clearTargetObject];
     }
 }
 
@@ -225,37 +291,29 @@
     if( pgr.state == UIGestureRecognizerStateBegan )
     {
         _panLast = [pgr locationInView:self];
-        _panTracking = true;
     }
     else if( pgr.state == UIGestureRecognizerStateChanged )
     {
-        CGSize sz       = self.frame.size;
-        CGPoint pt      = [pgr locationInView:self];
-        
-        /*
-        CGPoint spt = (CGPoint){ (pt.x - _panLast.x) / sz.width,
-                                -(pt.y - _panLast.y) / sz.height };
-         */
-        
-        CGPoint spt = (CGPoint){   (pt.x / sz.width  * 2) - 1.0,
-                                 -((pt.y / sz.height * 2) - 1.0)  };
+        CGPoint pt  = [pgr locationInView:self];
+        CGPoint spt = [self nativeToTG:pt];
 
+        [self checkTargetObject:pt];
+        
         // we get a ton of 0 movement
         if( fabsf(spt.x) > FLT_EPSILON && _currentTriggers->_triggerPanX )
             _currentTriggers->_triggerPanX(spt.x);
         if( fabsf(spt.y) > FLT_EPSILON && _currentTriggers->_triggerPanY )
             _currentTriggers->_triggerPanY(spt.y);
 
-        if( _currentTriggers->_triggerDrag1 )
+        if( !_objectResponded && _currentTriggers->_triggerDrag1 )
             _currentTriggers->_triggerDrag1([self nativeToTG:pt]);
-        if( _currentTriggers->_triggerDragPos )
+        if( !_objectResponded && _currentTriggers->_triggerDragPos )
             _currentTriggers->_triggerDragPos(pt);
         
-        //_panLast = pt;
+        [self clearTargetObject];
     }
     else if( pgr.state == UIGestureRecognizerStateEnded || pgr.state == UIGestureRecognizerStateCancelled )
     {
-        _panTracking = false;
     }
 }
 

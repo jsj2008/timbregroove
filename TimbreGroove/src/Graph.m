@@ -10,7 +10,7 @@
 #import "Camera.h"
 #import "Global.h"
 #import "Config.h"
-#import "GraphView+Touches.h"
+#import "GraphView.h"
 
 #import "Parameter.h"
 #import "TriggerMap.h"
@@ -289,7 +289,17 @@ typedef void (^RecurseBlock)(TG3dObject *);
 
 -(void)getParameters:(NSMutableDictionary *)putHere;
 {
-    [self traverseWithObj:putHere selector:@selector(getParameters:)];
+    NSMutableDictionary * graphParameters = [NSMutableDictionary new];
+    
+    [self traverseWithObj:graphParameters selector:@selector(getParameters:)];
+    
+    _viewBasedParameters = [graphParameters mapReduce:^id(NSString *name, Parameter *parameter) {
+        if( parameter.targetObject )
+            return parameter;
+        return nil;
+    }];
+    
+    [putHere addEntriesFromDictionary:graphParameters];
 }
 
 

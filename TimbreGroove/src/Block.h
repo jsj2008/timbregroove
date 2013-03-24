@@ -11,9 +11,10 @@
 
 #import <objc/runtime.h>
 
-#define TGC_SIZE  'z'
-#define TGC_POINT 'p'
-#define TGC_RECT  't'
+#define TGC_SIZE    'z'
+#define TGC_POINT   'p'
+#define TGC_RECT    't'
+#define TGC_VECTOR3 '3'
 
 char GetBlockArgumentType(id block);
 

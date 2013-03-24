@@ -58,7 +58,9 @@ void TGLog(LogLevel loglevel,NSString *format, ...)
         va_end (ap);
     }
 }
-void TGSetLogLevel(LogLevel logLevel)
+LogLevel TGSetLogLevel(LogLevel logLevel)
 {
+    LogLevel prev = _currentLL;
     _currentLL = logLevel;
+    return prev;
 }

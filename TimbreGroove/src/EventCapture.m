@@ -20,31 +20,31 @@
 
 
 @interface EventCapture() {
-    NSMutableDictionary * _objDict;
-    unsigned int          _currentColor;
-    GLuint                _posLocation;
 }
 @end
 
+typedef void (^CaptureRecurseBlock)(TG3dObject *);
+
 @implementation EventCapture
 
-+(id)getGraphViewTapChildElementOf:(TG3dObject *)root inView:(UIView *)view atPt:(CGPoint)pt
++(id)getGraphViewTapChildElementOf:(TG3dObject *)graph inView:(UIView *)view atPt:(CGPoint)pt
 {
-    return [[EventCapture new] childElementOf:root fromScreenPt:pt inView:view];
-}
-
--(id)childElementOf:(TG3dObject *)graph
-       fromScreenPt:(CGPoint)pt
-             inView:(UIView *)view
-{
-    GenericShader * shader;
-	uint8_t pix[4];
+    NSMutableDictionary * _objDict;
+    __block unsigned int          _currentColor;
+    GLuint                _posLocation;
+    LogLevel              prevLogLevel;
+    GenericShader *       shader;
+	uint8_t               pix[4];
+    
     CGSize sz = view.frame.size;
     FBO * fbo = [[FBO alloc] initWithWidth:sz.width height:sz.height];
     
     _currentColor    = 1;
     _objDict         = [NSMutableDictionary new];
+    prevLogLevel     = TGSetLogLevel(LLShitsOnFire);
     shader           = [GenericShader shader];
+    TGSetLogLevel(prevLogLevel);
+    
     _posLocation     = [shader location:gv_pos];
     
     [fbo bindToRender];
@@ -53,7 +53,24 @@
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     [shader use];
-    [self recursive_render:graph.children shader:shader];
+
+    CaptureRecurseBlock renderObj = nil;
+    
+    renderObj = ^(TG3dObject * child)
+    {
+        if( child.interactive )
+        {
+            GLKVector4 color = NTC(_currentColor);
+            [shader writeToLocation:gv_ucolor type:TG_VECTOR4 data:color.v];
+            [shader writeToLocation:gv_pvm type:TG_MATRIX4 data:[child calcPVM].m];
+            [child renderToCaptureAtBufferLocation:_posLocation];
+            _objDict[@(_currentColor)] = child;
+            ++_currentColor;
+        }
+        [child.children each:renderObj];
+    };
+
+    [graph.children each:renderObj];
     
     glReadPixels((GLuint)pt.x,
                  sz.height - (GLuint)pt.y,
@@ -68,23 +85,4 @@
 */    
     return _objDict[@((pix[0] << 16) | (pix[1] << 8) | pix[2])];
 }
-
-
--(void)recursive_render:(NSArray *)children shader:(GenericShader *)shader
-{
-    for( TG3dObject * child in children )
-    {
-        if( child.interactive )
-        {
-            GLKVector4 color = NTC(_currentColor);
-            [shader writeToLocation:gv_ucolor type:TG_VECTOR4 data:color.v];
-            [shader writeToLocation:gv_pvm type:TG_MATRIX4 data:[child calcPVM].m];
-            [child renderToCaptureAtBufferLocation:_posLocation];
-            _objDict[@(_currentColor)] = child;
-            ++_currentColor;
-        }
-        [self recursive_render:child.children shader:shader];
-    }
-}
-
 @end

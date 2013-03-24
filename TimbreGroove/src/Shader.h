@@ -10,6 +10,23 @@
 #import "TGTypes.h"
 #import "Parameter.h"
 
+/*
+
+ Shader variables have 3 representations:
+    (a) 'name'          the text name as they appear in the shader (e.g. u_someVarName)
+    (b) 'indexIntoName' the index into array that will represent both during runtime
+    (c) 'location'      the location handle assigned to it by openGL (e.g. via glGetUniformLocation)
+ 
+ Init a shader with an array of names and from then on refer ONLY to a variable
+ in terms of an index into that array. The name array must have the attributes bunched up at the
+ beginning of the array, followed the uniforms.
+ 
+ For special cases, you can retieve the coresponding name or location
+ -(GLint)location:(int)indexIntoNames;
+ -(const char *)nameForIndex:(int)indexIntoNames;
+
+ 
+*/
 @class TG3dObject;
 
 @interface ShaderWrapper : NSObject {
@@ -27,7 +44,7 @@
 
 @interface Shader : ShaderWrapper {
 @protected
-    GLint *       _vars;
+    GLint *       _locations;
 }
 
 +(id)shaderFromPoolWithVertex:(const char *)vert
@@ -58,12 +75,27 @@
 
 // Get the gl location for a variable (uniform or attribute) if you want to call
 // glUniform* yourself:
-- (GLint) location:(int)indexIntoNames;
--(const char *)nameForIndex:(int)index;
+-(GLint) location:(int)indexIntoNames;
+-(const char *)nameForIndex:(int)indexIntoNames;
 
--(void)floatParameter:(NSMutableDictionary *)putHere idx:(int)idx;
--(void)floatParameter:(NSMutableDictionary *)putHere idx:(int)idx value:(float)value range:(FloatRange)range;
--(void)pointParameter:(NSMutableDictionary *)putHere idx:(int)idx;
+-(Parameter *)floatParameter:(NSMutableDictionary *)putHere
+              indexIntoNames:(int)idx
+                       value:(float)value
+                  neg11range:(FloatRange)range;
+-(Parameter *)floatParameter:(NSMutableDictionary *)putHere indexIntoNames:(int)idx value:(float)value range:(FloatRange)range;
+-(Parameter *)floatParameter:(NSMutableDictionary *)putHere indexIntoNames:(int)idx;
+-(Parameter *)pointParameter:(NSMutableDictionary *)putHere indexIntoNames:(int)idx;
+-(Parameter *)vec3Parameter :(NSMutableDictionary *)putHere indexIntoNames:(int)idx;
+
+-(Parameter *)floatParameter:(NSMutableDictionary *)putHere
+              indexIntoNames:(int)idx
+                       value:(float)value
+                  neg11range:(FloatRange)range
+                   forObject:(TG3dObject *)target;
+-(Parameter *)floatParameter:(NSMutableDictionary *)putHere indexIntoNames:(int)idx value:(float)value range:(FloatRange)range forObject:(TG3dObject *)obj;
+-(Parameter *)floatParameter:(NSMutableDictionary *)putHere indexIntoNames:(int)idx forObject:(TG3dObject *)obj;
+-(Parameter *)pointParameter:(NSMutableDictionary *)putHere indexIntoNames:(int)idx forObject:(TG3dObject *)obj;
+-(Parameter *)vec3Parameter :(NSMutableDictionary *)putHere indexIntoNames:(int)idx forObject:(TG3dObject *)obj;
 
 
 @property (nonatomic) bool acceptMissingVars;

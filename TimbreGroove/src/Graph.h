@@ -15,4 +15,5 @@
 -(void)pause;
 -(void)activate;
 -(id)loadFromConfig:(ConfigGraphicElement *)config andViewSize:(CGSize)viewSize modal:(bool)modal;
+@property (nonatomic,strong) NSDictionary * viewBasedParameters;
 @end

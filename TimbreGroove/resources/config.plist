@@ -3,9 +3,39 @@
 <plist version="1.0">
 <dict>
 	<key>default_scene</key>
-	<string>running</string>
+	<string>spherey</string>
 	<key>scenes</key>
 	<dict>
+		<key>spherey</key>
+		<dict>
+			<key>connections</key>
+			<array>
+				<dict>
+					<key>PanX</key>
+					<string>u_distortionFactor</string>
+				</dict>
+				<dict>
+					<key>DblTap</key>
+					<string>ResetRotation</string>
+					<key>PanY</key>
+					<string>xRotation</string>
+					<key>Tap</key>
+					<string>u_distortionPoint</string>
+					<key>PanX</key>
+					<string>yRotation</string>
+					<key>MainSlider</key>
+					<string>MasterVolume</string>
+				</dict>
+			</array>
+			<key>icon</key>
+			<string>fractalSphere.png</string>
+			<key>display</key>
+			<string>Sphere-y</string>
+			<key>3d_element</key>
+			<string>spherey_element</string>
+			<key>audio_element</key>
+			<string>jazz</string>
+		</dict>
 		<key>running</key>
 		<dict>
 			<key>connections</key>
@@ -345,6 +375,11 @@
 	</dict>
 	<key>3d_elements</key>
 	<dict>
+		<key>spherey_element</key>
+		<dict>
+			<key>instanceClass</key>
+			<string>Spherey</string>
+		</dict>
 		<key>fft</key>
 		<dict>
 			<key>instanceClass</key>
