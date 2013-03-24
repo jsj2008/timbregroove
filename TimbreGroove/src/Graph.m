@@ -23,6 +23,7 @@ typedef void (^RecurseBlock)(TG3dObject *);
     @public
     FloatParamBlock _timerTrigger;
     FloatParamBlock _updateTrigger;
+    FloatParamBlock _tickTrigger;
 }
 @end
 @implementation GraphTriggers
@@ -33,11 +34,13 @@ typedef void (^RecurseBlock)(TG3dObject *);
     {
         _timerTrigger  = [scene.triggers getFloatTrigger:kTriggerTimer];
         _updateTrigger = [scene.triggers getFloatTrigger:kTriggerUpdate];
+        _tickTrigger   = [scene.triggers getFloatTrigger:kTriggerTick];
     }
     else
     {
         _timerTrigger = nil;
         _updateTrigger = nil;
+        _tickTrigger = nil;
     }
 }
 
@@ -227,6 +230,9 @@ typedef void (^RecurseBlock)(TG3dObject *);
     if( _currentTriggers->_updateTrigger )
         _currentTriggers->_updateTrigger(dt);
 
+    if( _currentTriggers->_tickTrigger )
+        _currentTriggers->_updateTrigger(dt / 1000.0);
+    
     static RecurseBlock updateBlock;
     
     updateBlock = ^(TG3dObject *n)

@@ -194,21 +194,26 @@
 {
 }
 
+#define RAD_TURNS(f) (f * (M_PI / 180))
+
 -(void)getParameters:(NSMutableDictionary *)parameters
 {
     if( !_disableStandarParameters )
     {
         parameters[kParamRotationX] = [Parameter withBlock:^(float f) {
             GLKVector3 r = self.rotation;
-            self.rotation = (GLKVector3){ GLKMathDegreesToRadians(f * 360), r.y, r.z };
+            r.x += RAD_TURNS(f * 3);
+            self.rotation = r;
         }];
         parameters[kParamRotationY] = [Parameter withBlock:^(float f) {
             GLKVector3 r = self.rotation;
-            self.rotation = (GLKVector3){ r.x, GLKMathDegreesToRadians(f * 360), r.z };
+            r.y += RAD_TURNS(f * 3);
+            self.rotation = r;
         }];
         parameters[kParamRotationZ] = [Parameter withBlock:^(float f) {
             GLKVector3 r = self.rotation;
-            self.rotation = (GLKVector3){ r.x, r.y, GLKMathDegreesToRadians(f * 360) };
+            r.z += RAD_TURNS(f * 3);
+            self.rotation = r;
         }];
     }
 }

@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>default_scene</key>
-	<string>spherey</string>
+	<string>ripple</string>
 	<key>scenes</key>
 	<dict>
 		<key>spherey</key>
@@ -131,7 +131,7 @@
 					<string>u_time</string>
 				</dict>
 				<dict>
-					<key>Timer</key>
+					<key>Update</key>
 					<string>zRotation</string>
 				</dict>
 			</array>
