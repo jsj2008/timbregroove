@@ -51,4 +51,6 @@ extern NSString * const kConfig3dMenuOrder;
 extern NSString * const kConfig3dIcon;
 extern NSString * const kConfig3dCustomProperties;
 
+extern NSString * const kConfigModels;
+
 #endif

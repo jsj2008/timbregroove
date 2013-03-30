@@ -9,7 +9,6 @@
 #import <Foundation/Foundation.h>
 
 #ifndef NO_GLOBAL_DECLS
-extern NSString const * kGlobalScene;
 extern NSString const * kGlobalRecording;
 #endif
 

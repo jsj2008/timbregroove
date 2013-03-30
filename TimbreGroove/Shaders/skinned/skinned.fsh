@@ -5,5 +5,5 @@ varying mediump vec2  TexCoord;
 
 void main()
 {
-    gl_FragColor = texture2D(sTexture, TexCoord) * LightIntensity;
+    gl_FragColor = vec4(1) + (texture2D(sTexture, TexCoord) * LightIntensity);
 }

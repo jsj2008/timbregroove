@@ -30,6 +30,15 @@ varying vec3 v_lightFilter;
 #ifdef MESH_DISTORT
 uniform vec3 u_distortionPoint;
 uniform float u_distortionFactor;
+vec3 distortForPt( vec3 V, vec3 M )
+{
+    float range = 0.4;
+
+    float range2 = range * range;
+    vec3 MV = V - M;
+    float alpha = range2 / (range2 + dot(MV, MV));
+    return alpha * M + (1.0-alpha) * V;
+}
 #endif
 
 #ifdef TIME
@@ -63,22 +72,19 @@ void main()
 
 #ifdef MESH_DISTORT
     /*
-    float dist = sin(distance(pos,u_distortionPoint));
-    pos += vec3(dist,dist,0) * u_distortionFactor;
-    gl_Position = u_pvm * vec4( pos, a_position.w );
-     */
-    /*
-    float length = distance(u_distortionPoint,pos.xyz);
-    pos.x *= 1.0 + length/2.0;
-    pos.y += length/2.0;
-     */
-    vec3 jointPt = vec3(1.0,0.0,0.0);
-    if( abs(distance(pos,jointPt)) < 0.3 )
-    {        
-        float distToDistPt = distance(pos,u_distortionPoint);
-        pos += distToDistPt * u_distortionFactor;
-    }
-    
+     point V =     [incoming vertex]
+     point M =     [magnet location]
+     float range = [chosen nominal range for the magnetic effect]
+     
+     float range2 = range * range  [range squared, for comparison with squared distance]
+     vector MV = V - M             [vector from M to V]
+     float alpha = range2 / (range2 + dot(MV, MV))  [weighting factor]
+     point V' =  alpha * M + (1-alpha) * V          [new, "magnetized" position]
+    */
+
+    pos = distortForPt(pos,vec3(2.0,0.0,0.0));
+    pos = distortForPt(pos,vec3(2.0,1.0,0.0));
+
     gl_Position = u_pvm * vec4(pos,a_position.w);
 #else
 	gl_Position   = u_pvm * vec4(pos,a_position.w);

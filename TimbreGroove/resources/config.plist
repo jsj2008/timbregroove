@@ -3,28 +3,74 @@
 <plist version="1.0">
 <dict>
 	<key>default_scene</key>
-	<string>ripple</string>
+	<string>squarey</string>
 	<key>scenes</key>
 	<dict>
+		<key>squarey</key>
+		<dict>
+			<key>connections</key>
+			<array>
+				<dict>
+					<key>kTriggerDblTap</key>
+					<string>FixZoom</string>
+					<key>kTriggerPanY</key>
+					<string>Zoom</string>
+					<key>kTriggerDynamicPeak</key>
+					<string>Ping!</string>
+					<key>kTriggerTap1</key>
+					<string>RandomVibesNote</string>
+					<key>kTriggerMainSlider</key>
+					<string>kParamMasterVolume</string>
+				</dict>
+			</array>
+			<key>icon</key>
+			<string>runner.png</string>
+			<key>display</key>
+			<string>sq</string>
+			<key>3d_element</key>
+			<string>squarey</string>
+			<key>audio_element</key>
+			<string>jazz</string>
+		</dict>
+		<key>bouncy</key>
+		<dict>
+			<key>connections</key>
+			<array>
+				<dict>
+					<key>kTriggerDblTap</key>
+					<string>FixZoom</string>
+					<key>kTriggerPanY</key>
+					<string>Zoom</string>
+					<key>kTriggerDynamicPeak</key>
+					<string>Ping!</string>
+					<key>kTriggerTap1</key>
+					<string>RandomVibesNote</string>
+					<key>kTriggerMainSlider</key>
+					<string>kParamMasterVolume</string>
+				</dict>
+			</array>
+			<key>icon</key>
+			<string>runner.png</string>
+			<key>display</key>
+			<string>Bouncy</string>
+			<key>3d_element</key>
+			<string>bouncyMesh</string>
+			<key>audio_element</key>
+			<string>jazz</string>
+		</dict>
 		<key>spherey</key>
 		<dict>
 			<key>connections</key>
 			<array>
 				<dict>
-					<key>PanX</key>
-					<string>u_distortionFactor</string>
-				</dict>
-				<dict>
-					<key>DblTap</key>
+					<key>kTriggerDblTap</key>
 					<string>ResetRotation</string>
-					<key>PanY</key>
-					<string>xRotation</string>
-					<key>Tap</key>
-					<string>u_distortionPoint</string>
-					<key>PanX</key>
-					<string>yRotation</string>
-					<key>MainSlider</key>
-					<string>MasterVolume</string>
+					<key>kTriggerPanY</key>
+					<string>kParamRotationX</string>
+					<key>kTriggerPanX</key>
+					<string>kParamRotationY</string>
+					<key>kTriggerMainSlider</key>
+					<string>kParamMasterVolume</string>
 				</dict>
 			</array>
 			<key>icon</key>
@@ -41,12 +87,16 @@
 			<key>connections</key>
 			<array>
 				<dict>
-					<key>Loudness</key>
+					<key>kTriggerDblTap</key>
+					<string>FixZoom</string>
+					<key>kTriggerPanY</key>
+					<string>Zoom</string>
+					<key>kTriggerDynamicPeak</key>
 					<string>Ping!</string>
-					<key>Tap</key>
+					<key>kTriggerTap1</key>
 					<string>RandomVibesNote</string>
-					<key>MainSlider</key>
-					<string>MasterVolume</string>
+					<key>kTriggerMainSlider</key>
+					<string>kParamMasterVolume</string>
 				</dict>
 			</array>
 			<key>icon</key>
@@ -54,7 +104,7 @@
 			<key>display</key>
 			<string>Running</string>
 			<key>3d_element</key>
-			<string>meshImporter</string>
+			<string>runningHero</string>
 			<key>audio_element</key>
 			<string>jazz</string>
 		</dict>
@@ -63,12 +113,12 @@
 			<key>connections</key>
 			<array>
 				<dict>
-					<key>Loudness</key>
+					<key>kTriggerDynamicPeak</key>
 					<string>Ping!</string>
-					<key>Tap</key>
+					<key>kTriggerTap1</key>
 					<string>RandomVibesNote</string>
-					<key>MainSlider</key>
-					<string>MasterVolume</string>
+					<key>kTriggerMainSlider</key>
+					<string>kParamMasterVolume</string>
 				</dict>
 			</array>
 			<key>icon</key>
@@ -85,10 +135,10 @@
 			<key>connections</key>
 			<array>
 				<dict>
-					<key>AudioFrame</key>
-					<string>AudioFrameCapture</string>
-					<key>MainSlider</key>
-					<string>MasterVolume</string>
+					<key>kTriggerAudioFrame</key>
+					<string>kParamAudioFrameCapture</string>
+					<key>kTriggerMainSlider</key>
+					<string>kParamMasterVolume</string>
 				</dict>
 			</array>
 			<key>icon</key>
@@ -105,12 +155,12 @@
 			<key>connections</key>
 			<array>
 				<dict>
-					<key>AudioFrame</key>
-					<string>AudioFrameCapture</string>
-					<key>Tap</key>
+					<key>kTriggerAudioFrame</key>
+					<string>kParamAudioFrameCapture</string>
+					<key>kTriggerTap1</key>
 					<string>RandomVibeNote</string>
-					<key>MainSlider</key>
-					<string>MasterVolume</string>
+					<key>kTriggerMainSlider</key>
+					<string>kParamMasterVolume</string>
 				</dict>
 			</array>
 			<key>icon</key>
@@ -127,12 +177,12 @@
 			<key>connections</key>
 			<array>
 				<dict>
-					<key>Timer</key>
+					<key>kTriggerTimer</key>
 					<string>u_time</string>
 				</dict>
 				<dict>
-					<key>Update</key>
-					<string>zRotation</string>
+					<key>kTriggerUpdate</key>
+					<string>kParamRotationZ</string>
 				</dict>
 			</array>
 			<key>icon</key>
@@ -153,13 +203,13 @@
 			<key>connections</key>
 			<array>
 				<dict>
-					<key>MainSlider</key>
-					<string>MasterVolume</string>
-					<key>Loudness</key>
+					<key>kTriggerMainSlider</key>
+					<string>kParamMasterVolume</string>
+					<key>kTriggerDynamicPeak</key>
 					<string>ItemRadius</string>
-					<key>DblTap</key>
+					<key>kTriggerDblTap</key>
 					<string>NewItem</string>
-					<key>Tap</key>
+					<key>kTriggerTap1</key>
 					<string>MoveItem:EaseOutSine:0.6</string>
 				</dict>
 			</array>
@@ -194,7 +244,7 @@
 			<key>connections</key>
 			<array>
 				<dict>
-					<key>Tap</key>
+					<key>kTriggerTap1</key>
 					<string>TapNote</string>
 				</dict>
 			</array>
@@ -375,6 +425,30 @@
 	</dict>
 	<key>3d_elements</key>
 	<dict>
+		<key>squarey</key>
+		<dict>
+			<key>instanceClass</key>
+			<string>MeshImporter</string>
+			<key>properties</key>
+			<dict>
+				<key>scalingFactor</key>
+				<real>50.1</real>
+				<key>meshName</key>
+				<string>squarey.pod</string>
+			</dict>
+		</dict>
+		<key>runningHero</key>
+		<dict>
+			<key>instanceClass</key>
+			<string>MeshImporter</string>
+			<key>properties</key>
+			<dict>
+				<key>scalingFactor</key>
+				<real>0.5</real>
+				<key>meshName</key>
+				<string>man.pod</string>
+			</dict>
+		</dict>
 		<key>spherey_element</key>
 		<dict>
 			<key>instanceClass</key>
@@ -397,13 +471,13 @@
 				<key>connections</key>
 				<array>
 					<dict>
-						<key>Tap</key>
+						<key>kTriggerTap1</key>
 						<string>SwellSound</string>
 					</dict>
 					<dict>
-						<key>MainSlider</key>
-						<string>MasterVolume</string>
-						<key>Tap</key>
+						<key>kTriggerMainSlider</key>
+						<string>kParamMasterVolume</string>
+						<key>kTriggerTap1</key>
 						<string>u_ripplePt:EaseOutSine:2.3</string>
 					</dict>
 				</array>
@@ -425,7 +499,7 @@
 					<dict>
 						<key>Pinch</key>
 						<string>CurveWidth</string>
-						<key>PanX</key>
+						<key>kTriggerPanX</key>
 						<string>CurveCutoff</string>
 						<key>TapNative</key>
 						<string>Buttons</string>
@@ -444,24 +518,14 @@
 			<key>icon</key>
 			<string>imageBaker.png</string>
 		</dict>
-		<key>meshImporter</key>
+		<key>bouncyMesh</key>
 		<dict>
 			<key>instanceClass</key>
 			<string>MeshImporter</string>
 			<key>properties</key>
 			<dict>
-				<key>knownPODs</key>
-				<dict>
-					<key>man.pod</key>
-					<dict>
-						<key>Mat_belt</key>
-						<string>Belt.pvr</string>
-						<key>Mat_legs</key>
-						<string>Legs.pvr</string>
-						<key>Mat_body</key>
-						<string>Body.pvr</string>
-					</dict>
-				</dict>
+				<key>meshName</key>
+				<string>bouncy.pod</string>
 			</dict>
 		</dict>
 		<key>fractalSphere</key>
@@ -504,6 +568,28 @@
 			<integer>60</integer>
 			<key>icon</key>
 			<string>text.png</string>
+		</dict>
+	</dict>
+	<key>models</key>
+	<dict>
+		<key>squarey.pod</key>
+		<dict>
+			<key>mat1</key>
+			<string>aotkSmall.pvr</string>
+		</dict>
+		<key>bouncy.pod</key>
+		<dict>
+			<key>pool_png</key>
+			<string>pool.pvr</string>
+		</dict>
+		<key>man.pod</key>
+		<dict>
+			<key>Mat_belt</key>
+			<string>Belt.pvr</string>
+			<key>Mat_legs</key>
+			<string>Legs.pvr</string>
+			<key>Mat_body</key>
+			<string>Body.pvr</string>
 		</dict>
 	</dict>
 </dict>

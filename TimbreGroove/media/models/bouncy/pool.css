@@ -1,0 +1,15 @@
+/* ----------------------------------------------------
+   created with http://www.texturepacker.com 
+   ----------------------------------------------------
+   $TexturePacker:SmartUpdate:114ec1bc34c584af2619a2cb1db1b099$
+   ----------------------------------------------------
+
+   usage: <span class="{-spritename-} sprite"></span>
+
+   replace {-spritename-} with the sprite you like to use
+
+*/
+
+.sprite {display:inline-block; overflow:hidden; background-repeat: no-repeat;background-image:url(gridtest.pvr);}
+
+.gridtest {width:256px; height:256px; background-position: -2px -2px}

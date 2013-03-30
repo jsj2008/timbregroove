@@ -123,6 +123,8 @@
 		571FD90416F02B69007DB564 /* MathStuff.c in Sources */ = {isa = PBXBuildFile; fileRef = 571FD90316F02B69007DB564 /* MathStuff.c */; };
 		571FD90816F037E3007DB564 /* PoolsideAudio.m in Sources */ = {isa = PBXBuildFile; fileRef = 571FD90716F037E3007DB564 /* PoolsideAudio.m */; };
 		572098E116DA9FA40075E584 /* Parameter.m in Sources */ = {isa = PBXBuildFile; fileRef = 572098E016DA9FA40075E584 /* Parameter.m */; };
+		572124A017021E3B00E29524 /* aotkSmall.pvr in Resources */ = {isa = PBXBuildFile; fileRef = 5721249E17021E3B00E29524 /* aotkSmall.pvr */; };
+		572124A117021E3B00E29524 /* squarey.pod in Resources */ = {isa = PBXBuildFile; fileRef = 5721249F17021E3B00E29524 /* squarey.pod */; };
 		5721989616853F9E0062C36F /* GraphView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5721989516853F9D0062C36F /* GraphView.m */; };
 		572AD0E016EBC1870070AE6A /* FFTScope.m in Sources */ = {isa = PBXBuildFile; fileRef = 572AD0DF16EBC1870070AE6A /* FFTScope.m */; };
 		572D7F2E16832749006D48BF /* GenericWithTexture.m in Sources */ = {isa = PBXBuildFile; fileRef = 572D7F2D16832749006D48BF /* GenericWithTexture.m */; };
@@ -171,6 +173,7 @@
 		575DA0041693E35A00A50C41 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 575DA0031693E35A00A50C41 /* MobileCoreServices.framework */; };
 		575DA0061693E43300A50C41 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 575DA0051693E43300A50C41 /* AssetsLibrary.framework */; };
 		575DA00A169437AC00A50C41 /* FractalSphere.m in Sources */ = {isa = PBXBuildFile; fileRef = 5737C4B216930BD500C12F2D /* FractalSphere.m */; };
+		5761844116FF594700127DC4 /* pool.pvr in Resources */ = {isa = PBXBuildFile; fileRef = 5761844016FF594700127DC4 /* pool.pvr */; };
 		5763AAA816AF0AAA00856C34 /* PoolScreen.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 5763AAA716AF0AAA00856C34 /* PoolScreen.vsh */; };
 		5763AAAB16AF0AC700856C34 /* PoolScreen.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 5763AAAA16AF0AC700856C34 /* PoolScreen.fsh */; };
 		5764756C167D5E8C00D5A431 /* GenericShader.m in Sources */ = {isa = PBXBuildFile; fileRef = 5764756B167D5E8C00D5A431 /* GenericShader.m */; };
@@ -194,6 +197,8 @@
 		577AE4BB16B3969800B4FDF1 /* subtractPressureGradient.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 577AE4B116B3969800B4FDF1 /* subtractPressureGradient.fsh */; };
 		577AE4BC16B3969800B4FDF1 /* velocityBoundary.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 577AE4B216B3969800B4FDF1 /* velocityBoundary.fsh */; };
 		577AE4BD16B3969800B4FDF1 /* visualize.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 577AE4B316B3969800B4FDF1 /* visualize.fsh */; };
+		577F0EE517009D7F0008A703 /* Log.m in Sources */ = {isa = PBXBuildFile; fileRef = 577F0EE417009D7F0008A703 /* Log.m */; };
+		577F0EE71700BD970008A703 /* NameMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 577F0EE61700BD970008A703 /* NameMap.m */; };
 		5780832016B7103A002810BD /* moon.gif in Resources */ = {isa = PBXBuildFile; fileRef = 5780831F16B7103A002810BD /* moon.gif */; };
 		5780832316B72992002810BD /* moon.png in Resources */ = {isa = PBXBuildFile; fileRef = 5780832216B72992002810BD /* moon.png */; };
 		5780832616B73299002810BD /* PoolWater.m in Sources */ = {isa = PBXBuildFile; fileRef = 5780832516B73299002810BD /* PoolWater.m */; };
@@ -211,6 +216,7 @@
 		5798B05916BA00F70093F473 /* pause.png in Resources */ = {isa = PBXBuildFile; fileRef = 5798B05716BA00F70093F473 /* pause.png */; };
 		5798B05A16BA00F70093F473 /* play.png in Resources */ = {isa = PBXBuildFile; fileRef = 5798B05816BA00F70093F473 /* play.png */; };
 		579AD1A916C40B670071AA9A /* Config.m in Sources */ = {isa = PBXBuildFile; fileRef = 579AD1A816C40B670071AA9A /* Config.m */; };
+		579E5B6A16FED274009970C1 /* Bouncy.pod in Resources */ = {isa = PBXBuildFile; fileRef = 579E5B6916FED274009970C1 /* Bouncy.pod */; };
 		57A0BB4C16F7D57C0063305D /* Synth.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A0BB4B16F7D57C0063305D /* Synth.m */; };
 		57A4C22016DFDCF10044B3C9 /* Sampler.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A4C21F16DFDCF10044B3C9 /* Sampler.m */; };
 		57A58EA816ADE68200C9FA53 /* Cube.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A58EA716ADE68200C9FA53 /* Cube.m */; };
@@ -248,7 +254,7 @@
 		57E27F0416F9166600282F9A /* m.mid in Resources */ = {isa = PBXBuildFile; fileRef = 57E27F0316F9166600282F9A /* m.mid */; };
 		57E27F0616F9626500282F9A /* runner.png in Resources */ = {isa = PBXBuildFile; fileRef = 57E27F0516F9626500282F9A /* runner.png */; };
 		57E590A816BA2E3F00330F40 /* State.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E590A716BA2E3F00330F40 /* State.m */; };
-		57E62B2216C30D9D007064A0 /* PVRImporter.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E62B2116C30D9D007064A0 /* PVRImporter.m */; };
+		57E62B2216C30D9D007064A0 /* MeshImporter.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E62B2116C30D9D007064A0 /* MeshImporter.m */; };
 		57E62E67168433100030908E /* Photo.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E62E66168433100030908E /* Photo.m */; };
 		57E7465E1680438300C1D4FF /* EventCapture.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E7465D1680438300C1D4FF /* EventCapture.m */; };
 		57E874F816782894008243B2 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57E874F716782894008243B2 /* UIKit.framework */; };
@@ -357,7 +363,7 @@
 		5700235A16A554D9006F0E8E /* man.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = man.pod; sourceTree = "<group>"; };
 		5700236016A5556D006F0E8E /* skinned.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = skinned.fsh; sourceTree = "<group>"; };
 		5700236116A5556D006F0E8E /* skinned.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = skinned.vsh; sourceTree = "<group>"; };
-		5700236416A55680006F0E8E /* SkinnedPVR.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SkinnedPVR.cpp; path = ../SkinnedPVR.cpp; sourceTree = "<group>"; };
+		5700236416A55680006F0E8E /* SkinnedPVR.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SkinnedPVR.cpp; path = ../SkinnedPVR.cpp; sourceTree = "<group>"; usesTabs = 0; };
 		5700236516A55680006F0E8E /* SkinnedPVR.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SkinnedPVR.h; path = ../SkinnedPVR.h; sourceTree = "<group>"; };
 		5700236716A556F8006F0E8E /* belt.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = belt.png; sourceTree = "<group>"; };
 		5700236816A556F8006F0E8E /* body.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = body.png; sourceTree = "<group>"; };
@@ -452,6 +458,8 @@
 		571FD90716F037E3007DB564 /* PoolsideAudio.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PoolsideAudio.m; sourceTree = "<group>"; };
 		572098DF16DA9FA30075E584 /* Parameter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Parameter.h; sourceTree = "<group>"; };
 		572098E016DA9FA40075E584 /* Parameter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = Parameter.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		5721249E17021E3B00E29524 /* aotkSmall.pvr */ = {isa = PBXFileReference; lastKnownFileType = file; path = aotkSmall.pvr; sourceTree = "<group>"; };
+		5721249F17021E3B00E29524 /* squarey.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = squarey.pod; sourceTree = "<group>"; };
 		5721989416853F9D0062C36F /* GraphView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = GraphView.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		5721989516853F9D0062C36F /* GraphView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = GraphView.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		572AD0DF16EBC1870070AE6A /* FFTScope.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FFTScope.m; sourceTree = "<group>"; };
@@ -520,6 +528,7 @@
 		575DA0011693C90400A50C41 /* SettingsVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SettingsVC.m; sourceTree = "<group>"; };
 		575DA0031693E35A00A50C41 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		575DA0051693E43300A50C41 /* AssetsLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AssetsLibrary.framework; path = System/Library/Frameworks/AssetsLibrary.framework; sourceTree = SDKROOT; };
+		5761844016FF594700127DC4 /* pool.pvr */ = {isa = PBXFileReference; lastKnownFileType = file; path = pool.pvr; sourceTree = "<group>"; };
 		5763AAA716AF0AAA00856C34 /* PoolScreen.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = PoolScreen.vsh; sourceTree = "<group>"; };
 		5763AAAA16AF0AC700856C34 /* PoolScreen.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = PoolScreen.fsh; sourceTree = "<group>"; };
 		5764756A167D5E8C00D5A431 /* GenericShader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GenericShader.h; path = ../shaders/GenericShader.h; sourceTree = "<group>"; };
@@ -550,6 +559,9 @@
 		577AE4B116B3969800B4FDF1 /* subtractPressureGradient.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = subtractPressureGradient.fsh; sourceTree = "<group>"; };
 		577AE4B216B3969800B4FDF1 /* velocityBoundary.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = velocityBoundary.fsh; sourceTree = "<group>"; };
 		577AE4B316B3969800B4FDF1 /* visualize.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = visualize.fsh; sourceTree = "<group>"; };
+		577F0EE317009D560008A703 /* Log.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Log.h; sourceTree = "<group>"; };
+		577F0EE417009D7F0008A703 /* Log.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Log.m; sourceTree = "<group>"; };
+		577F0EE61700BD970008A703 /* NameMap.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NameMap.m; sourceTree = "<group>"; };
 		5780831F16B7103A002810BD /* moon.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = moon.gif; sourceTree = "<group>"; };
 		5780832216B72992002810BD /* moon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = moon.png; sourceTree = "<group>"; };
 		5780832416B73299002810BD /* PoolWater.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PoolWater.h; sourceTree = "<group>"; };
@@ -578,6 +590,7 @@
 		5798B05816BA00F70093F473 /* play.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = play.png; sourceTree = "<group>"; };
 		579AD1A716C40B670071AA9A /* Config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
 		579AD1A816C40B670071AA9A /* Config.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Config.m; sourceTree = "<group>"; };
+		579E5B6916FED274009970C1 /* Bouncy.pod */ = {isa = PBXFileReference; lastKnownFileType = file; path = Bouncy.pod; sourceTree = "<group>"; };
 		57A0BB4B16F7D57C0063305D /* Synth.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Synth.m; sourceTree = "<group>"; };
 		57A4C21E16DFDCF10044B3C9 /* Sampler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sampler.h; sourceTree = "<group>"; };
 		57A4C21F16DFDCF10044B3C9 /* Sampler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = Sampler.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
@@ -641,8 +654,7 @@
 		57E27F0716F9769500282F9A /* ChannelProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChannelProtocol.h; sourceTree = "<group>"; };
 		57E590A616BA2E3F00330F40 /* State.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = State.h; sourceTree = "<group>"; };
 		57E590A716BA2E3F00330F40 /* State.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = State.m; sourceTree = "<group>"; };
-		57E62B2016C30D9D007064A0 /* PVRImporter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRImporter.h; sourceTree = "<group>"; };
-		57E62B2116C30D9D007064A0 /* PVRImporter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PVRImporter.m; sourceTree = "<group>"; };
+		57E62B2116C30D9D007064A0 /* MeshImporter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MeshImporter.m; sourceTree = "<group>"; };
 		57E62E65168433100030908E /* Photo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Photo.h; sourceTree = "<group>"; };
 		57E62E66168433100030908E /* Photo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Photo.m; sourceTree = "<group>"; };
 		57E7465C1680438300C1D4FF /* EventCapture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EventCapture.h; sourceTree = "<group>"; };
@@ -734,6 +746,8 @@
 		5700235516A55460006F0E8E /* models */ = {
 			isa = PBXGroup;
 			children = (
+				5721249D17021E1300E29524 /* squarey */,
+				579E5B6816FED23F009970C1 /* bouncy */,
 				5700235616A55486006F0E8E /* runningMan */,
 			);
 			path = models;
@@ -901,6 +915,15 @@
 			path = src/contrib;
 			sourceTree = "<group>";
 		};
+		5721249D17021E1300E29524 /* squarey */ = {
+			isa = PBXGroup;
+			children = (
+				5721249E17021E3B00E29524 /* aotkSmall.pvr */,
+				5721249F17021E3B00E29524 /* squarey.pod */,
+			);
+			path = squarey;
+			sourceTree = "<group>";
+		};
 		5722A1E816DEE51C007136B9 /* app */ = {
 			isa = PBXGroup;
 			children = (
@@ -914,6 +937,7 @@
 				5751F2DB16D54C7E00144F2B /* ConfigNames.h */,
 				57D0EBDA16D4BA5200DBF457 /* Names.h */,
 				57D0EBDB16D4BA5300DBF457 /* Names.m */,
+				577F0EE61700BD970008A703 /* NameMap.m */,
 				57D0EBD716D4B1C300DBF457 /* TriggerMap.h */,
 				57D0EBD816D4B1C400DBF457 /* TriggerMap.m */,
 				572098DF16DA9FA30075E584 /* Parameter.h */,
@@ -924,6 +948,8 @@
 				5705DED816E5DA5200A80445 /* Tween.c */,
 				571FD90516F02C07007DB564 /* MathStuff.h */,
 				571FD90316F02B69007DB564 /* MathStuff.c */,
+				577F0EE317009D560008A703 /* Log.h */,
+				577F0EE417009D7F0008A703 /* Log.m */,
 			);
 			name = app;
 			sourceTree = "<group>";
@@ -1175,8 +1201,7 @@
 				5790068616841F3B0068659F /* Interactive.h */,
 				572EB21D16788D170062F290 /* MeshBuffer.h */,
 				572EB21E16788D170062F290 /* MeshBuffer.m */,
-				57E62B2016C30D9D007064A0 /* PVRImporter.h */,
-				57E62B2116C30D9D007064A0 /* PVRImporter.m */,
+				57E62B2116C30D9D007064A0 /* MeshImporter.m */,
 				572EB21816787AFF0062F290 /* Shader.h */,
 				572EB21916787AFF0062F290 /* Shader.m */,
 				57A66EEB167B1D1B00B9EA75 /* Texture.h */,
@@ -1204,6 +1229,15 @@
 				571537EE16FCA8CA00DCA5E1 /* Spherey.m */,
 			);
 			name = "scene elements";
+			sourceTree = "<group>";
+		};
+		579E5B6816FED23F009970C1 /* bouncy */ = {
+			isa = PBXGroup;
+			children = (
+				5761844016FF594700127DC4 /* pool.pvr */,
+				579E5B6916FED274009970C1 /* Bouncy.pod */,
+			);
+			path = bouncy;
 			sourceTree = "<group>";
 		};
 		57A10E961685E08300B80314 /* audio */ = {
@@ -1611,6 +1645,10 @@
 				57AE3BDD16D83B0A007ADC17 /* stars.jpg in Resources */,
 				57E27F0416F9166600282F9A /* m.mid in Resources */,
 				57E27F0616F9626500282F9A /* runner.png in Resources */,
+				579E5B6A16FED274009970C1 /* Bouncy.pod in Resources */,
+				5761844116FF594700127DC4 /* pool.pvr in Resources */,
+				572124A017021E3B00E29524 /* aotkSmall.pvr in Resources */,
+				572124A117021E3B00E29524 /* squarey.pod in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1699,7 +1737,7 @@
 				57ED524D16BEF92D00B38054 /* GraphCollection.m in Sources */,
 				57ED525116C0A00900B38054 /* PauseViewController.m in Sources */,
 				57E8E2BA16C1BF7600CD39BC /* Global.m in Sources */,
-				57E62B2216C30D9D007064A0 /* PVRImporter.m in Sources */,
+				57E62B2216C30D9D007064A0 /* MeshImporter.m in Sources */,
 				5741C70716C32280009451C9 /* DistortedGeneric.m in Sources */,
 				579AD1A916C40B670071AA9A /* Config.m in Sources */,
 				57C3BB8516C6B5B000899F4B /* SoundSystem+Diag.m in Sources */,
@@ -1742,6 +1780,8 @@
 				57A0BB4C16F7D57C0063305D /* Synth.m in Sources */,
 				571537EF16FCA8CA00DCA5E1 /* Spherey.m in Sources */,
 				571537F316FCEFCD00DCA5E1 /* Reducers.m in Sources */,
+				577F0EE517009D7F0008A703 /* Log.m in Sources */,
+				577F0EE71700BD970008A703 /* NameMap.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

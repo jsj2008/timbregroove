@@ -9,70 +9,71 @@
 #include "SkinnedPVR.h"
 #include <string.h>
 #include "OGLES2Tools.h"
+#include "Log.h"
 
 // Camera constants used to generate the projection matrix
-const float g_fCameraNear	= 4.0f;
-const float g_fCameraFar	= 5000.0f;
+const float g_fCameraNear    = 4.0f;
+const float g_fCameraFar    = 5000.0f;
 
 const float g_fDemoFrameRate = 0.015f;
 
 enum EVertexAttrib {
-	VERTEX_ARRAY, NORMAL_ARRAY, TEXCOORD_ARRAY, BONEWEIGHT_ARRAY, BONEINDEX_ARRAY, eNumAttribs };
+    VERTEX_ARRAY, NORMAL_ARRAY, TEXCOORD_ARRAY, BONEWEIGHT_ARRAY, BONEINDEX_ARRAY, eNumAttribs };
 const char* g_aszAttribNames[] = {
-	"inVertex", "inNormal", "inTexCoord", "inBoneWeight", "inBoneIndex" };
+    "inVertex", "inNormal", "inTexCoord", "inBoneWeight", "inBoneIndex" };
 
 // shader uniforms
 enum EUniform {
-	eMVPMatrix, eViewProj, eLightDirModel, eLightDirWorld, eBoneCount, eBoneMatrices, eBoneMatricesIT, eNumUniforms };
+    eMVPMatrix, eViewProj, eLightDirModel, eLightDirWorld, eBoneCount, eBoneMatrices, eBoneMatricesIT, eNumUniforms };
 const char* g_aszUniformNames[] = {
-	"MVPMatrix", "ViewProjMatrix", "LightDirModel", "LightDirWorld", "BoneCount", "BoneMatrixArray[0]", "BoneMatrixArrayIT[0]" };
+    "MVPMatrix", "ViewProjMatrix", "LightDirModel", "LightDirWorld", "BoneCount", "BoneMatrixArray[0]", "BoneMatrixArrayIT[0]" };
 
 
 class OGLES2Skinning
 {
-	// 3D Model
-	CPVRTModelPOD	m_Scene;
+    // 3D Model
+    CPVRTModelPOD    m_Scene;
     // POD scene file name
     CPVRTString m_psSceneFile;
     
-	// Model transformation variables
-	PVRTMat4	m_Transform;
-	float		m_fAngle;
-	float		m_fDistance;
+    // Model transformation variables
+    PVRTMat4    m_Transform;
+    float        m_fAngle;
+    float        m_fDistance;
     
-	GLuint	m_uiVertShader;
-	GLuint	m_uiFragShader;
-	GLuint*	m_puiVbo;
-	GLuint*	m_puiIndexVbo;
+    GLuint    m_uiVertShader;
+    GLuint    m_uiFragShader;
+    GLuint*    m_puiVbo;
+    GLuint*    m_puiIndexVbo;
     
-	// Group shader programs and their uniform locations together
-	struct
-	{
-		GLuint uiId;
-		GLuint auiLoc[eNumUniforms];
-	}
-	m_ShaderProgram;
+    // Group shader programs and their uniform locations together
+    struct
+    {
+        GLuint uiId;
+        GLuint auiLoc[eNumUniforms];
+    }
+    m_ShaderProgram;
     
     
-	unsigned long m_iTimePrev;
-	float	m_fFrame;
+    unsigned long m_iTimePrev;
+    float    m_fFrame;
     
     CPVRTString  m_psFragShaderSrcFile;
     CPVRTString m_psVertShaderSrcFile;
     
-	GLuint * m_puiTextures;
-	GLuint * m_uiTextures;
+    GLuint * m_puiTextures;
+    GLuint * m_uiTextures;
     CPVRTString * m_ppTextureFiles;
     CPVRTString * m_ppTextureNames;
     int m_numTextures;
     
-	bool InitApplication();
-	bool ReleaseView();
-	bool LoadTextures(CPVRTString* pErrorStr);
-	bool LoadShaders(CPVRTString* pErrorStr);
-	void LoadVbos();
+    bool InitApplication();
+    bool ReleaseView();
+    bool LoadTextures(CPVRTString* pErrorStr);
+    bool LoadShaders(CPVRTString* pErrorStr);
+    void LoadVbos();
     
-	void DrawMesh(int i32NodeIndex);
+    void DrawMesh(int i32NodeIndex);
     
     bool m_paused;
     
@@ -113,10 +114,10 @@ void Skinner_Resume(PVR_SKINNER skinner)
 
 OGLES2Skinning::OGLES2Skinning( char *psSceneFile, char **ppTextureFiles, char **ppTextureName, int numTextures, void *refCon )
 :   m_psSceneFile(psSceneFile),
-    m_psFragShaderSrcFile("skinned.fsh"),
-    m_psVertShaderSrcFile("skinned.vsh"),
-    m_paused(false),
-    m_refCon(refCon)
+m_psFragShaderSrcFile("skinned.fsh"),
+m_psVertShaderSrcFile("skinned.vsh"),
+m_paused(false),
+m_refCon(refCon)
 {
     m_numTextures = numTextures;
     if( numTextures )
@@ -142,12 +143,14 @@ OGLES2Skinning::OGLES2Skinning( char *psSceneFile, char **ppTextureFiles, char *
 
 OGLES2Skinning::~OGLES2Skinning()
 {
+    TGLogc(LLMeshImporter, "Closing down Skinning obj");
+    
     ReleaseView();
     
-	m_Scene.Destroy();
+    m_Scene.Destroy();
     
-	delete [] m_puiVbo;
-	delete [] m_puiIndexVbo;
+    delete [] m_puiVbo;
+    delete [] m_puiIndexVbo;
     
     delete [] m_ppTextureFiles;
     delete [] m_ppTextureNames;
@@ -160,7 +163,11 @@ bool OGLES2Skinning::LoadTextures(CPVRTString* const pErrorStr)
     for( int i = 0; i < m_numTextures; i++)
     {
         const char * tname = m_ppTextureFiles[i].c_str();
-        if(PVRTTextureLoadFromPVR(tname,m_uiTextures+i) != PVR_SUCCESS)
+        if(PVRTTextureLoadFromPVR(tname,m_uiTextures+i) == PVR_SUCCESS)
+        {
+            TGLogc(LLMeshImporter, "Texture loaded ok %s",tname);
+        }
+        else
         {
             printf("Problem with texture: %s\n",tname);
             *pErrorStr = "ERROR: Failed to load texture";
@@ -170,152 +177,193 @@ bool OGLES2Skinning::LoadTextures(CPVRTString* const pErrorStr)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
     
-	return true;
+    return true;
 }
 
 bool OGLES2Skinning::LoadShaders(CPVRTString* pErrorStr)
 {
-	if (PVRTShaderLoadFromFile(NULL, // no support for bin shaders on iOS
+    if (PVRTShaderLoadFromFile(NULL, // no support for bin shaders on iOS
                                m_psVertShaderSrcFile.c_str(),
                                GL_VERTEX_SHADER,
                                GL_SGX_BINARY_IMG,
                                &m_uiVertShader,
                                pErrorStr) != PVR_SUCCESS)
-	{
-		return false;
-	}
+    {
+        return false;
+    }
     
-	if (PVRTShaderLoadFromFile(NULL,
+    if (PVRTShaderLoadFromFile(NULL,
                                m_psFragShaderSrcFile.c_str(),
                                GL_FRAGMENT_SHADER,
                                GL_SGX_BINARY_IMG,
                                &m_uiFragShader,
                                pErrorStr) != PVR_SUCCESS)
-	{
-		return false;
-	}
+    {
+        return false;
+    }
     
-	if (PVRTCreateProgram(&m_ShaderProgram.uiId, m_uiVertShader, m_uiFragShader, g_aszAttribNames, eNumAttribs, pErrorStr) != PVR_SUCCESS)
-	{
-		EnvExitMsg(  pErrorStr->c_str());
-		return false;
-	}
+    if (PVRTCreateProgram(&m_ShaderProgram.uiId, m_uiVertShader, m_uiFragShader, g_aszAttribNames, eNumAttribs, pErrorStr) != PVR_SUCCESS)
+    {
+        EnvExitMsg(  pErrorStr->c_str());
+        return false;
+    }
     
-	for (int i = 0; i < eNumUniforms; ++i)
-	{
-		m_ShaderProgram.auiLoc[i] = glGetUniformLocation(m_ShaderProgram.uiId, g_aszUniformNames[i]);
-	}
+    for (int i = 0; i < eNumUniforms; ++i)
+    {
+        m_ShaderProgram.auiLoc[i] = glGetUniformLocation(m_ShaderProgram.uiId, g_aszUniformNames[i]);
+    }
     
-	return true;
+    return true;
 }
 
 void OGLES2Skinning::LoadVbos()
 {
-	if (!m_puiVbo)      m_puiVbo = new GLuint[m_Scene.nNumMesh];
-	if (!m_puiIndexVbo) m_puiIndexVbo = new GLuint[m_Scene.nNumMesh];
+    if (!m_puiVbo)      m_puiVbo = new GLuint[m_Scene.nNumMesh];
+    if (!m_puiIndexVbo) m_puiIndexVbo = new GLuint[m_Scene.nNumMesh];
     
-	/*
+    /*
      Load vertex data of all meshes in the scene into VBOs
      
      The meshes have been exported with the "Interleave Vectors" option,
      so all data is interleaved in the buffer at pMesh->pInterleaved.
-     Interleaving data improves the memory access pattern and cache efficiency,
-     thus it can be read faster by the hardware.
      */
     
-	glGenBuffers(m_Scene.nNumMesh, m_puiVbo);
+    glGenBuffers(m_Scene.nNumMesh, m_puiVbo);
     
-	for (unsigned int i = 0; i < m_Scene.nNumMesh; ++i)
-	{
-		// Load vertex data into buffer object
-		SPODMesh& Mesh = m_Scene.pMesh[i];
-		unsigned int uiSize = Mesh.nNumVertex * Mesh.sVertex.nStride;
+    for (unsigned int i = 0; i < m_Scene.nNumMesh; ++i)
+    {
+        // Load vertex data into buffer object
+        SPODMesh& Mesh = m_Scene.pMesh[i];
+        unsigned int uiSize = Mesh.nNumVertex * Mesh.sVertex.nStride;
         
-		glBindBuffer(GL_ARRAY_BUFFER, m_puiVbo[i]);
-		glBufferData(GL_ARRAY_BUFFER, uiSize, Mesh.pInterleaved, GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, m_puiVbo[i]);
+        glBufferData(GL_ARRAY_BUFFER, uiSize, Mesh.pInterleaved, GL_STATIC_DRAW);
         
-		// Load index data into buffer object if available
-		m_puiIndexVbo[i] = 0;
+        // Load index data into buffer object if available
+        m_puiIndexVbo[i] = 0;
         
-		if (Mesh.sFaces.pData)
-		{
-			glGenBuffers(1, &m_puiIndexVbo[i]);
-			uiSize = PVRTModelPODCountIndices(Mesh) * sizeof(GLshort);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_puiIndexVbo[i]);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, uiSize, Mesh.sFaces.pData, GL_STATIC_DRAW);
-		}
-	}
+        if (Mesh.sFaces.pData)
+        {
+            glGenBuffers(1, &m_puiIndexVbo[i]);
+            uiSize = PVRTModelPODCountIndices(Mesh) * sizeof(GLshort);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_puiIndexVbo[i]);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, uiSize, Mesh.sFaces.pData, GL_STATIC_DRAW);
+        }
+        
+        TGLogc(LLMeshImporter, "Loaded mesh data mesh %d of %d numVerts: %d indx: %d (vbo[%d])", i,m_Scene.nNumMesh,
+               Mesh.nNumVertex, uiSize / sizeof(GLshort),m_puiIndexVbo[i]);
+    }
     
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
+static void dumpScene(SPODScene &s)
+{
+    printf("Scene: \n");
+    printf("   numCamera: %d    numLight:%d    numMesh: %d\n", s.nNumCamera,s.nNumLight,s.nNumMesh);
+    printf("     numNode: %d  numMeshNde:%d    numTxtr: %d\n", s.nNumNode,s.nNumMeshNode,s.nNumTexture);
+    printf("      numMat: %d    numFrame:%d        FPS: %d\n", s.nNumMaterial,s.nNumFrame,s.nFPS);
+    printf("        flag: %s (%04X)\n", s.nFlags & PVRTMODELPODSF_FIXED ? "PVRTMODELPODSF_FIXED" : "(none)",s.nFlags);
+    printf("  userDataSize: %d\n", s.nUserDataSize);
+    
+    int i = 0;
+    for( i = 0; i < s.nNumCamera; i++ )
+    {
+        SPODCamera & cam = s.pCamera[i];
+        printf("Camera[%d]: target: %d fov:%.4f far:%.4f near:%.4f (animFOV:%p)\n",
+               i, cam.nIdxTarget, cam.fFOV, cam.fFar, cam.fNear, cam.pfAnimFOV);
+    }
+    for( i = 0; i < s.nNumLight; i++ )
+    {
+        SPODLight & light = s.pLight[i];
+        printf("Light:[%d] ",                     i);
+        printf("nIdxTarget: %d ",                 light. nIdxTarget);
+        printf("pfColour: {%.4f,%.4f,%.4f} ",     light. pfColour[0],light.pfColour[1],light.pfColour[2]);
+        printf("eType: %d\n",                     light. eType);
+        printf("            fConstantAttn: %.4f ",light. fConstantAttenuation);
+        printf("fLinearAtten: %.4f ",             light. fLinearAttenuation);
+        printf("fQuadraticAtten: %.4f ",          light. fQuadraticAttenuation);
+        printf("fFalloffAngle: %.4f ",            light. fFalloffAngle);
+        printf("fFalloffExp: %.4f\n",             light. fFalloffExponent);
+    }
+#if 0
+    VERTTYPE    pfColourBackground[3];        /*!< Background colour */
+    VERTTYPE    pfColourAmbient[3];            /*!< Ambient colour */
+    PVRTchar8        *pUserData;
+    SPODMesh        *pMesh;                    /*!< Mesh array. Meshes may be instanced several times in a scene;
+                                                SPODTexture        *pTexture;        /*!< Texture array */
+    SPODMaterial    *pMaterial;        /*!< Material array */
+#endif
+    
+}
 bool OGLES2Skinning::InitApplication()
 {
     CPVRTString ErrorStr;
     
-	m_puiVbo = 0;
-	m_puiIndexVbo = 0;
+    m_puiVbo = 0;
+    m_puiIndexVbo = 0;
     
-	CPVRTResourceFile::SetReadPath((char*)EnvGet(prefReadPath));
-	CPVRTResourceFile::SetLoadReleaseFunctions(NULL,NULL);
+    CPVRTResourceFile::SetReadPath((char*)EnvGet(prefReadPath));
+    CPVRTResourceFile::SetLoadReleaseFunctions(NULL,NULL);
     
-	if (m_Scene.ReadFromFile(m_psSceneFile.c_str()) != PVR_SUCCESS)
-	{
-		EnvExitMsg(  "ERROR: Couldn't load the .pod file\n");
-		return false;
-	}
+    if (m_Scene.ReadFromFile(m_psSceneFile.c_str()) != PVR_SUCCESS)
+    {
+        EnvExitMsg(  "ERROR: Couldn't load the .pod file\n");
+        return false;
+    }
     
-	// The cameras are stored in the file. We check it contains at least one.
+    dumpScene(m_Scene);
+    // The cameras are stored in the file. We check it contains at least one.
 #ifdef DEBUG
-	if (m_Scene.nNumCamera == 0)
-	{
-		EnvExitMsg(  "ERROR: The scene does not contain a camera\n");
-		return false;
-	}
+    if (m_Scene.nNumCamera == 0)
+    {
+        EnvExitMsg(  "ERROR: The scene does not contain a camera\n");
+        return false;
+    }
     
-	// Check the scene contains at least one light
-	if (m_Scene.nNumLight == 0)
-	{
-		EnvExitMsg(  "ERROR: The scene does not contain a light\n");
-		return false;
-	}
+    // Check the scene contains at least one light
+    if (m_Scene.nNumLight == 0)
+    {
+        EnvExitMsg(  "ERROR: The scene does not contain a light\n");
+        return false;
+    }
 #endif
     
-	m_fFrame = 0;
-	m_iTimePrev = EnvGetTime(m_refCon);
-	m_Transform = PVRTMat4::Identity();
-	m_fAngle = 0.0f;
-	m_fDistance = 0.0f;
+    m_fFrame = 0;
+    m_iTimePrev = EnvGetTime(m_refCon);
+    m_Transform = PVRTMat4::Identity();
+    m_fAngle = 0.0f;
+    m_fDistance = 0.0f;
     
     // the rest of this method was
     // moved from per-context-switch InitView() to
     // one-time only per instance.
     
-	LoadVbos();
+    LoadVbos();
     
-	if (!LoadTextures(&ErrorStr))
-	{
-		EnvExitMsg(  ErrorStr.c_str());
-		return false;
-	}
+    if (!LoadTextures(&ErrorStr))
+    {
+        EnvExitMsg(  ErrorStr.c_str());
+        return false;
+    }
     
-	if (!LoadShaders(&ErrorStr))
-	{
-		EnvExitMsg(  ErrorStr.c_str());
-		return false;
-	}
+    if (!LoadShaders(&ErrorStr))
+    {
+        EnvExitMsg(  ErrorStr.c_str());
+        return false;
+    }
     
-	glUniform1i(glGetUniformLocation(m_ShaderProgram.uiId, "sTexture"), 0);
+    glUniform1i(glGetUniformLocation(m_ShaderProgram.uiId, "sTexture"), 0);
     
-	/*
+    /*
      Initialise an array to lookup the textures
      for each material in the scene.
      */
-	m_puiTextures = new GLuint[m_Scene.nNumMaterial];
+    m_puiTextures = new GLuint[m_Scene.nNumMaterial];
     for( int i = 0; i < m_numTextures; i++ )
     {
-		SPODMaterial* pMaterial = &m_Scene.pMaterial[i];
+        SPODMaterial* pMaterial = &m_Scene.pMaterial[i];
         
         for (int n = 0; n < m_numTextures; n++ )
         {
@@ -327,20 +375,20 @@ bool OGLES2Skinning::InitApplication()
         }
         
     }
-	return true;
+    return true;
 }
 
 bool OGLES2Skinning::ReleaseView()
 {
     glDeleteTextures(m_numTextures, m_puiTextures);
-	glDeleteProgram(m_ShaderProgram.uiId);
-	glDeleteShader(m_uiVertShader);
-	glDeleteShader(m_uiFragShader);
-	glDeleteBuffers(m_Scene.nNumMesh, m_puiVbo);
-	glDeleteBuffers(m_Scene.nNumMesh, m_puiIndexVbo);
-	delete[] m_puiTextures;
+    glDeleteProgram(m_ShaderProgram.uiId);
+    glDeleteShader(m_uiVertShader);
+    glDeleteShader(m_uiFragShader);
+    glDeleteBuffers(m_Scene.nNumMesh, m_puiVbo);
+    glDeleteBuffers(m_Scene.nNumMesh, m_puiIndexVbo);
+    delete[] m_puiTextures;
     
-	return true;
+    return true;
 }
 
 bool OGLES2Skinning::RenderScene(float *modelMatrix)
@@ -349,69 +397,72 @@ bool OGLES2Skinning::RenderScene(float *modelMatrix)
         return true;
     
     GLboolean isCullFace = glIsEnabled(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
-	glClearColor(0.6f, 0.8f, 0.6f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glCullFace(GL_BACK);
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-	glUseProgram(m_ShaderProgram.uiId);
-	glActiveTexture(GL_TEXTURE0);
+    glUseProgram(m_ShaderProgram.uiId);
+    glActiveTexture(GL_TEXTURE0);
     
-	/*
+    /*
      Calculates the frame number to animate in a time-based manner.
      Uses the shell function EnvGetTime() to get the time in milliseconds.
      */
-	unsigned long iTime = EnvGetTime(m_refCon);
+    unsigned long iTime = EnvGetTime(m_refCon);
     
-	if(iTime > m_iTimePrev)
-	{
-		float fDelta = (float) (iTime - m_iTimePrev);
-		m_fFrame += fDelta * g_fDemoFrameRate;
+    //if(iTime > m_iTimePrev)
+    {
+        float fDelta = (float) (iTime - m_iTimePrev);
+        m_fFrame += fDelta * g_fDemoFrameRate;
         memcpy(m_Transform.f,modelMatrix,sizeof(m_Transform.f));
-	}
+    }
     
-	m_iTimePrev	= iTime;
+    m_iTimePrev    = iTime;
     
-	if(m_fFrame > m_Scene.nNumFrame - 1)
-		m_fFrame = 0;
+    if(m_fFrame > m_Scene.nNumFrame - 1)
+        m_fFrame = 0;
     
-	// Set the scene animation to the current frame
-	m_Scene.SetFrame(m_fFrame);
+    // Set the scene animation to the current frame
+    m_Scene.SetFrame(m_fFrame);
     
-	/*
+    /*
      Set up camera
      */
-	PVRTVec3	vFrom, vTo, vUp(0, 1, 0);
-	PVRTMat4 mView, mProjection;
-	float fFOV;
+    PVRTVec3    vFrom, vTo, vUp(0, 1, 0);
+    PVRTMat4 mView, mProjection;
+    float fFOV;
     
-	// We can get the camera position, target and field of view (fov) with GetCameraPos()
-	fFOV = m_Scene.GetCamera(vFrom, vTo, vUp, 0);
+    // We can get the camera position, target and field of view (fov) with GetCameraPos()
+    fFOV = m_Scene.GetCamera(vFrom, vTo, vUp, 0);
     
-	/*
+    /*
      We can build the model view matrix from the camera position, target and an up vector.
      For this we use PVRTMat4::LookAtRH().
      */
-	mView = PVRTMat4::LookAtRH(vFrom, vTo, vUp);
+    mView = PVRTMat4::LookAtRH(vFrom, vTo, vUp);
     
-	// Calculate the projection matrix
-	bool bRotate = false; // EnvGet(prefIsRotated) && EnvGet(prefFullScreen);
+    // Calculate the projection matrix
+    bool bRotate = false; // EnvGet(prefIsRotated) && EnvGet(prefFullScreen);
 #define ASPC (float)EnvGeti(prefWidth)/(float)EnvGeti(prefHeight)
-	mProjection = PVRTMat4::PerspectiveFovRH(fFOV, ASPC, g_fCameraNear, g_fCameraFar, PVRTMat4::OGL, bRotate);
+    mProjection = PVRTMat4::PerspectiveFovRH(fFOV, ASPC, g_fCameraNear, g_fCameraFar, PVRTMat4::OGL, bRotate);
     
-	// Read the light direction from the scene
-	PVRTVec4 vLightDirWorld = PVRTVec4( 0, 0, 0, 0 );
-	vLightDirWorld = m_Scene.GetLightDirection(0);
-	glUniform3fv(m_ShaderProgram.auiLoc[eLightDirWorld], 1, &vLightDirWorld.x);
+    // Read the light direction from the scene
+    PVRTVec4 vLightDirWorld = PVRTVec4( 0, 0, 0, 0 );
+    vLightDirWorld = m_Scene.GetLightDirection(0);
+    glUniform3fv(m_ShaderProgram.auiLoc[eLightDirWorld], 1, &vLightDirWorld.x);
     
-	// Set up the View * Projection Matrix
-	PVRTMat4 mViewProjection;
+    // Set up the View * Projection Matrix
+    PVRTMat4 mViewProjection;
     
-	mViewProjection = mProjection * mView;
-	glUniformMatrix4fv(m_ShaderProgram.auiLoc[eViewProj], 1, GL_FALSE, mViewProjection.ptr());
+    mViewProjection = mProjection * mView;
+    // VS
+  //  glUniformMatrix4fv(m_ShaderProgram.auiLoc[eViewProj], 1, GL_FALSE, mViewProjection.ptr());
     
-	/*
+    glUniformMatrix4fv(m_ShaderProgram.auiLoc[eViewProj], 1, GL_FALSE, modelMatrix);
+    
+    /*
      A scene is composed of nodes. There are 3 types of nodes:
      - MeshNodes :
      references a mesh in the pMesh[].
@@ -423,65 +474,69 @@ bool OGLES2Skinning::RenderScene(float *modelMatrix)
      - cameras
      To draw a scene, you must go through all the MeshNodes and draw the referenced meshes.
      */
-	for (unsigned int i32NodeIndex = 0; i32NodeIndex < m_Scene.nNumMeshNode; ++i32NodeIndex)
-	{
-		SPODNode& Node = m_Scene.pNode[i32NodeIndex];
+    for (unsigned int i32NodeIndex = 0; i32NodeIndex < m_Scene.nNumMeshNode; ++i32NodeIndex)
+    {
+        SPODNode& Node = m_Scene.pNode[i32NodeIndex];
         
-		// Get the node model matrix
-		PVRTMat4 mWorld;
-		mWorld = m_Scene.GetWorldMatrix(Node);
+        // Get the node model matrix
+        PVRTMat4 mWorld;
+        mWorld = m_Scene.GetWorldMatrix(Node);
         
-		// Set up shader uniforms
-		PVRTMat4 mModelViewProj;
-		mModelViewProj = mViewProjection * mWorld;
-		glUniformMatrix4fv(m_ShaderProgram.auiLoc[eMVPMatrix], 1, GL_FALSE, mModelViewProj.ptr());
+        // Set up shader uniforms
+        PVRTMat4 mModelViewProj;
+        mModelViewProj = mViewProjection * mWorld;
+        glUniformMatrix4fv(m_ShaderProgram.auiLoc[eMVPMatrix], 1, GL_FALSE, mModelViewProj.ptr());
         
-		PVRTVec4 vLightDirModel;
-		vLightDirModel = mWorld.inverse() * vLightDirWorld;
-		glUniform3fv(m_ShaderProgram.auiLoc[eLightDirModel], 1, &vLightDirModel.x);
+        PVRTVec4 vLightDirModel;
+        vLightDirModel = mWorld.inverse() * vLightDirWorld;
+        glUniform3fv(m_ShaderProgram.auiLoc[eLightDirModel], 1, &vLightDirModel.x);
         
-		// Loads the correct texture using our texture lookup table
-		if(Node.nIdxMaterial == -1)
-			glBindTexture(GL_TEXTURE_2D, 0); // It has no pMaterial defined. Use blank texture (0)
-		else
-			glBindTexture(GL_TEXTURE_2D, m_puiTextures[Node.nIdxMaterial]);
+        // Loads the correct texture using our texture lookup table
+        if(Node.nIdxMaterial == -1)
+            glBindTexture(GL_TEXTURE_2D, 0); // It has no pMaterial defined. Use blank texture (0)
+        else
+            glBindTexture(GL_TEXTURE_2D, m_puiTextures[Node.nIdxMaterial]);
         
-		DrawMesh(i32NodeIndex);
-	}
+        DrawMesh(i32NodeIndex);
+    }
     
     if( !isCullFace )
         glDisable(GL_CULL_FACE);
     
-	return true;
+    return true;
 }
 
 void OGLES2Skinning::DrawMesh(int i32NodeIndex)
 {
-	SPODNode& Node = m_Scene.pNode[i32NodeIndex];
-	SPODMesh& Mesh = m_Scene.pMesh[Node.nIdx];
+    SPODNode& Node = m_Scene.pNode[i32NodeIndex];
+    SPODMesh& Mesh = m_Scene.pMesh[Node.nIdx];
     
-	glBindBuffer(GL_ARRAY_BUFFER, m_puiVbo[Node.nIdx]);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_puiIndexVbo[Node.nIdx]);
-	glEnableVertexAttribArray(VERTEX_ARRAY);
-	glEnableVertexAttribArray(NORMAL_ARRAY);
-	glEnableVertexAttribArray(TEXCOORD_ARRAY);
-	glVertexAttribPointer(VERTEX_ARRAY, 3, GL_FLOAT, GL_FALSE, Mesh.sVertex.nStride,  Mesh.sVertex.pData);
-	glVertexAttribPointer(NORMAL_ARRAY, 3, GL_FLOAT, GL_FALSE, Mesh.sNormals.nStride, Mesh.sNormals.pData);
-	glVertexAttribPointer(TEXCOORD_ARRAY, 2, GL_FLOAT, GL_FALSE, Mesh.psUVW[0].nStride, Mesh.psUVW[0].pData);
+    glBindBuffer(GL_ARRAY_BUFFER, m_puiVbo[Node.nIdx]);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_puiIndexVbo[Node.nIdx]);
+    glEnableVertexAttribArray(VERTEX_ARRAY);
+    glEnableVertexAttribArray(NORMAL_ARRAY);
+    if( Mesh.psUVW )
+        glEnableVertexAttribArray(TEXCOORD_ARRAY);
+    glVertexAttribPointer(VERTEX_ARRAY, 3, GL_FLOAT, GL_FALSE, Mesh.sVertex.nStride,  Mesh.sVertex.pData);
+    glVertexAttribPointer(NORMAL_ARRAY, 3, GL_FLOAT, GL_FALSE, Mesh.sNormals.nStride, Mesh.sNormals.pData);
+    if( Mesh.psUVW )
+        glVertexAttribPointer(TEXCOORD_ARRAY, 2, GL_FLOAT, GL_FALSE, Mesh.psUVW[0].nStride, Mesh.psUVW[0].pData);
     
-	/*
+    /*
      If the current mesh has bone index and weight data then we need to
      set up some additional variables in the shaders.
      */
-	if(Mesh.sBoneIdx.n && Mesh.sBoneWeight.n)
-	{
-		glEnableVertexAttribArray(BONEINDEX_ARRAY);
-		glEnableVertexAttribArray(BONEWEIGHT_ARRAY);
+    // VS
+#if 1
+    if(Mesh.sBoneIdx.n && Mesh.sBoneWeight.n)
+    {
+        glEnableVertexAttribArray(BONEINDEX_ARRAY);
+        glEnableVertexAttribArray(BONEWEIGHT_ARRAY);
         
-		glVertexAttribPointer(BONEINDEX_ARRAY, Mesh.sBoneIdx.n, GL_UNSIGNED_BYTE, GL_FALSE, Mesh.sBoneIdx.nStride, Mesh.sBoneIdx.pData);
-		glVertexAttribPointer(BONEWEIGHT_ARRAY, Mesh.sBoneWeight.n, GL_UNSIGNED_BYTE, GL_TRUE, Mesh.sBoneWeight.nStride, Mesh.sBoneWeight.pData);
+        glVertexAttribPointer(BONEINDEX_ARRAY, Mesh.sBoneIdx.n, GL_UNSIGNED_BYTE, GL_FALSE, Mesh.sBoneIdx.nStride, Mesh.sBoneIdx.pData);
+        glVertexAttribPointer(BONEWEIGHT_ARRAY, Mesh.sBoneWeight.n, GL_UNSIGNED_BYTE, GL_TRUE, Mesh.sBoneWeight.nStride, Mesh.sBoneWeight.pData);
         
-		/*
+        /*
          There is a limit to the number of bone matrices that you can pass to the shader so we have
          chosen to limit the number of bone matrices that affect a mesh to 8. However, this does
          not mean our character can only have a skeleton consisting of 8 bones. We can get around
@@ -489,57 +544,59 @@ void OGLES2Skinning::DrawMesh(int i32NodeIndex)
          affected by a sub set of the overal skeleton. This is why we have this for loop that
          iterates through the bone batches contained with the SPODMesh.
          */
-		for (int i32Batch = 0; i32Batch < Mesh.sBoneBatches.nBatchCnt; ++i32Batch)
-		{
-			// Set the number of bones that will influence each vertex in the mesh
-			glUniform1i(m_ShaderProgram.auiLoc[eBoneCount], Mesh.sBoneIdx.n);
+        for (int i32Batch = 0; i32Batch < Mesh.sBoneBatches.nBatchCnt; ++i32Batch)
+        {
+            // Set the number of bones that will influence each vertex in the mesh
+            glUniform1i(m_ShaderProgram.auiLoc[eBoneCount], Mesh.sBoneIdx.n);
             
-			// Go through the bones for the current bone batch
-			PVRTMat4 amBoneWorld[8];
-			PVRTMat3 afBoneWorldIT[8], mBoneIT;
+            // Go through the bones for the current bone batch
+            PVRTMat4 amBoneWorld[8];
+            PVRTMat3 afBoneWorldIT[8], mBoneIT;
             
-			int i32Count = Mesh.sBoneBatches.pnBatchBoneCnt[i32Batch];
+            int i32Count = Mesh.sBoneBatches.pnBatchBoneCnt[i32Batch];
             
-			for(int i = 0; i < i32Count; ++i)
-			{
-				int i32NodeID = Mesh.sBoneBatches.pnBatches[i32Batch * Mesh.sBoneBatches.nBatchBoneMax + i];
-				amBoneWorld[i] = m_Transform * m_Scene.GetBoneWorldMatrix(Node, m_Scene.pNode[i32NodeID]);
-				afBoneWorldIT[i] = PVRTMat3(amBoneWorld[i]).inverse().transpose();
-			}
+            for(int i = 0; i < i32Count; ++i)
+            {
+                int i32NodeID = Mesh.sBoneBatches.pnBatches[i32Batch * Mesh.sBoneBatches.nBatchBoneMax + i];
+                amBoneWorld[i] = m_Transform * m_Scene.GetBoneWorldMatrix(Node, m_Scene.pNode[i32NodeID]);
+                afBoneWorldIT[i] = PVRTMat3(amBoneWorld[i]).inverse().transpose();
+            }
             
-			glUniformMatrix4fv(m_ShaderProgram.auiLoc[eBoneMatrices], i32Count, GL_FALSE, amBoneWorld[0].ptr());
-			glUniformMatrix3fv(m_ShaderProgram.auiLoc[eBoneMatricesIT], i32Count, GL_FALSE, afBoneWorldIT[0].ptr());
+            glUniformMatrix4fv(m_ShaderProgram.auiLoc[eBoneMatrices], i32Count, GL_FALSE, amBoneWorld[0].ptr());
+            glUniformMatrix3fv(m_ShaderProgram.auiLoc[eBoneMatricesIT], i32Count, GL_FALSE, afBoneWorldIT[0].ptr());
             
-			/*
+            /*
              As we are using bone batching we don't want to draw all the faces contained within pMesh, we only want
              to draw the ones that are in the current batch. To do this we pass to the drawMesh function the offset
              to the start of the current batch of triangles (Mesh.sBoneBatches.pnBatchOffset[i32Batch]) and the
              total number of triangles to draw (i32Tris)
              */
-			int i32Tris;
-			if(i32Batch+1 < Mesh.sBoneBatches.nBatchCnt)
-				i32Tris = Mesh.sBoneBatches.pnBatchOffset[i32Batch+1] - Mesh.sBoneBatches.pnBatchOffset[i32Batch];
-			else
-				i32Tris = Mesh.nNumFaces - Mesh.sBoneBatches.pnBatchOffset[i32Batch];
+            int i32Tris;
+            if(i32Batch+1 < Mesh.sBoneBatches.nBatchCnt)
+                i32Tris = Mesh.sBoneBatches.pnBatchOffset[i32Batch+1] - Mesh.sBoneBatches.pnBatchOffset[i32Batch];
+            else
+                i32Tris = Mesh.nNumFaces - Mesh.sBoneBatches.pnBatchOffset[i32Batch];
             
-			size_t offset = sizeof(GLushort) * 3 * Mesh.sBoneBatches.pnBatchOffset[i32Batch];
-			glDrawElements(GL_TRIANGLES, i32Tris * 3, GL_UNSIGNED_SHORT, (void*) offset);
-		}
+            size_t offset = sizeof(GLushort) * 3 * Mesh.sBoneBatches.pnBatchOffset[i32Batch];
+            glDrawElements(GL_TRIANGLES, i32Tris * 3, GL_UNSIGNED_SHORT, (void*) offset);
+        }
         
-		glDisableVertexAttribArray(BONEINDEX_ARRAY);
-		glDisableVertexAttribArray(BONEWEIGHT_ARRAY);
-	}
-	else
-	{
-		glUniform1i(m_ShaderProgram.auiLoc[eBoneCount], 0);
-		glDrawElements(GL_TRIANGLES, Mesh.nNumFaces*3, GL_UNSIGNED_SHORT, 0);
-	}
+        glDisableVertexAttribArray(BONEINDEX_ARRAY);
+        glDisableVertexAttribArray(BONEWEIGHT_ARRAY);
+    }
+    else
+#endif
+        
+    {
+        glUniform1i(m_ShaderProgram.auiLoc[eBoneCount], 0);
+        glDrawElements(GL_TRIANGLES, Mesh.nNumFaces*3, GL_UNSIGNED_SHORT, 0);
+    }
     
-	glDisableVertexAttribArray(VERTEX_ARRAY);
-	glDisableVertexAttribArray(NORMAL_ARRAY);
-	glDisableVertexAttribArray(TEXCOORD_ARRAY);
+    glDisableVertexAttribArray(VERTEX_ARRAY);
+    glDisableVertexAttribArray(NORMAL_ARRAY);
+    glDisableVertexAttribArray(TEXCOORD_ARRAY);
     
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 

@@ -178,7 +178,6 @@
             if( _targetedObject == targetObject )
             {
                 orgBlock(f);
-                //_objectResponded = true;
             }
         } copy ]];
     }
@@ -192,7 +191,6 @@
 {
     if( self.graph.viewBasedParameters )
     {
-        _objectResponded = false;
         _targetedObject = [EventCapture getGraphViewTapChildElementOf:self.graph inView:self atPt:pt];
         if( !_targetedObject )
             _targetedObject = self.graph;
@@ -201,7 +199,6 @@
 
 -(void)clearTargetObject
 {
-    _objectResponded = false;
     _targetedObject = nil;
 }
 
@@ -286,34 +283,121 @@
     }
 }
 
+#define PT_DIFF(a,b) (CGPoint){a.x-b.x,a.y-b.y}
+
 -(void)panning:(UIPanGestureRecognizer *)pgr
 {
     if( pgr.state == UIGestureRecognizerStateBegan )
     {
         _panLast = [pgr locationInView:self];
-    }
+        _panPivot = _panLast;
+        TGLog(LLGestureStuff, @"Panning starting: {%.1f, %.1f}",_panPivot.x, _panPivot.y);
+    }    
     else if( pgr.state == UIGestureRecognizerStateChanged )
     {
         CGPoint pt  = [pgr locationInView:self];
-        CGPoint spt = [self nativeToTG:pt];
 
         [self checkTargetObject:pt];
-        
-        // we get a ton of 0 movement
-        if( fabsf(spt.x) > FLT_EPSILON && _currentTriggers->_triggerPanX )
-            _currentTriggers->_triggerPanX(spt.x);
-        if( fabsf(spt.y) > FLT_EPSILON && _currentTriggers->_triggerPanY )
-            _currentTriggers->_triggerPanY(spt.y);
 
-        if( !_objectResponded && _currentTriggers->_triggerDrag1 )
-            _currentTriggers->_triggerDrag1([self nativeToTG:pt]);
-        if( !_objectResponded && _currentTriggers->_triggerDragPos )
-            _currentTriggers->_triggerDragPos(pt);
+        if( _currentTriggers->_triggerPanX || _currentTriggers->_triggerPanY )
+        {
+            bool bSkipPan = false;
+            CGPoint diff = PT_DIFF(pt,_panLast);
+            if( !_xPanning && !_yPanning )
+            {
+                _xPanning = fabsf(diff.x) > fabsf(diff.y);
+                _yPanning = !_xPanning;
+                TGLog(LLGestureStuff, @"Panning axis chosen: x:%d y:%d", _xPanning, _yPanning);
+            }
+            
+            float currentPos = 0;
+            float testPos   = 0;
+            if( _xPanning )
+            {
+                currentPos = pt.x;
+                testPos   = _panLast.x;
+            }
+            else // yPanning
+            {
+                currentPos = pt.y;
+                testPos   = _panLast.y;
+            }
+            
+            if( currentPos == testPos )
+            {
+                bSkipPan = true;
+            }
+            else if( _panDir )
+            {
+                if( _panDir == 1 )
+                {
+                    if( currentPos < testPos )
+                    {
+                        _panDir = -1;
+                        _panPivot = pt;
+                        TGLog(LLGestureStuff, @"Direction changed to %d (pivot: {%.1f, %.1f}",_panDir,pt.x,pt.y);
+                        bSkipPan = true;
+                    }
+                }
+                else // panDir == -1
+                {
+                    if( currentPos > testPos )
+                    {
+                        _panDir = 1;
+                        _panPivot = pt;
+                        TGLog(LLGestureStuff, @"Direction changed to %d (pivot: {%.1f, %.1f}",_panDir,pt.x,pt.y);
+                        bSkipPan = true;
+                    }
+                }
+                
+            }
+            else // panDir uninitialized
+            {
+                _panDir = currentPos > testPos ? 1 : -1;
+                TGLog(LLGestureStuff, @"Panning direction chosen: %d",_panDir);
+            }
+
+            if( !bSkipPan )
+            {
+                CGSize sz = self.frame.size;
+                
+                if( _xPanning && _currentTriggers->_triggerPanX )
+                {
+                    float fdiff = (_panPivot.x - pt.x) / sz.width;
+                    TGLog(LLGestureStuff, @"Sending X pan: %f (dir:%d pos:{%.1f,%.1f}) ) ",fdiff,_panDir,pt.x,pt.y);
+                    _currentTriggers->_triggerPanX(fdiff);
+                }
+                else if( _yPanning && _currentTriggers->_triggerPanY )
+                {
+                    float fdiff = (_panPivot.y - pt.y) / sz.width;
+                    TGLog(LLGestureStuff, @"Sending Y pan: %f (dir:%d pos:{%.1f,%.1f}) ) ",fdiff,_panDir,pt.x,pt.y);
+                    _currentTriggers->_triggerPanY(fdiff);
+                }
+            }
+            
+        }
+        
+        if( _currentTriggers->_triggerDrag1 )
+        {
+            CGPoint scaledPt = [self nativeToTG:pt];
+            TGLog(LLGestureStuff, @"Sending scaled drag pt: {%f,%f}",scaledPt.x, scaledPt.y);
+            _currentTriggers->_triggerDrag1(scaledPt);
+        }
+        if( _currentTriggers->_triggerDragPos )
+        {
+            TGLog(LLGestureStuff, @"Sending native drag pt: {%.1f, %1.f}",pt.x, pt.y);
+            _currentTriggers->_triggerDragPos(pt);            
+        }
+        
+        _panLast = pt;
         
         [self clearTargetObject];
     }
     else if( pgr.state == UIGestureRecognizerStateEnded || pgr.state == UIGestureRecognizerStateCancelled )
     {
+        TGLog(LLGestureStuff, @"Panning over");
+        _xPanning = _yPanning = 0;
+        _panDir = 0;
     }
 }
 

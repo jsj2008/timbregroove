@@ -52,6 +52,27 @@ NSString * const kConfig3dMenuOrder     = @"order";
 NSString * const kConfig3dIcon          = @"icon";
 NSString * const kConfig3dCustomProperties = @"properties";
 
+NSString * const kConfigModels = @"models";
+
+extern NSString const * textNameForkName( NSString const * kName );
+
+NSDictionary * __mapParamNames(NSDictionary * dict)
+{
+	NSMutableDictionary *result = [NSMutableDictionary dictionaryWithCapacity:[dict count]];
+    
+	[dict each:^(NSString * kNameKey, NSString * kNameValue)
+     {
+         result[textNameForkName(kNameKey)] = textNameForkName(kNameValue);
+     }];
+	
+	return result;
+}
+
+NSArray * mapParamNames(NSArray * inArr)
+{
+    return [inArr map:^id(id obj) { return  __mapParamNames(obj); }];
+}
+
 static Config * __sharedConfig;
 
 @interface Config () {
@@ -68,6 +89,7 @@ static Config * __sharedConfig;
     {
         NSString * configPath = [[NSBundle mainBundle] pathForResource:@"config"
                                                                 ofType:@"plist" ];
+        
         _plistConfig = [NSDictionary dictionaryWithContentsOfFile:configPath];
     }
     
@@ -106,6 +128,13 @@ static Config * __sharedConfig;
 -(ConfigGraphicElement *)getGraphicElement:(NSString *)name {
     return [[ConfigGraphicElement alloc] initWithD:[_plistConfig[kConfig3dElements] valueForKey:name]];
 }
+
+-(NSDictionary *)getModel:(NSString *)name
+{
+    NSDictionary * models = _plistConfig[kConfigModels];
+    return models[name];
+}
+
 @end
 
 @implementation ConfigBase
@@ -147,7 +176,7 @@ static Config * __sharedConfig;
 -(NSString *)EQ { return [_me valueForKey:kConfigAudioEQ]; }
 -(NSString *)instanceClass { return [_me valueForKey:kConfigAudioInstanceClass]; }
 -(NSDictionary *)customProperties { return [_me valueForKey:kConfigAudioCustomProperties]; }
--(NSArray *)connections { return [_me valueForKey:kConfigSceneConnections]; };
+-(NSArray *)connections { return mapParamNames([_me valueForKey:kConfigSceneConnections]); };
 -(NSArray*)instruments {
     NSArray * names = [_me valueForKey:kConfigAudioInstruments];
     return [names map:^id(id name) {
@@ -167,5 +196,5 @@ static Config * __sharedConfig;
 -(NSString *)displayName { return [_me valueForKey:kConfigSceneDisplayName]; };
 -(ConfigAudioProfile *)audioElement { return [__sharedConfig getAudioProfile:[_me valueForKey:kConfigSceneAudio]];}
 -(ConfigGraphicElement *)graphicElement { return [__sharedConfig getGraphicElement:[_me valueForKey:kConfigScene3d]];}
--(NSArray *)connections { return [_me valueForKey:kConfigSceneConnections]; };
+-(NSArray *)connections { return mapParamNames([_me valueForKey:kConfigSceneConnections]); };
 @end

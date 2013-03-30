@@ -10,6 +10,7 @@
 #define TimbreGroove_TGTypes_h
 
 #import "BKGlobals.h"
+#import "Log.h"
 
 #define R0_1()      (((float)(arc4random_uniform(0x1000000) % 255))/255.0)
 #define R0_n(n)     (int)(arc4random_uniform(n))
@@ -23,20 +24,6 @@
 
 #define GL_ERROR_C { GLenum __e = glGetError(); if(__e) { TGLog(LLShitsOnFire, @"glError(%d/%04X) %s:%d",__e,__e,__FILE__,__LINE__); }}
 
-typedef enum LogLevel {
-    LLShitsOnFire = 0,
-    LLKindaImportant = 1,
-    LLObjLifetime = 1 << 1,
-    LLAudioTweaks = 1 << 2,
-    LLJustSayin = 1 << 3,
-    LLGLResource = 1 << 4,
-    LLMidiStuff = 1 << 5,
-    LLCaptureOps = 1 << 6,
-    LLAudioResource = 1 << 7,
-    LLShaderStuff = 1 << 8
-} LogLevel;
-void TGLog(LogLevel,NSString *format, ...);
-LogLevel TGSetLogLevel(LogLevel);
 
 typedef void (^FloatParamBlock)(float);
 typedef void (^PointParamBlock)(CGPoint);
@@ -69,7 +56,7 @@ typedef enum {
 #define TGParameterType TGUniformType
 #define TG_POINT        TG_VECTOR2
 #define TG_COLOR        TG_VECTOR4
-#define TG_MIXERUPDATE  TG_LAST_UTYPE+1
+
 
 typedef enum {
     TG_POINTS = GL_POINTS, // etc.

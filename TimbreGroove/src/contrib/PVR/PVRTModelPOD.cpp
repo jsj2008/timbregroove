@@ -1225,7 +1225,11 @@ static bool ReadCamera(
 	{
 		switch(nName)
 		{
-		case ePODFileCamera | PVRTMODELPOD_TAG_END:			return true;
+		case ePODFileCamera | PVRTMODELPOD_TAG_END:
+            {
+                s.fFar = 1000.0; // VS
+                return true;
+            }
 
 		case ePODFileCamIdxTgt:		if(!src.Read32(s.nIdxTarget)) return false;					break;
 		case ePODFileCamFOV:		if(!src.Read32(s.fFOV)) return false;							break;
@@ -1441,6 +1445,32 @@ static void PVRTFixInterleavedEndianness(SPODMesh &s)
 	PVRTFixInterleavedEndiannessUsingCPODData(s.pInterleaved, s.sBoneWeight, s.nNumVertex);
 }
 
+static void dumpMesh(SPODMesh &m)
+{
+    CPODData pdata = m.sVertex;
+    PVRTuint8 * pvec3;
+    
+    if( m.pInterleaved )
+        pvec3 = m.pInterleaved + (int)(unsigned char*) (size_t)pdata.pData;
+    else
+        pvec3 = pdata.pData;
+    
+    int stride = pdata.nStride;
+    printf("Vertext data %s: %d vertices at offset: %d stride:%d\n",
+           m.pInterleaved ? "Interleaved" : "NON-interleaved",
+           m.nNumVertex, (int)(unsigned char*) (size_t)pdata.pData, stride);
+    
+    for( int i = 0; i < m.nNumVertex; i++ )
+    {
+        for( int r = 0; r < 3 && i < m.nNumVertex; r++, i++ )
+        {
+            PVRTVECTOR3f *vec3 = (PVRTVECTOR3f *)(pvec3);
+            printf("{%.4f,%.4f,%.4f}, ",vec3[i].x,vec3[i].y,vec3[i].z);
+            pvec3 += stride;
+        }
+        printf("\n");
+    }
+}
 /*!***************************************************************************
  @Function			ReadMesh
  @Modified			s The SPODMesh to read into
@@ -1465,6 +1495,7 @@ static bool ReadMesh(
 			if(nUVWs != s.nNumUVW)
 				return false;
 			PVRTFixInterleavedEndianness(s);
+                dumpMesh(s);
 			return true;
 
 		case ePODFileMeshNumVtx:			if(!src.Read32(s.nNumVertex)) return false;													break;
@@ -2623,7 +2654,12 @@ void CPVRTModelPOD::GetWorldMatrix(
 PVRTMat4 CPVRTModelPOD::GetWorldMatrix(const SPODNode& node) const
 {
 	PVRTMat4 mWorld;
+    // VS
+#ifdef USE_MATRIX_CACHE
 	GetWorldMatrix(mWorld,node);
+#else
+    GetWorldMatrixNoCache(mWorld, node);
+#endif
 	return mWorld;
 }
 

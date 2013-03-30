@@ -15,11 +15,16 @@
 
 @interface GraphView : GLKView {
 @private // here for categories
-    bool    _objectResponded;
-    CGPoint _panLast;
     NSMutableArray * _triggerStack;
     ViewTriggers * _currentTriggers;
     id _targetedObject;
+    
+    CGPoint _panLast;
+    CGPoint _panPivot;
+    bool    _xPanning;
+    bool    _yPanning;
+    int     _panDir;
+    
 }
 @property (nonatomic) GLKVector4 backcolor;
 @property (nonatomic,strong) Graph * graph;

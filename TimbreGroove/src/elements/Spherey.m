@@ -13,6 +13,7 @@
 #import "Light.h"
 #import "Texture.h"
 
+
 NSString * const kParamDistortionPt = @"DistortionPt";
 
 @interface Spherey : Sphere
@@ -23,7 +24,7 @@ NSString * const kParamDistortionPt = @"DistortionPt";
 -(id)wireUp
 {
     [super wireUp];
-    self.rotation = (GLKVector3){ 0, M_PI, 0 };
+    self.position = (GLKVector3){-1,0,0};
     return self;
 }
 
@@ -41,22 +42,16 @@ NSString * const kParamDistortionPt = @"DistortionPt";
 
 -(void)createTexture
 {
-    self.texture = [[Texture alloc] initWithFileName:@"moon.png"];
+    self.texture = [[Texture alloc] initWithFileName:@"gridtest.png" ]; //  @"moon.png"];
 }
 -(void)getParameters:(NSMutableDictionary *)parameters
 {
     [super getParameters:parameters];
     
     Shader    * shader = self.shader;    
+    
     [shader vec3Parameter:parameters indexIntoNames:gv_distortionPt];
-    [shader floatParameter:parameters
-            indexIntoNames:gv_distortionFactor
-                     value:0.5
-                neg11range:(FloatRange){0.01,1.0}
-                 forObject:self];
-    
-    ((Parameter *)parameters[kParamRotationY]).targetObject = self.parent;
-    
+
     parameters[@"ResetRotation"] = [Parameter withBlock:^(CGPoint pt) {
         self.rotation = (GLKVector3){0,0,0};
     }];
