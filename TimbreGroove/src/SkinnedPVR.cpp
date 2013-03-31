@@ -458,9 +458,9 @@ bool OGLES2Skinning::RenderScene(float *modelMatrix)
     
     mViewProjection = mProjection * mView;
     // VS
-  //  glUniformMatrix4fv(m_ShaderProgram.auiLoc[eViewProj], 1, GL_FALSE, mViewProjection.ptr());
+    glUniformMatrix4fv(m_ShaderProgram.auiLoc[eViewProj], 1, GL_FALSE, mViewProjection.ptr());
     
-    glUniformMatrix4fv(m_ShaderProgram.auiLoc[eViewProj], 1, GL_FALSE, modelMatrix);
+  //  glUniformMatrix4fv(m_ShaderProgram.auiLoc[eViewProj], 1, GL_FALSE, modelMatrix);
     
     /*
      A scene is composed of nodes. There are 3 types of nodes:

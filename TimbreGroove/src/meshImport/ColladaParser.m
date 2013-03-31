@@ -1115,12 +1115,11 @@ foundCharacters:(NSString *)string
     }
 }
 
--(void)repackGeometry:(MeshGeometryBuffer *)buffer
-                    meshData:(IncomingMeshData *) meshData
-                      offset:(unsigned int)offset
-             primitiveStride:(unsigned int)primitiveStride
+-(void)repackIndex:(MeshGeometryBuffer *)buffer
+          meshData:(IncomingMeshData *) meshData
+            offset:(unsigned int)offset
+   primitiveStride:(unsigned int)primitiveStride
 {
-    
     unsigned short * primitives    = meshData->_triangleTag->_primitives;
     unsigned int     numPrimitives = meshData->_triangleTag->_numPrimitives;
     unsigned short * vectorCounts  = meshData->_triangleTag->_vectorCounts;
@@ -1160,7 +1159,6 @@ foundCharacters:(NSString *)string
             {
                 oldIBufferIdx = primitiveIndex + ( v * primitiveStride ) + offset;
                 newIndexBuffer[newIBufferIdx++] = primitives[ oldIBufferIdx ];
-                
             }
         }
         primitiveIndex += primitiveStride * vectorPerShape;
@@ -1168,11 +1166,29 @@ foundCharacters:(NSString *)string
     
     buffer->indexData  = realloc(newIndexBuffer, sizeof(unsigned int) * newIBufferIdx);
     buffer->numIndices = newIBufferIdx;
+}
 
+-(void)simpleRepackIndex:(MeshGeometryBuffer *)buffer
+                meshData:(IncomingMeshData *) meshData
+                  offset:(unsigned int)offset
+         primitiveStride:(unsigned int)primitiveStride
+{
+    unsigned short * primitives    = meshData->_triangleTag->_primitives;
+    unsigned int     numPrimitives = meshData->_triangleTag->_numPrimitives;
+    
+    unsigned int     newIndexCount    = numPrimitives / 3;
+    unsigned int *   newIndexBuffer   = malloc( sizeof(unsigned int) * newIndexCount);
+                                               
+    for( int i = 0; i < newIndexCount; i++ )
+        newIndexBuffer[i] = primitives[ i * 3 + offset];
+    
+    buffer->indexData  = newIndexBuffer;
+    buffer->numIndices = newIndexCount;
 }
 
 -(void)turnUp:(MeshGeometryBuffer *)bufferInfo
 {
+#if 0
     float * buffer = bufferInfo->data;
     for( int i = 0; i < bufferInfo->numFloats; i += 3 )
     {
@@ -1180,6 +1196,7 @@ foundCharacters:(NSString *)string
         buffer[i+1] = buffer[i+2];
         buffer[i+2] = y;
     }
+#endif
 }
 -(void)applyBindMatrix:(MeshGeometryBuffer *)bufferInfo
             bindMatrix: (GLKMatrix4)bindMatrix
@@ -1312,13 +1329,33 @@ foundCharacters:(NSString *)string
                 primitiveStride = thisOffset;
         }
         
+        unsigned short *vectorCounts = meshData->_triangleTag->_vectorCounts;
+        bool allThrees = true;
+        for( unsigned int vc = 0; vc < meshData->_triangleTag->_count; vc++ )
+        {
+            if( vectorCounts[vc] != 3 )
+            {
+                allThrees = false;
+                break;
+            }
+        }
+        
         for( MeshSemanticKey key = MSKPosition; key < kNumMeshSemanticKeys; key++ )
         {
             MeshGeometryBuffer *buffer = sceneGeometry->_buffers + key;
             
             if( buffer->data )
             {
-                [self repackGeometry:buffer meshData:meshData offset:primitivesOffset[key] primitiveStride:primitiveStride];
+                if( allThrees )
+                    [self simpleRepackIndex:buffer
+                                   meshData:meshData
+                                     offset:primitivesOffset[key]
+                            primitiveStride:primitiveStride];
+                else
+                    [self repackIndex:buffer
+                             meshData:meshData
+                               offset:primitivesOffset[key]
+                      primitiveStride:primitiveStride];
             }
         }
         
@@ -1343,8 +1380,8 @@ foundCharacters:(NSString *)string
         sceneSkin->_bindShapeMatrix = iskin->_bindShapeMatrix;
         sceneSkin->_influencingJointCounts          = iskin->_weights->_vcounts;
         sceneSkin->_numInfluencingJointCounts       = iskin->_weights->_numVcounts;
-        sceneSkin->_weightIndices         = iskin->_weights->_weights;
-        sceneSkin->_numWeightIndicies      = iskin->_weights->_numWeights;
+        sceneSkin->_packedWeightIndices         = iskin->_weights->_weights;
+        sceneSkin->_numPackedWeightIndicies      = iskin->_weights->_numWeights;
         
         for( int i = 0; i < iskin->_weights->_nextInput; i++ )
         {
@@ -1383,6 +1420,12 @@ foundCharacters:(NSString *)string
                 sceneSkin->_weights = iss->_data;
                 sceneSkin->_numWeights = iss->_numFloats;
             }
+        }
+        
+        for( NSString * jointName in jointNameArray )
+        {
+            MeshSceneArmatureNode * joint = findJointWithName(jointName,nil);
+            [sceneSkin->_influencingJoints addObject:joint];
         }
         
         sceneSkin->_geometry = getGeometry( iskin->_meshSource );

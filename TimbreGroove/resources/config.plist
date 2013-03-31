@@ -434,7 +434,7 @@
 			<key>properties</key>
 			<dict>
 				<key>colladaFile</key>
-				<string>bendyCyl.dae</string>
+				<string>testWithUV.dae</string>
 			</dict>
 		</dict>
 		<key>runningHero</key>

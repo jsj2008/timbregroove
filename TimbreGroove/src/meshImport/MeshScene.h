@@ -109,6 +109,18 @@ typedef enum _MeshSceneNodeType {
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  MeshSkinning @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+typedef struct _Influence {
+    unsigned int jointIndex;
+    float        weight;
+} Influence;
+
+typedef struct _VertexInfluence {
+    unsigned int numInfluences;
+    Influence influence[1];
+} VertexInfluence;
+
+#define NEXT_INFLUENCE(p) (VertexInfluence *)( p->influence + (p->numInfluences - 1))
+
 @interface MeshSkinning : NSObject {
 @public
     GLKMatrix4       _bindShapeMatrix;
@@ -149,15 +161,14 @@ typedef enum _MeshSceneNodeType {
     //
     //     numberOfJointsApplied = _influencingJointCounts[ v ]
     //
-    //     for n = currPos -> currPos + numberOfJointsAppled
+    //     for currPos -> currPos + numberOfJointsAppled
     //          joint:n  = _influencingJoints[ _weightIndices[ currPos + _jointWOffset ] ]
     //          weight:n =           _weights[ _weightIndices[ currPos + _weightFOffset ] ]
-    //          outv:n = ((v * skin->BSM) * joint:n->invBSM * joint:n->_transform ) * weight-n;
-    //     outv = sum of all outv:n's
+    //          outv:n += ((mesh[v] * skin->BSM) * joint:n->invBSM * joint:n->_transform ) * weight:n;
     //        ￼
     //
-    unsigned short * _weightIndices; // factor?
-    int              _numWeightIndicies;
+    unsigned short * _packedWeightIndices; 
+    int              _numPackedWeightIndicies;
 
     int              _jointWOffset;
     int              _weightFOffset;
@@ -165,6 +176,8 @@ typedef enum _MeshSceneNodeType {
     MeshSceneArmatureNode * _bone;
     MeshGeometry *          _geometry;
 }
+
+-(void)influence:(MeshGeometryBuffer *)buffer dest:(float *)dest;
 @end
 
 

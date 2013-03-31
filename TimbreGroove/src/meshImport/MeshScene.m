@@ -46,9 +46,62 @@
 {
     if( _influencingJointCounts )
         free(_influencingJointCounts);
-    if( _weightIndices )
-        free(_weightIndices);
+    if( _packedWeightIndices )
+        free(_packedWeightIndices);
 }
+
+// yea, yea, this is just the first pass
+// most of this should be cache and/or in the
+// shader, I get it.
+-(void)influence:(MeshGeometryBuffer *)buffer dest:(float *)dest
+{
+    unsigned int   currPos  = 0;
+    int            ji       = 0;
+    int            wi;
+    float          weight;
+    GLKVector3     vec3;
+    
+    unsigned int   numJoints    = [_influencingJoints count];
+    GLKMatrix4 *   jointMats    = malloc( sizeof(GLKMatrix4) * numJoints * 2);
+    GLKMatrix4 *   jointInvMats = jointMats + numJoints;
+    
+    __block int bji = 0;
+    [_influencingJoints each:^(MeshSceneArmatureNode * joint) {
+        jointMats[bji + numJoints] = joint->_transform;
+        jointMats[bji]             = joint->_invBindMatrix;
+        bji++;
+    }];
+    
+    GLKVector3 * vec = (GLKVector3 *)buffer->data;
+    GLKVector3 * p   = (GLKVector3 *)dest;
+    
+    for( int i = 0; i < buffer->numElements; i++ )
+    {
+        int numberOfJointsApplied = _influencingJointCounts[ i % _numInfluencingJointCounts ];
+        
+        GLKVector3 outVec3 = (GLKVector3){0,0,0};
+        
+        for( unsigned int n = 0; n < numberOfJointsApplied; n++  )
+        {
+            ji = _packedWeightIndices[ currPos + _jointWOffset ];
+            wi = _packedWeightIndices[ currPos + _weightFOffset];
+            
+            currPos += 2;
+            
+            weight = _weights[ wi ];
+            
+            vec3 = GLKMatrix4MultiplyVector3( jointInvMats[ji], vec[i] );
+            vec3 = GLKMatrix4MultiplyVector3( jointMats[ji],    vec3);
+            vec3 = GLKVector3MultiplyScalar ( vec3,             weight);
+            outVec3 = GLKVector3Add(outVec3, vec3);
+        }
+        
+        p[i] = outVec3;
+    }
+    
+    free(jointMats);
+}
+
 @end
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@  MeshAnimation  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 

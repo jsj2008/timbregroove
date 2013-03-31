@@ -32,16 +32,6 @@
     return self;
 }
 
--(GLKMatrix4)modelViewxxx
-{
- //   GLKMatrix4 mx = [super modelView];
- //   return GLKMatrix4Multiply(_transform,mx);
-    
-    _vec3 = GLKMatrix4MultiplyVector3WithTranslation(_transform, (GLKVector3){0,0,0});
-    
-    return _transform;
-}
-
 -(void)createBuffer
 {
     MeshBuffer * mb = [Cube cubeWithWidth:0.6
@@ -56,19 +46,9 @@
 
 @implementation GenericImport {
     MeshScene * _scene;
+    MeshBuffer * _mb;
 }
 
--(id)wireUp
-{
-    [super wireUp];
-    
-    Camera * camera = self.camera;
-    GLKVector3 pos = camera.position;
-    pos.z -= 2.0;
-    camera.position = pos;
-    
-    return self;
-}
 -(void)showArmatures
 {
     if( _scene->_armatureTree )
@@ -105,8 +85,8 @@
     _colladaFile = colladaFile;
     _scene = [ColladaParser parse:colladaFile];
     [self showArmatures];
-    self.color = (GLKVector4){ 1, 0.2, 0.4, 0.1};
-    self.position = (GLKVector3){ 0, 1.2, 0 };
+    self.color = (GLKVector4){ 1, 0.2, 0.7, 0.4};
+    //self.position = (GLKVector3){ 0, 1.2, 0 };
 }
 
 -(void)releaseScene
@@ -166,7 +146,8 @@
 
     // FIXME: all normals are broken
     b[MSKNormal].data = NULL;
-    [self flatten:b];
+    
+  //  [self flatten:b];
     
     for( MeshSemanticKey key = MSKPosition; key < kNumMeshSemanticKeys; key++ )
     {
@@ -175,24 +156,33 @@
         {
             // FIXME: disabling all indexing. Ouch.
             MeshGeometryBuffer mcopy = *mgb;
-            mcopy.indexData = NULL;
+            //mcopy.indexData = NULL;
 
             MeshSceneBuffer * msb = [[MeshSceneBuffer alloc] initWithGeometryBuffer:&mcopy
                                                              andIndexIntoShaderName:indexIntoNamesMap[key]];
             [self addBuffer:msb];
-            if( key != MSKPosition )
+            if( key == MSKPosition )
+            {
+                _mb = msb;
+                //msb.usage = GL_DYNAMIC_DRAW;
+                //msb.drawType = GL_TRIANGLE_STRIP;
+            }
+            else
+            {
                 msb.drawable = false;
+            }
         }
     }
     
-#if 0
+#if 1
     if( (TGGetLogLevel() & LLMeshImporter) != 0 )
     {
         static char * varname[] = {
-            "gv_acolor",
-            "gv_normal",
             "gv_pos",
-            "gv_uv" };
+            "gv_normal",
+            "gv_uv",
+            "gv_acolor",
+        };
         
         for( int b = 0; b < 3; b ++ )
         {
@@ -200,7 +190,10 @@
             if( !bufferInfo->data )
                 continue;
             
-            TGLogp(LLMeshImporter, @"Dumping buffer for: %s", varname[indexIntoNamesMap[b]]);
+            TGLogp(LLMeshImporter, @"Dumping buffer for: %s (%d/%d)",
+                    varname[indexIntoNamesMap[b]],
+                   bufferInfo->numFloats/bufferInfo->stride,
+                    bufferInfo->numFloats);
             float *p = bufferInfo->data;
             int count = bufferInfo->numFloats;
             for( int i = 0; i < count;  )
@@ -217,16 +210,34 @@
             
             if( bufferInfo->indexData )
             {
-                TGLogp(LLMeshImporter, @"Index");
+                TGLogp(LLMeshImporter, @"Index (%d/%d)",
+                       bufferInfo->numIndices/3,
+                       bufferInfo->numIndices);
+                
                 unsigned int *p = bufferInfo->indexData;
                 int count = bufferInfo->numIndices;
-                for( int i = 0; i < count;  )
+                int i;
+                for( i = 0; i < count;  )
+                {
+                    for( int r = 0; r < 3 && i < count; r++  )
+                    {
+                        printf("{");
+                        for( int s = 0; s < 3; s++ )
+                            printf( " %d ",p[i++]);
+                        printf("} ");
+                    }
+                    printf("\n");
+                }
+                
+                TGLogp(LLMeshImporter, @"Flattened geometry");
+                float * b = bufferInfo->data;
+                for( i = 0; i < count;  )
                 {
                     for( int r = 0; r < 3 && i < count; r++  )
                     {
                         printf("{");
                         for( int s = 0; s < bufferInfo->stride; s++ )
-                            printf( " %d ",p[i++]);
+                            printf( " %+.3f ",b[p[i++]]);
                         printf("} ");
                     }
                     printf("\n");
@@ -235,16 +246,25 @@
         }
     }
 #endif
-    
-    [self releaseScene];
 }
 
 -(void)render:(NSUInteger)w h:(NSUInteger)h
 {
-    BlendState * bs = [BlendState enable:true];
-    
+    /*
+    MeshSkinning * skin = _scene->_mesh->_skin;
+
+    if( skin )
+    {
+        MeshGeometry * geometry = [_scene getGeometry:nil];
+        MeshGeometryBuffer * b = geometry->_buffers;
+        float * p = malloc( sizeof(float) * b->numFloats );
+        [skin influence:b dest:p];
+        [_mb setData:p];
+        free(p);
+        
+    }
+    */
     [super render:w h:h];
 
-    [bs restore];
 }
 @end

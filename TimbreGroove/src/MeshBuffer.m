@@ -40,10 +40,17 @@
 
 -(void)draw
 {
+    glBindBuffer(GL_ARRAY_BUFFER, _glVBuffer);
+    
     if( _glIBuffer == -1 )
+    {
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glIBuffer);
         glDrawArrays(_drawType, 0, _numVertices);
+    }
     else
+    {
         glDrawElements(_drawType,_numIndices,GL_UNSIGNED_INT,(void*)0);
+    }
 }
 
 +(GLsizei)calcDataSize: (VertexStride *)strides
@@ -161,16 +168,14 @@
         strideOffset += (stride->numSize * stride->numbersPerElement);
     }
 
-    glEnableVertexAttribArray(0);
+   // glEnableVertexAttribArray(0);
 }
 
 -(void)bind
 {
     glBindBuffer(GL_ARRAY_BUFFER, _glVBuffer);
-    [self setupBindings];
     
-    if( _glIBuffer != -1 )
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glIBuffer);
+    [self setupBindings];
 }
 
 -(void)unbind
