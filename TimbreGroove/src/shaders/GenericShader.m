@@ -15,10 +15,10 @@ const char * _generic_shader_name = "generic";
 #define SHADER_FILE_NAME _generic_shader_name
 
 static const char * _generic_shader_var_names[NUM_GENERIC_VARIABLES] = {
-    "a_color",
-    "a_normal",
     "a_position",
+    "a_normal",
     "a_uv",
+    "a_color",
     
     "u_pvm",
     "u_sampler",

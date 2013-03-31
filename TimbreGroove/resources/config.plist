@@ -11,12 +11,14 @@
 			<key>connections</key>
 			<array>
 				<dict>
+					<key>kTriggerPanX</key>
+					<string>kParamCameraRotationY</string>
+				</dict>
+				<dict>
 					<key>kTriggerDblTap</key>
 					<string>FixZoom</string>
 					<key>kTriggerPanY</key>
-					<string>Zoom</string>
-					<key>kTriggerDynamicPeak</key>
-					<string>Ping!</string>
+					<string>kParamCameraZ</string>
 					<key>kTriggerTap1</key>
 					<string>RandomVibesNote</string>
 					<key>kTriggerMainSlider</key>
@@ -28,7 +30,7 @@
 			<key>display</key>
 			<string>sq</string>
 			<key>3d_element</key>
-			<string>squarey</string>
+			<string>test</string>
 			<key>audio_element</key>
 			<string>jazz</string>
 		</dict>
@@ -425,16 +427,14 @@
 	</dict>
 	<key>3d_elements</key>
 	<dict>
-		<key>squarey</key>
+		<key>test</key>
 		<dict>
 			<key>instanceClass</key>
-			<string>MeshImporter</string>
+			<string>GenericImport</string>
 			<key>properties</key>
 			<dict>
-				<key>scalingFactor</key>
-				<real>50.1</real>
-				<key>meshName</key>
-				<string>squarey.pod</string>
+				<key>colladaFile</key>
+				<string>bendyCyl.dae</string>
 			</dict>
 		</dict>
 		<key>runningHero</key>

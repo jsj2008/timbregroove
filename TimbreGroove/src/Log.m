@@ -32,9 +32,39 @@ void TGLogc(LogLevel loglevel,const char * format, ...)
     }    
 }
 
+void TGLogp(LogLevel loglevel,NSString * format, ...)
+{
+    if( (loglevel == LLShitsOnFire) || ((loglevel & _currentLL) != 0)  )
+    {
+        va_list ap;
+        va_start (ap, format);
+        NSString * str = [[NSString alloc] initWithFormat:format arguments:ap];
+        printf("%s\n",[str UTF8String]);
+        va_end (ap);
+    }
+}
+
+void TGLogpc(LogLevel loglevel,const char * format, ...)
+{
+    if( (loglevel == LLShitsOnFire) || ((loglevel & _currentLL) != 0)  )
+    {
+        va_list ap;
+        va_start (ap, format);
+        NSString * str = [[NSString alloc] initWithFormat:@(format) arguments:ap];
+        printf("%s\n",[str UTF8String]);
+        va_end (ap);
+    }
+}
+
+
 LogLevel TGSetLogLevel(LogLevel logLevel)
 {
     LogLevel prev = _currentLL;
     _currentLL = logLevel;
     return prev;
+}
+
+LogLevel TGGetLogLevel()
+{
+    return _currentLL;
 }

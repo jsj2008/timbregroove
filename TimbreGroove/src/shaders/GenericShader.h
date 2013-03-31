@@ -10,12 +10,12 @@
 #import "Shader.h"
 
 typedef enum {
-    gv_acolor = 0,
+    gv_pos = 0,
     gv_normal,
-    gv_pos,
     gv_uv,
+    gv_acolor,
     
-    GV_LAST_ATTR = gv_uv,
+    GV_LAST_ATTR = gv_acolor,
     
     gv_pvm, // projection-view-mat
     gv_sampler,

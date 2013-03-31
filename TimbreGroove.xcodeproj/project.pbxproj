@@ -109,6 +109,13 @@
 		570F416216ABBA0E000FCA7B /* GridPlane.m in Sources */ = {isa = PBXBuildFile; fileRef = 570F416116ABBA0E000FCA7B /* GridPlane.m */; };
 		570F416516ABDFFD000FCA7B /* Cloud.m in Sources */ = {isa = PBXBuildFile; fileRef = 570F416416ABDFFD000FCA7B /* Cloud.m */; };
 		5712FB4416B1B8B1004D62AE /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5712FB4316B1B8B1004D62AE /* Accelerate.framework */; };
+		571470571706771F00383D04 /* ColladaParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 571470541706771F00383D04 /* ColladaParser.m */; };
+		571470581706771F00383D04 /* MeshScene.m in Sources */ = {isa = PBXBuildFile; fileRef = 571470561706771F00383D04 /* MeshScene.m */; };
+		5714705B1706788800383D04 /* MeshSceneBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = 5714705A1706788800383D04 /* MeshSceneBuffer.m */; };
+		5714705E17067D3100383D04 /* GenericImport.m in Sources */ = {isa = PBXBuildFile; fileRef = 5714705D17067D3100383D04 /* GenericImport.m */; };
+		571470601706817600383D04 /* test.dae in Resources */ = {isa = PBXBuildFile; fileRef = 5714705F1706817600383D04 /* test.dae */; };
+		5714706217068E3C00383D04 /* testWithUV.dae in Resources */ = {isa = PBXBuildFile; fileRef = 5714706117068E3C00383D04 /* testWithUV.dae */; };
+		5714706417069A3000383D04 /* numText.png in Resources */ = {isa = PBXBuildFile; fileRef = 5714706317069A3000383D04 /* numText.png */; };
 		5714713F16C8451E00CA2A69 /* Midi.m in Sources */ = {isa = PBXBuildFile; fileRef = 5714713E16C8451E00CA2A69 /* Midi.m */; };
 		5714714116C8464800CA2A69 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5714714016C8464800CA2A69 /* CoreMIDI.framework */; };
 		5714714316C86A4900CA2A69 /* ChildOfGod.mid in Resources */ = {isa = PBXBuildFile; fileRef = 5714714216C86A4900CA2A69 /* ChildOfGod.mid */; };
@@ -243,6 +250,7 @@
 		57CB3B0E16BE2BF9007C093C /* NewSceneCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 57CB3B0D16BE2BF9007C093C /* NewSceneCell.m */; };
 		57CCFFC216849337003B4A19 /* Text.m in Sources */ = {isa = PBXBuildFile; fileRef = 57CCFFC116849336003B4A19 /* Text.m */; };
 		57CE24D716CF01CA0007BDD0 /* FivePointBezier.m in Sources */ = {isa = PBXBuildFile; fileRef = 57CE24D616CF01CA0007BDD0 /* FivePointBezier.m */; };
+		57D0133C17072E160080F58E /* bendyCyl.dae in Resources */ = {isa = PBXBuildFile; fileRef = 57D0133B17072E160080F58E /* bendyCyl.dae */; };
 		57D0EBD616D43CD600DBF457 /* GraphView+Touches.m in Sources */ = {isa = PBXBuildFile; fileRef = 57D0EBD516D43CD600DBF457 /* GraphView+Touches.m */; };
 		57D0EBD916D4B1C500DBF457 /* TriggerMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 57D0EBD816D4B1C400DBF457 /* TriggerMap.m */; };
 		57D0EBDC16D4BA5400DBF457 /* Names.m in Sources */ = {isa = PBXBuildFile; fileRef = 57D0EBDB16D4BA5300DBF457 /* Names.m */; };
@@ -438,6 +446,18 @@
 		570F416316ABDFF2000FCA7B /* Cloud.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Cloud.h; sourceTree = "<group>"; };
 		570F416416ABDFFD000FCA7B /* Cloud.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Cloud.m; sourceTree = "<group>"; };
 		5712FB4316B1B8B1004D62AE /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
+		571470521706771F00383D04 /* ColladaNames.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColladaNames.h; sourceTree = "<group>"; };
+		571470531706771F00383D04 /* ColladaParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColladaParser.h; sourceTree = "<group>"; };
+		571470541706771F00383D04 /* ColladaParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ColladaParser.m; sourceTree = "<group>"; };
+		571470551706771F00383D04 /* MeshScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MeshScene.h; sourceTree = "<group>"; };
+		571470561706771F00383D04 /* MeshScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MeshScene.m; sourceTree = "<group>"; };
+		571470591706788800383D04 /* MeshSceneBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MeshSceneBuffer.h; sourceTree = "<group>"; };
+		5714705A1706788800383D04 /* MeshSceneBuffer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MeshSceneBuffer.m; sourceTree = "<group>"; };
+		5714705C17067D3100383D04 /* GenericImport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenericImport.h; sourceTree = "<group>"; };
+		5714705D17067D3100383D04 /* GenericImport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GenericImport.m; sourceTree = "<group>"; };
+		5714705F1706817600383D04 /* test.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = test.dae; sourceTree = "<group>"; };
+		5714706117068E3C00383D04 /* testWithUV.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = testWithUV.dae; sourceTree = "<group>"; };
+		5714706317069A3000383D04 /* numText.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = numText.png; sourceTree = "<group>"; };
 		5714713D16C8451E00CA2A69 /* Midi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Midi.h; sourceTree = "<group>"; };
 		5714713E16C8451E00CA2A69 /* Midi.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = Midi.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		5714714016C8464800CA2A69 /* CoreMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = System/Library/Frameworks/CoreMIDI.framework; sourceTree = SDKROOT; };
@@ -637,6 +657,7 @@
 		57CCFFC116849336003B4A19 /* Text.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Text.m; sourceTree = "<group>"; };
 		57CE24D516CF01CA0007BDD0 /* FivePointBezier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FivePointBezier.h; sourceTree = "<group>"; };
 		57CE24D616CF01CA0007BDD0 /* FivePointBezier.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FivePointBezier.m; sourceTree = "<group>"; };
+		57D0133B17072E160080F58E /* bendyCyl.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = bendyCyl.dae; sourceTree = "<group>"; };
 		57D0EBD516D43CD600DBF457 /* GraphView+Touches.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = "GraphView+Touches.m"; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		57D0EBD716D4B1C300DBF457 /* TriggerMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TriggerMap.h; sourceTree = "<group>"; };
 		57D0EBD816D4B1C400DBF457 /* TriggerMap.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TriggerMap.m; sourceTree = "<group>"; };
@@ -746,6 +767,9 @@
 		5700235516A55460006F0E8E /* models */ = {
 			isa = PBXGroup;
 			children = (
+				57D0133B17072E160080F58E /* bendyCyl.dae */,
+				5714706117068E3C00383D04 /* testWithUV.dae */,
+				5714705F1706817600383D04 /* test.dae */,
 				5721249D17021E1300E29524 /* squarey */,
 				579E5B6816FED23F009970C1 /* bouncy */,
 				5700235616A55486006F0E8E /* runningMan */,
@@ -903,6 +927,20 @@
 			path = geometry;
 			sourceTree = "<group>";
 		};
+		57147051170676DC00383D04 /* meshImport */ = {
+			isa = PBXGroup;
+			children = (
+				571470521706771F00383D04 /* ColladaNames.h */,
+				571470531706771F00383D04 /* ColladaParser.h */,
+				571470541706771F00383D04 /* ColladaParser.m */,
+				571470551706771F00383D04 /* MeshScene.h */,
+				571470561706771F00383D04 /* MeshScene.m */,
+				571470591706788800383D04 /* MeshSceneBuffer.h */,
+				5714705A1706788800383D04 /* MeshSceneBuffer.m */,
+			);
+			path = meshImport;
+			sourceTree = "<group>";
+		};
 		571ECF97167BE2CE00727A30 /* contrib */ = {
 			isa = PBXGroup;
 			children = (
@@ -965,6 +1003,8 @@
 				572D7F2D16832749006D48BF /* GenericWithTexture.m */,
 				5741C70516C32280009451C9 /* DistortedGeneric.h */,
 				5741C70616C32280009451C9 /* DistortedGeneric.m */,
+				5714705C17067D3100383D04 /* GenericImport.h */,
+				5714705D17067D3100383D04 /* GenericImport.m */,
 			);
 			name = generic;
 			sourceTree = "<group>";
@@ -982,6 +1022,7 @@
 		572EB1E216786C630062F290 /* images */ = {
 			isa = PBXGroup;
 			children = (
+				5714706317069A3000383D04 /* numText.png */,
 				57AE3BDC16D83B0A007ADC17 /* stars.jpg */,
 				5751F2E216D5FA6B00144F2B /* gridtest.png */,
 				57AA0AC416D12B9100BCA4A0 /* uvWrap.png */,
@@ -1188,6 +1229,7 @@
 		578CB8FD16A6102C00088BA2 /* openGL */ = {
 			isa = PBXGroup;
 			children = (
+				57147051170676DC00383D04 /* meshImport */,
 				570F415C16ABB736000FCA7B /* geometry */,
 				570F40D316AB8B96000FCA7B /* shaders */,
 				57E590A616BA2E3F00330F40 /* State.h */,
@@ -1649,6 +1691,10 @@
 				5761844116FF594700127DC4 /* pool.pvr in Resources */,
 				572124A017021E3B00E29524 /* aotkSmall.pvr in Resources */,
 				572124A117021E3B00E29524 /* squarey.pod in Resources */,
+				571470601706817600383D04 /* test.dae in Resources */,
+				5714706217068E3C00383D04 /* testWithUV.dae in Resources */,
+				5714706417069A3000383D04 /* numText.png in Resources */,
+				57D0133C17072E160080F58E /* bendyCyl.dae in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1782,6 +1828,10 @@
 				571537F316FCEFCD00DCA5E1 /* Reducers.m in Sources */,
 				577F0EE517009D7F0008A703 /* Log.m in Sources */,
 				577F0EE71700BD970008A703 /* NameMap.m in Sources */,
+				571470571706771F00383D04 /* ColladaParser.m in Sources */,
+				571470581706771F00383D04 /* MeshScene.m in Sources */,
+				5714705B1706788800383D04 /* MeshSceneBuffer.m in Sources */,
+				5714705E17067D3100383D04 /* GenericImport.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -29,12 +29,14 @@ extern "C" {
     } LogLevel;
     
     LogLevel TGSetLogLevel(LogLevel);
-    
+    LogLevel TGGetLogLevel();
 #ifdef __OBJC__
     void TGLog(LogLevel,NSString *format, ...);
+    void TGLogp(LogLevel,NSString * format, ...); // use printf
     
 #else
     void TGLogc(LogLevel,const char * format, ...);
+    void TGLogpc(LogLevel,const char * format, ...); // use printf
 }
 #endif
 

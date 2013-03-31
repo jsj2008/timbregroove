@@ -10,6 +10,7 @@
 
 @interface DepthTestState() {
     GLboolean  _state;
+    bool _restored;
 }
 @end
 
@@ -29,6 +30,13 @@
     }
     return self;
 }
+
+-(void)dealloc
+{
+    if( !_restored )
+        [self restore];
+}
+
 -(void)enable:(bool)enable
 {
     _state = glIsEnabled(GL_DEPTH_TEST);
@@ -36,6 +44,7 @@
         glEnable(GL_DEPTH_TEST);
     else
         glDisable(GL_DEPTH_TEST);
+    _restored = false;
 }
 
 -(void)restore
@@ -44,6 +53,7 @@
         glEnable(GL_DEPTH_TEST);
     else
         glDisable(GL_DEPTH_TEST);
+    _restored = true;
 }
 
 @end
@@ -56,6 +66,8 @@
     
     bool _factors;
     bool _color;
+    
+    bool _restored;
 }
 @end
 
@@ -100,7 +112,11 @@
     return self;
 }
 
-
+-(void)dealloc
+{
+    if( !_restored )
+        [self restore];
+}
 
 -(void)restore
 {
@@ -112,6 +128,8 @@
         glBlendFunc(_srcFactor, _dstFactor);
     if( _color)
         glBlendColor(_bColor.r, _bColor.g, _bColor.b, _bColor.a);
+    
+    _restored = true;
 }
 
 -(void)color:(GLKVector4)color
@@ -119,6 +137,7 @@
     glGetFloatv(GL_BLEND_COLOR, _bColor.v);
     _color = true;
     glBlendColor(color.r, color.g, color.b, color.a);
+    _restored = false;
 }
 
 -(void)factors:(GLenum)src dst:(GLenum)dst
@@ -127,6 +146,7 @@
     glGetIntegerv(GL_BLEND_DST, (GLint *)&_dstFactor);
     _factors = true;
     glBlendFunc(src, dst);
+    _restored = false;
 }
 
 -(void)enable:(bool)enable
@@ -138,6 +158,7 @@
         glEnable(GL_BLEND);
     else
         glDisable(GL_BLEND);
+    _restored = false;
 }
 
 -(void)enable:(bool)enable srcFactor:(GLenum)srcF dstFactor:(GLenum)dstF

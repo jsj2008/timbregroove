@@ -215,6 +215,30 @@
             r.z += RAD_TURNS(f * 3);
             self.rotation = r;
         }];
+        parameters[kParamCameraRotationX] = [Parameter withBlock:^(float f) {
+            Camera * camera = self.camera;
+            GLKVector3 r = camera.rotation;
+            r.x += RAD_TURNS(f * 3);
+            camera.rotation = r;
+        }];
+        parameters[kParamCameraRotationY] = [Parameter withBlock:^(float f) {
+            Camera * camera = self.camera;
+            GLKVector3 r = camera.rotation;
+            r.y += RAD_TURNS(f * 3);
+            camera.rotation = r;
+        }];
+        parameters[kParamCameraRotationZ] = [Parameter withBlock:^(float f) {
+            Camera * camera = self.camera;
+            GLKVector3 r = camera.rotation;
+            r.z += RAD_TURNS(f * 3);
+            camera.rotation = r;
+        }];
+        parameters[kParamCameraZ] = [Parameter withBlock:^(float f) {
+            Camera * camera = self.camera;
+            GLKVector3 r = camera.position;
+            r.z += f * 3.0;
+            camera.position = r;
+        }];
     }
 }
 

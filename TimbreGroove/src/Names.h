@@ -99,6 +99,11 @@ extern NSString const * kParamRotation;
 extern NSString const * kParamRotationX;
 extern NSString const * kParamRotationY;
 extern NSString const * kParamRotationZ;
+extern NSString const * kParamCameraRotationX;
+extern NSString const * kParamCameraRotationY;
+extern NSString const * kParamCameraRotationZ;
+extern NSString const * kParamCameraZ;
+
 extern NSString const * kParamLightDirection;
 extern NSString const * kParamLightColor;
 extern NSString const * kParamNewElement;

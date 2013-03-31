@@ -119,7 +119,7 @@
     GLsizei bufferSize = _bufferSize = strideSize * numVertices;
     
     glGenBuffers(1, &_glVBuffer);
-    TGLog(LLGLResource, @"created vertex buffer: %@ (%d)",self.description, _glVBuffer);
+    TGLog(LLGLResource, @"created vertex buffer: %@ (%d) sz:%d numVrtx:%d",self, _glVBuffer,bufferSize,numVertices);
     glBindBuffer(GL_ARRAY_BUFFER, _glVBuffer);
     glBufferData(GL_ARRAY_BUFFER, bufferSize, data, _usage);
     
@@ -138,7 +138,7 @@
 {
     _numIndices = numIndices;
     glGenBuffers(1, &_glIBuffer);
-    TGLog(LLGLResource, @"created index buffer: %d",_glIBuffer);
+    TGLog(LLGLResource, @"created index buffer: %d numIndx:%d",_glIBuffer,numIndices);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glIBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof(unsigned int), data, _usage);
 }
