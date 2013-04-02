@@ -16,6 +16,8 @@ typedef enum _MeshSemanticKey {
     MSKNormal,
     MSKUV,
     MSKColor,
+    MSKBoneIndex,
+    MSKBoneWeights,
     
     kNumMeshSemanticKeys
 } MeshSemanticKey;
@@ -27,6 +29,7 @@ typedef struct _MeshGeometryBuffer {
     int              stride;
     int              numFloats;
     int              numElements;
+    
     unsigned int *   indexData;
     int              numIndices;
 } MeshGeometryBuffer;
@@ -48,15 +51,17 @@ typedef enum _MeshSceneNodeType {
 @public
     MeshSceneNodeType     _type;
     NSString *            _name;
+    GLKMatrix4            _transform;
     NSMutableDictionary * _children;
 }
+@property (nonatomic) GLKMatrix4 transform;
+
 -(void)addChild:(MeshSceneNode *)child name:(NSString *)name;
 @end
 
 @interface MeshSceneArmatureNode : MeshSceneNode {
 @public
     GLKMatrix4   _world;
-    GLKMatrix4   _transform;
     GLKMatrix4   _invBindMatrix;
     GLKMatrix4   _invBindPoseMatrix;
     __weak MeshSceneArmatureNode * _parent;
@@ -90,6 +95,9 @@ typedef enum _MeshSceneNodeType {
     int             _numFrames;
     GLKMatrix4 *    _transforms;
     
+    NSTimeInterval  _clock;
+    unsigned int    _nextFrame;
+    
     // block?
     MeshSceneNode * _target;
     NSString *      _property;
@@ -105,6 +113,7 @@ typedef enum _MeshSceneNodeType {
     MeshSceneArmatureNode * _armatureTree;
 }
 -(MeshGeometry *)getGeometry:(NSString *)name;
+-(void)calcMatricies;
 @end
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  MeshSkinning @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -175,6 +184,7 @@ typedef struct _VertexInfluence {
     
     MeshSceneArmatureNode * _bone;
     MeshGeometry *          _geometry;
+    unsigned short *        _vectorIndex;
 }
 
 -(void)influence:(MeshGeometryBuffer *)buffer dest:(float *)dest;

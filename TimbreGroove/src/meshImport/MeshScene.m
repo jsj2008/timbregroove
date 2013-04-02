@@ -26,6 +26,24 @@
 {
     return _mesh->_skin ? _mesh->_skin->_geometry : _mesh->_geometry;
 }
+
+-(void)calcMatricies
+{
+    static void (^calcArmatureMarticies)(id,MeshSceneArmatureNode *) = nil;
+    
+    if( _armatureTree )
+    {
+        calcArmatureMarticies = ^(id key, MeshSceneArmatureNode * node) {
+            if( node->_children )
+                [node->_children each:calcArmatureMarticies];
+            else
+                [node matrix];
+        };
+        
+        calcArmatureMarticies(nil,_armatureTree);
+    }
+}
+
 @end
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  MeshSkinning @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -48,6 +66,8 @@
         free(_influencingJointCounts);
     if( _packedWeightIndices )
         free(_packedWeightIndices);
+    if( _vectorIndex )
+        free(_vectorIndex);
 }
 
 // yea, yea, this is just the first pass
@@ -67,7 +87,7 @@
     
     __block int bji = 0;
     [_influencingJoints each:^(MeshSceneArmatureNode * joint) {
-        jointMats[bji + numJoints] = joint->_transform;
+        jointMats[bji + numJoints] = joint->_world;
         jointMats[bji]             = joint->_invBindMatrix;
         bji++;
     }];
@@ -75,9 +95,9 @@
     GLKVector3 * vec = (GLKVector3 *)buffer->data;
     GLKVector3 * p   = (GLKVector3 *)dest;
     
-    for( int i = 0; i < buffer->numElements; i++ )
+    for( int i = 0; i < _numInfluencingJointCounts; i++ )
     {
-        int numberOfJointsApplied = _influencingJointCounts[ i % _numInfluencingJointCounts ];
+        int numberOfJointsApplied = _influencingJointCounts[ i ];
         
         GLKVector3 outVec3 = (GLKVector3){0,0,0};
         
@@ -96,7 +116,8 @@
             outVec3 = GLKVector3Add(outVec3, vec3);
         }
         
-        p[i] = outVec3;
+        unsigned int vindex = _vectorIndex ? _vectorIndex[i] : i;
+        p[vindex] = outVec3;
     }
     
     free(jointMats);
@@ -131,8 +152,10 @@
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  SceneNode(s) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-@implementation MeshSceneNode
-
+@implementation MeshSceneNode 
+-(void)setTransform:(GLKMatrix4)transform
+{
+}
 -(void)addChild:(MeshSceneNode *)child name:(NSString *)name
 {
     if( !_children )
@@ -141,7 +164,10 @@
 }
 @end
 
-@implementation MeshSceneArmatureNode
+@implementation MeshSceneArmatureNode {
+    bool _gotInversere;
+}
+
 
 -(GLKMatrix4)matrix
 {
@@ -154,8 +180,12 @@
     {
         _world = _transform;
     }
-    bool invertable;
-    _invBindPoseMatrix = GLKMatrix4Invert(_world,&invertable);
+    if( !_gotInversere )
+    {
+        bool invertable;
+        _invBindPoseMatrix = GLKMatrix4Invert(_world,&invertable);
+        _gotInversere = true;
+    }
     return _world;
 }
 @end

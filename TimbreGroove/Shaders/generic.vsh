@@ -17,6 +17,11 @@ attribute vec4 a_color;
 varying vec4 v_color;
 #endif
 
+#ifdef BONES
+attribute int a_boneIndex;
+attribute float int a_boneWeights;
+#endif
+
 #ifdef NORMAL
 attribute vec3 a_normal;
 

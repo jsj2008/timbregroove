@@ -5,29 +5,15 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.66.1 r55057</authoring_tool>
     </contributor>
-    <created>2013-03-30T09:24:26</created>
-    <modified>2013-03-30T09:24:26</modified>
+    <created>2013-03-30T08:12:36</created>
+    <modified>2013-03-30T08:12:36</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
-  <library_images>
-    <image id="numText_png" name="numText_png">
-      <init_from>numText.png</init_from>
-    </image>
-  </library_images>
+  <library_images/>
   <library_effects>
-    <effect id="CubMat-effect">
+    <effect id="Material-effect">
       <profile_COMMON>
-        <newparam sid="numText_png-surface">
-          <surface type="2D">
-            <init_from>numText_png</init_from>
-          </surface>
-        </newparam>
-        <newparam sid="numText_png-sampler">
-          <sampler2D>
-            <source>numText_png-surface</source>
-          </sampler2D>
-        </newparam>
         <technique sid="common">
           <phong>
             <emission>
@@ -37,7 +23,7 @@
               <color sid="ambient">0 0 0 1</color>
             </ambient>
             <diffuse>
-              <texture texture="numText_png-sampler" texcoord="UVMap"/>
+              <color sid="diffuse">0.64 0.64 0.64 1</color>
             </diffuse>
             <specular>
               <color sid="specular">0.5 0.5 0.5 1</color>
@@ -60,8 +46,8 @@
     </effect>
   </library_effects>
   <library_materials>
-    <material id="CubMat-material" name="CubMat">
-      <instance_effect url="#CubMat-effect"/>
+    <material id="Material-material" name="Material">
+      <instance_effect url="#Material-effect"/>
     </material>
   </library_materials>
   <library_geometries>
@@ -99,7 +85,7 @@
         <vertices id="Cube-mesh-vertices">
           <input semantic="POSITION" source="#Cube-mesh-positions"/>
         </vertices>
-        <polylist material="CubMat-material" count="12">
+        <polylist material="Material-material" count="12">
           <input semantic="VERTEX" source="#Cube-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cube-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Cube-mesh-map-0" offset="2" set="0"/>
@@ -118,7 +104,7 @@
         <instance_geometry url="#Cube-mesh">
           <bind_material>
             <technique_common>
-              <instance_material symbol="CubMat-material" target="#CubMat-material">
+              <instance_material symbol="Material-material" target="#Material-material">
                 <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
               </instance_material>
             </technique_common>

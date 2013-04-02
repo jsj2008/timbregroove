@@ -46,6 +46,8 @@ typedef enum _ColladaTagState
 
 static float * parseFloats(NSString * str, int * numFloats)
 {
+    str = [str stringByTrimmingCharactersInSet:
+           [NSCharacterSet whitespaceCharacterSet]];
     NSArray * burp = [str componentsSeparatedByString:@" "];
     unsigned long count = [burp count];
     float * p = malloc(sizeof(float)*count);
@@ -68,6 +70,13 @@ static unsigned short * parseUShorts(NSString * str, int * numUShorts)
     for( NSString * f in burp )
         *p++ = (unsigned short)[f intValue];
     return buffer;
+}
+
+static NSArray * parseStringArray( NSString * str )
+{
+    str = [str stringByTrimmingCharactersInSet:
+           [NSCharacterSet whitespaceCharacterSet]];
+    return [str componentsSeparatedByString:@" "];
 }
 
 static int scanInt(NSString * str)
@@ -706,7 +715,7 @@ typedef enum _NodeCoordSpec {
                 IncomingSkinSource * iss = [iskin->_incomingSources lastObject];
                 if( _stringArrayString )
                 {
-                    iss->_nameArray = [_stringArrayString componentsSeparatedByString:@" "];
+                    iss->_nameArray = parseStringArray(_stringArrayString);
                     _stringArrayString = nil;
                     UNSET(kColStateInStringArray);
                 }
@@ -1115,6 +1124,29 @@ foundCharacters:(NSString *)string
     }
 }
 
+-(void)flatten:(MeshGeometryBuffer *)b
+{
+    unsigned int elementSize = b->stride;
+    float * newBuffer = malloc( sizeof(float) * b->numIndices *elementSize);
+    float * p = newBuffer;
+    float * old = b->data;
+    unsigned int * idx = b->indexData;
+    int i;
+    for( int x = 0; x < b->numIndices; x++ )
+    {
+        i = *idx++ * elementSize;
+        for( int e = 0; e < elementSize; e++ )
+            *p++ = old[i + e];
+    }
+    free(b->data);
+    b->data = newBuffer;
+    b->numFloats = b->numIndices * elementSize;
+    b->numElements = b->numIndices;
+    free(b->indexData);
+    b->indexData = NULL;
+    b->numIndices = 0;
+}
+
 -(void)repackIndex:(MeshGeometryBuffer *)buffer
           meshData:(IncomingMeshData *) meshData
             offset:(unsigned int)offset
@@ -1176,11 +1208,14 @@ foundCharacters:(NSString *)string
     unsigned short * primitives    = meshData->_triangleTag->_primitives;
     unsigned int     numPrimitives = meshData->_triangleTag->_numPrimitives;
     
-    unsigned int     newIndexCount    = numPrimitives / 3;
+    unsigned int     newIndexCount    = numPrimitives / primitiveStride;
     unsigned int *   newIndexBuffer   = malloc( sizeof(unsigned int) * newIndexCount);
                                                
     for( int i = 0; i < newIndexCount; i++ )
-        newIndexBuffer[i] = primitives[ i * 3 + offset];
+    {
+        int value = primitives[ i * primitiveStride + offset];
+        newIndexBuffer[i] = value;
+    }
     
     buffer->indexData  = newIndexBuffer;
     buffer->numIndices = newIndexCount;
@@ -1188,7 +1223,6 @@ foundCharacters:(NSString *)string
 
 -(void)turnUp:(MeshGeometryBuffer *)bufferInfo
 {
-#if 0
     float * buffer = bufferInfo->data;
     for( int i = 0; i < bufferInfo->numFloats; i += 3 )
     {
@@ -1196,7 +1230,6 @@ foundCharacters:(NSString *)string
         buffer[i+1] = buffer[i+2];
         buffer[i+2] = y;
     }
-#endif
 }
 -(void)applyBindMatrix:(MeshGeometryBuffer *)bufferInfo
             bindMatrix: (GLKMatrix4)bindMatrix
@@ -1264,19 +1297,10 @@ foundCharacters:(NSString *)string
         return msan;
     };
 
-    static void (^calcArmatureMarticies)(id,MeshSceneArmatureNode *) = nil;
-    
-   if( armatureNode )
+    if( armatureNode )
     {
-        calcArmatureMarticies = ^(id key, MeshSceneArmatureNode * node) {
-            if( node->_children )
-                [node->_children each:calcArmatureMarticies];
-            else
-                [node matrix];
-        };
-        
         scene->_armatureTree = mapArmatures(nil,armatureNode);
-        calcArmatureMarticies(nil,scene->_armatureTree);
+        [scene calcMatricies];
     }
     
     static MeshSceneArmatureNode *  (^findJointWithName)(NSString *,MeshSceneArmatureNode *) = nil;
@@ -1331,15 +1355,18 @@ foundCharacters:(NSString *)string
         
         unsigned short *vectorCounts = meshData->_triangleTag->_vectorCounts;
         bool allThrees = true;
-        for( unsigned int vc = 0; vc < meshData->_triangleTag->_count; vc++ )
+        if( vectorCounts )
         {
-            if( vectorCounts[vc] != 3 )
+            for( unsigned int vc = 0; vc < meshData->_triangleTag->_count; vc++ )
             {
-                allThrees = false;
-                break;
+                if( vectorCounts[vc] != 3 )
+                {
+                    allThrees = false;
+                    break;
+                }
             }
         }
-        
+
         for( MeshSemanticKey key = MSKPosition; key < kNumMeshSemanticKeys; key++ )
         {
             MeshGeometryBuffer *buffer = sceneGeometry->_buffers + key;
@@ -1356,6 +1383,9 @@ foundCharacters:(NSString *)string
                              meshData:meshData
                                offset:primitivesOffset[key]
                       primitiveStride:primitiveStride];
+                
+                if( key != MSKPosition )
+                    [self flatten:buffer];
             }
         }
         

@@ -44,9 +44,30 @@
 
 @end
 
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
 @implementation GenericImport {
     MeshScene * _scene;
     MeshBuffer * _mb;
+    unsigned int _nextFrame;
+}
+
+- (id)init
+{
+    self = [super init];
+    if (self) {
+        _bufferDrawType = GL_TRIANGLES;
+    }
+    return self;
+}
+
+-(id)wireUp
+{
+    _scene = [ColladaParser parse:_colladaFile];
+    [self showArmatures];
+    self.color = (GLKVector4){ 1, 0.2, 0.7, 0.4};
+
+    return [super wireUp];
 }
 
 -(void)showArmatures
@@ -83,10 +104,14 @@
 -(void)setColladaFile:(NSString *)colladaFile
 {
     _colladaFile = colladaFile;
-    _scene = [ColladaParser parse:colladaFile];
-    [self showArmatures];
-    self.color = (GLKVector4){ 1, 0.2, 0.7, 0.4};
-    //self.position = (GLKVector3){ 0, 1.2, 0 };
+}
+
+-(void)setDrawType:(NSString *)drawType
+{
+    if([drawType caseInsensitiveCompare:@"triangles"] == NSOrderedSame)
+        _bufferDrawType = GL_TRIANGLES;
+    else if([drawType caseInsensitiveCompare:@"triangle_strip"] == NSOrderedSame)
+        _bufferDrawType = GL_TRIANGLE_STRIP;
 }
 
 -(void)releaseScene
@@ -111,34 +136,17 @@
     self.texture = [[Texture alloc] initWithFileName:@"numText.png"];
 }
 
-// FIXME: hack to undo indexing, why is this needed?
--(void)flatten:(MeshGeometryBuffer *)b
-{
-    float * newBuffer = malloc( sizeof(float) * b->numIndices * 3);
-    float * p = newBuffer;
-    float * old = b->data;
-    unsigned int * idx = b->indexData;
-    
-    for( int x = 0; x < b->numIndices; x++ )
-    {
-        int i = *idx++ * 3;
-        *p++ = old[i];
-        *p++ = old[i+1];
-        *p++ = old[i+2];
-    }
-    free(b->data);
-    b->data = newBuffer;
-    b->numFloats = b->numIndices * 3;
-    b->numElements = b->numIndices;
-}
 
 -(void)createBuffer
 {
     static GenericVariables indexIntoNamesMap[kNumMeshSemanticKeys] = {
-        gv_pos,    // MSKPosition
-        gv_normal, // MSKNormal
-        gv_uv,     // MSKUV
-        gv_acolor  // MSKColor
+        gv_pos,         // MSKPosition
+        gv_normal,      // MSKNormal
+        gv_uv,          // MSKUV
+        gv_acolor,      // MSKColor
+        gv_boneIndex,   // MSKBoneIndex,
+        gv_boneWeights, // MSKBoneWeights,
+
     };
     MeshGeometry * geometry = [_scene getGeometry:nil];
 
@@ -147,30 +155,26 @@
     // FIXME: all normals are broken
     b[MSKNormal].data = NULL;
     
-  //  [self flatten:b];
-    
     for( MeshSemanticKey key = MSKPosition; key < kNumMeshSemanticKeys; key++ )
     {
         MeshGeometryBuffer * mgb = geometry->_buffers + key;
         if( mgb->data )
         {
-            // FIXME: disabling all indexing. Ouch.
-            MeshGeometryBuffer mcopy = *mgb;
-            //mcopy.indexData = NULL;
-
-            MeshSceneBuffer * msb = [[MeshSceneBuffer alloc] initWithGeometryBuffer:&mcopy
+            MeshSceneBuffer * msb = [[MeshSceneBuffer alloc] initWithGeometryBuffer:mgb
                                                              andIndexIntoShaderName:indexIntoNamesMap[key]];
-            [self addBuffer:msb];
             if( key == MSKPosition )
             {
                 _mb = msb;
-                //msb.usage = GL_DYNAMIC_DRAW;
-                //msb.drawType = GL_TRIANGLE_STRIP;
+                if( _scene->_mesh->_skin )
+                    msb.usage = GL_DYNAMIC_DRAW;
+                msb.drawType = _bufferDrawType;
             }
             else
             {
                 msb.drawable = false;
             }
+            
+            [self addBuffer:msb];
         }
     }
     
@@ -182,6 +186,8 @@
             "gv_normal",
             "gv_uv",
             "gv_acolor",
+            "gv_boneIndex", 
+            "gv_boneWeights"
         };
         
         for( int b = 0; b < 3; b ++ )
@@ -229,18 +235,27 @@
                     printf("\n");
                 }
                 
+                
                 TGLogp(LLMeshImporter, @"Flattened geometry");
-                float * b = bufferInfo->data;
-                for( i = 0; i < count;  )
                 {
-                    for( int r = 0; r < 3 && i < count; r++  )
+                    MeshGeometryBuffer * b = bufferInfo;
+                    unsigned int elementSize = b->stride;
+                    float * old = b->data;
+                    unsigned int * idx = b->indexData;
+                    int i;
+                    for( int x = 0; x < b->numIndices; x++ )
                     {
-                        printf("{");
-                        for( int s = 0; s < bufferInfo->stride; s++ )
-                            printf( " %+.3f ",b[p[i++]]);
-                        printf("} ");
+                        i = *idx++ * elementSize;
+                        printf(" { ");
+                        for( int e = 0; e < elementSize; e++ )
+                        {
+                            float f = old[i + e];
+                            printf( " %+.3f", f );
+                        }
+                        printf(" }");
+                        if( (x+1) % 3 == 0 )
+                            printf("\n");
                     }
-                    printf("\n");
                 }
             }
         }
@@ -248,22 +263,45 @@
 #endif
 }
 
+-(void)update:(NSTimeInterval)dt
+{
+    if ( _scene->_animations )
+    {
+        __block bool dirty = false;
+        [_scene->_animations each:^(MeshAnimation * animation) {
+            animation->_clock += dt;
+            if( animation->_clock >= animation->_keyFrames[animation->_nextFrame] )
+            {
+                animation->_target.transform = animation->_transforms[_nextFrame];
+                ++animation->_nextFrame;
+                if( animation->_nextFrame == animation->_numFrames )
+                {
+                    animation->_clock = 0;
+                    animation->_nextFrame = 0;
+                }
+                dirty = true;
+            }
+        }];
+        
+        if( dirty )
+        {
+            [_scene calcMatricies];
+            MeshSkinning * skin = _scene->_mesh->_skin;
+            
+            if( skin )
+            {
+                MeshGeometry * geometry = [_scene getGeometry:nil];
+                MeshGeometryBuffer * b = geometry->_buffers;
+                float * p = malloc( sizeof(float) * b->numFloats );
+                [skin influence:b dest:p];
+                [_mb setData:p];
+                free(p);
+            }            
+        }
+    }
+}
 -(void)render:(NSUInteger)w h:(NSUInteger)h
 {
-    /*
-    MeshSkinning * skin = _scene->_mesh->_skin;
-
-    if( skin )
-    {
-        MeshGeometry * geometry = [_scene getGeometry:nil];
-        MeshGeometryBuffer * b = geometry->_buffers;
-        float * p = malloc( sizeof(float) * b->numFloats );
-        [skin influence:b dest:p];
-        [_mb setData:p];
-        free(p);
-        
-    }
-    */
     [super render:w h:h];
 
 }

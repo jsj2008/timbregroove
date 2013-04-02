@@ -23,12 +23,14 @@ NSString const * kShaderFeatureDistort =  @"#define MESH_DISTORT\n";
 NSString const * kShaderFeatureDistortTexture =  @"#define TEXTURE_DISTORT\n";
 NSString const * kShaderFeaturePsychedelic =  @"#define PSYCHEDELIC\n";
 NSString const * kShaderFeatureSpotFilter =  @"#define SPOT_FILTER\n";
+NSString const * kShaderFeatureBones = @"#define BONES\n";
 
 @interface GenericBase () {
 @protected
     bool _enableMultipleTextures;
     bool _supportPrepare;
     bool _supportMeshBind;
+    NSMutableArray * _buffers;
 }
 
 @end
@@ -72,7 +74,10 @@ NSString const * kShaderFeatureSpotFilter =  @"#define SPOT_FILTER\n";
 {
     if( !_buffers )
         _buffers = [NSMutableArray new];
-    [_buffers addObject:buffer];
+    if( buffer.drawable )
+        [_buffers addObject:buffer];
+    else
+        [_buffers insertObject:buffer atIndex:0];
 }
 
 
@@ -108,6 +113,9 @@ NSString const * kShaderFeatureSpotFilter =  @"#define SPOT_FILTER\n";
                 break;
             case gv_uv:
                 [putHere addObject:kShaderFeatureTexture];
+                break;
+            case gv_boneWeights:
+                [putHere addObject:kShaderFeatureBones];
                 break;
             default:
                 break;
@@ -182,12 +190,14 @@ NSString const * kShaderFeatureSpotFilter =  @"#define SPOT_FILTER\n";
     }
     else
     {
+        // drawable meshes are (should be)
+        // sorted last
         for( MeshBuffer * b in _buffers )
+        {
             [b bind];
-
-        for( MeshBuffer * b in _buffers )
             if( b.drawable )
                 [b draw];
+        }
         
         for( MeshBuffer * b in _buffers )
             [b unbind];

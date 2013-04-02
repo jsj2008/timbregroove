@@ -19,6 +19,7 @@ extern NSString const * kShaderFeatureDistort;
 extern NSString const * kShaderFeatureDistortTexture;
 extern NSString const * kShaderFeaturePsychedelic;
 extern NSString const * kShaderFeatureSpotFilter;
+extern NSString const * kShaderFeatureBones;
 #endif
 
 @class MeshBuffer;
@@ -34,10 +35,7 @@ typedef enum ShaderTimeType {
     kSTT_Total       // self.totalTime is sent every update
 } ShaderTimeType;
 
-@interface GenericBase : TG3dObject {
-@protected
-    NSMutableArray * _buffers;
-}
+@interface GenericBase : TG3dObject
 
 @property (nonatomic, readonly) bool hasTexture;
 

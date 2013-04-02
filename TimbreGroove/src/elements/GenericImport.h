@@ -9,6 +9,8 @@
 #import "Generic.h"
 
 @interface GenericImport : Generic
-
+// startup options read from config.plist
 @property (nonatomic,strong) NSString * colladaFile;
+@property (nonatomic) GLint bufferDrawType;
 @end
+

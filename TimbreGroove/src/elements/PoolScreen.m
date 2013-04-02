@@ -105,7 +105,9 @@ extern float g_last_power, g_last_radius;
 #pragma mark PoolScreen
 
 
-@implementation PoolScreen
+@implementation PoolScreen {
+    MeshBuffer * buffer;
+}
 
 -(id)wireUpWithViewSize:(CGSize)viewSize
 {
@@ -129,7 +131,7 @@ extern float g_last_power, g_last_radius;
 
 -(void)createBuffer
 {
-    MeshBuffer * buffer = [GridPlane gridWithIndicesIntoNames:@[@(pw_position),@(pw_uv)]
+    buffer = [GridPlane gridWithIndicesIntoNames:@[@(pw_position),@(pw_uv)]
                                                andDoUVs:true
                                            andDoNormals:false];
     [self addBuffer:buffer];
@@ -182,7 +184,7 @@ extern float g_last_power, g_last_radius;
     shader.time = (float)self.totalTime;
     
     [self.texture bind:0];
-    MeshBuffer * b = _buffers[0];
+    MeshBuffer * b = buffer;
     [b bind];
 
     [_dts enable:false];

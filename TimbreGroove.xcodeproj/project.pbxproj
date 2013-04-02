@@ -162,6 +162,7 @@
 		5737C4A3169277B700C12F2D /* fluid.png in Resources */ = {isa = PBXBuildFile; fileRef = 5737C4A2169277B700C12F2D /* fluid.png */; };
 		5737C4B41693206D00C12F2D /* imageBaker.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 5737C4AF1693090D00C12F2D /* imageBaker.fsh */; };
 		5737C4B51693206D00C12F2D /* imageBaker.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 5737C4AD169308DF00C12F2D /* imageBaker.vsh */; };
+		573BFB83170B700D00D32E37 /* simpleBend.dae in Resources */ = {isa = PBXBuildFile; fileRef = 573BFB82170B700D00D32E37 /* simpleBend.dae */; };
 		573CEEF216E997A200B02EE3 /* NSObject+BlocksKit.m in Sources */ = {isa = PBXBuildFile; fileRef = 573CEEF116E997A200B02EE3 /* NSObject+BlocksKit.m */; };
 		573CEEF516E99D8F00B02EE3 /* NSString+Tweening.m in Sources */ = {isa = PBXBuildFile; fileRef = 573CEEF416E99D8F00B02EE3 /* NSString+Tweening.m */; };
 		5741C70716C32280009451C9 /* DistortedGeneric.m in Sources */ = {isa = PBXBuildFile; fileRef = 5741C70616C32280009451C9 /* DistortedGeneric.m */; };
@@ -521,6 +522,7 @@
 		5737C4AD169308DF00C12F2D /* imageBaker.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = imageBaker.vsh; sourceTree = "<group>"; };
 		5737C4AF1693090D00C12F2D /* imageBaker.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = imageBaker.fsh; sourceTree = "<group>"; };
 		5737C4B216930BD500C12F2D /* FractalSphere.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FractalSphere.m; sourceTree = "<group>"; };
+		573BFB82170B700D00D32E37 /* simpleBend.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = simpleBend.dae; sourceTree = "<group>"; };
 		573CEEF016E997A100B02EE3 /* NSObject+BlocksKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+BlocksKit.h"; sourceTree = "<group>"; };
 		573CEEF116E997A200B02EE3 /* NSObject+BlocksKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+BlocksKit.m"; sourceTree = "<group>"; };
 		573CEEF316E99D8F00B02EE3 /* NSString+Tweening.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSString+Tweening.h"; path = "src/NSString+Tweening.h"; sourceTree = "<group>"; };
@@ -767,6 +769,7 @@
 		5700235516A55460006F0E8E /* models */ = {
 			isa = PBXGroup;
 			children = (
+				573BFB82170B700D00D32E37 /* simpleBend.dae */,
 				57D0133B17072E160080F58E /* bendyCyl.dae */,
 				5714706117068E3C00383D04 /* testWithUV.dae */,
 				5714705F1706817600383D04 /* test.dae */,
@@ -1695,6 +1698,7 @@
 				5714706217068E3C00383D04 /* testWithUV.dae in Resources */,
 				5714706417069A3000383D04 /* numText.png in Resources */,
 				57D0133C17072E160080F58E /* bendyCyl.dae in Resources */,
+				573BFB83170B700D00D32E37 /* simpleBend.dae in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

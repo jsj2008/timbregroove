@@ -10,7 +10,9 @@
 #import "GridPlane.h"
 #import "Texture.h"
 
-@implementation GenericWithTexture
+@implementation GenericWithTexture {
+    GridPlane * gp;
+}
 
 -(id)initWithText:(NSString *)text
 {
@@ -34,7 +36,7 @@
 
 -(void)createBuffer
 {
-    GridPlane * gp = [GridPlane gridWithIndicesIntoNames:@[@(gv_pos),@(gv_uv)]
+    gp = [GridPlane gridWithIndicesIntoNames:@[@(gv_pos),@(gv_uv)]
                                                 andDoUVs:true
                                             andDoNormals:false];
     [self addBuffer:gp];
@@ -42,7 +44,6 @@
 
 -(float)gridWidth
 {
-    GridPlane * gp = (GridPlane *)_buffers[0];
     return gp.width;
 }
 

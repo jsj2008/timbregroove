@@ -40,17 +40,10 @@
 
 -(void)draw
 {
-    glBindBuffer(GL_ARRAY_BUFFER, _glVBuffer);
-    
     if( _glIBuffer == -1 )
-    {
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glIBuffer);
         glDrawArrays(_drawType, 0, _numVertices);
-    }
     else
-    {
         glDrawElements(_drawType,_numIndices,GL_UNSIGNED_INT,(void*)0);
-    }
 }
 
 +(GLsizei)calcDataSize: (VertexStride *)strides
@@ -174,8 +167,9 @@
 -(void)bind
 {
     glBindBuffer(GL_ARRAY_BUFFER, _glVBuffer);
-    
     [self setupBindings];
+    if( _glIBuffer != -1 )
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glIBuffer);
 }
 
 -(void)unbind
@@ -183,7 +177,11 @@
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     if( _glIBuffer != -1 )
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
+    for( int i = 0; i < _numStrides; i++ )
+    {
+        VertexStride * stride = _strides + i;
+        glDisableVertexAttribArray(stride->location);
+    }
 }
 
 // TODO: this probably belongs somewhere else

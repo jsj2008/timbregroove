@@ -18,7 +18,7 @@
 					<key>kTriggerDblTap</key>
 					<string>FixZoom</string>
 					<key>kTriggerPanY</key>
-					<string>kParamCameraZ</string>
+					<string>kParamCameraRotationX</string>
 					<key>kTriggerTap1</key>
 					<string>RandomVibesNote</string>
 					<key>kTriggerMainSlider</key>
@@ -427,26 +427,30 @@
 	</dict>
 	<key>3d_elements</key>
 	<dict>
+		<key>bendyCyl</key>
+		<dict>
+			<key>instanceClass</key>
+			<string>GenericImport</string>
+			<key>properties</key>
+			<dict>
+				<key>drawMethod</key>
+				<string>triangle_strip</string>
+				<key>colladaFile</key>
+				<string>bendyCyl.dae</string>
+			</dict>
+		</dict>
 		<key>test</key>
 		<dict>
 			<key>instanceClass</key>
 			<string>GenericImport</string>
 			<key>properties</key>
 			<dict>
+				<key>scaleXYZ</key>
+				<real>0.7</real>
+				<key>drawMethod</key>
+				<string>triangles</string>
 				<key>colladaFile</key>
-				<string>testWithUV.dae</string>
-			</dict>
-		</dict>
-		<key>runningHero</key>
-		<dict>
-			<key>instanceClass</key>
-			<string>MeshImporter</string>
-			<key>properties</key>
-			<dict>
-				<key>scalingFactor</key>
-				<real>0.5</real>
-				<key>meshName</key>
-				<string>man.pod</string>
+				<string>simpleBend.dae</string>
 			</dict>
 		</dict>
 		<key>spherey_element</key>
