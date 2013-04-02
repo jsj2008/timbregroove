@@ -153,9 +153,12 @@
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  SceneNode(s) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 @implementation MeshSceneNode 
+
 -(void)setTransform:(GLKMatrix4)transform
 {
+    _transform = transform;
 }
+
 -(void)addChild:(MeshSceneNode *)child name:(NSString *)name
 {
     if( !_children )

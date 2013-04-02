@@ -16,6 +16,16 @@
 #import "Cube.h"
 #import "Camera.h"
 
+
+static void dumpMatrix(GLKMatrix4 m)
+{
+    printf("\n{ %+.4f, %+.4f, %+.4f, %+.4f, \n  %+.4f, %+.4f, %+.4f, %+.4f, \n  %+.4f, %+.4f, %+.4f, %+.4f, \n  %+.4f, %+.4f, %+.4f, %+.4f }\n",
+            m.m[0], m.m[1], m.m[2], m.m[3],
+           m.m[4], m.m[5], m.m[6], m.m[7],
+           m.m[8], m.m[9], m.m[10], m.m[11],
+           m.m[12], m.m[13], m.m[14], m.m[15] );
+}
+
 @interface VisibleBone : Generic {
 @public
     GLKMatrix4 _transform;
@@ -49,7 +59,6 @@
 @implementation GenericImport {
     MeshScene * _scene;
     MeshBuffer * _mb;
-    unsigned int _nextFrame;
 }
 
 - (id)init
@@ -67,6 +76,18 @@
     [self showArmatures];
     self.color = (GLKVector4){ 1, 0.2, 0.7, 0.4};
 
+#if 0
+    if( _scene->_animations )
+        [_scene->_animations each:^(MeshAnimation * animation) {
+            TGLog(LLMeshImporter,@"Frames for: %@", animation->_target->_name);
+            for( int i = 0; i < animation->_numFrames; i++ )
+            {
+                TGLog(LLMeshImporter,@"Frame[%d] : %f ", i, animation->_keyFrames[i]);
+                dumpMatrix(animation->_transforms[i]);
+            }
+        }];
+#endif
+    
     return [super wireUp];
 }
 
@@ -178,7 +199,7 @@
         }
     }
     
-#if 1
+#if 0
     if( (TGGetLogLevel() & LLMeshImporter) != 0 )
     {
         static char * varname[] = {
@@ -272,7 +293,7 @@
             animation->_clock += dt;
             if( animation->_clock >= animation->_keyFrames[animation->_nextFrame] )
             {
-                animation->_target.transform = animation->_transforms[_nextFrame];
+                animation->_target->_transform = animation->_transforms[animation->_nextFrame];
                 ++animation->_nextFrame;
                 if( animation->_nextFrame == animation->_numFrames )
                 {
@@ -296,7 +317,7 @@
                 [skin influence:b dest:p];
                 [_mb setData:p];
                 free(p);
-            }            
+            }
         }
     }
 }

@@ -1223,6 +1223,7 @@ foundCharacters:(NSString *)string
 
 -(void)turnUp:(MeshGeometryBuffer *)bufferInfo
 {
+#if 0
     float * buffer = bufferInfo->data;
     for( int i = 0; i < bufferInfo->numFloats; i += 3 )
     {
@@ -1230,6 +1231,8 @@ foundCharacters:(NSString *)string
         buffer[i+1] = buffer[i+2];
         buffer[i+2] = y;
     }
+#endif
+    
 }
 -(void)applyBindMatrix:(MeshGeometryBuffer *)bufferInfo
             bindMatrix: (GLKMatrix4)bindMatrix
