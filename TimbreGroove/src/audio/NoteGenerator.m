@@ -92,7 +92,7 @@
             nextNote += intervals[ i % numIntervals ];
         }
         _numNotes = i;
-        _notes = realloc( _notes, sizeof(Byte) * _numNotes );
+        _notes = realloc( _notes, sizeof(_notes[0]) * _numNotes );
     }
 }
 

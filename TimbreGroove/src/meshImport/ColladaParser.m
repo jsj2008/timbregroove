@@ -42,7 +42,7 @@ typedef enum _ColladaTagState
 #define CHECKANY(f) ((_state & f) != 0)
 
 
-#define EQSTR(a,b) ([a caseInsensitiveCompare:b] == NSOrderedSame)
+#define EQSTR(a,b) (a && ([a caseInsensitiveCompare:b] == NSOrderedSame))
 
 static float * parseFloats(NSString * str, int * numFloats)
 {
@@ -265,12 +265,16 @@ typedef enum _NodeCoordSpec {
     NCSScale = 1 << 4
 } NodeCoordSpec;
 
+@class IncomingNode;
+
 @interface IncomingNode  : NSObject {
 @public
     NSString * _id;
     NSString * _name;
     NSString * _sid;
     NSString * _type;
+    
+    MeshSceneNodeType _msnType;
     
     GLKMatrix4 _transform;
     
@@ -287,6 +291,8 @@ typedef enum _NodeCoordSpec {
     
     NSMutableDictionary * _children;
     NodeCoordSpec         _incomingSpec;
+    
+    __weak IncomingNode * _parent;
 }
 @end
 
@@ -814,6 +820,8 @@ typedef enum _NodeCoordSpec {
             
             if( EQSTR(elementName, kTag_skeleton) )
             {
+                IncomingNode * inode = [incnt->_nodeStack lastObject];
+                inode->_msnType = MSNT_Mesh;
                 SET(kColStateCaptureText);
                 return;
             }
@@ -829,15 +837,31 @@ typedef enum _NodeCoordSpec {
             {
                 IncomingNode * inode = [incnt->_nodeStack lastObject];
                 inode->_geometryName = [(NSString *)attributeDict[kAttr_url] substringFromIndex:1];
-            }            
+                inode->_msnType = MSNT_Mesh;
+                return;
+            }
+            
+            if( EQSTR(elementName, kTag_instance_camera) )
+            {
+                IncomingNode * inode = [incnt->_nodeStack lastObject];
+                inode->_msnType = MSNT_Camera;
+                return;
+            }
+            
+            if( EQSTR(elementName, kTag_instance_light) )
+            {
+                IncomingNode * inode = [incnt->_nodeStack lastObject];
+                inode->_msnType = MSNT_Light;
+                return;
+            }
         }
         
         if( EQSTR(elementName, kTag_node) )
         {
             IncomingNode * inode = [IncomingNode new];
+            inode->_sid  = attributeDict[kAttr_sid];
             inode->_name = attributeDict[kAttr_name];
             inode->_id   = attributeDict[kAttr_id];
-            inode->_sid  = attributeDict[kAttr_sid];
             inode->_type = attributeDict[kAttr_type];
             
             IncomingNode * parent = [incnt->_nodeStack lastObject];
@@ -847,6 +871,16 @@ typedef enum _NodeCoordSpec {
                 incnt->_tree[inode->_id] = inode;
             [incnt->_nodeStack addObject:inode];
             
+            inode->_parent = parent;
+            if( EQSTR(inode->_type,@"JOINT") )
+            {
+                inode->_msnType = MSNT_Armature;
+                while( parent && parent->_msnType != MSNT_Armature )
+                {
+                    parent->_msnType = MSNT_Armature;
+                    parent = parent->_parent;
+                }
+            }
             SET(kColStateInNode);
         }
     }
@@ -1246,21 +1280,6 @@ foundCharacters:(NSString *)string
 
 -(MeshScene *)finalAssembly
 {
-    static bool (^hasJointDecsendant)(IncomingNode *) = ^bool (IncomingNode *node) {
-        if( EQSTR(node->_type, kValue_name_JOINT) )
-            return true;
-
-        if( !node->_children )
-            return false;
-        
-        for( NSString * nodeName in node->_children )
-        {
-            if( hasJointDecsendant(node->_children[nodeName]) )
-                return true;
-        }
-        return false;
-    };
-
     MeshScene * scene = [MeshScene new];
     
     IncomingNode * armatureNode = nil;
@@ -1269,14 +1288,10 @@ foundCharacters:(NSString *)string
     for( NSString * nodeName in _nodeTree )
     {
         IncomingNode * node = _nodeTree[nodeName];
-        if( node->_skeletonName || node->_geometryName || node->_skinName )
-        {
+        if( node->_msnType == MSNT_Mesh )
             meshNode = node;
-        }
-        else if( hasJointDecsendant(node) )
-        {
+        else if( node->_msnType == MSNT_Armature )
             armatureNode = node;
-        }
     }
     
     static MeshSceneArmatureNode *  (^mapArmatures)(MeshSceneArmatureNode *, IncomingNode *) =
@@ -1286,6 +1301,7 @@ foundCharacters:(NSString *)string
         msan->_parent = parent;
         msan->_transform = inode->_transform;
         msan->_name = inode->_id;
+        msan->_sid = inode->_sid;
         
         if( inode->_children )
         {
@@ -1313,7 +1329,7 @@ foundCharacters:(NSString *)string
         if( !node )
             node = scene->_armatureTree;
         
-        if( EQSTR(name, node->_name) )
+        if( EQSTR(name, node->_sid) || EQSTR(name, node->_name) )
             return node;
         
         if( node->_children )

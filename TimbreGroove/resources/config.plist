@@ -450,7 +450,7 @@
 				<key>drawMethod</key>
 				<string>triangles</string>
 				<key>colladaFile</key>
-				<string>simpleBend.dae</string>
+				<string>stretchBox.dae</string>
 			</dict>
 		</dict>
 		<key>spherey_element</key>

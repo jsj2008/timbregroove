@@ -30,6 +30,7 @@ static void dumpMatrix(GLKMatrix4 m)
 @public
     GLKMatrix4 _transform;
     GLKVector3 _vec3;
+    MeshSceneArmatureNode * _node;
 }
 @end
 @implementation VisibleBone
@@ -76,7 +77,7 @@ static void dumpMatrix(GLKMatrix4 m)
     [self showArmatures];
     self.color = (GLKVector4){ 1, 0.2, 0.7, 0.4};
 
-#if 0
+#if 1
     if( _scene->_animations )
         [_scene->_animations each:^(MeshAnimation * animation) {
             TGLog(LLMeshImporter,@"Frames for: %@", animation->_target->_name);
@@ -108,6 +109,7 @@ static void dumpMatrix(GLKMatrix4 m)
         
         createBones = ^(id key, MeshSceneArmatureNode * node) {
             VisibleBone * vb = [[VisibleBone alloc] init];
+            vb->_node = node;
             vb->_transform = node->_world;
             GLKVector4 vec4 = GLKMatrix4GetRow(node->_world, 3);
             vb.position = *(GLKVector3 *)&vec4;
@@ -293,7 +295,10 @@ static void dumpMatrix(GLKMatrix4 m)
             animation->_clock += dt;
             if( animation->_clock >= animation->_keyFrames[animation->_nextFrame] )
             {
-                animation->_target->_transform = animation->_transforms[animation->_nextFrame];
+                MeshSceneNode * node = animation->_target;
+                
+                node->_transform = animation->_transforms[animation->_nextFrame];
+
                 ++animation->_nextFrame;
                 if( animation->_nextFrame == animation->_numFrames )
                 {
@@ -307,6 +312,12 @@ static void dumpMatrix(GLKMatrix4 m)
         if( dirty )
         {
             [_scene calcMatricies];
+
+            [self.children each:^(VisibleBone *vb) {
+                GLKVector4 vec4 = GLKMatrix4GetRow(vb->_node->_world, 3);
+                vb.position = *(GLKVector3 *)&vec4;
+            }];
+            
             MeshSkinning * skin = _scene->_mesh->_skin;
             
             if( skin )

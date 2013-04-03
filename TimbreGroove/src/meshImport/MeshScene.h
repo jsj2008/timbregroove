@@ -43,14 +43,18 @@ typedef struct _MeshGeometryBuffer {
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  SceneNode(s) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 typedef enum _MeshSceneNodeType {
+    MSNT_UNKNOWN_WTF,
     MSNT_Mesh,
-    MSNT_Armiture
+    MSNT_Armature,
+    MSNT_Camera,
+    MSNT_Light
 } MeshSceneNodeType;
 
 @interface MeshSceneNode : NSObject {
 @public
     MeshSceneNodeType     _type;
     NSString *            _name;
+    NSString *            _sid;
     GLKMatrix4            _transform;
     NSMutableDictionary * _children;
 }

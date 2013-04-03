@@ -287,6 +287,7 @@
 		57F290FA16957F5D00293B0E /* fractal.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 57F290F21695775400293B0E /* fractal.fsh */; };
 		57F290FB16957F5D00293B0E /* fractal.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 57F290F51695776400293B0E /* fractal.vsh */; };
 		57F412F3168167F700D9DC67 /* Sphere.m in Sources */ = {isa = PBXBuildFile; fileRef = 57F412F2168167F700D9DC67 /* Sphere.m */; };
+		57FF251B170BBC4200C8B7D2 /* stretchBox.dae in Resources */ = {isa = PBXBuildFile; fileRef = 57FF251A170BBC4200C8B7D2 /* stretchBox.dae */; };
 		57FF32E816C41BEC00948935 /* atmos1.sf2 in Resources */ = {isa = PBXBuildFile; fileRef = 57FF32E216C41BEC00948935 /* atmos1.sf2 */; };
 		57FF32E916C41BEC00948935 /* CONGAS_3.sf2 in Resources */ = {isa = PBXBuildFile; fileRef = 57FF32E316C41BEC00948935 /* CONGAS_3.sf2 */; };
 		57FF32EC16C41BEC00948935 /* triangle.sf2 in Resources */ = {isa = PBXBuildFile; fileRef = 57FF32E616C41BEC00948935 /* triangle.sf2 */; };
@@ -712,6 +713,7 @@
 		57F290F8169578C700293B0E /* Fractal.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Fractal.m; sourceTree = "<group>"; };
 		57F412F1168167F700D9DC67 /* Sphere.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sphere.h; sourceTree = "<group>"; };
 		57F412F2168167F700D9DC67 /* Sphere.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Sphere.m; sourceTree = "<group>"; };
+		57FF251A170BBC4200C8B7D2 /* stretchBox.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = stretchBox.dae; sourceTree = "<group>"; };
 		57FF32E216C41BEC00948935 /* atmos1.sf2 */ = {isa = PBXFileReference; lastKnownFileType = file; path = atmos1.sf2; sourceTree = "<group>"; };
 		57FF32E316C41BEC00948935 /* CONGAS_3.sf2 */ = {isa = PBXFileReference; lastKnownFileType = file; path = CONGAS_3.sf2; sourceTree = "<group>"; };
 		57FF32E616C41BEC00948935 /* triangle.sf2 */ = {isa = PBXFileReference; lastKnownFileType = file; path = triangle.sf2; sourceTree = "<group>"; };
@@ -769,6 +771,7 @@
 		5700235516A55460006F0E8E /* models */ = {
 			isa = PBXGroup;
 			children = (
+				57FF251A170BBC4200C8B7D2 /* stretchBox.dae */,
 				573BFB82170B700D00D32E37 /* simpleBend.dae */,
 				57D0133B17072E160080F58E /* bendyCyl.dae */,
 				5714706117068E3C00383D04 /* testWithUV.dae */,
@@ -1699,6 +1702,7 @@
 				5714706417069A3000383D04 /* numText.png in Resources */,
 				57D0133C17072E160080F58E /* bendyCyl.dae in Resources */,
 				573BFB83170B700D00D32E37 /* simpleBend.dae in Resources */,
+				57FF251B170BBC4200C8B7D2 /* stretchBox.dae in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
