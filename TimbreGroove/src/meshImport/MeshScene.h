@@ -85,8 +85,6 @@ typedef enum _MeshSceneNodeType {
     GLKVector3 _scale;
     
     MeshSkinning *          _skin;
-    MeshSceneArmatureNode * _skeleton;
-    
     MeshGeometry *          _geometry;
 }
 @end
@@ -118,6 +116,7 @@ typedef enum _MeshSceneNodeType {
 }
 -(MeshGeometry *)getGeometry:(NSString *)name;
 -(void)calcMatricies;
+-(void)calcAnimationMatricies;
 @end
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  MeshSkinning @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -192,6 +191,7 @@ typedef struct _VertexInfluence {
 }
 
 -(void)influence:(MeshGeometryBuffer *)buffer dest:(float *)dest;
+-(void)debugDump;
 @end
 
 

@@ -16,15 +16,20 @@
 #import "Cube.h"
 #import "Camera.h"
 
+#define DEBUG_SKIN 1
+#define DEBUG_SKIN_GEOMETRY 1
 
+#ifdef DEBUG_SKIN
 static void dumpMatrix(GLKMatrix4 m)
 {
-    printf("\n{ %+.4f, %+.4f, %+.4f, %+.4f, \n  %+.4f, %+.4f, %+.4f, %+.4f, \n  %+.4f, %+.4f, %+.4f, %+.4f, \n  %+.4f, %+.4f, %+.4f, %+.4f }\n",
-            m.m[0], m.m[1], m.m[2], m.m[3],
-           m.m[4], m.m[5], m.m[6], m.m[7],
-           m.m[8], m.m[9], m.m[10], m.m[11],
-           m.m[12], m.m[13], m.m[14], m.m[15] );
+    printf("{ %+.4G, %+.4G, %+.4G, %+.4G, \n  %+.4G, %+.4G, %+.4G, %+.4G, \n  %+.4G, %+.4G, %+.4G, %+.4G, \n  %+.4G, %+.4G, %+.4G, %+.4G }",
+           m.m00, m.m01, m.m02, m.m03,
+           m.m10, m.m11, m.m12, m.m13,
+           m.m20, m.m21, m.m22, m.m23,
+           m.m30, m.m31, m.m32, m.m33 );
+    
 }
+#endif
 
 @interface VisibleBone : Generic {
 @public
@@ -73,21 +78,66 @@ static void dumpMatrix(GLKMatrix4 m)
 
 -(id)wireUp
 {
-    _scene = [ColladaParser parse:_colladaFile];
-    [self showArmatures];
-    self.color = (GLKVector4){ 1, 0.2, 0.7, 0.4};
+    _scene        = [ColladaParser parse:_colladaFile];
+    self.color    = (GLKVector4){ 1, 0.2, 0.7, 0.4};
+    self.position = (GLKVector3){ 0, -0.5, 0 };
+//    self.rotation = (GLKVector3){ -GLKMathDegreesToRadians(90), 0, 0 };
 
-#if 1
+#ifdef DEBUG_SKIN
+    
+    TGLogp(LLMeshImporter, @"// Imported COLLADA: %@",_colladaFile);
+    
+    NSString * baseName = [_colladaFile stringByDeletingPathExtension];
+    
+    MeshSkinning * skin = _scene->_mesh->_skin;
+    if( skin )
+    {
+        TGLogp(LLMeshImporter, @"GLKMatrix4 %@_bindShapeMatrix = (GLKMatrix4)",baseName);
+        dumpMatrix(skin->_bindShapeMatrix); printf(";\n");
+        TGLogp(LLMeshImporter, @"float %@_weights[] = ",baseName);
+       [skin debugDump];
+    }
+    
     if( _scene->_animations )
-        [_scene->_animations each:^(MeshAnimation * animation) {
-            TGLog(LLMeshImporter,@"Frames for: %@", animation->_target->_name);
+    {
+        for( MeshAnimation * animation in _scene->_animations )
+        {
+            TGLogp(LLMeshImporter,@"GLKMatrix4 %@_%@_animationFrames[] = { ", baseName, animation->_target->_name);
+
             for( int i = 0; i < animation->_numFrames; i++ )
             {
-                TGLog(LLMeshImporter,@"Frame[%d] : %f ", i, animation->_keyFrames[i]);
-                dumpMatrix(animation->_transforms[i]);
+                TGLogp(LLMeshImporter,@"\n// Frame[%d] at %fms ", i, animation->_keyFrames[i]);
+                dumpMatrix(animation->_transforms[i]); printf(",\n");
             }
-        }];
+            TGLogp(LLMeshImporter,@"}; // end %@_%@_animationFrames", baseName, animation->_target->_name);
+            
+        };
+    }
+    
+    static void (^dumpBones)(id,MeshSceneArmatureNode *) = nil;
+    
+    dumpBones = ^(id key, MeshSceneArmatureNode * node) {
+
+        NSString * parentName = node->_parent ? node->_parent->_name : @"none";
+        GLKVector4 vec4 = GLKMatrix4GetRow(node->_world, 3);
+        TGLogp(LLMeshImporter, @"\n//-------------\"%@\" joint at {%.4f, %.4f, %.4f} parent: %@\n",
+               node->_name, vec4.x, vec4.y, vec4.z, parentName );
+        TGLogp(LLMeshImporter, @"GLKMatrix4 %@_%@_transform = (GLKMatrix4)",baseName, node->_name);
+        dumpMatrix(node->_transform);
+        TGLogp(LLMeshImporter, @";\n\nGLKMatrix4 %@_%@_world = (GLKMatrix4)",baseName, node->_name);
+        dumpMatrix(node->_world);
+        TGLogp(LLMeshImporter, @";\n\nGLKMatrix4 %@_%@_invBindPose = (GLKMatrix4)",baseName, node->_name);
+        dumpMatrix(node->_invBindPoseMatrix);
+        TGLogp(LLMeshImporter, @";\n");
+        if( node->_children )
+            [node->_children each:dumpBones];
+    };
+    
+    dumpBones(nil, _scene->_armatureTree);
+    
 #endif
+    
+    [self showArmatures];
     
     return [super wireUp];
 }
@@ -105,25 +155,32 @@ static void dumpMatrix(GLKMatrix4 m)
         
         __block int nextColor = 0;
         
-        static void (^createBones)(id,MeshSceneArmatureNode *) = nil;
+        static void (^createBones)(MeshSceneArmatureNode *) = nil;
         
-        createBones = ^(id key, MeshSceneArmatureNode * node) {
+        createBones = ^(MeshSceneArmatureNode * node) {
             VisibleBone * vb = [[VisibleBone alloc] init];
             vb->_node = node;
             vb->_transform = node->_world;
             GLKVector4 vec4 = GLKMatrix4GetRow(node->_world, 3);
             vb.position = *(GLKVector3 *)&vec4;
-            TGLog(LLMeshImporter, @"%@ bond node at {%.4f, %.4f, %.4f}", node->_name, vec4.x, vec4.y, vec4.z );
             vb.color = colors[nextColor];
             nextColor = ++nextColor % 4;
             [self appendChild:[vb wireUp]];
-            if( node->_children )
-               [node->_children each:createBones];
         };
         
-        createBones(nil, _scene->_armatureTree);
+        if( _scene->_animations )
+        {
+            [_scene->_animations each:^(MeshAnimation * animation) {
+                createBones((MeshSceneArmatureNode *)animation->_target);
+            }];
+        }
+        else
+        {
+            [_scene->_mesh->_skin->_influencingJoints each:createBones];
+        }
     }
 }
+
 -(void)setColladaFile:(NSString *)colladaFile
 {
     _colladaFile = colladaFile;
@@ -201,9 +258,11 @@ static void dumpMatrix(GLKMatrix4 m)
         }
     }
     
-#if 0
+#ifdef DEBUG_SKIN_GEOMETRY
     if( (TGGetLogLevel() & LLMeshImporter) != 0 )
     {
+        NSString * baseName = [_colladaFile stringByDeletingPathExtension];
+        
         static char * varname[] = {
             "gv_pos",
             "gv_normal",
@@ -219,10 +278,11 @@ static void dumpMatrix(GLKMatrix4 m)
             if( !bufferInfo->data )
                 continue;
             
-            TGLogp(LLMeshImporter, @"Dumping buffer for: %s (%d/%d)",
+            TGLogp(LLMeshImporter, @"GLKVector3 %@_%s[%d] = {",
+                   baseName,
                     varname[indexIntoNamesMap[b]],
-                   bufferInfo->numFloats/bufferInfo->stride,
-                    bufferInfo->numFloats);
+                   bufferInfo->numFloats/bufferInfo->stride);
+
             float *p = bufferInfo->data;
             int count = bufferInfo->numFloats;
             for( int i = 0; i < count;  )
@@ -230,18 +290,21 @@ static void dumpMatrix(GLKMatrix4 m)
                 for( int r = 0; r < 3 && i < count; r++  )
                 {
                     printf("{");
+                    char * comma = "";
                     for( int s = 0; s < bufferInfo->stride; s++ )
-                        printf( " %+.3f ",p[i++]);
-                    printf("} ");
+                        { printf( "%s %+.3f ",comma, p[i++]); comma = ","; }
+                    printf("}, ");
                 }
                 printf("\n");
             }
+            printf("};\n");
             
             if( bufferInfo->indexData )
             {
-                TGLogp(LLMeshImporter, @"Index (%d/%d)",
-                       bufferInfo->numIndices/3,
-                       bufferInfo->numIndices);
+                TGLogp(LLMeshImporter, @"unsigned int %@_%s_index[%d] = {",
+                       baseName,
+                       varname[indexIntoNamesMap[b]],
+                       bufferInfo->numIndices );
                 
                 unsigned int *p = bufferInfo->indexData;
                 int count = bufferInfo->numIndices;
@@ -250,17 +313,26 @@ static void dumpMatrix(GLKMatrix4 m)
                 {
                     for( int r = 0; r < 3 && i < count; r++  )
                     {
-                        printf("{");
+                        printf(" ");
+                        char * comma = "";
                         for( int s = 0; s < 3; s++ )
-                            printf( " %d ",p[i++]);
-                        printf("} ");
+                        {
+                            printf( "%s %d",comma,p[i++]);
+                            comma = ",";
+                        }
+                        printf(", ");
                     }
                     printf("\n");
                 }
+                printf("};\n");
                 
                 
-                TGLogp(LLMeshImporter, @"Flattened geometry");
+                TGLogp(LLMeshImporter, @"GLKVector3 %@_%s_flat[%d] = {",
+                       baseName,
+                       varname[indexIntoNamesMap[b]],
+                       bufferInfo->numIndices );
                 {
+                    
                     MeshGeometryBuffer * b = bufferInfo;
                     unsigned int elementSize = b->stride;
                     float * old = b->data;
@@ -270,15 +342,18 @@ static void dumpMatrix(GLKMatrix4 m)
                     {
                         i = *idx++ * elementSize;
                         printf(" { ");
+                        char *comma = "";
                         for( int e = 0; e < elementSize; e++ )
                         {
                             float f = old[i + e];
-                            printf( " %+.3f", f );
+                            printf( "%s %+.3f", comma, f );
+                            comma = ",";
                         }
-                        printf(" }");
+                        printf(" },");
                         if( (x+1) % 3 == 0 )
                             printf("\n");
                     }
+                    printf("};\n");
                 }
             }
         }
@@ -293,7 +368,7 @@ static void dumpMatrix(GLKMatrix4 m)
         __block bool dirty = false;
         [_scene->_animations each:^(MeshAnimation * animation) {
             animation->_clock += dt;
-            if( animation->_clock >= animation->_keyFrames[animation->_nextFrame] )
+            while( animation->_clock >= animation->_keyFrames[animation->_nextFrame] )
             {
                 MeshSceneNode * node = animation->_target;
                 
@@ -311,11 +386,17 @@ static void dumpMatrix(GLKMatrix4 m)
         
         if( dirty )
         {
-            [_scene calcMatricies];
+       //     [_scene calcAnimationMatricies];
 
             [self.children each:^(VisibleBone *vb) {
-                GLKVector4 vec4 = GLKMatrix4GetRow(vb->_node->_world, 3);
+                MeshSceneArmatureNode * node = vb->_node;
+                GLKVector4 vec4 = GLKMatrix4GetRow(node->_world, 3);
                 vb.position = *(GLKVector3 *)&vec4;
+#if 0
+                GLKVector4 tvec4 = GLKMatrix4GetRow(node->_transform, 3);
+                TGLog(LLMeshImporter, @"world: { %.3f, %.3f, %.3f }  trans:  { %.3f, %.3f, %.3f }",
+                      vec4.x, vec4.y, vec4.z, tvec4.x, tvec4.y, tvec4.z );
+#endif
             }];
             
             MeshSkinning * skin = _scene->_mesh->_skin;

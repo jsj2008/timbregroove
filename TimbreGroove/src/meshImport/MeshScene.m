@@ -7,6 +7,7 @@
 //
 
 #import "MeshScene.h"
+#import "Log.h"
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  Mesh  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -27,6 +28,16 @@
     return _mesh->_skin ? _mesh->_skin->_geometry : _mesh->_geometry;
 }
 
+-(void)calcAnimationMatricies
+{
+    if( _animations )
+    {
+        [_animations each:^(MeshAnimation * animation) {
+            [(MeshSceneArmatureNode *)animation->_target matrix];
+        }];
+    }
+}
+
 -(void)calcMatricies
 {
     static void (^calcArmatureMarticies)(id,MeshSceneArmatureNode *) = nil;
@@ -39,7 +50,6 @@
             else
                 [node matrix];
         };
-        
         calcArmatureMarticies(nil,_armatureTree);
     }
 }
@@ -73,7 +83,8 @@
 // yea, yea, this is just the first pass
 // most of this should be cache and/or in the
 // shader, I get it.
--(void)influence:(MeshGeometryBuffer *)buffer dest:(float *)dest
+-(void)influence:(MeshGeometryBuffer *)buffer
+            dest:(float *)dest
 {
     unsigned int   currPos  = 0;
     int            ji       = 0;
@@ -86,9 +97,19 @@
     GLKMatrix4 *   jointInvMats = jointMats + numJoints;
     
     __block int bji = 0;
+    
     [_influencingJoints each:^(MeshSceneArmatureNode * joint) {
-        jointMats[bji + numJoints] = joint->_world;
-        jointMats[bji]             = joint->_invBindMatrix;
+        
+        GLKMatrix4 m = [joint matrix];
+        m = (GLKMatrix4) {
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            m.m03,m.m13,m.m23, 1
+        };
+        
+        jointMats[bji]     = m;
+        jointInvMats[bji]  = joint->_invBindMatrix;
         bji++;
     }];
     
@@ -111,17 +132,54 @@
             weight = _weights[ wi ];
             
             vec3 = GLKMatrix4MultiplyVector3( jointInvMats[ji], vec[i] );
-            vec3 = GLKMatrix4MultiplyVector3( jointMats[ji],    vec3);
+//          vec3 = GLKMatrix4MultiplyVector3( jointMats[ji],    vec3);
+            vec3 = GLKMatrix4MultiplyVector3WithTranslation(jointMats[ji], vec3);
             vec3 = GLKVector3MultiplyScalar ( vec3,             weight);
             outVec3 = GLKVector3Add(outVec3, vec3);
         }
-        
+#if 0
+        TGLogp(LLMeshImporter, @"%d { %+.3f, %+.3f, %+.3f } -> { %+.3f, %+.3f, %+.3f }",
+               i,
+               vec[i].x, vec[i].y, vec[i].z,
+               outVec3.x, outVec3.y, outVec3.z
+               );
+#endif
         unsigned int vindex = _vectorIndex ? _vectorIndex[i] : i;
         p[vindex] = outVec3;
     }
     
     free(jointMats);
 }
+
+-(void)debugDump
+{
+    unsigned int   currPos  = 0;
+    int            ji       = 0;
+    int            wi;
+    float          weight;
+    
+    NSArray * jointNames = [_influencingJoints map:^id(MeshSceneArmatureNode * joint) {
+        return joint->_name;
+    }];
+    
+    TGLogp(LLMeshImporter, @" { ");
+
+    for( int i = 0; i < _numInfluencingJointCounts; i++ )
+    {
+        int numberOfJointsApplied = _influencingJointCounts[ i ];
+        
+        for( unsigned int n = 0; n < numberOfJointsApplied; n++  )
+        {
+            ji = _packedWeightIndices[ currPos + _jointWOffset ];
+            wi = _packedWeightIndices[ currPos + _weightFOffset];
+            currPos += 2;
+            weight = _weights[ wi ];       
+            TGLogp(LLMeshImporter, @"  %.4f, // [%02d][%d] %@", weight, i, n, jointNames[ji]);
+        }
+    }
+    TGLogp(LLMeshImporter, @" }; ");
+}
+
 
 @end
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@  MeshAnimation  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

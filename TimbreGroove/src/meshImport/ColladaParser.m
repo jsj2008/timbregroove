@@ -44,6 +44,8 @@ typedef enum _ColladaTagState
 
 #define EQSTR(a,b) (a && ([a caseInsensitiveCompare:b] == NSOrderedSame))
 
+#define EQMAT4(a,b) ( memcmp(a.m,b.m,sizeof(a.m)) == 0 )
+
 static float * parseFloats(NSString * str, int * numFloats)
 {
     str = [str stringByTrimmingCharactersInSet:
@@ -286,7 +288,6 @@ typedef enum _NodeCoordSpec {
     GLKVector3 _scale;
     
     NSString * _skinName;
-    NSString * _skeletonName;
     NSString * _geometryName; // no skinning
     
     NSMutableDictionary * _children;
@@ -891,7 +892,7 @@ typedef enum _NodeCoordSpec {
             if( EQSTR(elementName, kTag_matrix) )
             {
                 IncomingNode * inode = [incnt->_nodeStack lastObject];
-                inode->_transform = *(GLKMatrix4 *)_floatArray;
+                    inode->_transform = *(GLKMatrix4 *)_floatArray;
                 _floatArray = NULL;
                 _floatArrayCount = 0;
                 return;
@@ -930,13 +931,6 @@ typedef enum _NodeCoordSpec {
                 inode->_incomingSpec = 0;
                 _floatArray = NULL;
                 _floatArrayCount = 0;
-                return;
-            }
-            
-            if( EQSTR(elementName, kTag_skeleton) )
-            {
-                IncomingNode * inode = [incnt->_nodeStack lastObject];
-                inode->_skeletonName = [_captureString substringFromIndex:1];
                 return;
             }
             
@@ -1302,6 +1296,7 @@ foundCharacters:(NSString *)string
         msan->_transform = inode->_transform;
         msan->_name = inode->_id;
         msan->_sid = inode->_sid;
+        msan->_type = inode->_msnType;
         
         if( inode->_children )
         {
@@ -1460,7 +1455,8 @@ foundCharacters:(NSString *)string
                 for( NSString * jointName in jointNameArray )
                 {
                     MeshSceneArmatureNode * joint = findJointWithName(jointName,nil);
-                    joint->_invBindMatrix = *mats;
+//                    joint->_invBindMatrix = *mats;
+                    joint->_invBindMatrix = GLKMatrix4Identity;
                     mats++;
                 }
             }
@@ -1488,11 +1484,6 @@ foundCharacters:(NSString *)string
         sceneMeshNode->_geometry = getGeometry( meshNode->_geometryName );
     }
     
-    if( meshNode->_skeletonName )
-    {
-        sceneMeshNode->_skeleton = findJointWithName( meshNode->_skeletonName, nil );
-    }
-    
     scene->_mesh = sceneMeshNode;
     
     if( [_animations count] )
@@ -1502,9 +1493,24 @@ foundCharacters:(NSString *)string
             NSArray * parts = [namePath componentsSeparatedByString:@"/"];
             
             MeshAnimation * sceneAnim = _animations[namePath];
-            sceneAnim->_target = findJointWithName(parts[0],nil);
-            sceneAnim->_property = parts[1];
-            [scene->_animations addObject:sceneAnim];
+            
+            GLKMatrix4 * firstMat = &sceneAnim->_transforms[0];
+            
+            bool allSame = true;
+            for( int a = 1; a < sceneAnim->_numFrames; a++ )
+            {
+                if( !EQMAT4((*firstMat), sceneAnim->_transforms[a]) )
+                {
+                    allSame = false;
+                    break;
+                }
+            }
+            if( !allSame )
+            {
+                sceneAnim->_target = findJointWithName(parts[0],nil);
+                sceneAnim->_property = parts[1];
+                [scene->_animations addObject:sceneAnim];
+            }
         }
     }
     
@@ -1518,10 +1524,11 @@ foundCharacters:(NSString *)string
 {
     ColladaParserImpl * cParser = [[ColladaParserImpl alloc] init];
     
-    NSString * path = [[NSBundle mainBundle] pathForResource:[fileName stringByDeletingPathExtension]
+    NSString *      path = [[NSBundle mainBundle] pathForResource:[fileName stringByDeletingPathExtension]
                                                       ofType:[fileName pathExtension]];    
-    NSData *data = [[NSData alloc] initWithContentsOfFile:path];
+    NSData *        data = [[NSData alloc] initWithContentsOfFile:path];
     NSXMLParser * parser = [[NSXMLParser alloc] initWithData:data];
+    
     [parser setDelegate:cParser];
     bool success = [parser parse]; 
     if( success )
