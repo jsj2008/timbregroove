@@ -1455,8 +1455,7 @@ foundCharacters:(NSString *)string
                 for( NSString * jointName in jointNameArray )
                 {
                     MeshSceneArmatureNode * joint = findJointWithName(jointName,nil);
-//                    joint->_invBindMatrix = *mats;
-                    joint->_invBindMatrix = GLKMatrix4Identity;
+                    joint->_invBindMatrix = *mats;
                     mats++;
                 }
             }
@@ -1466,13 +1465,17 @@ foundCharacters:(NSString *)string
                 sceneSkin->_numWeights = iss->_numFloats;
             }
         }
-        
         for( NSString * jointName in jointNameArray )
         {
             MeshSceneArmatureNode * joint = findJointWithName(jointName,nil);
             [sceneSkin->_influencingJoints addObject:joint];
         }
-        
+
+        /*
+        MeshSceneArmatureNode * joint = findJointWithName(@"Top",nil);
+        [sceneSkin->_influencingJoints addObject:joint];
+         */
+
         sceneSkin->_geometry = getGeometry( iskin->_meshSource );
         sceneMeshNode->_skin = sceneSkin;
         
@@ -1507,7 +1510,22 @@ foundCharacters:(NSString *)string
             }
             if( !allSame )
             {
-                sceneAnim->_target = findJointWithName(parts[0],nil);
+                bool needsHack = true;
+                GLKMatrix3 mat3 = GLKMatrix4GetMatrix3(sceneAnim->_transforms[0]);
+                
+                for( int a = 1; a < sceneAnim->_numFrames; a++ )
+                {
+                    GLKMatrix3 test = GLKMatrix4GetMatrix3(sceneAnim->_transforms[0]);
+                    if( !EQMAT4(mat3,test) )
+                    {
+                        needsHack = false;
+                        break;
+                    }
+                }
+                
+                MeshSceneArmatureNode * joint = findJointWithName(parts[0],nil);
+                joint->_translateHack = needsHack;
+                sceneAnim->_target = joint;
                 sceneAnim->_property = parts[1];
                 [scene->_animations addObject:sceneAnim];
             }
@@ -1524,7 +1542,9 @@ foundCharacters:(NSString *)string
 {
     ColladaParserImpl * cParser = [[ColladaParserImpl alloc] init];
     
-    NSString *      path = [[NSBundle mainBundle] pathForResource:[fileName stringByDeletingPathExtension]
+    NSString * fileBaseName = [fileName stringByDeletingPathExtension];
+    
+    NSString *      path = [[NSBundle mainBundle] pathForResource:fileBaseName
                                                       ofType:[fileName pathExtension]];    
     NSData *        data = [[NSData alloc] initWithContentsOfFile:path];
     NSXMLParser * parser = [[NSXMLParser alloc] initWithData:data];
@@ -1534,6 +1554,7 @@ foundCharacters:(NSString *)string
     if( success )
     {
         MeshScene * scene = [cParser finalAssembly];
+        scene.fileName = fileBaseName;
         return scene;
     }
     return nil;

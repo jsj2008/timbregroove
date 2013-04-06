@@ -95,18 +95,24 @@
     unsigned int   numJoints    = [_influencingJoints count];
     GLKMatrix4 *   jointMats    = malloc( sizeof(GLKMatrix4) * numJoints * 2);
     GLKMatrix4 *   jointInvMats = jointMats + numJoints;
+    bool      *    doTranslate  = malloc( sizeof(bool) * numJoints );
     
     __block int bji = 0;
     
     [_influencingJoints each:^(MeshSceneArmatureNode * joint) {
         
         GLKMatrix4 m = [joint matrix];
-        m = (GLKMatrix4) {
-            1, 0, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            m.m03,m.m13,m.m23, 1
-        };
+        
+        doTranslate[bji] = joint->_translateHack;
+        if( doTranslate[bji] )
+        {
+            m = (GLKMatrix4) {
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                m.m03,m.m13,m.m23, 1
+            };
+        }
         
         jointMats[bji]     = m;
         jointInvMats[bji]  = joint->_invBindMatrix;
@@ -132,54 +138,21 @@
             weight = _weights[ wi ];
             
             vec3 = GLKMatrix4MultiplyVector3( jointInvMats[ji], vec[i] );
-//          vec3 = GLKMatrix4MultiplyVector3( jointMats[ji],    vec3);
-            vec3 = GLKMatrix4MultiplyVector3WithTranslation(jointMats[ji], vec3);
+            if( doTranslate[ji] )
+                vec3 = GLKMatrix4MultiplyVector3WithTranslation(jointMats[ji], vec3);
+            else
+                vec3 = GLKMatrix4MultiplyVector3( jointMats[ji],    vec3);
             vec3 = GLKVector3MultiplyScalar ( vec3,             weight);
             outVec3 = GLKVector3Add(outVec3, vec3);
         }
-#if 0
-        TGLogp(LLMeshImporter, @"%d { %+.3f, %+.3f, %+.3f } -> { %+.3f, %+.3f, %+.3f }",
-               i,
-               vec[i].x, vec[i].y, vec[i].z,
-               outVec3.x, outVec3.y, outVec3.z
-               );
-#endif
+
         unsigned int vindex = _vectorIndex ? _vectorIndex[i] : i;
         p[vindex] = outVec3;
     }
     
     free(jointMats);
+    free(doTranslate);
 }
-
--(void)debugDump
-{
-    unsigned int   currPos  = 0;
-    int            ji       = 0;
-    int            wi;
-    float          weight;
-    
-    NSArray * jointNames = [_influencingJoints map:^id(MeshSceneArmatureNode * joint) {
-        return joint->_name;
-    }];
-    
-    TGLogp(LLMeshImporter, @" { ");
-
-    for( int i = 0; i < _numInfluencingJointCounts; i++ )
-    {
-        int numberOfJointsApplied = _influencingJointCounts[ i ];
-        
-        for( unsigned int n = 0; n < numberOfJointsApplied; n++  )
-        {
-            ji = _packedWeightIndices[ currPos + _jointWOffset ];
-            wi = _packedWeightIndices[ currPos + _weightFOffset];
-            currPos += 2;
-            weight = _weights[ wi ];       
-            TGLogp(LLMeshImporter, @"  %.4f, // [%02d][%d] %@", weight, i, n, jointNames[ji]);
-        }
-    }
-    TGLogp(LLMeshImporter, @" }; ");
-}
-
 
 @end
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@  MeshAnimation  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

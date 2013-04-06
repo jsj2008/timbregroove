@@ -69,7 +69,7 @@ typedef enum _MeshSceneNodeType {
     GLKMatrix4   _invBindMatrix;
     GLKMatrix4   _invBindPoseMatrix;
     __weak MeshSceneArmatureNode * _parent;
-    
+    bool _translateHack;
 }
 -(GLKMatrix4)matrix;
 @end
@@ -114,24 +114,13 @@ typedef enum _MeshSceneNodeType {
     MeshSceneMeshNode *     _mesh;
     MeshSceneArmatureNode * _armatureTree;
 }
+@property (nonatomic,strong) NSString * fileName;
 -(MeshGeometry *)getGeometry:(NSString *)name;
 -(void)calcMatricies;
 -(void)calcAnimationMatricies;
 @end
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  MeshSkinning @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-typedef struct _Influence {
-    unsigned int jointIndex;
-    float        weight;
-} Influence;
-
-typedef struct _VertexInfluence {
-    unsigned int numInfluences;
-    Influence influence[1];
-} VertexInfluence;
-
-#define NEXT_INFLUENCE(p) (VertexInfluence *)( p->influence + (p->numInfluences - 1))
 
 @interface MeshSkinning : NSObject {
 @public
@@ -191,7 +180,9 @@ typedef struct _VertexInfluence {
 }
 
 -(void)influence:(MeshGeometryBuffer *)buffer dest:(float *)dest;
--(void)debugDump;
 @end
 
 
+@interface MeshScene (Emitter)
+-(void)emit;
+@end

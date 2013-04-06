@@ -11,6 +11,8 @@
 			<key>connections</key>
 			<array>
 				<dict>
+					<key>kTriggerDrag1</key>
+					<string>controllerPos</string>
 					<key>kTriggerPanX</key>
 					<string>kParamCameraRotationY</string>
 				</dict>
@@ -18,7 +20,7 @@
 					<key>kTriggerDblTap</key>
 					<string>FixZoom</string>
 					<key>kTriggerPanY</key>
-					<string>kParamCameraRotationX</string>
+					<string>kParamCameraZ</string>
 					<key>kTriggerTap1</key>
 					<string>RandomVibesNote</string>
 					<key>kTriggerMainSlider</key>
@@ -446,11 +448,11 @@
 			<key>properties</key>
 			<dict>
 				<key>scaleXYZ</key>
-				<real>0.7</real>
+				<real>1</real>
 				<key>drawMethod</key>
 				<string>triangles</string>
 				<key>colladaFile</key>
-				<string>stretchBox.dae</string>
+				<string>ballStretch.dae</string>
 			</dict>
 		</dict>
 		<key>spherey_element</key>

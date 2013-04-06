@@ -54,7 +54,7 @@ typedef void (^CaptureRecurseBlock)(TG3dObject *);
     
     [shader use];
 
-    CaptureRecurseBlock renderObj = nil;
+    static CaptureRecurseBlock renderObj = nil;
     
     renderObj = ^(TG3dObject * child)
     {

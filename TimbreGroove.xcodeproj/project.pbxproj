@@ -205,6 +205,8 @@
 		577AE4BB16B3969800B4FDF1 /* subtractPressureGradient.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 577AE4B116B3969800B4FDF1 /* subtractPressureGradient.fsh */; };
 		577AE4BC16B3969800B4FDF1 /* velocityBoundary.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 577AE4B216B3969800B4FDF1 /* velocityBoundary.fsh */; };
 		577AE4BD16B3969800B4FDF1 /* visualize.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 577AE4B316B3969800B4FDF1 /* visualize.fsh */; };
+		577E7ECF170E16EC009E9916 /* bounce.dae in Resources */ = {isa = PBXBuildFile; fileRef = 577E7ECE170E16EC009E9916 /* bounce.dae */; };
+		577E7ED5170E1A1F009E9916 /* MeshScene+Emitter.m in Sources */ = {isa = PBXBuildFile; fileRef = 577E7ED4170E1A1F009E9916 /* MeshScene+Emitter.m */; };
 		577F0EE517009D7F0008A703 /* Log.m in Sources */ = {isa = PBXBuildFile; fileRef = 577F0EE417009D7F0008A703 /* Log.m */; };
 		577F0EE71700BD970008A703 /* NameMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 577F0EE61700BD970008A703 /* NameMap.m */; };
 		5780832016B7103A002810BD /* moon.gif in Resources */ = {isa = PBXBuildFile; fileRef = 5780831F16B7103A002810BD /* moon.gif */; };
@@ -266,6 +268,8 @@
 		57E62B2216C30D9D007064A0 /* MeshImporter.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E62B2116C30D9D007064A0 /* MeshImporter.m */; };
 		57E62E67168433100030908E /* Photo.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E62E66168433100030908E /* Photo.m */; };
 		57E7465E1680438300C1D4FF /* EventCapture.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E7465D1680438300C1D4FF /* EventCapture.m */; };
+		57E7EB99170F6B7100D3DC88 /* stretchBoxMaya.dae in Resources */ = {isa = PBXBuildFile; fileRef = 57E7EB98170F6B7100D3DC88 /* stretchBoxMaya.dae */; };
+		57E7EB9D170FA83E00D3DC88 /* ballStretch.dae in Resources */ = {isa = PBXBuildFile; fileRef = 57E7EB9C170FA83E00D3DC88 /* ballStretch.dae */; };
 		57E874F816782894008243B2 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57E874F716782894008243B2 /* UIKit.framework */; };
 		57E874FA16782894008243B2 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57E874F916782894008243B2 /* Foundation.framework */; };
 		57E874FC16782894008243B2 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57E874FB16782894008243B2 /* CoreGraphics.framework */; };
@@ -582,6 +586,8 @@
 		577AE4B116B3969800B4FDF1 /* subtractPressureGradient.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = subtractPressureGradient.fsh; sourceTree = "<group>"; };
 		577AE4B216B3969800B4FDF1 /* velocityBoundary.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = velocityBoundary.fsh; sourceTree = "<group>"; };
 		577AE4B316B3969800B4FDF1 /* visualize.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = visualize.fsh; sourceTree = "<group>"; };
+		577E7ECE170E16EC009E9916 /* bounce.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = bounce.dae; sourceTree = "<group>"; };
+		577E7ED4170E1A1F009E9916 /* MeshScene+Emitter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "MeshScene+Emitter.m"; sourceTree = "<group>"; };
 		577F0EE317009D560008A703 /* Log.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Log.h; sourceTree = "<group>"; };
 		577F0EE417009D7F0008A703 /* Log.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Log.m; sourceTree = "<group>"; };
 		577F0EE61700BD970008A703 /* NameMap.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NameMap.m; sourceTree = "<group>"; };
@@ -683,6 +689,8 @@
 		57E62E66168433100030908E /* Photo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Photo.m; sourceTree = "<group>"; };
 		57E7465C1680438300C1D4FF /* EventCapture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EventCapture.h; sourceTree = "<group>"; };
 		57E7465D1680438300C1D4FF /* EventCapture.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EventCapture.m; sourceTree = "<group>"; };
+		57E7EB98170F6B7100D3DC88 /* stretchBoxMaya.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = stretchBoxMaya.dae; sourceTree = "<group>"; };
+		57E7EB9C170FA83E00D3DC88 /* ballStretch.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = ballStretch.dae; sourceTree = "<group>"; };
 		57E874F316782894008243B2 /* TimbreGroove.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TimbreGroove.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		57E874F716782894008243B2 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		57E874F916782894008243B2 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -771,6 +779,9 @@
 		5700235516A55460006F0E8E /* models */ = {
 			isa = PBXGroup;
 			children = (
+				57E7EB9C170FA83E00D3DC88 /* ballStretch.dae */,
+				57E7EB98170F6B7100D3DC88 /* stretchBoxMaya.dae */,
+				577E7ECE170E16EC009E9916 /* bounce.dae */,
 				57FF251A170BBC4200C8B7D2 /* stretchBox.dae */,
 				573BFB82170B700D00D32E37 /* simpleBend.dae */,
 				57D0133B17072E160080F58E /* bendyCyl.dae */,
@@ -941,6 +952,7 @@
 				571470541706771F00383D04 /* ColladaParser.m */,
 				571470551706771F00383D04 /* MeshScene.h */,
 				571470561706771F00383D04 /* MeshScene.m */,
+				577E7ED4170E1A1F009E9916 /* MeshScene+Emitter.m */,
 				571470591706788800383D04 /* MeshSceneBuffer.h */,
 				5714705A1706788800383D04 /* MeshSceneBuffer.m */,
 			);
@@ -1703,6 +1715,9 @@
 				57D0133C17072E160080F58E /* bendyCyl.dae in Resources */,
 				573BFB83170B700D00D32E37 /* simpleBend.dae in Resources */,
 				57FF251B170BBC4200C8B7D2 /* stretchBox.dae in Resources */,
+				577E7ECF170E16EC009E9916 /* bounce.dae in Resources */,
+				57E7EB99170F6B7100D3DC88 /* stretchBoxMaya.dae in Resources */,
+				57E7EB9D170FA83E00D3DC88 /* ballStretch.dae in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1840,6 +1855,7 @@
 				571470581706771F00383D04 /* MeshScene.m in Sources */,
 				5714705B1706788800383D04 /* MeshSceneBuffer.m in Sources */,
 				5714705E17067D3100383D04 /* GenericImport.m in Sources */,
+				577E7ED5170E1A1F009E9916 /* MeshScene+Emitter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
