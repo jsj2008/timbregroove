@@ -35,19 +35,6 @@
     return self;
 }
 
--(id)cloneCamera
-{
-    Camera * c = [Camera new];
-    c->_near         = _near;
-    c->_far          = _far;
-    c->_frustumAngle = _frustumAngle;
-    c->_position     = _position;
-    c->_rotation     = _rotation;
-    c->_projection   = _projection;
-    
-    return c;
-}
-
 -(void)setPerspective: (float)near
              far:(float)far
    frustumAngle:(float)degrees
@@ -73,7 +60,7 @@
          viewHeight:viewHeight];
 }
 
--(GLKMatrix4)projectionMatrix
+-(GLKMatrix4)transformationMatrix
 {
     GLKMatrix4 mx = GLKMatrix4MakeTranslation( _position.x, _position.y, _position.z );
     
@@ -84,10 +71,18 @@
     if( _rotation.z )
         mx = GLKMatrix4Rotate(mx, _rotation.z, 0.0f, 0.0f, 1.0f);
 
-    mx = GLKMatrix4Multiply(_projection, mx);
-    
     return mx;
- 
+}
+
+-(GLKMatrix4)projection
+{
+    return _projection;
+}
+
+-(GLKMatrix4)projectionMatrix
+{
+    GLKMatrix4 mx = [self transformationMatrix];
+    return GLKMatrix4Multiply(_projection, mx);
 }
 
 -(void)setZ:(float)z

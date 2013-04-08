@@ -28,7 +28,7 @@
         _spacing = spacing;
         _width = 2.0;
         _height = 2.0;
-        self.drawType = TG_LINE_STRIP; // TG_POINTS;
+        self.drawType = GL_LINE_STRIP;
         [self createWithIndicesIntoNames:indicesIntoNames
                                    doUVs:false
                                doNormals:false];

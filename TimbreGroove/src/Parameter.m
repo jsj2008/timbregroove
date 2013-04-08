@@ -97,7 +97,7 @@
         if( _paramType == TGC_VECTOR3 )
         {
             return ^(CGPoint pt) {
-                return ((Vector3ParamBlock)_block)((GLKVector3){pt.x,pt.y,0});
+                return ((Vector3ParamBlock)_block)((TGVector3){pt.x,pt.y,0});
             };
         }
         

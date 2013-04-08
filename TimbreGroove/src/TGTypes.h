@@ -15,21 +15,8 @@
 #define R0_1()      (((float)(arc4random_uniform(0x1000000) % 255))/255.0)
 #define R0_n(n)     (int)(arc4random_uniform(n))
 
-
-#define TG_MIN(a,b)            (((a) < (b)) ? (a) : (b))
-#define TG_MAX(a,b)            (((a) > (b)) ? (a) : (b))
-#define TG_CLAMP(x, lo, hi)      (TG_MIN((hi), TG_MAX((x), (lo))))
-
-#define CLAMP_TO_0_1(x) (x < 0.0 ? 0.0 : x > 1.0 ? 1.0 : x)
-
 #define GL_ERROR_C { GLenum __e = glGetError(); if(__e) { TGLog(LLShitsOnFire, @"glError(%d/%04X) %s:%d",__e,__e,__FILE__,__LINE__); }}
 
-
-typedef void (^FloatParamBlock)(float);
-typedef void (^PointParamBlock)(CGPoint);
-typedef void (^IntParamBlock)(int);
-typedef void (^PointerParamBlock)(void *);
-typedef void (^Vector3ParamBlock)(GLKVector3);
 
 typedef struct _TGVector3 {
     float x;
@@ -37,6 +24,14 @@ typedef struct _TGVector3 {
     float z;
 } TGVector3; // use this instead of GLKVector3 for param blocks
 // because the block signature detection code rejects unions
+
+#define TG3(tg3) *(GLKVector3 *)&tg3
+
+typedef void (^FloatParamBlock)(float);
+typedef void (^PointParamBlock)(CGPoint);
+typedef void (^IntParamBlock)(int);
+typedef void (^PointerParamBlock)(void *);
+typedef void (^Vector3ParamBlock)(TGVector3);
 
 typedef enum {
     TG_FLOAT,
@@ -53,20 +48,8 @@ typedef enum {
     TG_LAST_UTYPE = TG_INT
 } TGUniformType;
 
-#define TGParameterType TGUniformType
 #define TG_POINT        TG_VECTOR2
 #define TG_COLOR        TG_VECTOR4
-
-
-typedef enum {
-    TG_POINTS = GL_POINTS, // etc.
-    TG_LINES,
-    TG_LINE_LOOP,
-    TG_LINE_STRIP,
-    TG_TRIANGLES,      // default
-    TG_TRIANGLE_STRIP,
-    TG_TRIANGLE_FAN
-} TGDrawType;
 
 typedef enum VertexStrideType {
     st_float1 = 900,

@@ -55,11 +55,13 @@ extern TweenCallback TweenReverseLooper;
 -(PointParamBlock)getPointTrigger:(NSString const *)triggerName;
 -(IntParamBlock)getIntTrigger:(NSString const *)triggerName;
 -(PointerParamBlock)getPointerTrigger:(NSString const *)triggerName;
+-(Vector3ParamBlock)getVector3Trigger:(NSString const *)triggerName;
 
 -(FloatParamBlock)getFloatTrigger:(NSString const *)triggerName cb:(TweenCallback)cb;
 -(PointParamBlock)getPointTrigger:(NSString const *)triggerName cb:(TweenCallback)cb;
 -(IntParamBlock)getIntTrigger:(NSString const *)triggerName cb:(TweenCallback)cb;
 -(PointerParamBlock)getPointerTrigger:(NSString const *)triggerName cb:(TweenCallback)cb;
+-(Vector3ParamBlock)getVector3Trigger:(NSString const *)triggerName cb:(TweenCallback)cb;
 
 // Step 4. Call through Trigger when appropriate
 

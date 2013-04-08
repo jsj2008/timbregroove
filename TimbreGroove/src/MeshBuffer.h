@@ -52,7 +52,7 @@ static inline VertexStride * StrideInit1f(VertexStride * s)
 */
 @interface MeshBuffer : NSObject
 
-@property (nonatomic) TGDrawType  drawType;
+@property (nonatomic) GLuint      drawType;
 @property (nonatomic) GLenum      usage;
 @property (nonatomic) bool        drawable;
 @property (nonatomic) GLuint      glVBuffer;

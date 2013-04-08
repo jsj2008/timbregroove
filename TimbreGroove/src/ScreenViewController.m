@@ -39,8 +39,13 @@
     id _modalUtility;
     
     FloatParamBlock _mainSliderTrigger;
+    IntParamBlock   _playTrigger;
     
     NSString * _recordObserver;
+    
+    int _indexOfPlayPause;
+    UIBarButtonItem * _realPlay;
+    UIBarButtonItem * _pause;
     
 }
 
@@ -52,12 +57,14 @@
 @property (weak, nonatomic) IBOutlet UIPageControl *pager;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *trashCan;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *recordButton;
+@property (weak, nonatomic) IBOutlet UIBarButtonItem *playButton;
 @property (weak, nonatomic) IBOutlet UIView *menuAreaView;
 - (IBAction)closeAudioMenu:(UIBarButtonItem *)sender;
 - (IBAction)changePage:(id)sender;
 - (IBAction)toolbarSlider:(UISlider *)sender;
 - (IBAction)audioPanel:(UIButton *)sender;
 - (IBAction)trash:(UIBarButtonItem *)sender;
+- (IBAction)play:(UIBarButtonItem *)sender;
 - (IBAction)record:(UIBarButtonItem *)sender;
 - (IBAction)showMenu:(UITapGestureRecognizer *)sender;
 @end
@@ -68,7 +75,7 @@
 {
     [super viewDidLoad];
 
-    TGSetLogLevel(LLShitsOnFire);
+    TGSetLogLevel( LLShitsOnFire | LLGestureStuff );
     
     _postDeleteSceneIndex = -1;
     // force some global instializations
@@ -106,12 +113,28 @@
                afterDelay:0.12];
     
     _mainSliderTrigger = [currentScene.triggers getFloatTrigger:kTriggerMainSlider];
+    _playTrigger       = [currentScene.triggers getIntTrigger:kTriggerPlayButton];
 }
 
 -(void)viewDidLayoutSubviews
 {
     if( !_currentScene )
     {
+        _realPlay = self.playButton;
+        _pause = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemPause
+                                                  target:self
+                                                  action:@selector(pause:)];
+        int i = 0;
+        for( UIBarButtonItem * bbi in self.utilityToolBar.items )
+        {
+            if( bbi == _realPlay )
+            {
+                _indexOfPlayPause = i;
+                break;
+            }
+            ++i;
+        }
+        
         for( UIViewController * vc in self.childViewControllers )
         {
             if( [vc.title isEqualToString:@"graphVC"] )
@@ -281,6 +304,31 @@
     _postDeleteSceneIndex = _pager.currentPage;
     int i = _postDeleteSceneIndex ? 0 : 1;
     self.currentScene = _scenes[i];
+}
+
+-(void)replaceObjectInUtilityToolBarAtIndex:(NSUInteger)index withObject:(id)object
+{
+    NSMutableArray * barItems = [NSMutableArray arrayWithArray:self.utilityToolBar.items];
+    barItems[index] = object;
+    [self.utilityToolBar setItems:barItems animated:YES];
+    
+}
+- (void)pause:(UIBarButtonItem *)sender
+{
+    if( _playTrigger )
+    {
+        _playTrigger(0);
+        [self replaceObjectInUtilityToolBarAtIndex:_indexOfPlayPause withObject:_realPlay];
+    }
+}
+
+- (IBAction)play:(UIBarButtonItem *)sender
+{
+    if( _playTrigger )
+    {
+        _playTrigger(1);
+        [self replaceObjectInUtilityToolBarAtIndex:_indexOfPlayPause withObject:_pause];
+    }
 }
 
 - (IBAction)record:(UIBarButtonItem *)sender {

@@ -6,8 +6,8 @@
 //  Copyright (c) 2012 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "DistortedGeneric.h"
+#import "Generic.h"
 
-@interface Photo : DistortedGeneric
+@interface Photo : Generic
 
 @end

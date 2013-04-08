@@ -103,6 +103,7 @@ extern NSString const * kParamCameraRotationX;
 extern NSString const * kParamCameraRotationY;
 extern NSString const * kParamCameraRotationZ;
 extern NSString const * kParamCameraZ;
+extern NSString const * kParamSceneAnimation;
 
 extern NSString const * kParamLightDirection;
 extern NSString const * kParamLightColor;
@@ -138,6 +139,7 @@ extern NSString const * kTriggerHold2;
 extern NSString const * kTriggerHoldAndDrag;
 extern NSString const * kTriggerHoldAndTap;
 extern NSString const * kTriggerMainSlider;
+extern NSString const * kTriggerPlayButton;
 
 extern NSString const * kTriggerDynamicPeak;
 extern NSString const * kTriggerDynamicHold;

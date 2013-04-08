@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "DistortedGeneric.h"
+#import "Generic.h"
 
 @class Texture;
 
-@interface Sphere : DistortedGeneric
+@interface Sphere : Generic
 @property (nonatomic) float lightRotation;
 @end

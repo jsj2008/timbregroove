@@ -13,9 +13,12 @@
 #import "Light.h"
 #import "State.h"
 #import "Parameter.h"
+#import "Names.h"
 
 #import "Cube.h"
 #import "Camera.h"
+
+#define VISIBLE_BONE_Z 1.5
 
 @interface VisibleBone : Generic {
 @public
@@ -23,27 +26,6 @@
     GLKVector3 _vec3;
     MeshSceneArmatureNode * _node;
 }
-@end
-@implementation VisibleBone
-
--(id)wireUp
-{
-    [super wireUp];
-    self.scaleXYZ = 0.4;
-    self.disableStandarParameters = true;
-    return self;
-}
-
--(void)createBuffer
-{
-    MeshBuffer * mb = [Cube cubeWithWidth:0.6
-                            andIndicesIntoNames:@[@(gv_pos)]
-                                       andDoUVs:false
-                             andDoNormals:false];
-
-    [self addBuffer:mb];
-}
-
 @end
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -53,8 +35,6 @@
     MeshBuffer * _mb;
     
     bool _runAnimations;
-    
-    VisibleBone * _controller;
 }
 
 - (id)init
@@ -73,6 +53,15 @@
 //  [_scene emit];
     self.color = (GLKVector4){ 0.4, 1.0, 1.0, 0.7 };
     return [super wireUp];
+}
+
+-(void)getParameters:(NSMutableDictionary *)putHere
+{
+    [super getParameters:putHere];
+    
+    putHere[kParamSceneAnimation] = [Parameter withBlock:^(int play) {
+        _runAnimations = play;
+    }];
 }
 
 -(void)showArmatures
@@ -95,6 +84,7 @@
             vb->_node = node;
             vb->_transform = node->_world;
             GLKVector4 vec4 = GLKMatrix4GetRow(node->_world, 3);
+            vec4.z = VISIBLE_BONE_Z;
             vb.position = *(GLKVector3 *)&vec4;
             vb.color = colors[nextColor];
             nextColor = ++nextColor % 4;
@@ -111,7 +101,6 @@
         {
             [_scene->_mesh->_skin->_influencingJoints each:createBones];
         }
-        _controller = (VisibleBone *)self.children[0];
     }
 }
 
@@ -150,25 +139,6 @@
     self.texture = [[Texture alloc] initWithFileName:@"numText.png"];
 }
 
--(void)getParameters:(NSMutableDictionary *)putHere
-{
-    if( _controller )
-    {
-        Parameter * parameter = [Parameter withBlock:^(TGVector3 vec3) {
-            _controller.position = *(GLKVector3 *)&vec3;
-            _controller->_node->_transform = (GLKMatrix4){
-                1, 0, 0, vec3.y,
-                0, 1, 0, -vec3.x,
-                0, 0, 1, vec3.z,
-                0, 0, 1, 0
-            };
-           // _controller->_node->_translateHack = false;
-            [self calculateInfluences];
-        }];
-//        parameter.targetObject = _controller;
-        putHere[@"controllerPos"] = parameter;
-    }
-}
 -(void)createBuffer
 {
     static GenericVariables indexIntoNamesMap[kNumMeshSemanticKeys] = {
@@ -229,9 +199,12 @@
 
 -(void)update:(NSTimeInterval)dt
 {
+    [super update:dt];
+    
     if ( _runAnimations && _scene->_animations )
     {
         __block bool dirty = false;
+        
         [_scene->_animations each:^(MeshAnimation * animation) {
             animation->_clock += dt;
             if( animation->_clock >= animation->_keyFrames[animation->_nextFrame] )
@@ -252,24 +225,57 @@
         
         if( dirty )
         {
-       //     [_scene calcAnimationMatricies];
-
             [self.children each:^(VisibleBone *vb) {
                 MeshSceneArmatureNode * node = vb->_node;
                 GLKVector4 vec4 = GLKMatrix4GetRow(node->_world, 3);
+                vec4.z = VISIBLE_BONE_Z;
                 vb.position = *(GLKVector3 *)&vec4;
             }];
             [self calculateInfluences];
         }
     }
-    else
-    {
-        
-    }
 }
--(void)render:(NSUInteger)w h:(NSUInteger)h
+
+@end
+
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@implementation VisibleBone
+
+-(id)wireUp
 {
-    [super render:w h:h];
+    [super wireUp];
+    self.disableStandarParameters = true;
+    self.interactive = true;
+    return self;
+}
+
+-(void)createBuffer
+{
+    MeshBuffer * mb = [Cube cubeWithWidth:0.1
+                      andIndicesIntoNames:@[@(gv_pos)]
+                                 andDoUVs:false
+                             andDoNormals:false];
+    
+    [self addBuffer:mb];
+}
+
+-(void)getParameters:(NSMutableDictionary *)putHere
+{
+    [super getParameters:putHere];
+    
+    putHere[@"controllerPos"] = [Parameter withBlock:^(TGVector3 vec3) {
+        self.position = TG3(vec3);
+        _node->_transform = (GLKMatrix4){
+            1, 0, 0, vec3.y,
+            0, 1, 0, -vec3.x,
+            0, 0, 1, vec3.z,
+            0, 0, 1, 0
+        };
+        
+        [(GenericImport *)_parent calculateInfluences];
+    }];
 
 }
+
 @end

@@ -10,19 +10,20 @@
 #import "Global.h"
 #import "Scene.h"
 #import "Names.h"
-#import "EventCapture.h"
+#import "ObjectGestures.h"
+#import "Camera.h"
 
 @interface ViewTriggers : NSObject {
 @public
-    PointParamBlock _triggerDirection;
-    FloatParamBlock _triggerPinch;
-    PointParamBlock _triggerTapPos;
-    PointParamBlock _triggerTap1;
-    FloatParamBlock _triggerPanX;
-    FloatParamBlock _triggerPanY;
-    PointParamBlock _triggerDrag1;
-    PointParamBlock _triggerDragPos;
-    PointParamBlock _triggerDblTap;
+    PointParamBlock    _triggerDirection;
+    FloatParamBlock    _triggerPinch;
+    PointParamBlock    _triggerTapPos;
+    PointParamBlock    _triggerTap1;
+    FloatParamBlock    _triggerPanX;
+    FloatParamBlock    _triggerPanY;
+    Vector3ParamBlock  _triggerDrag1;
+    PointParamBlock    _triggerDragPos;
+    PointParamBlock    _triggerDblTap;
     
     NSDictionary * _targetedParams;
 }
@@ -39,9 +40,11 @@
         _triggerTap1      = [tm getPointTrigger:kTriggerTap1];
         _triggerPanX      = [tm getFloatTrigger:kTriggerPanX];
         _triggerPanY      = [tm getFloatTrigger:kTriggerPanY];
-        _triggerDrag1     = [tm getPointTrigger:kTriggerDrag1];
-        _triggerDragPos   = [tm getPointTrigger:kTriggerDragPos];
         _triggerDblTap    = [tm getPointTrigger:kTriggerDblTap];
+        
+        // object movers:
+        _triggerDrag1     = [tm getVector3Trigger:kTriggerDrag1];
+        _triggerDragPos   = [tm getPointTrigger:kTriggerDragPos];
     }
     else
     {
@@ -125,12 +128,21 @@
         pnch = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinch:)];
         [self addGestureRecognizer:pnch];
     }
+
+    MoveGesture * mg = nil;
     
-    if( _currentTriggers->_triggerPanX || _currentTriggers->_triggerPanY ||
-       _currentTriggers->_triggerDrag1 || _currentTriggers->_triggerDragPos )
+    if( _currentTriggers->_triggerDrag1 || _currentTriggers->_triggerDragPos )
+    {
+        mg = [[MoveGesture alloc] initWithTarget:self action:@selector(moveObject:)];
+        [self addGestureRecognizer:mg];
+    }
+    
+    if( _currentTriggers->_triggerPanX || _currentTriggers->_triggerPanY )
     {
         UIPanGestureRecognizer * pgr;
         pgr = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panning:)];
+        if( mg )
+           [pgr requireGestureRecognizerToFail:mg];
         [self addGestureRecognizer:pgr];
     }
     
@@ -166,7 +178,6 @@
             if( _targetedObject == targetObject )
             {
                 orgBlock(pt);
-                //_objectResponded = true;
             }
         } copy]];
     }
@@ -187,20 +198,6 @@
     return nil;
 }
 
--(void)checkTargetObject:(CGPoint)pt
-{
-    if( self.graph.viewBasedParameters )
-    {
-        _targetedObject = [EventCapture getGraphViewTapChildElementOf:self.graph inView:self atPt:pt];
-        if( !_targetedObject )
-            _targetedObject = self.graph;
-    }
-}
-
--(void)clearTargetObject
-{
-    _targetedObject = nil;
-}
 
 -(void)swipe:(UISwipeGestureRecognizer *)sgr
 {
@@ -261,14 +258,11 @@
     if( tgr.state == UIGestureRecognizerStateEnded )
     {
         CGPoint pt      = [tgr locationInView:self];
-        [self checkTargetObject:pt];
         
         if( _currentTriggers->_triggerTapPos )
             _currentTriggers->_triggerTapPos(pt);
         if( _currentTriggers->_triggerTap1 )
-            _currentTriggers->_triggerTap1([self nativeToTG:pt]);
-        
-        [self clearTargetObject];
+            _currentTriggers->_triggerTap1([self nativeToTG:pt]);        
     }
 }
 
@@ -277,9 +271,7 @@
     if( tgr.state == UIGestureRecognizerStateEnded )
     {
         CGPoint pt = [tgr locationInView:self];
-        [self checkTargetObject:pt];
         _currentTriggers->_triggerDblTap([self nativeToTG:pt]);
-        [self clearTargetObject];
     }
 }
 
@@ -297,101 +289,82 @@
     {
         CGPoint pt  = [pgr locationInView:self];
 
-        [self checkTargetObject:pt];
-
-        if( _currentTriggers->_triggerPanX || _currentTriggers->_triggerPanY )
+        bool bSkipPan = false;
+        CGPoint diff = PT_DIFF(pt,_panLast);
+        if( !_xPanning && !_yPanning )
         {
-            bool bSkipPan = false;
-            CGPoint diff = PT_DIFF(pt,_panLast);
-            if( !_xPanning && !_yPanning )
-            {
-                _xPanning = fabsf(diff.x) > fabsf(diff.y);
-                _yPanning = !_xPanning;
-                TGLog(LLGestureStuff, @"Panning axis chosen: x:%d y:%d", _xPanning, _yPanning);
-            }
-            
-            float currentPos = 0;
-            float testPos   = 0;
-            if( _xPanning )
-            {
-                currentPos = pt.x;
-                testPos   = _panLast.x;
-            }
-            else // yPanning
-            {
-                currentPos = pt.y;
-                testPos   = _panLast.y;
-            }
-            
-            if( currentPos == testPos )
-            {
-                bSkipPan = true;
-            }
-            else if( _panDir )
-            {
-                if( _panDir == 1 )
-                {
-                    if( currentPos < testPos )
-                    {
-                        _panDir = -1;
-                        _panPivot = pt;
-                        TGLog(LLGestureStuff, @"Direction changed to %d (pivot: {%.1f, %.1f}",_panDir,pt.x,pt.y);
-                        bSkipPan = true;
-                    }
-                }
-                else // panDir == -1
-                {
-                    if( currentPos > testPos )
-                    {
-                        _panDir = 1;
-                        _panPivot = pt;
-                        TGLog(LLGestureStuff, @"Direction changed to %d (pivot: {%.1f, %.1f}",_panDir,pt.x,pt.y);
-                        bSkipPan = true;
-                    }
-                }
-                
-            }
-            else // panDir uninitialized
-            {
-                _panDir = currentPos > testPos ? 1 : -1;
-                TGLog(LLGestureStuff, @"Panning direction chosen: %d",_panDir);
-            }
-
-            if( !bSkipPan )
-            {
-                CGSize sz = self.frame.size;
-                
-                if( _xPanning && _currentTriggers->_triggerPanX )
-                {
-                    float fdiff = (_panPivot.x - pt.x) / sz.width;
-                    TGLog(LLGestureStuff, @"Sending X pan: %f (dir:%d pos:{%.1f,%.1f}) ) ",fdiff,_panDir,pt.x,pt.y);
-                    _currentTriggers->_triggerPanX(fdiff);
-                }
-                else if( _yPanning && _currentTriggers->_triggerPanY )
-                {
-                    float fdiff = (_panPivot.y - pt.y) / sz.width;
-                    TGLog(LLGestureStuff, @"Sending Y pan: %f (dir:%d pos:{%.1f,%.1f}) ) ",fdiff,_panDir,pt.x,pt.y);
-                    _currentTriggers->_triggerPanY(fdiff);
-                }
-            }
-            
+            _xPanning = fabsf(diff.x) > fabsf(diff.y);
+            _yPanning = !_xPanning;
+            TGLog(LLGestureStuff, @"Panning axis chosen: x:%d y:%d", _xPanning, _yPanning);
         }
         
-        if( _currentTriggers->_triggerDrag1 )
+        float currentPos = 0;
+        float testPos   = 0;
+        if( _xPanning )
         {
-            CGPoint scaledPt = [self nativeToTG:pt];
-            TGLog(LLGestureStuff, @"Sending scaled drag pt: {%f,%f}",scaledPt.x, scaledPt.y);
-            _currentTriggers->_triggerDrag1(scaledPt);
+            currentPos = pt.x;
+            testPos   = _panLast.x;
         }
-        if( _currentTriggers->_triggerDragPos )
+        else // yPanning
         {
-            TGLog(LLGestureStuff, @"Sending native drag pt: {%.1f, %1.f}",pt.x, pt.y);
-            _currentTriggers->_triggerDragPos(pt);            
+            currentPos = pt.y;
+            testPos   = _panLast.y;
         }
         
+        if( currentPos == testPos )
+        {
+            bSkipPan = true;
+        }
+        else if( _panDir )
+        {
+            if( _panDir == 1 )
+            {
+                if( currentPos < testPos )
+                {
+                    _panDir = -1;
+                    _panPivot = pt;
+                    TGLog(LLGestureStuff, @"Direction changed to %d (pivot: {%.1f, %.1f}",_panDir,pt.x,pt.y);
+                    bSkipPan = true;
+                }
+            }
+            else // panDir == -1
+            {
+                if( currentPos > testPos )
+                {
+                    _panDir = 1;
+                    _panPivot = pt;
+                    TGLog(LLGestureStuff, @"Direction changed to %d (pivot: {%.1f, %.1f}",_panDir,pt.x,pt.y);
+                    bSkipPan = true;
+                }
+            }
+            
+        }
+        else // panDir uninitialized
+        {
+            _panDir = currentPos > testPos ? 1 : -1;
+            TGLog(LLGestureStuff, @"Panning direction chosen: %d",_panDir);
+        }
+        
+        if( !bSkipPan )
+        {
+            CGSize sz = self.frame.size;
+            
+            if( _xPanning && _currentTriggers->_triggerPanX )
+            {
+                float fdiff = (_panPivot.x - pt.x) / sz.width;
+                TGLog(LLGestureStuff, @"Sending X pan: %f (dir:%d pos:{%.1f,%.1f}) ) ",fdiff,_panDir,pt.x,pt.y);
+                _currentTriggers->_triggerPanX(fdiff);
+            }
+            else if( _yPanning && _currentTriggers->_triggerPanY )
+            {
+                float fdiff = (_panPivot.y - pt.y) / sz.width;
+                TGLog(LLGestureStuff, @"Sending Y pan: %f (dir:%d pos:{%.1f,%.1f}) ) ",fdiff,_panDir,pt.x,pt.y);
+                _currentTriggers->_triggerPanY(fdiff);
+            }
+        }
+    
         _panLast = pt;
-        
-        [self clearTargetObject];
+
     }
     else if( pgr.state == UIGestureRecognizerStateEnded || pgr.state == UIGestureRecognizerStateCancelled )
     {
@@ -401,4 +374,65 @@
     }
 }
 
+-(TGVector3)unprojectPoint:(CGPoint)local_pt forObject:(TG3dObject*)object
+{
+    GLKVector3 window_coord = GLKVector3Make(local_pt.x,local_pt.y, 0.0f);
+    bool result;
+    int viewport[4];
+    CGSize sz = self.frame.size;
+    viewport[0] = 0.0f;
+    viewport[1] = 0.0f;
+    viewport[2] = (int)sz.width;
+    viewport[3] = (int)sz.height;
+    GLKMatrix4 modelView = GLKMatrix4Identity;
+    GLKVector3 near_pt = GLKMathUnproject(window_coord,
+                                          modelView,
+                                          [object.camera projectionMatrix],
+                                          &viewport[0],
+                                          &result);
+    window_coord = GLKVector3Make(local_pt.x,local_pt.y, 1.0f);
+    GLKVector3 far_pt = GLKMathUnproject(window_coord,
+                                          modelView,
+                                          [object.camera projectionMatrix],
+                                          &viewport[0],
+                                          &result);
+
+    //need to get z=0 from
+    //assumes near and far are on opposite sides of z=0
+    float z_magnitude = fabs(far_pt.z-near_pt.z);
+    float near_pt_factor = fabs(near_pt.z)/z_magnitude;
+    float far_pt_factor = fabs(far_pt.z)/z_magnitude;
+    GLKVector3 vec3 = GLKVector3Add( GLKVector3MultiplyScalar(near_pt, far_pt_factor),
+                                        GLKVector3MultiplyScalar(far_pt, near_pt_factor));
+    vec3.y = -vec3.y;
+    return *(TGVector3 *)&vec3;
+}
+
+-(void)moveObject:(MoveGesture *)mg
+{
+    if( mg.state == UIGestureRecognizerStateBegan )
+    {
+        _targetedObject = mg.targetedObject;
+    }
+    else if( mg.state == UIGestureRecognizerStateChanged )
+    {
+        CGPoint pt  = [mg locationInView:self];
+        if( _currentTriggers->_triggerDrag1 )
+        {
+            TGVector3 vec3 = [self unprojectPoint:pt forObject:_targetedObject];
+            TGLog(LLGestureStuff, @"Sending object drag pt: %@", NSStringFromGLKVector3(TG3(vec3)));
+            _currentTriggers->_triggerDrag1(vec3);
+        }
+        if( _currentTriggers->_triggerDragPos )
+        {
+            TGLog(LLGestureStuff, @"Sending native drag pt: {%.4f, %.4f}",pt.x, pt.y);
+            _currentTriggers->_triggerDragPos(pt);
+        }
+    }
+    else if( mg.state == UIGestureRecognizerStateEnded )
+    {
+        _targetedObject = nil;
+    }
+    
+}
 @end

@@ -17,8 +17,6 @@
 
 @interface Camera : NSObject
 
--(id)cloneCamera;
-
 @property (nonatomic) GLKVector3 position;
 @property (nonatomic) GLKVector3 rotation;
 @property (nonatomic) GLKVector3 lookAt;
@@ -28,7 +26,8 @@
 -(void)setPerspective: (float)near far:(float)far frustumAngle:(float)degrees viewWidth:(float)viewWidth viewHeight:(float)viewHeight;
 -(void)setPerspectiveForViewWidth:(float)viewWidth andHeight:(float)viewHeight;
 
--(GLKMatrix4) projectionMatrix;
+-(GLKMatrix4)projectionMatrix;
+-(GLKMatrix4)projection;
 
 @end
 

@@ -11,6 +11,8 @@
 			<key>connections</key>
 			<array>
 				<dict>
+					<key>kTriggerPlayButton</key>
+					<string>kParamSceneAnimation</string>
 					<key>kTriggerDrag1</key>
 					<string>controllerPos</string>
 					<key>kTriggerPanX</key>
@@ -83,32 +85,6 @@
 			<string>Sphere-y</string>
 			<key>3d_element</key>
 			<string>spherey_element</string>
-			<key>audio_element</key>
-			<string>jazz</string>
-		</dict>
-		<key>running</key>
-		<dict>
-			<key>connections</key>
-			<array>
-				<dict>
-					<key>kTriggerDblTap</key>
-					<string>FixZoom</string>
-					<key>kTriggerPanY</key>
-					<string>Zoom</string>
-					<key>kTriggerDynamicPeak</key>
-					<string>Ping!</string>
-					<key>kTriggerTap1</key>
-					<string>RandomVibesNote</string>
-					<key>kTriggerMainSlider</key>
-					<string>kParamMasterVolume</string>
-				</dict>
-			</array>
-			<key>icon</key>
-			<string>runner.png</string>
-			<key>display</key>
-			<string>Running</string>
-			<key>3d_element</key>
-			<string>runningHero</string>
 			<key>audio_element</key>
 			<string>jazz</string>
 		</dict>
@@ -429,18 +405,6 @@
 	</dict>
 	<key>3d_elements</key>
 	<dict>
-		<key>bendyCyl</key>
-		<dict>
-			<key>instanceClass</key>
-			<string>GenericImport</string>
-			<key>properties</key>
-			<dict>
-				<key>drawMethod</key>
-				<string>triangle_strip</string>
-				<key>colladaFile</key>
-				<string>bendyCyl.dae</string>
-			</dict>
-		</dict>
 		<key>test</key>
 		<dict>
 			<key>instanceClass</key>
@@ -523,16 +487,6 @@
 			<integer>40</integer>
 			<key>icon</key>
 			<string>imageBaker.png</string>
-		</dict>
-		<key>bouncyMesh</key>
-		<dict>
-			<key>instanceClass</key>
-			<string>MeshImporter</string>
-			<key>properties</key>
-			<dict>
-				<key>meshName</key>
-				<string>bouncy.pod</string>
-			</dict>
 		</dict>
 		<key>fractalSphere</key>
 		<dict>

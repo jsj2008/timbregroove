@@ -463,6 +463,11 @@ TweenCallback TweenReverseLooper = ^TweenDoneIndicator(TriggerTween *tt) {
     return [self getTrigger:triggerName ofType:_C_INT cb:nil];
 }
 
+-(Vector3ParamBlock)getVector3Trigger:(const NSString *)triggerName
+{
+    return [self getTrigger:triggerName ofType:TGC_VECTOR3 cb:nil];
+}
+
 -(FloatParamBlock)getFloatTrigger:(NSString const *)triggerName cb:(TweenCallback)cb
 {
     return [self getTrigger:triggerName ofType:_C_FLT cb:cb];
@@ -482,5 +487,11 @@ TweenCallback TweenReverseLooper = ^TweenDoneIndicator(TriggerTween *tt) {
 {
     return [self getTrigger:triggerName ofType:_C_PTR  cb:cb];
 }
+
+-(Vector3ParamBlock)getVector3Trigger:(const NSString *)triggerName  cb:(TweenCallback)cb
+{
+    return [self getTrigger:triggerName ofType:TGC_VECTOR3 cb:cb];
+}
+
 
 @end

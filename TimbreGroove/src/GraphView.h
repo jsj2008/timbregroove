@@ -19,11 +19,15 @@
     ViewTriggers * _currentTriggers;
     id _targetedObject;
     
+    // for smart panning
     CGPoint _panLast;
     CGPoint _panPivot;
     bool    _xPanning;
     bool    _yPanning;
     int     _panDir;
+    
+    // for object movement
+    CGPoint _objectScale;
     
 }
 @property (nonatomic) GLKVector4 backcolor;

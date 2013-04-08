@@ -63,6 +63,7 @@ NSString const * kParamCameraZ          =   @"zCamera";
 NSString const * kParamLightDirection   =   @"Light Direction";
 NSString const * kParamLightColor       =   @"Color of Light";
 NSString const * kParamNewElement       =   @"Create";
+NSString const * kParamSceneAnimation   =   @"SceneAnimation";
 
 NSString const * kTriggerVPad1       =   @"VirtualPad1";
 NSString const * kTriggerVPad2       =   @"VirtualPad2";
@@ -82,7 +83,7 @@ NSString const * kTriggerDblTap      =   @"DblTap";
 NSString const * kTriggerPanX        =   @"PanX";
 NSString const * kTriggerPanY        =   @"PanY";
 NSString const * kTriggerDragPos     =   @"DragNative";
-NSString const * kTriggerDrag1       =   @"Drag";
+NSString const * kTriggerDrag1       =   @"ObjectDrag";
 NSString const * kTriggerDrag2       =   @"Drag2";
 NSString const * kTriggerDrag3       =   @"Drag3";
 NSString const * kTriggerDirection   =   @"Swipe Direction";
@@ -93,6 +94,7 @@ NSString const * kTriggerHold2       =   @"Hold2";
 NSString const * kTriggerHoldAndDrag =   @"HoldDrag";
 NSString const * kTriggerHoldAndTap  =   @"HoldTap";
 NSString const * kTriggerMainSlider  =   @"MainSlider";
+NSString const * kTriggerPlayButton  =   @"PlayButton";
 
 NSString const * kTriggerDynamicPeak     =   @"Loudness";
 NSString const * kTriggerDynamicHold     =   @"LoudnessHold";

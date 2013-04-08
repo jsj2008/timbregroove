@@ -71,6 +71,7 @@ void ensureNameMapDict()
       @"kParamCameraRotationY":  kParamCameraRotationY ,
       @"kParamCameraRotationZ":  kParamCameraRotationZ ,
       @"kParamCameraZ":  kParamCameraZ ,
+      @"kParamSceneAnimation": kParamSceneAnimation,
       
       @"kParamLightDirection":  kParamLightDirection ,
       @"kParamLightColor":  kParamLightColor ,
@@ -105,6 +106,7 @@ void ensureNameMapDict()
       @"kTriggerHoldAndDrag":  kTriggerHoldAndDrag ,
       @"kTriggerHoldAndTap":  kTriggerHoldAndTap ,
       @"kTriggerMainSlider":  kTriggerMainSlider ,
+      @"kTriggerPlayButton": kTriggerPlayButton,
       
       @"kTriggerDynamicPeak":  kTriggerDynamicPeak ,
       @"kTriggerDynamicHold":  kTriggerDynamicHold ,
