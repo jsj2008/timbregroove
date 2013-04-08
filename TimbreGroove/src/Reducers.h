@@ -14,4 +14,5 @@
 
 @interface NSDictionary (reducer)
 - (NSDictionary *)mapReduce:(BKKeyValueTransformBlock)block;
+- (NSMutableArray *)keyReduce:(BKKeyValueTransformBlock)block;
 @end

@@ -50,4 +50,21 @@
     return nil;
 }
 
+- (NSMutableArray *)keyReduce:(BKKeyValueTransformBlock)block {
+	NSParameterAssert(block != nil);
+	
+	NSMutableArray *result = [NSMutableArray new];
+    
+    [self enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+        id newKey = block(key,obj);
+        if( newKey )
+           [result addObject:newKey];
+    }];
+	
+    if( [result count] > 0 )
+        return result;
+    
+    return nil;
+}
+
 @end

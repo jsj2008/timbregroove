@@ -68,15 +68,13 @@
 
 -(id)getParamBlockOfType:(char)requestParamType
 {
-    if( _paramType == _C_VOID )
+    if( requestParamType == _paramType || _paramType == _C_VOID )
     {
         return _block;
     }
+    
     if( requestParamType == _C_FLT )
     {
-        if( _paramType == _C_FLT )
-            return _block;
-        
         if( _paramType == TGC_POINT )
         {
             return ^(float f) {
@@ -84,16 +82,8 @@
             };
         }
     }
-    else if( requestParamType == _C_INT )
-    {
-        if( requestParamType == _C_INT )
-            return  _block;
-    }
     else if( requestParamType == TGC_POINT )
     {
-        if( _paramType == TGC_POINT )
-            return _block;
-        
         if( _paramType == TGC_VECTOR3 )
         {
             return ^(CGPoint pt) {
@@ -111,9 +101,6 @@
     }
     else if( requestParamType == TGC_VECTOR3 )
     {
-        if( _paramType == TGC_VECTOR3 )
-            return _block;
-        
         if( _paramType == TGC_POINT )
         {
             return ^(GLKVector3 vec3) {
@@ -129,11 +116,7 @@
             };
         }
     }
-    else if( requestParamType == _C_PTR )
-    {
-        if( _paramType == _C_PTR )
-            return _block;
-    }
+
     TGLog(LLShitsOnFire, @"Unsupported param trigger: %c requested on a %c type",requestParamType,_paramType);
     exit(-1);
     return nil;

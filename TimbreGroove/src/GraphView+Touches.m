@@ -164,36 +164,26 @@
     }
 }
 
--(Parameter *)paramWrapperForObject:(TG3dObject *)targetObject parameter:(Parameter *)parameterToWrap
+-(Parameter *)paramWrapperForObject:(TG3dObject *)targetObject
+                          parameter:(Parameter *)parameterToWrap
 {
     char nativeType = parameterToWrap.nativeType;
 
     targetObject.interactive = true;
 
-    if( nativeType == TGC_POINT || nativeType == TGC_VECTOR3 )
+    if( nativeType == TGC_VECTOR3 )
     {
-        PointParamBlock orgBlock = [parameterToWrap getParamBlockOfType:TGC_POINT];
+        Vector3ParamBlock orgBlock = [parameterToWrap getParamBlockOfType:TGC_VECTOR3];
         
-        return [Parameter withBlock:[^(CGPoint pt) {            
+        return [Parameter withBlock:[^(TGVector3 vec3) {
             if( _targetedObject == targetObject )
             {
-                orgBlock(pt);
+                orgBlock(vec3);
             }
         } copy]];
     }
-    else if( nativeType == _C_FLT )
-    {
-        FloatParamBlock orgBlock = [parameterToWrap getParamBlockOfType:_C_FLT];
-        
-        return [Parameter withBlock:[^(float f) {
-            if( _targetedObject == targetObject )
-            {
-                orgBlock(f);
-            }
-        } copy ]];
-    }
-    
-    TGLog(LLShitsOnFire, @"Only CGPoint, Vector3 or float parameters can be targeted for specific objects");
+
+    TGLog(LLShitsOnFire, @"Only Vector3 parameters can be targeted for specific objects");
     exit(-1);
     return nil;
 }
@@ -378,13 +368,9 @@
 {
     GLKVector3 window_coord = GLKVector3Make(local_pt.x,local_pt.y, 0.0f);
     bool result;
-    int viewport[4];
     CGSize sz = self.frame.size;
-    viewport[0] = 0.0f;
-    viewport[1] = 0.0f;
-    viewport[2] = (int)sz.width;
-    viewport[3] = (int)sz.height;
-    GLKMatrix4 modelView = GLKMatrix4Identity;
+    int viewport[4] = { 0, 0, (int)sz.width, (int)sz.height };
+    GLKMatrix4 modelView = GLKMatrix4Identity; // um, is this supposed to LookAt?
     GLKVector3 near_pt = GLKMathUnproject(window_coord,
                                           modelView,
                                           [object.camera projectionMatrix],
@@ -404,7 +390,7 @@
     float far_pt_factor = fabs(far_pt.z)/z_magnitude;
     GLKVector3 vec3 = GLKVector3Add( GLKVector3MultiplyScalar(near_pt, far_pt_factor),
                                         GLKVector3MultiplyScalar(far_pt, near_pt_factor));
-    vec3.y = -vec3.y;
+    vec3.y = -vec3.y; // er...
     return *(TGVector3 *)&vec3;
 }
 

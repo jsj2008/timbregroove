@@ -12,5 +12,6 @@
 // startup options read from config.plist
 @property (nonatomic,strong) NSString * colladaFile;
 @property (nonatomic) GLint bufferDrawType;
+@property (nonatomic) bool runEmitter;
 @end
 

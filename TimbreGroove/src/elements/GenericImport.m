@@ -18,8 +18,6 @@
 #import "Cube.h"
 #import "Camera.h"
 
-#define VISIBLE_BONE_Z 1.5
-
 @interface VisibleBone : Generic {
 @public
     GLKMatrix4 _transform;
@@ -50,7 +48,8 @@
 {
     _scene = [ColladaParser parse:_colladaFile];
     [self showArmatures];
-//  [_scene emit];
+    if( _runEmitter )
+        [_scene emit];
     self.color = (GLKVector4){ 0.4, 1.0, 1.0, 0.7 };
     return [super wireUp];
 }
@@ -69,10 +68,10 @@
     if( _scene->_armatureTree )
     {
         static GLKVector4 colors[] = {
-            { 1, 0, 0, 0.5 },
-            { 0, 1, 0, 0.5 },
-            { 0, 1, 1, 0.5 },
-            { 1, 0, 1, 0.5 }
+            { 1, 0,   0, 0.5 },
+            { 0, 1,   0, 0.5 },
+            { 0, 0.5, 1, 0.5 },
+            { 1, 0,   1, 0.5 }
             };
         
         __block int nextColor = 0;
@@ -84,7 +83,6 @@
             vb->_node = node;
             vb->_transform = node->_world;
             GLKVector4 vec4 = GLKMatrix4GetRow(node->_world, 3);
-            vec4.z = VISIBLE_BONE_Z;
             vb.position = *(GLKVector3 *)&vec4;
             vb.color = colors[nextColor];
             nextColor = ++nextColor % 4;
@@ -228,7 +226,6 @@
             [self.children each:^(VisibleBone *vb) {
                 MeshSceneArmatureNode * node = vb->_node;
                 GLKVector4 vec4 = GLKMatrix4GetRow(node->_world, 3);
-                vec4.z = VISIBLE_BONE_Z;
                 vb.position = *(GLKVector3 *)&vec4;
             }];
             [self calculateInfluences];
@@ -246,7 +243,6 @@
 {
     [super wireUp];
     self.disableStandarParameters = true;
-    self.interactive = true;
     return self;
 }
 
@@ -264,7 +260,7 @@
 {
     [super getParameters:putHere];
     
-    putHere[@"controllerPos"] = [Parameter withBlock:^(TGVector3 vec3) {
+    Parameter * parameter = [Parameter withBlock:^(TGVector3 vec3) {
         self.position = TG3(vec3);
         _node->_transform = (GLKMatrix4){
             1, 0, 0, vec3.y,
@@ -272,10 +268,11 @@
             0, 0, 1, vec3.z,
             0, 0, 1, 0
         };
-        
         [(GenericImport *)_parent calculateInfluences];
     }];
-
+    parameter.targetObject = self;
+    NSString * paramName = [NSString stringWithFormat:@"controllerPos#%@",_node->_name];
+    putHere[paramName] = parameter;
 }
 
 @end

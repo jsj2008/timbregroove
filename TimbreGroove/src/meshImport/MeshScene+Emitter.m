@@ -12,12 +12,14 @@
 
 static void dumpMatrix(GLKMatrix4 m)
 {
+    TGLogp(LLMeshImporter, NSStringFromGLKMatrix4(m));
+    /*
     printf("{ %+.4G, %+.4G, %+.4G, %+.4G, \n  %+.4G, %+.4G, %+.4G, %+.4G, \n  %+.4G, %+.4G, %+.4G, %+.4G, \n  %+.4G, %+.4G, %+.4G, %+.4G }",
            m.m00, m.m01, m.m02, m.m03,
            m.m10, m.m11, m.m12, m.m13,
            m.m20, m.m21, m.m22, m.m23,
            m.m30, m.m31, m.m32, m.m33 );
-    
+    */
 }
 
 @implementation MeshScene (Emitter)

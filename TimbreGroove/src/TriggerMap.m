@@ -307,6 +307,8 @@ TweenCallback TweenReverseLooper = ^TweenDoneIndicator(TriggerTween *tt) {
     // NSString name : NSArray[] names (from above)
     NSMutableDictionary * _mappings;
     
+    NSArray * _sortedParamNames; // optimzation
+    
     NSMutableSet * _tweenerReleasePool;
     
     __weak id<TriggerMapProtocol> _delegate;
@@ -346,6 +348,7 @@ TweenCallback TweenReverseLooper = ^TweenDoneIndicator(TriggerTween *tt) {
 -(void)addParameters:(NSDictionary *)nameKeyParamValues
 {
     [_parameters addEntriesFromDictionary:nameKeyParamValues];
+    _sortedParamNames = [[_parameters allKeys] sortedArrayUsingSelector:@selector(compare:)];
 }
 
 -(void)addMappings:(NSDictionary *)triggerKeyParamNameValues
@@ -370,6 +373,37 @@ TweenCallback TweenReverseLooper = ^TweenDoneIndicator(TriggerTween *tt) {
         else
             [_mappings removeObjectForKey:triggerName];
     }];
+}
+
+-(NSArray *)checkForObjectMappings:(NSArray *)paramNames
+                       triggerName:(NSString const *)triggerName
+{
+    NSMutableArray * newNames = nil;
+    
+    for( NSString * paramName in paramNames )
+    {
+        NSString * name = [paramName stringByAppendingString:@"#"];
+        NSRange range = (NSRange){ 0, [name length] };
+        NSArray * matching = [_sortedParamNames objectsAtIndexes:[_sortedParamNames indexesOfObjectsPassingTest:^BOOL(NSString * paramName,
+                                                                                                                      NSUInteger idx,
+                                                                                                                      BOOL *stop) {
+            NSComparisonResult result = [paramName compare:name
+                                                   options:NSLiteralSearch
+                                                     range:range];
+            *stop = result == NSOrderedDescending;
+            return result == NSOrderedSame;
+        }]];
+        
+        if( [matching count] )
+        {
+            if( !newNames )
+                newNames = [NSMutableArray arrayWithArray:paramNames];
+            [newNames addObjectsFromArray:matching];
+            [newNames removeObject:paramName];
+        }
+    }
+    
+    return newNames ? newNames : paramNames;
 }
 
 -(id)getTrigger:(NSString const *)triggerName ofType:(char)type cb:(id)callback
@@ -412,6 +446,8 @@ TweenCallback TweenReverseLooper = ^TweenDoneIndicator(TriggerTween *tt) {
     if( !paramNames ) // maybe it's not a trigger, but a param name?
         return blockForParamName(triggerName);
 
+    paramNames = [self checkForObjectMappings:paramNames triggerName:triggerName];
+    
     NSArray * arrayOfBlocks = [paramNames reduce:blockForParamName];
 
     if( !arrayOfBlocks )
@@ -438,6 +474,10 @@ TweenCallback TweenReverseLooper = ^TweenDoneIndicator(TriggerTween *tt) {
     else if( type == _C_INT )
     {
         retBlock =  ^(int i) {[arrayOfBlocks apply:^(IntParamBlock blk) { blk(i);}];};
+    }
+    else if( type == TGC_VECTOR3 )
+    {
+        retBlock = ^(TGVector3 v){[arrayOfBlocks apply:^(Vector3ParamBlock blk) { blk(v); }]; };
     }
     
     return [retBlock copy];

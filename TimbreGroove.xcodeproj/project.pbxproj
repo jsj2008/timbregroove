@@ -213,6 +213,7 @@
 		57DF536A16DC1A6000990B8D /* Serenity.m in Sources */ = {isa = PBXBuildFile; fileRef = 57DF536916DC1A6000990B8D /* Serenity.m */; };
 		57DF9C8116B5B9AB00050635 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57DF9C8016B5B9AB00050635 /* AVFoundation.framework */; };
 		57DF9C8416B5BE2500050635 /* SoundSystem.m in Sources */ = {isa = PBXBuildFile; fileRef = 57DF9C8316B5BE2500050635 /* SoundSystem.m */; };
+		57E0CD8D1713236F00F83113 /* walk.dae in Resources */ = {isa = PBXBuildFile; fileRef = 57E0CD8C1713236F00F83113 /* walk.dae */; };
 		57E1954616ABECA50099514B /* PoolShader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 57E1954516ABECA50099514B /* PoolShader.vsh */; };
 		57E1954A16ABEEBD0099514B /* SphereOid.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E1954916ABEEBD0099514B /* SphereOid.m */; };
 		57E27F0416F9166600282F9A /* m.mid in Resources */ = {isa = PBXBuildFile; fileRef = 57E27F0316F9166600282F9A /* m.mid */; };
@@ -537,6 +538,7 @@
 		57DF9C8016B5B9AB00050635 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		57DF9C8216B5BE2500050635 /* SoundSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SoundSystem.h; sourceTree = "<group>"; };
 		57DF9C8316B5BE2500050635 /* SoundSystem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SoundSystem.m; sourceTree = "<group>"; };
+		57E0CD8C1713236F00F83113 /* walk.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = walk.dae; sourceTree = "<group>"; };
 		57E1954516ABECA50099514B /* PoolShader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = PoolShader.vsh; sourceTree = "<group>"; };
 		57E1954816ABEEAC0099514B /* SphereOid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SphereOid.h; sourceTree = "<group>"; };
 		57E1954916ABEEBD0099514B /* SphereOid.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SphereOid.m; sourceTree = "<group>"; };
@@ -615,6 +617,7 @@
 		5700235516A55460006F0E8E /* models */ = {
 			isa = PBXGroup;
 			children = (
+				57E0CD8C1713236F00F83113 /* walk.dae */,
 				57E7EB9C170FA83E00D3DC88 /* ballStretch.dae */,
 				57E7EB98170F6B7100D3DC88 /* boxStretch.dae */,
 			);
@@ -1428,6 +1431,7 @@
 				5714706417069A3000383D04 /* numText.png in Resources */,
 				57E7EB99170F6B7100D3DC88 /* boxStretch.dae in Resources */,
 				57E7EB9D170FA83E00D3DC88 /* ballStretch.dae in Resources */,
+				57E0CD8D1713236F00F83113 /* walk.dae in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

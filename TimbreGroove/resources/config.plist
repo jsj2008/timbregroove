@@ -11,22 +11,18 @@
 			<key>connections</key>
 			<array>
 				<dict>
+					<key>kTriggerMainSlider</key>
+					<string>kParamMasterVolume</string>
+					<key>kTriggerTap1</key>
+					<string>RandomVibesNote</string>
+					<key>kTriggerPanY</key>
+					<string>kParamCameraZ</string>
 					<key>kTriggerPlayButton</key>
 					<string>kParamSceneAnimation</string>
 					<key>kTriggerDrag1</key>
 					<string>controllerPos</string>
 					<key>kTriggerPanX</key>
 					<string>kParamCameraRotationY</string>
-				</dict>
-				<dict>
-					<key>kTriggerDblTap</key>
-					<string>FixZoom</string>
-					<key>kTriggerPanY</key>
-					<string>kParamCameraZ</string>
-					<key>kTriggerTap1</key>
-					<string>RandomVibesNote</string>
-					<key>kTriggerMainSlider</key>
-					<string>kParamMasterVolume</string>
 				</dict>
 			</array>
 			<key>icon</key>
@@ -416,7 +412,7 @@
 				<key>drawMethod</key>
 				<string>triangles</string>
 				<key>colladaFile</key>
-				<string>ballStretch.dae</string>
+				<string>walk.dae</string>
 			</dict>
 		</dict>
 		<key>spherey_element</key>
