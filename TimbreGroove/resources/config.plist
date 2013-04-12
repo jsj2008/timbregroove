@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>default_scene</key>
-	<string>ball</string>
+	<string>tex</string>
 	<key>scenes</key>
 	<dict>
 		<key>ball</key>
@@ -66,7 +66,7 @@
 			<key>audio_element</key>
 			<string>jazz</string>
 		</dict>
-		<key>plasticOnoBag</key>
+		<key>tex</key>
 		<dict>
 			<key>connections</key>
 			<array>
@@ -90,9 +90,9 @@
 			<key>icon</key>
 			<string>runner.png</string>
 			<key>display</key>
-			<string>Plastic Ono</string>
+			<string>tex</string>
 			<key>3d_element</key>
-			<string>test</string>
+			<string>tex</string>
 			<key>audio_element</key>
 			<string>jazz</string>
 		</dict>
@@ -420,7 +420,7 @@
 			<key>properties</key>
 			<dict>
 				<key>runEmitter</key>
-				<true/>
+				<false/>
 				<key>scaleXYZ</key>
 				<real>1</real>
 				<key>drawType</key>
@@ -436,7 +436,7 @@
 			<key>properties</key>
 			<dict>
 				<key>runEmitter</key>
-				<true/>
+				<false/>
 				<key>scaleXYZ</key>
 				<real>1</real>
 				<key>drawType</key>
@@ -445,14 +445,14 @@
 				<string>boxStretch.dae</string>
 			</dict>
 		</dict>
-		<key>test</key>
+		<key>tex</key>
 		<dict>
 			<key>instanceClass</key>
 			<string>GenericImport</string>
 			<key>properties</key>
 			<dict>
 				<key>runEmitter</key>
-				<false/>
+				<true/>
 				<key>scaleXYZ_not</key>
 				<real>0.25</real>
 				<key>drawType</key>

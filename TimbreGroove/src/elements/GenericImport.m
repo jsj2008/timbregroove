@@ -22,6 +22,7 @@
 @public
     MeshSceneArmatureNode * _node;
 }
+-(void)updateTransformFromPos;
 @end
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -89,11 +90,12 @@
             vb->_node = node;
             GLKVector3 vec3 = POSITION_FROM_MAT(node->_world);
             vb.position = vec3;
+            [vb updateTransformFromPos];
             vb.color = colors[nextColor];
             nextColor = ++nextColor % 4;
             [self appendChild:[vb wireUp]];
         };
-        
+
         if( _scene->_animations )
         {
             [_scene->_animations each:^(MeshAnimation * animation) {
@@ -293,12 +295,10 @@
     [self addBuffer:mb];
 }
 
--(void)setPosition:(GLKVector3)vec3
+-(void)updateTransformFromPos
 {
-    [super setPosition:vec3];
-    GLKMatrix4 m = _node->_invBindMatrix;
-    _node->_transform = GLKMatrix4Multiply(m, GLKMatrix4MakeTranslation( vec3.x, vec3.y, vec3.z ) );
-    [(GenericImport *)_parent calculateInfluences];
+    GLKVector3 vec3 = self.position;
+    _node->_transform = GLKMatrix4Translate(_node->_invBindMatrix, vec3.x, vec3.y, vec3.z );
 }
 
 -(void)getParameters:(NSMutableDictionary *)putHere
@@ -307,6 +307,8 @@
     
     Parameter * parameter = [Parameter withBlock:^(TGVector3 vec3) {
         self.position = TG3(vec3);
+        [self updateTransformFromPos];
+        [(GenericImport *)_parent calculateInfluences];
     }];
     parameter.targetObject = self;
     NSString * paramName = [NSString stringWithFormat:@"controllerPos#%@",_node->_name];
