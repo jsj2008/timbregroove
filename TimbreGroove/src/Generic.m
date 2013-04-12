@@ -32,7 +32,6 @@ NSString const * kShaderFeatureBones = @"#define BONES\n";
     bool _supportMeshBind;
     NSMutableArray * _buffers;
 }
-
 @end
 
 @implementation GenericBase
@@ -179,8 +178,9 @@ NSString const * kShaderFeatureBones = @"#define BONES\n";
     if( _supportPrepare )
         [shader prepareRender:self];
 
-    [self bindTextures:true];
-    
+    if( !_drawWireFrame )
+        [self bindTextures:true];
+
     if( [_buffers count] == 1 )
     {
         MeshBuffer * b = _buffers[0];
@@ -202,7 +202,9 @@ NSString const * kShaderFeatureBones = @"#define BONES\n";
         for( MeshBuffer * b in _buffers )
             [b unbind];
     }
-    [self bindTextures:false];
+    
+    if( !_drawWireFrame )
+        [self bindTextures:false];
 }
 
 -(void)renderToCaptureAtBufferLocation:(GLint)location

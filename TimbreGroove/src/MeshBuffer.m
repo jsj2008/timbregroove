@@ -14,9 +14,10 @@
 
 @interface MeshBuffer()
 {
+@protected
     unsigned int   _numVertices;
     unsigned int   _numIndices;
-    VertexStride _strides[MAX_STRIDES];
+    VertexStride   _strides[MAX_STRIDES];
     unsigned int   _numStrides;
     unsigned int   _strideSize;
     GLsizei        _bufferSize;
@@ -222,5 +223,44 @@
     stride.indexIntoShaderNames = indexIntoNames;
     [self setData:rgba strides:&stride countStrides:1 numVertices:numColors indexData:NULL numIndices:0];
     self.drawable = false;
+}
+@end
+
+@implementation WireFrame
+
+-(id)initWithIndexBuffer:(unsigned int *)indices
+                    data:(float *)data
+          geometryBuffer:(MeshBuffer *)buffer
+{
+    self = [super init];
+    if( self )
+    {
+        unsigned int numIndices      = buffer->_numIndices;
+        unsigned int numLineIndices = (numIndices / 3) * 6;
+        unsigned int offset_line = 0;
+        unsigned int * lineArray = malloc( numLineIndices * sizeof(unsigned int));
+        for ( unsigned int f = 0; f < numIndices; f += 3)
+        {
+            lineArray[ offset_line++ ] = indices[f];
+            lineArray[ offset_line++ ] = indices[f + 1];
+            
+            lineArray[ offset_line++ ] = indices[f + 1];
+            lineArray[ offset_line++ ] = indices[f + 2];
+            
+            lineArray[ offset_line++ ] = indices[f + 2];
+            lineArray[ offset_line++ ] = indices[f];
+        }
+        [self setData:data
+              strides:buffer->_strides
+         countStrides:buffer->_numStrides
+          numVertices:buffer->_numVertices
+            indexData:lineArray
+           numIndices:numLineIndices];
+ 
+        free(lineArray);
+        
+        self.drawType = GL_LINES;
+    }
+    return self;
 }
 @end

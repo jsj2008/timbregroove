@@ -198,7 +198,7 @@
 
 -(void)getParameters:(NSMutableDictionary *)parameters
 {
-    if( !_disableStandarParameters )
+    if( !_disableStandardParameters )
     {
         parameters[kParamRotationX] = [Parameter withBlock:^(float f) {
             GLKVector3 r = self.rotation;
@@ -238,6 +238,12 @@
             GLKVector3 r = camera.position;
             r.z += f * 3.0;
             camera.position = r;
+        }];
+        
+        parameters[kParamCameraReset] = [Parameter withBlock:^(CGPoint pt) {
+            Camera * camera = self.camera;
+            camera.position = (GLKVector3){ 0, 0, CAMERA_DEFAULT_Z };
+            camera.rotation = (GLKVector3){ 0, 0, 0 };
         }];
     }
 }

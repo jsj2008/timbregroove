@@ -55,7 +55,7 @@ NSString const * kParamCurveWidth   = @"CurveWidth";
 
 -(id)wireUp
 {
-    self.disableStandarParameters = true;
+    self.disableStandardParameters = true;
     
     [super wireUp];
     

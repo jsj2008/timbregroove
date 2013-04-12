@@ -72,6 +72,8 @@ void ensureNameMapDict()
       @"kParamCameraRotationZ":  kParamCameraRotationZ ,
       @"kParamCameraZ":  kParamCameraZ ,
       @"kParamSceneAnimation": kParamSceneAnimation,
+      @"kParamCameraReset": kParamCameraReset,
+      
       
       @"kParamLightDirection":  kParamLightDirection ,
       @"kParamLightColor":  kParamLightColor ,

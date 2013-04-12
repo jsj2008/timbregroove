@@ -13,5 +13,6 @@
 @property (nonatomic,strong) NSString * colladaFile;
 @property (nonatomic) GLint bufferDrawType;
 @property (nonatomic) bool runEmitter;
+@property (nonatomic) bool runAnimations;
 @end
 

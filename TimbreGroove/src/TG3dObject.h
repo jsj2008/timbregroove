@@ -58,7 +58,7 @@
 - (GLKMatrix4) modelView; // based on position/rotation/scale
 - (GLKMatrix4) calcPVM;   // combine camera and model
 
-@property (nonatomic) bool disableStandarParameters;
+@property (nonatomic) bool disableStandardParameters;
 
 - (void)getSettings:(NSMutableArray *)putHere;
 - (void)getParameters:(NSMutableDictionary *)putHere;

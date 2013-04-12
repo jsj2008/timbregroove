@@ -13,6 +13,7 @@
 -(id)initWithGeometryBuffer:(MeshGeometryBuffer *)bufferInfo
      andIndexIntoShaderName:(int)iisn
 {
+    static VertexStrideType strideMap[] = { st_float1, st_float2, st_float3, st_float4 };
     self = [super init];
     if( self )
     {
@@ -22,20 +23,7 @@
         stride.location = -1;
         stride.numbersPerElement = bufferInfo->stride;
         stride.numSize = sizeof(float);
-        switch (stride.numbersPerElement) {
-            case 1:
-                stride.strideType = st_float1;
-                break;
-            case 2:
-                stride.strideType = st_float2;
-                break;
-            case 3:
-                stride.strideType = st_float3;
-                break;
-            case 4:
-                stride.strideType = st_float4;
-                break;
-        };
+        stride.strideType = strideMap[ bufferInfo->stride ];
         
         [self setData:bufferInfo->data
               strides:&stride

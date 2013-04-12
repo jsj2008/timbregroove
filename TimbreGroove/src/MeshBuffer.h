@@ -89,6 +89,13 @@ static inline VertexStride * StrideInit1f(VertexStride * s)
 
 @end
 
+@interface WireFrame : MeshBuffer
+-(id)initWithIndexBuffer:(unsigned int *)indices
+                    data:(float *)data
+          geometryBuffer:(MeshBuffer *)buffer;
+@end
+
 @interface ColorBuffer : MeshBuffer
 -(void)setDataWithRGBAs:(float *)rgba numColors:(unsigned int)numColors indexIntoNames:(int)indexIntoNames;
 @end
+

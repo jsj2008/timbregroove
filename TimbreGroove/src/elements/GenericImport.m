@@ -20,8 +20,6 @@
 
 @interface VisibleBone : Generic {
 @public
-    GLKMatrix4 _transform;
-    GLKVector3 _vec3;
     MeshSceneArmatureNode * _node;
 }
 @end
@@ -30,9 +28,8 @@
 
 @implementation GenericImport {
     MeshScene * _scene;
-    MeshBuffer * _mb;
-    
-    bool _runAnimations;
+    MeshBuffer * _drawingBuffer;
+    bool _doWireframe;
 }
 
 - (id)init
@@ -47,11 +44,18 @@
 -(id)wireUp
 {
     _scene = [ColladaParser parse:_colladaFile];
+    self.color = (GLKVector4){ 0.4, 1.0, 1.0, 0.7 };
+    [super wireUp];
     [self showArmatures];
     if( _runEmitter )
+    {
+        LogLevel logl = TGGetLogLevel();
+        TGSetLogLevel(logl | LLMeshImporter);
         [_scene emit];
-    self.color = (GLKVector4){ 0.4, 1.0, 1.0, 0.7 };
-    return [super wireUp];
+        TGSetLogLevel(logl);
+    }
+ //   [self playFirstFrame];
+    return self;
 }
 
 -(void)getParameters:(NSMutableDictionary *)putHere
@@ -76,14 +80,15 @@
         
         __block int nextColor = 0;
         
+  //      float posScale = self.scaleXYZ;
+        
         static void (^createBones)(MeshSceneArmatureNode *) = nil;
         
         createBones = ^(MeshSceneArmatureNode * node) {
             VisibleBone * vb = [[VisibleBone alloc] init];
             vb->_node = node;
-            vb->_transform = node->_world;
-            GLKVector4 vec4 = GLKMatrix4GetRow(node->_world, 3);
-            vb.position = *(GLKVector3 *)&vec4;
+            GLKVector3 vec3 = POSITION_FROM_MAT(node->_world);
+            vb.position = vec3;
             vb.color = colors[nextColor];
             nextColor = ++nextColor % 4;
             [self appendChild:[vb wireUp]];
@@ -113,6 +118,12 @@
         _bufferDrawType = GL_TRIANGLES;
     else if([drawType caseInsensitiveCompare:@"triangle_strip"] == NSOrderedSame)
         _bufferDrawType = GL_TRIANGLE_STRIP;
+    else if([drawType caseInsensitiveCompare:@"wireframe"] == NSOrderedSame)
+    {
+        _bufferDrawType = GL_TRIANGLES;
+        _doWireframe = true;
+    }
+    
 }
 
 -(void)releaseScene
@@ -132,7 +143,7 @@
     self.light.direction = GLKMatrix4MultiplyVector3(mx,(GLKVector3){-1, 0, -1});
 }
 
--(void)createTexture
+-(void)createTexturexxx
 {
     self.texture = [[Texture alloc] initWithFileName:@"numText.png"];
 }
@@ -160,14 +171,23 @@
         MeshGeometryBuffer * mgb = geometry->_buffers + key;
         if( mgb->data )
         {
-            MeshSceneBuffer * msb = [[MeshSceneBuffer alloc] initWithGeometryBuffer:mgb
+            MeshBuffer * msb = [[MeshSceneBuffer alloc] initWithGeometryBuffer:mgb
                                                              andIndexIntoShaderName:indexIntoNamesMap[key]];
             if( key == MSKPosition )
             {
-                _mb = msb;
-                if( _scene->_mesh->_skin )
-                    msb.usage = GL_DYNAMIC_DRAW;
-                msb.drawType = _bufferDrawType;
+                //if( _scene->_mesh->_skin )
+                //    msb.usage = GL_DYNAMIC_DRAW;
+                if( _bufferDrawType )
+                    msb.drawType = _bufferDrawType;
+                
+                if( _doWireframe )
+                {
+                    msb = [[WireFrame alloc] initWithIndexBuffer:mgb->indexData
+                                                                       data:mgb->data
+                                                             geometryBuffer:msb];
+                    
+                }
+                _drawingBuffer = msb;
             }
             else
             {
@@ -190,9 +210,32 @@
         MeshGeometryBuffer * b = geometry->_buffers;
         float * p = malloc( sizeof(float) * b->numFloats );
         [skin influence:b dest:p];
-        [_mb setData:p];
+        [_drawingBuffer setData:p];
         free(p);
     }    
+}
+
+-(void)playFirstFrame
+{
+    if( _scene->_animations )
+    {
+        [_scene->_animations each:^(MeshAnimation * animation) {
+            
+            MeshSceneNode * node = animation->_target;
+            node->_transform = animation->_transforms[0];
+        }];
+        [self updateVisibleBones];
+    }
+}
+
+-(void)updateVisibleBones
+{
+    [self.children each:^(VisibleBone *vb) {
+        MeshSceneArmatureNode * node = vb->_node;
+        GLKVector3 vec3 = POSITION_FROM_MAT( node->_world );
+        vb.position = vec3;
+    }];
+    [self calculateInfluences];
 }
 
 -(void)update:(NSTimeInterval)dt
@@ -222,14 +265,7 @@
         }];
         
         if( dirty )
-        {
-            [self.children each:^(VisibleBone *vb) {
-                MeshSceneArmatureNode * node = vb->_node;
-                GLKVector4 vec4 = GLKMatrix4GetRow(node->_world, 3);
-                vb.position = *(GLKVector3 *)&vec4;
-            }];
-            [self calculateInfluences];
-        }
+            [self updateVisibleBones];
     }
 }
 
@@ -237,23 +273,32 @@
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+
 @implementation VisibleBone
 
 -(id)wireUp
 {
     [super wireUp];
-    self.disableStandarParameters = true;
+    self.disableStandardParameters = true;
     return self;
 }
 
 -(void)createBuffer
 {
-    MeshBuffer * mb = [Cube cubeWithWidth:0.1
+    MeshBuffer * mb = [Cube cubeWithWidth:0.25
                       andIndicesIntoNames:@[@(gv_pos)]
                                  andDoUVs:false
                              andDoNormals:false];
     
     [self addBuffer:mb];
+}
+
+-(void)setPosition:(GLKVector3)vec3
+{
+    [super setPosition:vec3];
+    GLKMatrix4 m = _node->_invBindMatrix;
+    _node->_transform = GLKMatrix4Multiply(m, GLKMatrix4MakeTranslation( vec3.x, vec3.y, vec3.z ) );
+    [(GenericImport *)_parent calculateInfluences];
 }
 
 -(void)getParameters:(NSMutableDictionary *)putHere
@@ -262,13 +307,6 @@
     
     Parameter * parameter = [Parameter withBlock:^(TGVector3 vec3) {
         self.position = TG3(vec3);
-        _node->_transform = (GLKMatrix4){
-            1, 0, 0, vec3.y,
-            0, 1, 0, -vec3.x,
-            0, 0, 1, vec3.z,
-            0, 0, 1, 0
-        };
-        [(GenericImport *)_parent calculateInfluences];
     }];
     parameter.targetObject = self;
     NSString * paramName = [NSString stringWithFormat:@"controllerPos#%@",_node->_name];

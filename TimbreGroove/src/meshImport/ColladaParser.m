@@ -46,6 +46,7 @@ typedef enum _ColladaTagState
 
 #define EQMAT4(a,b) ( memcmp(a.m,b.m,sizeof(a.m)) == 0 )
 
+
 static float * parseFloats(NSString * str, int * numFloats)
 {
     str = [str stringByTrimmingCharactersInSet:
@@ -416,7 +417,13 @@ typedef enum _NodeCoordSpec {
             else if( EQSTR(ia->_paramName,kValue_name_TRANSFORM) )
             {
                 if( EQSTR(ia->_paramType,kValue_type_float4x4) )
-                    ia->_animation->_transforms = (GLKMatrix4 *)_floatArray;
+                {
+                    unsigned int numMatrices = _floatArrayCount / 16;
+                    GLKMatrix4 * mats = (GLKMatrix4 *)_floatArray;
+                    for( unsigned int i = 0; i < numMatrices; i++ )
+                        mats[i] = GLKMatrix4Transpose(mats[i]);
+                    ia->_animation->_transforms = mats;
+                }
                 _floatArray = NULL;
                 _floatArrayCount = 0;
             }
@@ -760,7 +767,7 @@ typedef enum _NodeCoordSpec {
         
         if( EQSTR(elementName, kTag_bind_shape_matrix) )
         {
-            iskin->_bindShapeMatrix = *(GLKMatrix4 *)_floatArray;
+            iskin->_bindShapeMatrix = GLKMatrix4MakeWithArrayAndTranspose(_floatArray);
             _floatArray = NULL;
             _floatArrayCount = 0;
             return;
@@ -823,7 +830,9 @@ typedef enum _NodeCoordSpec {
             {
                 IncomingNode * inode = [incnt->_nodeStack lastObject];
                 inode->_msnType = MSNT_Mesh;
-                SET(kColStateCaptureText);
+                
+                // we don't really need the "skeleton" name here
+                //SET(kColStateCaptureText);
                 return;
             }
             
@@ -892,7 +901,7 @@ typedef enum _NodeCoordSpec {
             if( EQSTR(elementName, kTag_matrix) )
             {
                 IncomingNode * inode = [incnt->_nodeStack lastObject];
-                    inode->_transform = *(GLKMatrix4 *)_floatArray;
+                inode->_transform = GLKMatrix4MakeWithArrayAndTranspose(_floatArray);
                 _floatArray = NULL;
                 _floatArrayCount = 0;
                 return;
@@ -1421,11 +1430,11 @@ foundCharacters:(NSString *)string
         MeshSkinning * sceneSkin = [MeshSkinning new];
         IncomingSkin * iskin = _skins[ meshNode->_skinName];
         
-        sceneSkin->_bindShapeMatrix = iskin->_bindShapeMatrix;
-        sceneSkin->_influencingJointCounts          = iskin->_weights->_vcounts;
-        sceneSkin->_numInfluencingJointCounts       = iskin->_weights->_numVcounts;
+        sceneSkin->_bindShapeMatrix             = iskin->_bindShapeMatrix;
+        sceneSkin->_influencingJointCounts      = iskin->_weights->_vcounts;
+        sceneSkin->_numInfluencingJointCounts   = iskin->_weights->_numVcounts;
         sceneSkin->_packedWeightIndices         = iskin->_weights->_weights;
-        sceneSkin->_numPackedWeightIndicies      = iskin->_weights->_numWeights;
+        sceneSkin->_numPackedWeightIndicies     = iskin->_weights->_numWeights;
         
         for( int i = 0; i < iskin->_weights->_nextInput; i++ )
         {
@@ -1450,13 +1459,12 @@ foundCharacters:(NSString *)string
         {
             if( EQSTR(iss->_paramName, kValue_name_TRANSFORM) )
             {
-                GLKMatrix4 * mats = (GLKMatrix4 *)iss->_data;
+                GLKMatrix4 * mats = (GLKMatrix4 *)(iss->_data);
                 
                 for( NSString * jointName in jointNameArray )
                 {
                     MeshSceneArmatureNode * joint = findJointWithName(jointName,nil);
-                    joint->_invBindMatrix = *mats;
-                    mats++;
+                    joint->_invBindMatrix = GLKMatrix4Transpose(*mats++);
                 }
             }
             else if( EQSTR(iss->_paramName, kValue_name_WEIGHT) )
@@ -1470,11 +1478,6 @@ foundCharacters:(NSString *)string
             MeshSceneArmatureNode * joint = findJointWithName(jointName,nil);
             [sceneSkin->_influencingJoints addObject:joint];
         }
-
-        /*
-        MeshSceneArmatureNode * joint = findJointWithName(@"Top",nil);
-        [sceneSkin->_influencingJoints addObject:joint];
-         */
 
         sceneSkin->_geometry = getGeometry( iskin->_meshSource );
         sceneMeshNode->_skin = sceneSkin;
@@ -1497,6 +1500,7 @@ foundCharacters:(NSString *)string
             
             MeshAnimation * sceneAnim = _animations[namePath];
             
+#ifdef OPTIMIZE_ANIMATIONS
             GLKMatrix4 * firstMat = &sceneAnim->_transforms[0];
             
             bool allSame = true;
@@ -1508,28 +1512,20 @@ foundCharacters:(NSString *)string
                     break;
                 }
             }
+
             if( !allSame )
+#endif
             {
-                bool needsHack = true;
-                GLKMatrix3 mat3 = GLKMatrix4GetMatrix3(sceneAnim->_transforms[0]);
-                
-                for( int a = 1; a < sceneAnim->_numFrames; a++ )
-                {
-                    GLKMatrix3 test = GLKMatrix4GetMatrix3(sceneAnim->_transforms[0]);
-                    if( !EQMAT4(mat3,test) )
-                    {
-                        needsHack = false;
-                        break;
-                    }
-                }
-                
                 MeshSceneArmatureNode * joint = findJointWithName(parts[0],nil);
-                joint->_translateHack = needsHack;
                 sceneAnim->_target = joint;
                 sceneAnim->_property = parts[1];
                 [scene->_animations addObject:sceneAnim];
             }
         }
+    }
+    else
+    {
+        scene->_animations = nil;
     }
     
     return scene;

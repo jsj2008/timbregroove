@@ -200,6 +200,7 @@
 		57BE7FB616CACA0D001972ED /* RingBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57BE7FB416CACA0C001972ED /* RingBuffer.cpp */; };
 		57BF036716C61C2300148359 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57BF036616C61C2300148359 /* CoreAudio.framework */; };
 		57C3BB8516C6B5B000899F4B /* SoundSystem+Diag.m in Sources */ = {isa = PBXBuildFile; fileRef = 57C3BB8416C6B5B000899F4B /* SoundSystem+Diag.m */; };
+		57C7BA8A171686AF000C82E8 /* tex.dae in Resources */ = {isa = PBXBuildFile; fileRef = 57C7BA89171686AF000C82E8 /* tex.dae */; };
 		57CAF78516891EDB00459353 /* libc++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 57CAF78416891EDA00459353 /* libc++.dylib */; };
 		57CB3B0716BE148A007C093C /* rabbit.png in Resources */ = {isa = PBXBuildFile; fileRef = 57CB3B0516BE148A007C093C /* rabbit.png */; };
 		57CB3B0816BE148A007C093C /* snail.png in Resources */ = {isa = PBXBuildFile; fileRef = 57CB3B0616BE148A007C093C /* snail.png */; };
@@ -518,6 +519,7 @@
 		57BF036616C61C2300148359 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		57C3BB8316C6B5B000899F4B /* SoundSystem+Diag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SoundSystem+Diag.h"; sourceTree = "<group>"; };
 		57C3BB8416C6B5B000899F4B /* SoundSystem+Diag.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "SoundSystem+Diag.m"; sourceTree = "<group>"; };
+		57C7BA89171686AF000C82E8 /* tex.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = tex.dae; sourceTree = "<group>"; };
 		57C9E6A416EDC66C005F44D1 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
 		57CAF78416891EDA00459353 /* libc++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libc++.dylib"; path = "usr/lib/libc++.dylib"; sourceTree = SDKROOT; };
 		57CB3B0516BE148A007C093C /* rabbit.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = rabbit.png; sourceTree = "<group>"; };
@@ -617,6 +619,7 @@
 		5700235516A55460006F0E8E /* models */ = {
 			isa = PBXGroup;
 			children = (
+				57C7BA89171686AF000C82E8 /* tex.dae */,
 				57E0CD8C1713236F00F83113 /* walk.dae */,
 				57E7EB9C170FA83E00D3DC88 /* ballStretch.dae */,
 				57E7EB98170F6B7100D3DC88 /* boxStretch.dae */,
@@ -1432,6 +1435,7 @@
 				57E7EB99170F6B7100D3DC88 /* boxStretch.dae in Resources */,
 				57E7EB9D170FA83E00D3DC88 /* ballStretch.dae in Resources */,
 				57E0CD8D1713236F00F83113 /* walk.dae in Resources */,
+				57C7BA8A171686AF000C82E8 /* tex.dae in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -103,6 +103,8 @@ extern NSString const * kParamCameraRotationX;
 extern NSString const * kParamCameraRotationY;
 extern NSString const * kParamCameraRotationZ;
 extern NSString const * kParamCameraZ;
+extern NSString const * kParamCameraReset;
+
 extern NSString const * kParamSceneAnimation;
 
 extern NSString const * kParamLightDirection;

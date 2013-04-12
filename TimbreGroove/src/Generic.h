@@ -39,6 +39,8 @@ typedef enum ShaderTimeType {
 
 @property (nonatomic, readonly) bool hasTexture;
 
+@property (nonatomic, strong) MeshBuffer * wireframe;
+@property (nonatomic) bool drawWireFrame;
 
 @property (nonatomic,strong) Light * light;
 

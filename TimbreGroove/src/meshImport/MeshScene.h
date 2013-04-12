@@ -67,7 +67,6 @@ typedef enum _MeshSceneNodeType {
 @public
     GLKMatrix4   _world;
     GLKMatrix4   _invBindMatrix;
-    GLKMatrix4   _invBindPoseMatrix;
     __weak MeshSceneArmatureNode * _parent;
     bool _translateHack;
 }

@@ -3,14 +3,16 @@
 <plist version="1.0">
 <dict>
 	<key>default_scene</key>
-	<string>squarey</string>
+	<string>ball</string>
 	<key>scenes</key>
 	<dict>
-		<key>squarey</key>
+		<key>ball</key>
 		<dict>
 			<key>connections</key>
 			<array>
 				<dict>
+					<key>kTriggerDblTap</key>
+					<string>kParamCameraReset</string>
 					<key>kTriggerMainSlider</key>
 					<string>kParamMasterVolume</string>
 					<key>kTriggerTap1</key>
@@ -28,59 +30,69 @@
 			<key>icon</key>
 			<string>runner.png</string>
 			<key>display</key>
-			<string>sq</string>
+			<string>Ball</string>
 			<key>3d_element</key>
-			<string>test</string>
+			<string>ball</string>
 			<key>audio_element</key>
 			<string>jazz</string>
 		</dict>
-		<key>bouncy</key>
+		<key>box</key>
 		<dict>
 			<key>connections</key>
 			<array>
 				<dict>
 					<key>kTriggerDblTap</key>
-					<string>FixZoom</string>
-					<key>kTriggerPanY</key>
-					<string>Zoom</string>
-					<key>kTriggerDynamicPeak</key>
-					<string>Ping!</string>
-					<key>kTriggerTap1</key>
-					<string>RandomVibesNote</string>
+					<string>kParamCameraReset</string>
 					<key>kTriggerMainSlider</key>
 					<string>kParamMasterVolume</string>
+					<key>kTriggerTap1</key>
+					<string>RandomVibesNote</string>
+					<key>kTriggerPanY</key>
+					<string>kParamCameraZ</string>
+					<key>kTriggerPlayButton</key>
+					<string>kParamSceneAnimation</string>
+					<key>kTriggerDrag1</key>
+					<string>controllerPos</string>
+					<key>kTriggerPanX</key>
+					<string>kParamCameraRotationY</string>
 				</dict>
 			</array>
 			<key>icon</key>
 			<string>runner.png</string>
 			<key>display</key>
-			<string>Bouncy</string>
+			<string>Box</string>
 			<key>3d_element</key>
-			<string>bouncyMesh</string>
+			<string>box</string>
 			<key>audio_element</key>
 			<string>jazz</string>
 		</dict>
-		<key>spherey</key>
+		<key>plasticOnoBag</key>
 		<dict>
 			<key>connections</key>
 			<array>
 				<dict>
 					<key>kTriggerDblTap</key>
-					<string>ResetRotation</string>
-					<key>kTriggerPanY</key>
-					<string>kParamRotationX</string>
-					<key>kTriggerPanX</key>
-					<string>kParamRotationY</string>
+					<string>kParamCameraReset</string>
 					<key>kTriggerMainSlider</key>
 					<string>kParamMasterVolume</string>
+					<key>kTriggerTap1</key>
+					<string>RandomVibesNote</string>
+					<key>kTriggerPanY</key>
+					<string>kParamCameraZ</string>
+					<key>kTriggerPlayButton</key>
+					<string>kParamSceneAnimation</string>
+					<key>kTriggerDrag1</key>
+					<string>controllerPos</string>
+					<key>kTriggerPanX</key>
+					<string>kParamCameraRotationY</string>
 				</dict>
 			</array>
 			<key>icon</key>
-			<string>fractalSphere.png</string>
+			<string>runner.png</string>
 			<key>display</key>
-			<string>Sphere-y</string>
+			<string>Plastic Ono</string>
 			<key>3d_element</key>
-			<string>spherey_element</string>
+			<string>test</string>
 			<key>audio_element</key>
 			<string>jazz</string>
 		</dict>
@@ -401,18 +413,52 @@
 	</dict>
 	<key>3d_elements</key>
 	<dict>
+		<key>ball</key>
+		<dict>
+			<key>instanceClass</key>
+			<string>GenericImport</string>
+			<key>properties</key>
+			<dict>
+				<key>runEmitter</key>
+				<true/>
+				<key>scaleXYZ</key>
+				<real>1</real>
+				<key>drawType</key>
+				<string>wireframe</string>
+				<key>colladaFile</key>
+				<string>ballStretch.dae</string>
+			</dict>
+		</dict>
+		<key>box</key>
+		<dict>
+			<key>instanceClass</key>
+			<string>GenericImport</string>
+			<key>properties</key>
+			<dict>
+				<key>runEmitter</key>
+				<true/>
+				<key>scaleXYZ</key>
+				<real>1</real>
+				<key>drawType</key>
+				<string>wireframe</string>
+				<key>colladaFile</key>
+				<string>boxStretch.dae</string>
+			</dict>
+		</dict>
 		<key>test</key>
 		<dict>
 			<key>instanceClass</key>
 			<string>GenericImport</string>
 			<key>properties</key>
 			<dict>
-				<key>scaleXYZ</key>
-				<real>1</real>
-				<key>drawMethod</key>
-				<string>triangles</string>
+				<key>runEmitter</key>
+				<false/>
+				<key>scaleXYZ_not</key>
+				<real>0.25</real>
+				<key>drawType</key>
+				<string>wireframe</string>
 				<key>colladaFile</key>
-				<string>walk.dae</string>
+				<string>tex.dae</string>
 			</dict>
 		</dict>
 		<key>spherey_element</key>

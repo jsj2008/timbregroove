@@ -8,6 +8,7 @@
 
 #import "MeshScene.h"
 #import "Log.h"
+#import "TGTypes.h"
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  Mesh  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -95,32 +96,27 @@
     unsigned int   numJoints    = [_influencingJoints count];
     GLKMatrix4 *   jointMats    = malloc( sizeof(GLKMatrix4) * numJoints * 2);
     GLKMatrix4 *   jointInvMats = jointMats + numJoints;
-    bool      *    doTranslate  = malloc( sizeof(bool) * numJoints );
     
     __block int bji = 0;
     
-    [_influencingJoints each:^(MeshSceneArmatureNode * joint) {
-        
-        GLKMatrix4 m = [joint matrix];
-        
-        doTranslate[bji] = joint->_translateHack;
-        if( doTranslate[bji] )
-        {
-            m = (GLKMatrix4) {
-                1, 0, 0, 0,
-                0, 1, 0, 0,
-                0, 0, 1, 0,
-                m.m03,m.m13,m.m23, 1
-            };
-        }
-        
-        jointMats[bji]     = m;
+    [_influencingJoints each:^(MeshSceneArmatureNode * joint) {        
+        jointMats[bji]     = [joint matrix];
         jointInvMats[bji]  = joint->_invBindMatrix;
         bji++;
     }];
     
     GLKVector3 * vec = (GLKVector3 *)buffer->data;
     GLKVector3 * p   = (GLKVector3 *)dest;
+    
+    
+    /*
+        outv = each(v)[i=0]{ ((v*BSM)*IBMi*JMIi)*JW }
+     
+        Bind Shap Matrix
+        Inverse Bind-pose Matrix of joint-i
+        Joint Matrix (transormation-i)
+        Joint Weight 
+     */
     
     for( int i = 0; i < _numInfluencingJointCounts; i++ )
     {
@@ -137,11 +133,8 @@
             
             weight = _weights[ wi ];
             
-            vec3 = GLKMatrix4MultiplyVector3( jointInvMats[ji], vec[i] );
-            if( doTranslate[ji] )
-                vec3 = GLKMatrix4MultiplyVector3WithTranslation(jointMats[ji], vec3);
-            else
-                vec3 = GLKMatrix4MultiplyVector3( jointMats[ji],    vec3);
+            vec3 = GLKMatrix4MultiplyVector3WithTranslation( jointInvMats[ji], vec[i] );
+            vec3 = GLKMatrix4MultiplyVector3WithTranslation( jointMats[ji],    vec3);
             vec3 = GLKVector3MultiplyScalar ( vec3,             weight);
             outVec3 = GLKVector3Add(outVec3, vec3);
         }
@@ -151,7 +144,6 @@
     }
     
     free(jointMats);
-    free(doTranslate);
 }
 
 @end
@@ -198,9 +190,7 @@
 }
 @end
 
-@implementation MeshSceneArmatureNode {
-    bool _gotInversere;
-}
+@implementation MeshSceneArmatureNode
 
 
 -(GLKMatrix4)matrix
@@ -208,17 +198,11 @@
     if( _parent )
     {
         GLKMatrix4 parentWorld = [_parent matrix];
-        _world = GLKMatrix4Multiply(_transform, parentWorld);
+        _world = GLKMatrix4Multiply(parentWorld,_transform);
     }
     else
     {
         _world = _transform;
-    }
-    if( !_gotInversere )
-    {
-        bool invertable;
-        _invBindPoseMatrix = GLKMatrix4Invert(_world,&invertable);
-        _gotInversere = true;
     }
     return _world;
 }

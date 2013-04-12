@@ -60,6 +60,8 @@ NSString const * kParamCameraRotationX  =   @"xCameraRotation";
 NSString const * kParamCameraRotationY  =   @"yCameraRotation";
 NSString const * kParamCameraRotationZ  =   @"zCameraRotation";
 NSString const * kParamCameraZ          =   @"zCamera";
+NSString const * kParamCameraReset      =   @"CameraReset";
+
 NSString const * kParamLightDirection   =   @"Light Direction";
 NSString const * kParamLightColor       =   @"Color of Light";
 NSString const * kParamNewElement       =   @"Create";

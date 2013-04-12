@@ -67,4 +67,13 @@ typedef struct VertexStride {
     GLuint       location;
 } VertexStride;
 
+#define POSITION_FROM_MAT(m) PositionFromMatrix(m)
+
+static inline GLKVector3 PositionFromMatrix(GLKMatrix4 m)
+{
+    GLKVector4 vec4 = GLKMatrix4GetColumn(m, 3);
+    return *(GLKVector3 *)&vec4;
+}
+
+
 #endif
