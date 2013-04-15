@@ -3,9 +3,39 @@
 <plist version="1.0">
 <dict>
 	<key>default_scene</key>
-	<string>tex</string>
+	<string>butterfly</string>
 	<key>scenes</key>
 	<dict>
+		<key>butterfly</key>
+		<dict>
+			<key>connections</key>
+			<array>
+				<dict>
+					<key>kTriggerDblTap</key>
+					<string>kParamCameraReset</string>
+					<key>kTriggerMainSlider</key>
+					<string>kParamMasterVolume</string>
+					<key>kTriggerTap1</key>
+					<string>RandomVibesNote</string>
+					<key>kTriggerPanY</key>
+					<string>kParamCameraZ</string>
+					<key>kTriggerPlayButton</key>
+					<string>kParamSceneAnimation</string>
+					<key>kTriggerDrag1</key>
+					<string>controllerPos</string>
+					<key>kTriggerPanX</key>
+					<string>kParamCameraRotationY</string>
+				</dict>
+			</array>
+			<key>icon</key>
+			<string>runner.png</string>
+			<key>display</key>
+			<string>butterfly</string>
+			<key>3d_element</key>
+			<string>butterfly</string>
+			<key>audio_element</key>
+			<string>jazz</string>
+		</dict>
 		<key>ball</key>
 		<dict>
 			<key>connections</key>
@@ -413,6 +443,22 @@
 	</dict>
 	<key>3d_elements</key>
 	<dict>
+		<key>butterfly</key>
+		<dict>
+			<key>instanceClass</key>
+			<string>GenericImport</string>
+			<key>properties</key>
+			<dict>
+				<key>runEmitter</key>
+				<false/>
+				<key>scaleXYZ</key>
+				<real>0.2</real>
+				<key>drawType</key>
+				<string>wireframe</string>
+				<key>colladaFile</key>
+				<string>butterfly.dae</string>
+			</dict>
+		</dict>
 		<key>ball</key>
 		<dict>
 			<key>instanceClass</key>
@@ -570,28 +616,6 @@
 			<integer>60</integer>
 			<key>icon</key>
 			<string>text.png</string>
-		</dict>
-	</dict>
-	<key>models</key>
-	<dict>
-		<key>squarey.pod</key>
-		<dict>
-			<key>mat1</key>
-			<string>aotkSmall.pvr</string>
-		</dict>
-		<key>bouncy.pod</key>
-		<dict>
-			<key>pool_png</key>
-			<string>pool.pvr</string>
-		</dict>
-		<key>man.pod</key>
-		<dict>
-			<key>Mat_belt</key>
-			<string>Belt.pvr</string>
-			<key>Mat_legs</key>
-			<string>Legs.pvr</string>
-			<key>Mat_body</key>
-			<string>Body.pvr</string>
 		</dict>
 	</dict>
 </dict>

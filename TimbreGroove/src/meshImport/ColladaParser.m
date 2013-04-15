@@ -1332,6 +1332,9 @@ foundCharacters:(NSString *)string
         
         if( !node )
             node = scene->_armatureTree;
+
+        if( !node )
+            return nil;
         
         if( EQSTR(name, node->_sid) || EQSTR(name, node->_name) )
             return node;
@@ -1517,7 +1520,21 @@ foundCharacters:(NSString *)string
 #endif
             {
                 MeshSceneArmatureNode * joint = findJointWithName(parts[0],nil);
-                sceneAnim->_target = joint;
+                if( joint )
+                {
+                    sceneAnim->_target = joint;
+                }
+                else
+                {
+                    if( EQSTR(scene->_mesh->_name,parts[0]) )
+                    {
+                        sceneAnim->_target = scene->_mesh;
+                    }
+                    else
+                    {
+                        TGLog(LLShitsOnFire, @"Can't find the target animation node: %@/%@", parts[0],parts[1]);
+                    }
+                }
                 sceneAnim->_property = parts[1];
                 [scene->_animations addObject:sceneAnim];
             }

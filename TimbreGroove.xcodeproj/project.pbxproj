@@ -14,6 +14,7 @@
 		57019F721685C086007FA38F /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57019F711685C086007FA38F /* AudioToolbox.framework */; };
 		570220D9169B8E7F0028FE33 /* UIView+TGExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 570220D8169B8E7F0028FE33 /* UIView+TGExtension.m */; };
 		57044EF616AC5D3100663B56 /* Torus.m in Sources */ = {isa = PBXBuildFile; fileRef = 57044EF516AC5D3100663B56 /* Torus.m */; };
+		5705272F1719F69F00E17825 /* butterfly.dae in Resources */ = {isa = PBXBuildFile; fileRef = 5705272E1719F69F00E17825 /* butterfly.dae */; };
 		5705DED916E5DA5300A80445 /* Tween.c in Sources */ = {isa = PBXBuildFile; fileRef = 5705DED816E5DA5200A80445 /* Tween.c */; };
 		570665F4167F3D3F0081B8C3 /* squareTest.tif in Resources */ = {isa = PBXBuildFile; fileRef = 570665F3167F3D3F0081B8C3 /* squareTest.tif */; };
 		5707CA7416BCA18400B24818 /* GraphViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5707CA7316BCA18300B24818 /* GraphViewController.m */; };
@@ -261,6 +262,7 @@
 		570220D8169B8E7F0028FE33 /* UIView+TGExtension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIView+TGExtension.m"; path = "src/UIView+TGExtension.m"; sourceTree = "<group>"; };
 		57044EF416AC5D3100663B56 /* Torus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Torus.h; sourceTree = "<group>"; };
 		57044EF516AC5D3100663B56 /* Torus.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Torus.m; sourceTree = "<group>"; };
+		5705272E1719F69F00E17825 /* butterfly.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = butterfly.dae; sourceTree = "<group>"; };
 		5705DED816E5DA5200A80445 /* Tween.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Tween.c; sourceTree = "<group>"; };
 		5705DEDA16E5DA7E00A80445 /* Tween.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Tween.h; sourceTree = "<group>"; };
 		570665F3167F3D3F0081B8C3 /* squareTest.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = squareTest.tif; sourceTree = "<group>"; };
@@ -619,6 +621,7 @@
 		5700235516A55460006F0E8E /* models */ = {
 			isa = PBXGroup;
 			children = (
+				5705272E1719F69F00E17825 /* butterfly.dae */,
 				57C7BA89171686AF000C82E8 /* tex.dae */,
 				57E0CD8C1713236F00F83113 /* walk.dae */,
 				57E7EB9C170FA83E00D3DC88 /* ballStretch.dae */,
@@ -1436,6 +1439,7 @@
 				57E7EB9D170FA83E00D3DC88 /* ballStretch.dae in Resources */,
 				57E0CD8D1713236F00F83113 /* walk.dae in Resources */,
 				57C7BA8A171686AF000C82E8 /* tex.dae in Resources */,
+				5705272F1719F69F00E17825 /* butterfly.dae in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
