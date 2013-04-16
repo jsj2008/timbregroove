@@ -18,19 +18,145 @@
 #import "Cube.h"
 #import "Camera.h"
 
-@interface VisibleBone : Generic {
+@interface JointPainter : Generic {
 @public
     MeshSceneArmatureNode * _node;
 }
 -(void)updateTransformFromPos;
 @end
 
+@interface MeshPainter : Generic
+@end
+
+@implementation MeshPainter {
+    MeshSceneMeshNode * _node;
+    MeshBuffer * _drawingBuffer;
+    GLint _bufferDrawType;
+    bool _doWireframe;
+}
+
+-(id)init
+{
+    TGLog(LLShitsOnFire, @"no init without node please. thank you");
+    exit(-1);
+}
+
+-(id)initWithNode:(MeshSceneMeshNode *)node drawType:(GLint)bufferDrawType wireframe:(bool)doWireFrame
+{
+    self = [super init];
+    if( self )
+    {
+        _node = node;
+        _bufferDrawType = bufferDrawType;
+        _doWireframe = doWireFrame;
+    }
+    return self;
+}
+
+-(id)wireUp
+{
+    self.color = (GLKVector4){ 1, 1, 1, 1 };
+    [super wireUp];
+    self.disableStandardParameters = true;
+    return self;
+}
+
+-(void)createTexturexxx
+{
+    //self.texture = [[Texture alloc] initWithFileName:@"numText.png"];
+}
+
+-(void)configureLightingxx
+{
+    if( !self.light )
+        self.light = [Light new]; // defaults are good
+    float subColor = 0;
+    self.light.ambientColor = (GLKVector4){subColor, subColor, 1.0, 1.0};
+    
+    GLKVector3 lDir = self.light.direction;
+    GLKMatrix4 mx = GLKMatrix4MakeTranslation( lDir.x, lDir.y, lDir.z );
+    self.light.direction = GLKMatrix4MultiplyVector3(mx,(GLKVector3){-1, 0, -1});
+}
+
+
+-(void)createBuffer
+{
+    static GenericVariables indexIntoNamesMap[kNumMeshSemanticKeys] = {
+        gv_pos,         // MSKPosition
+        gv_normal,      // MSKNormal
+        gv_uv,          // MSKUV
+        gv_acolor,      // MSKColor
+        gv_boneIndex,   // MSKBoneIndex,
+        gv_boneWeights, // MSKBoneWeights,
+        
+    };
+    MeshGeometry * geometry = _node->_geometry;
+    
+    MeshGeometryBuffer * b = geometry->_buffers;
+    
+    // FIXME: all normals are broken
+    b[MSKNormal].data = NULL;
+    
+    for( MeshSemanticKey key = MSKPosition; key < kNumMeshSemanticKeys; key++ )
+    {
+        MeshGeometryBuffer * mgb = geometry->_buffers + key;
+        if( mgb->data )
+        {
+            MeshBuffer * msb = [[MeshSceneBuffer alloc] initWithGeometryBuffer:mgb
+                                                        andIndexIntoShaderName:indexIntoNamesMap[key]];
+            if( key == MSKPosition )
+            {
+                //if( _node->_skin )
+                //    msb.usage = GL_DYNAMIC_DRAW;
+                if( _bufferDrawType )
+                    msb.drawType = _bufferDrawType;
+                
+                if( _doWireframe )
+                {
+                    msb = [[WireFrame alloc] initWithIndexBuffer:mgb->indexData
+                                                            data:mgb->data
+                                                  geometryBuffer:msb];
+                    
+                }
+                _drawingBuffer = msb;
+            }
+            else
+            {
+                msb.drawable = false;
+            }
+            
+            [self addBuffer:msb];
+        }
+    }
+    
+}
+
+-(void)calculateInfluences
+{
+    MeshSkinning * skin = _node->_skin;
+    
+    if( skin )
+    {
+        MeshGeometry * geometry = _node->_geometry;
+        MeshGeometryBuffer * b = geometry->_buffers;
+        float * p = malloc( sizeof(float) * b->numFloats );
+        [skin influence:b dest:p];
+        [_drawingBuffer setData:p];
+        free(p);
+    }
+    
+    if( _kids )
+       [_kids each:^(MeshPainter *painter) { [painter calculateInfluences]; }];
+}
+
+@end
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 @implementation GenericImport {
     MeshScene * _scene;
-    MeshBuffer * _drawingBuffer;
     bool _doWireframe;
+    NSArray * _meshPainters;
+    NSArray * _jointPainters;
 }
 
 - (id)init
@@ -45,9 +171,9 @@
 -(id)wireUp
 {
     _scene = [ColladaParser parse:_colladaFile];
-    self.color = (GLKVector4){ 0.4, 1.0, 1.0, 0.7 };
     [super wireUp];
-    [self showArmatures];
+    [self buildJointPainters];
+    [self buildMeshPainters];
     if( _runEmitter )
     {
         LogLevel logl = TGGetLogLevel();
@@ -55,7 +181,14 @@
         [_scene emit];
         TGSetLogLevel(logl);
     }
- //   [self playFirstFrame];
+
+    if( _cameraZ )
+    {
+        GLKVector3 pos = self.camera.position;
+        pos.z = _cameraZ;
+        self.camera.position = pos;
+    }
+    
     return self;
 }
 
@@ -68,45 +201,76 @@
     }];
 }
 
--(void)showArmatures
+-(void)buildJointPainters
 {
-    if( _scene->_armatureTree )
+    if( !_scene->_joints )
+        return;
+        
+    static GLKVector4 colors[] = {
+        { 1, 0,   0, 0.5 },
+        { 0, 1,   0, 0.5 },
+        { 0, 0.5, 1, 0.5 },
+        { 1, 0,   1, 0.5 }
+    };
+    
+    __block int nextColor = 0;
+    
+    static void (^createJointPainter)(MeshSceneArmatureNode *) = nil;
+    
+    NSMutableArray * painterObjects = [NSMutableArray new];
+    
+    createJointPainter = ^(MeshSceneArmatureNode * node) {
+        JointPainter * vb = [[JointPainter alloc] init];
+        vb->_node = node;
+        GLKVector3 vec3 = POSITION_FROM_MAT(node->_world);
+        vb.position = vec3;
+        [vb updateTransformFromPos];
+        vb.color = colors[nextColor];
+        nextColor = ++nextColor % (sizeof(colors)/sizeof(colors[0]));
+        [self appendChild:[vb wireUp]];
+        [painterObjects addObject:vb];
+    };
+    
+    if( _scene->_animations )
     {
-        static GLKVector4 colors[] = {
-            { 1, 0,   0, 0.5 },
-            { 0, 1,   0, 0.5 },
-            { 0, 0.5, 1, 0.5 },
-            { 1, 0,   1, 0.5 }
-            };
-        
-        __block int nextColor = 0;
-        
-  //      float posScale = self.scaleXYZ;
-        
-        static void (^createBones)(MeshSceneArmatureNode *) = nil;
-        
-        createBones = ^(MeshSceneArmatureNode * node) {
-            VisibleBone * vb = [[VisibleBone alloc] init];
-            vb->_node = node;
-            GLKVector3 vec3 = POSITION_FROM_MAT(node->_world);
-            vb.position = vec3;
-            [vb updateTransformFromPos];
-            vb.color = colors[nextColor];
-            nextColor = ++nextColor % 4;
-            [self appendChild:[vb wireUp]];
-        };
-
-        if( _scene->_animations )
-        {
-            [_scene->_animations each:^(MeshAnimation * animation) {
-                createBones((MeshSceneArmatureNode *)animation->_target);
-            }];
-        }
-        else
-        {
-            [_scene->_mesh->_skin->_influencingJoints each:createBones];
-        }
+        [_scene->_animations each:^(MeshAnimation * animation) {
+            createJointPainter((MeshSceneArmatureNode *)animation->_target);
+        }];
     }
+    else
+    {
+        [_scene->_meshes each:^(MeshSceneMeshNode * node) {
+            if( node->_skin )
+                [node->_skin->_influencingJoints each:createJointPainter];
+        }];
+    }
+    
+    _jointPainters = [NSArray arrayWithArray:painterObjects];
+}
+
+-(void)buildMeshPainters
+{
+    static MeshPainter * (^createMeshPainter)(MeshSceneMeshNode *, TG3dObject *) = nil;
+    
+    createMeshPainter = ^MeshPainter *(MeshSceneMeshNode *node, TG3dObject *parent)
+    {
+        MeshPainter * painterObj = [[MeshPainter alloc] initWithNode:node drawType:_bufferDrawType wireframe:_doWireframe];
+        [parent appendChild:[painterObj wireUp]];
+        if( node->_children )
+            [node->_children each:^(id key, MeshSceneMeshNode *child) {
+                createMeshPainter(child,painterObj);
+            }];
+        return painterObj;
+    };
+    
+    NSMutableArray * painterObjects = [NSMutableArray new];
+    
+    [_scene->_meshes each:^(MeshSceneMeshNode *node) {
+        MeshPainter * painterObj = createMeshPainter(node,self);
+        [painterObjects addObject:painterObj];
+    }];
+    
+    _meshPainters = [NSArray arrayWithArray:painterObjects];
 }
 
 -(void)setColladaFile:(NSString *)colladaFile
@@ -133,111 +297,20 @@
     _scene = nil;
 }
 
--(void)configureLightingxx
+-(void)updatePainters
 {
-    if( !self.light )
-        self.light = [Light new]; // defaults are good
-    float subColor = 0;
-    self.light.ambientColor = (GLKVector4){subColor, subColor, 1.0, 1.0};
-    
-    GLKVector3 lDir = self.light.direction;
-    GLKMatrix4 mx = GLKMatrix4MakeTranslation( lDir.x, lDir.y, lDir.z );
-    self.light.direction = GLKMatrix4MultiplyVector3(mx,(GLKVector3){-1, 0, -1});
-}
-
--(void)createTexturexxx
-{
-    self.texture = [[Texture alloc] initWithFileName:@"numText.png"];
-}
-
--(void)createBuffer
-{
-    static GenericVariables indexIntoNamesMap[kNumMeshSemanticKeys] = {
-        gv_pos,         // MSKPosition
-        gv_normal,      // MSKNormal
-        gv_uv,          // MSKUV
-        gv_acolor,      // MSKColor
-        gv_boneIndex,   // MSKBoneIndex,
-        gv_boneWeights, // MSKBoneWeights,
-
-    };
-    MeshGeometry * geometry = [_scene getGeometry:nil];
-
-    MeshGeometryBuffer * b = geometry->_buffers;
-
-    // FIXME: all normals are broken
-    b[MSKNormal].data = NULL;
-    
-    for( MeshSemanticKey key = MSKPosition; key < kNumMeshSemanticKeys; key++ )
-    {
-        MeshGeometryBuffer * mgb = geometry->_buffers + key;
-        if( mgb->data )
-        {
-            MeshBuffer * msb = [[MeshSceneBuffer alloc] initWithGeometryBuffer:mgb
-                                                             andIndexIntoShaderName:indexIntoNamesMap[key]];
-            if( key == MSKPosition )
-            {
-                //if( _scene->_mesh->_skin )
-                //    msb.usage = GL_DYNAMIC_DRAW;
-                if( _bufferDrawType )
-                    msb.drawType = _bufferDrawType;
-                
-                if( _doWireframe )
-                {
-                    msb = [[WireFrame alloc] initWithIndexBuffer:mgb->indexData
-                                                                       data:mgb->data
-                                                             geometryBuffer:msb];
-                    
-                }
-                _drawingBuffer = msb;
-            }
-            else
-            {
-                msb.drawable = false;
-            }
-            
-            [self addBuffer:msb];
-        }
-    }
-    
-}
-
--(void)calculateInfluences
-{
-    MeshSkinning * skin = _scene->_mesh->_skin;
-    
-    if( skin )
-    {
-        MeshGeometry * geometry = [_scene getGeometry:nil];
-        MeshGeometryBuffer * b = geometry->_buffers;
-        float * p = malloc( sizeof(float) * b->numFloats );
-        [skin influence:b dest:p];
-        [_drawingBuffer setData:p];
-        free(p);
-    }    
-}
-
--(void)playFirstFrame
-{
-    if( _scene->_animations )
-    {
-        [_scene->_animations each:^(MeshAnimation * animation) {
-            
-            MeshSceneNode * node = animation->_target;
-            node->_transform = animation->_transforms[0];
-        }];
-        [self updateVisibleBones];
-    }
-}
-
--(void)updateVisibleBones
-{
-    [self.children each:^(VisibleBone *vb) {
+    [_jointPainters each:^(JointPainter *vb) {
         MeshSceneArmatureNode * node = vb->_node;
         GLKVector3 vec3 = POSITION_FROM_MAT( node->_world );
         vb.position = vec3;
     }];
+ 
     [self calculateInfluences];
+}
+    
+-(void)calculateInfluences
+{
+    [_meshPainters each:^(MeshPainter *meshPainter) { [meshPainter calculateInfluences]; }];
 }
 
 -(void)update:(NSTimeInterval)dt
@@ -267,7 +340,7 @@
         }];
         
         if( dirty )
-            [self updateVisibleBones];
+            [self updatePainters];
     }
 }
 
@@ -276,7 +349,7 @@
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
-@implementation VisibleBone
+@implementation JointPainter
 
 -(id)wireUp
 {

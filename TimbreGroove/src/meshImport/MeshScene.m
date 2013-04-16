@@ -24,11 +24,6 @@
     return self;
 }
 
--(MeshGeometry *)getGeometry:(NSString *)name
-{
-    return _mesh->_skin ? _mesh->_skin->_geometry : _mesh->_geometry;
-}
-
 -(void)calcAnimationMatricies
 {
     if( _animations )
@@ -43,7 +38,7 @@
 {
     static void (^calcArmatureMarticies)(id,MeshSceneArmatureNode *) = nil;
     
-    if( _armatureTree )
+    if( _joints )
     {
         calcArmatureMarticies = ^(id key, MeshSceneArmatureNode * node) {
             if( node->_children )
@@ -51,7 +46,10 @@
             else
                 [node matrix];
         };
-        calcArmatureMarticies(nil,_armatureTree);
+        
+        [_joints each:^(id sender) {
+            calcArmatureMarticies(nil,sender);
+        }];
     }
 }
 
@@ -186,12 +184,9 @@
 {
     if( !_children )
         _children = [NSMutableDictionary new];
+    child->_parent = self;
     _children[name] = child;
 }
-@end
-
-@implementation MeshSceneArmatureNode
-
 
 -(GLKMatrix4)matrix
 {
@@ -206,6 +201,12 @@
     }
     return _world;
 }
+
+@end
+
+@implementation MeshSceneArmatureNode
+
+
 @end
 
 @implementation MeshSceneMeshNode

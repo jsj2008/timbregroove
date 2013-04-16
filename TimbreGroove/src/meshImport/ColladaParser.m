@@ -13,6 +13,8 @@
 #import "ColladaNames.h"
 #import "Log.h"
 
+#define CULL_NULL_ANIMATIONS 1
+
 typedef enum _ColladaTagState
 {
     kColStateInAnimation = 1,
@@ -32,8 +34,10 @@ typedef enum _ColladaTagState
     kColStateInNode = 1 << 12,
     kColStateCaptureText = 1 << 13,
     kColStateUp = 1 << 14,
-    
-    
+    kColStateMaterialLibrary = 1 << 15,
+    kColStateMaterialTag = 1 << 16,
+    kColStateEffectLibrary = 1 << 17,
+    kColStateEffectTag =  1 << 18
 } ColladaTagState;
 
 #define SET(f)      _state |= f
@@ -126,6 +130,8 @@ static int scanInt(NSString * str)
     
     int              _numPrimitives;
     int              _nextInput;
+    
+    bool             _isActualTrianglesForReal;
 }
 
 @end
@@ -163,6 +169,8 @@ static int scanInt(NSString * str)
     
     IncomingVertexData *   _vertexData;
     IncomingTriangleTag *  _triangleTag;
+    
+    MeshGeometry * _meshGeometry;
 }
 @end
 @implementation IncomingMeshData
@@ -262,9 +270,9 @@ typedef enum _SkinSemanticKey {
 
 typedef enum _NodeCoordSpec {
     NCSLocation = 1,
-    NCSRoationX = 1 << 1,
-    NCSRoationY = 1 << 2,
-    NCSRoationZ = 1 << 3,
+    NCSRotationX = 1 << 1,
+    NCSRotationY = 1 << 2,
+    NCSRotationZ = 1 << 3,
     NCSScale = 1 << 4
 } NodeCoordSpec;
 
@@ -306,7 +314,9 @@ typedef enum _NodeCoordSpec {
         _children = [NSMutableDictionary new];
     _children[child->_id] = child;
 }
+
 @end
+
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  IncomingNodeTree @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 @interface IncomingNodeTree : NSObject {
@@ -331,7 +341,42 @@ typedef enum _NodeCoordSpec {
 
 @end
 
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  IncomingMaterial @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@interface IncomingMaterial : NSObject {
+@public
+    NSString * _name;
+    NSString * _id;
+    NSString * _effect;
+}
+@end
+
+@implementation IncomingMaterial
+@end
+
+@interface IncomingEffect : NSObject {
+    NSString * _id;
+    NSString * _type; // 'phong'
+    
+    GLKVector4 _emission;
+    GLKVector4 _ambient;
+    GLKVector4 _diffuse;
+    GLKVector4 _specular;
+    float      _shininess;
+    GLKVector4 _reflective;
+    float      _reflectivity;
+    NSString * _transparent_opaque_type; // 'RGB_ZERO'
+    GLKVector4 _transparent;
+    float      _transparency;
+}
+@end
+
+@implementation IncomingEffect
+@end
+
+
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  ColladaParser @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+#pragma mark CollalaParserImpl
 
 @interface ColladaParserImpl : NSObject<NSXMLParserDelegate> {
 
@@ -356,7 +401,8 @@ typedef enum _NodeCoordSpec {
     NSMutableDictionary * _animations;
     NSMutableDictionary * _geometries;
     NSMutableDictionary * _skins;
-    NSMutableDictionary * _nodeTree;
+    NSMutableDictionary * _nodes;
+    NSMutableDictionary * _materials;
 }
 @end
 
@@ -370,7 +416,7 @@ typedef enum _NodeCoordSpec {
         _animations = [NSMutableDictionary new];
         _geometries = [NSMutableDictionary new];
         _skins      = [NSMutableDictionary new];
-        _nodeTree   = [NSMutableDictionary new];
+        _nodes   = [NSMutableDictionary new];
         _up         = 'y';
     }
     return self;
@@ -463,9 +509,12 @@ typedef enum _NodeCoordSpec {
             return;
         }
 
-        if( EQSTR(elementName, kTag_triangles) || EQSTR(elementName, kTag_polylist) )
+        bool isTriangles = EQSTR(elementName, kTag_triangles);
+        bool isPolylist  = EQSTR(elementName, kTag_polylist);
+        if(  isTriangles || isPolylist  )
         {
             meshData->_triangleTag = [[IncomingTriangleTag alloc] init];
+            meshData->_triangleTag->_isActualTrianglesForReal = isTriangles;
             meshData->_triangleTag->_count = scanInt(attributeDict[kAttr_count]);
             SET(kColStateTriangles);
             return;
@@ -740,6 +789,7 @@ typedef enum _NodeCoordSpec {
                     _floatArray = NULL;
                     _floatArrayCount = 0;
                 }
+                UNSET(kColStateInSource);
                 return;
             }
         }
@@ -761,6 +811,12 @@ typedef enum _NodeCoordSpec {
                 iskin->_weights->_numWeights = _ushortArrayCount;
                 _ushortArray = NULL;
                 _ushortArrayCount = 0;
+                return;
+            }
+            
+            if( EQSTR(elementName, kTag_vertex_weights) )
+            {
+                UNSET(kColStateVertexWeights);
                 return;
             }
         }
@@ -818,18 +874,18 @@ typedef enum _NodeCoordSpec {
                 NSString * sid = attributeDict[kAttr_sid];
                 IncomingNode * inode = [incnt->_nodeStack lastObject];
                 if( EQSTR(sid, kValue_sid_rotationX) )
-                    inode->_incomingSpec = NCSRoationX;
+                    inode->_incomingSpec = NCSRotationX;
                 else if( EQSTR(sid, kValue_sid_rotationY) )
-                    inode->_incomingSpec = NCSRoationY;
+                    inode->_incomingSpec = NCSRotationY;
                 else
-                    inode->_incomingSpec = NCSRoationZ;
+                    inode->_incomingSpec = NCSRotationZ;
                 return;                    
             }
             
             if( EQSTR(elementName, kTag_skeleton) )
             {
                 IncomingNode * inode = [incnt->_nodeStack lastObject];
-                inode->_msnType = MSNT_Mesh;
+                inode->_msnType = MSNT_SkinnedMesh;
                 
                 // we don't really need the "skeleton" name here
                 //SET(kColStateCaptureText);
@@ -840,6 +896,7 @@ typedef enum _NodeCoordSpec {
             {
                 IncomingNode * inode = [incnt->_nodeStack lastObject];
                 inode->_skinName = [(NSString *)attributeDict[kAttr_url] substringFromIndex:1];
+                inode->_msnType = MSNT_SkinnedMesh;
                 return;
             }
             
@@ -885,11 +942,6 @@ typedef enum _NodeCoordSpec {
             if( EQSTR(inode->_type,@"JOINT") )
             {
                 inode->_msnType = MSNT_Armature;
-                while( parent && parent->_msnType != MSNT_Armature )
-                {
-                    parent->_msnType = MSNT_Armature;
-                    parent = parent->_parent;
-                }
             }
             SET(kColStateInNode);
         }
@@ -930,9 +982,9 @@ typedef enum _NodeCoordSpec {
             if( EQSTR(elementName, kTag_rotate) )
             {
                 IncomingNode * inode = [incnt->_nodeStack lastObject];
-                if( inode->_incomingSpec == NCSRoationX )
+                if( inode->_incomingSpec == NCSRotationX )
                     inode->_rotationX = *(GLKVector3 *)_floatArray;
-                else if( inode->_incomingSpec == NCSRoationY )
+                else if( inode->_incomingSpec == NCSRotationY )
                     inode->_rotationY = *(GLKVector3 *)_floatArray;
                 else
                     inode->_rotationZ = *(GLKVector3 *)_floatArray;
@@ -959,7 +1011,7 @@ typedef enum _NodeCoordSpec {
 -(void)assembleScene
 {
     IncomingNodeTree * incnt = _incoming;
-    _nodeTree = incnt->_tree;
+    _nodes = incnt->_tree;
     _incoming = nil;
     UNSET(kColStateVisualScene);
 }
@@ -1260,7 +1312,15 @@ foundCharacters:(NSString *)string
 
 -(void)turnUp:(MeshGeometryBuffer *)bufferInfo
 {
+    TGLog(LLShitsOnFire, @"Yea, unfortunately this code doesn't deal with anything but 'Y UP' colladas");
+    exit(-1);
+    
 #if 0
+    /*
+        This is broken because we have to turn
+        every single matrix too.
+     */
+     
     float * buffer = bufferInfo->data;
     for( int i = 0; i < bufferInfo->numFloats; i += 3 )
     {
@@ -1281,61 +1341,111 @@ foundCharacters:(NSString *)string
     }
 }
 
+
 -(MeshScene *)finalAssembly
 {
     MeshScene * scene = [MeshScene new];
     
-    IncomingNode * armatureNode = nil;
-    IncomingNode * meshNode = nil;
+    NSMutableDictionary * meshNodes  = [NSMutableDictionary new];
+    NSMutableDictionary * jointNodes = [NSMutableDictionary new];
     
-    for( NSString * nodeName in _nodeTree )
+    // Pass 1: create appropriate runtime nodes
+    
+    static void (^passOne)(id, IncomingNode *) = nil;
+    
+    passOne = ^(id key, IncomingNode *inode)
     {
-        IncomingNode * node = _nodeTree[nodeName];
-        if( node->_msnType == MSNT_Mesh )
-            meshNode = node;
-        else if( node->_msnType == MSNT_Armature )
-            armatureNode = node;
-    }
-    
-    static MeshSceneArmatureNode *  (^mapArmatures)(MeshSceneArmatureNode *, IncomingNode *) =
-    ^MeshSceneArmatureNode * (MeshSceneArmatureNode * parent, IncomingNode *inode) {
-
-        MeshSceneArmatureNode * msan = [MeshSceneArmatureNode new];
-        msan->_parent = parent;
-        msan->_transform = inode->_transform;
-        msan->_name = inode->_id;
-        msan->_sid = inode->_sid;
-        msan->_type = inode->_msnType;
-        
-        if( inode->_children )
+        if( inode->_msnType == MSNT_Armature )
         {
-            for( NSString * nodeName in inode->_children )
-            {
-                IncomingNode * ichild = inode->_children[nodeName];
-                MeshSceneArmatureNode * child = mapArmatures(msan,ichild);
-                [msan addChild:child name:nodeName];
-            }
+            MeshSceneArmatureNode * msan = [MeshSceneArmatureNode new];
+            msan->_transform = inode->_transform;
+            msan->_name      = inode->_id;
+            msan->_sid       = inode->_sid;
+            msan->_type      = inode->_msnType;
+            jointNodes[inode->_id] = msan;
         }
-        
-        return msan;
+        else if( (inode->_msnType & MSNT_SomeKindaMeshWereIn) != 0 )
+        {
+            MeshSceneMeshNode * msmn = [[MeshSceneMeshNode alloc] init];
+            msmn->_location  = inode->_location;
+            msmn->_rotationX = inode->_rotationX;
+            msmn->_rotationY = inode->_rotationY;
+            msmn->_rotationZ = inode->_rotationZ;
+            msmn->_scale     = inode->_scale;
+            msmn->_name      = inode->_id;
+            msmn->_type      = inode->_msnType;
+            meshNodes[inode->_id] = msmn;
+        }
+        if( inode->_children )
+           [inode->_children each:passOne];
     };
 
-    if( armatureNode )
+    [_nodes each:passOne];
+    
+    // Pass 2. Parent runtime nodes
+    
+    static void (^passTwo)(id, IncomingNode *) = nil;
+    
+    passTwo = ^(id key, IncomingNode *inode)
     {
-        scene->_armatureTree = mapArmatures(nil,armatureNode);
+        if( inode->_msnType == MSNT_Armature )
+        {
+            MeshSceneArmatureNode * runtimeNode = jointNodes[inode->_id];
+            IncomingNode * parent = inode->_parent;
+            while( parent )
+            {
+                if( parent->_msnType == MSNT_Armature )
+                {
+                    MeshSceneArmatureNode * runtimeParent = jointNodes[parent->_id];
+                    [runtimeParent addChild:runtimeNode name:runtimeNode->_name];
+                    break;
+                }
+                parent = parent->_parent;
+            }
+        }
+        else if( (inode->_msnType & MSNT_SomeKindaMeshWereIn) != 0 )
+        {
+            MeshSceneMeshNode * runtimeNode = meshNodes[inode->_id];
+            IncomingNode * parent = inode->_parent;
+            while( parent )
+            {
+                if( (parent->_msnType & MSNT_SomeKindaMeshWereIn) != 0 )
+                {
+                    MeshSceneMeshNode * runtimeParent = meshNodes[parent->_id];
+                    [runtimeParent addChild:runtimeNode name:runtimeNode->_name];
+                    break;
+                }
+                parent = parent->_parent;
+            }
+        }
+        if( inode->_children )
+           [inode->_children each:passTwo];        
+    };
+    
+    [_nodes each:passTwo];
+    
+    // Pass 3: isolate top of the trees
+    
+    scene->_meshes = [[meshNodes mapReduce:^id(id key, MeshSceneNode *node) {
+        if( ((node->_type & MSNT_SomeKindaMeshWereIn) != 0) && !node->_parent )
+            return node;
+        return nil;
+    }] allValues];
+    
+    scene->_joints = [[jointNodes mapReduce:^id(id key, MeshSceneNode *node) {
+        if( node->_type == MSNT_Armature && !node->_parent )
+            return node;
+        return nil;
+    }] allValues];
+    
+    if( scene->_joints )
         [scene calcMatricies];
-    }
-    
-    static MeshSceneArmatureNode *  (^findJointWithName)(NSString *,MeshSceneArmatureNode *) = nil;
-    
-    findJointWithName = ^MeshSceneArmatureNode * (NSString *name,MeshSceneArmatureNode *node) {
-        
-        if( !node )
-            node = scene->_armatureTree;
 
-        if( !node )
-            return nil;
-        
+    
+    static MeshSceneArmatureNode *  (^_findJointWithName)(NSString *,MeshSceneArmatureNode *) = nil;
+    
+    _findJointWithName = ^MeshSceneArmatureNode * (NSString *name,MeshSceneArmatureNode *node)
+    {        
         if( EQSTR(name, node->_sid) || EQSTR(name, node->_name) )
             return node;
         
@@ -1344,7 +1454,7 @@ foundCharacters:(NSString *)string
             for( NSString * nodeName in node->_children )
             {
                 MeshSceneArmatureNode * child = node->_children[nodeName];
-                MeshSceneArmatureNode * retNode = findJointWithName(name,child);
+                MeshSceneArmatureNode * retNode = _findJointWithName(name,child);
                 if( retNode )
                     return retNode;
             }
@@ -1353,11 +1463,32 @@ foundCharacters:(NSString *)string
         return nil;
     };
     
+    static MeshSceneArmatureNode *  (^findJointWithName)(NSString *,MeshSceneArmatureNode *) = nil;
+    
+    findJointWithName = ^MeshSceneArmatureNode * (NSString *name,MeshSceneArmatureNode *node)
+    {
+        MeshSceneArmatureNode * joint = jointNodes[name];
+        
+        if( joint )
+            return joint;
+
+        for( NSString * jname in jointNodes )
+        {
+            joint = _findJointWithName(name,jointNodes[jname]);
+            if( joint )
+                return joint;
+        }
+        return nil;
+    };
+    
+    
     static MeshGeometry *  (^getGeometry)(NSString *) = nil;
     
     getGeometry = ^MeshGeometry * (NSString *name) {
         IncomingMeshData * meshData      = _geometries[name];
         MeshGeometry     * sceneGeometry = [MeshGeometry new];
+        
+        meshData->_meshGeometry = sceneGeometry;
         
         NSString * srcName;
         int primitiveStride = 0;
@@ -1378,21 +1509,25 @@ foundCharacters:(NSString *)string
             if(  thisOffset > primitiveStride )
                 primitiveStride = thisOffset;
         }
-        
-        unsigned short *vectorCounts = meshData->_triangleTag->_vectorCounts;
+
         bool allThrees = true;
-        if( vectorCounts )
+
+        if( !meshData->_triangleTag->_isActualTrianglesForReal )
         {
-            for( unsigned int vc = 0; vc < meshData->_triangleTag->_count; vc++ )
+            unsigned short *vectorCounts = meshData->_triangleTag->_vectorCounts;
+            if( vectorCounts )
             {
-                if( vectorCounts[vc] != 3 )
+                for( unsigned int vc = 0; vc < meshData->_triangleTag->_count; vc++ )
                 {
-                    allThrees = false;
-                    break;
+                    if( vectorCounts[vc] != 3 )
+                    {
+                        allThrees = false;
+                        break;
+                    }
                 }
             }
         }
-
+        
         for( MeshSemanticKey key = MSKPosition; key < kNumMeshSemanticKeys; key++ )
         {
             MeshGeometryBuffer *buffer = sceneGeometry->_buffers + key;
@@ -1420,90 +1555,124 @@ foundCharacters:(NSString *)string
         if(meshData->_triangleTag->_vectorCounts)
             free(meshData->_triangleTag->_vectorCounts);
 
-        if( _up == 'z' )
+        if( _up != 'y' )
             [self turnUp:sceneGeometry->_buffers];
         
         return sceneGeometry;
     };
     
-    MeshSceneMeshNode * sceneMeshNode = [MeshSceneMeshNode new];
-    
-    if( meshNode->_skinName )
-    {
-        MeshSkinning * sceneSkin = [MeshSkinning new];
-        IncomingSkin * iskin = _skins[ meshNode->_skinName];
-        
-        sceneSkin->_bindShapeMatrix             = iskin->_bindShapeMatrix;
-        sceneSkin->_influencingJointCounts      = iskin->_weights->_vcounts;
-        sceneSkin->_numInfluencingJointCounts   = iskin->_weights->_numVcounts;
-        sceneSkin->_packedWeightIndices         = iskin->_weights->_weights;
-        sceneSkin->_numPackedWeightIndicies     = iskin->_weights->_numWeights;
-        
-        for( int i = 0; i < iskin->_weights->_nextInput; i++ )
-        {
-            SkinSemanticKey sskey = iskin->_weights->_semanticKey[i];
-            if( sskey == SSKJoint )
-                sceneSkin->_jointWOffset = iskin->_weights->_offsets[i];
-            else
-                sceneSkin->_weightFOffset = iskin->_weights->_offsets[i];
-        }
 
-        NSArray * jointNameArray;
-        for( IncomingSkinSource * iss in iskin->_incomingSources )
+    static void (^mapGeometry)(id,IncomingNode*) = nil;
+    
+    mapGeometry = ^(id key, IncomingNode *inode)
+    {
+        if( inode->_msnType == MSNT_Mesh )
         {
-            if( EQSTR(iss->_paramName, kValue_name_JOINT) )
-            {
-                jointNameArray = iss->_nameArray;
-                break;
-            }
+            MeshSceneMeshNode * runtimeNode = meshNodes[inode->_id];
+            runtimeNode->_geometry = getGeometry( inode->_geometryName );
         }
-        
-        for( IncomingSkinSource * iss in iskin->_incomingSources )
+        else if( inode->_msnType == MSNT_SkinnedMesh )
         {
-            if( EQSTR(iss->_paramName, kValue_name_TRANSFORM) )
+            MeshSkinning * sceneSkin = [MeshSkinning new];
+            IncomingSkin * iskin = _skins[ inode->_skinName];
+            
+            sceneSkin->_bindShapeMatrix             = iskin->_bindShapeMatrix;
+            sceneSkin->_influencingJointCounts      = iskin->_weights->_vcounts;
+            sceneSkin->_numInfluencingJointCounts   = iskin->_weights->_numVcounts;
+            sceneSkin->_packedWeightIndices         = iskin->_weights->_weights;
+            sceneSkin->_numPackedWeightIndicies     = iskin->_weights->_numWeights;
+            
+            for( int i = 0; i < iskin->_weights->_nextInput; i++ )
             {
-                GLKMatrix4 * mats = (GLKMatrix4 *)(iss->_data);
-                
-                for( NSString * jointName in jointNameArray )
+                SkinSemanticKey sskey = iskin->_weights->_semanticKey[i];
+                if( sskey == SSKJoint )
+                    sceneSkin->_jointWOffset = iskin->_weights->_offsets[i];
+                else
+                    sceneSkin->_weightFOffset = iskin->_weights->_offsets[i];
+            }
+            
+            NSArray * jointNameArray;
+            for( IncomingSkinSource * iss in iskin->_incomingSources )
+            {
+                if( EQSTR(iss->_paramName, kValue_name_JOINT) )
                 {
-                    MeshSceneArmatureNode * joint = findJointWithName(jointName,nil);
-                    joint->_invBindMatrix = GLKMatrix4Transpose(*mats++);
+                    jointNameArray = iss->_nameArray;
+                    break;
                 }
             }
-            else if( EQSTR(iss->_paramName, kValue_name_WEIGHT) )
+            
+            for( IncomingSkinSource * iss in iskin->_incomingSources )
             {
-                sceneSkin->_weights = iss->_data;
-                sceneSkin->_numWeights = iss->_numFloats;
+                if( EQSTR(iss->_paramName, kValue_name_TRANSFORM) )
+                {
+                    GLKMatrix4 * mats = (GLKMatrix4 *)(iss->_data);
+                    
+                    for( NSString * jointName in jointNameArray )
+                    {
+                        MeshSceneArmatureNode * joint = findJointWithName(jointName,nil);
+                        joint->_invBindMatrix = GLKMatrix4Transpose(*mats++);
+                    }
+                }
+                else if( EQSTR(iss->_paramName, kValue_name_WEIGHT) )
+                {
+                    sceneSkin->_weights = iss->_data;
+                    sceneSkin->_numWeights = iss->_numFloats;
+                }
             }
+            for( NSString * jointName in jointNameArray )
+            {
+                MeshSceneArmatureNode * joint = findJointWithName(jointName,nil);
+                [sceneSkin->_influencingJoints addObject:joint];
+            }
+            
+            MeshSceneMeshNode * runtimeNode = meshNodes[inode->_id];
+            runtimeNode->_skin = sceneSkin;
+            runtimeNode->_geometry = getGeometry( iskin->_meshSource );
+            
+            [self applyBindMatrix:runtimeNode->_geometry->_buffers
+                       bindMatrix:sceneSkin->_bindShapeMatrix];
         }
-        for( NSString * jointName in jointNameArray )
-        {
-            MeshSceneArmatureNode * joint = findJointWithName(jointName,nil);
-            [sceneSkin->_influencingJoints addObject:joint];
-        }
-
-        sceneSkin->_geometry = getGeometry( iskin->_meshSource );
-        sceneMeshNode->_skin = sceneSkin;
         
-        [self applyBindMatrix:sceneSkin->_geometry->_buffers
-                   bindMatrix:sceneSkin->_bindShapeMatrix];
-    }
-    else if( meshNode->_geometryName )
-    {
-        sceneMeshNode->_geometry = getGeometry( meshNode->_geometryName );
-    }
+        if( inode->_children )
+            [inode->_children each:mapGeometry];
+    };
+            
+
+    // Pass 4. Hook up geometries and skins
     
-    scene->_mesh = sceneMeshNode;
+    [_nodes each:mapGeometry];
+    
     
     if( [_animations count] )
     {
+        static MeshSceneMeshNode * (^findMeshNodeWithGeometryName)(NSString *) = nil;
+        
+        findMeshNodeWithGeometryName = ^MeshSceneMeshNode *(NSString *name)
+        {
+            MeshSceneMeshNode * meshNode = meshNodes[name];
+            if( meshNode )
+                return meshNode;
+            IncomingMeshData * imd = _geometries[name];
+            if( !imd )
+                return nil;
+            for( NSString * mname in meshNodes )
+            {
+                meshNode = meshNodes[mname];
+                if( meshNode->_geometry ==  imd->_meshGeometry )
+                    return meshNode;
+            }
+            return nil;
+        };
+        
+        NSMutableArray * sceneAnimations = [NSMutableArray new];
+        
         for( NSString * namePath in _animations )
         {
             NSArray * parts = [namePath componentsSeparatedByString:@"/"];
             
             MeshAnimation * sceneAnim = _animations[namePath];
             
-#ifdef OPTIMIZE_ANIMATIONS
+#ifdef CULL_NULL_ANIMATIONS
             GLKMatrix4 * firstMat = &sceneAnim->_transforms[0];
             
             bool allSame = true;
@@ -1526,19 +1695,17 @@ foundCharacters:(NSString *)string
                 }
                 else
                 {
-                    if( EQSTR(scene->_mesh->_name,parts[0]) )
-                    {
-                        sceneAnim->_target = scene->_mesh;
-                    }
-                    else
-                    {
-                        TGLog(LLShitsOnFire, @"Can't find the target animation node: %@/%@", parts[0],parts[1]);
-                    }
+                    sceneAnim->_target = findMeshNodeWithGeometryName(parts[0]);
                 }
+                if( !sceneAnim->_target )
+                    TGLog(LLShitsOnFire, @"Can't find the target animation node: %@/%@", parts[0],parts[1]);
+                
                 sceneAnim->_property = parts[1];
-                [scene->_animations addObject:sceneAnim];
+                [sceneAnimations addObject:sceneAnim];
             }
         }
+        
+        scene->_animations = [NSArray arrayWithArray:sceneAnimations];
     }
     else
     {

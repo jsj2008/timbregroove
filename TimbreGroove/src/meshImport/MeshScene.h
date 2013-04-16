@@ -9,6 +9,9 @@
 #import <Foundation/Foundation.h>
 #import <GLKit/GLKit.h>
 
+@class MeshSkinning;
+
+
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  MeshGeometry  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 typedef enum _MeshSemanticKey {
@@ -43,11 +46,13 @@ typedef struct _MeshGeometryBuffer {
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  SceneNode(s) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 typedef enum _MeshSceneNodeType {
-    MSNT_UNKNOWN_WTF,
-    MSNT_Mesh,
-    MSNT_Armature,
-    MSNT_Camera,
-    MSNT_Light
+    MSNT_GroupNode,
+    MSNT_Mesh = 1,
+    MSNT_SkinnedMesh = 1 << 1,
+    MSNT_SomeKindaMeshWereIn = MSNT_Mesh | MSNT_SkinnedMesh,
+    MSNT_Armature = 1 << 2,
+    MSNT_Camera = 1 << 3,
+    MSNT_Light = 1 << 4
 } MeshSceneNodeType;
 
 @interface MeshSceneNode : NSObject {
@@ -56,25 +61,25 @@ typedef enum _MeshSceneNodeType {
     NSString *            _name;
     NSString *            _sid;
     GLKMatrix4            _transform;
+    GLKMatrix4             _world;
     NSMutableDictionary * _children;
+    
+    __weak MeshSceneNode* _parent;
 }
 @property (nonatomic) GLKMatrix4 transform;
 
 -(void)addChild:(MeshSceneNode *)child name:(NSString *)name;
-@end
-
-@interface MeshSceneArmatureNode : MeshSceneNode {
-@public
-    GLKMatrix4   _world;
-    GLKMatrix4   _invBindMatrix;
-    __weak MeshSceneArmatureNode * _parent;
-    bool _translateHack;
-}
 -(GLKMatrix4)matrix;
 @end
 
-@class MeshSkinning;
+//------- Joint
+@interface MeshSceneArmatureNode : MeshSceneNode {
+@public
+    GLKMatrix4   _invBindMatrix;
+}
+@end
 
+//------- Mesh
 @interface MeshSceneMeshNode : MeshSceneNode {
 @public
     GLKVector3 _location;
@@ -83,8 +88,8 @@ typedef enum _MeshSceneNodeType {
     GLKVector3 _rotationZ;
     GLKVector3 _scale;
     
-    MeshSkinning *          _skin;
-    MeshGeometry *          _geometry;
+    MeshSkinning *  _skin;
+    MeshGeometry *  _geometry;
 }
 @end
 
@@ -109,12 +114,11 @@ typedef enum _MeshSceneNodeType {
 
 @interface MeshScene : NSObject {
 @public
-    NSMutableArray      *   _animations;
-    MeshSceneMeshNode *     _mesh;
-    MeshSceneArmatureNode * _armatureTree;
+    NSArray  * _animations;
+    NSArray  * _meshes;
+    NSArray  * _joints;
 }
 @property (nonatomic,strong) NSString * fileName;
--(MeshGeometry *)getGeometry:(NSString *)name;
 -(void)calcMatricies;
 -(void)calcAnimationMatricies;
 @end
@@ -174,7 +178,6 @@ typedef enum _MeshSceneNodeType {
     int              _weightFOffset;
     
     MeshSceneArmatureNode * _bone;
-    MeshGeometry *          _geometry;
     unsigned short *        _vectorIndex;
 }
 

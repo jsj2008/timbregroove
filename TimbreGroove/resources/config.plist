@@ -449,6 +449,10 @@
 			<string>GenericImport</string>
 			<key>properties</key>
 			<dict>
+				<key>runAnimations</key>
+				<true/>
+				<key>cameraZ</key>
+				<integer>-70</integer>
 				<key>runEmitter</key>
 				<false/>
 				<key>scaleXYZ</key>

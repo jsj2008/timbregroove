@@ -88,7 +88,7 @@ static NSString * stringFromMat(GLKMatrix4 m)
     
     printf("#pragma mark BONES\n\n");
     
-    dumpBones(nil, _armatureTree);
+    [_joints each:^(id sender) { dumpBones(nil,sender); }];
     
     NSUInteger totalNames = [allJointNames count];
     TGLogp(LLMeshImporter, @"Joint * %@_joints[%d] = {", baseName, totalNames);
@@ -101,13 +101,16 @@ static NSString * stringFromMat(GLKMatrix4 m)
     
     printf("#pragma mark SKIN\n\n");
 
-    MeshSkinning * skin = _mesh->_skin;
-    if( skin )
-    {
-        TGLogp(LLMeshImporter, @"GLKMatrix4 %@_bindShapeMatrix = %@;\n",baseName,stringFromMat(skin->_bindShapeMatrix));
-        TGLogp(LLMeshImporter, @"float %@_weights[] = ",baseName);
-        [self emitSkin:skin];
-    }
+    [_meshes each:^(MeshSceneMeshNode * mesh) {
+        MeshSkinning * skin = mesh->_skin;
+        if( skin )
+        {
+            TGLogp(LLMeshImporter, @"GLKMatrix4 %@_%@_bindShapeMatrix = %@;\n",
+                   baseName, mesh->_name, stringFromMat(skin->_bindShapeMatrix));
+            TGLogp(LLMeshImporter, @"float %@_weights[] = ",baseName);
+            [self emitSkin:skin];
+        }
+    }];
     
     if( _animations )
     {
@@ -158,103 +161,109 @@ static NSString * stringFromMat(GLKMatrix4 m)
         
     };
     
-    MeshGeometry * geometry = _mesh->_geometry;
-    if( !geometry )
-        geometry = _mesh->_skin->_geometry;
-    
-    printf("#pragma mark GEOMETRY\n\n");
+    [_meshes each:^(MeshSceneMeshNode * mesh ) {
 
-    for( int b = 0; b < 3; b ++ )
-    {
-        MeshGeometryBuffer * bufferInfo = geometry->_buffers + b;
-        if( !bufferInfo->data )
-            continue;
+        MeshGeometry * geometry = mesh->_geometry;
+        NSString * meshName = mesh->_name;
         
-        TGLogp(LLMeshImporter, @"GLKVector%d %@_%s[%d] = {",
-               bufferInfo->stride,
-               baseName,
-               varname[indexIntoNamesMap[b]],
-               bufferInfo->numFloats/bufferInfo->stride);
+        TGLogp(LLMeshImporter,@"#pragma mark GEOMETRY %@\n\n",meshName);
         
-        float *p = bufferInfo->data;
-        int count = bufferInfo->numFloats;
-        for( int i = 0; i < count;  )
+        for( int b = 0; b < 3; b ++ )
         {
-            for( int r = 0; r < 3 && i < count; r++  )
-            {
-                printf("{");
-                char * comma = "";
-                for( int s = 0; s < bufferInfo->stride; s++ )
-                { printf( "%s %+.3f ",comma, p[i++]); comma = ","; }
-                if( i + 1 < count )
-                    printf("}, ");
-                else
-                    printf("}");
-            }
-            printf("\n");
-        }
-        printf("};\n");
-        
-        if( bufferInfo->indexData )
-        {
-            TGLogp(LLMeshImporter, @"unsigned int %@_%s_index[%d] = {",
-                   baseName,
-                   varname[indexIntoNamesMap[b]],
-                   bufferInfo->numIndices );
+            MeshGeometryBuffer * bufferInfo = geometry->_buffers + b;
+            if( !bufferInfo->data )
+                continue;
             
-            unsigned int *p = bufferInfo->indexData;
-            int count = bufferInfo->numIndices;
-            int i;
-            for( i = 0; i < count;  )
+            TGLogp(LLMeshImporter, @"GLKVector%d %@_%@_%s[%d] = {",
+                   bufferInfo->stride,
+                   baseName,
+                   meshName,
+                   varname[indexIntoNamesMap[b]],
+                   bufferInfo->numFloats/bufferInfo->stride);
+            
+            float *p = bufferInfo->data;
+            int count = bufferInfo->numFloats;
+            for( int i = 0; i < count;  )
             {
                 for( int r = 0; r < 3 && i < count; r++  )
                 {
-                    printf(" ");
+                    printf("{");
                     char * comma = "";
-                    for( int s = 0; s < 3; s++ )
-                    {
-                        printf( "%s %d",comma,p[i++]);
-                        comma = ",";
-                    }
+                    for( int s = 0; s < bufferInfo->stride; s++ )
+                    { printf( "%s %+.3f ",comma, p[i++]); comma = ","; }
                     if( i + 1 < count )
-                        printf(", ");
+                        printf("}, ");
+                    else
+                        printf("}");
                 }
                 printf("\n");
             }
             printf("};\n");
             
-#ifdef EMIT_FLATTENED_INDEX
-            TGLogp(LLMeshImporter, @"GLKVector3 %@_%s_flat[%d] = {",
-                   baseName,
-                   varname[indexIntoNamesMap[b]],
-                   bufferInfo->numIndices );
+            if( bufferInfo->indexData )
             {
+                TGLogp(LLMeshImporter, @"unsigned int %@_%@_%s_index[%d] = {",
+                       baseName,
+                       meshName,
+                       varname[indexIntoNamesMap[b]],
+                       bufferInfo->numIndices );
                 
-                MeshGeometryBuffer * b = bufferInfo;
-                unsigned int elementSize = b->stride;
-                float * old = b->data;
-                unsigned int * idx = b->indexData;
+                unsigned int *p = bufferInfo->indexData;
+                int count = bufferInfo->numIndices;
                 int i;
-                for( int x = 0; x < b->numIndices; x++ )
+                for( i = 0; i < count;  )
                 {
-                    i = *idx++ * elementSize;
-                    printf(" { ");
-                    char *comma = "";
-                    for( int e = 0; e < elementSize; e++ )
+                    for( int r = 0; r < 3 && i < count; r++  )
                     {
-                        float f = old[i + e];
-                        printf( "%s %+.3f", comma, f );
-                        comma = ",";
+                        printf(" ");
+                        char * comma = "";
+                        for( int s = 0; s < 3; s++ )
+                        {
+                            printf( "%s %d",comma,p[i++]);
+                            comma = ",";
+                        }
+                        if( i + 1 < count )
+                            printf(", ");
                     }
-                    printf(" },");
-                    if( (x+1) % 3 == 0 )
-                        printf("\n");
+                    printf("\n");
                 }
                 printf("};\n");
-            }
+                
+#ifdef EMIT_FLATTENED_INDEX
+                TGLogp(LLMeshImporter, @"GLKVector3 %@_%@_%s_flat[%d] = {",
+                       baseName,
+                       meshName,
+                       varname[indexIntoNamesMap[b]],
+                       bufferInfo->numIndices );
+                {
+                    
+                    MeshGeometryBuffer * b = bufferInfo;
+                    unsigned int elementSize = b->stride;
+                    float * old = b->data;
+                    unsigned int * idx = b->indexData;
+                    int i;
+                    for( int x = 0; x < b->numIndices; x++ )
+                    {
+                        i = *idx++ * elementSize;
+                        printf(" { ");
+                        char *comma = "";
+                        for( int e = 0; e < elementSize; e++ )
+                        {
+                            float f = old[i + e];
+                            printf( "%s %+.3f", comma, f );
+                            comma = ",";
+                        }
+                        printf(" },");
+                        if( (x+1) % 3 == 0 )
+                            printf("\n");
+                    }
+                    printf("};\n");
+                }
 #endif
+            }
         }
-    }
+    }];
+    
     TGLogp(LLMeshImporter, @"#endif // %@_import_included",baseName);
     
 }

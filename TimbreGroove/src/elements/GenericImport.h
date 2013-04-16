@@ -8,11 +8,12 @@
 
 #import "Generic.h"
 
-@interface GenericImport : Generic
+@interface GenericImport : TG3dObject
 // startup options read from config.plist
 @property (nonatomic,strong) NSString * colladaFile;
 @property (nonatomic) GLint bufferDrawType;
 @property (nonatomic) bool runEmitter;
 @property (nonatomic) bool runAnimations;
+@property (nonatomic) float cameraZ;
 @end
 
