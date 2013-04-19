@@ -9,7 +9,7 @@
 #import "Generic.h"
 
 #import "SettingsVC.h"
-#import "Texture.h"
+#import "Material.h"
 
 #import "GridPlane.h"
 #import "SphereOid.h"
@@ -74,12 +74,6 @@ typedef enum shaderType {
     self.settingsAreDirty = true;
 }
 
--(void)createShader
-{
-    Class klass = NSClassFromString(_shaderName);
-    self.shader = [klass new];
-}
-
 -(void)update:(NSTimeInterval)dt
 {
     _rot += 1;
@@ -89,21 +83,18 @@ typedef enum shaderType {
         ((Pool*)self.shader).time = (float)dt;
 }
 
--(void)createTexture
+-(void)createShader
 {
+    Texture * texture = nil;
     if( _shaderType == pool )
     {
-        self.texture = [[Texture alloc] initWithFileName:@"pool.png"];
-        //self.texture.repeat = true;
+        texture = [[Texture alloc] initWithFileName:@"pool.png"];
+        [self addShaderFeature:texture];
     }
-}
-
--(void)getTextureLocations
-{
-    if( _shaderType == pool )
-    {
-        self.texture.uLocation = [self.shader location:pool_sampler];
-    }
+    Class klass = NSClassFromString(_shaderName);
+    self.shader = [klass new];
+    if( texture )
+        texture.uLocation = [self.shader location:pool_sampler];
 }
 
 -(void)createBuffer

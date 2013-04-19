@@ -331,7 +331,8 @@ typedef enum _sfpType {
     _valueCache = malloc(_valueCacheMax * sizeof(ValueCacheItem));
     
     NSString * tag = [headers length] ? headers : @"default";
-    _poolKey = [NSString stringWithFormat:@"%s-%s-%@",vert,frag,tag];
+    _poolKey = [NSString stringWithFormat:@"%s-%s-%@-%@",vert,frag,tag,[EAGLContext currentContext]];
+
     if( !__shaders )
         __shaders = [NSHashTable weakObjectsHashTable];
     [__shaders addObject:self];

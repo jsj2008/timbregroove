@@ -176,9 +176,9 @@
 		5781CAB716E581B6007C8EC2 /* NSIndexSet+BlocksKit.m in Sources */ = {isa = PBXBuildFile; fileRef = 5781CAB216E581B5007C8EC2 /* NSIndexSet+BlocksKit.m */; };
 		5781CAB816E581B6007C8EC2 /* NSObject+AssociatedObjects.m in Sources */ = {isa = PBXBuildFile; fileRef = 5781CAB416E581B6007C8EC2 /* NSObject+AssociatedObjects.m */; };
 		5781CABB16E581E6007C8EC2 /* NSSet+BlocksKit.m in Sources */ = {isa = PBXBuildFile; fileRef = 5781CABA16E581E6007C8EC2 /* NSSet+BlocksKit.m */; };
-		578292C7169879930053ADCD /* ImageBaker.m in Sources */ = {isa = PBXBuildFile; fileRef = 578292C6169879930053ADCD /* ImageBaker.m */; };
 		578292C9169A87B10053ADCD /* test.png in Resources */ = {isa = PBXBuildFile; fileRef = 578292C8169A87B00053ADCD /* test.png */; };
 		578292CB169A8B660053ADCD /* imageBaker.png in Resources */ = {isa = PBXBuildFile; fileRef = 578292CA169A8B650053ADCD /* imageBaker.png */; };
+		5787A701171FC89A00861C01 /* ShaderTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 5787A700171FC89900861C01 /* ShaderTimer.m */; };
 		5798B05916BA00F70093F473 /* pause.png in Resources */ = {isa = PBXBuildFile; fileRef = 5798B05716BA00F70093F473 /* pause.png */; };
 		5798B05A16BA00F70093F473 /* play.png in Resources */ = {isa = PBXBuildFile; fileRef = 5798B05816BA00F70093F473 /* play.png */; };
 		579AD1A916C40B670071AA9A /* Config.m in Sources */ = {isa = PBXBuildFile; fileRef = 579AD1A816C40B670071AA9A /* Config.m */; };
@@ -186,7 +186,7 @@
 		57A4C22016DFDCF10044B3C9 /* Sampler.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A4C21F16DFDCF10044B3C9 /* Sampler.m */; };
 		57A58EA816ADE68200C9FA53 /* Cube.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A58EA716ADE68200C9FA53 /* Cube.m */; };
 		57A58EB116AE020C00C9FA53 /* poolLines.png in Resources */ = {isa = PBXBuildFile; fileRef = 57A58EB016AE020C00C9FA53 /* poolLines.png */; };
-		57A66EED167B1D1C00B9EA75 /* Texture.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A66EEC167B1D1C00B9EA75 /* Texture.m */; };
+		57A66EED167B1D1C00B9EA75 /* Material.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A66EEC167B1D1C00B9EA75 /* Material.m */; };
 		57A66EEF167B293E00B9EA75 /* aotk_tex_64.png in Resources */ = {isa = PBXBuildFile; fileRef = 57A66EEE167B293E00B9EA75 /* aotk_tex_64.png */; };
 		57AA0AC316D1269600BCA4A0 /* uv.png in Resources */ = {isa = PBXBuildFile; fileRef = 57AA0AC216D1269600BCA4A0 /* uv.png */; };
 		57AA0AC516D12B9100BCA4A0 /* uvWrap.png in Resources */ = {isa = PBXBuildFile; fileRef = 57AA0AC416D12B9100BCA4A0 /* uvWrap.png */; };
@@ -221,7 +221,6 @@
 		57E27F0416F9166600282F9A /* m.mid in Resources */ = {isa = PBXBuildFile; fileRef = 57E27F0316F9166600282F9A /* m.mid */; };
 		57E27F0616F9626500282F9A /* runner.png in Resources */ = {isa = PBXBuildFile; fileRef = 57E27F0516F9626500282F9A /* runner.png */; };
 		57E590A816BA2E3F00330F40 /* State.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E590A716BA2E3F00330F40 /* State.m */; };
-		57E62E67168433100030908E /* Photo.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E62E66168433100030908E /* Photo.m */; };
 		57E7465E1680438300C1D4FF /* EventCapture.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E7465D1680438300C1D4FF /* EventCapture.m */; };
 		57E7EB99170F6B7100D3DC88 /* boxStretch.dae in Resources */ = {isa = PBXBuildFile; fileRef = 57E7EB98170F6B7100D3DC88 /* boxStretch.dae */; };
 		57E7EB9D170FA83E00D3DC88 /* ballStretch.dae in Resources */ = {isa = PBXBuildFile; fileRef = 57E7EB9C170FA83E00D3DC88 /* ballStretch.dae */; };
@@ -415,8 +414,8 @@
 		5758FDEC16D06648003913D1 /* funkRiff1.mid */ = {isa = PBXFileReference; lastKnownFileType = audio.midi; path = funkRiff1.mid; sourceTree = "<group>"; };
 		575AA12316ADA61500635A76 /* Pool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Pool.h; sourceTree = "<group>"; };
 		575AA12516ADA61F00635A76 /* Pool.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Pool.m; sourceTree = "<group>"; };
-		575AA12716ADAF6900635A76 /* Light.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Light.h; sourceTree = "<group>"; };
-		575AA12816ADAF6900635A76 /* Light.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Light.m; sourceTree = "<group>"; };
+		575AA12716ADAF6900635A76 /* Light.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Light.h; path = ../Light.h; sourceTree = "<group>"; };
+		575AA12816ADAF6900635A76 /* Light.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Light.m; path = ../Light.m; sourceTree = "<group>"; };
 		575AA12A16ADBB9500635A76 /* pool.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = pool.png; sourceTree = "<group>"; };
 		575AA12D16ADBC6800635A76 /* PoolScreen.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PoolScreen.m; sourceTree = "<group>"; };
 		575C8EEC1695FB4C00AB565B /* fractalSphere.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fractalSphere.png; sourceTree = "<group>"; };
@@ -478,9 +477,10 @@
 		5781CAB416E581B6007C8EC2 /* NSObject+AssociatedObjects.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+AssociatedObjects.m"; sourceTree = "<group>"; };
 		5781CAB916E581E6007C8EC2 /* NSSet+BlocksKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSSet+BlocksKit.h"; sourceTree = "<group>"; };
 		5781CABA16E581E6007C8EC2 /* NSSet+BlocksKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSSet+BlocksKit.m"; sourceTree = "<group>"; };
-		578292C6169879930053ADCD /* ImageBaker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageBaker.m; sourceTree = "<group>"; };
 		578292C8169A87B00053ADCD /* test.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = test.png; sourceTree = "<group>"; };
 		578292CA169A8B650053ADCD /* imageBaker.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = imageBaker.png; sourceTree = "<group>"; };
+		5787A6FF171FC89900861C01 /* ShaderTimer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ShaderTimer.h; path = TimbreGroove/src/ShaderTimer.h; sourceTree = SOURCE_ROOT; };
+		5787A700171FC89900861C01 /* ShaderTimer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ShaderTimer.m; path = TimbreGroove/src/ShaderTimer.m; sourceTree = SOURCE_ROOT; };
 		5790068616841F3B0068659F /* Interactive.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Interactive.h; sourceTree = "<group>"; };
 		5798B05716BA00F70093F473 /* pause.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = pause.png; sourceTree = "<group>"; };
 		5798B05816BA00F70093F473 /* play.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = play.png; sourceTree = "<group>"; };
@@ -492,8 +492,8 @@
 		57A58EA616ADE68200C9FA53 /* Cube.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Cube.h; sourceTree = "<group>"; };
 		57A58EA716ADE68200C9FA53 /* Cube.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Cube.m; sourceTree = "<group>"; };
 		57A58EB016AE020C00C9FA53 /* poolLines.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = poolLines.png; sourceTree = "<group>"; };
-		57A66EEB167B1D1B00B9EA75 /* Texture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Texture.h; sourceTree = "<group>"; };
-		57A66EEC167B1D1C00B9EA75 /* Texture.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Texture.m; sourceTree = "<group>"; };
+		57A66EEB167B1D1B00B9EA75 /* Material.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Material.h; path = ../Material.h; sourceTree = "<group>"; };
+		57A66EEC167B1D1C00B9EA75 /* Material.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Material.m; path = ../Material.m; sourceTree = "<group>"; };
 		57A66EEE167B293E00B9EA75 /* aotk_tex_64.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = aotk_tex_64.png; sourceTree = "<group>"; };
 		57AA0AC216D1269600BCA4A0 /* uv.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = uv.png; sourceTree = "<group>"; };
 		57AA0AC416D12B9100BCA4A0 /* uvWrap.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = uvWrap.png; sourceTree = "<group>"; };
@@ -551,8 +551,6 @@
 		57E27F0716F9769500282F9A /* ChannelProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChannelProtocol.h; sourceTree = "<group>"; };
 		57E590A616BA2E3F00330F40 /* State.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = State.h; sourceTree = "<group>"; };
 		57E590A716BA2E3F00330F40 /* State.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = State.m; sourceTree = "<group>"; };
-		57E62E65168433100030908E /* Photo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Photo.h; sourceTree = "<group>"; };
-		57E62E66168433100030908E /* Photo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Photo.m; sourceTree = "<group>"; };
 		57E7465C1680438300C1D4FF /* EventCapture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EventCapture.h; sourceTree = "<group>"; };
 		57E7465D1680438300C1D4FF /* EventCapture.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EventCapture.m; sourceTree = "<group>"; };
 		57E7EB98170F6B7100D3DC88 /* boxStretch.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = boxStretch.dae; sourceTree = "<group>"; };
@@ -833,6 +831,12 @@
 				572D7F2D16832749006D48BF /* GenericWithTexture.m */,
 				5714705C17067D3100383D04 /* GenericImport.h */,
 				5714705D17067D3100383D04 /* GenericImport.m */,
+				5787A6FF171FC89900861C01 /* ShaderTimer.h */,
+				5787A700171FC89900861C01 /* ShaderTimer.m */,
+				57A66EEB167B1D1B00B9EA75 /* Material.h */,
+				57A66EEC167B1D1C00B9EA75 /* Material.m */,
+				575AA12716ADAF6900635A76 /* Light.h */,
+				575AA12816ADAF6900635A76 /* Light.m */,
 			);
 			name = generic;
 			sourceTree = "<group>";
@@ -984,8 +988,6 @@
 			children = (
 				57F290F7169578C700293B0E /* Fractal.h */,
 				57F290F8169578C700293B0E /* Fractal.m */,
-				57E62E65168433100030908E /* Photo.h */,
-				57E62E66168433100030908E /* Photo.m */,
 				57F412F1168167F700D9DC67 /* Sphere.h */,
 				57F412F2168167F700D9DC67 /* Sphere.m */,
 				5707CA7116BC9E4500B24818 /* Text.h */,
@@ -1071,10 +1073,6 @@
 				572EB21E16788D170062F290 /* MeshBuffer.m */,
 				572EB21816787AFF0062F290 /* Shader.h */,
 				572EB21916787AFF0062F290 /* Shader.m */,
-				57A66EEB167B1D1B00B9EA75 /* Texture.h */,
-				57A66EEC167B1D1C00B9EA75 /* Texture.m */,
-				575AA12716ADAF6900635A76 /* Light.h */,
-				575AA12816ADAF6900635A76 /* Light.m */,
 			);
 			name = openGL;
 			sourceTree = "<group>";
@@ -1085,7 +1083,6 @@
 				577AE48716B35D1400B4FDF1 /* Fluid.m */,
 				5737C4B216930BD500C12F2D /* FractalSphere.m */,
 				570F40D816AB8EE0000FCA7B /* StockDemo.m */,
-				578292C6169879930053ADCD /* ImageBaker.m */,
 				575AA12D16ADBC6800635A76 /* PoolScreen.m */,
 				57B2098C16CAFABF007BE2A2 /* Oscilloscope.m */,
 				577368D216CDCBF70051551F /* EQPanel.h */,
@@ -1458,20 +1455,18 @@
 				572EB21F16788D170062F290 /* MeshBuffer.m in Sources */,
 				572EB2261678BBCA0062F290 /* TG3dObject.m in Sources */,
 				572EB2291678BF740062F290 /* Camera.m in Sources */,
-				57A66EED167B1D1C00B9EA75 /* Texture.m in Sources */,
+				57A66EED167B1D1C00B9EA75 /* Material.m in Sources */,
 				571A42FE167C315700CD7E8F /* Graph.m in Sources */,
 				5764756C167D5E8C00D5A431 /* GenericShader.m in Sources */,
 				57647571167D619800D5A431 /* Generic.m in Sources */,
 				57E7465E1680438300C1D4FF /* EventCapture.m in Sources */,
 				57F412F3168167F700D9DC67 /* Sphere.m in Sources */,
 				572D7F2E16832749006D48BF /* GenericWithTexture.m in Sources */,
-				57E62E67168433100030908E /* Photo.m in Sources */,
 				57CCFFC216849337003B4A19 /* Text.m in Sources */,
 				5721989616853F9E0062C36F /* GraphView.m in Sources */,
 				574B5FF9168D20BD008367D1 /* FBO.m in Sources */,
 				575DA0021693C90400A50C41 /* SettingsVC.m in Sources */,
 				57F290F9169578C700293B0E /* Fractal.m in Sources */,
-				578292C7169879930053ADCD /* ImageBaker.m in Sources */,
 				570220D9169B8E7F0028FE33 /* UIView+TGExtension.m in Sources */,
 				5716775F16A685A800F78B25 /* AssetLoader.m in Sources */,
 				570F40D616AB8BE2000FCA7B /* Fire.m in Sources */,
@@ -1546,6 +1541,7 @@
 				5714705E17067D3100383D04 /* GenericImport.m in Sources */,
 				577E7ED5170E1A1F009E9916 /* MeshScene+Emitter.m in Sources */,
 				571EDCCF1711F09F008375AA /* ObjectGestures.m in Sources */,
+				5787A701171FC89A00861C01 /* ShaderTimer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

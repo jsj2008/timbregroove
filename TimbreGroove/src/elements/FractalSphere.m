@@ -19,6 +19,7 @@
     Fractal * _texRenderer;
     float _myRot;
     FBO *_fbo;
+    AmbientLighting * _ambient;
     
     float _pmin;
     float _pmax;
@@ -31,6 +32,7 @@
 
 -(id)wireUp
 {
+    _ambient = [[AmbientLighting alloc] init];
     _fbo = [[FBO alloc] initWithWidth:512 height:512];
     _texRenderer = [[Fractal alloc] init];
     _texRenderer.fbo = _fbo;
@@ -45,11 +47,15 @@
     return [super wireUp];
 }
 
--(void)createTexture
+-(void)createShader
 {
-    self.texture = _fbo;
+    [self addShaderFeature:_fbo];
+    [self addShaderFeature:[DirectionalLight new]];
+    [self addShaderFeature:_ambient];
+    [super createShader];
 }
 
+#if 0
 -(void)configureLighting
 {
     if( !self.light )
@@ -61,6 +67,7 @@
     GLKMatrix4 mx = GLKMatrix4MakeTranslation( lDir.x, lDir.y, lDir.z );
     self.light.direction = GLKMatrix4MultiplyVector3(mx,(GLKVector3){-1, 0, -1});
 }
+#endif
 
 -(void)getParameters:(NSMutableDictionary *)putHere
 {
@@ -70,7 +77,7 @@
     putHere[@"Ping!"] = [Parameter withBlock:^(float f) {
         _myRot += f * 45.0;
         self.rotation = (GLKVector3){ 0, GLKMathDegreesToRadians(_myRot), 0 };
-        self.light.ambientColor = (GLKVector4){f, f*0.7, f, 1.0};
+        _ambient.ambientColor = (GLKVector4){f, f*0.7, f, 1.0};
     }];
     
 }

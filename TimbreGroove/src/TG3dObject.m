@@ -134,7 +134,7 @@
     while( e && e->_shader == nil )
         e = (TG3dObject *)e.parent;
     
-#if DEBUG
+#if DEBUGX
     if( !e || !e->_shader )
     {
         TGLog(LLShitsOnFire, @"Missing shader (did you call wireUp?)");

@@ -17,7 +17,7 @@
 
 #import "GraphView.h"
 #import "FBO.h"
-#import "Texture.h"
+#import "Material.h"
 #import "GenericWithTexture.h"
 
 #import "Scene.h"

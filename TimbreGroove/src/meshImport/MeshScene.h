@@ -8,9 +8,30 @@
 
 #import <Foundation/Foundation.h>
 #import <GLKit/GLKit.h>
+#import "TGTypes.h"
 
 @class MeshSkinning;
 
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  MeshMaterial  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+typedef enum _MeshMaterialType {
+    MMT_Phong
+
+} MeshMaterialType;
+
+
+@interface MeshMaterial : NSObject {
+    @public
+    NSString * _name;
+    MeshMaterialType _type;
+}
+@end
+
+@interface MeshMaterialPhong : MeshMaterial {
+    GLKVector4  _colors[PhongColor_NUM_COLORS];
+    float       _float[PhongValue_NUM_FLOATS];
+}
+@end
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  MeshGeometry  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -25,21 +46,30 @@ typedef enum _MeshSemanticKey {
     kNumMeshSemanticKeys
 } MeshSemanticKey;
 
-
-typedef struct _MeshGeometryBuffer {
-    float *          data;
-    int              offset;
-    int              stride;
-    int              numFloats;
-    int              numElements;
-    
+typedef struct _MeshGeometryIndexBuffer {
     unsigned int *   indexData;
-    int              numIndices;
+    int              numIndices;    
+} MeshGeometryIndexBuffer;
+
+/*
+ materials are assigned to index buffers -
+ one geometry mesh might have several different
+ materials assigned, one per index
+*/
+typedef struct _MeshGeometryBuffer {
+    float * data;
+    int     offset;
+    int     stride;
+    int     numFloats;
+    int     numElements;
+    
 } MeshGeometryBuffer;
 
 @interface MeshGeometry : NSObject {
 @public
-    MeshGeometryBuffer _buffers[kNumMeshSemanticKeys];
+    MeshGeometryBuffer        _buffers[kNumMeshSemanticKeys];
+    unsigned int              _numIndexBuffers;
+    MeshGeometryIndexBuffer * _indexBuffers;
 }
 @end
 
@@ -90,6 +120,7 @@ typedef enum _MeshSceneNodeType {
     
     MeshSkinning *  _skin;
     MeshGeometry *  _geometry;
+    MeshMaterial *  _material;
 }
 @end
 
@@ -117,6 +148,7 @@ typedef enum _MeshSceneNodeType {
     NSArray  * _animations;
     NSArray  * _meshes;
     NSArray  * _joints;
+    NSArray  * _materials;
 }
 @property (nonatomic,strong) NSString * fileName;
 -(void)calcMatricies;

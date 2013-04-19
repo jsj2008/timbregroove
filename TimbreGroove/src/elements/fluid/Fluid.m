@@ -12,7 +12,7 @@
 #import "MeshBuffer.h"
 #import "Camera.h"
 #import "GraphView.h"
-#import "Texture.h"
+#import "Material.h"
 #import "Geometry.h"
 #import "State.h"
 
@@ -371,7 +371,7 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
     for( id key in _keyedTextures )
     {
         Texture * t = _keyedTextures[key];
-        [t unbind];
+        [t unbind:_shader];
     }
 
     [_bs restore];

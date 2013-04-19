@@ -28,6 +28,10 @@
     return nil;
 }
 
+- (NSArray *)unique
+{
+    return [NSArray arrayWithArray:[[NSSet setWithArray:self] allObjects]];
+}
 @end
 
 //--------------------------------------------------------------------------------

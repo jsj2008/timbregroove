@@ -8,8 +8,11 @@
 
 #import "Generic.h"
 
+@class Texture;
+
 @interface GenericWithTexture : Generic
 -(id)initWithText:(NSString *)text;
 -(id)initWithFileName:(NSString *)imageFileName;
 @property (nonatomic,readonly) float gridWidth;
+@property (nonatomic,strong) Texture * texture;
 @end

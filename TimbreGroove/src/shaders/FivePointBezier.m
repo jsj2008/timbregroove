@@ -68,9 +68,6 @@ static const char * _sbp_var_names[] = {
     "u_color"
 };
 
-@interface FivePointBezier() {
-}
-@end
 
 @implementation FivePointBezier
 

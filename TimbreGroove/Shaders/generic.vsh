@@ -6,6 +6,8 @@
 precision highp float;
 
 attribute vec4 a_position;
+uniform mat4 u_pvm;
+
 
 #ifdef TEXTURE
 attribute vec2 a_uv;
@@ -27,31 +29,73 @@ attribute vec3 a_normal;
 
 uniform mat3 u_normalMat;
 uniform vec3 u_lightDir;
+uniform vec3 u_lightPosition;
+
+#ifdef AMBIENT_LIGHTING
 uniform vec3 u_dirColor;
 uniform vec3 u_ambient;
+
 varying vec3 v_lightFilter;
+
+void sendAmbientLight()
+{
+    vec3 transformedNormal = u_normalMat * a_normal;
+    float directionalLightWeighting = max(dot(transformedNormal, u_lightDir), 0.0);
+    v_lightFilter = u_ambient + u_dirColor * directionalLightWeighting;
+}
 #endif
 
-#ifdef MESH_DISTORT
-uniform vec3 u_distortionPoint;
-uniform float u_distortionFactor;
-vec3 distortForPt( vec3 V, vec3 M )
-{
-    float range = 0.4;
+#ifdef PHONG_LIGHTING
 
-    float range2 = range * range;
-    vec3 MV = V - M;
-    float alpha = range2 / (range2 + dot(MV, MV));
-    return alpha * M + (1.0-alpha) * V;
-}
+
+varying vec4  v_phongLitColor;
+
+uniform vec4  u_phongColors[6];
+uniform float u_phongValues[3];
+
+const int PhongColor_Emission = 0;
+const int PhongColor_Ambient = 1;
+const int PhongColor_Diffuse = 2;
+const int PhongColor_Specular = 3;
+const int PhongColor_Reflective = 4;
+const int PhongColor_Transparent = 5;
+
+const int PhongValue_Shininess = 0;
+const int PhongValue_Reflectivity = 1;
+const int PhongValue_Transparency = 2;
+
+void phongLighting(vec3 position)
+{
+    vec3 materialAmbientColor  = u_phongColors[PhongColor_Ambient].xyz;
+    vec3 materialDiffuseColor  = u_phongColors[PhongColor_Diffuse].xyz;
+    vec3 materialSpecularColor = u_phongColors[PhongColor_Specular].xyz;
+
+    vec3 lightDirection;
+    
+    if (u_lightPos.w == 0.0)
+        lightDirection = normalize(vec3(u_lightPosition));
+    else
+        lightDirection = normalize(vec3(u_lightPosition - u_pvm * position)); 
+
+    vec3 eyespaceNormal  = u_normalMat * a_normal;
+    vec3 viewDirection   = vec3(0.0, 0.0, 1.0);
+    vec3 halfPlane       = normalize(lightDirection + viewDirection);
+
+    float diffuseFactor  = max(0.0, dot(eyespaceNormal, lightDirection)); 
+    float specularFactor = max(0.0, dot(eyespaceNormal, halfPlane)); 
+
+    specularFactor = pow(specularFactor, u_phongValues[PhongValue_Shininess]);
+    vec3 color = materialAmbientColor + (diffuseFactor * materialDiffuseColor) + (specularFactor * materialSpecularColor);
+
+    v_phongLitColor = vec4(color, 1.0);
+#endif
+
 #endif
 
 #ifdef TIME
 uniform float u_time;
 varying float v_time;
 #endif
-
-uniform mat4 u_pvm;
 
 void main()
 {
@@ -65,35 +109,20 @@ void main()
     v_color = a_color;
 #endif
     
-#ifdef NORMAL
-    vec3 transformedNormal = u_normalMat * a_normal;
-    float directionalLightWeighting = max(dot(transformedNormal, u_lightDir), 0.0);
-    v_lightFilter = u_ambient + u_dirColor * directionalLightWeighting;
+#ifdef AMBIENT_LIGHTING
+    sendAmbientLight();
 #endif
     
+#ifdef PHONG_LIGHTING
+    phongLighting(a_position);
+#endif
+
 #ifdef TIME
     v_time = u_time;
 #endif
 
-#ifdef MESH_DISTORT
-    /*
-     point V =     [incoming vertex]
-     point M =     [magnet location]
-     float range = [chosen nominal range for the magnetic effect]
-     
-     float range2 = range * range  [range squared, for comparison with squared distance]
-     vector MV = V - M             [vector from M to V]
-     float alpha = range2 / (range2 + dot(MV, MV))  [weighting factor]
-     point V' =  alpha * M + (1-alpha) * V          [new, "magnetized" position]
-    */
-
-    pos = distortForPt(pos,vec3(2.0,0.0,0.0));
-    pos = distortForPt(pos,vec3(2.0,1.0,0.0));
-
-    gl_Position = u_pvm * vec4(pos,a_position.w);
-#else
 	gl_Position   = u_pvm * vec4(pos,a_position.w);
-#endif
+
 
 }
 

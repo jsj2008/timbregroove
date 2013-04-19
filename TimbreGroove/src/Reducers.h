@@ -10,6 +10,7 @@
 
 @interface NSArray (reducer)
 - (NSMutableArray *)reduce:(BKTransformBlock)block;
+- (NSArray *)unique;
 @end
 
 @interface NSDictionary (reducer)

@@ -8,7 +8,6 @@
 
 #import "GenericShader.h"
 #import "Generic.h"
-#import "Light.h"
 
 const char * _generic_shader_name = "generic";
 
@@ -28,13 +27,16 @@ static const char * _generic_shader_var_names[NUM_GENERIC_VARIABLES] = {
     
     "u_normalMat",
     "u_lightDir",
+    "u_lightPosition",
+    
     "u_dirColor",
     "u_ambient",
     
+    "u_phongColors",
+    "u_phongValues",
+    
     "u_time",
     
-    "u_distortionPoint", 
-    "u_distortionFactor",
     "u_rippleSize",
     "u_ripplePt",
     "u_spotLocation",
@@ -71,8 +73,6 @@ static const char * _generic_shader_var_names[NUM_GENERIC_VARIABLES] = {
 
 -(id)initWithHeaders:(NSString *)headers
 {
-    // TODO: deal with different headers requiring different names to be passed in
-    //
     self.acceptMissingVars = true;
     return   [super initWithVertex: SHADER_FILE_NAME
                        andFragment: SHADER_FILE_NAME
@@ -85,43 +85,8 @@ static const char * _generic_shader_var_names[NUM_GENERIC_VARIABLES] = {
 - (void) prepareRender:(TG3dObject *)tgobj
 {
     [super prepareRender:tgobj];
-    GenericBase * object = (GenericBase *)tgobj;
-    
-    GLKMatrix4 pvm = [object calcPVM];
+    GLKMatrix4 pvm = [(Generic *)tgobj calcPVM];
     [self writeToLocation:gv_pvm type:TG_MATRIX4 data:pvm.m];
-    
-    if( object.light )
-    {
-        Light * light = object.light;
-        
-        GLKMatrix3 normalMat = GLKMatrix3InvertAndTranspose(GLKMatrix4GetMatrix3(pvm), NULL);
-        [self writeToLocation:gv_normalMat type:TG_MATRIX3 data:normalMat.m];
-        
-        [self writeToLocation:gv_lightDir type:TG_VECTOR3 data:light.direction.v];
-        [self writeToLocation:gv_dirColor type:TG_VECTOR3 data:light.dirColor.v];
-        [self writeToLocation:gv_ambient  type:TG_VECTOR3 data:light.ambientColor.v];
-    }
-    
-    if( object.useColor )
-        [self writeToLocation:gv_ucolor type:TG_VECTOR4 data:object.color.v];
-    
-    ShaderTimeType stt = object.timerType;
-    if( stt > kSTT_Custom )
-    {
-        float time;
-        if( stt == kSTT_Timer )
-            time = object.timer;
-        else if( stt == kSTT_CountDown)
-        {
-            float countDown = object.countDownBase - object.timer;
-            if( countDown < 0.0 )
-                return; // N.B. <-----------------
-            time = countDown;
-        }
-        else
-            time = object.totalTime;
-        [self writeToLocation:gv_time type:TG_FLOAT data:&time];
-    }
 }
 
 @end

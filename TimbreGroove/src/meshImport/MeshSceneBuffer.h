@@ -12,6 +12,7 @@
 @interface MeshSceneBuffer : MeshBuffer
 
 -(id)initWithGeometryBuffer:(MeshGeometryBuffer *)bufferInfo
+               andIndexData:(MeshGeometryIndexBuffer *)indexBuffer
      andIndexIntoShaderName:(int)iisn;
 
 @end

@@ -9,7 +9,6 @@
 #ifndef TimbreGroove_TGTypes_h
 #define TimbreGroove_TGTypes_h
 
-#import "BKGlobals.h"
 #import "Log.h"
 
 #define R0_1()      (((float)(arc4random_uniform(0x1000000) % 255))/255.0)
@@ -75,5 +74,28 @@ static inline GLKVector3 PositionFromMatrix(GLKMatrix4 m)
     return *(GLKVector3 *)&vec4;
 }
 
+
+// these need to match up to shader
+typedef enum _PhongColor {
+    PhongColor_None = -1,
+    PhongColor_Emission,
+    PhongColor_Ambient,
+    PhongColor_Diffuse,
+    PhongColor_Specular,
+    PhongColor_Reflective,
+    PhongColor_Transparent,
+    
+    PhongColor_NUM_COLORS
+    
+} PhongColors;
+
+typedef enum _PhongFloat {
+    PhongValue_None = -1,
+    PhongValue_Shininess,
+    PhongValue_Reflectivity,
+    PhongValue_Transparency,
+    
+    PhongValue_NUM_FLOATS
+} PhongFloat;
 
 #endif

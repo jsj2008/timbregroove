@@ -7,18 +7,37 @@
 //
 
 #import "Light.h"
+#import "GenericShader.h"
+#import "Generic.h"
 
-@implementation Light
+@implementation DirectionalLight
 
 -(id)init
 {
     if( (self = [super init]) )
     {
-        _direction = GLKVector3Make(0, 0.5, 0);
-        _dirColor = GLKVector3Make(1, 1, 1);
-        _pos = GLKVector3Make(0, 0, -1);
+        _direction = (GLKVector3){0, 0.5, 0};
+        _position  = (GLKVector3){0, 0,   -1};
     }
     
     return self;
 }
+
+-(void)getShaderFeatureNames:(NSMutableArray *)putHere
+{
+    [putHere addObject:kShaderFeatureNormal];
+}
+
+-(void)bind:(Shader *)shader object:(Generic *)object
+{
+    GLKMatrix4 pvm = [object calcPVM];
+    GLKMatrix3 normalMat = GLKMatrix3InvertAndTranspose(GLKMatrix4GetMatrix3(pvm), NULL);
+    [shader writeToLocation:gv_normalMat type:TG_MATRIX3 data:normalMat.m];
+    
+    [shader writeToLocation:gv_lightDir type:TG_VECTOR3 data:_direction.v];
+    [shader writeToLocation:gv_lightPosition type:TG_VECTOR3 data:_position.v];
+}
+-(void)unbind:(Shader *)shader {}
+-(void)setShader:(Shader *)shader{}
+
 @end

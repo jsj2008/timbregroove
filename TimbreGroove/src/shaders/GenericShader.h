@@ -20,19 +20,29 @@ typedef enum {
     GV_LAST_ATTR = gv_boneWeights,
     
     gv_pvm, // projection-view-mat
+    
+    // Texture
     gv_sampler,
+    
+    // ColorMaterial
     gv_ucolor,
     
+    // Light
     gv_normalMat,
     gv_lightDir,
+    gv_lightPosition,
+    
+    // Ambient material
     gv_dirColor,
     gv_ambient,
     
+    // Phong material
+    gv_phongColors,
+    gv_phoneValues,
+    
+    // ShaderTimer
     gv_time,
-    
-    gv_distortionPt, // vec3
-    gv_distortionFactor, // float
-    
+
     gv_rippleSize,
     gv_ripplePt,
     gv_spotLocation,

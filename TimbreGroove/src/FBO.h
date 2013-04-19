@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "Texture.h"
+#import "Material.h"
 
 @class TG3dObject;
 

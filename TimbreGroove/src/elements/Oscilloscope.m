@@ -11,6 +11,7 @@
 #import "SoundSystem.h"
 #import "Parameter.h"
 #import "Generic.h"
+#import "Material.h"
 #import "Names.h"
 
 @interface Oscilloscope : Generic
@@ -34,12 +35,17 @@
 
 -(void)createBuffer
 {
-    self.color = (GLKVector4){ 0.4, 1, 0.4, 1};
     Line * mesh = [[Line alloc] initWithIndicesIntoNames:@[@(gv_pos)]
                                                isDynamic:true
                                                  spacing:kFramesForDisplay];
     _lineMesh = mesh;
     [self addBuffer:mesh];
+}
+
+-(void)createShader
+{
+    [super addShaderFeature:[ColorMaterial withColor:(GLKVector4){ 0.4, 1, 0.4, 1}]];
+    [super createShader];
 }
 
 -(void)getParameters:(NSMutableDictionary *)putHere

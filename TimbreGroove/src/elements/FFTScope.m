@@ -11,6 +11,7 @@
 #import "SoundSystem.h"
 #import "Parameter.h"
 #import "Generic.h"
+#import "Material.h"
 #import "Names.h"
 
 extern void fft(float *in_out, int len);
@@ -37,12 +38,17 @@ extern void fft(float *in_out, int len);
 
 -(void)createBuffer
 {
-    self.color = (GLKVector4){ 1, 1, 0.4, 1};
     Line * mesh = [[Line alloc] initWithIndicesIntoNames:@[@(gv_pos)]
                                                isDynamic:true
                                                  spacing:kFramesForDisplay];
     _lineMesh = mesh;
     [self addBuffer:mesh];
+}
+
+-(void)createShader
+{
+    [self addShaderFeature:[ColorMaterial withColor:(GLKVector4){ 1,1,0,1 }]];
+    [super createShader];
 }
 
 -(void)getParameters:(NSMutableDictionary *)putHere

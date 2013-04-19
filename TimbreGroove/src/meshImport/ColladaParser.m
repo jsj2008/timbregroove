@@ -17,33 +17,36 @@
 
 typedef enum _ColladaTagState
 {
-    kColStateInAnimation = 1,
-    kColStateFloatArray = 1 << 1,
-    kColStateInMeshGeometry = 1 << 2,
-    kColStateInSource = 1 << 3,
-    kColStateInVertices = 1 << 4,
-    kColStateTriangles = 1 << 5,
-    kColStateIntArray = 1 << 6,
-    kColStateTriangleIntArray = kColStateTriangles | kColStateIntArray,
-    kColStateVertexWeights = 1 << 7,
-    kColStateSkin = 1 << 8,
-    kColStateSkinSource = kColStateSkin | kColStateInSource,
-    kColStateInStringArray = 1 << 9,
-    kColStateJoint = 1 << 10,
-    kColStateVisualScene = 1 << 11,
-    kColStateInNode = 1 << 12,
-    kColStateCaptureText = 1 << 13,
-    kColStateUp = 1 << 14,
-    kColStateMaterialLibrary = 1 << 15,
-    kColStateMaterialTag = 1 << 16,
-    kColStateEffectLibrary = 1 << 17,
-    kColStateEffectTag =  1 << 18
+    kColStateIntArray         = 1,
+    kColStateFloatArray       = 1 << 1,
+    kColStateStringArray      = 1 << 2,
+    kColStateFloat            = 1 << 3,
+    kColStateCaptureText      = 1 << 4,
+
+    kColStateInAnimation      = 1 << 8,
+    kColStateInMeshGeometry   = 1 << 9,
+    kColStateMaterialLibrary  = 1 << 10,
+    kColStateEffectLibrary    = 1 << 11,
+    kColStateSkin             = 1 << 12,
+    kColStateVisualScene      = 1 << 13,
+    
+    kColStateInSource         = 1 << 18,
+    kColStateInVertices       = 1 << 19,
+    kColStatePolyIndices      = 1 << 20,
+    kColStateVertexWeights    = 1 << 21,
+    kColStateJoint            = 1 << 22,
+    kColStateInNode           = 1 << 23,
+    kColStateUp               = 1 << 24,
+    kColStateMaterialTag      = 1 << 25,
+    kColStateEffectTag        = 1 << 26,
+    kColStatePhong            = 1 << 27,
+    
 } ColladaTagState;
 
 #define SET(f)      _state |= f
 #define UNSET(f)    _state &= ~f
 #define CHECK(f)    ((_state & f) == f)
-#define CHECKANY(f) ((_state & f) != 0)
+#define CHECKANY(f) CHECK(f)
 
 
 #define EQSTR(a,b) (a && ([a caseInsensitiveCompare:b] == NSOrderedSame))
@@ -119,12 +122,12 @@ static int scanInt(NSString * str)
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  IncomingTriangleTag @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-@interface IncomingTriangleTag : NSObject {
+@interface IncomingPolygonIndex : NSObject {
 @public
     int              _count;
     MeshSemanticKey  _semanticKey[kNumMeshSemanticKeys];
     int              _offsets[kNumMeshSemanticKeys];
-    NSMutableArray * _source;
+    NSMutableArray * _sourceURL;
     unsigned short * _primitives;
     unsigned short * _vectorCounts;
     
@@ -135,13 +138,13 @@ static int scanInt(NSString * str)
 }
 
 @end
-@implementation IncomingTriangleTag
+@implementation IncomingPolygonIndex
 
 - (id)init
 {
     self = [super init];
     if (self) {
-        _source = [NSMutableArray new];
+        _sourceURL = [NSMutableArray new];
     }
     return self;
 }
@@ -149,7 +152,7 @@ static int scanInt(NSString * str)
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@ IncomingVertexData  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-@interface IncomingVertexData : NSObject {
+@interface IncomingSourceTag : NSObject {
 @public
     MeshGeometryBuffer _meta;
 
@@ -157,7 +160,7 @@ static int scanInt(NSString * str)
     NSString *  _redirectTo;
 }
 @end
-@implementation IncomingVertexData
+@implementation IncomingSourceTag
 @end
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  IncomingMeshData @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -165,12 +168,14 @@ static int scanInt(NSString * str)
 @interface IncomingMeshData : NSObject {
 @public
     NSString *             _geometryName;
-    NSMutableDictionary *  _vertexDict;
+    NSMutableDictionary *  _sources;        // vertex data here
+    NSMutableArray *       _polygonTags;    // index data here
     
-    IncomingVertexData *   _vertexData;
-    IncomingTriangleTag *  _triangleTag;
+    IncomingSourceTag *   _tempIncomingSourceTag;
     
-    MeshGeometry * _meshGeometry;
+
+    // filled in at finalize
+    MeshGeometry *         _meshGeometry;
 }
 @end
 @implementation IncomingMeshData
@@ -178,7 +183,8 @@ static int scanInt(NSString * str)
 {
     self = [super init];
     if (self) {
-        _vertexDict = [NSMutableDictionary new];
+        _sources = [NSMutableDictionary new];
+        _polygonTags = [NSMutableArray new];
     }
     return self;
 }
@@ -189,13 +195,13 @@ static int scanInt(NSString * str)
 @interface IncomingSkinSource : NSObject {
 @public
     NSString * _id;
-    int       _count;
+    int        _count;
     NSString * _source;
-    int _accCount;
-    int _stride;
-    NSArray * _nameArray;
-    float * _data;
-    int _numFloats;
+    int        _accCount;
+    int        _stride;
+    NSArray *  _nameArray;
+    float *    _data;
+    int        _numFloats;
     NSString * _paramName;
     NSString * _paramType;
 }
@@ -215,14 +221,14 @@ typedef enum _SkinSemanticKey {
 
 @interface IncomingWeights : NSObject {
 @public
-    int _count;
-    SkinSemanticKey _semanticKey[kNumSkinSemanticKeys]; // N.B. these are NOT ordered
-    int _offsets[kNumSkinSemanticKeys];
-    NSMutableArray * _sources;
-    unsigned short * _vcounts;
-    unsigned short * _weights;
-    unsigned int _numVcounts;
-    unsigned int _numWeights;
+    int               _count;
+    SkinSemanticKey   _semanticKey[kNumSkinSemanticKeys]; // N.B. these are NOT ordered
+    int               _offsets[kNumSkinSemanticKeys];
+    NSMutableArray *  _sources;
+    unsigned short *  _vcounts;
+    unsigned short *  _weights;
+    unsigned int      _numVcounts;
+    unsigned int      _numWeights;
     
     int _nextInput;
 }
@@ -343,31 +349,70 @@ typedef enum _NodeCoordSpec {
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  IncomingMaterial @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+@class IncomingEffect;
+
 @interface IncomingMaterial : NSObject {
 @public
     NSString * _name;
     NSString * _id;
     NSString * _effect;
+    
+    IncomingEffect * _instance;
 }
 @end
 
 @implementation IncomingMaterial
 @end
 
+
+NSString  *  PhongColorNames[PhongColor_NUM_COLORS];
+NSString *  PhongFloatNames[PhongValue_NUM_FLOATS];
+
+@interface IncomingPhong : NSObject {
+@public
+    GLKVector4 _colors[PhongColor_NUM_COLORS];
+    float      _floats[PhongValue_NUM_FLOATS];
+    
+    NSString * _transparent_opaque_type; // 'RGB_ZERO'
+    
+    PhongColors _expectingColor;
+    PhongFloat _expectingFloat;
+}
+@end
+
+@implementation IncomingPhong
+-(id)init
+{
+    self = [super init];
+    if( self )
+    {
+        if( !PhongColorNames[0] )
+        {
+            PhongColorNames[PhongColor_Emission] = kTag_emission;
+            PhongColorNames[PhongColor_Ambient] = kTag_ambient;
+            PhongColorNames[PhongColor_Diffuse] = kTag_diffuse;
+            PhongColorNames[PhongColor_Specular] = kTag_specular;
+            PhongColorNames[PhongColor_Reflective] = kTag_reflective;
+            PhongColorNames[PhongColor_Transparent] = kTag_transparent;
+            PhongFloatNames[PhongValue_Shininess] = kTag_shininess;
+            PhongFloatNames[PhongValue_Reflectivity] = kTag_reflectivity;
+            PhongFloatNames[PhongValue_Transparency] = kTag_transparency;
+        }
+        
+        _expectingColor = PhongColor_None;
+        _expectingFloat = PhongValue_None;
+    }
+    return self;
+}
+@end
+
 @interface IncomingEffect : NSObject {
+    @public
     NSString * _id;
     NSString * _type; // 'phong'
     
-    GLKVector4 _emission;
-    GLKVector4 _ambient;
-    GLKVector4 _diffuse;
-    GLKVector4 _specular;
-    float      _shininess;
-    GLKVector4 _reflective;
-    float      _reflectivity;
-    NSString * _transparent_opaque_type; // 'RGB_ZERO'
-    GLKVector4 _transparent;
-    float      _transparency;
+    IncomingPhong * _phong;
+    
 }
 @end
 
@@ -403,6 +448,7 @@ typedef enum _NodeCoordSpec {
     NSMutableDictionary * _skins;
     NSMutableDictionary * _nodes;
     NSMutableDictionary * _materials;
+    NSMutableDictionary * _effects;
 }
 @end
 
@@ -416,7 +462,9 @@ typedef enum _NodeCoordSpec {
         _animations = [NSMutableDictionary new];
         _geometries = [NSMutableDictionary new];
         _skins      = [NSMutableDictionary new];
-        _nodes   = [NSMutableDictionary new];
+        _nodes      = [NSMutableDictionary new];
+        _materials  = [NSMutableDictionary new];
+        _effects    = [NSMutableDictionary new];
         _up         = 'y';
     }
     return self;
@@ -493,14 +541,16 @@ typedef enum _NodeCoordSpec {
     
     if( attributeDict )
     {
-        bool bIsSource   = EQSTR(elementName,kTag_source);
-        bool bIsVertices = EQSTR(elementName,kTag_vertices);
-        if(  bIsSource || bIsVertices )
+        bool bIsSource         = EQSTR(elementName,kTag_source);
+        bool bIsVertexRedirect = EQSTR(elementName,kTag_vertices);
+        if(  bIsSource || bIsVertexRedirect )
         {
-            IncomingVertexData *ims = [IncomingVertexData new];
+            IncomingSourceTag *ims = [IncomingSourceTag new];
             ims->_id = attributeDict[kAttr_id];
             
-            meshData->_vertexData = ims;
+            meshData->_sources[ims->_id] = ims;
+            
+            meshData->_tempIncomingSourceTag = ims;
             
             if( bIsSource )
                 SET(kColStateInSource);
@@ -513,10 +563,13 @@ typedef enum _NodeCoordSpec {
         bool isPolylist  = EQSTR(elementName, kTag_polylist);
         if(  isTriangles || isPolylist  )
         {
-            meshData->_triangleTag = [[IncomingTriangleTag alloc] init];
-            meshData->_triangleTag->_isActualTrianglesForReal = isTriangles;
-            meshData->_triangleTag->_count = scanInt(attributeDict[kAttr_count]);
-            SET(kColStateTriangles);
+            IncomingPolygonIndex * polyTag = [[IncomingPolygonIndex alloc] init];
+            polyTag->_isActualTrianglesForReal = isTriangles;
+            polyTag->_count = scanInt(attributeDict[kAttr_count]);
+            
+            [meshData->_polygonTags addObject:polyTag];
+            
+            SET(kColStatePolyIndices);
             return;
         }
         
@@ -530,9 +583,9 @@ typedef enum _NodeCoordSpec {
             
             if( EQSTR(elementName,kTag_accessor) )
             {
-                IncomingVertexData * ims = meshData->_vertexData;
+                IncomingSourceTag * ims = meshData->_tempIncomingSourceTag;
                 ims->_meta.numElements = scanInt(attributeDict[kAttr_count]);
-                ims->_meta.stride       = scanInt(attributeDict[kAttr_stride]);
+                ims->_meta.stride      = scanInt(attributeDict[kAttr_stride]);
                 return;
             }
         }
@@ -541,19 +594,19 @@ typedef enum _NodeCoordSpec {
         {
             if( EQSTR(elementName,kTag_input) )
             {
-                IncomingVertexData * ims = meshData->_vertexData;
+                IncomingSourceTag * ims = meshData->_tempIncomingSourceTag;
                 ims->_redirectTo = [(NSString *)attributeDict[kAttr_source] substringFromIndex:1];
             }
             
             return;
         }
         
-        if( CHECKANY(kColStateTriangles) )
+        if( CHECKANY(kColStatePolyIndices) )
         {
             if( EQSTR(elementName, kTag_input) )
             {
-                IncomingTriangleTag * itt = meshData->_triangleTag;
-                int idx = itt->_nextInput;
+                IncomingPolygonIndex * polyIndexTag = [meshData->_polygonTags lastObject];
+                int idx = polyIndexTag->_nextInput;
                 
                 // 1. Get semantic
                 //
@@ -569,17 +622,17 @@ typedef enum _NodeCoordSpec {
                     NSLog(@"Unknown mesh semantic type: %@",semantic);
                     exit(-1);
                 }
-                itt->_semanticKey[idx] = sem;
+                polyIndexTag->_semanticKey[idx] = sem;
                 
                 // 2. get offset
                 //
-                itt->_offsets[idx] = scanInt(attributeDict[kAttr_offset]);
+                polyIndexTag->_offsets[idx] = scanInt(attributeDict[kAttr_offset]);
                 
                 // 3. get source (what this is referring to)
                 //
-                itt->_source[idx] = [(NSString *)attributeDict[kAttr_source] substringFromIndex:1];
+                polyIndexTag->_sourceURL[idx] = [(NSString *)attributeDict[kAttr_source] substringFromIndex:1];
                 
-                itt->_nextInput++;
+                polyIndexTag->_nextInput++;
                 return;
             }
             
@@ -594,20 +647,20 @@ typedef enum _NodeCoordSpec {
     {
         if( CHECKANY(kColStateInVertices) )
         {
-            IncomingVertexData * ivd = meshData->_vertexData;
-            meshData->_vertexDict[ivd->_id] = ivd;
-            meshData->_vertexData = nil;
+            IncomingSourceTag * ivd = meshData->_tempIncomingSourceTag;
+            meshData->_sources[ivd->_id] = ivd;
+            meshData->_tempIncomingSourceTag = nil;
             UNSET(kColStateInVertices);
             return;
         }
         
-        if( CHECKANY(kColStateTriangles) )
+        if( CHECKANY(kColStatePolyIndices) )
         {
             if( EQSTR(elementName, kTag_p) )
             {
-                IncomingTriangleTag * itt = meshData->_triangleTag;
-                itt->_primitives = _ushortArray;
-                itt->_numPrimitives = _ushortArrayCount;
+                IncomingPolygonIndex * polyIndexTag = [meshData->_polygonTags lastObject];
+                polyIndexTag->_primitives = _ushortArray;
+                polyIndexTag->_numPrimitives = _ushortArrayCount;
                 _ushortArrayCount = 0;
                 _ushortArray = NULL;
                 return;
@@ -615,7 +668,7 @@ typedef enum _NodeCoordSpec {
             
             if( EQSTR(elementName, kTag_vcount) )
             {
-                IncomingTriangleTag * itt = meshData->_triangleTag;
+                IncomingPolygonIndex * itt = [meshData->_polygonTags lastObject];
                 itt->_vectorCounts = _ushortArray;
                 _ushortArrayCount = 0;
                 _ushortArray = NULL;
@@ -624,7 +677,7 @@ typedef enum _NodeCoordSpec {
             
             if( EQSTR(elementName, kTag_triangles) || EQSTR(elementName, kTag_polylist) )
             {
-                UNSET(kColStateTriangles);
+                UNSET(kColStatePolyIndices);
                 return;
             }
         }
@@ -633,14 +686,13 @@ typedef enum _NodeCoordSpec {
         {
             if( EQSTR(elementName, kTag_source) )
             {
-                IncomingVertexData * ivd = meshData->_vertexData;
+                IncomingSourceTag * ivd = meshData->_tempIncomingSourceTag;
                 ivd->_meta.numFloats = _floatArrayCount;
                 ivd->_meta.data = _floatArray;
                 _floatArray = NULL;
                 _floatArrayCount = 0;
-                meshData->_vertexDict[ivd->_id] = ivd;
                 
-                meshData->_vertexData = nil;
+                meshData->_tempIncomingSourceTag = nil;
                 UNSET(kColStateInSource);
             }
         }
@@ -662,11 +714,11 @@ typedef enum _NodeCoordSpec {
     
     if( attributeDict )
     {
-        if( CHECK(kColStateSkinSource) )
+        if( CHECK(kColStateInSource) )
         {
             if( EQSTR(elementName, kTag_Name_array) )
             {
-                SET(kColStateInStringArray);
+                SET(kColStateStringArray);
                 return;
             }
             
@@ -771,7 +823,7 @@ typedef enum _NodeCoordSpec {
     }
     else
     {
-        if( CHECK(kColStateSkinSource) )
+        if( CHECK(kColStateInSource) )
         {
             if( EQSTR(elementName, kTag_source) )
             {
@@ -780,7 +832,7 @@ typedef enum _NodeCoordSpec {
                 {
                     iss->_nameArray = parseStringArray(_stringArrayString);
                     _stringArrayString = nil;
-                    UNSET(kColStateInStringArray);
+                    UNSET(kColStateStringArray);
                 }
                 if( _floatArray )
                 {
@@ -1016,6 +1068,163 @@ typedef enum _NodeCoordSpec {
     UNSET(kColStateVisualScene);
 }
 
+
+-(void)handleMaterials:(NSString *)elementName
+            attributes:(NSDictionary *)attributeDict
+{
+    if( attributeDict )
+    {
+        if( EQSTR(elementName, kTag_material) )
+        {
+            IncomingMaterial * im = [[IncomingMaterial alloc] init];
+            im->_id = attributeDict[kAttr_id];
+            im->_name = attributeDict[kAttr_name];
+            _materials[im->_id] = im;
+            _incoming = im;
+            SET(kColStateMaterialTag);
+        }
+        
+        if( CHECKANY(kColStateMaterialTag) )
+        {
+            if( EQSTR(elementName, kTag_instance_effect) )
+            {
+                IncomingMaterial * im = _incoming;
+                im->_effect = [(NSString *)attributeDict[kAttr_url] substringFromIndex:1];
+            }
+        }
+    }
+    else
+    {
+        if( CHECKANY(kColStateMaterialTag) )
+        {
+            if( EQSTR(elementName, kTag_material) )
+            {
+                _incoming = nil;
+                UNSET(kColStateMaterialTag);
+            }
+        }
+    }
+}
+
+-(void)handleEffects:(NSString *)elementName
+          attributes:(NSDictionary *)attributeDict
+{
+    if( attributeDict )
+    {
+        if( CHECKANY(kColStateEffectTag) )
+        {
+            IncomingEffect * ie = _incoming;
+            
+            if( CHECKANY(kColStatePhong) )
+            {
+                IncomingPhong * im = ie->_phong;
+
+                if( im->_expectingColor != PhongColor_None )
+                {
+                    if( EQSTR(elementName, kTag_color) )
+                    {
+                        SET(kColStateFloatArray);
+                        return;
+                    }
+                }
+                
+                if( im->_expectingFloat != PhongValue_None )
+                {
+                    if( EQSTR(elementName, kTag_float) )
+                    {
+                        SET(kColStateFloat);
+                        return;
+                    }
+                }
+                
+                for( int i = 0; i < PhongColor_NUM_COLORS; i++ )
+                {
+                    if( EQSTR(elementName, PhongColorNames[i]) )
+                    {
+                        im->_expectingColor = i;
+                        if( i == PhongColor_Transparent )
+                            im->_transparent_opaque_type = attributeDict[kAttr_opaque];
+                        return;
+                    }
+                }
+                
+                for( int f = 0; f < PhongValue_NUM_FLOATS; f++ )
+                {
+                    if( EQSTR(elementName, PhongFloatNames[f]) )
+                    {
+                        im->_expectingFloat = f;
+                        return;
+                    }
+                }
+
+            }
+            
+            if( EQSTR(elementName, kTag_phong) )
+            {
+                IncomingEffect * ie = _incoming;
+                ie->_phong = [IncomingPhong new];
+                SET(kColStatePhong);
+                return;
+            }
+            
+        }
+        
+        if( EQSTR(elementName, kTag_effect) )
+        {
+            IncomingEffect * ie = [[IncomingEffect alloc] init];
+            ie->_id = attributeDict[kAttr_id];
+            _effects[ie->_id] = ie;
+            _incoming = ie;
+            SET(kColStateEffectTag);
+            return;
+        }
+    }
+    else
+    {
+        if( CHECKANY(kColStateEffectTag) )
+        {
+            IncomingEffect * ie = _incoming;
+            
+            if( CHECKANY(kColStatePhong) )
+            {
+                if( EQSTR(elementName, kTag_phong) )
+                {
+                    UNSET(kColStatePhong);
+                    return;
+                }
+                
+                IncomingPhong * im = ie->_phong;
+                
+                if( EQSTR(elementName, kTag_color) )
+                {
+                    im->_colors[ im->_expectingColor ] = *(GLKVector4 *)_floatArray;
+                    im->_expectingColor = PhongColor_None;
+                    _floatArray = NULL;
+                    _floatArrayCount = 0;
+                    return;
+                }
+                
+                if( EQSTR(elementName, kTag_float) )
+                {
+                    im->_floats[ im->_expectingFloat ] = [_floatString floatValue];
+                    im->_expectingFloat = PhongValue_None;
+                    _floatString = nil;
+                    return;
+                }
+                
+            }
+            
+            if( EQSTR(elementName, kTag_effect) )
+            {
+                _incoming = nil;
+                SET(kColStateEffectTag);
+                return;
+            }
+        }
+        
+    }
+}
+
 -(void)    parser:(NSXMLParser *)parser
   didStartElement:(NSString *)elementName
      namespaceURI:(NSString *)namespaceURI
@@ -1043,6 +1252,18 @@ typedef enum _NodeCoordSpec {
     if( CHECKANY(kColStateVisualScene) )
     {
         [self handleScene:elementName attributes:attributeDict];
+        return;
+    }
+    
+    if( CHECKANY(kColStateMaterialLibrary) )
+    {
+        [self handleMaterials:elementName attributes:attributeDict];
+        return;
+    }
+    
+    if( CHECKANY(kColStateEffectLibrary) )
+    {
+        [self handleEffects:elementName attributes:attributeDict];
         return;
     }
     
@@ -1086,6 +1307,18 @@ typedef enum _NodeCoordSpec {
         return;
     }
     
+    if( EQSTR(elementName, kTag_library_materials) )
+    {
+        SET(kColStateMaterialLibrary);
+        return;
+    }
+    
+    if( EQSTR(elementName, kTag_library_effects) )
+    {
+        SET(kColStateEffectLibrary);
+        return;
+    }
+    
 }
 
 -(void)  parser:(NSXMLParser *)parser
@@ -1100,6 +1333,13 @@ foundCharacters:(NSString *)string
         return;
     }
     
+    if( CHECKANY(kColStateFloat) )
+    {
+        _floatString = [NSMutableString stringWithString:string];
+        UNSET(kColStateFloat);
+        return;
+    }
+    
     if( CHECKANY(kColStateIntArray) )
     {
         if( _ushortString )
@@ -1109,7 +1349,7 @@ foundCharacters:(NSString *)string
         return;
     }
     
-    if( CHECKANY(kColStateInStringArray) )
+    if( CHECKANY(kColStateStringArray) )
     {
         if( _stringArrayString )
            [_stringArrayString appendString:string];
@@ -1131,9 +1371,9 @@ foundCharacters:(NSString *)string
     qualifiedName:(NSString *)qName
 {
 
-    if( CHECKANY(kColStateInStringArray) )
+    if( CHECKANY(kColStateStringArray) )
     {
-        UNSET(kColStateInStringArray);
+        UNSET(kColStateStringArray);
         if( EQSTR(elementName, kTag_Name_array) )
             return;
     }
@@ -1205,45 +1445,80 @@ foundCharacters:(NSString *)string
         return;
     }
     
+    if( CHECKANY(kColStateMaterialLibrary) )
+    {
+        if( EQSTR(elementName, kTag_library_materials) )
+        {
+            UNSET(kColStateMaterialLibrary);
+            return;
+        }
+        
+        [self handleMaterials:elementName attributes:nil];
+        return;
+    }
+
+    if( CHECKANY(kColStateEffectLibrary) )
+    {
+        if( EQSTR(elementName, kTag_library_effects) )
+        {
+            UNSET(kColStateEffectLibrary);
+            return;
+        }
+        
+        [self handleEffects:elementName attributes:nil];
+    }
+    
     if( CHECKANY(kColStateUp) )
     {
         if( EQSTR(_captureString, @"Z_UP") )
             _up = 'z';
         UNSET(kColStateUp);
     }
+
 }
 
--(void)flatten:(MeshGeometryBuffer *)b
+-(void) flatten:(MeshGeometryBuffer *)b
+          index:(MeshGeometryIndexBuffer *)index
+numIndexBuffers:(unsigned int)numIndexBuffers
 {
+    unsigned int totalNumberOfIndices = 0;
+    for( int ii = 0; ii < numIndexBuffers; ii++ )
+    {
+        totalNumberOfIndices += index[ii].numIndices;
+    }
+    
     unsigned int elementSize = b->stride;
-    float * newBuffer = malloc( sizeof(float) * b->numIndices *elementSize);
+    float * newBuffer = malloc( sizeof(float) * totalNumberOfIndices * elementSize);
     float * p = newBuffer;
     float * old = b->data;
-    unsigned int * idx = b->indexData;
-    int i;
-    for( int x = 0; x < b->numIndices; x++ )
+    
+    for( int nn = 0; nn < numIndexBuffers; nn++ )
     {
-        i = *idx++ * elementSize;
-        for( int e = 0; e < elementSize; e++ )
-            *p++ = old[i + e];
+        unsigned int * idx = index[nn].indexData;
+        int i;
+        for( int x = 0; x < index[nn].numIndices; x++ )
+        {
+            i = *idx++ * elementSize;
+            for( int e = 0; e < elementSize; e++ )
+                *p++ = old[i + e];
+        }
+        free(index[nn].indexData);        
     }
     free(b->data);
     b->data = newBuffer;
-    b->numFloats = b->numIndices * elementSize;
-    b->numElements = b->numIndices;
-    free(b->indexData);
-    b->indexData = NULL;
-    b->numIndices = 0;
+    
+    b->numFloats = totalNumberOfIndices * elementSize;
+    b->numElements = totalNumberOfIndices;
 }
 
--(void)repackIndex:(MeshGeometryBuffer *)buffer
-          meshData:(IncomingMeshData *) meshData
-            offset:(unsigned int)offset
-   primitiveStride:(unsigned int)primitiveStride
+-(void)repackPolyIndex:(IncomingPolygonIndex *)polyTag
+                offset:(unsigned int)offset
+       primitiveStride:(unsigned int)primitiveStride
+          bufferTarget:(MeshGeometryIndexBuffer *)bufferTarget
 {
-    unsigned short * primitives    = meshData->_triangleTag->_primitives;
-    unsigned int     numPrimitives = meshData->_triangleTag->_numPrimitives;
-    unsigned short * vectorCounts  = meshData->_triangleTag->_vectorCounts;
+    unsigned short * primitives    = polyTag->_primitives;
+    unsigned int     numPrimitives = polyTag->_numPrimitives;
+    unsigned short * vectorCounts  = polyTag->_vectorCounts;
     
     unsigned int     vectorCountIndex = 0;
     unsigned int     primitiveIndex   = 0;
@@ -1260,6 +1535,7 @@ foundCharacters:(NSString *)string
         
         if( vectorPerShape > 3 )
         {
+            // triangulate
             unsigned short oldIndices[10];
             for( unsigned int v = 0; v < vectorPerShape; v++ )
             {
@@ -1285,17 +1561,17 @@ foundCharacters:(NSString *)string
         primitiveIndex += primitiveStride * vectorPerShape;
     }
     
-    buffer->indexData  = realloc(newIndexBuffer, sizeof(unsigned int) * newIBufferIdx);
-    buffer->numIndices = newIBufferIdx;
+    bufferTarget->indexData  = realloc(newIndexBuffer, sizeof(unsigned int) * newIBufferIdx);
+    bufferTarget->numIndices = newIBufferIdx;
 }
 
--(void)simpleRepackIndex:(MeshGeometryBuffer *)buffer
-                meshData:(IncomingMeshData *) meshData
-                  offset:(unsigned int)offset
-         primitiveStride:(unsigned int)primitiveStride
+-(void)repackTriangleIndex:(IncomingPolygonIndex *)polyTag
+                    offset:(unsigned int)offset
+           primitiveStride:(unsigned int)primitiveStride
+              bufferTarget:(MeshGeometryIndexBuffer *)bufferTarget
 {
-    unsigned short * primitives    = meshData->_triangleTag->_primitives;
-    unsigned int     numPrimitives = meshData->_triangleTag->_numPrimitives;
+    unsigned short * primitives    = polyTag->_primitives;
+    unsigned int     numPrimitives = polyTag->_numPrimitives;
     
     unsigned int     newIndexCount    = numPrimitives / primitiveStride;
     unsigned int *   newIndexBuffer   = malloc( sizeof(unsigned int) * newIndexCount);
@@ -1306,8 +1582,8 @@ foundCharacters:(NSString *)string
         newIndexBuffer[i] = value;
     }
     
-    buffer->indexData  = newIndexBuffer;
-    buffer->numIndices = newIndexCount;
+    bufferTarget->indexData  = newIndexBuffer;
+    bufferTarget->numIndices = newIndexCount;
 }
 
 -(void)turnUp:(MeshGeometryBuffer *)bufferInfo
@@ -1341,6 +1617,28 @@ foundCharacters:(NSString *)string
     }
 }
 
+-(bool)isTriangulated:(IncomingPolygonIndex *)polyIndexTag
+{
+    bool allThrees = true;
+    
+    if( !polyIndexTag->_isActualTrianglesForReal )
+    {
+        unsigned short *vectorCounts = polyIndexTag->_vectorCounts;
+        if( vectorCounts )
+        {
+            for( unsigned int vc = 0; vc < polyIndexTag->_count; vc++ )
+            {
+                if( vectorCounts[vc] != 3 )
+                {
+                    allThrees = false;
+                    break;
+                }
+            }
+        }
+    }
+    
+    return allThrees;
+}
 
 -(MeshScene *)finalAssembly
 {
@@ -1482,79 +1780,130 @@ foundCharacters:(NSString *)string
     };
     
     
-    static MeshGeometry *  (^getGeometry)(NSString *) = nil;
+    static MeshGeometry *  (^massageGeometry)(NSString *) = nil;
     
-    getGeometry = ^MeshGeometry * (NSString *name) {
-        IncomingMeshData * meshData      = _geometries[name];
+    massageGeometry = ^MeshGeometry * (NSString *name) {
         MeshGeometry     * sceneGeometry = [MeshGeometry new];
-        
+        IncomingMeshData * meshData      = _geometries[name];
+
         meshData->_meshGeometry = sceneGeometry;
+
+        
+        // Step 1.
+        // -----------------------------------------------------------
+        // Populate the MeshGeometryBuffer structures for
+        // each semantic (UV, vertex, normal, etc.) with data & stride information
+        
+        // Big assumption(?): the indices in all triangle/polylist tags in this
+        // mesh all refer to the same buffer data (sources) with the same semantics
+        // and same offsets
+        
+        IncomingPolygonIndex * firstPolyIndexTag = meshData->_polygonTags[0];
+
+        // FYI 'primitives' refers to Collada's <p> tag
         
         NSString * srcName;
         int primitiveStride = 0;
         unsigned int primitivesOffset[kNumMeshSemanticKeys];
         
-        for( int i = 0; i < meshData->_triangleTag->_nextInput; i++ )
+        for( int i = 0; i < firstPolyIndexTag->_nextInput; i++ )
         {
-            srcName = meshData->_triangleTag->_source[i];
-            IncomingVertexData * ivd = meshData->_vertexDict[srcName];
-            if( ivd->_redirectTo )
-                ivd = meshData->_vertexDict[ivd->_redirectTo];
+            srcName = firstPolyIndexTag->_sourceURL[i];
+            IncomingSourceTag * sourceTag = meshData->_sources[srcName];
+            if( sourceTag->_redirectTo )
+                sourceTag = meshData->_sources[sourceTag->_redirectTo];
             
-            MeshSemanticKey key = meshData->_triangleTag->_semanticKey[i];
+            MeshSemanticKey key = firstPolyIndexTag->_semanticKey[i];
             
-            primitivesOffset[key] = meshData->_triangleTag->_offsets[i];
-            sceneGeometry->_buffers[key] = ivd->_meta;
+            primitivesOffset[key] = firstPolyIndexTag->_offsets[i];
+            
+            // The info is already there in the source tag,
+            // just copy it over...
+            sceneGeometry->_buffers[key] = sourceTag->_meta;
+            
             int thisOffset = primitivesOffset[key] + 1;
-            if(  thisOffset > primitiveStride )
+            if( thisOffset > primitiveStride )
                 primitiveStride = thisOffset;
         }
 
-        bool allThrees = true;
-
-        if( !meshData->_triangleTag->_isActualTrianglesForReal )
+        // Step 2.
+        // -----------------------------------------------------------
+        // Extract (de-interlace) the relevant index buffer from
+        // the Triangle/Polylist tag for each buffer semantic
+        // e.g. Normal, UV, Vertex, etc.
+        
+        
+        int numPolyTags = [meshData->_polygonTags count];
+        int polyTagIndexCount = 0;
+        
+        size_t sz = sizeof(MeshGeometryIndexBuffer) * numPolyTags * kNumMeshSemanticKeys;
+        MeshGeometryIndexBuffer * tempDeinterlacedIndexBuffers = malloc(sz);
+        memset(tempDeinterlacedIndexBuffers, 0, sz);
+        
+        for( IncomingPolygonIndex * polyIndexTag in meshData->_polygonTags )
         {
-            unsigned short *vectorCounts = meshData->_triangleTag->_vectorCounts;
-            if( vectorCounts )
+            bool triangulated = [self isTriangulated:polyIndexTag];
+            
+            for( MeshSemanticKey key = 0; key < kNumMeshSemanticKeys; key++ )
             {
-                for( unsigned int vc = 0; vc < meshData->_triangleTag->_count; vc++ )
+                MeshGeometryBuffer *buffer = sceneGeometry->_buffers + key;
+                
+                if( buffer->data )
                 {
-                    if( vectorCounts[vc] != 3 )
-                    {
-                        allThrees = false;
-                        break;
-                    }
+                    MeshGeometryIndexBuffer extractedIndexBuffers = { 0, 0 };
+                    
+                    // N.B. these do a malloc()
+                    
+                    if( triangulated )
+                        [self repackTriangleIndex:polyIndexTag
+                                           offset:primitivesOffset[key]
+                                  primitiveStride:primitiveStride
+                                     bufferTarget:&extractedIndexBuffers];
+                    else
+                        [self repackPolyIndex:polyIndexTag
+                                       offset:primitivesOffset[key]
+                              primitiveStride:primitiveStride
+                                 bufferTarget:&extractedIndexBuffers];
+                    
+                    tempDeinterlacedIndexBuffers[ (key * numPolyTags) + polyTagIndexCount ] = extractedIndexBuffers;
                 }
             }
+            
+            if(polyIndexTag->_primitives)
+                free(polyIndexTag->_primitives);
+            if(polyIndexTag->_vectorCounts)
+                free(polyIndexTag->_vectorCounts);
+            
+            ++polyTagIndexCount;
         }
         
-        for( MeshSemanticKey key = MSKPosition; key < kNumMeshSemanticKeys; key++ )
+        // Step 3.
+        // -----------------------------------------------------------
+        // flatten all semantic buffers (except for the vertex/shapes)
+        // b/c OpenGL only allows one index per shader call
+        
+        for( MeshSemanticKey key = 0; key < kNumMeshSemanticKeys; key++ )
         {
             MeshGeometryBuffer *buffer = sceneGeometry->_buffers + key;
             
             if( buffer->data )
             {
-                if( allThrees )
-                    [self simpleRepackIndex:buffer
-                                   meshData:meshData
-                                     offset:primitivesOffset[key]
-                            primitiveStride:primitiveStride];
+                if( key == MSKPosition )
+                {
+                    size_t sz = sizeof(MeshGeometryIndexBuffer) * numPolyTags;
+                    sceneGeometry->_indexBuffers = malloc(sz);
+                    memcpy(sceneGeometry->_indexBuffers, &tempDeinterlacedIndexBuffers[MSKPosition], sz );
+                    sceneGeometry->_numIndexBuffers = numPolyTags;
+                }
                 else
-                    [self repackIndex:buffer
-                             meshData:meshData
-                               offset:primitivesOffset[key]
-                      primitiveStride:primitiveStride];
-                
-                if( key != MSKPosition )
-                    [self flatten:buffer];
+                {
+                    [self flatten:buffer
+                            index:&tempDeinterlacedIndexBuffers[ key * numPolyTags ]
+                  numIndexBuffers:numPolyTags];
+                }
             }
         }
         
-        if(meshData->_triangleTag->_primitives)
-            free(meshData->_triangleTag->_primitives);
-        if(meshData->_triangleTag->_vectorCounts)
-            free(meshData->_triangleTag->_vectorCounts);
-
         if( _up != 'y' )
             [self turnUp:sceneGeometry->_buffers];
         
@@ -1569,7 +1918,7 @@ foundCharacters:(NSString *)string
         if( inode->_msnType == MSNT_Mesh )
         {
             MeshSceneMeshNode * runtimeNode = meshNodes[inode->_id];
-            runtimeNode->_geometry = getGeometry( inode->_geometryName );
+            runtimeNode->_geometry = massageGeometry( inode->_geometryName );
         }
         else if( inode->_msnType == MSNT_SkinnedMesh )
         {
@@ -1627,7 +1976,7 @@ foundCharacters:(NSString *)string
             
             MeshSceneMeshNode * runtimeNode = meshNodes[inode->_id];
             runtimeNode->_skin = sceneSkin;
-            runtimeNode->_geometry = getGeometry( iskin->_meshSource );
+            runtimeNode->_geometry = massageGeometry( iskin->_meshSource );
             
             [self applyBindMatrix:runtimeNode->_geometry->_buffers
                        bindMatrix:sceneSkin->_bindShapeMatrix];

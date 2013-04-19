@@ -6,33 +6,13 @@
 //  Copyright (c) 2012 Ass Over Tea Kettle. All rights reserved.
 //
 #import "Text.h"
-#import "Texture.h"
+#import "Material.h"
 #import "Camera.h"
 #import "SettingsVC.h"
 
 NSString * const __str_textFieldName = @"textTexture";
 
-@interface Text() {
-    NSTimeInterval _time;
-}
-@end
-
 @implementation Text
-
--(id)init
-{
-    return [super init];
-}
-
--(id)initWithString:(NSString *)text
-{
-    self = [super init];
-    if( self )
-    {
-        _text = text;
-    }
-    return self;
-}
 
 -(id)wireUp
 {
@@ -41,23 +21,16 @@ NSString * const __str_textFieldName = @"textTexture";
     return [super wireUp];
 }
 
--(void)createTexture
+-(void)createShader
 {
-    self.texture = [[Texture alloc] initWithString:_text];
-}
-
--(void)update:(NSTimeInterval)dt 
-{
-    _time += (dt*15);
-    GLKVector3 rot = { 0, GLKMathDegreesToRadians(_time), 0 };
-    self.rotation = rot;
+    if( !self.texture )
+        self.texture = [[Texture alloc] initWithString:_text];
+    [super createShader];
 }
 
 -(void)setText:(NSString *)text
 {
     _text = text;
-    [self createTexture];
-    [self getTextureLocations];
 }
 
 - (void)getSettings:(NSMutableArray *)putHere

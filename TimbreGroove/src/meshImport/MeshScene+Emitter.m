@@ -168,7 +168,7 @@ static NSString * stringFromMat(GLKMatrix4 m)
         
         TGLogp(LLMeshImporter,@"#pragma mark GEOMETRY %@\n\n",meshName);
         
-        for( int b = 0; b < 3; b ++ )
+        for( int b = 0; b < kNumMeshSemanticKeys; b ++ )
         {
             MeshGeometryBuffer * bufferInfo = geometry->_buffers + b;
             if( !bufferInfo->data )
@@ -199,13 +199,18 @@ static NSString * stringFromMat(GLKMatrix4 m)
                 printf("\n");
             }
             printf("};\n");
-            
+        }
+        
+        for( int ii = 0; ii < geometry->_numIndexBuffers; ii++ )
+        {
+            MeshGeometryIndexBuffer * bufferInfo = geometry->_indexBuffers + ii;
             if( bufferInfo->indexData )
             {
-                TGLogp(LLMeshImporter, @"unsigned int %@_%@_%s_index[%d] = {",
+                TGLogp(LLMeshImporter, @"unsigned int %@_%@_%s_index_%d[%d] = {",
                        baseName,
                        meshName,
-                       varname[indexIntoNamesMap[b]],
+                       varname[indexIntoNamesMap[MSKPosition]],
+                       ii,
                        bufferInfo->numIndices );
                 
                 unsigned int *p = bufferInfo->indexData;
@@ -228,7 +233,8 @@ static NSString * stringFromMat(GLKMatrix4 m)
                     printf("\n");
                 }
                 printf("};\n");
-                
+            }
+            
 #ifdef EMIT_FLATTENED_INDEX
                 TGLogp(LLMeshImporter, @"GLKVector3 %@_%@_%s_flat[%d] = {",
                        baseName,
@@ -260,7 +266,6 @@ static NSString * stringFromMat(GLKMatrix4 m)
                     printf("};\n");
                 }
 #endif
-            }
         }
     }];
     

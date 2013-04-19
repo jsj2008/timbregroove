@@ -49,6 +49,7 @@ NSString * const kTag_diffuse = @"diffuse";
 NSString * const kTag_directional = @"directional";
 NSString * const kTag_double_sided = @"double_sided";
 NSString * const kTag_effect = @"effect";
+NSString * const kTag_emission = @"emission";
 NSString * const kTag_extra = @"extra";
 NSString * const kTag_float = @"float";
 NSString * const kTag_float_array = @"float_array";

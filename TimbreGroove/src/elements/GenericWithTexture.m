@@ -8,7 +8,7 @@
 
 #import "GenericWithTexture.h"
 #import "GridPlane.h"
-#import "Texture.h"
+#import "Material.h"
 
 @implementation GenericWithTexture {
     GridPlane * gp;
@@ -45,6 +45,14 @@
 -(float)gridWidth
 {
     return gp.width;
+}
+
+-(void)setTexture:(Texture *)texture
+{
+    if( _texture )
+        [self removeShaderFeature:_texture];
+    [self addShaderFeature:texture];
+    _texture = texture;
 }
 
 @end

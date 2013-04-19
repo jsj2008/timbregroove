@@ -1,5 +1,5 @@
 //
-//  texture
+//  generic frag shader
 //
 //  Created by victor on 11/20/12.
 //  Copyright (c) 2012 Ass Over Tea Kettle. All rights reserved.
@@ -19,8 +19,12 @@ varying vec4 v_color;
 varying float v_time;
 #endif
 
-#ifdef NORMAL
+#ifdef AMBIENT_LIGHTING
 varying vec3 v_lightFilter;
+#endif
+
+#ifdef PHONG_LIGHTING
+varying vec4  v_phongLitColor;
 #endif
 
 #ifdef SPOT_FILTER
@@ -106,9 +110,13 @@ void main()
   #endif
 #endif
 
-#ifdef NORMAL
+#ifdef AMBIENT_LIGHTING
     color = vec4(color.rgb * v_lightFilter, color.a);
 #endif
     
+#ifdef PHONG_LIGHTING
+    color = v_phongLitColor;
+#endif
+
     gl_FragColor = color;
 }

@@ -33,6 +33,7 @@
         _drawType = GL_TRIANGLES;
         _usage = GL_STATIC_DRAW;
         _glIBuffer = -1;
+        _glVBuffer = -1;
         _drawable = true;
     }
     
@@ -167,8 +168,11 @@
 
 -(void)bind
 {
-    glBindBuffer(GL_ARRAY_BUFFER, _glVBuffer);
-    [self setupBindings];
+    if( _glVBuffer != -1 )
+    {
+        glBindBuffer(GL_ARRAY_BUFFER, _glVBuffer);
+        [self setupBindings];
+    }
     if( _glIBuffer != -1 )
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glIBuffer);
 }

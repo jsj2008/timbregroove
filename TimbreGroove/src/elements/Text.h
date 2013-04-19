@@ -9,7 +9,5 @@
 #import "GenericWithTexture.h"
 
 @interface Text : GenericWithTexture
--(id)init;
--(id)initWithString:(NSString *)text;
 @property (nonatomic,strong) NSString * text;
 @end

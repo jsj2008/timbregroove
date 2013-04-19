@@ -6,28 +6,82 @@
 //  Copyright (c) 2012 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "Texture.h"
+#import "Material.h"
 #import "Shader.h"
+#import "Generic.h"
+#import "GenericShader.h"
 
-@interface Material () {
+@implementation ColorMaterial
++(id)withColor:(GLKVector4)color
+{
+    ColorMaterial * cm = [ColorMaterial new];
+    cm->_color = color;
+    return cm;
 }
-
+-(void)getShaderFeatureNames:(NSMutableArray *)putHere
+{
+    [putHere addObject:kShaderFeatureUColor];
+}
+-(void)bind:(Shader *)shader object:(Generic *)object
+{
+    [shader writeToLocation:gv_ucolor type:TG_VECTOR4 data:_color.v];
+}
+-(void)unbind:(Shader *)shader {}
+-(void)setShader:(Shader *)shader{}
 @end
 
-@implementation Material
+@implementation AmbientLighting
+-(void)getShaderFeatureNames:(NSMutableArray *)putHere
+{
+    [putHere addObject:kShaderFeatureAmbientLighting];
+}
+-(void)bind:(Shader *)shader object:(Generic *)object
+{
+    [shader writeToLocation:gv_ambient  type:TG_VECTOR3 data:_ambientColor.v];
+    [shader writeToLocation:gv_dirColor type:TG_VECTOR3 data:_dirColor.v];
+}
+-(void)unbind:(Shader *)shader {}
+-(void)setShader:(Shader *)shader{}
+@end
+
+@implementation PhongLighting {
+    GLKVector4 _colors[ PhongColor_NUM_COLORS ];
+    float      _values[ PhongValue_NUM_FLOATS ];
+}
+
+-(void)getShaderFeatureNames:(NSMutableArray *)putHere
+{
+    [putHere addObject:kShaderFeaturePhongLighting];
+}
+
+-(void)setMaterials:(GLKVector4 *)colors values:(float *)values
+{
+    memcpy(_colors,colors,sizeof(_colors));
+    memcpy(_values,values,sizeof(_values));
+}
+
+-(void)getMaterials:(GLKVector4 **)colors values:(float **)values
+{
+    *colors = _colors;
+    *values = _values;
+}
+
+-(void)bind:(Shader *)shader object:(Generic *)object
+{
+    glUniform4fv( [shader location:gv_phongColors], PhongColor_NUM_COLORS, (const GLfloat *)_colors);
+    glUniform1fv( [shader location:gv_phoneValues], PhongValue_NUM_FLOATS, (const GLfloat *)_values);
+}
+-(void)unbind:(Shader *)shader {}
+-(void)setShader:(Shader *)shader{}
 @end
 
 #pragma mark -
 
-@interface Texture() {
+@implementation Texture {
     GLuint               _glTexture;
     GLenum               _target;
     GLKTextureInfoOrigin _origin;
 }
-@end
-
-@implementation Texture
-
 
 -(id)initWithFileName:(NSString *)fileName
 {
@@ -152,6 +206,59 @@
     return ok;
 }
 
+/*
+ 
+ // load from asset
+ 
+ AssetLoader * _ati;
+
+ 
+ -(void)setTextureFileName:(id)textureFileName
+ {
+ _textureFileName = textureFileName;
+ if( [textureFileName isKindOfClass:[NSURL class]] )
+ {
+ _ati = [[AssetToImage alloc] initWithURL:textureFileName andTarget:self andKey:@"textureImage"];
+ }
+ else
+ {
+ self.texture = [[Texture alloc] initWithFileName:_textureFileName];
+ }
+ }
+ 
+ // be careful not to call this setter while
+ // another part of the code triggers the AssetToImage
+ // call above
+ -(void)setTextureImage:(UIImage *)image
+ {
+ self.texture = [[Texture alloc] initWithImage:image];
+ _ati = nil;
+ }
+ 
+ */
+
+-(void)getShaderFeatureNames:(NSMutableArray *)putHere
+{
+    [putHere addObject:kShaderFeatureTexture];
+}
+
+
+-(void)bind:(Shader *)shader object:(Generic *)object
+{
+    [self bind:_target];
+}
+
+-(void)unbind:(Shader *)shader
+{
+    glActiveTexture(GL_TEXTURE0 + _target);
+    glBindTexture(GL_TEXTURE_2D, 0); // 0 is reserved for unbind
+}
+
+-(void)setShader:(Shader *)shader
+{
+    _uLocation = [shader location:gv_sampler];
+}
+
 -(void)bind:(int)target
 {
     glActiveTexture(GL_TEXTURE0 + target);
@@ -165,11 +272,6 @@
     }
 }
 
--(void)unbind
-{
-    glActiveTexture(GL_TEXTURE0 + _target);
-    glBindTexture(GL_TEXTURE_2D, 0); // 0 is reserved for unbind
-}
 
 -(void)dealloc
 {

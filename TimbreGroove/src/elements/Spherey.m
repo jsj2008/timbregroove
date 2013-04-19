@@ -11,7 +11,7 @@
 #import "Names.h"
 #import "GraphView.h"
 #import "Light.h"
-#import "Texture.h"
+#import "Material.h"
 
 
 NSString * const kParamDistortionPt = @"DistortionPt";
@@ -28,6 +28,7 @@ NSString * const kParamDistortionPt = @"DistortionPt";
     return self;
 }
 
+#if 0
 -(void)configureLighting
 {
     if( !self.light )
@@ -39,22 +40,12 @@ NSString * const kParamDistortionPt = @"DistortionPt";
     GLKMatrix4 mx = GLKMatrix4MakeTranslation( lDir.x, lDir.y, lDir.z );
     self.light.direction = GLKMatrix4MultiplyVector3(mx,(GLKVector3){-1, 0, -1});
 }
+#endif
 
--(void)createTexture
+-(void)createShader
 {
-    self.texture = [[Texture alloc] initWithFileName:@"gridtest.png" ]; //  @"moon.png"];
-}
--(void)getParameters:(NSMutableDictionary *)parameters
-{
-    [super getParameters:parameters];
-    
-    Shader    * shader = self.shader;    
-    
-    [shader vec3Parameter:parameters indexIntoNames:gv_distortionPt];
-
-    parameters[@"ResetRotation"] = [Parameter withBlock:^(CGPoint pt) {
-        self.rotation = (GLKVector3){0,0,0};
-    }];
+    [self addShaderFeature:[[Texture alloc] initWithFileName:@"moon.png"]];
+    [super createShader];
 }
 
 @end

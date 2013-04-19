@@ -9,7 +9,7 @@
 #import "GenericImport.h"
 #import "MeshSceneBuffer.h"
 #import "ColladaParser.h"
-#import "Texture.h"
+#import "Material.h"
 #import "Light.h"
 #import "State.h"
 #import "Parameter.h"
@@ -22,6 +22,7 @@
 @public
     MeshSceneArmatureNode * _node;
 }
+@property (nonatomic) GLKVector4 color;
 -(void)updateTransformFromPos;
 @end
 
@@ -33,6 +34,7 @@
     MeshBuffer * _drawingBuffer;
     GLint _bufferDrawType;
     bool _doWireframe;
+    ColorMaterial * _colorMat;
 }
 
 -(id)init
@@ -55,17 +57,12 @@
 
 -(id)wireUp
 {
-    self.color = (GLKVector4){ 1, 1, 1, 1 };
     [super wireUp];
     self.disableStandardParameters = true;
     return self;
 }
 
--(void)createTexturexxx
-{
-    //self.texture = [[Texture alloc] initWithFileName:@"numText.png"];
-}
-
+#if 0
 -(void)configureLightingxx
 {
     if( !self.light )
@@ -77,7 +74,7 @@
     GLKMatrix4 mx = GLKMatrix4MakeTranslation( lDir.x, lDir.y, lDir.z );
     self.light.direction = GLKMatrix4MultiplyVector3(mx,(GLKVector3){-1, 0, -1});
 }
-
+#endif
 
 -(void)createBuffer
 {
@@ -102,33 +99,86 @@
         MeshGeometryBuffer * mgb = geometry->_buffers + key;
         if( mgb->data )
         {
-            MeshBuffer * msb = [[MeshSceneBuffer alloc] initWithGeometryBuffer:mgb
-                                                        andIndexIntoShaderName:indexIntoNamesMap[key]];
+            MeshBuffer *              msb = nil;
+            MeshGeometryIndexBuffer * mgib = nil;
+            
             if( key == MSKPosition )
             {
-                //if( _node->_skin )
-                //    msb.usage = GL_DYNAMIC_DRAW;
+                if( geometry->_numIndexBuffers > 1 )
+                {
+                    msb = [[MeshSceneBuffer alloc] initWithGeometryBuffer:mgb
+                                                             andIndexData:mgib
+                                                   andIndexIntoShaderName:indexIntoNamesMap[key]];
+                    
+                    static GLKVector4 colors[] = {
+                        { 1, 0,   0, 0.5 },
+                        { 0, 1,   0, 0.5 },
+                        { 0, 0.5, 1, 0.5 },
+                        { 1, 0,   1, 0.5 }
+                    };
+                    
+                    static int nextColor = 0;
+                    
+                    ColorMaterial * color = [ColorMaterial withColor:colors[nextColor]];
+                    nextColor = ++nextColor % (sizeof(colors)/sizeof(colors[0]));
+                    for( int i = 0; i < geometry->_numIndexBuffers; i++ )
+                    {
+                        MeshGeometryIndexBuffer * mgib = geometry->_indexBuffers + i;
+                        MeshBuffer * ibuffer = [[MeshBuffer alloc] init];
+                        [ibuffer setIndexData:mgib->indexData numIndices:mgib->numIndices];
+                        [self addIndexShape:ibuffer features:@[color]];
+                    }
+                    
+                    [self addBuffer:msb];
+                    msb.drawable = false;
+                }
+                else
+                {
+                    mgib = geometry->_indexBuffers;
+                    msb = [[MeshSceneBuffer alloc] initWithGeometryBuffer:mgb
+                                                             andIndexData:mgib
+                                                   andIndexIntoShaderName:indexIntoNamesMap[key]];
+                    
+                    [self addBuffer:msb];
+                    _colorMat = [ColorMaterial withColor:(GLKVector4){1,1,0,1}];
+                }
+
+                if( _node->_skin )
+                    msb.usage = GL_DYNAMIC_DRAW;
                 if( _bufferDrawType )
                     msb.drawType = _bufferDrawType;
                 
                 if( _doWireframe )
                 {
+                    /*
                     msb = [[WireFrame alloc] initWithIndexBuffer:mgb->indexData
                                                             data:mgb->data
                                                   geometryBuffer:msb];
-                    
+                    */
                 }
                 _drawingBuffer = msb;
             }
             else
             {
+                msb = [[MeshSceneBuffer alloc] initWithGeometryBuffer:mgb
+                                                         andIndexData:mgib
+                                               andIndexIntoShaderName:indexIntoNamesMap[key]];
                 msb.drawable = false;
+                [self addBuffer:msb];
+                                
             }
             
-            [self addBuffer:msb];
+            
         }
     }
     
+}
+
+-(void)createShader
+{
+    if( _colorMat )
+        [self addShaderFeature:_colorMat];
+    [super createShader];
 }
 
 -(void)calculateInfluences
@@ -168,11 +218,12 @@
     return self;
 }
 
+
 -(id)wireUp
 {
     _scene = [ColladaParser parse:_colladaFile];
     [super wireUp];
-    [self buildJointPainters];
+ //   [self buildJointPainters];
     [self buildMeshPainters];
     if( _runEmitter )
     {
@@ -366,6 +417,12 @@
                              andDoNormals:false];
     
     [self addBuffer:mb];
+}
+
+-(void)createShader
+{
+    [self addShaderFeature:[ColorMaterial withColor:_color]];
+    [super createShader];
 }
 
 -(void)updateTransformFromPos

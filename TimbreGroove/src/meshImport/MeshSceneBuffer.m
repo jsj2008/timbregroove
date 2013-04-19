@@ -11,6 +11,7 @@
 @implementation MeshSceneBuffer
 
 -(id)initWithGeometryBuffer:(MeshGeometryBuffer *)bufferInfo
+               andIndexData:(MeshGeometryIndexBuffer *)indexBuffer
      andIndexIntoShaderName:(int)iisn
 {
     static VertexStrideType strideMap[] = { st_float1, st_float2, st_float3, st_float4 };
@@ -24,14 +25,16 @@
         stride.numbersPerElement = bufferInfo->stride;
         stride.numSize = sizeof(float);
         stride.strideType = strideMap[ bufferInfo->stride ];
+
+        unsigned int * indexData  = indexBuffer ? indexBuffer->indexData  : NULL;
+        unsigned int   numIndices = indexBuffer ? indexBuffer->numIndices : 0;
         
         [self setData:bufferInfo->data
               strides:&stride
          countStrides:1
           numVertices:bufferInfo->numElements
-            indexData:bufferInfo->indexData
-           numIndices:bufferInfo->numIndices];
-        
+            indexData:indexData
+           numIndices:numIndices];
     }
     return self;
 }

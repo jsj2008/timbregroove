@@ -75,7 +75,7 @@
 {
     [super viewDidLoad];
 
-    TGSetLogLevel( LLShitsOnFire | LLMeshImporter );
+    TGSetLogLevel( LLShitsOnFire | LLMeshImporter | LLShaderStuff | LLGLResource);
     
     _postDeleteSceneIndex = -1;
     // force some global instializations

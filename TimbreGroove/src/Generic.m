@@ -10,31 +10,36 @@
 #import "GenericShader.h"
 #import "MeshBuffer.h"
 #import "Camera.h"
-#import "Texture.h"
+#import "Material.h"
 #import "AssetLoader.h"
 #import "Light.h"
 
-NSString const * kShaderFeatureColor = @"#define COLOR\n";
-NSString const * kShaderFeatureNormal = @"#define NORMAL\n";
-NSString const * kShaderFeatureTexture = @"#define TEXTURE\n";
-NSString const * kShaderFeatureUColor = @"#define U_COLOR\n";
-NSString const * kShaderFeatureTime =  @"#define TIME\n";
-NSString const * kShaderFeatureDistort =  @"#define MESH_DISTORT\n";
-NSString const * kShaderFeatureDistortTexture =  @"#define TEXTURE_DISTORT\n";
-NSString const * kShaderFeaturePsychedelic =  @"#define PSYCHEDELIC\n";
-NSString const * kShaderFeatureSpotFilter =  @"#define SPOT_FILTER\n";
-NSString const * kShaderFeatureBones = @"#define BONES\n";
+NSString const * kShaderFeatureColor           = @"#define COLOR\n";
+NSString const * kShaderFeatureNormal          = @"#define NORMAL\n";
+NSString const * kShaderFeatureTexture         = @"#define TEXTURE\n";
+NSString const * kShaderFeatureUColor          = @"#define U_COLOR\n";
+NSString const * kShaderFeatureTime            = @"#define TIME\n";
+NSString const * kShaderFeatureDistortTexture  = @"#define TEXTURE_DISTORT\n";
+NSString const * kShaderFeaturePsychedelic     = @"#define PSYCHEDELIC\n";
+NSString const * kShaderFeatureSpotFilter      = @"#define SPOT_FILTER\n";
+NSString const * kShaderFeatureBones           = @"#define BONES\n";
+NSString const * kShaderFeaturePhongLighting   = @"#define PHONG_LIGHTING\n";
+NSString const * kShaderFeatureAmbientLighting = @"#define AMBIENT_LIGHTING\n";
 
-@interface GenericBase () {
-@protected
-    bool _enableMultipleTextures;
-    bool _supportPrepare;
-    bool _supportMeshBind;
-    NSMutableArray * _buffers;
+@interface IndexShape : NSObject {
+    @public
+    MeshBuffer * indexBuffer;
+    NSArray * features;
 }
 @end
+@implementation IndexShape
+@end
 
-@implementation GenericBase
+@implementation Generic {
+    NSMutableArray * _buffers;
+    NSMutableArray * _shaderFeatures;
+    NSMutableArray * _shapes;
+}
 
 -(void)clean
 {
@@ -45,57 +50,52 @@ NSString const * kShaderFeatureBones = @"#define BONES\n";
 -(id)wireUp
 {
     [super wireUp];
-    if( _enableMultipleTextures )
-        [self createTextures];
-    else
-        [self createTexture];
     [self createBuffer];
-    [self createShader]; // generic assumes on buffer exists
-    [self getBufferLocations];
-    [self getTextureLocations];
-    [self configureLighting];
+    [self createShader]; // generic assumes materials & buffer exists
     return self;
 }
 
--(void)setShader:(Shader *)shader
+-(void)createBuffer
 {
-    [super setShader:shader];
-    
-    _supportMeshBind = [shader respondsToSelector:@selector(location:)];
-    _supportPrepare  = [shader respondsToSelector:@selector(prepareRender:)];
 }
-
-#pragma mark -
-#pragma mark Initialization sequence
-#pragma mark -
-
--(void)addBuffer:(MeshBuffer *)buffer
-{
-    if( !_buffers )
-        _buffers = [NSMutableArray new];
-    if( buffer.drawable )
-        [_buffers addObject:buffer];
-    else
-        [_buffers insertObject:buffer atIndex:0];
-}
-
-
--(void)createBuffer{}
--(void)createTexture{}
--(void)createTextures{}
 
 -(void)createShader
 {
-    NSMutableArray * features = [NSMutableArray new];
-    [self getShaderFeatures:features];
-    NSMutableString * strFeatures = [NSMutableString new];
-    for( NSString * feature in features )
-        [strFeatures appendString:feature];
-    self.shader = [GenericShader shaderWithHeaders:strFeatures];
+    NSMutableArray * _featureNames = [NSMutableArray new];
+    [self getShaderFeatureNames:_featureNames];
+
+    NSArray * featureNames = [_featureNames unique];
+    NSString *strFeatures = [featureNames reduce:@"" withBlock:^id(NSString *str, id obj) {
+        return [str stringByAppendingString:obj];
+    }];
+    
+    Shader * shader = [GenericShader shaderWithHeaders:strFeatures];
+    self.shader = shader;
+    
+    if( _shaderFeatures )
+        [_shaderFeatures each:^(id<ShaderFeature> feature) { [feature setShader:shader]; }];
+    
+    
+    for( MeshBuffer * buffer in _buffers )
+        [buffer getLocations:shader];
+
+    if( _shapes )
+    {
+        for( IndexShape * shape in _shapes )
+            [shape->indexBuffer getLocations:shader];
+    }
 }
 
--(void)getShaderFeatures:(NSMutableArray *)putHere
+-(void)getShaderFeatureNames:(NSMutableArray *)putHere
 {
+    if( _shaderFeatures )
+        [_shaderFeatures apply:^(id<ShaderFeature> feature) { [feature getShaderFeatureNames:putHere]; }];
+    
+    if( _shapes )
+        [_shapes apply:^(IndexShape *shape) {
+            [shape->features apply:^(id<ShaderFeature> feature) { [feature getShaderFeatureNames:putHere]; }];
+        }];
+        
     NSMutableArray * arr = [NSMutableArray new];
     for( MeshBuffer * buffer in _buffers )
         [arr addObjectsFromArray:buffer.indicesIntoShaderNames];
@@ -110,9 +110,6 @@ NSString const * kShaderFeatureBones = @"#define BONES\n";
             case gv_normal:
                 [putHere addObject:kShaderFeatureNormal];
                 break;
-            case gv_uv:
-                [putHere addObject:kShaderFeatureTexture];
-                break;
             case gv_boneWeights:
                 [putHere addObject:kShaderFeatureBones];
                 break;
@@ -120,54 +117,44 @@ NSString const * kShaderFeatureBones = @"#define BONES\n";
                 break;
         }
     }
+}
+
+-(void)addBuffer:(MeshBuffer *)buffer
+{
+    if( !_buffers )
+        _buffers = [NSMutableArray new];
+    if( buffer.drawable )
+        [_buffers addObject:buffer];
+    else
+        [_buffers insertObject:buffer atIndex:0];
+}
+
+
+-(void)addShaderFeature:(id<ShaderFeature>)feature
+{
+    if( !_shaderFeatures )
+        _shaderFeatures = [NSMutableArray new];
+    [_shaderFeatures addObject:feature];
+    if( self.shader )
+       [feature setShader:self.shader];
     
-    if( [arr containsObject:@(gv_normal)] )
-        if( !_light ) // how buried is this??
-            _light = [Light new];
-
-    if( _useColor )
-        [putHere addObject:kShaderFeatureUColor];
-    
-    if( _timerType != kSTT_None )
-        [putHere addObject:kShaderFeatureTime];
 }
 
-
--(void)configureLighting
+-(void)removeShaderFeature:(id<ShaderFeature>)feature
 {
+    [_shaderFeatures removeObject:feature];
 }
 
-#pragma mark -
-#pragma mark Uniform properties
-#pragma mark -
-
--(void)getTextureLocations
+-(void)addIndexShape:(MeshBuffer *)indexBuffer
+            features:(NSArray *)shaderFeatures
 {
+    if( !_shapes )
+        _shapes = [NSMutableArray new];
+    IndexShape * is = [IndexShape new];
+    is->indexBuffer = indexBuffer;
+    is->features = shaderFeatures;
+    [_shapes addObject:is];
 }
-
-
--(void)getBufferLocations
-{
-    if( _supportMeshBind )
-        for( MeshBuffer * buffer in _buffers )
-            [buffer getLocations:self.shader];
-}
-
--(void)setColor:(GLKVector4)color
-{
-    _color = color;
-    _useColor = true;
-}
-
-#pragma mark -
-#pragma mark Per frame
-#pragma mark -
-
-/*
--(void)update:(NSTimeInterval)dt
-{
-}
-*/
 
 -(void)render:(NSUInteger)w h:(NSUInteger)h
 {
@@ -175,190 +162,62 @@ NSString const * kShaderFeatureBones = @"#define BONES\n";
     
     [shader use];
     
-    if( _supportPrepare )
-        [shader prepareRender:self];
-
-    if( !_drawWireFrame )
-        [self bindTextures:true];
-
-    if( [_buffers count] == 1 )
+    [shader prepareRender:self];
+    
+    if( _shaderFeatures )
     {
-        MeshBuffer * b = _buffers[0];
-        [b bind];
-        [b draw];
-        [b unbind];
+        // don't do each:block here b/c of threading concerns
+        for( id<ShaderFeature> feature in _shaderFeatures )
+            [feature bind:shader object:self];
+            
     }
-    else
+
+    // drawable meshes are (should be)
+    // sorted last
+    for( MeshBuffer * b in _buffers )
     {
-        // drawable meshes are (should be)
-        // sorted last
-        for( MeshBuffer * b in _buffers )
-        {
-            [b bind];
-            if( b.drawable )
-                [b draw];
-        }
-        
-        for( MeshBuffer * b in _buffers )
-            [b unbind];
+        [b bind];
+        if( b.drawable )
+            [b draw];
     }
     
-    if( !_drawWireFrame )
-        [self bindTextures:false];
+    if( _shapes )
+    {
+        for( IndexShape * shape in _shapes )
+        {
+            if( shape->features )
+            {
+                for( id<ShaderFeature> feature in shape->features )
+                    [feature bind:shader object:self];
+            }
+            [shape->indexBuffer bind];
+            [shape->indexBuffer draw];
+            if( shape->features )
+            {
+                for( id<ShaderFeature> feature in shape->features )
+                    [feature unbind:shader];
+            }
+        }
+    }
+    
+    for( MeshBuffer * b in _buffers )
+        [b unbind];
+    
+    if( _shaderFeatures )
+    {
+        // don't do each:block here b/c of threading concerns
+        for( id<ShaderFeature> feature in _shaderFeatures )
+            [feature unbind:shader];
+    }
 }
 
 -(void)renderToCaptureAtBufferLocation:(GLint)location
 {
-    MeshBuffer * buffer = _buffers[0];
+    MeshBuffer * buffer = _buffers[0]; // drawable
     [buffer bindToTempLocation:location];
     [buffer draw];
     [buffer unbind];
 }
 
--(void)bindTextures:(bool)bind
-{
-}
-
-@end
-
-@interface Generic() {
-    Texture * _texture;
-    AssetLoader * _ati;
-}
-@end
-
-@implementation Generic
-
--(void)clean
-{
-    [super clean];
-    _texture = nil;
-}
-
--(void)createTexture
-{
-    
-}
-
--(void)getTextureLocations
-{
-    if( _texture )
-    {
-        Shader * shader = self.shader;
-        _texture.uLocation = [shader location:gv_sampler];
-    }
-}
-
--(void)bindTextures:(bool)bind
-{
-    if( _texture )
-    {
-        if( bind )
-            [_texture bind:0];
-        else
-            [_texture unbind];
-    }
-    
-}
-
--(void)setTextureFileName:(id)textureFileName
-{
-    _textureFileName = textureFileName;
-    if( [textureFileName isKindOfClass:[NSURL class]] )
-    {
-        _ati = [[AssetToImage alloc] initWithURL:textureFileName andTarget:self andKey:@"textureImage"];
-    }
-    else
-    {
-        self.texture = [[Texture alloc] initWithFileName:_textureFileName];
-    }
-}
-
-// be careful not to call this setter while
-// another part of the code triggers the AssetToImage
-// call above
--(void)setTextureImage:(UIImage *)image
-{
-    self.texture = [[Texture alloc] initWithImage:image];
-    _ati = nil;
-}
-
--(Texture *)texture
-{
-    return _texture;
-}
-
--(void)setTexture:(Texture *)texture
-{
-    _texture = texture;
-}
-
--(bool)hasTexture
-{
-    return _texture != nil;
-}
-
-
-@end
-
-
-@interface GenericMultiTextures () {
-    NSMutableArray * _textures;
-}
-@end
-
-@implementation GenericMultiTextures
-
--(void)clean
-{
-    [super clean];
-    _textures = nil;
-}
-
--(id)wireUp
-{
-    _enableMultipleTextures = true;
-    return [super wireUp];
-}
-
--(void)createTextures
-{
-    
-}
-
--(void)bindTextures:(bool)bind
-{
-    int target = 0;
-    for( Texture * t in _textures )
-    {
-        if( bind )
-        {
-            [t bind:target];
-            ++target;
-        }
-        else
-        {
-            [t unbind];
-        }
-    }
-}
-
--(void)replaceTextures:(NSArray *)textures
-{
-    _textures = [textures mutableCopy];
-    [self getTextureLocations];
-}
-
--(void)addTextureObject:(Texture *)texture
-{
-    if( !_textures )
-        _textures = [NSMutableArray new];
-    [_textures addObject:texture];
-}
-
--(bool)hasTexture
-{
-    return [_textures count];
-}
 
 @end

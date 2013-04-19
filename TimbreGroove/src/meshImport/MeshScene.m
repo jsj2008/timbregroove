@@ -162,11 +162,16 @@
 
 -(void)dealloc
 {
+    TGLog(LLObjLifetime, @"Geomtry released");
+    
     for( int i = 0; i < kNumMeshSemanticKeys; i++ )
     {
         if( _buffers[i].data )
             free(_buffers[i].data);
     }
+    
+    if( _indexBuffers )
+        free(_indexBuffers);
 }
 
 @end
@@ -205,9 +210,21 @@
 @end
 
 @implementation MeshSceneArmatureNode
-
-
 @end
 
 @implementation MeshSceneMeshNode
+@end
+
+@implementation MeshMaterial
+@end
+
+@implementation MeshMaterialPhong
+- (id)init
+{
+    self = [super init];
+    if (self) {
+        _type = MMT_Phong;
+    }
+    return self;
+}
 @end

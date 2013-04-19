@@ -6,12 +6,11 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "Texture.h"
+#import "Generic.h"
 
-@interface Light : Material
+@interface DirectionalLight : NSObject<ShaderFeature>
 
-@property (nonatomic) GLKVector3 direction; // is this lookAt ??
-@property (nonatomic) GLKVector3 dirColor; // ??
-@property (nonatomic) GLKVector3 pos; // haha, now we're just being random
+@property (nonatomic) GLKVector3 direction; 
+@property (nonatomic) GLKVector3 position;
 
 @end

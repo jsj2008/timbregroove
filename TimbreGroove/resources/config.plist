@@ -603,15 +603,6 @@
 			<key>icon</key>
 			<string>test.png</string>
 		</dict>
-		<key>photo</key>
-		<dict>
-			<key>instanceClass</key>
-			<string>Photo</string>
-			<key>order</key>
-			<integer>50</integer>
-			<key>icon</key>
-			<string>photo.png</string>
-		</dict>
 		<key>text</key>
 		<dict>
 			<key>instanceClass</key>

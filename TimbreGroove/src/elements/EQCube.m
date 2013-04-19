@@ -76,32 +76,37 @@ NSString const * kParamRotateCube  = @"RotateCube";
     
 }
 
--(void)createTexture
+-(void)createShader
 {
     _eqPanel = [[EQPanel alloc] init];
     
-    self.texture = [[FBO alloc] initWithObject:_eqPanel
+    Texture * texture = [[FBO alloc] initWithObject:_eqPanel
                                          width:EQ_PANEL_HEIGHT * 4
                                         height:EQ_PANEL_HEIGHT];
+    
+    //GLKVector4 color = (GLKVector4){ 0.4, 0.4, 0.6, 1.0 };
+    //ColorMaterial cmat = [ColorMaterial withColor:color];
+    
+    DirectionalLight *light = [DirectionalLight new];
+    light.direction = (GLKVector3){ 0.5, 1, -0.5 };
+
+    AmbientLighting *ambient = [AmbientLighting new];
+    ambient.ambientColor = (GLKVector4){0.2, 0.2, 0.2, 1};
+    
+    [self addShaderFeature:texture];
+    [self addShaderFeature:light];
+    [self addShaderFeature:ambient];
+    [super createShader];
 }
 
 -(void)createBuffer
 {
-    self.color = (GLKVector4){ 0.4, 0.4, 0.6, 1.0 };
     Cube * cube = [Cube cubeWithWidth:CUBE_SIZE
                   andIndicesIntoNames:@[@(gv_pos),@(gv_uv),@(gv_normal)]
                              andDoUVs:true
                          andDoNormals:true
                              wrapType:kCubeWrapHorizontal];
     [self addBuffer:cube];
-}
-
--(void)configureLighting
-{
-    if( !self.light )
-        self.light = [Light new]; // defaults are good
-    self.light.ambientColor = (GLKVector4){0.2, 0.2, 0.2, 1};
-    self.light.direction = (GLKVector3){ 0.5, 1, -0.5 };
 }
 
 -(void)isPrevNext:(CGPoint) pt

@@ -61,6 +61,7 @@ extern float g_last_power, g_last_radius;
     float _maxF;
     float _minF;
 }
+@property (nonatomic,strong) Texture * texture;
 -(void)getMovingPoint:(CGPoint *)ppt;
 @end
 
@@ -142,11 +143,6 @@ extern float g_last_power, g_last_radius;
     self.texture = [[Texture alloc] initWithFileName:@"pool.png"];
 }
 
--(void)getTextureLocations
-{
-    self.texture.uLocation = [_shader location:pw_sampler];
-}
-
 -(void)createShader
 {
     PoolWaterShader * shader = [[PoolWaterShader alloc] init];
@@ -154,6 +150,7 @@ extern float g_last_power, g_last_radius;
     shader.scale = (GLKVector2){ 1/sz.width, 1/sz.height };
     [shader writeStatics];
     self.shader = shader;
+    self.texture.uLocation = [_shader location:pw_sampler];
 }
 
 -(void)update:(NSTimeInterval)dt
@@ -198,7 +195,7 @@ extern float g_last_power, g_last_radius;
     }
 
     [b unbind];
-    [self.texture unbind];
+    [self.texture unbind:shader];
 
     [_dts restore];
 }
