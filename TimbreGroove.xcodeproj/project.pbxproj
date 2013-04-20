@@ -119,8 +119,6 @@
 		572EB27F167A9B160062F290 /* config.plist in Resources */ = {isa = PBXBuildFile; fileRef = 572EB27E167A9B160062F290 /* config.plist */; };
 		572EB290167AC0020062F290 /* fountain.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1F416786C630062F290 /* fountain.fsh */; };
 		572EB291167AC0020062F290 /* fountain.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1F516786C630062F290 /* fountain.vsh */; };
-		572EB292167AC0020062F290 /* hump.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1F616786C630062F290 /* hump.fsh */; };
-		572EB293167AC0020062F290 /* hump.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1F716786C630062F290 /* hump.vsh */; };
 		5737C4A3169277B700C12F2D /* fluid.png in Resources */ = {isa = PBXBuildFile; fileRef = 5737C4A2169277B700C12F2D /* fluid.png */; };
 		5737C4B41693206D00C12F2D /* imageBaker.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 5737C4AF1693090D00C12F2D /* imageBaker.fsh */; };
 		5737C4B51693206D00C12F2D /* imageBaker.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 5737C4AD169308DF00C12F2D /* imageBaker.vsh */; };
@@ -383,8 +381,6 @@
 		572EB1F116786C630062F290 /* MainStoryboard_iPhone.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = MainStoryboard_iPhone.storyboard; sourceTree = "<group>"; };
 		572EB1F416786C630062F290 /* fountain.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = fountain.fsh; sourceTree = "<group>"; };
 		572EB1F516786C630062F290 /* fountain.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = fountain.vsh; sourceTree = "<group>"; };
-		572EB1F616786C630062F290 /* hump.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = hump.fsh; sourceTree = "<group>"; };
-		572EB1F716786C630062F290 /* hump.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; lineEnding = 0; path = hump.vsh; sourceTree = "<group>"; };
 		572EB1F916786C630062F290 /* TGAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TGAppDelegate.h; path = src/TGAppDelegate.h; sourceTree = "<group>"; };
 		572EB1FA16786C630062F290 /* TGAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TGAppDelegate.m; path = src/TGAppDelegate.m; sourceTree = "<group>"; };
 		572EB211167878FD0062F290 /* Node.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Node.h; sourceTree = "<group>"; };
@@ -629,11 +625,11 @@
 		5700235516A55460006F0E8E /* models */ = {
 			isa = PBXGroup;
 			children = (
+				57E7EB9C170FA83E00D3DC88 /* ballStretch.dae */,
+				57E7EB98170F6B7100D3DC88 /* boxStretch.dae */,
 				5705272E1719F69F00E17825 /* butterfly.dae */,
 				57C7BA89171686AF000C82E8 /* tex.dae */,
 				57E0CD8C1713236F00F83113 /* walk.dae */,
-				57E7EB9C170FA83E00D3DC88 /* ballStretch.dae */,
-				57E7EB98170F6B7100D3DC88 /* boxStretch.dae */,
 			);
 			path = models;
 			sourceTree = "<group>";
@@ -951,8 +947,6 @@
 				5737C4AD169308DF00C12F2D /* imageBaker.vsh */,
 				577368CD16CDBB320051551F /* bezier.vsh */,
 				577368CB16CDBAF40051551F /* bezier.fsh */,
-				572EB1F616786C630062F290 /* hump.fsh */,
-				572EB1F716786C630062F290 /* hump.vsh */,
 			);
 			path = shaders;
 			sourceTree = "<group>";
@@ -1380,8 +1374,6 @@
 				57647578167D97EC00D5A431 /* generic.vsh in Resources */,
 				572EB290167AC0020062F290 /* fountain.fsh in Resources */,
 				572EB291167AC0020062F290 /* fountain.vsh in Resources */,
-				572EB292167AC0020062F290 /* hump.fsh in Resources */,
-				572EB293167AC0020062F290 /* hump.vsh in Resources */,
 				57E87526167829BB008243B2 /* Alex-icon.png in Resources */,
 				572EB1FD16786C630062F290 /* Alex.png in Resources */,
 				572EB1FE16786C630062F290 /* Default-568h@2x.png in Resources */,
