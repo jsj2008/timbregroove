@@ -142,10 +142,7 @@ void doLighting()
 		l_normal       = normalize( u_normalMat * l_vertexNormal );
         
         for( int i = 0; i < u_lightsEnabled; i++ )
-        {
-            if( u_lights[i].enabled )
-                pointLight( u_lights[i], amb, diff, spec );
-        }
+            pointLight( u_lights[i], amb, diff, spec );
         
 		v_color.rgb = u_material[CI_Ambient].rgb + (diff.rgb * u_material[CI_Diffuse].rgb);
 		v_color.a   = u_material[CI_Diffuse].a;
@@ -178,6 +175,9 @@ void main()
     v_vertex_color = a_color;
 #endif
     
+#ifdef NORMAL
+    doLighting();
+#endif
     
 #ifdef TIME
     v_time = u_time;
