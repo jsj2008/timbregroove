@@ -11,45 +11,26 @@ uniform sampler2D u_sampler;
 varying lowp vec2 v_texCoordOut;
 #else
 #ifdef COLOR
-varying vec4 v_color;
+varying vec4 v_vertex_color;
 #endif
+#endif
+
+#ifdef NORMAL
+varying vec4 v_color;
+varying vec4 v_specular;
 #endif
 
 #ifdef TIME
 varying float v_time;
 #endif
 
-#ifdef AMBIENT_LIGHTING
-varying vec3 v_lightFilter;
-#endif
-
-#ifdef PHONG_LIGHTING
-varying vec4  v_phongLitColor;
-#endif
-
-#ifdef SPOT_FILTER
-uniform vec2 u_spotLocation;
-uniform float u_spotIntensity;
-float spotFilter()
-{
-    if( u_spotIntensity < 0.001 )
-        return 0.0;
-    vec2  pos       = (v_texCoordOut - 0.5) * 2.0; // transpose to object space
-    float dist = distance(pos,u_spotLocation);
-    if( dist > 0.3 )
-        return 0.0;
-    return clamp( cos(dist), 0.0, 1.0 );
-}
-#endif
-
-uniform vec4 u_color;
-
 #ifdef TEXTURE_DISTORT
 uniform float u_rippleSize;
 uniform vec2  u_ripplePt;
 
-vec4 texture_dist(vec2 center)
+vec4 texture_dist()
 {
+    vec2  center     = u_ripplePt;
     float rippleSize = u_rippleSize;
     
     if( rippleSize < 0.1 )
@@ -75,48 +56,22 @@ vec4 texture_dist(vec2 center)
 
 void main()
 {
-    vec4 color;
+    vec4 color = vec4(1);
     
 #ifdef TEXTURE
-    float alpha;
-    #ifdef SPOT_FILTER
-        alpha = spotFilter();
-    #else
-        alpha = 1.0;
-    #endif
-    if( alpha > 0.0 )
-    {
-    #ifdef TEXTURE_DISTORT
-        color = texture_dist( u_ripplePt );
-        color.a = min( color.a, alpha );
-    #else
-        vec2 st = v_texCoordOut;
-        #ifdef PSYCHEDELIC
-            vec2  pos = (st - 0.5) * 2.0; // transpose to object space
-            float len = length(pos);
-            st = st + (pos / len) * cos(len - v_time);
-        #endif
-        color = vec4( texture2D(u_sampler, st).rgb, alpha );
-    #endif
-    }
-  #ifdef U_COLOR
-    color += u_color;
-  #endif
+#ifdef TEXTURE_DISTORT
+    color = texture_dist();
 #else
-  #ifdef COLOR
-    color = v_color;
-  #else
-    color = u_color;
-  #endif
+    color = texture2D(s_texture, v_texCoord);
 #endif
-
-#ifdef AMBIENT_LIGHTING
-    color = vec4(color.rgb * v_lightFilter, color.a);
+#elif COLOR
+    color = v_vertex_color;
 #endif
     
-#ifdef PHONG_LIGHTING
-    color = v_phongLitColor;
+#ifdef NORMAL
+    color *= v_color;
+    color = vec4(color.rgb + v_specular.rgb, color.a);
 #endif
-
+    
     gl_FragColor = color;
 }
