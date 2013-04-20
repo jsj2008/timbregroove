@@ -14,22 +14,12 @@
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  MeshMaterial  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-typedef enum _MeshMaterialType {
-    MMT_Phong
-
-} MeshMaterialType;
-
-
 @interface MeshMaterial : NSObject {
-    @public
+@public
     NSString * _name;
-    MeshMaterialType _type;
-}
-@end
-
-@interface MeshMaterialPhong : MeshMaterial {
-    GLKVector4  _colors[PhongColor_NUM_COLORS];
-    float       _float[PhongValue_NUM_FLOATS];
+    MaterialColors _colors;
+    float _shininess;
+    bool _doSpecular;
 }
 @end
 
@@ -120,7 +110,7 @@ typedef enum _MeshSceneNodeType {
     
     MeshSkinning *  _skin;
     MeshGeometry *  _geometry;
-    MeshMaterial *  _material;
+    NSArray *       _materials;
 }
 @end
 
@@ -148,7 +138,6 @@ typedef enum _MeshSceneNodeType {
     NSArray  * _animations;
     NSArray  * _meshes;
     NSArray  * _joints;
-    NSArray  * _materials;
 }
 @property (nonatomic,strong) NSString * fileName;
 -(void)calcMatricies;

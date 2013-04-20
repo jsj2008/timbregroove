@@ -7,6 +7,7 @@
 //
 
 #import "GenericImport.h"
+#import "GenericCamera.h"
 #import "MeshSceneBuffer.h"
 #import "ColladaParser.h"
 #import "Material.h"
@@ -16,7 +17,6 @@
 #import "Names.h"
 
 #import "Cube.h"
-#import "Camera.h"
 
 @interface JointPainter : Generic {
 @public
@@ -34,7 +34,7 @@
     MeshBuffer * _drawingBuffer;
     GLint _bufferDrawType;
     bool _doWireframe;
-    ColorMaterial * _colorMat;
+    id<ShaderFeature> _material;
 }
 
 -(id)init
@@ -57,24 +57,12 @@
 
 -(id)wireUp
 {
+    [self.lights addLight:[Light new]];
+    
     [super wireUp];
     self.disableStandardParameters = true;
     return self;
 }
-
-#if 0
--(void)configureLightingxx
-{
-    if( !self.light )
-        self.light = [Light new]; // defaults are good
-    float subColor = 0;
-    self.light.ambientColor = (GLKVector4){subColor, subColor, 1.0, 1.0};
-    
-    GLKVector3 lDir = self.light.direction;
-    GLKMatrix4 mx = GLKMatrix4MakeTranslation( lDir.x, lDir.y, lDir.z );
-    self.light.direction = GLKMatrix4MultiplyVector3(mx,(GLKVector3){-1, 0, -1});
-}
-#endif
 
 -(void)createBuffer
 {
@@ -88,11 +76,6 @@
         
     };
     MeshGeometry * geometry = _node->_geometry;
-    
-    MeshGeometryBuffer * b = geometry->_buffers;
-    
-    // FIXME: all normals are broken
-    b[MSKNormal].data = NULL;
     
     for( MeshSemanticKey key = MSKPosition; key < kNumMeshSemanticKeys; key++ )
     {
@@ -110,23 +93,22 @@
                                                              andIndexData:mgib
                                                    andIndexIntoShaderName:indexIntoNamesMap[key]];
                     
-                    static GLKVector4 colors[] = {
-                        { 1, 0,   0, 0.5 },
-                        { 0, 1,   0, 0.5 },
-                        { 0, 0.5, 1, 0.5 },
-                        { 1, 0,   1, 0.5 }
-                    };
-                    
-                    static int nextColor = 0;
-                    
-                    ColorMaterial * color = [ColorMaterial withColor:colors[nextColor]];
-                    nextColor = ++nextColor % (sizeof(colors)/sizeof(colors[0]));
                     for( int i = 0; i < geometry->_numIndexBuffers; i++ )
                     {
                         MeshGeometryIndexBuffer * mgib = geometry->_indexBuffers + i;
                         MeshBuffer * ibuffer = [[MeshBuffer alloc] init];
                         [ibuffer setIndexData:mgib->indexData numIndices:mgib->numIndices];
-                        [self addIndexShape:ibuffer features:@[color]];
+                        Material * material = nil;
+                        if( _node->_materials )
+                        {
+                            MeshMaterial * mm = _node->_materials[i];
+                            material = [Material withColors:mm->_colors shininess:mm->_shininess doSpecular:mm->_doSpecular];
+                        }
+                        else
+                        {
+                            material = [Material withColor:(GLKVector4){ 0.7, 0.7, 0.7, 1.0 }];
+                        }
+                        [self addIndexShape:ibuffer features:@[material]];
                     }
                     
                     [self addBuffer:msb];
@@ -140,7 +122,12 @@
                                                    andIndexIntoShaderName:indexIntoNamesMap[key]];
                     
                     [self addBuffer:msb];
-                    _colorMat = [ColorMaterial withColor:(GLKVector4){1,1,0,1}];
+                    
+                    if( _node->_materials )
+                    {
+                        MeshMaterial * mm = _node->_materials[0];
+                        _material = [Material withColors:mm->_colors shininess:mm->_shininess doSpecular:mm->_doSpecular];
+                    }
                 }
 
                 if( _node->_skin )
@@ -165,19 +152,15 @@
                                                andIndexIntoShaderName:indexIntoNamesMap[key]];
                 msb.drawable = false;
                 [self addBuffer:msb];
-                                
             }
-            
-            
         }
     }
-    
 }
 
 -(void)createShader
 {
-    if( _colorMat )
-        [self addShaderFeature:_colorMat];
+    if( _material )
+        [self addShaderFeature:_material];
     [super createShader];
 }
 
@@ -421,7 +404,7 @@
 
 -(void)createShader
 {
-    [self addShaderFeature:[ColorMaterial withColor:_color]];
+    [self addShaderFeature:[Material withColor:_color]];
     [super createShader];
 }
 

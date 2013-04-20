@@ -18,6 +18,8 @@
 		5705DED916E5DA5300A80445 /* Tween.c in Sources */ = {isa = PBXBuildFile; fileRef = 5705DED816E5DA5200A80445 /* Tween.c */; };
 		570665F4167F3D3F0081B8C3 /* squareTest.tif in Resources */ = {isa = PBXBuildFile; fileRef = 570665F3167F3D3F0081B8C3 /* squareTest.tif */; };
 		5707CA7416BCA18400B24818 /* GraphViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5707CA7316BCA18300B24818 /* GraphViewController.m */; };
+		5708A79D172305FB00F79E34 /* capture.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 5708A79C172305FB00F79E34 /* capture.vsh */; };
+		5708A79F1723060800F79E34 /* capture.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 5708A79E1723060800F79E34 /* capture.fsh */; };
 		570CE40616BDCACC00D67551 /* ScreenViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 570CE40516BDCACC00D67551 /* ScreenViewController.m */; };
 		570CE40816BDD55900D67551 /* powerButtons.png in Resources */ = {isa = PBXBuildFile; fileRef = 570CE40716BDD55900D67551 /* powerButtons.png */; };
 		570CE40B16BDD66900D67551 /* powerOff.png in Resources */ = {isa = PBXBuildFile; fileRef = 570CE40916BDD66900D67551 /* powerOff.png */; };
@@ -207,11 +209,13 @@
 		57CB3B0816BE148A007C093C /* snail.png in Resources */ = {isa = PBXBuildFile; fileRef = 57CB3B0616BE148A007C093C /* snail.png */; };
 		57CB3B0B16BE2BC5007C093C /* NewScenePicker.m in Sources */ = {isa = PBXBuildFile; fileRef = 57CB3B0A16BE2BC5007C093C /* NewScenePicker.m */; };
 		57CB3B0E16BE2BF9007C093C /* NewSceneCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 57CB3B0D16BE2BF9007C093C /* NewSceneCell.m */; };
+		57CBB3D31721CE0700E45BCC /* GenericCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = 57CBB3D21721CE0700E45BCC /* GenericCamera.m */; };
 		57CCFFC216849337003B4A19 /* Text.m in Sources */ = {isa = PBXBuildFile; fileRef = 57CCFFC116849336003B4A19 /* Text.m */; };
 		57CE24D716CF01CA0007BDD0 /* FivePointBezier.m in Sources */ = {isa = PBXBuildFile; fileRef = 57CE24D616CF01CA0007BDD0 /* FivePointBezier.m */; };
 		57D0EBD616D43CD600DBF457 /* GraphView+Touches.m in Sources */ = {isa = PBXBuildFile; fileRef = 57D0EBD516D43CD600DBF457 /* GraphView+Touches.m */; };
 		57D0EBD916D4B1C500DBF457 /* TriggerMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 57D0EBD816D4B1C400DBF457 /* TriggerMap.m */; };
 		57D0EBDC16D4BA5400DBF457 /* Names.m in Sources */ = {isa = PBXBuildFile; fileRef = 57D0EBDB16D4BA5300DBF457 /* Names.m */; };
+		57DF21FC1722792E000C5225 /* ShaderFeature.m in Sources */ = {isa = PBXBuildFile; fileRef = 57DF21FB1722792E000C5225 /* ShaderFeature.m */; };
 		57DF536A16DC1A6000990B8D /* Serenity.m in Sources */ = {isa = PBXBuildFile; fileRef = 57DF536916DC1A6000990B8D /* Serenity.m */; };
 		57DF9C8116B5B9AB00050635 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57DF9C8016B5B9AB00050635 /* AVFoundation.framework */; };
 		57DF9C8416B5BE2500050635 /* SoundSystem.m in Sources */ = {isa = PBXBuildFile; fileRef = 57DF9C8316B5BE2500050635 /* SoundSystem.m */; };
@@ -267,6 +271,8 @@
 		570665F3167F3D3F0081B8C3 /* squareTest.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = squareTest.tif; sourceTree = "<group>"; };
 		5707CA7116BC9E4500B24818 /* Text.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Text.h; sourceTree = "<group>"; };
 		5707CA7316BCA18300B24818 /* GraphViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GraphViewController.m; sourceTree = "<group>"; };
+		5708A79C172305FB00F79E34 /* capture.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = capture.vsh; sourceTree = "<group>"; };
+		5708A79E1723060800F79E34 /* capture.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = capture.fsh; sourceTree = "<group>"; };
 		570CE40516BDCACC00D67551 /* ScreenViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ScreenViewController.m; path = src/ScreenViewController.m; sourceTree = "<group>"; };
 		570CE40716BDD55900D67551 /* powerButtons.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = powerButtons.png; sourceTree = "<group>"; };
 		570CE40916BDD66900D67551 /* powerOff.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = powerOff.png; sourceTree = "<group>"; };
@@ -530,6 +536,9 @@
 		57CB3B0A16BE2BC5007C093C /* NewScenePicker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NewScenePicker.m; path = ../NewScenePicker.m; sourceTree = "<group>"; };
 		57CB3B0C16BE2BF9007C093C /* NewSceneCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NewSceneCell.h; path = ../NewSceneCell.h; sourceTree = "<group>"; };
 		57CB3B0D16BE2BF9007C093C /* NewSceneCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NewSceneCell.m; path = ../NewSceneCell.m; sourceTree = "<group>"; };
+		57CBB3D01721CBE100E45BCC /* ShaderFeature.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderFeature.h; sourceTree = "<group>"; };
+		57CBB3D11721CE0700E45BCC /* GenericCamera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenericCamera.h; sourceTree = "<group>"; };
+		57CBB3D21721CE0700E45BCC /* GenericCamera.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GenericCamera.m; sourceTree = "<group>"; };
 		57CCFFC116849336003B4A19 /* Text.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Text.m; sourceTree = "<group>"; };
 		57CE24D516CF01CA0007BDD0 /* FivePointBezier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FivePointBezier.h; sourceTree = "<group>"; };
 		57CE24D616CF01CA0007BDD0 /* FivePointBezier.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FivePointBezier.m; sourceTree = "<group>"; };
@@ -538,6 +547,7 @@
 		57D0EBD816D4B1C400DBF457 /* TriggerMap.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TriggerMap.m; sourceTree = "<group>"; };
 		57D0EBDA16D4BA5200DBF457 /* Names.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Names.h; sourceTree = "<group>"; };
 		57D0EBDB16D4BA5300DBF457 /* Names.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Names.m; sourceTree = "<group>"; };
+		57DF21FB1722792E000C5225 /* ShaderFeature.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ShaderFeature.m; sourceTree = "<group>"; };
 		57DF536916DC1A6000990B8D /* Serenity.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Serenity.m; sourceTree = "<group>"; };
 		57DF9C8016B5B9AB00050635 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		57DF9C8216B5BE2500050635 /* SoundSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SoundSystem.h; sourceTree = "<group>"; };
@@ -837,6 +847,8 @@
 				57A66EEC167B1D1C00B9EA75 /* Material.m */,
 				575AA12716ADAF6900635A76 /* Light.h */,
 				575AA12816ADAF6900635A76 /* Light.m */,
+				57CBB3D11721CE0700E45BCC /* GenericCamera.h */,
+				57CBB3D21721CE0700E45BCC /* GenericCamera.m */,
 			);
 			name = generic;
 			sourceTree = "<group>";
@@ -933,6 +945,8 @@
 				57F290F51695776400293B0E /* fractal.vsh */,
 				57647574167D7C4A00D5A431 /* generic.fsh */,
 				57647572167D7C3C00D5A431 /* generic.vsh */,
+				5708A79E1723060800F79E34 /* capture.fsh */,
+				5708A79C172305FB00F79E34 /* capture.vsh */,
 				5737C4AF1693090D00C12F2D /* imageBaker.fsh */,
 				5737C4AD169308DF00C12F2D /* imageBaker.vsh */,
 				577368CD16CDBB320051551F /* bezier.vsh */,
@@ -1073,6 +1087,8 @@
 				572EB21E16788D170062F290 /* MeshBuffer.m */,
 				572EB21816787AFF0062F290 /* Shader.h */,
 				572EB21916787AFF0062F290 /* Shader.m */,
+				57CBB3D01721CBE100E45BCC /* ShaderFeature.h */,
+				57DF21FB1722792E000C5225 /* ShaderFeature.m */,
 			);
 			name = openGL;
 			sourceTree = "<group>";
@@ -1304,6 +1320,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5708A79D172305FB00F79E34 /* capture.vsh in Resources */,
+				5708A79F1723060800F79E34 /* capture.fsh in Resources */,
 				570F415916ABB646000FCA7B /* FireShader.fsh in Resources */,
 				570F415A16ABB646000FCA7B /* HeatShader.vsh in Resources */,
 				577368CC16CDBAF40051551F /* bezier.fsh in Resources */,
@@ -1542,6 +1560,8 @@
 				577E7ED5170E1A1F009E9916 /* MeshScene+Emitter.m in Sources */,
 				571EDCCF1711F09F008375AA /* ObjectGestures.m in Sources */,
 				5787A701171FC89A00861C01 /* ShaderTimer.m in Sources */,
+				57CBB3D31721CE0700E45BCC /* GenericCamera.m in Sources */,
+				57DF21FC1722792E000C5225 /* ShaderFeature.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -84,18 +84,16 @@ NSString const * kParamRotateCube  = @"RotateCube";
                                          width:EQ_PANEL_HEIGHT * 4
                                         height:EQ_PANEL_HEIGHT];
     
-    //GLKVector4 color = (GLKVector4){ 0.4, 0.4, 0.6, 1.0 };
-    //ColorMaterial cmat = [ColorMaterial withColor:color];
-    
-    DirectionalLight *light = [DirectionalLight new];
-    light.direction = (GLKVector3){ 0.5, 1, -0.5 };
 
-    AmbientLighting *ambient = [AmbientLighting new];
-    ambient.ambientColor = (GLKVector4){0.2, 0.2, 0.2, 1};
+    Light *light = [Light new];
+    light.directional = true;
+    light.position = (GLKVector3){ 0.5, 1, -0.5 };
+    [self.lights addLight:light];
+    
+    Material * mat = [Material withColor:(GLKVector4){0.2, 0.2, 0.2, 1}];
     
     [self addShaderFeature:texture];
-    [self addShaderFeature:light];
-    [self addShaderFeature:ambient];
+    [self addShaderFeature:mat];
     [super createShader];
 }
 

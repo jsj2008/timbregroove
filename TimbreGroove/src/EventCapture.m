@@ -8,7 +8,7 @@
 
 #import "EventCapture.h"
 #import "TG3dObject.h"
-#import "GenericShader.h"
+#import "Shader.h"
 #import "MeshBuffer.h"
 #import "Interactive.h"
 #import "FBO.h"
@@ -18,6 +18,24 @@
 #define _NTC(n) ((n&0xFF)/255.0f)
 #define NTC(n) { _NTC((n>>16)), _NTC((n>>8)), _NTC(n), 1.0 }
 
+typedef enum CapVarNames {
+    cv_pos,
+    cv_LAST_ATTR = cv_pos,
+    cv_pvm,
+    cv_color
+} CapVarNames;
+
+static const char * capVarNames[] = { "a_position", "u_pvm", "u_color" };
+
+static Shader * getCaptureShader()
+{
+    return [Shader shaderFromPoolWithVertex:"capture"
+                                andFragment:"capture"
+                                andVarNames:capVarNames
+                                andNumNames:3
+                                andLastAttr:cv_LAST_ATTR
+                                 andHeaders:nil];
+}
 
 @interface EventCapture() {
 }
@@ -30,10 +48,10 @@ typedef void (^CaptureRecurseBlock)(TG3dObject *);
 +(id)getGraphViewTapChildElementOf:(TG3dObject *)graph inView:(UIView *)view atPt:(CGPoint)pt
 {
     NSMutableDictionary * _objDict;
-    __block unsigned int          _currentColor;
+    __block unsigned int  _currentColor;
     GLuint                _posLocation;
     LogLevel              prevLogLevel;
-    GenericShader *       shader;
+    Shader *              shader;
 	uint8_t               pix[4];
     
     CGSize sz = view.frame.size;
@@ -42,10 +60,10 @@ typedef void (^CaptureRecurseBlock)(TG3dObject *);
     _currentColor    = 1;
     _objDict         = [NSMutableDictionary new];
     prevLogLevel     = TGSetLogLevel(LLShitsOnFire);
-    shader           = [GenericShader shader];
+    shader           = getCaptureShader();
     TGSetLogLevel(prevLogLevel);
     
-    _posLocation     = [shader location:gv_pos];
+    _posLocation     = [shader location:cv_pos];
     
     [fbo bindToRender];
     glViewport(0, 0, fbo.width, fbo.height);
@@ -61,8 +79,8 @@ typedef void (^CaptureRecurseBlock)(TG3dObject *);
         if( child.interactive )
         {
             GLKVector4 color = NTC(_currentColor);
-            [shader writeToLocation:gv_ucolor type:TG_VECTOR4 data:color.v];
-            [shader writeToLocation:gv_pvm type:TG_MATRIX4 data:[child calcPVM].m];
+            [shader writeToLocation:cv_color type:TG_VECTOR4 data:color.v];
+            [shader writeToLocation:cv_pvm type:TG_MATRIX4 data:[child calcPVM].m];
             [child renderToCaptureAtBufferLocation:_posLocation];
             _objDict[@(_currentColor)] = child;
             ++_currentColor;

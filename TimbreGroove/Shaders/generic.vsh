@@ -7,7 +7,7 @@ precision highp float;
 
 attribute vec4 a_position;
 uniform mat4 u_pvm;
-
+uniform mat4 u_mvm;
 
 #ifdef TEXTURE
 attribute vec2 a_uv;
@@ -16,79 +16,148 @@ varying lowp vec2 v_texCoordOut;
 
 #ifdef COLOR
 attribute vec4 a_color;
-varying vec4 v_color;
+varying vec4 v_vertex_color;
 #endif
 
 #ifdef BONES
-attribute int a_boneIndex;
-attribute float int a_boneWeights;
+attribute int   a_boneIndex;
+attribute float a_boneWeights;
 #endif
 
 #ifdef NORMAL
+
+#define NUM_LIGHTS 2
+
+const int CI_Ambient  = 0;
+const int CI_Diffuse  = 1;
+const int CI_Specular = 2;
+const int CI_Emission = 3;
+
+const int CI_NUM_COLORS = 4;
+
+struct Light {
+	vec4   position;
+    vec4   colors[CI_NUM_COLORS];
+	vec3   attenuation;
+    
+	float spotCutoffAngle;
+	vec3  spotDirection;
+	float spotFalloffExponent;
+};
+
 attribute vec3 a_normal;
 
-uniform mat3 u_normalMat;
-uniform vec3 u_lightDir;
-uniform vec3 u_lightPosition;
+varying vec4   v_color;
+varying vec4   v_specular;
 
-#ifdef AMBIENT_LIGHTING
-uniform vec3 u_dirColor;
-uniform vec3 u_ambient;
+uniform mat3   u_normalMat;
+uniform int    u_lightsEnabled;
+uniform Light  u_lights[NUM_LIGHTS];
+uniform vec4   u_material[CI_NUM_COLORS];
+uniform float  u_shininess;
+uniform bool   u_doSpecular;
 
-varying vec3 v_lightFilter;
+vec3 l_ecPosition3;
+vec3 l_normal;
+vec3 l_eye;
+vec4 l_vertexPosition;
+vec3 l_vertexNormal;
 
-void sendAmbientLight()
+
+void pointLight(const in Light light,
+				inout vec4 ambient,
+				inout vec4 diffuse,
+				inout vec4 specular)
 {
-    vec3 transformedNormal = u_normalMat * a_normal;
-    float directionalLightWeighting = max(dot(transformedNormal, u_lightDir), 0.0);
-    v_lightFilter = u_ambient + u_dirColor * directionalLightWeighting;
-}
-#endif
-
-#ifdef PHONG_LIGHTING
-
-
-varying vec4  v_phongLitColor;
-
-uniform vec4  u_phongColors[6];
-uniform float u_phongValues[3];
-
-const int PhongColor_Emission = 0;
-const int PhongColor_Ambient = 1;
-const int PhongColor_Diffuse = 2;
-const int PhongColor_Specular = 3;
-const int PhongColor_Reflective = 4;
-const int PhongColor_Transparent = 5;
-
-const int PhongValue_Shininess = 0;
-const int PhongValue_Reflectivity = 1;
-const int PhongValue_Transparency = 2;
-
-void phongLighting(vec3 position)
-{
-    vec3 materialAmbientColor  = u_phongColors[PhongColor_Ambient].xyz;
-    vec3 materialDiffuseColor  = u_phongColors[PhongColor_Diffuse].xyz;
-    vec3 materialSpecularColor = u_phongColors[PhongColor_Specular].xyz;
-
-    vec3 lightDirection;
+	float nDotVP;
+	float eDotRV;
+	float pf;
+	float attenuation;
+	float d;
+	vec3 VP;
+	vec3 reflectVector;
     
-    if (u_lightPos.w == 0.0)
-        lightDirection = normalize(vec3(u_lightPosition));
+	// 1 means light source is directional
+    // 0 means ambient
+	if (light.position.w == 0.0)
+    {
+		attenuation = 1.0;
+		VP = light.position.xyz;
+    }
     else
-        lightDirection = normalize(vec3(u_lightPosition - u_pvm * position)); 
+    {
+        // Normalize the distance of the
+		// Vector between light position and vertex
+		VP = vec3(light.position.xyz - l_ecPosition3);
+		d  = length(VP);
+		VP = normalize(VP);
 
-    vec3 eyespaceNormal  = u_normalMat * a_normal;
-    vec3 viewDirection   = vec3(0.0, 0.0, 1.0);
-    vec3 halfPlane       = normalize(lightDirection + viewDirection);
+		// Calculate attenuation
+		vec3 attDist = vec3(1.0, d, d * d);
+		attenuation = 1.0 / dot(light.attenuation, attDist);
+        
+		// Calculate spot lighting effects
+		if (light.spotCutoffAngle > 0.0) {
+			float spotFactor = dot(-VP, light.spotDirection);
+			if (spotFactor >= cos(radians(light.spotCutoffAngle))) {
+				spotFactor = pow(spotFactor, light.spotFalloffExponent);
+			} else {
+				spotFactor = 0.0;
+			}
+			attenuation *= spotFactor;
+		}
+	}
+    
+	// angle between normal and light-vertex vector
+	nDotVP = max(0.0, dot(VP, l_normal));
+	
+ 	ambient += light.colors[CI_Ambient] * attenuation;
+	if (nDotVP > 0.0) {
+		diffuse += light.colors[CI_Diffuse] * (nDotVP * attenuation);
+        
+		if (u_doSpecular) {
+			// reflected vector
+			reflectVector = normalize(reflect(-VP, l_normal));
+			
+			// angle between eye and reflected vector
+			eDotRV = max(0.0, dot(l_eye, reflectVector));
+			eDotRV = pow(eDotRV, 16.0);
+            
+			pf = pow(eDotRV, u_shininess);
+			specular += light.colors[CI_Specular] * (pf * attenuation);
+		}
+	}
+}
 
-    float diffuseFactor  = max(0.0, dot(eyespaceNormal, lightDirection)); 
-    float specularFactor = max(0.0, dot(eyespaceNormal, halfPlane)); 
-
-    specularFactor = pow(specularFactor, u_phongValues[PhongValue_Shininess]);
-    vec3 color = materialAmbientColor + (diffuseFactor * materialDiffuseColor) + (specularFactor * materialSpecularColor);
-
-    v_phongLitColor = vec4(color, 1.0);
-#endif
+void doLighting()
+{
+	vec4 amb = vec4(0.0);
+	vec4 diff = vec4(0.0);
+	vec4 spec = vec4(0.0);
+    
+	if( u_lightsEnabled > 0 )
+    {
+		l_ecPosition3  = vec3(u_mvm * l_vertexPosition);
+		l_eye          = -normalize(l_ecPosition3);
+		l_normal       = normalize( u_normalMat * l_vertexNormal );
+        
+        for( int i = 0; i < u_lightsEnabled; i++ )
+        {
+            if( u_lights[i].enabled )
+                pointLight( u_lights[i], amb, diff, spec );
+        }
+        
+		v_color.rgb = u_material[CI_Ambient].rgb + (diff.rgb * u_material[CI_Diffuse].rgb);
+		v_color.a   = u_material[CI_Diffuse].a;
+		
+		v_color    = clamp(v_color, 0.0, 1.0);
+		v_specular = vec4( spec.rgb * u_material[CI_Specular].rgb, u_material[CI_Specular].a );
+		
+	} else {
+		v_color = u_material[CI_Diffuse];
+		v_specular = spec;
+	}
+}
 
 #endif
 
@@ -106,23 +175,14 @@ void main()
 #endif
     
 #ifdef COLOR
-    v_color = a_color;
+    v_vertex_color = a_color;
 #endif
     
-#ifdef AMBIENT_LIGHTING
-    sendAmbientLight();
-#endif
     
-#ifdef PHONG_LIGHTING
-    phongLighting(a_position);
-#endif
-
 #ifdef TIME
     v_time = u_time;
 #endif
 
-	gl_Position   = u_pvm * vec4(pos,a_position.w);
-
-
+	gl_Position = u_pvm * vec4(pos,a_position.w);
 }
 

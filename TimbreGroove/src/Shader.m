@@ -213,7 +213,7 @@ typedef enum _sfpType {
     sfpt_01
 } sfpType;
 
-@interface Shader () {
+@implementation Shader {
     const char ** _names;
     
     int           _numLocations;
@@ -243,8 +243,6 @@ typedef enum _sfpType {
     FloatParamBlock _fparam;
 }
 
-@end
-@implementation Shader
 
 +(id)shaderWithVertex:(const char *)vert
           andFragment:(const char *)frag
@@ -379,6 +377,11 @@ typedef enum _sfpType {
     }
     
     return _locations[indexIntoNames];
+}
+
+- (void)writeFloats:(int)indexIntoNames numFloats:(int)numFloats data:(void*)data
+{
+    glUniform1fv( _locations[indexIntoNames], numFloats, data);
 }
 
 - (void)writeToLocation:(int)indexIntoNames type:(TGUniformType)type data:(void*)data

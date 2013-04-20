@@ -134,7 +134,7 @@
     while( e && e->_shader == nil )
         e = (TG3dObject *)e.parent;
     
-#if DEBUGX
+#if DEBUG
     if( !e || !e->_shader )
     {
         TGLog(LLShitsOnFire, @"Missing shader (did you call wireUp?)");
@@ -144,6 +144,14 @@
     return e ? e->_shader : nil;
 }
 
+-(Shader *)hasShader
+{
+    TG3dObject * e = self;
+    
+    while( e && e->_shader == nil )
+        e = (TG3dObject *)e.parent;
+    return e ? e->_shader : nil;
+}
 
 -(Camera *)camera
 {
@@ -160,6 +168,11 @@
     }
 #endif
     return e ? e->_camera : nil;
+}
+
+-(Camera *)ownCamera
+{
+    return self->_camera;
 }
 
 -(GraphView *)hasView

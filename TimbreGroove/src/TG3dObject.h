@@ -40,6 +40,8 @@
 @property (nonatomic,strong) FBO       * fbo;
 
 -(GraphView *)hasView;
+-(Shader *)hasShader;
+-(Camera *)ownCamera;
 
 @property (nonatomic)        GLKVector3 position;
 @property (nonatomic)        GLKVector3 rotation;

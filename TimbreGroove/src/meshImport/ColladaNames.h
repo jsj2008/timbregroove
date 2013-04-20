@@ -27,8 +27,28 @@ NSString * const kAttr_url = @"url";
 NSString * const kAttr_version = @"version";
 NSString * const kAttr_xmlns = @"xmlns";
 
+
+#define _kTag_ambient      "ambient"
+#define _kTag_diffuse      "diffuse"
+#define _kTag_emission     "emission"
+#define _kTag_reflective   "reflective"
+#define _kTag_reflectivity "reflectivity"
+#define _kTag_shininess    "shininess"
+#define _kTag_specular     "specular"
+#define _kTag_transparency "transparency"
+#define _kTag_transparent  "transparent"
+
+NSString * const kTag_ambient = @ _kTag_ambient;
+NSString * const kTag_diffuse = @ _kTag_diffuse;
+NSString * const kTag_emission = @ _kTag_emission;
+NSString * const kTag_reflective = @ _kTag_reflective;
+NSString * const kTag_reflectivity = @ _kTag_reflectivity;
+NSString * const kTag_shininess = @ _kTag_shininess;
+NSString * const kTag_specular = @ _kTag_specular;
+NSString * const kTag_transparency = @ _kTag_transparency;
+NSString * const kTag_transparent = @ _kTag_transparent;
+
 NSString * const kTag_accessor = @"accessor";
-NSString * const kTag_ambient = @"ambient";
 NSString * const kTag_animation = @"animation";
 NSString * const kTag_asset = @"asset";
 NSString * const kTag_attenuationEnd = @"attenuationEnd";
@@ -45,11 +65,9 @@ NSString * const kTag_color = @"color";
 NSString * const kTag_contributor = @"contributor";
 NSString * const kTag_controller = @"controller";
 NSString * const kTag_created = @"created";
-NSString * const kTag_diffuse = @"diffuse";
 NSString * const kTag_directional = @"directional";
 NSString * const kTag_double_sided = @"double_sided";
 NSString * const kTag_effect = @"effect";
-NSString * const kTag_emission = @"emission";
 NSString * const kTag_extra = @"extra";
 NSString * const kTag_float = @"float";
 NSString * const kTag_float_array = @"float_array";
@@ -64,6 +82,7 @@ NSString * const kTag_instance_light = @"instance_light";
 NSString * const kTag_instance_material = @"instance_material";
 NSString * const kTag_instance_visual_scene = @"instance_visual_scene";
 NSString * const kTag_joints = @"joints";
+NSString * const kTag_lambert = @"lambert";
 NSString * const kTag_library_animations = @"library_animations";
 NSString * const kTag_library_cameras = @"library_cameras";
 NSString * const kTag_library_controllers = @"library_controllers";
@@ -87,22 +106,16 @@ NSString * const kTag_perspective = @"perspective";
 NSString * const kTag_phong = @"phong";
 NSString * const kTag_polylist = @"polylist";
 NSString * const kTag_profile_COMMON = @"profile_COMMON";
-NSString * const kTag_reflective = @"reflective";
-NSString * const kTag_reflectivity = @"reflectivity";
 NSString * const kTag_rotate = @"rotate";
 NSString * const kTag_sampler = @"sampler";
 NSString * const kTag_scale = @"scale";
 NSString * const kTag_scene = @"scene";
-NSString * const kTag_shininess = @"shininess";
 NSString * const kTag_skeleton = @"skeleton";
 NSString * const kTag_skin = @"skin";
 NSString * const kTag_source = @"source";
-NSString * const kTag_specular = @"specular";
 NSString * const kTag_technique = @"technique";
 NSString * const kTag_technique_common = @"technique_common";
 NSString * const kTag_translate = @"translate";
-NSString * const kTag_transparency = @"transparency";
-NSString * const kTag_transparent = @"transparent";
 NSString * const kTag_triangles = @"triangles";
 NSString * const kTag_up_axis = @"up_axis";
 NSString * const kTag_v = @"v";

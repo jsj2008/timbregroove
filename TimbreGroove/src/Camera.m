@@ -89,6 +89,7 @@
 {
     _position.z = z;
 }
+
 @end
 
 @implementation IdentityCamera

@@ -10,34 +10,73 @@
 #import "GenericShader.h"
 #import "Generic.h"
 
-@implementation DirectionalLight
+@implementation Light
 
 -(id)init
 {
     if( (self = [super init]) )
     {
-        _direction = (GLKVector3){0, 0.5, 0};
-        _position  = (GLKVector3){0, 0,   -1};
+        _desc.position  = (GLKVector4){0, 0, -5, 0 };
+        _desc.colors.diffuse = (GLKVector4){ 1, 1, 1, 1 };
+        _desc.attenuation = (GLKVector3){1, 1, 1};
     }
     
     return self;
 }
 
--(void)getShaderFeatureNames:(NSMutableArray *)putHere
+-(GLKVector3)position
 {
-    [putHere addObject:kShaderFeatureNormal];
+    return (GLKVector3){ _desc.position.x, _desc.position.y, _desc.position.z };
+}
+
+-(void)setPosition:(GLKVector3)position
+{
+    _desc.position = (GLKVector4){ position.x, position.y, position.z, _desc.position.w };
+}
+
+-(void)setDirectional:(bool)directional
+{
+    _desc.position.w = directional ? 1.0 : 0.0;
+}
+
+-(bool)directional
+{
+    return _desc.position.w == 1.0;
 }
 
 -(void)bind:(Shader *)shader object:(Generic *)object
 {
-    GLKMatrix4 pvm = [object calcPVM];
-    GLKMatrix3 normalMat = GLKMatrix3InvertAndTranspose(GLKMatrix4GetMatrix3(pvm), NULL);
+    GLKMatrix4 mv = object.modelView;
+    GLKMatrix3 normalMat = GLKMatrix3InvertAndTranspose(GLKMatrix4GetMatrix3(mv), NULL);
     [shader writeToLocation:gv_normalMat type:TG_MATRIX3 data:normalMat.m];
-    
-    [shader writeToLocation:gv_lightDir type:TG_VECTOR3 data:_direction.v];
-    [shader writeToLocation:gv_lightPosition type:TG_VECTOR3 data:_position.v];
+    [shader writeFloats:gv_lights + _lightNumber numFloats:sizeof(_desc)/sizeof(float) data:&_desc];
 }
--(void)unbind:(Shader *)shader {}
--(void)setShader:(Shader *)shader{}
 
+@end
+
+@implementation Lights {
+    __weak Generic * _object;
+    int _numLights;
+}
+
+-(id)initWithObject:(Generic *)object
+{
+    self = [super init];
+    if( self )
+    {
+        _object = object;
+    }
+    return self;
+}
+
+-(void)addLight:(Light *)light
+{
+    ++_numLights;
+    [_object addShaderFeature:light];
+}
+
+-(void)bind:(Shader *)shader object:(id)object
+{
+    [shader writeToLocation:gv_lightingEnabled type:TG_INT data:&_numLights];
+}
 @end

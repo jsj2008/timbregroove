@@ -22,18 +22,18 @@ static const char * _generic_shader_var_names[NUM_GENERIC_VARIABLES] = {
     "a_boneWeights",
     
     "u_pvm",
-    "u_sampler",
-    "u_color",
-    
+    "u_mvm",
     "u_normalMat",
-    "u_lightDir",
-    "u_lightPosition",
+
+    "u_sampler",
+
+    "u_material",
+    "u_shininess",
+    "u_doSpecular",
     
-    "u_dirColor",
-    "u_ambient",
-    
-    "u_phongColors",
-    "u_phongValues",
+    "u_lightingEnabled",
+    "u_lights",
+    "u_lights[2]",
     
     "u_time",
     
@@ -80,13 +80,6 @@ static const char * _generic_shader_var_names[NUM_GENERIC_VARIABLES] = {
                        andNumNames: NUM_GENERIC_VARIABLES
                        andLastAttr: GV_LAST_ATTR
                         andHeaders: headers];
-}
-
-- (void) prepareRender:(TG3dObject *)tgobj
-{
-    [super prepareRender:tgobj];
-    GLKMatrix4 pvm = [(Generic *)tgobj calcPVM];
-    [self writeToLocation:gv_pvm type:TG_MATRIX4 data:pvm.m];
 }
 
 @end

@@ -7,7 +7,6 @@
 //
 
 #import "Graph.h"
-#import "Camera.h"
 #import "Global.h"
 #import "Config.h"
 #import "GraphView.h"
@@ -61,17 +60,6 @@ typedef void (^RecurseBlock)(TG3dObject *);
 @property (nonatomic,weak) TG3dObject * modal;
 @end
 @implementation Graph
-
--(id)init
-{
-    self = [super init];
-    if( self )
-    {
-        self.camera = [Camera new];
-    }
-    
-    return self;
-}
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"

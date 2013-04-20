@@ -11,68 +11,47 @@
 #import "Generic.h"
 #import "GenericShader.h"
 
-@implementation ColorMaterial
+/*
+@property (nonatomic) MaterialColors colors;
+@property (nonatomic) float shininess;
+@property (nonatomic) bool  doLighting;
+@property (nonatomic) bool  doSpecular;
++(id)withColor:(GLKVector4)color;
++(id)withColors:(MaterialColors)matcolors shininess:(float)shininess;
+*/
+@implementation Material
 +(id)withColor:(GLKVector4)color
 {
-    ColorMaterial * cm = [ColorMaterial new];
-    cm->_color = color;
-    return cm;
+    Material * m = [Material new];
+    m->_colors.diffuse = color;
+    m->_colors.ambient = (GLKVector4){ 1, 1, 1, 1 };
+    return m;
 }
--(void)getShaderFeatureNames:(NSMutableArray *)putHere
++(id)withColors:(MaterialColors)matcolors shininess:(float)shininess doSpecular:(bool)doSpecular
 {
-    [putHere addObject:kShaderFeatureUColor];
-}
--(void)bind:(Shader *)shader object:(Generic *)object
-{
-    [shader writeToLocation:gv_ucolor type:TG_VECTOR4 data:_color.v];
-}
--(void)unbind:(Shader *)shader {}
--(void)setShader:(Shader *)shader{}
-@end
-
-@implementation AmbientLighting
--(void)getShaderFeatureNames:(NSMutableArray *)putHere
-{
-    [putHere addObject:kShaderFeatureAmbientLighting];
-}
--(void)bind:(Shader *)shader object:(Generic *)object
-{
-    [shader writeToLocation:gv_ambient  type:TG_VECTOR3 data:_ambientColor.v];
-    [shader writeToLocation:gv_dirColor type:TG_VECTOR3 data:_dirColor.v];
-}
--(void)unbind:(Shader *)shader {}
--(void)setShader:(Shader *)shader{}
-@end
-
-@implementation PhongLighting {
-    GLKVector4 _colors[ PhongColor_NUM_COLORS ];
-    float      _values[ PhongValue_NUM_FLOATS ];
-}
-
--(void)getShaderFeatureNames:(NSMutableArray *)putHere
-{
-    [putHere addObject:kShaderFeaturePhongLighting];
-}
-
--(void)setMaterials:(GLKVector4 *)colors values:(float *)values
-{
-    memcpy(_colors,colors,sizeof(_colors));
-    memcpy(_values,values,sizeof(_values));
-}
-
--(void)getMaterials:(GLKVector4 **)colors values:(float **)values
-{
-    *colors = _colors;
-    *values = _values;
+    Material * m = [Material new];
+    m->_colors = matcolors;
+    m->_shininess = shininess;
+    m->_doSpecular = doSpecular;
+    return m;
 }
 
 -(void)bind:(Shader *)shader object:(Generic *)object
 {
-    glUniform4fv( [shader location:gv_phongColors], PhongColor_NUM_COLORS, (const GLfloat *)_colors);
-    glUniform1fv( [shader location:gv_phoneValues], PhongValue_NUM_FLOATS, (const GLfloat *)_values);
+    [shader writeFloats:gv_material numFloats:sizeof(_colors)/sizeof(float) data:&_colors];
+    [shader writeToLocation:gv_shininess type:TG_FLOAT data:&_shininess];
+    [shader writeToLocation:gv_doSpecular type:TG_BOOL data:&_doSpecular];
 }
--(void)unbind:(Shader *)shader {}
--(void)setShader:(Shader *)shader{}
+
+-(GLKVector4)ambient
+{
+    return _colors.ambient;
+}
+
+-(void)setAmbient:(GLKVector4)ambient
+{
+    _colors.ambient = ambient;
+}
 @end
 
 #pragma mark -

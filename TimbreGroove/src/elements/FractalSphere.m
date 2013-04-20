@@ -10,6 +10,7 @@
 #import "FBO.h"
 #import "Light.h"
 #import "Sphere.h"
+#import "Material.h"
 
 @interface FractalSphere : Sphere
 
@@ -17,9 +18,9 @@
 
 @interface FractalSphere() {
     Fractal * _texRenderer;
-    float _myRot;
-    FBO *_fbo;
-    AmbientLighting * _ambient;
+    float     _myRot;
+    FBO *     _fbo;
+    Material  *_mat;
     
     float _pmin;
     float _pmax;
@@ -32,7 +33,6 @@
 
 -(id)wireUp
 {
-    _ambient = [[AmbientLighting alloc] init];
     _fbo = [[FBO alloc] initWithWidth:512 height:512];
     _texRenderer = [[Fractal alloc] init];
     _texRenderer.fbo = _fbo;
@@ -49,25 +49,21 @@
 
 -(void)createShader
 {
+    MaterialColors colors = {
+        .ambient  = { 0.8, 0.8, 0.8, 1.0 },
+        .diffuse  = { 1.0, 1.0, 1.0, 1.0 },
+        .specular = { 1.0, 1.0, 1.0, 1.0 },
+        .emission = { 0.0, 0.0, 0.0, 0.0 }
+    };
+    
+    _mat = [Material withColors:colors shininess:1000.0 doSpecular:true];
+
     [self addShaderFeature:_fbo];
-    [self addShaderFeature:[DirectionalLight new]];
-    [self addShaderFeature:_ambient];
+    [self addShaderFeature:_mat];
+    [self.lights addLight:[Light new]];
+    
     [super createShader];
 }
-
-#if 0
--(void)configureLighting
-{
-    if( !self.light )
-        self.light = [Light new]; // defaults are good
-    float subColor = 0;
-    self.light.ambientColor = (GLKVector4){subColor, subColor, 1.0, 1.0};
-    
-    GLKVector3 lDir = self.light.direction;
-    GLKMatrix4 mx = GLKMatrix4MakeTranslation( lDir.x, lDir.y, lDir.z );
-    self.light.direction = GLKMatrix4MultiplyVector3(mx,(GLKVector3){-1, 0, -1});
-}
-#endif
 
 -(void)getParameters:(NSMutableDictionary *)putHere
 {
@@ -77,7 +73,7 @@
     putHere[@"Ping!"] = [Parameter withBlock:^(float f) {
         _myRot += f * 45.0;
         self.rotation = (GLKVector3){ 0, GLKMathDegreesToRadians(_myRot), 0 };
-        _ambient.ambientColor = (GLKVector4){f, f*0.7, f, 1.0};
+        _mat.ambient = (GLKVector4){f, f*0.7, f, 1.0};
     }];
     
 }

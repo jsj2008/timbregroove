@@ -40,14 +40,13 @@ typedef enum _ColladaTagState
     kColStateMaterialTag      = 1 << 25,
     kColStateEffectTag        = 1 << 26,
     kColStatePhong            = 1 << 27,
+    kColStateLambert          = 1 << 28,
     
 } ColladaTagState;
 
 #define SET(f)      _state |= f
 #define UNSET(f)    _state &= ~f
 #define CHECK(f)    ((_state & f) == f)
-#define CHECKANY(f) CHECK(f)
-
 
 #define EQSTR(a,b) (a && ([a caseInsensitiveCompare:b] == NSOrderedSame))
 
@@ -135,6 +134,8 @@ static int scanInt(NSString * str)
     int              _nextInput;
     
     bool             _isActualTrianglesForReal;
+    
+    NSString *       _materialName;
 }
 
 @end
@@ -147,6 +148,11 @@ static int scanInt(NSString * str)
         _sourceURL = [NSMutableArray new];
     }
     return self;
+}
+
+- (void)dealloc
+{
+    TGLog(LLObjLifetime, @"Releasing %@",self);
 }
 @end
 
@@ -161,6 +167,10 @@ static int scanInt(NSString * str)
 }
 @end
 @implementation IncomingSourceTag
+- (void)dealloc
+{
+    TGLog(LLObjLifetime, @"Releasing %@",self);
+}
 @end
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  IncomingMeshData @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -349,6 +359,38 @@ typedef enum _NodeCoordSpec {
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  IncomingMaterial @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+typedef enum EffectParamTags {
+    et_NONE,
+    et_ambient,
+    et_diffuse,
+    et_specular,
+    et_emission,
+    
+    et_reflective,
+    et_transparent, // opaque="RGB_ZERO"
+    
+    et_shininess,
+    et_reflectivity,
+    et_transparency,
+} EffectParamTags;
+
+static const char * effectParamTags[] = {
+    "",
+    // colors
+    _kTag_ambient,
+    _kTag_diffuse,
+    _kTag_specular,
+    _kTag_emission,
+    // colors (unsupported)
+    _kTag_reflective,
+    _kTag_transparent, // opaque="RGB_ZERO">
+    // floats
+    _kTag_shininess,
+    // floats (unsupported)
+    _kTag_transparency,
+    _kTag_reflectivity,
+};
+
 @class IncomingEffect;
 
 @interface IncomingMaterial : NSObject {
@@ -365,53 +407,14 @@ typedef enum _NodeCoordSpec {
 @end
 
 
-NSString  *  PhongColorNames[PhongColor_NUM_COLORS];
-NSString *  PhongFloatNames[PhongValue_NUM_FLOATS];
-
-@interface IncomingPhong : NSObject {
-@public
-    GLKVector4 _colors[PhongColor_NUM_COLORS];
-    float      _floats[PhongValue_NUM_FLOATS];
-    
-    NSString * _transparent_opaque_type; // 'RGB_ZERO'
-    
-    PhongColors _expectingColor;
-    PhongFloat _expectingFloat;
-}
-@end
-
-@implementation IncomingPhong
--(id)init
-{
-    self = [super init];
-    if( self )
-    {
-        if( !PhongColorNames[0] )
-        {
-            PhongColorNames[PhongColor_Emission] = kTag_emission;
-            PhongColorNames[PhongColor_Ambient] = kTag_ambient;
-            PhongColorNames[PhongColor_Diffuse] = kTag_diffuse;
-            PhongColorNames[PhongColor_Specular] = kTag_specular;
-            PhongColorNames[PhongColor_Reflective] = kTag_reflective;
-            PhongColorNames[PhongColor_Transparent] = kTag_transparent;
-            PhongFloatNames[PhongValue_Shininess] = kTag_shininess;
-            PhongFloatNames[PhongValue_Reflectivity] = kTag_reflectivity;
-            PhongFloatNames[PhongValue_Transparency] = kTag_transparency;
-        }
-        
-        _expectingColor = PhongColor_None;
-        _expectingFloat = PhongValue_None;
-    }
-    return self;
-}
-@end
-
 @interface IncomingEffect : NSObject {
     @public
-    NSString * _id;
-    NSString * _type; // 'phong'
+    NSString *      _id;
+    NSString *      _type; // 'phong'
+    EffectParamTags _incomingDataTag;
     
-    IncomingPhong * _phong;
+    MaterialColors _colors;
+    float          _shininess;
     
 }
 @end
@@ -449,6 +452,8 @@ NSString *  PhongFloatNames[PhongValue_NUM_FLOATS];
     NSMutableDictionary * _nodes;
     NSMutableDictionary * _materials;
     NSMutableDictionary * _effects;
+    
+    NSMutableDictionary * _materialBindings;
 }
 @end
 
@@ -465,9 +470,15 @@ NSString *  PhongFloatNames[PhongValue_NUM_FLOATS];
         _nodes      = [NSMutableDictionary new];
         _materials  = [NSMutableDictionary new];
         _effects    = [NSMutableDictionary new];
+        _materialBindings = [NSMutableDictionary new];
         _up         = 'y';
     }
     return self;
+}
+
+-(void)dealloc
+{
+    TGLog(LLObjLifetime, @"%@ released", self);
 }
 
 -(void)handleAnimation:(NSString *)elementName
@@ -566,6 +577,7 @@ NSString *  PhongFloatNames[PhongValue_NUM_FLOATS];
             IncomingPolygonIndex * polyTag = [[IncomingPolygonIndex alloc] init];
             polyTag->_isActualTrianglesForReal = isTriangles;
             polyTag->_count = scanInt(attributeDict[kAttr_count]);
+            polyTag->_materialName = attributeDict[kAttr_material];
             
             [meshData->_polygonTags addObject:polyTag];
             
@@ -573,7 +585,7 @@ NSString *  PhongFloatNames[PhongValue_NUM_FLOATS];
             return;
         }
         
-        if( CHECKANY(kColStateInSource) )
+        if( CHECK(kColStateInSource) )
         {
             if( EQSTR(elementName, kTag_float_array) )
             {
@@ -590,7 +602,7 @@ NSString *  PhongFloatNames[PhongValue_NUM_FLOATS];
             }
         }
         
-        if( CHECKANY(kColStateInVertices) )
+        if( CHECK(kColStateInVertices) )
         {
             if( EQSTR(elementName,kTag_input) )
             {
@@ -601,7 +613,7 @@ NSString *  PhongFloatNames[PhongValue_NUM_FLOATS];
             return;
         }
         
-        if( CHECKANY(kColStatePolyIndices) )
+        if( CHECK(kColStatePolyIndices) )
         {
             if( EQSTR(elementName, kTag_input) )
             {
@@ -645,7 +657,7 @@ NSString *  PhongFloatNames[PhongValue_NUM_FLOATS];
     }
     else
     {
-        if( CHECKANY(kColStateInVertices) )
+        if( CHECK(kColStateInVertices) )
         {
             IncomingSourceTag * ivd = meshData->_tempIncomingSourceTag;
             meshData->_sources[ivd->_id] = ivd;
@@ -654,7 +666,7 @@ NSString *  PhongFloatNames[PhongValue_NUM_FLOATS];
             return;
         }
         
-        if( CHECKANY(kColStatePolyIndices) )
+        if( CHECK(kColStatePolyIndices) )
         {
             if( EQSTR(elementName, kTag_p) )
             {
@@ -682,7 +694,7 @@ NSString *  PhongFloatNames[PhongValue_NUM_FLOATS];
             }
         }
 
-        if( CHECKANY(kColStateInSource) )
+        if( CHECK(kColStateInSource) )
         {
             if( EQSTR(elementName, kTag_source) )
             {
@@ -746,7 +758,7 @@ NSString *  PhongFloatNames[PhongValue_NUM_FLOATS];
         }
         
         
-        if( CHECKANY(kColStateVertexWeights) )
+        if( CHECK(kColStateVertexWeights) )
         {
             if( EQSTR(elementName, kTag_v) )
             {
@@ -846,7 +858,7 @@ NSString *  PhongFloatNames[PhongValue_NUM_FLOATS];
             }
         }
         
-        if( CHECKANY(kColStateVertexWeights) )
+        if( CHECK(kColStateVertexWeights) )
         {
             if( EQSTR(elementName, kTag_vcount) )
             {
@@ -900,7 +912,7 @@ NSString *  PhongFloatNames[PhongValue_NUM_FLOATS];
     
     if( attributeDict )
     {
-        if( CHECKANY(kColStateInNode) )
+        if( CHECK(kColStateInNode) )
         {
             if( EQSTR(elementName, kTag_matrix) )
             {
@@ -973,6 +985,12 @@ NSString *  PhongFloatNames[PhongValue_NUM_FLOATS];
                 inode->_msnType = MSNT_Light;
                 return;
             }
+            
+            if( EQSTR(elementName, kTag_instance_material) )
+            {
+//                <instance_material symbol="Shape02SG" target="#phong2"/>
+                _materialBindings[ attributeDict[kAttr_symbol] ] = [attributeDict[kAttr_target] substringFromIndex:1];
+            }
         }
         
         if( EQSTR(elementName, kTag_node) )
@@ -1000,7 +1018,7 @@ NSString *  PhongFloatNames[PhongValue_NUM_FLOATS];
     }
     else
     {
-        if( CHECKANY(kColStateInNode) )
+        if( CHECK(kColStateInNode) )
         {
             if( EQSTR(elementName, kTag_matrix) )
             {
@@ -1055,6 +1073,7 @@ NSString *  PhongFloatNames[PhongValue_NUM_FLOATS];
                     UNSET(kColStateInNode);
                 }
             }
+            
         }
         
     }
@@ -1084,7 +1103,7 @@ NSString *  PhongFloatNames[PhongValue_NUM_FLOATS];
             SET(kColStateMaterialTag);
         }
         
-        if( CHECKANY(kColStateMaterialTag) )
+        if( CHECK(kColStateMaterialTag) )
         {
             if( EQSTR(elementName, kTag_instance_effect) )
             {
@@ -1095,7 +1114,7 @@ NSString *  PhongFloatNames[PhongValue_NUM_FLOATS];
     }
     else
     {
-        if( CHECKANY(kColStateMaterialTag) )
+        if( CHECK(kColStateMaterialTag) )
         {
             if( EQSTR(elementName, kTag_material) )
             {
@@ -1111,60 +1130,41 @@ NSString *  PhongFloatNames[PhongValue_NUM_FLOATS];
 {
     if( attributeDict )
     {
-        if( CHECKANY(kColStateEffectTag) )
+        if( CHECK(kColStateEffectTag) )
         {
             IncomingEffect * ie = _incoming;
             
-            if( CHECKANY(kColStatePhong) )
+            if( EQSTR(elementName, kTag_color) )
             {
-                IncomingPhong * im = ie->_phong;
-
-                if( im->_expectingColor != PhongColor_None )
-                {
-                    if( EQSTR(elementName, kTag_color) )
-                    {
-                        SET(kColStateFloatArray);
-                        return;
-                    }
-                }
-                
-                if( im->_expectingFloat != PhongValue_None )
-                {
-                    if( EQSTR(elementName, kTag_float) )
-                    {
-                        SET(kColStateFloat);
-                        return;
-                    }
-                }
-                
-                for( int i = 0; i < PhongColor_NUM_COLORS; i++ )
-                {
-                    if( EQSTR(elementName, PhongColorNames[i]) )
-                    {
-                        im->_expectingColor = i;
-                        if( i == PhongColor_Transparent )
-                            im->_transparent_opaque_type = attributeDict[kAttr_opaque];
-                        return;
-                    }
-                }
-                
-                for( int f = 0; f < PhongValue_NUM_FLOATS; f++ )
-                {
-                    if( EQSTR(elementName, PhongFloatNames[f]) )
-                    {
-                        im->_expectingFloat = f;
-                        return;
-                    }
-                }
-
+                SET(kColStateFloatArray);
+                return;
+            }
+            
+            if( EQSTR(elementName, kTag_float) )
+            {
+                SET(kColStateFloat);
+                return;
             }
             
             if( EQSTR(elementName, kTag_phong) )
             {
-                IncomingEffect * ie = _incoming;
-                ie->_phong = [IncomingPhong new];
-                SET(kColStatePhong);
+                ie->_type = elementName;
                 return;
+            }
+            
+            if( EQSTR(elementName, kTag_lambert) )
+            {
+                ie->_type = elementName;
+                return;
+                
+            }
+            for( int i = 0; i < sizeof(effectParamTags)/sizeof(effectParamTags[0]); i++ )
+            {
+                if( EQSTR(elementName, @(effectParamTags[i])) )
+                {
+                    ie->_incomingDataTag = i;
+                    return;
+                }
             }
             
         }
@@ -1181,37 +1181,47 @@ NSString *  PhongFloatNames[PhongValue_NUM_FLOATS];
     }
     else
     {
-        if( CHECKANY(kColStateEffectTag) )
+        if( CHECK(kColStateEffectTag) )
         {
             IncomingEffect * ie = _incoming;
-            
-            if( CHECKANY(kColStatePhong) )
+            if( EQSTR(elementName, kTag_color) )
             {
-                if( EQSTR(elementName, kTag_phong) )
-                {
-                    UNSET(kColStatePhong);
-                    return;
+                GLKVector4 color = *(GLKVector4 *)_floatArray;
+                switch (ie->_incomingDataTag) {
+                    case et_ambient:
+                        ie->_colors.ambient = color;
+                        break;
+                    case et_diffuse:
+                        ie->_colors.diffuse = color;
+                        break;
+                    case et_emission:
+                        ie->_colors.emission = color;
+                        break;
+                    case et_specular:
+                        ie->_colors.specular = color;
+                        break;
+                    default:
+                        break;
                 }
-                
-                IncomingPhong * im = ie->_phong;
-                
-                if( EQSTR(elementName, kTag_color) )
-                {
-                    im->_colors[ im->_expectingColor ] = *(GLKVector4 *)_floatArray;
-                    im->_expectingColor = PhongColor_None;
-                    _floatArray = NULL;
-                    _floatArrayCount = 0;
-                    return;
+                ie->_incomingDataTag = et_NONE;
+                _floatArray = NULL;
+                _floatArrayCount = 0;
+                return;
+            }
+            
+            if( EQSTR(elementName, kTag_float) )
+            {
+                float val = [_floatString floatValue];
+                switch (ie->_incomingDataTag) {
+                    case et_shininess:
+                        ie->_shininess = val;
+                        break;                        
+                    default:
+                        break;
                 }
-                
-                if( EQSTR(elementName, kTag_float) )
-                {
-                    im->_floats[ im->_expectingFloat ] = [_floatString floatValue];
-                    im->_expectingFloat = PhongValue_None;
-                    _floatString = nil;
-                    return;
-                }
-                
+                ie->_incomingDataTag = et_NONE;
+                _floatString = NULL;
+                return;
             }
             
             if( EQSTR(elementName, kTag_effect) )
@@ -1231,37 +1241,37 @@ NSString *  PhongFloatNames[PhongValue_NUM_FLOATS];
     qualifiedName:(NSString *)qualifiedName
        attributes:(NSDictionary *)attributeDict
 {
-    if( CHECKANY(kColStateInAnimation) )
+    if( CHECK(kColStateInAnimation) )
     {
         [self handleAnimation:elementName attributes:attributeDict];
         return;
     }
     
-    if( CHECKANY(kColStateInMeshGeometry) )
+    if( CHECK(kColStateInMeshGeometry) )
     {
         [self handleMeshGeometry:elementName attributes:attributeDict];
         return;
     }
     
-    if( CHECKANY(kColStateSkin) )
+    if( CHECK(kColStateSkin) )
     {
         [self handleSkin:elementName attributes:attributeDict];
         return;
     }
     
-    if( CHECKANY(kColStateVisualScene) )
+    if( CHECK(kColStateVisualScene) )
     {
         [self handleScene:elementName attributes:attributeDict];
         return;
     }
     
-    if( CHECKANY(kColStateMaterialLibrary) )
+    if( CHECK(kColStateMaterialLibrary) )
     {
         [self handleMaterials:elementName attributes:attributeDict];
         return;
     }
     
-    if( CHECKANY(kColStateEffectLibrary) )
+    if( CHECK(kColStateEffectLibrary) )
     {
         [self handleEffects:elementName attributes:attributeDict];
         return;
@@ -1324,7 +1334,7 @@ NSString *  PhongFloatNames[PhongValue_NUM_FLOATS];
 -(void)  parser:(NSXMLParser *)parser
 foundCharacters:(NSString *)string
 {
-    if( CHECKANY(kColStateFloatArray) )
+    if( CHECK(kColStateFloatArray) )
     {
         if( _floatString )
             [_floatString appendString:string];
@@ -1333,14 +1343,14 @@ foundCharacters:(NSString *)string
         return;
     }
     
-    if( CHECKANY(kColStateFloat) )
+    if( CHECK(kColStateFloat) )
     {
         _floatString = [NSMutableString stringWithString:string];
         UNSET(kColStateFloat);
         return;
     }
     
-    if( CHECKANY(kColStateIntArray) )
+    if( CHECK(kColStateIntArray) )
     {
         if( _ushortString )
            [_ushortString appendString:string];
@@ -1349,7 +1359,7 @@ foundCharacters:(NSString *)string
         return;
     }
     
-    if( CHECKANY(kColStateStringArray) )
+    if( CHECK(kColStateStringArray) )
     {
         if( _stringArrayString )
            [_stringArrayString appendString:string];
@@ -1358,7 +1368,7 @@ foundCharacters:(NSString *)string
         return;
     }
     
-    if( CHECKANY(kColStateCaptureText) )
+    if( CHECK(kColStateCaptureText) )
     {
         _captureString = string;
         UNSET(kColStateCaptureText);
@@ -1371,14 +1381,14 @@ foundCharacters:(NSString *)string
     qualifiedName:(NSString *)qName
 {
 
-    if( CHECKANY(kColStateStringArray) )
+    if( CHECK(kColStateStringArray) )
     {
         UNSET(kColStateStringArray);
         if( EQSTR(elementName, kTag_Name_array) )
             return;
     }
     
-    if( CHECKANY(kColStateFloatArray) )
+    if( CHECK(kColStateFloatArray) )
     {
         _floatArray = parseFloats(_floatString, &_floatArrayCount);
         _floatString = nil;
@@ -1388,7 +1398,7 @@ foundCharacters:(NSString *)string
             return;
     }
     
-    if( CHECKANY(kColStateIntArray) )
+    if( CHECK(kColStateIntArray) )
     {
         _ushortArray = parseUShorts(_ushortString, &_ushortArrayCount);
         _ushortString = nil;
@@ -1396,7 +1406,7 @@ foundCharacters:(NSString *)string
         // return;
     }
     
-    if( CHECKANY(kColStateSkin) )
+    if( CHECK(kColStateSkin) )
     {
         if( EQSTR(elementName, kTag_controller) )
         {
@@ -1409,7 +1419,7 @@ foundCharacters:(NSString *)string
         return;
     }
     
-    if( CHECKANY(kColStateInAnimation) )
+    if( CHECK(kColStateInAnimation) )
     {
         if( EQSTR(elementName,kTag_animation) )
         {
@@ -1421,7 +1431,7 @@ foundCharacters:(NSString *)string
         return;
     }
     
-    if( CHECKANY(kColStateInMeshGeometry) )
+    if( CHECK(kColStateInMeshGeometry) )
     {
         if( EQSTR(elementName,kTag_geometry) )
         {
@@ -1433,7 +1443,7 @@ foundCharacters:(NSString *)string
         return;
     }
     
-    if( CHECKANY(kColStateVisualScene) )
+    if( CHECK(kColStateVisualScene) )
     {
         if( EQSTR(elementName, kTag_visual_scene) )
         {
@@ -1445,7 +1455,7 @@ foundCharacters:(NSString *)string
         return;
     }
     
-    if( CHECKANY(kColStateMaterialLibrary) )
+    if( CHECK(kColStateMaterialLibrary) )
     {
         if( EQSTR(elementName, kTag_library_materials) )
         {
@@ -1457,7 +1467,7 @@ foundCharacters:(NSString *)string
         return;
     }
 
-    if( CHECKANY(kColStateEffectLibrary) )
+    if( CHECK(kColStateEffectLibrary) )
     {
         if( EQSTR(elementName, kTag_library_effects) )
         {
@@ -1468,7 +1478,7 @@ foundCharacters:(NSString *)string
         [self handleEffects:elementName attributes:nil];
     }
     
-    if( CHECKANY(kColStateUp) )
+    if( CHECK(kColStateUp) )
     {
         if( EQSTR(_captureString, @"Z_UP") )
             _up = 'z';
@@ -1502,7 +1512,8 @@ numIndexBuffers:(unsigned int)numIndexBuffers
             for( int e = 0; e < elementSize; e++ )
                 *p++ = old[i + e];
         }
-        free(index[nn].indexData);        
+        free(index[nn].indexData);
+        index[nn].indexData = NULL;
     }
     free(b->data);
     b->data = newBuffer;
@@ -1870,9 +1881,15 @@ numIndexBuffers:(unsigned int)numIndexBuffers
             }
             
             if(polyIndexTag->_primitives)
+            {
                 free(polyIndexTag->_primitives);
+                polyIndexTag->_primitives = NULL;
+            }
             if(polyIndexTag->_vectorCounts)
+            {
                 free(polyIndexTag->_vectorCounts);
+                polyIndexTag->_vectorCounts = NULL;
+            }
             
             ++polyTagIndexCount;
         }
@@ -1904,6 +1921,9 @@ numIndexBuffers:(unsigned int)numIndexBuffers
             }
         }
         
+        free( tempDeinterlacedIndexBuffers );
+        
+        
         if( _up != 'y' )
             [self turnUp:sceneGeometry->_buffers];
         
@@ -1911,9 +1931,9 @@ numIndexBuffers:(unsigned int)numIndexBuffers
     };
     
 
-    static void (^mapGeometry)(id,IncomingNode*) = nil;
+    static void (^passFour)(id,IncomingNode*) = nil;
     
-    mapGeometry = ^(id key, IncomingNode *inode)
+    passFour = ^(id key, IncomingNode *inode)
     {
         if( inode->_msnType == MSNT_Mesh )
         {
@@ -1983,14 +2003,58 @@ numIndexBuffers:(unsigned int)numIndexBuffers
         }
         
         if( inode->_children )
-            [inode->_children each:mapGeometry];
+            [inode->_children each:passFour];
     };
             
 
     // Pass 4. Hook up geometries and skins
     
-    [_nodes each:mapGeometry];
+    [_nodes each:passFour];
     
+    // Pass 5. Materials
+    
+    static void (^passFive)( id, IncomingNode *) = nil;
+    
+    passFive = ^(id key, IncomingNode *inode ) {
+        
+        if( (inode->_msnType & (MSNT_Mesh|MSNT_SkinnedMesh)) != 0 )
+        {
+            IncomingMeshData * meshData;
+
+            if( inode->_geometryName )
+                meshData = _geometries[ inode->_geometryName ];
+            else {
+                IncomingSkin * skin = _skins[ inode->_skinName ];
+                meshData = _geometries[ skin->_meshSource ];
+            }
+            
+            NSMutableArray * materials = nil;
+            
+            for( IncomingPolygonIndex * ipi in meshData->_polygonTags )
+            {
+                if( ipi->_materialName )
+                {
+                    IncomingMaterial * im = _materials[ _materialBindings[ ipi->_materialName ] ];
+                    IncomingEffect   * ie = _effects[ im->_effect ];
+                    MeshMaterial     *  mm = [MeshMaterial new];
+                    mm->_colors = ie->_colors;
+                    mm->_shininess = ie->_shininess;
+                    mm->_doSpecular = EQSTR( ie->_type, kTag_phong );
+                    if( !materials )
+                        materials = [NSMutableArray new];
+                    [materials addObject:mm];
+                }
+            }
+            
+            MeshSceneMeshNode * runtimeNode = meshNodes[inode->_id];
+            runtimeNode->_materials = materials;
+        }
+        
+        if( inode->_children )
+            [inode->_children each:passFive];
+    };
+    
+    [_nodes each:passFive];
     
     if( [_animations count] )
     {

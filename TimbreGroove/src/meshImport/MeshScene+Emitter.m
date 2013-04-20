@@ -13,7 +13,8 @@
 static NSString * stringFromMat(GLKMatrix4 m)
 {
     return [NSString stringWithFormat:@"{ %G, %G, %G, %G,   %G, %G, %G, %G,   %G, %G, %G, %G,   %G, %G, %G, %G }",
-            m.m[0], m.m[1], m.m[2], m.m[3], m.m[4], m.m[5], m.m[6], m.m[7], m.m[8], m.m[9], m.m[10], m.m[11], m.m[12], m.m[13], m.m[14], m.m[15] ];
+            m.m[0], m.m[1], m.m[2],  m.m[3],  m.m[4],  m.m[5],  m.m[6],  m.m[7],
+            m.m[8], m.m[9], m.m[10], m.m[11], m.m[12], m.m[13], m.m[14], m.m[15] ];
 }
 
 @implementation MeshScene (Emitter)
@@ -66,8 +67,6 @@ static NSString * stringFromMat(GLKMatrix4 m)
     static void (^dumpBones)(id,MeshSceneArmatureNode *) = nil;
     
     dumpBones = ^(id key, MeshSceneArmatureNode * node) {
-        
-   //     NSString * parentName = node->_parent ? node->_parent->_name : @"none";
         
         [allJointNames addObject:node->_name];
         
@@ -158,7 +157,6 @@ static NSString * stringFromMat(GLKMatrix4 m)
         gv_acolor,      // MSKColor
         gv_boneIndex,   // MSKBoneIndex,
         gv_boneWeights, // MSKBoneWeights,
-        
     };
     
     [_meshes each:^(MeshSceneMeshNode * mesh ) {

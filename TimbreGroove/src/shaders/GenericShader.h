@@ -19,26 +19,25 @@ typedef enum {
     
     GV_LAST_ATTR = gv_boneWeights,
     
-    gv_pvm, // projection-view-mat
+    gv_pvm,        // projection-view-mat
+    gv_mvm,        // model view matrix
+    gv_normalMat,  // normals matrix
     
     // Texture
     gv_sampler,
     
-    // ColorMaterial
-    gv_ucolor,
+    // Material
+    gv_material,
+    gv_shininess,
+    gv_doSpecular,
     
     // Light
-    gv_normalMat,
-    gv_lightDir,
-    gv_lightPosition,
+    gv_lightingEnabled,
+    gv_lights,
+    gv_light_1 = gv_lights,
+    gv_light_2 = gv_lights + 1,
+    GV_NUM_LIGHTS = gv_light_2,
     
-    // Ambient material
-    gv_dirColor,
-    gv_ambient,
-    
-    // Phong material
-    gv_phongColors,
-    gv_phoneValues,
     
     // ShaderTimer
     gv_time,

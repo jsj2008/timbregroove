@@ -70,6 +70,7 @@
          andHeaders:(NSString *)headers;
 
 - (void)  writeToLocation:(int)indexIntoNames type:(TGUniformType)type data:(void*)data;
+- (void)  writeFloats:(int)indexIntoNames numFloats:(int)numFloats data:(void*)data;
 
 - (void) prepareRender:(TG3dObject *)object;
 
@@ -78,6 +79,8 @@
 -(GLint) location:(int)indexIntoNames;
 -(const char *)nameForIndex:(int)indexIntoNames;
 
+// Without target objects...
+// ----------------------------
 -(Parameter *)floatParameter:(NSMutableDictionary *)putHere
               indexIntoNames:(int)idx
                        value:(float)value
@@ -87,6 +90,9 @@
 -(Parameter *)pointParameter:(NSMutableDictionary *)putHere indexIntoNames:(int)idx;
 -(Parameter *)vec3Parameter :(NSMutableDictionary *)putHere indexIntoNames:(int)idx;
 
+
+// With target objects...
+// ----------------------------
 -(Parameter *)floatParameter:(NSMutableDictionary *)putHere
               indexIntoNames:(int)idx
                        value:(float)value

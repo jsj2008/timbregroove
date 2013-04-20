@@ -24,6 +24,11 @@
     return self;
 }
 
+-(void)dealloc
+{
+    TGLog(LLObjLifetime, @"%@ released", self);
+}
+
 -(void)calcAnimationMatricies
 {
     if( _animations )
@@ -71,6 +76,8 @@
 
 -(void)dealloc
 {
+    TGLog(LLObjLifetime, @"%@ released", self);
+    
     if( _influencingJointCounts )
         free(_influencingJointCounts);
     if( _packedWeightIndices )
@@ -108,11 +115,11 @@
     
     
     /*
-        outv = each(v)[i=0]{ ((v*BSM)*IBMi*JMIi)*JW }
+        outv = each(v)[I=0]{ ((v*bsm)*ibmI*jmiI)*jw }
      
         Bind Shap Matrix
-        Inverse Bind-pose Matrix of joint-i
-        Joint Matrix (transormation-i)
+        Inverse Bind-pose Matrix of jointI
+        Joint Matrix (transormationI)
         Joint Weight 
      */
     
@@ -153,6 +160,7 @@
 {
     free(_keyFrames);
     free(_transforms);
+    TGLog(LLObjLifetime, @"%@ released", self);
 }
 
 @end
@@ -162,7 +170,7 @@
 
 -(void)dealloc
 {
-    TGLog(LLObjLifetime, @"Geomtry released");
+    TGLog(LLObjLifetime, @"%@ released", self);
     
     for( int i = 0; i < kNumMeshSemanticKeys; i++ )
     {
@@ -218,13 +226,3 @@
 @implementation MeshMaterial
 @end
 
-@implementation MeshMaterialPhong
-- (id)init
-{
-    self = [super init];
-    if (self) {
-        _type = MMT_Phong;
-    }
-    return self;
-}
-@end

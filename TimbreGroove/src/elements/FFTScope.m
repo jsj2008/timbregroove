@@ -47,7 +47,7 @@ extern void fft(float *in_out, int len);
 
 -(void)createShader
 {
-    [self addShaderFeature:[ColorMaterial withColor:(GLKVector4){ 1,1,0,1 }]];
+    [self addShaderFeature:[Material withColor:(GLKVector4){ 1,1,0,1 }]];
     [super createShader];
 }
 

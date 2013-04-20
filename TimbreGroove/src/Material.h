@@ -8,26 +8,19 @@
 
 #import <Foundation/Foundation.h>
 #import "TGTypes.h"
-#import "Generic.h"
+#import "ShaderFeature.h"
 
-@interface ColorMaterial : NSObject<ShaderFeature>
-@property (nonatomic) GLKVector4 color;
+@interface Material : ShaderBinder
+@property (nonatomic) MaterialColors colors;
+@property (nonatomic) float shininess;
+@property (nonatomic) bool doSpecular;
+
+@property (nonatomic) GLKVector4 ambient;
+
 +(id)withColor:(GLKVector4)color;
--(void)getShaderFeatureNames:(NSMutableArray *)putHere;
++(id)withColors:(MaterialColors)matcolors shininess:(float)shininess doSpecular:(bool)doSpecular;
 @end
 
-@interface AmbientLighting : NSObject<ShaderFeature>
-@property (nonatomic) GLKVector4 ambientColor;
-@property (nonatomic) GLKVector4 dirColor;
--(void)getShaderFeatureNames:(NSMutableArray *)putHere;
-@end
-
-@interface PhongLighting : NSObject<ShaderFeature>
--(void)setMaterials:(GLKVector4 *)colors values:(float *)values;
--(void)getMaterials:(GLKVector4 **)colors values:(float **)values;
-
--(void)getShaderFeatureNames:(NSMutableArray *)putHere;
-@end
 
 @interface Texture : NSObject<ShaderFeature>
 
