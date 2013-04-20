@@ -10,9 +10,9 @@ precision highp float;
 uniform sampler2D u_sampler;
 varying lowp vec2 v_texCoordOut;
 #else
-#ifdef COLOR
-varying vec4 v_vertex_color;
-#endif
+    #ifdef COLOR
+        varying vec4 v_vertex_color;
+    #endif
 #endif
 
 #ifdef NORMAL
@@ -59,13 +59,15 @@ void main()
     vec4 color = vec4(1);
     
 #ifdef TEXTURE
-#ifdef TEXTURE_DISTORT
-    color = texture_dist();
+    #ifdef TEXTURE_DISTORT
+        color = texture_dist();
+    #else
+        color = texture2D(s_texture, v_texCoord);
+    #endif
 #else
-    color = texture2D(s_texture, v_texCoord);
-#endif
-#elif COLOR
-    color = v_vertex_color;
+    #ifdef COLOR
+        color = v_vertex_color;
+    #endif
 #endif
     
 #ifdef NORMAL
