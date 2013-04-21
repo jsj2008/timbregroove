@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "Generic.h"
+#import "Painter.h"
 
 @class Texture;
 
-@interface Sphere : Generic
+@interface Sphere : Painter
 @property (nonatomic) float lightRotation;
 @end

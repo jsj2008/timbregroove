@@ -34,6 +34,8 @@ extern "C" {
     void TGLog(LogLevel,NSString *format, ...);
     void TGLogp(LogLevel,NSString * format, ...); // use printf
     
+    LogLevel TGLogStringsToBits(NSDictionary *);
+    
 #else
     void TGLogc(LogLevel,const char * format, ...);
     void TGLogpc(LogLevel,const char * format, ...); // use printf

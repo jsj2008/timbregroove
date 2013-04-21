@@ -18,7 +18,7 @@
 #import "GraphView.h"
 #import "FBO.h"
 #import "Material.h"
-#import "GenericWithTexture.h"
+#import "TexturePainter.h"
 
 #import "Scene.h"
 #import "Audio.h"
@@ -27,7 +27,7 @@
 NSString const * kParamCurveCutoff   = @"CurveCutoff";
 NSString const * kParamCurveWidth   = @"CurveWidth";
 
-@interface EQOffText : GenericWithTexture
+@interface EQOffText : TexturePainter
 @end
 @implementation EQOffText
 -(void)createTexture

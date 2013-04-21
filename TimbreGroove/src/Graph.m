@@ -16,6 +16,8 @@
 #import "Scene.h"
 #import "Names.h"
 
+#import "PainterCamera.h"
+
 typedef void (^RecurseBlock)(TG3dObject *);
 
 @interface GraphTriggers : NSObject {
@@ -109,6 +111,7 @@ typedef void (^RecurseBlock)(TG3dObject *);
     NSDictionary * userData = config.customProperties;
     if( userData )
         [node setValuesForKeysWithDictionary:userData];
+    self.camera = [[PainterCamera alloc] init];
     [node wireUpWithViewSize:viewSize];
     if( modal )
         self.modal = node;

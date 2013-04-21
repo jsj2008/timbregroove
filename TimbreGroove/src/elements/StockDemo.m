@@ -6,7 +6,7 @@
 //
 //
 
-#import "Generic.h"
+#import "Painter.h"
 
 #import "SettingsVC.h"
 #import "Material.h"
@@ -22,7 +22,7 @@
 
 
 
-@interface StockDemo : Generic
+@interface StockDemo : Painter
 @property (nonatomic,strong) NSString * shaderName;
 @property (nonatomic,strong) NSString * geometryName;
 @end

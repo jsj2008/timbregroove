@@ -6,7 +6,7 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "Generic.h"
+#import "Painter.h"
 #import "GridPlane.h"
 #import "Camera.h"
 #import "FBO.h"
@@ -53,7 +53,7 @@ extern float g_last_power, g_last_radius;
 
 //--------------------------------------------------------------------------------
 
-@interface PoolScreen : Generic {
+@interface PoolScreen : Painter {
     NSMutableArray * _waters;
     CGSize _viewSz;
     DepthTestState * _dts;

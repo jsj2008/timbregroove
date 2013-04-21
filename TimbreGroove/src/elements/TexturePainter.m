@@ -6,11 +6,11 @@
 //  Copyright (c) 2012 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "GenericWithTexture.h"
+#import "TexturePainter.h"
 #import "GridPlane.h"
 #import "Material.h"
 
-@implementation GenericWithTexture {
+@implementation TexturePainter {
     GridPlane * gp;
 }
 

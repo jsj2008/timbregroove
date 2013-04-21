@@ -32,11 +32,20 @@ typedef enum {
     gv_doSpecular,
     
     // Light
-    gv_lightingEnabled,
-    gv_lights,
-    gv_light_1 = gv_lights,
-    gv_light_2 = gv_lights + 1,
-    GV_NUM_LIGHTS = gv_light_2,
+    gv_lightsEnabled,
+    gv_lights0_position,
+    gv_lights0_colors,
+    gv_lights0_attenuation,
+    gv_lights0_spotCutoffAngle,
+    gv_lights0_spotDirection,
+    gv_lights0_spotFalloffExponent,
+    
+    gv_lights1_position,
+    gv_lights1_colors,
+    gv_lights1_attenuation,
+    gv_lights1_spotCutoffAngle,
+    gv_lights1_spotDirection,
+    gv_lights1_spotFalloffExponent,
     
     
     // ShaderTimer
@@ -50,6 +59,8 @@ typedef enum {
     NUM_GENERIC_VARIABLES
     
 } GenericVariables;
+
+#define LIGHT_STRUCT_NUM_ELEMENTS 6
 
 @interface GenericShader : Shader
 

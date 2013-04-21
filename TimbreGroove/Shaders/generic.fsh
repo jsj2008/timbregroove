@@ -62,7 +62,7 @@ void main()
     #ifdef TEXTURE_DISTORT
         color = texture_dist();
     #else
-        color = texture2D(s_texture, v_texCoord);
+        color = texture2D(u_sampler, v_texCoordOut);
     #endif
 #else
     #ifdef COLOR

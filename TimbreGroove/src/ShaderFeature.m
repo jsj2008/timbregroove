@@ -11,6 +11,6 @@
 @implementation ShaderBinder
 -(void)getShaderFeatureNames:(NSMutableArray *)putHere{}
 -(void)setShader:(Shader *)shader{}
--(void)bind:(Shader *)shader object:(Generic*)object{}
+-(void)bind:(Shader *)shader object:(Painter*)object{}
 -(void)unbind:(Shader *)shader{}
 @end

@@ -6,8 +6,8 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "GenericImport.h"
-#import "GenericCamera.h"
+#import "MeshImportPainter.h"
+#import "PainterCamera.h"
 #import "MeshSceneBuffer.h"
 #import "ColladaParser.h"
 #import "Material.h"
@@ -18,7 +18,7 @@
 
 #import "Cube.h"
 
-@interface JointPainter : Generic {
+@interface JointPainter : Painter {
 @public
     MeshSceneArmatureNode * _node;
 }
@@ -26,7 +26,7 @@
 -(void)updateTransformFromPos;
 @end
 
-@interface MeshPainter : Generic
+@interface MeshPainter : Painter
 @end
 
 @implementation MeshPainter {
@@ -34,7 +34,7 @@
     MeshBuffer * _drawingBuffer;
     GLint _bufferDrawType;
     bool _doWireframe;
-    id<ShaderFeature> _material;
+    id<ShaderFeature>  _material;
 }
 
 -(id)init
@@ -57,10 +57,15 @@
 
 -(id)wireUp
 {
-    [self.lights addLight:[Light new]];
+    Light * light = [Light new];
+    light.position = (GLKVector3){ 0, 3, 0 };
+    light.attenuation = (GLKVector3){ 0.5, 0.2, 0};
+    light.directional = false;
+    
+    [self.lights addLight:light];
     
     [super wireUp];
-    self.disableStandardParameters = true;
+//    self.disableStandardParameters = true;
     return self;
 }
 
@@ -98,17 +103,21 @@
                         MeshGeometryIndexBuffer * mgib = geometry->_indexBuffers + i;
                         MeshBuffer * ibuffer = [[MeshBuffer alloc] init];
                         [ibuffer setIndexData:mgib->indexData numIndices:mgib->numIndices];
-                        Material * material = nil;
+                        NSArray * materials = nil;
                         if( _node->_materials )
                         {
                             MeshMaterial * mm = _node->_materials[i];
-                            material = [Material withColors:mm->_colors shininess:mm->_shininess doSpecular:mm->_doSpecular];
+                            id<ShaderFeature> material = [Material withColors:mm->_colors shininess:mm->_shininess doSpecular:mm->_doSpecular];
+                            if( mm->_textureFileName )
+                                materials = @[ material, [[Texture alloc] initWithFileName:mm->_textureFileName] ];
+                            else // should this be an 'AND' instead of an 'else?
+                                materials = @[ material ];
                         }
                         else
                         {
-                            material = [Material withColor:(GLKVector4){ 0.7, 0.7, 0.7, 1.0 }];
+                            materials = @[ [Material withColor:(GLKVector4){ 0.7, 0.7, 0.7, 1.0 }] ];
                         }
-                        [self addIndexShape:ibuffer features:@[material]];
+                        [self addIndexShape:ibuffer features:materials];
                     }
                     
                     [self addBuffer:msb];
@@ -126,7 +135,13 @@
                     if( _node->_materials )
                     {
                         MeshMaterial * mm = _node->_materials[0];
-                        _material = [Material withColors:mm->_colors shininess:mm->_shininess doSpecular:mm->_doSpecular];
+                        id<ShaderFeature> mat = [Material withColors:mm->_colors shininess:mm->_shininess doSpecular:mm->_doSpecular];
+                        [self addShaderFeature:mat];
+                        if( mm->_textureFileName )
+                        {
+                            mat = [[Texture alloc] initWithFileName:mm->_textureFileName];
+                            [self addShaderFeature:mat];
+                        }
                     }
                 }
 
@@ -185,7 +200,7 @@
 @end
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-@implementation GenericImport {
+@implementation MeshImportPainter {
     MeshScene * _scene;
     bool _doWireframe;
     NSArray * _meshPainters;
@@ -197,6 +212,7 @@
     self = [super init];
     if (self) {
         _bufferDrawType = GL_TRIANGLES;
+        self.disableStandardParameters = true;
     }
     return self;
 }
@@ -421,7 +437,7 @@
     Parameter * parameter = [Parameter withBlock:^(TGVector3 vec3) {
         self.position = TG3(vec3);
         [self updateTransformFromPos];
-        [(GenericImport *)_parent calculateInfluences];
+        [(MeshImportPainter *)_parent calculateInfluences];
     }];
     parameter.targetObject = self;
     NSString * paramName = [NSString stringWithFormat:@"controllerPos#%@",_node->_name];

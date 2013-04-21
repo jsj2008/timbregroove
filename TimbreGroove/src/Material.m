@@ -8,7 +8,7 @@
 
 #import "Material.h"
 #import "Shader.h"
-#import "Generic.h"
+#import "Painter.h"
 #import "GenericShader.h"
 
 /*
@@ -25,6 +25,7 @@
     Material * m = [Material new];
     m->_colors.diffuse = color;
     m->_colors.ambient = (GLKVector4){ 1, 1, 1, 1 };
+    m->_colors.specular = (GLKVector4){ 1, 1, 1, 1 };
     return m;
 }
 +(id)withColors:(MaterialColors)matcolors shininess:(float)shininess doSpecular:(bool)doSpecular
@@ -36,9 +37,13 @@
     return m;
 }
 
--(void)bind:(Shader *)shader object:(Generic *)object
+-(void)bind:(Shader *)shader object:(Painter *)object
 {
-    [shader writeFloats:gv_material numFloats:sizeof(_colors)/sizeof(float) data:&_colors];
+ //   [shader writeFloats:gv_material numFloats:sizeof(_colors)/sizeof(float) data:&_colors];
+    
+    GLint loc = [shader location:gv_material];
+    glUniform4fv(loc, 4, (GLfloat *)&_colors);
+    
     [shader writeToLocation:gv_shininess type:TG_FLOAT data:&_shininess];
     [shader writeToLocation:gv_doSpecular type:TG_BOOL data:&_doSpecular];
 }
@@ -222,9 +227,9 @@
 }
 
 
--(void)bind:(Shader *)shader object:(Generic *)object
+-(void)bind:(Shader *)shader object:(Painter *)object
 {
-    [self bind:_target];
+    [self bind:0]; // er, always zero for single texture blits? 
 }
 
 -(void)unbind:(Shader *)shader
@@ -240,10 +245,10 @@
 
 -(void)bind:(int)target
 {
+    _target = target;
     glActiveTexture(GL_TEXTURE0 + target);
     glBindTexture(GL_TEXTURE_2D, _glTexture);
     glUniform1i(_uLocation, target);
-    _target = target;
     if( _repeat )
     {
         glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );

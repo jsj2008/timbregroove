@@ -29,7 +29,9 @@ typedef enum _ColladaTagState
     kColStateEffectLibrary    = 1 << 11,
     kColStateSkin             = 1 << 12,
     kColStateVisualScene      = 1 << 13,
+    kColStateImageLibrary     = 1 << 14,
     
+    kColStateImage            = 1 << 17,
     kColStateInSource         = 1 << 18,
     kColStateInVertices       = 1 << 19,
     kColStatePolyIndices      = 1 << 20,
@@ -41,6 +43,7 @@ typedef enum _ColladaTagState
     kColStateEffectTag        = 1 << 26,
     kColStatePhong            = 1 << 27,
     kColStateLambert          = 1 << 28,
+    
     
 } ColladaTagState;
 
@@ -357,7 +360,7 @@ typedef enum _NodeCoordSpec {
 
 @end
 
-//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  IncomingMaterial @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  IncomingMaterial/Effect/Image @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 typedef enum EffectParamTags {
     et_NONE,
@@ -406,6 +409,17 @@ static const char * effectParamTags[] = {
 @implementation IncomingMaterial
 @end
 
+@interface IncomingNewParam : NSObject {
+    @public
+    NSString * _id;
+    NSString * _tag; // <surface, <sampler2d
+    NSString * _contentTag; // <init_from, <source
+    NSString * _content; // contents of <init_from>..</> or <source>..</>
+}
+@end
+
+@implementation IncomingNewParam
+@end
 
 @interface IncomingEffect : NSObject {
     @public
@@ -416,12 +430,34 @@ static const char * effectParamTags[] = {
     MaterialColors _colors;
     float          _shininess;
     
+    NSString * _textureName;
+    NSString * _texCoordName;
+    
+    IncomingNewParam * _incomingNewParam;
+    NSMutableDictionary * _newParams;
+    
 }
 @end
 
 @implementation IncomingEffect
+-(void)addNewParam:(NSString *)name value:(id)value
+{
+    if( !_newParams )
+        _newParams = [NSMutableDictionary new];
+    _newParams[name] = value;
+}
 @end
 
+@interface IncomingImage : NSObject {
+@public
+    NSString * _id;
+    NSString * _name;
+    NSString * _init_from;
+}
+@end
+@implementation IncomingImage
+
+@end
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  ColladaParser @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #pragma mark CollalaParserImpl
@@ -452,6 +488,7 @@ static const char * effectParamTags[] = {
     NSMutableDictionary * _nodes;
     NSMutableDictionary * _materials;
     NSMutableDictionary * _effects;
+    NSMutableDictionary * _images;
     
     NSMutableDictionary * _materialBindings;
 }
@@ -471,6 +508,7 @@ static const char * effectParamTags[] = {
         _materials  = [NSMutableDictionary new];
         _effects    = [NSMutableDictionary new];
         _materialBindings = [NSMutableDictionary new];
+        _images = [NSMutableDictionary new];
         _up         = 'y';
     }
     return self;
@@ -630,6 +668,8 @@ static const char * effectParamTags[] = {
                     sem = MSKNormal;
                 else if( EQSTR(semantic, kValue_semantic_TEXCOORD) )
                     sem = MSKUV;
+                else if( EQSTR(semantic, kValue_semantic_COLOR) )
+                    sem = MSKColor;
                 else {
                     NSLog(@"Unknown mesh semantic type: %@",semantic);
                     exit(-1);
@@ -1134,6 +1174,35 @@ static const char * effectParamTags[] = {
         {
             IncomingEffect * ie = _incoming;
             
+            if( ie->_incomingNewParam )
+            {
+                if( EQSTR(elementName, kTag_surface) || EQSTR(elementName, kTag_sampler2D) )
+                {
+                    ie->_incomingNewParam->_tag = elementName;
+                    return;
+                }
+                
+                if( EQSTR(elementName, kTag_init_from) || EQSTR(elementName, kTag_source) )
+                {
+                    ie->_incomingNewParam->_contentTag = elementName;
+                    SET(kColStateCaptureText);
+                    return;
+                }
+            }
+            
+            if( EQSTR(elementName, kTag_texture) )
+            {
+                ie->_textureName = attributeDict[kAttr_texture];
+                ie->_texCoordName = attributeDict[kAttr_texcoord];
+                return;
+            }
+            if( EQSTR(elementName, kTag_newparam) )
+            {
+                ie->_incomingNewParam = [IncomingNewParam new];
+                ie->_incomingNewParam->_id = attributeDict[kAttr_sid];
+                return;
+            }
+            
             if( EQSTR(elementName, kTag_color) )
             {
                 SET(kColStateFloatArray);
@@ -1184,6 +1253,24 @@ static const char * effectParamTags[] = {
         if( CHECK(kColStateEffectTag) )
         {
             IncomingEffect * ie = _incoming;
+            
+            if( ie->_incomingNewParam )
+            {
+                if( EQSTR(elementName, kTag_init_from) || EQSTR(elementName, kTag_source) )
+                {
+                    ie->_incomingNewParam->_content = _captureString;
+                    _captureString = nil;
+                    return;
+                }
+                
+                if( EQSTR(elementName, kTag_newparam) )
+                {
+                    [ie addNewParam:ie->_incomingNewParam->_id value:ie->_incomingNewParam];
+                    ie->_incomingNewParam = nil;
+                }
+                return;
+            }
+            
             if( EQSTR(elementName, kTag_color) )
             {
                 GLKVector4 color = *(GLKVector4 *)_floatArray;
@@ -1235,6 +1322,52 @@ static const char * effectParamTags[] = {
     }
 }
 
+-(void)handleImages:(NSString *)elementName
+          attributes:(NSDictionary *)attributeDict
+{
+    if( attributeDict )
+    {
+        if( CHECK(kColStateImage) )
+        {
+            if( EQSTR(elementName, kTag_init_from) )
+            {
+                SET(kColStateCaptureText);
+                return;
+            }
+        }
+        
+        if( EQSTR(elementName, kTag_image) )
+        {
+            IncomingImage * ii = [IncomingImage new];
+            ii->_id = attributeDict[kAttr_id];
+            ii->_name = attributeDict[kAttr_name];
+            _images[ii->_id] = ii;
+            _incoming = ii;
+            SET(kColStateImage);
+            return;
+        }
+    }
+    else
+    {
+        if( CHECK(kColStateImage) )
+        {
+            if( EQSTR(elementName, kTag_init_from) )
+            {
+                IncomingImage * ii = _incoming;
+                ii->_init_from = _captureString;
+                _captureString = nil;
+            }
+        }
+        
+        if( EQSTR(elementName, kTag_image) )
+        {
+            UNSET(kColStateImage);
+            _incoming = nil;
+            return;
+        }
+    }
+}
+
 -(void)    parser:(NSXMLParser *)parser
   didStartElement:(NSString *)elementName
      namespaceURI:(NSString *)namespaceURI
@@ -1274,6 +1407,12 @@ static const char * effectParamTags[] = {
     if( CHECK(kColStateEffectLibrary) )
     {
         [self handleEffects:elementName attributes:attributeDict];
+        return;
+    }
+    
+    if( CHECK(kColStateImageLibrary) )
+    {
+        [self handleImages:elementName attributes:attributeDict];
         return;
     }
     
@@ -1329,6 +1468,11 @@ static const char * effectParamTags[] = {
         return;
     }
     
+    if( EQSTR(elementName, kTag_library_images) )
+    {
+        SET(kColStateImageLibrary);
+        return;
+    }
 }
 
 -(void)  parser:(NSXMLParser *)parser
@@ -1476,6 +1620,19 @@ foundCharacters:(NSString *)string
         }
         
         [self handleEffects:elementName attributes:nil];
+        return;
+    }
+    
+    if( CHECK(kColStateImageLibrary) )
+    {
+        if( EQSTR(elementName, kTag_library_images) )
+        {
+            UNSET(kColStateImageLibrary);
+            return;
+        }
+        
+        [self handleImages:elementName attributes:nil];
+        return;
     }
     
     if( CHECK(kColStateUp) )
@@ -1733,6 +1890,8 @@ numIndexBuffers:(unsigned int)numIndexBuffers
     
     [_nodes each:passTwo];
     
+    passTwo = nil;
+    
     // Pass 3: isolate top of the trees
     
     scene->_meshes = [[meshNodes mapReduce:^id(id key, MeshSceneNode *node) {
@@ -1750,6 +1909,7 @@ numIndexBuffers:(unsigned int)numIndexBuffers
     if( scene->_joints )
         [scene calcMatricies];
 
+    // Pass 4. Hook up geometries and skins
     
     static MeshSceneArmatureNode *  (^_findJointWithName)(NSString *,MeshSceneArmatureNode *) = nil;
     
@@ -2007,8 +2167,6 @@ numIndexBuffers:(unsigned int)numIndexBuffers
     };
             
 
-    // Pass 4. Hook up geometries and skins
-    
     [_nodes each:passFour];
     
     // Pass 5. Materials
@@ -2040,6 +2198,32 @@ numIndexBuffers:(unsigned int)numIndexBuffers
                     mm->_colors = ie->_colors;
                     mm->_shininess = ie->_shininess;
                     mm->_doSpecular = EQSTR( ie->_type, kTag_phong );
+                    
+                    if( ie->_textureName )
+                    {
+                        mm->_colors.diffuse = (GLKVector4){ 1, 1, 1, 1 };
+                        
+                        if( 1 )
+                        {
+                            IncomingNewParam * inp = ie->_newParams[ie->_textureName];
+                            if( inp && EQSTR(inp->_tag, kTag_sampler2D) )
+                            {
+                                inp = ie->_newParams[ inp->_content ];
+                                if( inp && EQSTR(inp->_tag, kTag_surface) )
+                                {
+                                    IncomingImage * ii = _images[ inp->_content];
+                                    if( ii )
+                                        mm->_textureFileName = [ii->_init_from lastPathComponent];
+                                }
+                            }
+                            
+                            if( !mm->_textureFileName )
+                            {
+                                TGLog(LLShitsOnFire, @"Could not dig out a texture file name for %@", ie->_textureName);
+                                exit(-1);
+                            }
+                        }
+                    }
                     if( !materials )
                         materials = [NSMutableArray new];
                     [materials addObject:mm];
@@ -2119,11 +2303,23 @@ numIndexBuffers:(unsigned int)numIndexBuffers
         }
         
         scene->_animations = [NSArray arrayWithArray:sceneAnimations];
+        
+        findMeshNodeWithGeometryName = nil;
     }
     else
     {
         scene->_animations = nil;
     }
+    
+    // Faust says:
+    // release blocks b/c they hold refs to self
+    passOne = nil;
+    passTwo = nil;
+    _findJointWithName = nil;
+    findJointWithName = nil;
+    massageGeometry = nil;
+    passFour = nil;
+    passFive = nil;
     
     return scene;
 }

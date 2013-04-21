@@ -8,7 +8,7 @@
 
 
 #import "FivePointBezier.h"
-#import "Generic.h"
+#import "Painter.h"
 
 /*
  attribute float a_t_spacing;

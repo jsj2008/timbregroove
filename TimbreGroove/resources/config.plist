@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>default_scene</key>
-	<string>butterfly</string>
+	<string>box</string>
 	<key>scenes</key>
 	<dict>
 		<key>butterfly</key>
@@ -84,7 +84,7 @@
 					<key>kTriggerDrag1</key>
 					<string>controllerPos</string>
 					<key>kTriggerPanX</key>
-					<string>kParamCameraRotationY</string>
+					<string>kParamRotationY</string>
 				</dict>
 			</array>
 			<key>icon</key>
@@ -446,7 +446,7 @@
 		<key>butterfly</key>
 		<dict>
 			<key>instanceClass</key>
-			<string>GenericImport</string>
+			<string>MeshImportPainter</string>
 			<key>properties</key>
 			<dict>
 				<key>runAnimations</key>
@@ -466,7 +466,7 @@
 		<key>ball</key>
 		<dict>
 			<key>instanceClass</key>
-			<string>GenericImport</string>
+			<string>MeshImportPainter</string>
 			<key>properties</key>
 			<dict>
 				<key>runEmitter</key>
@@ -482,15 +482,15 @@
 		<key>box</key>
 		<dict>
 			<key>instanceClass</key>
-			<string>GenericImport</string>
+			<string>MeshImportPainter</string>
 			<key>properties</key>
 			<dict>
+				<key>cameraZ</key>
+				<integer>-2</integer>
 				<key>runEmitter</key>
 				<false/>
 				<key>scaleXYZ</key>
 				<real>1</real>
-				<key>drawType</key>
-				<string>wireframe</string>
 				<key>colladaFile</key>
 				<string>boxStretch.dae</string>
 			</dict>
@@ -498,7 +498,7 @@
 		<key>tex</key>
 		<dict>
 			<key>instanceClass</key>
-			<string>GenericImport</string>
+			<string>MeshImportPainter</string>
 			<key>properties</key>
 			<dict>
 				<key>runEmitter</key>
@@ -612,6 +612,31 @@
 			<key>icon</key>
 			<string>text.png</string>
 		</dict>
+	</dict>
+	<key>logging</key>
+	<dict>
+		<key>LLMeshImporter</key>
+		<false/>
+		<key>LLGestureStuff</key>
+		<false/>
+		<key>LLObjLifetime</key>
+		<true/>
+		<key>LLAudioTweaks</key>
+		<false/>
+		<key>LLJustSayin</key>
+		<false/>
+		<key>LLGLResource</key>
+		<false/>
+		<key>LLMidiStuff</key>
+		<false/>
+		<key>LLCaptureOps</key>
+		<false/>
+		<key>LLAudioResource</key>
+		<false/>
+		<key>LLShaderStuff</key>
+		<true/>
+		<key>LLKindaImportant</key>
+		<false/>
 	</dict>
 </dict>
 </plist>

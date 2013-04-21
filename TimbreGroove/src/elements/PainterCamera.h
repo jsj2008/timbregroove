@@ -9,6 +9,6 @@
 #import "Camera.h"
 #import "ShaderFeature.h"
 
-@interface GenericCamera : Camera<ShaderFeature>
+@interface PainterCamera : Camera<ShaderFeature>
 
 @end

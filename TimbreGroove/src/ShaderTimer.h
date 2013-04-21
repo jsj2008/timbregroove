@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "Generic.h"
+#import "Painter.h"
 
 typedef enum ShaderTimeType {
     kSTT_None,

@@ -7,7 +7,7 @@
 //
 
 #import "GenericShader.h"
-#import "Generic.h"
+#import "Painter.h"
 
 const char * _generic_shader_name = "generic";
 
@@ -31,9 +31,20 @@ static const char * _generic_shader_var_names[NUM_GENERIC_VARIABLES] = {
     "u_shininess",
     "u_doSpecular",
     
-    "u_lightingEnabled",
-    "u_lights",
-    "u_lights[2]",
+    "u_lightsEnabled",
+    "u_lights[0].position",
+    "u_lights[0].colors",
+    "u_lights[0].attenuation",
+    "u_lights[0].spotCutoffAngle",
+    "u_lights[0].spotDirection",
+    "u_lights[0].spotFalloffExponent",
+    
+    "u_lights[1].position",
+    "u_lights[1].colors",
+    "u_lights[1].attenuation",
+    "u_lights[1].spotCutoffAngle",
+    "u_lights[1].spotDirection",
+    "u_lights[1].spotFalloffExponent",
     
     "u_time",
     

@@ -22,12 +22,9 @@ extern NSString const * kShaderFeatureBones;
 #endif
 
 @class MeshBuffer;
-@class Texture;
-@class Generic;
 @class Lights;
-@class GenericCamera;
 
-@interface Generic : TG3dObject
+@interface Painter : TG3dObject
 
 @property (nonatomic,strong) Lights * lights;
 

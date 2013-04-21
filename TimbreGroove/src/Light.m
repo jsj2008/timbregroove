@@ -8,7 +8,7 @@
 
 #import "Light.h"
 #import "GenericShader.h"
-#import "Generic.h"
+#import "Painter.h"
 
 @implementation Light
 
@@ -18,6 +18,7 @@
     {
         _desc.position  = (GLKVector4){0, 0, -5, 0 };
         _desc.colors.diffuse = (GLKVector4){ 1, 1, 1, 1 };
+        _desc.colors.ambient = (GLKVector4){ 1, 1, 1, 1 };
         _desc.attenuation = (GLKVector3){1, 1, 1};
     }
     
@@ -39,27 +40,44 @@
     _desc.position.w = directional ? 1.0 : 0.0;
 }
 
+-(void)setAttenuation:(GLKVector3)attenuation
+{
+    _desc.attenuation = attenuation;
+}
+
+-(GLKVector3)attenuation
+{
+    return _desc.attenuation;
+}
+
 -(bool)directional
 {
     return _desc.position.w == 1.0;
 }
 
--(void)bind:(Shader *)shader object:(Generic *)object
+-(void)bind:(Shader *)shader object:(Painter *)object
 {
     GLKMatrix4 mv = object.modelView;
     GLKMatrix3 normalMat = GLKMatrix3InvertAndTranspose(GLKMatrix4GetMatrix3(mv), NULL);
     [shader writeToLocation:gv_normalMat type:TG_MATRIX3 data:normalMat.m];
-    [shader writeFloats:gv_lights + _lightNumber numFloats:sizeof(_desc)/sizeof(float) data:&_desc];
+    int offset = LIGHT_STRUCT_NUM_ELEMENTS * _lightNumber;
+    //[shader writeFloats:gv_lights0_colors + offset numFloats:sizeof(_desc.colors)/sizeof(float) data:&_desc.colors];
+    
+    GLint lightLoc = [shader location:gv_lights0_colors + offset];
+    glUniform4fv(lightLoc, 4, (GLfloat *)&_desc.colors.ambient );
+    
+    [shader writeToLocation:gv_lights0_position    + offset type:TG_VECTOR4 data:&_desc.position];
+    [shader writeToLocation:gv_lights0_attenuation + offset type:TG_VECTOR3 data:&_desc.attenuation];
 }
 
 @end
 
 @implementation Lights {
-    __weak Generic * _object;
+    __weak Painter * _object;
     int _numLights;
 }
 
--(id)initWithObject:(Generic *)object
+-(id)initWithObject:(Painter *)object
 {
     self = [super init];
     if( self )
@@ -77,6 +95,6 @@
 
 -(void)bind:(Shader *)shader object:(id)object
 {
-    [shader writeToLocation:gv_lightingEnabled type:TG_INT data:&_numLights];
+    [shader writeToLocation:gv_lightsEnabled type:TG_INT data:&_numLights];
 }
 @end

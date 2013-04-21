@@ -7,7 +7,7 @@
 //
 
 
-#import "GenericWithTexture.h"
+#import "TexturePainter.h"
 #import "Shader.h"
 #import "GridPlane.h"
 #import "Material.h"
@@ -19,7 +19,7 @@
 #import "SettingsVC.h"
 #import "ShaderTimer.h"
 
-@interface Ripple : GenericWithTexture
+@interface Ripple : TexturePainter
 @property (nonatomic,strong) NSString * background;
 @end
 

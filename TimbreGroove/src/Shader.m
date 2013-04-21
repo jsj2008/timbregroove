@@ -78,7 +78,6 @@ static NSHashTable * __shaders;
         glDetachShader(_program, fshader);
         glDeleteShader(fshader);
     }
-    TGLog(LLGLResource, @"created shader: %@ (%d)" ,self.description,_program);
     return YES;
     
 }
@@ -277,7 +276,7 @@ typedef enum _sfpType {
                    andHeaders:(NSString *)headers
 {
     NSString * tag = [headers length] ? headers : @"default";
-    NSString * shaderId = [NSString stringWithFormat:@"%s-%s-%@-%@",vert,frag,tag,[EAGLContext currentContext]];
+    NSString * shaderId = [NSString stringWithFormat:@"%s-%s-%@\n%@",vert,frag,[EAGLContext currentContext],tag];
     Shader * foundShader = nil;
     if( __shaders )
     {
@@ -292,7 +291,7 @@ typedef enum _sfpType {
     }
     if( foundShader )
     {
-        TGLog(LLGLResource, @"reusing shader %d - %@",foundShader.program,shaderId);
+        TGLog(LLGLResource | LLShaderStuff, @"reusing shader %d - %@",foundShader.program,shaderId);
     }
     return foundShader;
 }
@@ -329,11 +328,13 @@ typedef enum _sfpType {
     _valueCache = malloc(_valueCacheMax * sizeof(ValueCacheItem));
     
     NSString * tag = [headers length] ? headers : @"default";
-    _poolKey = [NSString stringWithFormat:@"%s-%s-%@-%@",vert,frag,tag,[EAGLContext currentContext]];
+    _poolKey = [NSString stringWithFormat:@"%s-%s-%@\n%@",vert,frag,[EAGLContext currentContext],tag];
 
     if( !__shaders )
         __shaders = [NSHashTable weakObjectsHashTable];
     [__shaders addObject:self];
+    TGLog(LLGLResource | LLShaderStuff, @"created shader: %@ (%d) %@" ,self,_program, _poolKey);
+    
     return self;
 }
 

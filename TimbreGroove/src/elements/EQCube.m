@@ -11,7 +11,7 @@
 #import "FBO.h"
 #import "Light.h"
 #import "GraphView.h"
-#import "GenericWithTexture.h"
+#import "TexturePainter.h"
 #import "EventCapture.h"
 
 #import "Scene.h"
@@ -27,11 +27,11 @@
 
 NSString const * kParamRotateCube  = @"RotateCube";
 
-@interface EQCube : Generic  {
+@interface EQCube : Painter  {
     EQPanel * _eqPanel;
     
-    GenericWithTexture * _next;
-    GenericWithTexture * _prev;
+    TexturePainter * _next;
+    TexturePainter * _prev;
     
     FloatParameter  * _rotateParam;
     FloatParamBlock   _rotateTrigger;
@@ -58,8 +58,8 @@ NSString const * kParamRotateCube  = @"RotateCube";
 
 -(void)setupButtons
 {
-    _next = [[GenericWithTexture alloc] initWithText:@"Next -->"];
-    _prev = [[GenericWithTexture alloc] initWithText:@"<-- Prev"];
+    _next = [[TexturePainter alloc] initWithText:@"Next -->"];
+    _prev = [[TexturePainter alloc] initWithText:@"<-- Prev"];
     
     _next.scaleXYZ = BUTTON_SCALE;
     _next.interactive = true;
@@ -110,7 +110,7 @@ NSString const * kParamRotateCube  = @"RotateCube";
 -(void)isPrevNext:(CGPoint) pt
 {
     UIView * view = self.view;
-    GenericWithTexture * button = [EventCapture getGraphViewTapChildElementOf:self
+    TexturePainter * button = [EventCapture getGraphViewTapChildElementOf:self
                                                                        inView:view
                                                                          atPt:pt];
     if( button == _prev )

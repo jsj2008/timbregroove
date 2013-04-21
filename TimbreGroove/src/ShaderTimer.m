@@ -15,7 +15,7 @@
     [putHere addObject:kShaderFeatureTime];
 }
 
--(void)bind:(Shader *)shader object:(Generic *)object
+-(void)bind:(Shader *)shader object:(Painter *)object
 {    
     ShaderTimeType stt = _timerType;
     if( stt > kSTT_Custom )

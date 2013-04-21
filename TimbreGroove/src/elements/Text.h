@@ -6,8 +6,8 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "GenericWithTexture.h"
+#import "TexturePainter.h"
 
-@interface Text : GenericWithTexture
+@interface Text : TexturePainter
 @property (nonatomic,strong) NSString * text;
 @end

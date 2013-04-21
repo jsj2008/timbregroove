@@ -10,11 +10,11 @@
 #import "Line.h"
 #import "SoundSystem.h"
 #import "Parameter.h"
-#import "Generic.h"
+#import "Painter.h"
 #import "Material.h"
 #import "Names.h"
 
-@interface Oscilloscope : Generic
+@interface Oscilloscope : Painter
 
 @end
 

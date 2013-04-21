@@ -12,7 +12,7 @@
 #define CAMERA_DEFAULT_NEAR           0.1f
 #define CAMERA_DEFAULT_FAR            1000.0f
 #define CAMERA_DEFAULT_frustum_ANGLE  45.0f
-#define CAMERA_DEFAULT_Z              -5.0f
+#define CAMERA_DEFAULT_Z              -10.0f
 
 
 @interface Camera : NSObject

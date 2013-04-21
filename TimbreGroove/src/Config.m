@@ -54,6 +54,8 @@ NSString * const kConfig3dCustomProperties = @"properties";
 
 NSString * const kConfigModels = @"models";
 
+NSString * const kConfigLogging = @"logging";
+
 extern NSString const * textNameForkName( NSString const * kName );
 
 NSDictionary * __mapParamNames(NSDictionary * dict)
@@ -135,6 +137,12 @@ static Config * __sharedConfig;
     return models[name];
 }
 
++(NSDictionary *)getLoggingOpts
+{
+    if( !__sharedConfig )
+        [Config sharedInstance];
+    return  __sharedConfig->_plistConfig[kConfigLogging];
+}
 @end
 
 @implementation ConfigBase

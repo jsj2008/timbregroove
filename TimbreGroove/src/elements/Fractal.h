@@ -6,8 +6,8 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "Generic.h"
+#import "Painter.h"
 
-@interface Fractal : Generic
+@interface Fractal : Painter
 @property (nonatomic) GLKVector4 backColor;
 @end

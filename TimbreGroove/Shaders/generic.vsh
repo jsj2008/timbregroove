@@ -137,19 +137,25 @@ void doLighting()
     
 	if( u_lightsEnabled > 0 )
     {
+        mat3 normalMat = u_normalMat;
+        
+        normalMat = mat3( u_mvm );
+        
 		l_ecPosition3  = vec3(u_mvm * l_vertexPosition);
 		l_eye          = -normalize(l_ecPosition3);
-		l_normal       = normalize( u_normalMat * l_vertexNormal );
+		l_normal       = normalize( normalMat * l_vertexNormal );
         
         for( int i = 0; i < u_lightsEnabled; i++ )
             pointLight( u_lights[i], amb, diff, spec );
+
+		v_color.rgb = (u_material[CI_Ambient].rgb + amb.rgb) * u_material[CI_Ambient].rgb +
+                      (diff.rgb * u_material[CI_Diffuse].rgb);
         
-		v_color.rgb = u_material[CI_Ambient].rgb + (diff.rgb * u_material[CI_Diffuse].rgb);
 		v_color.a   = u_material[CI_Diffuse].a;
 		
 		v_color    = clamp(v_color, 0.0, 1.0);
 		v_specular = vec4( spec.rgb * u_material[CI_Specular].rgb, u_material[CI_Specular].a );
-		
+        
 	} else {
 		v_color = u_material[CI_Diffuse];
 		v_specular = spec;
@@ -165,8 +171,6 @@ varying float v_time;
 
 void main()
 {
-    vec3 pos = a_position.xyz;
-
 #ifdef TEXTURE
     v_texCoordOut = a_uv;
 #endif
@@ -176,6 +180,8 @@ void main()
 #endif
     
 #ifdef NORMAL
+    l_vertexPosition = a_position;
+    l_vertexNormal = a_normal;
     doLighting();
 #endif
     
@@ -183,6 +189,6 @@ void main()
     v_time = u_time;
 #endif
 
-	gl_Position = u_pvm * vec4(pos,a_position.w);
+	gl_Position = u_pvm * a_position;
 }
 

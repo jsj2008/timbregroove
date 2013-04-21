@@ -6,9 +6,9 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "Generic.h"
+#import "Painter.h"
 
-@interface GenericImport : TG3dObject
+@interface MeshImportPainter : TG3dObject
 // startup options read from config.plist
 @property (nonatomic,strong) NSString * colladaFile;
 @property (nonatomic) GLint             bufferDrawType;

@@ -75,7 +75,9 @@
 {
     [super viewDidLoad];
 
-    TGSetLogLevel( LLShitsOnFire | LLMeshImporter | LLObjLifetime | LLGLResource);
+    NSDictionary * loggingOpts = [Config getLoggingOpts];
+    LogLevel level = TGLogStringsToBits(loggingOpts);
+    TGSetLogLevel( level );
     
     _postDeleteSceneIndex = -1;
     // force some global instializations

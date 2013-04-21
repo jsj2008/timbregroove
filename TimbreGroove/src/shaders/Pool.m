@@ -8,7 +8,7 @@
 
 #import "Pool.h"
 #import "TG3dObject.h"
-#import "Generic.h"
+#import "Painter.h"
 
 /*
  attribute vec4 position;

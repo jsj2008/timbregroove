@@ -8,7 +8,7 @@
 
 #import "MeshScene.h"
 #import "Log.h"
-#import "Generic.h"
+#import "Painter.h"
 
 static NSString * stringFromMat(GLKMatrix4 m)
 {

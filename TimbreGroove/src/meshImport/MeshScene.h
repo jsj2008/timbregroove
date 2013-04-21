@@ -20,6 +20,7 @@
     MaterialColors _colors;
     float _shininess;
     bool _doSpecular;
+    NSString * _textureFileName;
 }
 @end
 

@@ -8,6 +8,21 @@
 
 #import "Log.h"
 
+static const char * logStringToBit[] = {
+    "LLShitsOnFire",
+    "LLKindaImportant",
+    "LLObjLifetime",
+    "LLAudioTweaks",
+    "LLJustSayin",
+    "LLGLResource",
+    "LLMidiStuff",
+    "LLCaptureOps",
+    "LLAudioResource",
+    "LLShaderStuff",
+    "LLGestureStuff",
+    "LLMeshImporter"
+};
+
 static LogLevel _currentLL = LLShitsOnFire;
 
 void TGLog(LogLevel loglevel,NSString *format, ...)
@@ -56,6 +71,24 @@ void TGLogpc(LogLevel loglevel,const char * format, ...)
     }
 }
 
+LogLevel TGLogStringsToBits(NSDictionary *dict)
+{
+    __block LogLevel level = 0;
+    [dict each:^(NSString * name, NSNumber * value) {
+        if( [value boolValue] )
+        {
+            for( int i = 0; i < sizeof(logStringToBit)/sizeof(logStringToBit[0]); i++ )
+            {
+                if( [name isEqualToString:@(logStringToBit[i])] )
+                {
+                    level |= (1 << (i-1));
+                    break;
+                }
+            }
+        }
+    }];
+    return level;
+}
 
 LogLevel TGSetLogLevel(LogLevel logLevel)
 {

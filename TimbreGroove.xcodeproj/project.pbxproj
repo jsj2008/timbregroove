@@ -77,7 +77,7 @@
 		571470571706771F00383D04 /* ColladaParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 571470541706771F00383D04 /* ColladaParser.m */; };
 		571470581706771F00383D04 /* MeshScene.m in Sources */ = {isa = PBXBuildFile; fileRef = 571470561706771F00383D04 /* MeshScene.m */; };
 		5714705B1706788800383D04 /* MeshSceneBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = 5714705A1706788800383D04 /* MeshSceneBuffer.m */; };
-		5714705E17067D3100383D04 /* GenericImport.m in Sources */ = {isa = PBXBuildFile; fileRef = 5714705D17067D3100383D04 /* GenericImport.m */; };
+		5714705E17067D3100383D04 /* MeshImportPainter.m in Sources */ = {isa = PBXBuildFile; fileRef = 5714705D17067D3100383D04 /* MeshImportPainter.m */; };
 		5714706417069A3000383D04 /* numText.png in Resources */ = {isa = PBXBuildFile; fileRef = 5714706317069A3000383D04 /* numText.png */; };
 		5714713F16C8451E00CA2A69 /* Midi.m in Sources */ = {isa = PBXBuildFile; fileRef = 5714713E16C8451E00CA2A69 /* Midi.m */; };
 		5714714116C8464800CA2A69 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5714714016C8464800CA2A69 /* CoreMIDI.framework */; };
@@ -96,7 +96,7 @@
 		572098E116DA9FA40075E584 /* Parameter.m in Sources */ = {isa = PBXBuildFile; fileRef = 572098E016DA9FA40075E584 /* Parameter.m */; };
 		5721989616853F9E0062C36F /* GraphView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5721989516853F9D0062C36F /* GraphView.m */; };
 		572AD0E016EBC1870070AE6A /* FFTScope.m in Sources */ = {isa = PBXBuildFile; fileRef = 572AD0DF16EBC1870070AE6A /* FFTScope.m */; };
-		572D7F2E16832749006D48BF /* GenericWithTexture.m in Sources */ = {isa = PBXBuildFile; fileRef = 572D7F2D16832749006D48BF /* GenericWithTexture.m */; };
+		572D7F2E16832749006D48BF /* TexturePainter.m in Sources */ = {isa = PBXBuildFile; fileRef = 572D7F2D16832749006D48BF /* TexturePainter.m */; };
 		572EB1FD16786C630062F290 /* Alex.png in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1E316786C630062F290 /* Alex.png */; };
 		572EB1FE16786C630062F290 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1E416786C630062F290 /* Default-568h@2x.png */; };
 		572EB1FF16786C630062F290 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1E516786C630062F290 /* Default.png */; };
@@ -142,7 +142,7 @@
 		5763AAA816AF0AAA00856C34 /* PoolScreen.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 5763AAA716AF0AAA00856C34 /* PoolScreen.vsh */; };
 		5763AAAB16AF0AC700856C34 /* PoolScreen.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 5763AAAA16AF0AC700856C34 /* PoolScreen.fsh */; };
 		5764756C167D5E8C00D5A431 /* GenericShader.m in Sources */ = {isa = PBXBuildFile; fileRef = 5764756B167D5E8C00D5A431 /* GenericShader.m */; };
-		57647571167D619800D5A431 /* Generic.m in Sources */ = {isa = PBXBuildFile; fileRef = 57647570167D619800D5A431 /* Generic.m */; };
+		57647571167D619800D5A431 /* Painter.m in Sources */ = {isa = PBXBuildFile; fileRef = 57647570167D619800D5A431 /* Painter.m */; };
 		57647577167D97EC00D5A431 /* generic.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 57647574167D7C4A00D5A431 /* generic.fsh */; };
 		57647578167D97EC00D5A431 /* generic.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 57647572167D7C3C00D5A431 /* generic.vsh */; };
 		57677D9D16EAEE8100C3BA58 /* NoteGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = 57677D9C16EAEE8100C3BA58 /* NoteGenerator.m */; };
@@ -207,7 +207,7 @@
 		57CB3B0816BE148A007C093C /* snail.png in Resources */ = {isa = PBXBuildFile; fileRef = 57CB3B0616BE148A007C093C /* snail.png */; };
 		57CB3B0B16BE2BC5007C093C /* NewScenePicker.m in Sources */ = {isa = PBXBuildFile; fileRef = 57CB3B0A16BE2BC5007C093C /* NewScenePicker.m */; };
 		57CB3B0E16BE2BF9007C093C /* NewSceneCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 57CB3B0D16BE2BF9007C093C /* NewSceneCell.m */; };
-		57CBB3D31721CE0700E45BCC /* GenericCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = 57CBB3D21721CE0700E45BCC /* GenericCamera.m */; };
+		57CBB3D31721CE0700E45BCC /* PainterCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = 57CBB3D21721CE0700E45BCC /* PainterCamera.m */; };
 		57CCFFC216849337003B4A19 /* Text.m in Sources */ = {isa = PBXBuildFile; fileRef = 57CCFFC116849336003B4A19 /* Text.m */; };
 		57CE24D716CF01CA0007BDD0 /* FivePointBezier.m in Sources */ = {isa = PBXBuildFile; fileRef = 57CE24D616CF01CA0007BDD0 /* FivePointBezier.m */; };
 		57D0EBD616D43CD600DBF457 /* GraphView+Touches.m in Sources */ = {isa = PBXBuildFile; fileRef = 57D0EBD516D43CD600DBF457 /* GraphView+Touches.m */; };
@@ -336,8 +336,8 @@
 		571470561706771F00383D04 /* MeshScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MeshScene.m; sourceTree = "<group>"; };
 		571470591706788800383D04 /* MeshSceneBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MeshSceneBuffer.h; sourceTree = "<group>"; };
 		5714705A1706788800383D04 /* MeshSceneBuffer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MeshSceneBuffer.m; sourceTree = "<group>"; };
-		5714705C17067D3100383D04 /* GenericImport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenericImport.h; sourceTree = "<group>"; };
-		5714705D17067D3100383D04 /* GenericImport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GenericImport.m; sourceTree = "<group>"; };
+		5714705C17067D3100383D04 /* MeshImportPainter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MeshImportPainter.h; sourceTree = "<group>"; };
+		5714705D17067D3100383D04 /* MeshImportPainter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MeshImportPainter.m; sourceTree = "<group>"; };
 		5714706317069A3000383D04 /* numText.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = numText.png; sourceTree = "<group>"; };
 		5714713D16C8451E00CA2A69 /* Midi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Midi.h; sourceTree = "<group>"; };
 		5714713E16C8451E00CA2A69 /* Midi.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = Midi.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
@@ -364,8 +364,8 @@
 		5721989416853F9D0062C36F /* GraphView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = GraphView.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		5721989516853F9D0062C36F /* GraphView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = GraphView.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		572AD0DF16EBC1870070AE6A /* FFTScope.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FFTScope.m; sourceTree = "<group>"; };
-		572D7F2C16832749006D48BF /* GenericWithTexture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenericWithTexture.h; sourceTree = "<group>"; };
-		572D7F2D16832749006D48BF /* GenericWithTexture.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GenericWithTexture.m; sourceTree = "<group>"; };
+		572D7F2C16832749006D48BF /* TexturePainter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TexturePainter.h; sourceTree = "<group>"; };
+		572D7F2D16832749006D48BF /* TexturePainter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TexturePainter.m; sourceTree = "<group>"; };
 		572EB1E316786C630062F290 /* Alex.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Alex.png; sourceTree = "<group>"; };
 		572EB1E416786C630062F290 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		572EB1E516786C630062F290 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
@@ -429,8 +429,8 @@
 		5763AAAA16AF0AC700856C34 /* PoolScreen.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = PoolScreen.fsh; sourceTree = "<group>"; };
 		5764756A167D5E8C00D5A431 /* GenericShader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GenericShader.h; path = ../shaders/GenericShader.h; sourceTree = "<group>"; };
 		5764756B167D5E8C00D5A431 /* GenericShader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = GenericShader.m; path = ../shaders/GenericShader.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
-		5764756F167D619800D5A431 /* Generic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Generic.h; path = ../Generic.h; sourceTree = "<group>"; };
-		57647570167D619800D5A431 /* Generic.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = Generic.m; path = ../Generic.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		5764756F167D619800D5A431 /* Painter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Painter.h; path = ../Painter.h; sourceTree = "<group>"; };
+		57647570167D619800D5A431 /* Painter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = Painter.m; path = ../Painter.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		57647572167D7C3C00D5A431 /* generic.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = generic.vsh; sourceTree = "<group>"; };
 		57647574167D7C4A00D5A431 /* generic.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = generic.fsh; sourceTree = "<group>"; };
 		57647576167D8AC100D5A431 /* TGTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = TGTypes.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
@@ -533,8 +533,8 @@
 		57CB3B0C16BE2BF9007C093C /* NewSceneCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NewSceneCell.h; path = ../NewSceneCell.h; sourceTree = "<group>"; };
 		57CB3B0D16BE2BF9007C093C /* NewSceneCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NewSceneCell.m; path = ../NewSceneCell.m; sourceTree = "<group>"; };
 		57CBB3D01721CBE100E45BCC /* ShaderFeature.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderFeature.h; sourceTree = "<group>"; };
-		57CBB3D11721CE0700E45BCC /* GenericCamera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenericCamera.h; sourceTree = "<group>"; };
-		57CBB3D21721CE0700E45BCC /* GenericCamera.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GenericCamera.m; sourceTree = "<group>"; };
+		57CBB3D11721CE0700E45BCC /* PainterCamera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PainterCamera.h; sourceTree = "<group>"; };
+		57CBB3D21721CE0700E45BCC /* PainterCamera.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PainterCamera.m; sourceTree = "<group>"; };
 		57CCFFC116849336003B4A19 /* Text.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Text.m; sourceTree = "<group>"; };
 		57CE24D516CF01CA0007BDD0 /* FivePointBezier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FivePointBezier.h; sourceTree = "<group>"; };
 		57CE24D616CF01CA0007BDD0 /* FivePointBezier.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FivePointBezier.m; sourceTree = "<group>"; };
@@ -829,22 +829,22 @@
 		572D7F2B1683033D006D48BF /* generic */ = {
 			isa = PBXGroup;
 			children = (
-				5764756F167D619800D5A431 /* Generic.h */,
-				57647570167D619800D5A431 /* Generic.m */,
+				5764756F167D619800D5A431 /* Painter.h */,
+				57647570167D619800D5A431 /* Painter.m */,
 				5764756A167D5E8C00D5A431 /* GenericShader.h */,
 				5764756B167D5E8C00D5A431 /* GenericShader.m */,
-				572D7F2C16832749006D48BF /* GenericWithTexture.h */,
-				572D7F2D16832749006D48BF /* GenericWithTexture.m */,
-				5714705C17067D3100383D04 /* GenericImport.h */,
-				5714705D17067D3100383D04 /* GenericImport.m */,
+				572D7F2C16832749006D48BF /* TexturePainter.h */,
+				572D7F2D16832749006D48BF /* TexturePainter.m */,
+				5714705C17067D3100383D04 /* MeshImportPainter.h */,
+				5714705D17067D3100383D04 /* MeshImportPainter.m */,
 				5787A6FF171FC89900861C01 /* ShaderTimer.h */,
 				5787A700171FC89900861C01 /* ShaderTimer.m */,
 				57A66EEB167B1D1B00B9EA75 /* Material.h */,
 				57A66EEC167B1D1C00B9EA75 /* Material.m */,
 				575AA12716ADAF6900635A76 /* Light.h */,
 				575AA12816ADAF6900635A76 /* Light.m */,
-				57CBB3D11721CE0700E45BCC /* GenericCamera.h */,
-				57CBB3D21721CE0700E45BCC /* GenericCamera.m */,
+				57CBB3D11721CE0700E45BCC /* PainterCamera.h */,
+				57CBB3D21721CE0700E45BCC /* PainterCamera.m */,
 			);
 			name = generic;
 			sourceTree = "<group>";
@@ -1468,10 +1468,10 @@
 				57A66EED167B1D1C00B9EA75 /* Material.m in Sources */,
 				571A42FE167C315700CD7E8F /* Graph.m in Sources */,
 				5764756C167D5E8C00D5A431 /* GenericShader.m in Sources */,
-				57647571167D619800D5A431 /* Generic.m in Sources */,
+				57647571167D619800D5A431 /* Painter.m in Sources */,
 				57E7465E1680438300C1D4FF /* EventCapture.m in Sources */,
 				57F412F3168167F700D9DC67 /* Sphere.m in Sources */,
-				572D7F2E16832749006D48BF /* GenericWithTexture.m in Sources */,
+				572D7F2E16832749006D48BF /* TexturePainter.m in Sources */,
 				57CCFFC216849337003B4A19 /* Text.m in Sources */,
 				5721989616853F9E0062C36F /* GraphView.m in Sources */,
 				574B5FF9168D20BD008367D1 /* FBO.m in Sources */,
@@ -1548,11 +1548,11 @@
 				571470571706771F00383D04 /* ColladaParser.m in Sources */,
 				571470581706771F00383D04 /* MeshScene.m in Sources */,
 				5714705B1706788800383D04 /* MeshSceneBuffer.m in Sources */,
-				5714705E17067D3100383D04 /* GenericImport.m in Sources */,
+				5714705E17067D3100383D04 /* MeshImportPainter.m in Sources */,
 				577E7ED5170E1A1F009E9916 /* MeshScene+Emitter.m in Sources */,
 				571EDCCF1711F09F008375AA /* ObjectGestures.m in Sources */,
 				5787A701171FC89A00861C01 /* ShaderTimer.m in Sources */,
-				57CBB3D31721CE0700E45BCC /* GenericCamera.m in Sources */,
+				57CBB3D31721CE0700E45BCC /* PainterCamera.m in Sources */,
 				57DF21FC1722792E000C5225 /* ShaderFeature.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

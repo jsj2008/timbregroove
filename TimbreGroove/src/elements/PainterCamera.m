@@ -6,11 +6,11 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "GenericCamera.h"
-#import "Generic.h"
+#import "PainterCamera.h"
+#import "Painter.h"
 #import "GenericShader.h"
 
-@implementation GenericCamera
+@implementation PainterCamera
 
 -(void)getShaderFeatureNames:(NSMutableArray *)putHere
 {
@@ -20,7 +20,7 @@
 {
     
 }
--(void)bind:(Shader *)shader object:(Generic*)object
+-(void)bind:(Shader *)shader object:(Painter*)object
 {
     GLKMatrix4 mvm = object.modelView;
     GLKMatrix4 pvm = GLKMatrix4Multiply(self.projectionMatrix, mvm);

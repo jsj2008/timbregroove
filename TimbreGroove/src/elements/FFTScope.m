@@ -10,13 +10,13 @@
 #import "Line.h"
 #import "SoundSystem.h"
 #import "Parameter.h"
-#import "Generic.h"
+#import "Painter.h"
 #import "Material.h"
 #import "Names.h"
 
 extern void fft(float *in_out, int len);
 
-@interface FFTScope : Generic {
+@interface FFTScope : Painter {
     __weak Line * _lineMesh;
     float _data[kFramesForDisplay];
 

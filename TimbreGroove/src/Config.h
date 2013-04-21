@@ -61,4 +61,6 @@
 -(ConfigScene *)getScene:(NSString *)name;
 -(ConfigGraphicElement *)getGraphicElement:(NSString *)name;
 -(NSDictionary *)getModel:(NSString *)name;
+
++(NSDictionary *)getLoggingOpts;
 @end

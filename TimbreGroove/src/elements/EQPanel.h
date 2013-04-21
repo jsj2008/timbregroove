@@ -6,7 +6,7 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "Generic.h"
+#import "Painter.h"
 
 typedef enum EQband {
     eqbNone,
@@ -15,6 +15,6 @@ typedef enum EQband {
     eqbHigh
 } EQBand;
 
-@interface EQPanel : Generic
+@interface EQPanel : Painter
 @property (nonatomic) int band; 
 @end

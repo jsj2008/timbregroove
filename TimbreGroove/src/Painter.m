@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 Ass Over Tea Kettle. All rights reserved.
 //
 #define SKIP_GENERIC_DECLS
-#import "Generic.h"
+#import "Painter.h"
 #import "GenericShader.h"
 #import "MeshBuffer.h"
-#import "GenericCamera.h"
+#import "PainterCamera.h"
 #import "Material.h"
 #import "AssetLoader.h"
 #import "Light.h"
@@ -36,10 +36,11 @@ NSString const * kShaderFeatureAmbientLighting = @"#define AMBIENT_LIGHTING\n";
 @implementation IndexShape
 @end
 
-@implementation Generic {
+@implementation Painter {
     NSMutableArray * _buffers;
     NSMutableArray * _shaderFeatures;
     NSMutableArray * _shapes;
+    bool _cameraAddHack;
 }
 
 -(id)init
@@ -63,8 +64,6 @@ NSString const * kShaderFeatureAmbientLighting = @"#define AMBIENT_LIGHTING\n";
     [super wireUp];
     [self createBuffer];
     [self createShader]; // generic assumes materials & buffer exists
-    GenericCamera * camera = (GenericCamera *)self.camera;
-    [self addShaderFeature:camera];
     return self;
 }
 
@@ -170,6 +169,12 @@ NSString const * kShaderFeatureAmbientLighting = @"#define AMBIENT_LIGHTING\n";
 
 -(void)render:(NSUInteger)w h:(NSUInteger)h
 {
+    if( !_cameraAddHack )
+    {
+        [self addShaderFeature:(PainterCamera *)self.camera];
+        _cameraAddHack = true;
+    }
+    
     Shader * shader = self.shader;
     
     [shader use];

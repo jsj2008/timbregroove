@@ -9,10 +9,10 @@
 #import "ShaderFeature.h"
 
 @class Light;
-@class Generic;
+@class Painter;
 
 @interface Lights : ShaderBinder
--(id)initWithObject:(Generic *)object;
+-(id)initWithObject:(Painter *)object;
 -(void)addLight:(Light *)light;
 @end
 
@@ -43,6 +43,7 @@ typedef struct _ShaderLight {
 
 @interface Light : ShaderBinder
 @property (nonatomic) GLKVector3 position;
+@property (nonatomic) GLKVector3 attenuation;
 @property (nonatomic) ShaderLight desc;
 @property (nonatomic) bool directional;
 @property (nonatomic) int lightNumber;
