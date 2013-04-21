@@ -78,7 +78,7 @@
 					<key>kTriggerTap1</key>
 					<string>RandomVibesNote</string>
 					<key>kTriggerPanY</key>
-					<string>kParamCameraZ</string>
+					<string>kParamRotationX</string>
 					<key>kTriggerPlayButton</key>
 					<string>kParamSceneAnimation</string>
 					<key>kTriggerDrag1</key>
@@ -486,7 +486,7 @@
 			<key>properties</key>
 			<dict>
 				<key>cameraZ</key>
-				<integer>-2</integer>
+				<integer>-4</integer>
 				<key>runEmitter</key>
 				<false/>
 				<key>scaleXYZ</key>

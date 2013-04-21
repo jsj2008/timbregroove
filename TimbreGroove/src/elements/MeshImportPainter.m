@@ -60,7 +60,7 @@
     Light * light = [Light new];
     light.position = (GLKVector3){ 0, 3, 0 };
     light.attenuation = (GLKVector3){ 0.5, 0.2, 0};
-    light.directional = false;
+    light.directional = true;
     
     [self.lights addLight:light];
     

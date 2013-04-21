@@ -1314,7 +1314,7 @@ static const char * effectParamTags[] = {
             if( EQSTR(elementName, kTag_effect) )
             {
                 _incoming = nil;
-                SET(kColStateEffectTag);
+                UNSET(kColStateEffectTag);
                 return;
             }
         }
@@ -2065,7 +2065,7 @@ numIndexBuffers:(unsigned int)numIndexBuffers
             
             if( buffer->data )
             {
-                if( key == MSKPosition )
+                if( key == MSKPosition + 1000 )
                 {
                     size_t sz = sizeof(MeshGeometryIndexBuffer) * numPolyTags;
                     sceneGeometry->_indexBuffers = malloc(sz);
@@ -2203,25 +2203,22 @@ numIndexBuffers:(unsigned int)numIndexBuffers
                     {
                         mm->_colors.diffuse = (GLKVector4){ 1, 1, 1, 1 };
                         
-                        if( 1 )
+                        IncomingNewParam * inp = ie->_newParams[ie->_textureName];
+                        if( inp && EQSTR(inp->_tag, kTag_sampler2D) )
                         {
-                            IncomingNewParam * inp = ie->_newParams[ie->_textureName];
-                            if( inp && EQSTR(inp->_tag, kTag_sampler2D) )
+                            inp = ie->_newParams[ inp->_content ];
+                            if( inp && EQSTR(inp->_tag, kTag_surface) )
                             {
-                                inp = ie->_newParams[ inp->_content ];
-                                if( inp && EQSTR(inp->_tag, kTag_surface) )
-                                {
-                                    IncomingImage * ii = _images[ inp->_content];
-                                    if( ii )
-                                        mm->_textureFileName = [ii->_init_from lastPathComponent];
-                                }
+                                IncomingImage * ii = _images[ inp->_content];
+                                if( ii )
+                                    mm->_textureFileName = [ii->_init_from lastPathComponent];
                             }
-                            
-                            if( !mm->_textureFileName )
-                            {
-                                TGLog(LLShitsOnFire, @"Could not dig out a texture file name for %@", ie->_textureName);
-                                exit(-1);
-                            }
+                        }
+                        
+                        if( !mm->_textureFileName )
+                        {
+                            TGLog(LLShitsOnFire, @"Could not dig out a texture file name for %@", ie->_textureName);
+                            exit(-1);
                         }
                     }
                     if( !materials )
