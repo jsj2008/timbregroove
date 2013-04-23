@@ -143,7 +143,6 @@
 		5763AAAB16AF0AC700856C34 /* PoolScreen.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 5763AAAA16AF0AC700856C34 /* PoolScreen.fsh */; };
 		5764756C167D5E8C00D5A431 /* GenericShader.m in Sources */ = {isa = PBXBuildFile; fileRef = 5764756B167D5E8C00D5A431 /* GenericShader.m */; };
 		57647571167D619800D5A431 /* Painter.m in Sources */ = {isa = PBXBuildFile; fileRef = 57647570167D619800D5A431 /* Painter.m */; };
-		57647577167D97EC00D5A431 /* generic.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 57647574167D7C4A00D5A431 /* generic.fsh */; };
 		57647578167D97EC00D5A431 /* generic.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 57647572167D7C3C00D5A431 /* generic.vsh */; };
 		57677D9D16EAEE8100C3BA58 /* NoteGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = 57677D9C16EAEE8100C3BA58 /* NoteGenerator.m */; };
 		577368CC16CDBAF40051551F /* bezier.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 577368CB16CDBAF40051551F /* bezier.fsh */; };
@@ -180,6 +179,7 @@
 		578292CB169A8B660053ADCD /* imageBaker.png in Resources */ = {isa = PBXBuildFile; fileRef = 578292CA169A8B650053ADCD /* imageBaker.png */; };
 		5787A701171FC89A00861C01 /* ShaderTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 5787A700171FC89900861C01 /* ShaderTimer.m */; };
 		57889C1C17259B2A00B83495 /* Joints.m in Sources */ = {isa = PBXBuildFile; fileRef = 57889C1B17259B2900B83495 /* Joints.m */; };
+		57889C1E1726182A00B83495 /* generic.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 57889C1D1726182A00B83495 /* generic.fsh */; };
 		5798B05916BA00F70093F473 /* pause.png in Resources */ = {isa = PBXBuildFile; fileRef = 5798B05716BA00F70093F473 /* pause.png */; };
 		5798B05A16BA00F70093F473 /* play.png in Resources */ = {isa = PBXBuildFile; fileRef = 5798B05816BA00F70093F473 /* play.png */; };
 		579AD1A916C40B670071AA9A /* Config.m in Sources */ = {isa = PBXBuildFile; fileRef = 579AD1A816C40B670071AA9A /* Config.m */; };
@@ -431,7 +431,6 @@
 		5764756F167D619800D5A431 /* Painter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Painter.h; path = ../Painter.h; sourceTree = "<group>"; };
 		57647570167D619800D5A431 /* Painter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = Painter.m; path = ../Painter.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		57647572167D7C3C00D5A431 /* generic.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = generic.vsh; sourceTree = "<group>"; };
-		57647574167D7C4A00D5A431 /* generic.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = generic.fsh; sourceTree = "<group>"; };
 		57647576167D8AC100D5A431 /* TGTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = TGTypes.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		57677D9B16EAEE8000C3BA58 /* NoteGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoteGenerator.h; sourceTree = "<group>"; };
 		57677D9C16EAEE8100C3BA58 /* NoteGenerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NoteGenerator.m; sourceTree = "<group>"; };
@@ -484,6 +483,7 @@
 		5787A700171FC89900861C01 /* ShaderTimer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ShaderTimer.m; path = TimbreGroove/src/ShaderTimer.m; sourceTree = SOURCE_ROOT; };
 		57889C1A17259B2900B83495 /* Joints.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Joints.h; sourceTree = "<group>"; };
 		57889C1B17259B2900B83495 /* Joints.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Joints.m; sourceTree = "<group>"; };
+		57889C1D1726182A00B83495 /* generic.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = generic.fsh; sourceTree = "<group>"; };
 		5790068616841F3B0068659F /* Interactive.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Interactive.h; sourceTree = "<group>"; };
 		5798B05716BA00F70093F473 /* pause.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = pause.png; sourceTree = "<group>"; };
 		5798B05816BA00F70093F473 /* play.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = play.png; sourceTree = "<group>"; };
@@ -940,7 +940,7 @@
 				572EB1F516786C630062F290 /* fountain.vsh */,
 				57F290F21695775400293B0E /* fractal.fsh */,
 				57F290F51695776400293B0E /* fractal.vsh */,
-				57647574167D7C4A00D5A431 /* generic.fsh */,
+				57889C1D1726182A00B83495 /* generic.fsh */,
 				57647572167D7C3C00D5A431 /* generic.vsh */,
 				5708A79E1723060800F79E34 /* capture.fsh */,
 				5708A79C172305FB00F79E34 /* capture.vsh */,
@@ -1370,7 +1370,7 @@
 				57F290FB16957F5D00293B0E /* fractal.vsh in Resources */,
 				5737C4B41693206D00C12F2D /* imageBaker.fsh in Resources */,
 				5737C4B51693206D00C12F2D /* imageBaker.vsh in Resources */,
-				57647577167D97EC00D5A431 /* generic.fsh in Resources */,
+				57889C1E1726182A00B83495 /* generic.fsh in Resources */,
 				57647578167D97EC00D5A431 /* generic.vsh in Resources */,
 				572EB290167AC0020062F290 /* fountain.fsh in Resources */,
 				572EB291167AC0020062F290 /* fountain.vsh in Resources */,

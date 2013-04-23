@@ -56,7 +56,7 @@ vec4 texture_dist()
 
 void main()
 {
-    vec4 color = vec4(1);
+    vec4 color = vec4(0);
     
 #ifdef TEXTURE
     #ifdef TEXTURE_DISTORT
@@ -71,7 +71,7 @@ void main()
 #endif
     
 #ifdef NORMAL
-    color *= v_color;
+    color += v_color;
     color = vec4(color.rgb + v_specular.rgb, color.a);
 #endif
     
