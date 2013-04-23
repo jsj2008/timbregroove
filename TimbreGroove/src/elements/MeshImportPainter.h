@@ -8,7 +8,7 @@
 
 #import "Painter.h"
 
-@interface MeshImportPainter : TG3dObject
+@interface MeshImportPainter : Node3d
 // startup options read from config.plist
 @property (nonatomic,strong) NSString * colladaFile;
 @property (nonatomic) GLint             bufferDrawType;

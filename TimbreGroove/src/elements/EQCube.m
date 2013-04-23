@@ -86,7 +86,7 @@ NSString const * kParamRotateCube  = @"RotateCube";
     
 
     Light *light = [Light new];
-    light.directional = true;
+    light.point = true;
     light.position = (GLKVector3){ 0.5, 1, -0.5 };
     [self.lights addLight:light];
     

@@ -7,7 +7,7 @@
 //
 
 #import "EventCapture.h"
-#import "TG3dObject.h"
+#import "Node3d.h"
 #import "Shader.h"
 #import "MeshBuffer.h"
 #import "Interactive.h"
@@ -41,11 +41,11 @@ static Shader * getCaptureShader()
 }
 @end
 
-typedef void (^CaptureRecurseBlock)(TG3dObject *);
+typedef void (^CaptureRecurseBlock)(Node3d *);
 
 @implementation EventCapture
 
-+(id)getGraphViewTapChildElementOf:(TG3dObject *)graph inView:(UIView *)view atPt:(CGPoint)pt
++(id)getGraphViewTapChildElementOf:(Node3d *)graph inView:(UIView *)view atPt:(CGPoint)pt
 {
     NSMutableDictionary * _objDict;
     __block unsigned int  _currentColor;
@@ -74,7 +74,7 @@ typedef void (^CaptureRecurseBlock)(TG3dObject *);
 
     static CaptureRecurseBlock renderObj = nil;
     
-    renderObj = ^(TG3dObject * child)
+    renderObj = ^(Node3d * child)
     {
         if( child.interactive )
         {

@@ -10,7 +10,7 @@
 #import "TGTypes.h"
 #import "ShaderFeature.h"
 
-@interface Material : ShaderBinder
+@interface Material : NSObject<ShaderFeature>
 @property (nonatomic) MaterialColors colors;
 @property (nonatomic) float shininess;
 @property (nonatomic) bool doSpecular;

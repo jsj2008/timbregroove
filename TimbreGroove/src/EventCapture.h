@@ -8,10 +8,10 @@
 
 #import <Foundation/Foundation.h>
 
-@class TG3dObject;
+@class Node3d;
 
 @interface EventCapture : NSObject
-+(id)getGraphViewTapChildElementOf:(TG3dObject *)root
++(id)getGraphViewTapChildElementOf:(Node3d *)root
                             inView:(UIView *)view
                               atPt:(CGPoint)pt;
 

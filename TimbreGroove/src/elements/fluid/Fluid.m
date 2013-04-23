@@ -383,7 +383,7 @@ FluidVariable __kVariables[ NUM_fl_VARIABLES ] = {
 #pragma mark Main Fluid object
 #pragma mark -
 
-@interface Fluid : TG3dObject {
+@interface Fluid : Node3d {
     float _px;
     float _py;
 }

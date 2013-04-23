@@ -7,15 +7,15 @@
 //
 
 #import "MeshImportPainter.h"
+#import "MeshScene.h"
 #import "PainterCamera.h"
-#import "MeshSceneBuffer.h"
 #import "ColladaParser.h"
 #import "Material.h"
 #import "Light.h"
 #import "State.h"
 #import "Parameter.h"
 #import "Names.h"
-
+#import "Joints.h"
 #import "Cube.h"
 
 @interface JointPainter : Painter {
@@ -26,10 +26,10 @@
 -(void)updateTransformFromPos;
 @end
 
-@interface MeshPainter : Painter
+@interface MeshNodePainter : Painter
 @end
 
-@implementation MeshPainter {
+@implementation MeshNodePainter {
     MeshSceneMeshNode * _node;
     MeshBuffer * _drawingBuffer;
     GLint _bufferDrawType;
@@ -43,7 +43,9 @@
     exit(-1);
 }
 
--(id)initWithNode:(MeshSceneMeshNode *)node drawType:(GLint)bufferDrawType wireframe:(bool)doWireFrame
+-(id)initWithNode:(MeshSceneMeshNode *)node
+         drawType:(GLint)bufferDrawType
+        wireframe:(bool)doWireFrame
 {
     self = [super init];
     if( self )
@@ -58,144 +60,59 @@
 -(id)wireUp
 {
     Light * light = [Light new];
-    light.position = (GLKVector3){ 0, 3, 0 };
-    light.attenuation = (GLKVector3){ 0.5, 0.2, 0};
-    light.directional = true;
+    light.ambient = (GLKVector4){ 1, 1, 1, 1 };
+    light.diffuse = (GLKVector4){ 1, 1, 1, 1 };
+    GLKVector3 lightPos = (GLKVector3){ -4, 0, 14};
+    light.position = lightPos;
+    light.attenuation = (GLKVector3){ 0, 0.2, 0 };
+    light.point = true;
     
     [self.lights addLight:light];
     
     [super wireUp];
 //    self.disableStandardParameters = true;
+    
+    self.rotation = (GLKVector3){ GLKMathDegreesToRadians(20), GLKMathDegreesToRadians(20), 0 };
+    _node = nil; 
     return self;
 }
 
 -(void)createBuffer
 {
-    static GenericVariables indexIntoNamesMap[kNumMeshSemanticKeys] = {
-        gv_pos,         // MSKPosition
-        gv_normal,      // MSKNormal
-        gv_uv,          // MSKUV
-        gv_acolor,      // MSKColor
-        gv_boneIndex,   // MSKBoneIndex,
-        gv_boneWeights, // MSKBoneWeights,
-        
-    };
-    MeshGeometry * geometry = _node->_geometry;
-    
-    for( MeshSemanticKey key = MSKPosition; key < kNumMeshSemanticKeys; key++ )
-    {
-        MeshGeometryBuffer * mgb = geometry->_buffers + key;
-        if( mgb->data )
+    [_node->_geometries each:^(MeshGeometry * geometry) {
+        NSArray * mats = nil;
+        if( geometry->_materialName )
         {
-            MeshBuffer *              msb = nil;
-            MeshGeometryIndexBuffer * mgib = nil;
-            
-            if( key == MSKPosition )
+            MeshMaterial * mm = _node->_materials[ geometry->_materialName ];
+            Material * m = [Material withColors:mm->_colors shininess:mm->_shininess doSpecular:mm->_doSpecular];
+            if( mm->_textureFileName )
             {
-                if( geometry->_numIndexBuffers > 1 )
-                {
-                    msb = [[MeshSceneBuffer alloc] initWithGeometryBuffer:mgb
-                                                             andIndexData:mgib
-                                                   andIndexIntoShaderName:indexIntoNamesMap[key]];
-                    
-                    for( int i = 0; i < geometry->_numIndexBuffers; i++ )
-                    {
-                        MeshGeometryIndexBuffer * mgib = geometry->_indexBuffers + i;
-                        MeshBuffer * ibuffer = [[MeshBuffer alloc] init];
-                        [ibuffer setIndexData:mgib->indexData numIndices:mgib->numIndices];
-                        NSArray * materials = nil;
-                        if( _node->_materials )
-                        {
-                            MeshMaterial * mm = _node->_materials[i];
-                            id<ShaderFeature> material = [Material withColors:mm->_colors shininess:mm->_shininess doSpecular:mm->_doSpecular];
-                            if( mm->_textureFileName )
-                                materials = @[ material, [[Texture alloc] initWithFileName:mm->_textureFileName] ];
-                            else // should this be an 'AND' instead of an 'else?
-                                materials = @[ material ];
-                        }
-                        else
-                        {
-                            materials = @[ [Material withColor:(GLKVector4){ 0.7, 0.7, 0.7, 1.0 }] ];
-                        }
-                        [self addIndexShape:ibuffer features:materials];
-                    }
-                    
-                    [self addBuffer:msb];
-                    msb.drawable = false;
-                }
-                else
-                {
-                    mgib = geometry->_indexBuffers;
-                    msb = [[MeshSceneBuffer alloc] initWithGeometryBuffer:mgb
-                                                             andIndexData:mgib
-                                                   andIndexIntoShaderName:indexIntoNamesMap[key]];
-                    
-                    [self addBuffer:msb];
-                    
-                    if( _node->_materials )
-                    {
-                        MeshMaterial * mm = _node->_materials[0];
-                        id<ShaderFeature> mat = [Material withColors:mm->_colors shininess:mm->_shininess doSpecular:mm->_doSpecular];
-                        [self addShaderFeature:mat];
-                        if( mm->_textureFileName )
-                        {
-                            mat = [[Texture alloc] initWithFileName:mm->_textureFileName];
-                            [self addShaderFeature:mat];
-                        }
-                    }
-                }
-
-                if( _node->_skin )
-                    msb.usage = GL_DYNAMIC_DRAW;
-                if( _bufferDrawType )
-                    msb.drawType = _bufferDrawType;
-                
-                if( _doWireframe )
-                {
-                    /*
-                    msb = [[WireFrame alloc] initWithIndexBuffer:mgb->indexData
-                                                            data:mgb->data
-                                                  geometryBuffer:msb];
-                    */
-                }
-                _drawingBuffer = msb;
+                Texture * t = [[Texture alloc] initWithFileName:mm->_textureFileName];
+                mats = @[ t, m ];
             }
             else
             {
-                msb = [[MeshSceneBuffer alloc] initWithGeometryBuffer:mgb
-                                                         andIndexData:mgib
-                                               andIndexIntoShaderName:indexIntoNamesMap[key]];
-                msb.drawable = false;
-                [self addBuffer:msb];
+                mats = @[ m ];
             }
         }
-    }
-}
-
--(void)createShader
-{
-    if( _material )
-        [self addShaderFeature:_material];
-    [super createShader];
-}
-
--(void)calculateInfluences
-{
-    MeshSkinning * skin = _node->_skin;
+        
+        MeshBuffer * mb = [[MeshBuffer alloc] init];
+        [mb setData:geometry->_buffer
+            strides:&geometry->_strides[0]
+       countStrides:geometry->_numStrides
+        numVertices:geometry->_numVertices
+          indexData:NULL
+         numIndices:0];
+        
+        [self addShape:mb features:mats];
+    }];
     
-    if( skin )
+    if( _node->_skin )
     {
-        MeshGeometry * geometry = _node->_geometry;
-        MeshGeometryBuffer * b = geometry->_buffers;
-        float * p = malloc( sizeof(float) * b->numFloats );
-        [skin influence:b dest:p];
-        [_drawingBuffer setData:p];
-        free(p);
+        [self addShaderFeature:[Joints withArmatureNodes:_node->_skin->_influencingJoints]];
     }
-    
-    if( _kids )
-       [_kids each:^(MeshPainter *painter) { [painter calculateInfluences]; }];
 }
+
 
 @end
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -203,8 +120,9 @@
 @implementation MeshImportPainter {
     MeshScene * _scene;
     bool _doWireframe;
-    NSArray * _meshPainters;
+    NSArray * _nodePainters;
     NSArray * _jointPainters;
+    NSArray * _animations;
 }
 
 - (id)init
@@ -221,9 +139,12 @@
 -(id)wireUp
 {
     _scene = [ColladaParser parse:_colladaFile];
+
+    _animations = _scene->_animations;
+    
     [super wireUp];
  //   [self buildJointPainters];
-    [self buildMeshPainters];
+    [self buildNodePainters];
     if( _runEmitter )
     {
         LogLevel logl = TGGetLogLevel();
@@ -238,6 +159,8 @@
         pos.z = _cameraZ;
         self.camera.position = pos;
     }
+    
+    _scene = nil; // no need to hang on
     
     return self;
 }
@@ -281,9 +204,9 @@
         [painterObjects addObject:vb];
     };
     
-    if( _scene->_animations )
+    if( _animations )
     {
-        [_scene->_animations each:^(MeshAnimation * animation) {
+        [_animations each:^(MeshAnimation * animation) {
             createJointPainter((MeshSceneArmatureNode *)animation->_target);
         }];
     }
@@ -298,17 +221,17 @@
     _jointPainters = [NSArray arrayWithArray:painterObjects];
 }
 
--(void)buildMeshPainters
+-(void)buildNodePainters
 {
-    static MeshPainter * (^createMeshPainter)(MeshSceneMeshNode *, TG3dObject *) = nil;
+    static MeshNodePainter * (^createNodePainter)(MeshSceneMeshNode *, Node3d *) = nil;
     
-    createMeshPainter = ^MeshPainter *(MeshSceneMeshNode *node, TG3dObject *parent)
+    createNodePainter = ^MeshNodePainter *(MeshSceneMeshNode *node, Node3d *parent)
     {
-        MeshPainter * painterObj = [[MeshPainter alloc] initWithNode:node drawType:_bufferDrawType wireframe:_doWireframe];
+        MeshNodePainter * painterObj = [[MeshNodePainter alloc] initWithNode:node drawType:_bufferDrawType wireframe:_doWireframe];
         [parent appendChild:[painterObj wireUp]];
         if( node->_children )
             [node->_children each:^(id key, MeshSceneMeshNode *child) {
-                createMeshPainter(child,painterObj);
+                createNodePainter(child,painterObj);
             }];
         return painterObj;
     };
@@ -316,11 +239,11 @@
     NSMutableArray * painterObjects = [NSMutableArray new];
     
     [_scene->_meshes each:^(MeshSceneMeshNode *node) {
-        MeshPainter * painterObj = createMeshPainter(node,self);
+        MeshNodePainter * painterObj = createNodePainter(node,self);
         [painterObjects addObject:painterObj];
     }];
     
-    _meshPainters = [NSArray arrayWithArray:painterObjects];
+    _nodePainters = [NSArray arrayWithArray:painterObjects];
 }
 
 -(void)setColladaFile:(NSString *)colladaFile
@@ -360,18 +283,18 @@
     
 -(void)calculateInfluences
 {
-    [_meshPainters each:^(MeshPainter *meshPainter) { [meshPainter calculateInfluences]; }];
+ //   [_nodePainters each:^(MeshNodePainter *meshPainter) { [meshPainter calculateInfluences]; }];
 }
 
 -(void)update:(NSTimeInterval)dt
 {
     [super update:dt];
     
-    if ( _runAnimations && _scene->_animations )
+    if ( _runAnimations && _animations )
     {
         __block bool dirty = false;
         
-        [_scene->_animations each:^(MeshAnimation * animation) {
+        [_animations each:^(MeshAnimation * animation) {
             animation->_clock += dt;
             if( animation->_clock >= animation->_keyFrames[animation->_nextFrame] )
             {

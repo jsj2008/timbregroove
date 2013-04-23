@@ -7,7 +7,7 @@
 //
 
 #import "Fire.h"
-#import "TG3dObject.h"
+#import "Node3d.h"
 
 /*
  attribute vec4 position;
@@ -43,7 +43,7 @@ const char * _fire_shader_name = "FireShader";
     return self;
 }
 
--(void)prepareRender:(TG3dObject *)object
+-(void)prepareRender:(Node3d *)object
 {
     [super prepareRender:object];
     GLKMatrix4 pvm = [object calcPVM];

@@ -39,12 +39,8 @@
 
 -(void)bind:(Shader *)shader object:(Painter *)object
 {
- //   [shader writeFloats:gv_material numFloats:sizeof(_colors)/sizeof(float) data:&_colors];
-    
-    GLint loc = [shader location:gv_material];
-    glUniform4fv(loc, 4, (GLfloat *)&_colors);
-    
-    [shader writeToLocation:gv_shininess type:TG_FLOAT data:&_shininess];
+    [shader writeToLocation:gv_material   type:TG_VECTOR4 data:&_colors count:4];
+    [shader writeToLocation:gv_shininess  type:TG_FLOAT data:&_shininess];
     [shader writeToLocation:gv_doSpecular type:TG_BOOL data:&_doSpecular];
 }
 
@@ -57,6 +53,7 @@
 {
     _colors.ambient = ambient;
 }
+-(void)unbind:(Shader *)shader {}
 @end
 
 #pragma mark -

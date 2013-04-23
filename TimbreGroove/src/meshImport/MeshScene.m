@@ -86,9 +86,7 @@
         free(_vectorIndex);
 }
 
-// yea, yea, this is just the first pass
-// most of this should be cache and/or in the
-// shader, I get it.
+#if 0
 -(void)influence:(MeshGeometryBuffer *)buffer
             dest:(float *)dest
 {
@@ -150,7 +148,7 @@
     
     free(jointMats);
 }
-
+#endif
 @end
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@  MeshAnimation  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -171,15 +169,7 @@
 -(void)dealloc
 {
     TGLog(LLObjLifetime, @"%@ released", self);
-    
-    for( int i = 0; i < kNumMeshSemanticKeys; i++ )
-    {
-        if( _buffers[i].data )
-            free(_buffers[i].data);
-    }
-    
-    if( _indexBuffers )
-        free(_indexBuffers);
+    free(_buffer);
 }
 
 @end

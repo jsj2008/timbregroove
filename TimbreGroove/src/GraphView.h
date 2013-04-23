@@ -46,6 +46,6 @@
 -(void)triggersChanged:(Scene *)scene;
 -(void)pushTriggers;
 -(void)popTriggers;
--(Parameter *)paramWrapperForObject:(TG3dObject *)targetObject parameter:(Parameter *)parameterToWrap;
+-(Parameter *)paramWrapperForObject:(Node3d *)targetObject parameter:(Parameter *)parameterToWrap;
 @end
 

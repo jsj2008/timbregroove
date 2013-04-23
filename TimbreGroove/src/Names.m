@@ -52,6 +52,9 @@ NSString const * kParamColor            =   @"Shading";
 NSString const * kParamPlacement        =   @"Position";
 NSString const * kParamScale            =   @"Size";
 NSString const * kParamShape            =   @"Shape";
+NSString const * kParamPositionX        =   @"xPosition";
+NSString const * kParamPositionY        =   @"yPosition";
+NSString const * kParamPositionZ        =   @"zPosition";
 NSString const * kParamRotation         =   @"Rotation";
 NSString const * kParamRotationX        =   @"xRotation";
 NSString const * kParamRotationY        =   @"yRotation";
@@ -62,8 +65,12 @@ NSString const * kParamCameraRotationZ  =   @"zCameraRotation";
 NSString const * kParamCameraZ          =   @"zCamera";
 NSString const * kParamCameraReset      =   @"CameraReset";
 
-NSString const * kParamLightDirection   =   @"Light Direction";
-NSString const * kParamLightColor       =   @"Color of Light";
+NSString const * kParamLightX           =   @"LightX";
+NSString const * kParamLightY           =   @"LightY";
+NSString const * kParamLightZ           =   @"LightZ";
+NSString const * kParamLightIntensity   =   @"LightIntensity";
+
+
 NSString const * kParamNewElement       =   @"Create";
 NSString const * kParamSceneAnimation   =   @"SceneAnimation";
 

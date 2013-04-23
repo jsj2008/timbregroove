@@ -16,7 +16,7 @@
 @class GraphView;
 @class Scene;
 
-@interface TG3dObject : Node {
+@interface Node3d : Node {
 @protected
     Shader * _shader;
     NSTimeInterval _totalTime;

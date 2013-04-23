@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "Material.h"
 
-@class TG3dObject;
+@class Node3d;
 
 @interface FBO : Texture
 @property (nonatomic) GLuint width;
@@ -18,7 +18,7 @@
 - (id) initWithWidth:(GLuint)width
               height:(GLuint)height;
 
--(id)initWithObject:(TG3dObject *)object
+-(id)initWithObject:(Node3d *)object
               width:(GLuint)width
              height:(GLuint)height;
 

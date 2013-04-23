@@ -7,7 +7,7 @@
 //
 
 #import "Cloud.h"
-#import "TG3dObject.h"
+#import "Node3d.h"
 
 /*
  attribute vec4 position;
@@ -46,7 +46,7 @@ const char * _cloud_shader_name = "CloudShader";
     return self;
 }
 
--(void)prepareRender:(TG3dObject *)object
+-(void)prepareRender:(Node3d *)object
 {
     [super prepareRender:object];
     GLKMatrix4 pvm = [object calcPVM];

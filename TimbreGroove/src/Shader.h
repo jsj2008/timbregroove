@@ -27,7 +27,7 @@
 
  
 */
-@class TG3dObject;
+@class Node3d;
 
 @interface ShaderWrapper : NSObject {
 @protected
@@ -70,9 +70,9 @@
          andHeaders:(NSString *)headers;
 
 - (void)  writeToLocation:(int)indexIntoNames type:(TGUniformType)type data:(void*)data;
-- (void)  writeFloats:(int)indexIntoNames numFloats:(int)numFloats data:(void*)data;
+- (void)  writeToLocation:(int)indexIntoNames type:(TGUniformType)type data:(void*)data count:(unsigned int)count;
 
-- (void) prepareRender:(TG3dObject *)object;
+- (void) prepareRender:(Node3d *)object;
 
 // Get the gl location for a variable (uniform or attribute) if you want to call
 // glUniform* yourself:
@@ -97,11 +97,11 @@
               indexIntoNames:(int)idx
                        value:(float)value
                   neg11range:(FloatRange)range
-                   forObject:(TG3dObject *)target;
--(Parameter *)floatParameter:(NSMutableDictionary *)putHere indexIntoNames:(int)idx value:(float)value range:(FloatRange)range forObject:(TG3dObject *)obj;
--(Parameter *)floatParameter:(NSMutableDictionary *)putHere indexIntoNames:(int)idx forObject:(TG3dObject *)obj;
--(Parameter *)pointParameter:(NSMutableDictionary *)putHere indexIntoNames:(int)idx forObject:(TG3dObject *)obj;
--(Parameter *)vec3Parameter :(NSMutableDictionary *)putHere indexIntoNames:(int)idx forObject:(TG3dObject *)obj;
+                   forObject:(Node3d *)target;
+-(Parameter *)floatParameter:(NSMutableDictionary *)putHere indexIntoNames:(int)idx value:(float)value range:(FloatRange)range forObject:(Node3d *)obj;
+-(Parameter *)floatParameter:(NSMutableDictionary *)putHere indexIntoNames:(int)idx forObject:(Node3d *)obj;
+-(Parameter *)pointParameter:(NSMutableDictionary *)putHere indexIntoNames:(int)idx forObject:(Node3d *)obj;
+-(Parameter *)vec3Parameter :(NSMutableDictionary *)putHere indexIntoNames:(int)idx forObject:(Node3d *)obj;
 
 
 @property (nonatomic) bool acceptMissingVars;

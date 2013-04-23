@@ -368,8 +368,11 @@ typedef enum _sfpType {
         if( _locations[indexIntoNames] == -1 )
         {
             LogLevel logl = _acceptMissingVars ? LLShaderStuff : LLShitsOnFire;
-            TGLog(logl, @"Can't find attr/uniform for (%d) %s in program %d",
-                  indexIntoNames, _names[indexIntoNames],_program);
+            TGLog(logl, @"Can't find attr/uniform for (%d) %s in program %d %s",
+                  indexIntoNames,
+                  _names[indexIntoNames],
+                  _program,
+                  _acceptMissingVars ? "(eh, probablly fine)" : "(wups)");
             if( !_acceptMissingVars )
                 exit(-1);
         }
@@ -387,6 +390,11 @@ typedef enum _sfpType {
 
 - (void)writeToLocation:(int)indexIntoNames type:(TGUniformType)type data:(void*)data
 {
+    [self writeToLocation:indexIntoNames type:type data:data count:1];
+}
+
+- (void)writeToLocation:(int)indexIntoNames type:(TGUniformType)type data:(void*)data count:(unsigned int)count
+{
     if(  _locations[indexIntoNames] == -1 )
     {
         TGLog(LLShaderStuff, @"Trying to write to %s (%d) but doesn't exist",_names[indexIntoNames],indexIntoNames);
@@ -394,40 +402,38 @@ typedef enum _sfpType {
     }
     
     GLint location = _locations[indexIntoNames];
-    GLint i;
     
     switch(type)
     {
         case TG_FLOAT:
         case TG_BOOL_FLOAT:
-            glUniform1f(location, *(GLfloat *)data);
+            glUniform1fv(location, count, data);
             break;
             
         case TG_VECTOR2:
-            glUniform2fv(location, 1, data);
+            glUniform2fv(location, count, data);
             break;
             
         case TG_VECTOR3:
-            glUniform3fv(location, 1, data);
+            glUniform3fv(location, count, data);
             break;
             
         case TG_VECTOR4:
-            glUniform4fv(location, 1, data);
+            glUniform4fv(location, count, data);
             break;
             
         case TG_MATRIX3:
-            glUniformMatrix3fv(location, 1, 0, data);
+            glUniformMatrix3fv(location, count, GL_FALSE, data);
             break;
             
         case TG_MATRIX4:
-            glUniformMatrix4fv(location, 1, 0, data);
+            glUniformMatrix4fv(location, count, GL_FALSE, data);
             break;
             
         case TG_INT:
         case TG_TEXTURE:
         case TG_BOOL:
-            i = *(GLint *)data ? 1 : 0;
-            glUniform1i(location, i);
+            glUniform1iv(location, count, data);
             break;
     }
 }
@@ -437,7 +443,7 @@ typedef enum _sfpType {
     return _names[indexIntoNames];
 }
 
-- (void) prepareRender:(TG3dObject *)object
+- (void) prepareRender:(Node3d *)object
 {
     @synchronized(self) {
         ValueQueueItem * vqi = _valueQueue;
@@ -501,7 +507,7 @@ typedef enum _sfpType {
 
 -(Parameter *)floatParameter:(NSMutableDictionary *)putHere
        indexIntoNames:(int)idx
-            forObject:(TG3dObject *)target
+            forObject:(Node3d *)target
 {
     return [self floatParam:putHere indexIntoNames:idx value:0 range:EMPTY_RANGE forObject:target type:sfpt_straightUp];
 }
@@ -518,7 +524,7 @@ typedef enum _sfpType {
        indexIntoNames:(int)idx
                 value:(float)value
                 range:(FloatRange)range
-            forObject:(TG3dObject *)target
+            forObject:(Node3d *)target
 {
     return [self floatParam:putHere indexIntoNames:idx value:value range:range forObject:target type:sfpt_scaling];
 }
@@ -535,14 +541,14 @@ typedef enum _sfpType {
               indexIntoNames:(int)idx
                        value:(float)value
                   neg11range:(FloatRange)range
-                   forObject:(TG3dObject *)target
+                   forObject:(Node3d *)target
 {
     return [self floatParam:putHere indexIntoNames:idx value:value range:range forObject:target type:sfpt_neg11];
 }
 
 -(Parameter *)vecParameter:(NSMutableDictionary *)putHere
             indexIntoNames:(int)idx
-                 forObject:(TG3dObject *)target
+                 forObject:(Node3d *)target
                       type:(char)type
 {
     id block = nil;
@@ -592,7 +598,7 @@ typedef enum _sfpType {
 
 -(Parameter *)pointParameter:(NSMutableDictionary *)putHere
        indexIntoNames:(int)idx
-            forObject:(TG3dObject *)target
+            forObject:(Node3d *)target
 {
     
     return [self vecParameter:putHere indexIntoNames:idx forObject:target type:TGC_POINT];
@@ -606,7 +612,7 @@ typedef enum _sfpType {
 
 -(Parameter *)vec3Parameter :(NSMutableDictionary *)putHere
        indexIntoNames:(int)idx
-            forObject:(TG3dObject *)target
+            forObject:(Node3d *)target
 {
     return [self vecParameter:putHere indexIntoNames:idx forObject:target type:TGC_VECTOR3];
 }

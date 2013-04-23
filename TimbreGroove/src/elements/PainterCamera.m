@@ -12,14 +12,6 @@
 
 @implementation PainterCamera
 
--(void)getShaderFeatureNames:(NSMutableArray *)putHere
-{
-    
-}
--(void)setShader:(Shader *)shader;
-{
-    
-}
 -(void)bind:(Shader *)shader object:(Painter*)object
 {
     GLKMatrix4 mvm = object.modelView;
@@ -28,10 +20,5 @@
     [shader writeToLocation:gv_mvm type:TG_MATRIX4 data:mvm.m];
 }
 
--(void)unbind:(Shader *)shader
-{
-    
-}
-
-
+-(void)unbind:(Shader *)shader{}
 @end

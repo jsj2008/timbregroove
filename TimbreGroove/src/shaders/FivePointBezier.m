@@ -88,13 +88,13 @@ static const char * _sbp_var_names[] = {
 }
 
 
--(void)prepareRender:(TG3dObject *)object
+-(void)prepareRender:(Node3d *)object
 {
     [super prepareRender:object];
     GLKMatrix4 pvm = [object calcPVM];
     [self writeToLocation:spb_pvm type:TG_MATRIX4 data:pvm.m];
     [self writeToLocation:spb_color type:TG_VECTOR4 data:_color.v];
-    glUniform3fv(_locations[spb_controlPoints], 5, _controlPoints[0].v);
+    [self writeToLocation:spb_controlPoints type:TG_VECTOR3 data:&_controlPoints count:5];
 }
 
 @end

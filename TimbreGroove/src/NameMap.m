@@ -63,6 +63,11 @@ void ensureNameMapDict()
       @"kParamPlacement":  kParamPlacement ,
       @"kParamScale":  kParamScale ,
       @"kParamShape":  kParamShape ,
+      @"kParamPositionX":  kParamPositionX ,
+      @"kParamPositionY":  kParamPositionY ,
+      @"kParamPositionZ":  kParamPositionZ ,
+      
+      
       @"kParamRotation":  kParamRotation ,
       @"kParamRotationX":  kParamRotationX ,
       @"kParamRotationY":  kParamRotationY ,
@@ -74,9 +79,11 @@ void ensureNameMapDict()
       @"kParamSceneAnimation": kParamSceneAnimation,
       @"kParamCameraReset": kParamCameraReset,
       
+      @"kParamLightX": kParamLightX,
+      @"kParamLightY": kParamLightY,
+      @"kParamLightZ": kParamLightY,
+      @"kParamLightIntensity": kParamLightIntensity,
       
-      @"kParamLightDirection":  kParamLightDirection ,
-      @"kParamLightColor":  kParamLightColor ,
       @"kParamNewElement":  kParamNewElement ,
       
       @"kTriggerVPad1":  kTriggerVPad1 ,

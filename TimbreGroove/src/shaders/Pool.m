@@ -7,7 +7,7 @@
 //
 
 #import "Pool.h"
-#import "TG3dObject.h"
+#import "Node3d.h"
 #import "Painter.h"
 
 /*
@@ -75,7 +75,7 @@ const char * _pool_shader_name = "PoolShader";
     [self writeToLocation:pool_time type:TG_FLOAT data:&time];
 }
 
--(void)prepareRender:(TG3dObject *)object
+-(void)prepareRender:(Node3d *)object
 {
     [super prepareRender:object];
     GLKMatrix4 pvm = [object calcPVM];

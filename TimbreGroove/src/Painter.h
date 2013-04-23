@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "TG3dObject.h"
+#import "Node3d.h"
 #import "GenericShader.h"
 #import "ShaderFeature.h"
 
@@ -17,14 +17,13 @@ extern NSString const * kShaderFeatureNormal;
 extern NSString const * kShaderFeatureTexture;
 extern NSString const * kShaderFeatureTime;
 extern NSString const * kShaderFeatureDistortTexture;
-extern NSString const * kShaderFeatureSpotFilter;
 extern NSString const * kShaderFeatureBones;
 #endif
 
 @class MeshBuffer;
 @class Lights;
 
-@interface Painter : TG3dObject
+@interface Painter : Node3d
 
 @property (nonatomic,strong) Lights * lights;
 
@@ -37,7 +36,7 @@ extern NSString const * kShaderFeatureBones;
 -(void)addShaderFeature:(id<ShaderFeature>)feature;
 -(void)removeShaderFeature:(id<ShaderFeature>)feature;
 -(void)getShaderFeatureNames:(NSMutableArray *)putHere;
--(void)addIndexShape:(MeshBuffer *)indexBuffer
-            features:(NSArray *)shaderFeatures;
+-(void)addShape:(MeshBuffer *)indexBuffer
+       features:(NSArray *)shaderFeatures;
 @end
 

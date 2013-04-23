@@ -7,7 +7,7 @@
 //
 
 #import "FBO.h"
-#import "TG3dObject.h"
+#import "Node3d.h"
 
 @interface FBO() { 
     GLuint _fbo;
@@ -28,7 +28,7 @@
     return [self initWithWidth:width height:height type:0 format:0];
 }
 
--(id)initWithObject:(TG3dObject *)object width:(GLuint)width height:(GLuint)height
+-(id)initWithObject:(Node3d *)object width:(GLuint)width height:(GLuint)height
 {
     if( (self = [self initWithWidth:width height:height type:0 format:0]) )
     {

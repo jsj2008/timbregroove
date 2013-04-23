@@ -7,11 +7,11 @@
 //
 
 #import "TGTypes.h"
-#import "TG3dObject.h"
+#import "Node3d.h"
 
 @class ConfigGraphicElement;
 
-@interface Graph : TG3dObject
+@interface Graph : Node3d
 -(void)pause;
 -(void)activate;
 -(id)loadFromConfig:(ConfigGraphicElement *)config andViewSize:(CGSize)viewSize modal:(bool)modal;

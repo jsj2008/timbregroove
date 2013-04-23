@@ -17,30 +17,25 @@
 NSString const * kShaderFeatureColor           = @"#define COLOR\n";
 NSString const * kShaderFeatureNormal          = @"#define NORMAL\n";
 NSString const * kShaderFeatureTexture         = @"#define TEXTURE\n";
-NSString const * kShaderFeatureUColor          = @"#define U_COLOR\n";
 NSString const * kShaderFeatureTime            = @"#define TIME\n";
-NSString const * kShaderFeatureDistortTexture  = @"#define TEXTURE_DISTORT\n";
-NSString const * kShaderFeaturePsychedelic     = @"#define PSYCHEDELIC\n";
-NSString const * kShaderFeatureSpotFilter      = @"#define SPOT_FILTER\n";
 NSString const * kShaderFeatureBones           = @"#define BONES\n";
-NSString const * kShaderFeaturePhongLighting   = @"#define PHONG_LIGHTING\n";
-NSString const * kShaderFeatureLambertLighting = @"#define LAMBERT_LIGHTING\n";
-NSString const * kShaderFeatureAmbientLighting = @"#define AMBIENT_LIGHTING\n";
+NSString const * kShaderFeatureDistortTexture  = @"#define TEXTURE_DISTORT\n";
 
-@interface IndexShape : NSObject {
+@interface PainterShape : NSObject {
     @public
-    MeshBuffer * indexBuffer;
+    MeshBuffer * buffer;
     NSArray * features;
 }
 @end
-@implementation IndexShape
+@implementation PainterShape
 @end
 
 @implementation Painter {
     NSMutableArray * _buffers;
     NSMutableArray * _shaderFeatures;
     NSMutableArray * _shapes;
-    bool _cameraAddHack;
+    bool _wiredUp;
+    bool _cameredUp;
 }
 
 -(id)init
@@ -61,9 +56,13 @@ NSString const * kShaderFeatureAmbientLighting = @"#define AMBIENT_LIGHTING\n";
 
 -(id)wireUp
 {
-    [super wireUp];
-    [self createBuffer];
-    [self createShader]; // generic assumes materials & buffer exists
+    if( !_wiredUp )
+    {
+        [super wireUp];
+        [self createBuffer];
+        [self createShader]; // generic assumes materials & buffer exists
+        _wiredUp = true;
+    }
     return self;
 }
 
@@ -82,6 +81,33 @@ NSString const * kShaderFeatureAmbientLighting = @"#define AMBIENT_LIGHTING\n";
     }];
     
 }
+
+-(NSArray *)getAllFeatures
+{
+    NSMutableArray * allFeatures = [NSMutableArray arrayWithArray: _shaderFeatures ? _shaderFeatures : @[]];
+    if( _shapes )
+        [_shapes apply:^(PainterShape *shape) { if( shape->features ) [allFeatures addObjectsFromArray:shape->features]; }];
+    return allFeatures;
+}
+
+-(NSArray *)getAllBuffers
+{
+    NSMutableArray * allBuffers = [NSMutableArray arrayWithArray: _buffers ? _buffers : @[]];
+    if( _shapes )
+        [_shapes apply:^(PainterShape *shape) { [allBuffers addObject:shape->buffer]; }];
+    return allBuffers;
+}
+
+-(void)setShaderOnFeatures:(NSArray *)features shader:(Shader *)shader
+{
+    if( !shader )
+        return;
+    [features apply:^(id<ShaderFeature> feature) {
+        if( [feature respondsToSelector:@selector(setShader:)] )
+            [feature setShader:shader];
+    }];
+}
+
 -(void)createShader
 {
     Shader * shader = [GenericShader shaderWithHeaders:[self getShaderDefines]];
@@ -89,26 +115,21 @@ NSString const * kShaderFeatureAmbientLighting = @"#define AMBIENT_LIGHTING\n";
     
     [_buffers each:^(MeshBuffer * buffer) { [buffer getLocations:shader]; }];
 
-    if( _shaderFeatures )
-        [_shaderFeatures each:^(id<ShaderFeature> feature) { [feature setShader:shader]; }];
+    [self setShaderOnFeatures:[self getAllFeatures] shader:shader];
     
     if( _shapes )
-        [_shapes each:^(IndexShape * shape) { [shape->indexBuffer getLocations:shader]; }];
+        [_shapes each:^(PainterShape * shape) { [shape->buffer getLocations:shader]; }];
 }
 
 -(void)getShaderFeatureNames:(NSMutableArray *)putHere
-{
-    if( _shaderFeatures )
-        [_shaderFeatures apply:^(id<ShaderFeature> feature) { [feature getShaderFeatureNames:putHere]; }];
-    
-    if( _shapes )
-        [_shapes apply:^(IndexShape *shape) {
-            [shape->features apply:^(id<ShaderFeature> feature) { [feature getShaderFeatureNames:putHere]; }];
-        }];
+{    
+    [[self getAllFeatures] apply:^(id<ShaderFeature> feature) {
+        if( [feature respondsToSelector:@selector(getShaderFeatureNames:)] )
+           [feature getShaderFeatureNames:putHere];
+    }];
         
     NSMutableArray * arr = [NSMutableArray new];
-    for( MeshBuffer * buffer in _buffers )
-        [arr addObjectsFromArray:buffer.indicesIntoShaderNames];
+    [[self getAllBuffers] apply:^(MeshBuffer *buffer) { [arr addObjectsFromArray:buffer.indicesIntoShaderNames]; }];
 
     for( NSNumber * num in arr )
     {
@@ -119,10 +140,6 @@ NSString const * kShaderFeatureAmbientLighting = @"#define AMBIENT_LIGHTING\n";
                 break;
             case gv_normal:
                 [putHere addObject:kShaderFeatureNormal];
-                break;
-            case gv_boneWeights:
-                [putHere addObject:kShaderFeatureBones];
-                break;
             default:
                 break;
         }
@@ -145,10 +162,7 @@ NSString const * kShaderFeatureAmbientLighting = @"#define AMBIENT_LIGHTING\n";
     if( !_shaderFeatures )
         _shaderFeatures = [NSMutableArray new];
     [_shaderFeatures addObject:feature];
-    Shader * hasShader = [self hasShader];
-    if( hasShader )
-       [feature setShader:hasShader];
-    
+    [self setShaderOnFeatures:@[feature] shader:[self hasShader]];
 }
 
 -(void)removeShaderFeature:(id<ShaderFeature>)feature
@@ -156,23 +170,27 @@ NSString const * kShaderFeatureAmbientLighting = @"#define AMBIENT_LIGHTING\n";
     [_shaderFeatures removeObject:feature];
 }
 
--(void)addIndexShape:(MeshBuffer *)indexBuffer
-            features:(NSArray *)shaderFeatures
+-(void)addShape:(MeshBuffer *)buffer
+       features:(NSArray *)shaderFeatures
 {
     if( !_shapes )
         _shapes = [NSMutableArray new];
-    IndexShape * is = [IndexShape new];
-    is->indexBuffer = indexBuffer;
+    PainterShape * is = [PainterShape new];
+    is->buffer = buffer;
     is->features = shaderFeatures;
     [_shapes addObject:is];
+    [self setShaderOnFeatures:shaderFeatures shader:[self hasShader]];
 }
 
 -(void)render:(NSUInteger)w h:(NSUInteger)h
 {
-    if( !_cameraAddHack )
+    if( !_wiredUp )
+        [self wireUp];
+    
+    if( !_cameredUp )
     {
         [self addShaderFeature:(PainterCamera *)self.camera];
-        _cameraAddHack = true;
+        _cameredUp = true;
     }
     
     Shader * shader = self.shader;
@@ -182,64 +200,59 @@ NSString const * kShaderFeatureAmbientLighting = @"#define AMBIENT_LIGHTING\n";
     [shader prepareRender:self];
     
     if( _shaderFeatures )
-    {
-        // don't do each:block here b/c of threading concerns
-        for( id<ShaderFeature> feature in _shaderFeatures )
-            [feature bind:shader object:self];
-            
-    }
+        [_shaderFeatures each:^(id<ShaderFeature> feature) { [feature bind:shader object:self]; }];
 
-    // drawable meshes are (should be)
-    // sorted last
-    for( MeshBuffer * b in _buffers )
+    if( _buffers )
     {
-        [b bind];
-        if( b.drawable )
-            [b draw];
+        [_buffers each:^(MeshBuffer * b) {
+            [b bind];
+            if( b.drawable )
+                [b draw];
+        }];
+        [_buffers each:^(MeshBuffer * b) {
+            [b unbind];
+        }];
     }
     
     if( _shapes )
-    {
-        for( IndexShape * shape in _shapes )
-        {
-            if( shape->features )
-            {
-                for( id<ShaderFeature> feature in shape->features )
-                    [feature bind:shader object:self];
-            }
-            [shape->indexBuffer bind];
-            [shape->indexBuffer draw];
-            if( shape->features )
-            {
-                for( id<ShaderFeature> feature in shape->features )
-                    [feature unbind:shader];
-            }
-        }
-    }
-    
-    for( MeshBuffer * b in _buffers )
-        [b unbind];
-    
+        [self renderShapes:shader];
+
     if( _shaderFeatures )
-    {
-        // don't do each:block here b/c of threading concerns
-        for( id<ShaderFeature> feature in _shaderFeatures )
-            [feature unbind:shader];
-    }
+        [_shaderFeatures each:^(id<ShaderFeature> feature) { [feature unbind:shader]; }];
+
 }
 
+-(void)renderShapes:(Shader *)shader
+{
+    [_shapes each:^(PainterShape * shape) {
+        if( shape->features )
+            [shape->features each:^(id<ShaderFeature> feature) { [feature bind:shader object:self]; }];
+        [shape->buffer bind];
+        [shape->buffer draw];
+        if( shape->features )
+            [shape->features each:^(id<ShaderFeature> feature) { [feature unbind:shader]; }];
+    }];
+    
+}
 -(void)renderToCaptureAtBufferLocation:(GLint)location
 {
-    for( MeshBuffer * buffer in _buffers )
-    {
+    [[self getAllBuffers] each:^(MeshBuffer * buffer) {
         if( buffer.drawable )
         {
             [buffer bindToTempLocation:location];
             [buffer draw];
-            [buffer unbind];            
+            [buffer unbind];
         }
-    }
+    }];
 }
 
-
+- (void)getParameters:(NSMutableDictionary *)putHere
+{
+    [super getParameters:putHere];
+    
+    [[self getAllFeatures] each:^(id<ShaderFeature> feature) {
+        if( [feature respondsToSelector:@selector(getParameters:)] )
+            [feature getParameters:putHere];
+    }];
+}
 @end

@@ -78,13 +78,13 @@
 					<key>kTriggerTap1</key>
 					<string>RandomVibesNote</string>
 					<key>kTriggerPanY</key>
-					<string>kParamRotationX</string>
+					<string>kParamPositionZ</string>
 					<key>kTriggerPlayButton</key>
 					<string>kParamSceneAnimation</string>
 					<key>kTriggerDrag1</key>
 					<string>controllerPos</string>
 					<key>kTriggerPanX</key>
-					<string>kParamRotationY</string>
+					<string>kParamLightX</string>
 				</dict>
 			</array>
 			<key>icon</key>
@@ -486,13 +486,13 @@
 			<key>properties</key>
 			<dict>
 				<key>cameraZ</key>
-				<integer>-4</integer>
+				<real>-5.5</real>
 				<key>runEmitter</key>
 				<false/>
 				<key>scaleXYZ</key>
 				<real>1</real>
 				<key>colladaFile</key>
-				<string>boxStretch.dae</string>
+				<string>2boxes.dae</string>
 			</dict>
 		</dict>
 		<key>tex</key>
@@ -618,7 +618,7 @@
 		<key>LLMeshImporter</key>
 		<false/>
 		<key>LLGestureStuff</key>
-		<false/>
+		<true/>
 		<key>LLObjLifetime</key>
 		<true/>
 		<key>LLAudioTweaks</key>

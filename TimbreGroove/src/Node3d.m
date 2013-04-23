@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Ass Over Tea Kettle. All rights reserved.
 //
 
-#import "TG3dObject.h"
+#import "Node3d.h"
 #import "Camera.h"
 #import "Shader.h"
 #import "MeshBuffer.h"
@@ -17,11 +17,11 @@
 #import "State.h"
 #import "Names.h"
 
-@interface TG3dObject () {
+@interface Node3d () {
 }
 @end
 
-@implementation TG3dObject
+@implementation Node3d
 
 #pragma mark -
 #pragma mark Lifetime
@@ -129,10 +129,10 @@
 
 -(Shader *)shader
 {
-    TG3dObject * e = self;
+    Node3d * e = self;
     
     while( e && e->_shader == nil )
-        e = (TG3dObject *)e.parent;
+        e = (Node3d *)e.parent;
     
 #if DEBUG
     if( !e || !e->_shader )
@@ -146,19 +146,19 @@
 
 -(Shader *)hasShader
 {
-    TG3dObject * e = self;
+    Node3d * e = self;
     
     while( e && e->_shader == nil )
-        e = (TG3dObject *)e.parent;
+        e = (Node3d *)e.parent;
     return e ? e->_shader : nil;
 }
 
 -(Camera *)camera
 {
-    TG3dObject * e = self;
+    Node3d * e = self;
     
     while( e && e->_camera == nil )
-        e = (TG3dObject *)e.parent;
+        e = (Node3d *)e.parent;
 
 #if DEBUG
     if( !e || !e->_camera )
@@ -177,19 +177,19 @@
 
 -(GraphView *)hasView
 {
-    TG3dObject * e = self;
+    Node3d * e = self;
     
     while( e && e->_view == nil )
-        e = (TG3dObject *)e.parent;
+        e = (Node3d *)e.parent;
     return e ? e->_view : nil;
 }
 
 -(GraphView *)view
 {
-    TG3dObject * e = self;
+    Node3d * e = self;
     
     while( e && e->_view == nil )
-        e = (TG3dObject *)e.parent;
+        e = (Node3d *)e.parent;
     
 #if DEBUG
     if( !e || !e->_view )
@@ -208,6 +208,7 @@
 }
 
 #define RAD_TURNS(f) (f * (M_PI / 180))
+#define POS_MASSAGE(f) (f * 3)
 
 -(void)getParameters:(NSMutableDictionary *)parameters
 {
@@ -227,6 +228,22 @@
             GLKVector3 r = self.rotation;
             r.z += RAD_TURNS(f * 3);
             self.rotation = r;
+        }];
+        
+        parameters[kParamPositionX] = [Parameter withBlock:^(float f) {
+            GLKVector3 p = self.position;
+            p.x += POS_MASSAGE(f);
+            self.position = p;
+        }];
+        parameters[kParamPositionY] = [Parameter withBlock:^(float f) {
+            GLKVector3 p = self.position;
+            p.y += POS_MASSAGE(f);
+            self.position = p;
+        }];
+        parameters[kParamPositionZ] = [Parameter withBlock:^(float f) {
+            GLKVector3 p = self.position;
+            p.z += POS_MASSAGE(f);
+            self.position = p;
         }];
         parameters[kParamCameraRotationX] = [Parameter withBlock:^(float f) {
             Camera * camera = self.camera;

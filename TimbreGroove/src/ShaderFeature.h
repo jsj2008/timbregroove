@@ -10,11 +10,12 @@
 @class Painter;
 
 @protocol ShaderFeature <NSObject>
--(void)getShaderFeatureNames:(NSMutableArray *)putHere;
--(void)setShader:(Shader *)shader;
+@required
 -(void)bind:(Shader *)shader object:(Painter*)object;
 -(void)unbind:(Shader *)shader;
+@optional
+-(void)getShaderFeatureNames:(NSMutableArray *)putHere;
+-(void)setShader:(Shader *)shader;
+-(void)getParameters:(NSMutableDictionary *)putHere;
 @end
 
-@interface ShaderBinder : NSObject<ShaderFeature>
-@end

@@ -63,6 +63,7 @@ static float * parseFloats(NSString * str, int * numFloats)
     NSArray * burp = [str componentsSeparatedByString:@" "];
     unsigned long count = [burp count];
     float * p = malloc(sizeof(float)*count);
+//   TGLog(LLShitsOnFire, @"malloc: %p",p);
     *numFloats = (int)count;
     float * buffer = p;
     for( NSString * f in burp )
@@ -161,9 +162,17 @@ static int scanInt(NSString * str)
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@ IncomingVertexData  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+typedef struct _IncomingGeometryBuffer {
+    float * data;
+    int     stride;
+    int     numFloats;
+    int     numElements;
+} IncomingGeometryBuffer;
+
+
 @interface IncomingSourceTag : NSObject {
 @public
-    MeshGeometryBuffer _meta;
+    IncomingGeometryBuffer _bufferInfo;
 
     NSString *  _id;
     NSString *  _redirectTo;
@@ -188,7 +197,7 @@ static int scanInt(NSString * str)
     
 
     // filled in at finalize
-    MeshGeometry *         _meshGeometry;
+  //  MeshGeometry_OLD *         _meshGeometry;
 }
 @end
 @implementation IncomingMeshData
@@ -634,8 +643,8 @@ static const char * effectParamTags[] = {
             if( EQSTR(elementName,kTag_accessor) )
             {
                 IncomingSourceTag * ims = meshData->_tempIncomingSourceTag;
-                ims->_meta.numElements = scanInt(attributeDict[kAttr_count]);
-                ims->_meta.stride      = scanInt(attributeDict[kAttr_stride]);
+                ims->_bufferInfo.numElements = scanInt(attributeDict[kAttr_count]);
+                ims->_bufferInfo.stride      = scanInt(attributeDict[kAttr_stride]);
                 return;
             }
         }
@@ -739,8 +748,8 @@ static const char * effectParamTags[] = {
             if( EQSTR(elementName, kTag_source) )
             {
                 IncomingSourceTag * ivd = meshData->_tempIncomingSourceTag;
-                ivd->_meta.numFloats = _floatArrayCount;
-                ivd->_meta.data = _floatArray;
+                ivd->_bufferInfo.numFloats = _floatArrayCount;
+                ivd->_bufferInfo.data = _floatArray;
                 _floatArray = NULL;
                 _floatArrayCount = 0;
                 
@@ -1644,117 +1653,7 @@ foundCharacters:(NSString *)string
 
 }
 
--(void) flatten:(MeshGeometryBuffer *)b
-          index:(MeshGeometryIndexBuffer *)index
-numIndexBuffers:(unsigned int)numIndexBuffers
-{
-    unsigned int totalNumberOfIndices = 0;
-    for( int ii = 0; ii < numIndexBuffers; ii++ )
-    {
-        totalNumberOfIndices += index[ii].numIndices;
-    }
-    
-    unsigned int elementSize = b->stride;
-    float * newBuffer = malloc( sizeof(float) * totalNumberOfIndices * elementSize);
-    float * p = newBuffer;
-    float * old = b->data;
-    
-    for( int nn = 0; nn < numIndexBuffers; nn++ )
-    {
-        unsigned int * idx = index[nn].indexData;
-        int i;
-        for( int x = 0; x < index[nn].numIndices; x++ )
-        {
-            i = *idx++ * elementSize;
-            for( int e = 0; e < elementSize; e++ )
-                *p++ = old[i + e];
-        }
-        free(index[nn].indexData);
-        index[nn].indexData = NULL;
-    }
-    free(b->data);
-    b->data = newBuffer;
-    
-    b->numFloats = totalNumberOfIndices * elementSize;
-    b->numElements = totalNumberOfIndices;
-}
-
--(void)repackPolyIndex:(IncomingPolygonIndex *)polyTag
-                offset:(unsigned int)offset
-       primitiveStride:(unsigned int)primitiveStride
-          bufferTarget:(MeshGeometryIndexBuffer *)bufferTarget
-{
-    unsigned short * primitives    = polyTag->_primitives;
-    unsigned int     numPrimitives = polyTag->_numPrimitives;
-    unsigned short * vectorCounts  = polyTag->_vectorCounts;
-    
-    unsigned int     vectorCountIndex = 0;
-    unsigned int     primitiveIndex   = 0;
-    unsigned int *   newIndexBuffer   = malloc( sizeof(unsigned int) * numPrimitives * 5 );
-    unsigned int     newIBufferIdx    = 0;
-    
-    while(  primitiveIndex < numPrimitives )
-    {
-        int vectorPerShape = 3;
-        if( vectorCounts )
-            vectorPerShape = vectorCounts[ vectorCountIndex++ ];
-        
-        int oldIBufferIdx;
-        
-        if( vectorPerShape > 3 )
-        {
-            // triangulate
-            unsigned short oldIndices[10];
-            for( unsigned int v = 0; v < vectorPerShape; v++ )
-            {
-                oldIBufferIdx = primitiveIndex + ( v * primitiveStride ) + offset;
-                oldIndices[v] = primitives[ oldIBufferIdx ];
-            }
-            
-            for( unsigned int k = 1; k < vectorPerShape-1; k++ )
-            {
-                newIndexBuffer[newIBufferIdx++] = oldIndices[ 0 ];
-                newIndexBuffer[newIBufferIdx++] = oldIndices[ k ];
-                newIndexBuffer[newIBufferIdx++] = oldIndices[ k + 1 ];
-            }
-        }
-        else
-        {
-            for( unsigned int v = 0; v < vectorPerShape; v++ )
-            {
-                oldIBufferIdx = primitiveIndex + ( v * primitiveStride ) + offset;
-                newIndexBuffer[newIBufferIdx++] = primitives[ oldIBufferIdx ];
-            }
-        }
-        primitiveIndex += primitiveStride * vectorPerShape;
-    }
-    
-    bufferTarget->indexData  = realloc(newIndexBuffer, sizeof(unsigned int) * newIBufferIdx);
-    bufferTarget->numIndices = newIBufferIdx;
-}
-
--(void)repackTriangleIndex:(IncomingPolygonIndex *)polyTag
-                    offset:(unsigned int)offset
-           primitiveStride:(unsigned int)primitiveStride
-              bufferTarget:(MeshGeometryIndexBuffer *)bufferTarget
-{
-    unsigned short * primitives    = polyTag->_primitives;
-    unsigned int     numPrimitives = polyTag->_numPrimitives;
-    
-    unsigned int     newIndexCount    = numPrimitives / primitiveStride;
-    unsigned int *   newIndexBuffer   = malloc( sizeof(unsigned int) * newIndexCount);
-                                               
-    for( int i = 0; i < newIndexCount; i++ )
-    {
-        int value = primitives[ i * primitiveStride + offset];
-        newIndexBuffer[i] = value;
-    }
-    
-    bufferTarget->indexData  = newIndexBuffer;
-    bufferTarget->numIndices = newIndexCount;
-}
-
--(void)turnUp:(MeshGeometryBuffer *)bufferInfo
+-(void)turnUp:(IncomingGeometryBuffer *)bufferInfo
 {
     TGLog(LLShitsOnFire, @"Yea, unfortunately this code doesn't deal with anything but 'Y UP' colladas");
     exit(-1);
@@ -1774,15 +1673,6 @@ numIndexBuffers:(unsigned int)numIndexBuffers
     }
 #endif
     
-}
--(void)applyBindMatrix:(MeshGeometryBuffer *)bufferInfo
-            bindMatrix: (GLKMatrix4)bindMatrix
-{
-    GLKVector3 * buffer = (GLKVector3 *)bufferInfo->data;
-    for( int i = 0; i < bufferInfo->numElements; i++ )
-    {
-        buffer[i] = GLKMatrix4MultiplyVector3(bindMatrix, buffer[i]);
-    }
 }
 
 -(bool)isTriangulated:(IncomingPolygonIndex *)polyIndexTag
@@ -1806,6 +1696,193 @@ numIndexBuffers:(unsigned int)numIndexBuffers
     }
     
     return allThrees;
+}
+
+-(NSArray *)buildOpenGlBuffer:(IncomingMeshData *)imd
+                    skin:(MeshSkinning *)skin
+{
+    NSMutableArray * geometries = [NSMutableArray new];
+    
+    float * flattenedJointWeightIndex = NULL;
+    int numInfluencingJoints = 0;
+    
+    // A mesh in the Collada file can have several <triangle*>
+    // tags - each representing a shape, typically with a
+    // unique texture/material that are all draw from the
+    // same vertext <source>
+    
+    // *there might also be <polylist> tags but this function
+    // assumes the data has been triangulated at some point
+    
+    // The skinning information is shared between all shapes
+    // so we massage it before digging into the <triangle>s
+    if( skin )
+    {
+        // actually this is the number of POTENTIALLY influencing joints
+        numInfluencingJoints = [skin->_influencingJoints count];
+        
+        // we need random access to the weight/joint information to
+        // access it via the vertex index in the <triangle><p> we are
+        // parsing below. The native format is packed such that non-
+        // influencing joints do not appear. We will unpack to fixed
+        // length fields (len:=number of possibly influencing joints)
+        // and pad with 0 for irrelevant joints
+        size_t sz = sizeof(float) * skin->_numInfluencingJointCounts * numInfluencingJoints;
+        flattenedJointWeightIndex = malloc( sz );
+        memset(flattenedJointWeightIndex,0,sz);
+        float * p = flattenedJointWeightIndex;
+        unsigned int currPos = 0;
+        for( int i = 0; i < skin->_numInfluencingJointCounts; i++ )
+        {
+            // this is the actual number of joints applied to this vertex
+            int numberOfJointsApplied = skin->_influencingJointCounts[i];
+            unsigned int jointIndex;
+            unsigned int weightIndex;
+            for( int j = 0; j < numberOfJointsApplied; j++ )
+            {
+                jointIndex  = skin->_packedWeightIndices[ currPos + skin->_jointWOffset];
+                weightIndex = skin->_packedWeightIndices[ currPos + skin->_weightFOffset];
+                
+                currPos += 2;
+                
+                p[jointIndex] = skin->_weights[weightIndex];
+            }
+            
+            p += numInfluencingJoints;
+        }
+        
+        
+        free(skin->_influencingJointCounts);
+        skin->_influencingJointCounts = NULL;
+        free(skin->_packedWeightIndices);
+        skin->_packedWeightIndices = NULL;
+    }
+    
+    for( IncomingPolygonIndex * ipi in imd->_polygonTags)
+    {
+        IncomingSourceTag * isourceTags[kNumMeshSemanticKeys];
+        memset(isourceTags, 0, sizeof(isourceTags));
+        
+        unsigned int primitivesOffset[kNumMeshSemanticKeys];
+        unsigned int numVertices = ipi->_count * 3;
+        unsigned int primitiveStride = 0;
+        unsigned int numFloats = 0;
+        
+        for( int i = 0; i < ipi->_nextInput; i++ )
+        {
+            // dig out the relevant source tags
+            NSString * srcName = ipi->_sourceURL[i];
+            IncomingSourceTag * ist = imd->_sources[srcName];
+            if( ist->_redirectTo )
+                ist = imd->_sources[ist->_redirectTo];
+            MeshSemanticKey key = ipi->_semanticKey[i];
+            isourceTags[ key ] = ist;
+            
+            // calculate stride
+            primitivesOffset[ key ] = ipi->_offsets[i];
+            int thisOffset = primitivesOffset[key] + 1;
+            if( thisOffset > primitiveStride )
+                primitiveStride = thisOffset;
+            
+            // calculate num floats of target buffer
+            numFloats += numVertices * ist->_bufferInfo.stride;
+        }
+        
+        if( skin )
+        {
+            // 1 weight per vertext per joint
+            numFloats += numInfluencingJoints * numVertices;
+            /*
+            // yea, it's a litle buried here but it's definitely
+            // the most convient place to apply the BindShapeMatrix:
+            IncomingSourceTag * ist = isourceTags[ MSKPosition ];
+            GLKVector3 * vectors = (GLKVector3 *)ist->_bufferInfo.data;
+            for( int v = 0; v < ist->_bufferInfo.numElements; v++ )
+            {
+                vectors[v] = GLKMatrix4MultiplyVector3(skin->_bindShapeMatrix, vectors[v]);
+            }
+             */
+        }
+        
+        float * openGLBuffer = malloc( numFloats * sizeof(float) );
+        float * p  = openGLBuffer;
+        unsigned short int * primitives = ipi->_primitives;
+        unsigned int index;
+        unsigned int elementStride;
+        float * source;
+        
+        for( int i = 0; i < numVertices; i++ )
+        {
+            for( int key = 0; key < kNumMeshSemanticKeys; key++ )
+            {
+                IncomingSourceTag * ist = isourceTags[key];
+                if( !ist )
+                    continue;
+                
+                index = primitives[ primitivesOffset[ key ] ];
+                elementStride = ist->_bufferInfo.stride;
+                source = ist->_bufferInfo.data + (index * elementStride);
+                for( int stride = 0; stride < elementStride; stride++ )
+                    *p++ = *source++;
+            }
+            if( skin )
+            {
+                index = primitives[ primitivesOffset[ MSKPosition ] ];
+                float * weights = flattenedJointWeightIndex + (index * numInfluencingJoints);
+                for( int w = 0; w < numInfluencingJoints; w++ )
+                    *p++ = *weights++;
+            }
+            primitives += primitiveStride;
+        }
+
+        MeshGeometry * mg = [MeshGeometry new];
+        mg->_name         = imd->_geometryName;
+        mg->_materialName = ipi->_materialName;
+        mg->_numVertices  = numVertices;
+        mg->_buffer       = openGLBuffer;
+        
+        int strideCount = 0;
+        for( int key = 0; key < kNumMeshSemanticKeys; key++ )
+        {
+            IncomingSourceTag * ist = isourceTags[key];
+            if( !ist )
+                continue;
+            
+            VertexStride * vs = &mg->_strides[ strideCount ];
+            vs->glType = GL_FLOAT;
+            vs->numSize = sizeof(float);
+            vs->numbersPerElement = ist->_bufferInfo.stride;
+            vs->strideType = -1;
+            vs->indexIntoShaderNames = key; // lots of assumptions here
+            vs->location = -1;
+            ++strideCount;
+        }
+        
+        if( skin )
+        {
+            VertexStride * vs = &mg->_strides[ strideCount ];
+            vs->glType = GL_FLOAT;
+            vs->numSize = sizeof(float);
+            vs->numbersPerElement = numInfluencingJoints;
+            vs->strideType = -1;
+            vs->indexIntoShaderNames = MSKBoneWeights;
+            vs->location = -1;
+            ++strideCount;
+        }
+        mg->_numStrides = strideCount;
+        
+        [geometries addObject:mg];
+    }
+    
+    [imd->_sources each:^(id key, IncomingSourceTag * ist) {
+        if( ist->_bufferInfo.data )
+            free( ist->_bufferInfo.data );
+    }];
+
+    if( flattenedJointWeightIndex )
+        free(flattenedJointWeightIndex);
+    
+    return geometries;
 }
 
 -(MeshScene *)finalAssembly
@@ -1950,147 +2027,6 @@ numIndexBuffers:(unsigned int)numIndexBuffers
         return nil;
     };
     
-    
-    static MeshGeometry *  (^massageGeometry)(NSString *) = nil;
-    
-    massageGeometry = ^MeshGeometry * (NSString *name) {
-        MeshGeometry     * sceneGeometry = [MeshGeometry new];
-        IncomingMeshData * meshData      = _geometries[name];
-
-        meshData->_meshGeometry = sceneGeometry;
-
-        
-        // Step 1.
-        // -----------------------------------------------------------
-        // Populate the MeshGeometryBuffer structures for
-        // each semantic (UV, vertex, normal, etc.) with data & stride information
-        
-        // Big assumption(?): the indices in all triangle/polylist tags in this
-        // mesh all refer to the same buffer data (sources) with the same semantics
-        // and same offsets
-        
-        IncomingPolygonIndex * firstPolyIndexTag = meshData->_polygonTags[0];
-
-        // FYI 'primitives' refers to Collada's <p> tag
-        
-        NSString * srcName;
-        int primitiveStride = 0;
-        unsigned int primitivesOffset[kNumMeshSemanticKeys];
-        
-        for( int i = 0; i < firstPolyIndexTag->_nextInput; i++ )
-        {
-            srcName = firstPolyIndexTag->_sourceURL[i];
-            IncomingSourceTag * sourceTag = meshData->_sources[srcName];
-            if( sourceTag->_redirectTo )
-                sourceTag = meshData->_sources[sourceTag->_redirectTo];
-            
-            MeshSemanticKey key = firstPolyIndexTag->_semanticKey[i];
-            
-            primitivesOffset[key] = firstPolyIndexTag->_offsets[i];
-            
-            // The info is already there in the source tag,
-            // just copy it over...
-            sceneGeometry->_buffers[key] = sourceTag->_meta;
-            
-            int thisOffset = primitivesOffset[key] + 1;
-            if( thisOffset > primitiveStride )
-                primitiveStride = thisOffset;
-        }
-
-        // Step 2.
-        // -----------------------------------------------------------
-        // Extract (de-interlace) the relevant index buffer from
-        // the Triangle/Polylist tag for each buffer semantic
-        // e.g. Normal, UV, Vertex, etc.
-        
-        
-        int numPolyTags = [meshData->_polygonTags count];
-        int polyTagIndexCount = 0;
-        
-        size_t sz = sizeof(MeshGeometryIndexBuffer) * numPolyTags * kNumMeshSemanticKeys;
-        MeshGeometryIndexBuffer * tempDeinterlacedIndexBuffers = malloc(sz);
-        memset(tempDeinterlacedIndexBuffers, 0, sz);
-        
-        for( IncomingPolygonIndex * polyIndexTag in meshData->_polygonTags )
-        {
-            bool triangulated = [self isTriangulated:polyIndexTag];
-            
-            for( MeshSemanticKey key = 0; key < kNumMeshSemanticKeys; key++ )
-            {
-                MeshGeometryBuffer *buffer = sceneGeometry->_buffers + key;
-                
-                if( buffer->data )
-                {
-                    MeshGeometryIndexBuffer extractedIndexBuffers = { 0, 0 };
-                    
-                    // N.B. these do a malloc()
-                    
-                    if( triangulated )
-                        [self repackTriangleIndex:polyIndexTag
-                                           offset:primitivesOffset[key]
-                                  primitiveStride:primitiveStride
-                                     bufferTarget:&extractedIndexBuffers];
-                    else
-                        [self repackPolyIndex:polyIndexTag
-                                       offset:primitivesOffset[key]
-                              primitiveStride:primitiveStride
-                                 bufferTarget:&extractedIndexBuffers];
-                    
-                    tempDeinterlacedIndexBuffers[ (key * numPolyTags) + polyTagIndexCount ] = extractedIndexBuffers;
-                }
-            }
-            
-            if(polyIndexTag->_primitives)
-            {
-                free(polyIndexTag->_primitives);
-                polyIndexTag->_primitives = NULL;
-            }
-            if(polyIndexTag->_vectorCounts)
-            {
-                free(polyIndexTag->_vectorCounts);
-                polyIndexTag->_vectorCounts = NULL;
-            }
-            
-            ++polyTagIndexCount;
-        }
-        
-        // Step 3.
-        // -----------------------------------------------------------
-        // flatten all semantic buffers (except for the vertex/shapes)
-        // b/c OpenGL only allows one index per shader call
-        
-        for( MeshSemanticKey key = 0; key < kNumMeshSemanticKeys; key++ )
-        {
-            MeshGeometryBuffer *buffer = sceneGeometry->_buffers + key;
-            
-            if( buffer->data )
-            {
-                if( key == MSKPosition + 1000 )
-                {
-                    size_t sz = sizeof(MeshGeometryIndexBuffer) * numPolyTags;
-                    sceneGeometry->_indexBuffers = malloc(sz);
-                    memcpy(sceneGeometry->_indexBuffers, &tempDeinterlacedIndexBuffers[MSKPosition], sz );
-                    sceneGeometry->_numIndexBuffers = numPolyTags;
-                }
-                else
-                {
-                    [self flatten:buffer
-                            index:&tempDeinterlacedIndexBuffers[ key * numPolyTags ]
-                  numIndexBuffers:numPolyTags];
-                }
-            }
-        }
-        
-        free( tempDeinterlacedIndexBuffers );
-        
-        
-        if( _up != 'y' )
-            [self turnUp:sceneGeometry->_buffers];
-        
-        return sceneGeometry;
-    };
-    
-
     static void (^passFour)(id,IncomingNode*) = nil;
     
     passFour = ^(id key, IncomingNode *inode)
@@ -2098,7 +2034,10 @@ numIndexBuffers:(unsigned int)numIndexBuffers
         if( inode->_msnType == MSNT_Mesh )
         {
             MeshSceneMeshNode * runtimeNode = meshNodes[inode->_id];
-            runtimeNode->_geometry = massageGeometry( inode->_geometryName );
+            
+            IncomingMeshData * meshData      = _geometries[inode->_geometryName];
+            
+            runtimeNode->_geometries = [self buildOpenGlBuffer:meshData skin:nil];
         }
         else if( inode->_msnType == MSNT_SkinnedMesh )
         {
@@ -2156,11 +2095,11 @@ numIndexBuffers:(unsigned int)numIndexBuffers
             
             MeshSceneMeshNode * runtimeNode = meshNodes[inode->_id];
             runtimeNode->_skin = sceneSkin;
-            runtimeNode->_geometry = massageGeometry( iskin->_meshSource );
-            
-            [self applyBindMatrix:runtimeNode->_geometry->_buffers
-                       bindMatrix:sceneSkin->_bindShapeMatrix];
+            runtimeNode->_geometries = [self buildOpenGlBuffer:_geometries[iskin->_meshSource] skin:sceneSkin];
         }
+        
+//        if( _up != 'y' )
+//            [self turnUp:sceneGeometry->_buffers];
         
         if( inode->_children )
             [inode->_children each:passFour];
@@ -2186,7 +2125,7 @@ numIndexBuffers:(unsigned int)numIndexBuffers
                 meshData = _geometries[ skin->_meshSource ];
             }
             
-            NSMutableArray * materials = nil;
+            NSMutableDictionary * materials = nil;
             
             for( IncomingPolygonIndex * ipi in meshData->_polygonTags )
             {
@@ -2222,8 +2161,8 @@ numIndexBuffers:(unsigned int)numIndexBuffers
                         }
                     }
                     if( !materials )
-                        materials = [NSMutableArray new];
-                    [materials addObject:mm];
+                        materials = [NSMutableDictionary new];
+                    materials[ipi->_materialName] = mm;
                 }
             }
             
@@ -2236,28 +2175,9 @@ numIndexBuffers:(unsigned int)numIndexBuffers
     };
     
     [_nodes each:passFive];
-    
+
     if( [_animations count] )
     {
-        static MeshSceneMeshNode * (^findMeshNodeWithGeometryName)(NSString *) = nil;
-        
-        findMeshNodeWithGeometryName = ^MeshSceneMeshNode *(NSString *name)
-        {
-            MeshSceneMeshNode * meshNode = meshNodes[name];
-            if( meshNode )
-                return meshNode;
-            IncomingMeshData * imd = _geometries[name];
-            if( !imd )
-                return nil;
-            for( NSString * mname in meshNodes )
-            {
-                meshNode = meshNodes[mname];
-                if( meshNode->_geometry ==  imd->_meshGeometry )
-                    return meshNode;
-            }
-            return nil;
-        };
-        
         NSMutableArray * sceneAnimations = [NSMutableArray new];
         
         for( NSString * namePath in _animations )
@@ -2289,11 +2209,8 @@ numIndexBuffers:(unsigned int)numIndexBuffers
                 }
                 else
                 {
-                    sceneAnim->_target = findMeshNodeWithGeometryName(parts[0]);
+                    TGLog(LLShitsOnFire, @"Can't find the target joint animation node: %@/%@ (yea, it has to be joint)", parts[0],parts[1]);
                 }
-                if( !sceneAnim->_target )
-                    TGLog(LLShitsOnFire, @"Can't find the target animation node: %@/%@", parts[0],parts[1]);
-                
                 sceneAnim->_property = parts[1];
                 [sceneAnimations addObject:sceneAnim];
             }
@@ -2301,7 +2218,6 @@ numIndexBuffers:(unsigned int)numIndexBuffers
         
         scene->_animations = [NSArray arrayWithArray:sceneAnimations];
         
-        findMeshNodeWithGeometryName = nil;
     }
     else
     {
@@ -2312,11 +2228,10 @@ numIndexBuffers:(unsigned int)numIndexBuffers
     // release blocks b/c they hold refs to self
     passOne = nil;
     passTwo = nil;
-    _findJointWithName = nil;
-    findJointWithName = nil;
-    massageGeometry = nil;
     passFour = nil;
     passFive = nil;
+    _findJointWithName = nil;
+    findJointWithName = nil;
     
     return scene;
 }

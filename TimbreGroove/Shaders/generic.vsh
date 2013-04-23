@@ -20,8 +20,41 @@ varying vec4 v_vertex_color;
 #endif
 
 #ifdef BONES
-attribute int   a_boneIndex;
-attribute float a_boneWeights;
+
+uniform int  u_numJoints;
+uniform mat4 u_jointMats[9];
+uniform mat4 u_jointInvMats[9];
+
+// ok, so this is not really a mat3, it's a variable array
+// of floats and limits the number of influencing joints
+// to 9 which about 6 more than you should need
+
+attribute mat3 a_boneWeights;
+
+void doSkinning()
+{
+    vec4 pos = vec4(0);
+    
+    for( int i = 0; i < u_numJoints; i++ )
+    {
+        for( int c = 0; c < 3; c++ )
+        {
+            for( int r = 0; r < 3; r++ )
+            {
+                float weight = a_boneWeights[c][r];
+                
+                pos += u_jointMats[i] * a_position;
+                pos += u_jointInvMats[i] * pos;
+                
+                if( ++i == u_numJoints )
+                    break;
+            }
+            
+            if( i == u_numJoints )
+                break;
+        }
+    }
+}
 #endif
 
 #ifdef NORMAL
@@ -187,6 +220,10 @@ void main()
     
 #ifdef TIME
     v_time = u_time;
+#endif
+
+#ifdef BONES
+    doSkinning();
 #endif
 
 	gl_Position = u_pvm * a_position;

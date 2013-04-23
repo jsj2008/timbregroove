@@ -18,7 +18,7 @@
 
 #import "PainterCamera.h"
 
-typedef void (^RecurseBlock)(TG3dObject *);
+typedef void (^RecurseBlock)(Node3d *);
 
 @interface GraphTriggers : NSObject {
     @public
@@ -51,7 +51,7 @@ typedef void (^RecurseBlock)(TG3dObject *);
     // only have one top level node. Keep a pointer
     // so we don't do any unnecessary ARC calls into _kids[]
     // during update and render
-     __weak  TG3dObject * _single;
+     __weak  Node3d * _single;
     
     NSTimeInterval _runningTime;
     bool _isPaused;
@@ -59,7 +59,7 @@ typedef void (^RecurseBlock)(TG3dObject *);
     GraphTriggers *  _currentTriggers;
 }
 
-@property (nonatomic,weak) TG3dObject * modal;
+@property (nonatomic,weak) Node3d * modal;
 @end
 @implementation Graph
 
@@ -69,7 +69,7 @@ typedef void (^RecurseBlock)(TG3dObject *);
 {
     static RecurseBlock generalIter;
 
-    generalIter = ^(TG3dObject * obj)
+    generalIter = ^(Node3d * obj)
     {
         if( obj != self )
             [obj performSelector:selector withObject:param];
@@ -106,7 +106,7 @@ typedef void (^RecurseBlock)(TG3dObject *);
 -(id)loadFromConfig:(ConfigGraphicElement *)config andViewSize:(CGSize)viewSize modal:(bool)modal
 {
     Class klass = NSClassFromString(config.instanceClass);
-    TG3dObject * node = [[klass alloc] init];
+    Node3d * node = [[klass alloc] init];
     [self appendChild:node];
     NSDictionary * userData = config.customProperties;
     if( userData )
@@ -118,7 +118,7 @@ typedef void (^RecurseBlock)(TG3dObject *);
     return node;
 }
 
--(void)setModal:(TG3dObject *)modal
+-(void)setModal:(Node3d *)modal
 {
     GraphView * view = [self hasView];
     
@@ -163,7 +163,7 @@ typedef void (^RecurseBlock)(TG3dObject *);
 
 -(void)appendChild:(Node *)child
 {    
-    _single = _kids == nil ? (TG3dObject*)child : nil;
+    _single = _kids == nil ? (Node3d*)child : nil;
     [super appendChild:child];
 }
 
@@ -185,14 +185,14 @@ typedef void (^RecurseBlock)(TG3dObject *);
     
    static RecurseBlock wipeTriggers;
     
-    wipeTriggers = ^(TG3dObject * obj)
+    wipeTriggers = ^(Node3d * obj)
     {
         [obj triggersChanged:nil];
         if( obj->_kids )
             [obj->_kids each:wipeTriggers];
     };
     
-    wipeTriggers((TG3dObject *)child);
+    wipeTriggers((Node3d *)child);
     wipeTriggers = nil;
     child = nil;
 }
@@ -226,7 +226,7 @@ typedef void (^RecurseBlock)(TG3dObject *);
     
     static RecurseBlock updateBlock;
     
-    updateBlock = ^(TG3dObject *n)
+    updateBlock = ^(Node3d *n)
     {
         if( n != self )
         {
@@ -255,7 +255,7 @@ typedef void (^RecurseBlock)(TG3dObject *);
     
     static RecurseBlock renderBlock;
     
-    renderBlock = ^(TG3dObject *n)
+    renderBlock = ^(Node3d *n)
     {
         if( n != self )
             [n render:w h:h];

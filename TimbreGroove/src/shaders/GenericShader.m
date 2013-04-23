@@ -18,7 +18,6 @@ static const char * _generic_shader_var_names[NUM_GENERIC_VARIABLES] = {
     "a_normal",
     "a_uv",
     "a_color",
-    "a_boneIndex",
     "a_boneWeights",
     
     "u_pvm",
@@ -27,6 +26,10 @@ static const char * _generic_shader_var_names[NUM_GENERIC_VARIABLES] = {
 
     "u_sampler",
 
+    "u_jointMats",
+    "u_jointInvMats",
+    "u_numJoints",
+    
     "u_material",
     "u_shininess",
     "u_doSpecular",

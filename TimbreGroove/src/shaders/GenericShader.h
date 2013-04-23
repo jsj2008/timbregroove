@@ -14,7 +14,6 @@ typedef enum {
     gv_normal,
     gv_uv,
     gv_acolor,
-    gv_boneIndex,
     gv_boneWeights,
     
     GV_LAST_ATTR = gv_boneWeights,
@@ -25,6 +24,11 @@ typedef enum {
     
     // Texture
     gv_sampler,
+    
+    // Skinning
+    gv_jointMats,
+    gv_jointInvMats,
+    gv_numJoints,
     
     // Material
     gv_material,

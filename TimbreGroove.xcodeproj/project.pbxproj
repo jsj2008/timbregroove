@@ -76,7 +76,6 @@
 		5712FB4416B1B8B1004D62AE /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5712FB4316B1B8B1004D62AE /* Accelerate.framework */; };
 		571470571706771F00383D04 /* ColladaParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 571470541706771F00383D04 /* ColladaParser.m */; };
 		571470581706771F00383D04 /* MeshScene.m in Sources */ = {isa = PBXBuildFile; fileRef = 571470561706771F00383D04 /* MeshScene.m */; };
-		5714705B1706788800383D04 /* MeshSceneBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = 5714705A1706788800383D04 /* MeshSceneBuffer.m */; };
 		5714705E17067D3100383D04 /* MeshImportPainter.m in Sources */ = {isa = PBXBuildFile; fileRef = 5714705D17067D3100383D04 /* MeshImportPainter.m */; };
 		5714706417069A3000383D04 /* numText.png in Resources */ = {isa = PBXBuildFile; fileRef = 5714706317069A3000383D04 /* numText.png */; };
 		5714713F16C8451E00CA2A69 /* Midi.m in Sources */ = {isa = PBXBuildFile; fileRef = 5714713E16C8451E00CA2A69 /* Midi.m */; };
@@ -114,7 +113,7 @@
 		572EB213167878FD0062F290 /* Node.m in Sources */ = {isa = PBXBuildFile; fileRef = 572EB212167878FD0062F290 /* Node.m */; };
 		572EB21A16787AFF0062F290 /* Shader.m in Sources */ = {isa = PBXBuildFile; fileRef = 572EB21916787AFF0062F290 /* Shader.m */; };
 		572EB21F16788D170062F290 /* MeshBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = 572EB21E16788D170062F290 /* MeshBuffer.m */; };
-		572EB2261678BBCA0062F290 /* TG3dObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 572EB2251678BBCA0062F290 /* TG3dObject.m */; };
+		572EB2261678BBCA0062F290 /* Node3d.m in Sources */ = {isa = PBXBuildFile; fileRef = 572EB2251678BBCA0062F290 /* Node3d.m */; };
 		572EB2291678BF740062F290 /* Camera.m in Sources */ = {isa = PBXBuildFile; fileRef = 572EB2281678BF740062F290 /* Camera.m */; };
 		572EB27F167A9B160062F290 /* config.plist in Resources */ = {isa = PBXBuildFile; fileRef = 572EB27E167A9B160062F290 /* config.plist */; };
 		572EB290167AC0020062F290 /* fountain.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1F416786C630062F290 /* fountain.fsh */; };
@@ -130,6 +129,7 @@
 		5751F2E316D5FA6B00144F2B /* gridtest.png in Resources */ = {isa = PBXBuildFile; fileRef = 5751F2E216D5FA6B00144F2B /* gridtest.png */; };
 		5751F2E616D5FACB00144F2B /* Ripple.m in Sources */ = {isa = PBXBuildFile; fileRef = 5751F2E516D5FACB00144F2B /* Ripple.m */; };
 		5758FDED16D06648003913D1 /* funkRiff1.mid in Resources */ = {isa = PBXBuildFile; fileRef = 5758FDEC16D06648003913D1 /* funkRiff1.mid */; };
+		5759AD1E172482AF00E1BFBB /* 2boxes.dae in Resources */ = {isa = PBXBuildFile; fileRef = 5759AD1D172482AF00E1BFBB /* 2boxes.dae */; };
 		575AA12616ADA61F00635A76 /* Pool.m in Sources */ = {isa = PBXBuildFile; fileRef = 575AA12516ADA61F00635A76 /* Pool.m */; };
 		575AA12916ADAF6900635A76 /* Light.m in Sources */ = {isa = PBXBuildFile; fileRef = 575AA12816ADAF6900635A76 /* Light.m */; };
 		575AA12B16ADBB9500635A76 /* pool.png in Resources */ = {isa = PBXBuildFile; fileRef = 575AA12A16ADBB9500635A76 /* pool.png */; };
@@ -179,6 +179,7 @@
 		578292C9169A87B10053ADCD /* test.png in Resources */ = {isa = PBXBuildFile; fileRef = 578292C8169A87B00053ADCD /* test.png */; };
 		578292CB169A8B660053ADCD /* imageBaker.png in Resources */ = {isa = PBXBuildFile; fileRef = 578292CA169A8B650053ADCD /* imageBaker.png */; };
 		5787A701171FC89A00861C01 /* ShaderTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 5787A700171FC89900861C01 /* ShaderTimer.m */; };
+		57889C1C17259B2A00B83495 /* Joints.m in Sources */ = {isa = PBXBuildFile; fileRef = 57889C1B17259B2900B83495 /* Joints.m */; };
 		5798B05916BA00F70093F473 /* pause.png in Resources */ = {isa = PBXBuildFile; fileRef = 5798B05716BA00F70093F473 /* pause.png */; };
 		5798B05A16BA00F70093F473 /* play.png in Resources */ = {isa = PBXBuildFile; fileRef = 5798B05816BA00F70093F473 /* play.png */; };
 		579AD1A916C40B670071AA9A /* Config.m in Sources */ = {isa = PBXBuildFile; fileRef = 579AD1A816C40B670071AA9A /* Config.m */; };
@@ -213,7 +214,6 @@
 		57D0EBD616D43CD600DBF457 /* GraphView+Touches.m in Sources */ = {isa = PBXBuildFile; fileRef = 57D0EBD516D43CD600DBF457 /* GraphView+Touches.m */; };
 		57D0EBD916D4B1C500DBF457 /* TriggerMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 57D0EBD816D4B1C400DBF457 /* TriggerMap.m */; };
 		57D0EBDC16D4BA5400DBF457 /* Names.m in Sources */ = {isa = PBXBuildFile; fileRef = 57D0EBDB16D4BA5300DBF457 /* Names.m */; };
-		57DF21FC1722792E000C5225 /* ShaderFeature.m in Sources */ = {isa = PBXBuildFile; fileRef = 57DF21FB1722792E000C5225 /* ShaderFeature.m */; };
 		57DF536A16DC1A6000990B8D /* Serenity.m in Sources */ = {isa = PBXBuildFile; fileRef = 57DF536916DC1A6000990B8D /* Serenity.m */; };
 		57DF9C8116B5B9AB00050635 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57DF9C8016B5B9AB00050635 /* AVFoundation.framework */; };
 		57DF9C8416B5BE2500050635 /* SoundSystem.m in Sources */ = {isa = PBXBuildFile; fileRef = 57DF9C8316B5BE2500050635 /* SoundSystem.m */; };
@@ -334,8 +334,6 @@
 		571470541706771F00383D04 /* ColladaParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ColladaParser.m; sourceTree = "<group>"; };
 		571470551706771F00383D04 /* MeshScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MeshScene.h; sourceTree = "<group>"; };
 		571470561706771F00383D04 /* MeshScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MeshScene.m; sourceTree = "<group>"; };
-		571470591706788800383D04 /* MeshSceneBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MeshSceneBuffer.h; sourceTree = "<group>"; };
-		5714705A1706788800383D04 /* MeshSceneBuffer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MeshSceneBuffer.m; sourceTree = "<group>"; };
 		5714705C17067D3100383D04 /* MeshImportPainter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MeshImportPainter.h; sourceTree = "<group>"; };
 		5714705D17067D3100383D04 /* MeshImportPainter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MeshImportPainter.m; sourceTree = "<group>"; };
 		5714706317069A3000383D04 /* numText.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = numText.png; sourceTree = "<group>"; };
@@ -390,8 +388,8 @@
 		572EB21B16788C060062F290 /* TimbreGroove-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "TimbreGroove-Info.plist"; path = "TimbreGroove/TimbreGroove-Info.plist"; sourceTree = SOURCE_ROOT; };
 		572EB21D16788D170062F290 /* MeshBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MeshBuffer.h; sourceTree = "<group>"; };
 		572EB21E16788D170062F290 /* MeshBuffer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = MeshBuffer.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
-		572EB2241678BBCA0062F290 /* TG3dObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TG3dObject.h; sourceTree = "<group>"; };
-		572EB2251678BBCA0062F290 /* TG3dObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TG3dObject.m; sourceTree = "<group>"; };
+		572EB2241678BBCA0062F290 /* Node3d.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Node3d.h; sourceTree = "<group>"; };
+		572EB2251678BBCA0062F290 /* Node3d.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Node3d.m; sourceTree = "<group>"; };
 		572EB2271678BF740062F290 /* Camera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Camera.h; sourceTree = "<group>"; };
 		572EB2281678BF740062F290 /* Camera.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = Camera.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		572EB27E167A9B160062F290 /* config.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = config.plist; sourceTree = "<group>"; };
@@ -414,6 +412,7 @@
 		5751F2E216D5FA6B00144F2B /* gridtest.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = gridtest.png; sourceTree = "<group>"; };
 		5751F2E516D5FACB00144F2B /* Ripple.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Ripple.m; sourceTree = "<group>"; };
 		5758FDEC16D06648003913D1 /* funkRiff1.mid */ = {isa = PBXFileReference; lastKnownFileType = audio.midi; path = funkRiff1.mid; sourceTree = "<group>"; };
+		5759AD1D172482AF00E1BFBB /* 2boxes.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = 2boxes.dae; sourceTree = "<group>"; };
 		575AA12316ADA61500635A76 /* Pool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Pool.h; sourceTree = "<group>"; };
 		575AA12516ADA61F00635A76 /* Pool.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Pool.m; sourceTree = "<group>"; };
 		575AA12716ADAF6900635A76 /* Light.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Light.h; path = ../Light.h; sourceTree = "<group>"; };
@@ -483,6 +482,8 @@
 		578292CA169A8B650053ADCD /* imageBaker.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = imageBaker.png; sourceTree = "<group>"; };
 		5787A6FF171FC89900861C01 /* ShaderTimer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ShaderTimer.h; path = TimbreGroove/src/ShaderTimer.h; sourceTree = SOURCE_ROOT; };
 		5787A700171FC89900861C01 /* ShaderTimer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ShaderTimer.m; path = TimbreGroove/src/ShaderTimer.m; sourceTree = SOURCE_ROOT; };
+		57889C1A17259B2900B83495 /* Joints.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Joints.h; sourceTree = "<group>"; };
+		57889C1B17259B2900B83495 /* Joints.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Joints.m; sourceTree = "<group>"; };
 		5790068616841F3B0068659F /* Interactive.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Interactive.h; sourceTree = "<group>"; };
 		5798B05716BA00F70093F473 /* pause.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = pause.png; sourceTree = "<group>"; };
 		5798B05816BA00F70093F473 /* play.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = play.png; sourceTree = "<group>"; };
@@ -543,7 +544,6 @@
 		57D0EBD816D4B1C400DBF457 /* TriggerMap.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TriggerMap.m; sourceTree = "<group>"; };
 		57D0EBDA16D4BA5200DBF457 /* Names.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Names.h; sourceTree = "<group>"; };
 		57D0EBDB16D4BA5300DBF457 /* Names.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Names.m; sourceTree = "<group>"; };
-		57DF21FB1722792E000C5225 /* ShaderFeature.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ShaderFeature.m; sourceTree = "<group>"; };
 		57DF536916DC1A6000990B8D /* Serenity.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Serenity.m; sourceTree = "<group>"; };
 		57DF9C8016B5B9AB00050635 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		57DF9C8216B5BE2500050635 /* SoundSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SoundSystem.h; sourceTree = "<group>"; };
@@ -625,6 +625,7 @@
 		5700235516A55460006F0E8E /* models */ = {
 			isa = PBXGroup;
 			children = (
+				5759AD1D172482AF00E1BFBB /* 2boxes.dae */,
 				57E7EB9C170FA83E00D3DC88 /* ballStretch.dae */,
 				57E7EB98170F6B7100D3DC88 /* boxStretch.dae */,
 				5705272E1719F69F00E17825 /* butterfly.dae */,
@@ -779,8 +780,6 @@
 				571470551706771F00383D04 /* MeshScene.h */,
 				571470561706771F00383D04 /* MeshScene.m */,
 				577E7ED4170E1A1F009E9916 /* MeshScene+Emitter.m */,
-				571470591706788800383D04 /* MeshSceneBuffer.h */,
-				5714705A1706788800383D04 /* MeshSceneBuffer.m */,
 			);
 			path = meshImport;
 			sourceTree = "<group>";
@@ -826,7 +825,7 @@
 			name = app;
 			sourceTree = "<group>";
 		};
-		572D7F2B1683033D006D48BF /* generic */ = {
+		572D7F2B1683033D006D48BF /* painter */ = {
 			isa = PBXGroup;
 			children = (
 				5764756F167D619800D5A431 /* Painter.h */,
@@ -845,8 +844,10 @@
 				575AA12816ADAF6900635A76 /* Light.m */,
 				57CBB3D11721CE0700E45BCC /* PainterCamera.h */,
 				57CBB3D21721CE0700E45BCC /* PainterCamera.m */,
+				57889C1A17259B2900B83495 /* Joints.h */,
+				57889C1B17259B2900B83495 /* Joints.m */,
 			);
-			name = generic;
+			name = painter;
 			sourceTree = "<group>";
 		};
 		572EB1E116786C630062F290 /* media */ = {
@@ -967,7 +968,7 @@
 			isa = PBXGroup;
 			children = (
 				57778F5D16B9C7A000150097 /* library */,
-				572D7F2B1683033D006D48BF /* generic */,
+				572D7F2B1683033D006D48BF /* painter */,
 				578CB8FE16A6104900088BA2 /* scene elements */,
 			);
 			path = elements;
@@ -1082,7 +1083,6 @@
 				572EB21816787AFF0062F290 /* Shader.h */,
 				572EB21916787AFF0062F290 /* Shader.m */,
 				57CBB3D01721CBE100E45BCC /* ShaderFeature.h */,
-				57DF21FB1722792E000C5225 /* ShaderFeature.m */,
 			);
 			name = openGL;
 			sourceTree = "<group>";
@@ -1246,8 +1246,8 @@
 			children = (
 				572EB211167878FD0062F290 /* Node.h */,
 				572EB212167878FD0062F290 /* Node.m */,
-				572EB2241678BBCA0062F290 /* TG3dObject.h */,
-				572EB2251678BBCA0062F290 /* TG3dObject.m */,
+				572EB2241678BBCA0062F290 /* Node3d.h */,
+				572EB2251678BBCA0062F290 /* Node3d.m */,
 				571A42FC167C315600CD7E8F /* Graph.h */,
 				571A42FD167C315600CD7E8F /* Graph.m */,
 				5721989416853F9D0062C36F /* GraphView.h */,
@@ -1447,6 +1447,7 @@
 				57E0CD8D1713236F00F83113 /* walk.dae in Resources */,
 				57C7BA8A171686AF000C82E8 /* tex.dae in Resources */,
 				5705272F1719F69F00E17825 /* butterfly.dae in Resources */,
+				5759AD1E172482AF00E1BFBB /* 2boxes.dae in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1463,7 +1464,7 @@
 				572EB213167878FD0062F290 /* Node.m in Sources */,
 				572EB21A16787AFF0062F290 /* Shader.m in Sources */,
 				572EB21F16788D170062F290 /* MeshBuffer.m in Sources */,
-				572EB2261678BBCA0062F290 /* TG3dObject.m in Sources */,
+				572EB2261678BBCA0062F290 /* Node3d.m in Sources */,
 				572EB2291678BF740062F290 /* Camera.m in Sources */,
 				57A66EED167B1D1C00B9EA75 /* Material.m in Sources */,
 				571A42FE167C315700CD7E8F /* Graph.m in Sources */,
@@ -1547,13 +1548,12 @@
 				577F0EE71700BD970008A703 /* NameMap.m in Sources */,
 				571470571706771F00383D04 /* ColladaParser.m in Sources */,
 				571470581706771F00383D04 /* MeshScene.m in Sources */,
-				5714705B1706788800383D04 /* MeshSceneBuffer.m in Sources */,
 				5714705E17067D3100383D04 /* MeshImportPainter.m in Sources */,
 				577E7ED5170E1A1F009E9916 /* MeshScene+Emitter.m in Sources */,
 				571EDCCF1711F09F008375AA /* ObjectGestures.m in Sources */,
 				5787A701171FC89A00861C01 /* ShaderTimer.m in Sources */,
 				57CBB3D31721CE0700E45BCC /* PainterCamera.m in Sources */,
-				57DF21FC1722792E000C5225 /* ShaderFeature.m in Sources */,
+				57889C1C17259B2A00B83495 /* Joints.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

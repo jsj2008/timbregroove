@@ -164,7 +164,7 @@
     }
 }
 
--(Parameter *)paramWrapperForObject:(TG3dObject *)targetObject
+-(Parameter *)paramWrapperForObject:(Node3d *)targetObject
                           parameter:(Parameter *)parameterToWrap
 {
     char nativeType = parameterToWrap.nativeType;
@@ -364,7 +364,7 @@
     }
 }
 
--(TGVector3)unprojectPoint:(CGPoint)local_pt forObject:(TG3dObject*)object
+-(TGVector3)unprojectPoint:(CGPoint)local_pt forObject:(Node3d*)object
 {
     GLKVector3 window_coord = GLKVector3Make(local_pt.x,local_pt.y, 0.0f);
     bool result;

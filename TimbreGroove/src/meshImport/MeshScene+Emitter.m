@@ -10,6 +10,11 @@
 #import "Log.h"
 #import "Painter.h"
 
+typedef struct _StrideTypeMap {
+    VertexStrideType t;
+    const char * name;
+} StrideTypeMap;
+
 static NSString * stringFromMat(GLKMatrix4 m)
 {
     return [NSString stringWithFormat:@"{ %G, %G, %G, %G,   %G, %G, %G, %G,   %G, %G, %G, %G,   %G, %G, %G, %G }",
@@ -89,6 +94,8 @@ static NSString * stringFromMat(GLKMatrix4 m)
     
     [_joints each:^(id sender) { dumpBones(nil,sender); }];
     
+    dumpBones = nil;
+    
     NSUInteger totalNames = [allJointNames count];
     TGLogp(LLMeshImporter, @"Joint * %@_joints[%d] = {", baseName, totalNames);
     int nCount = 0;
@@ -97,6 +104,47 @@ static NSString * stringFromMat(GLKMatrix4 m)
         TGLogp(LLMeshImporter, @"  &%@_%@_joint%s", baseName,name,++nCount == totalNames ? "" : ",");
     }
     TGLogp(LLMeshImporter, @"};\n");
+
+    printf("#pragma mark GEOMETRY \n\n");
+
+    static const char * gvs[] = {
+        "gv_pos", "gv_normal", "gv_uv", "gv_acolor", "gv_boneWeights"
+    };
+    __block int meshCount = 0;
+    [_meshes each:^(MeshSceneMeshNode * msmn) {
+        [msmn->_geometries each:^(MeshGeometry *mg) {
+            TGLogp(LLMeshImporter, @"VertexStride  _%@_%@_strides_%d[] = { ", baseName, mg->_name, meshCount);
+            for( int i = 0; i < mg->_numStrides; i++ )
+            {
+                VertexStride * vs = &mg->_strides[ i ];
+                printf( "  { .glType = GL_FLOAT, .numSize = sizeof(float), .numbersPerElement = %d\n",
+                       vs->numbersPerElement  );
+                printf( "     .strideType = -1, .indexIntoShaderNames = %d /* %s */}%s\n ",
+                       vs->indexIntoShaderNames, gvs[vs->indexIntoShaderNames],
+                       i == mg->_numStrides - 1 ? "" : ",");
+            }
+            printf( "  };\n");
+            TGLogp(LLMeshImporter, @"VertexStride  _%@_%@_buffer_%d[] = { ", baseName, mg->_name, meshCount);
+            float * p = mg->_buffer;
+            for( int v = 0; v < mg->_numVertices; v++ )
+            {
+                for( int i = 0; i < mg->_numStrides; i++ )
+                {
+                    VertexStride * vs = &mg->_strides[ i ];
+                    for( int s = 0; s < vs->numbersPerElement; s++ )
+                        printf( "%G, ", *p++ );
+                    printf("  ");
+                }
+                printf("\n");
+            }
+            printf( "  };\n");
+            ++meshCount;
+        }];
+    }];
+    
+
+    return;
+    
     
     printf("#pragma mark SKIN\n\n");
 
@@ -155,13 +203,12 @@ static NSString * stringFromMat(GLKMatrix4 m)
         gv_normal,      // MSKNormal
         gv_uv,          // MSKUV
         gv_acolor,      // MSKColor
-        gv_boneIndex,   // MSKBoneIndex,
         gv_boneWeights, // MSKBoneWeights,
     };
     
     [_meshes each:^(MeshSceneMeshNode * mesh ) {
-
-        MeshGeometry * geometry = mesh->_geometry;
+#if 0
+        MeshGeometry_OLD * geometry = mesh->_geometry;
         NSString * meshName = mesh->_name;
         
         TGLogp(LLMeshImporter,@"#pragma mark GEOMETRY %@\n\n",meshName);
@@ -233,38 +280,9 @@ static NSString * stringFromMat(GLKMatrix4 m)
                 printf("};\n");
             }
             
-#ifdef EMIT_FLATTENED_INDEX
-                TGLogp(LLMeshImporter, @"GLKVector3 %@_%@_%s_flat[%d] = {",
-                       baseName,
-                       meshName,
-                       varname[indexIntoNamesMap[b]],
-                       bufferInfo->numIndices );
-                {
-                    
-                    MeshGeometryBuffer * b = bufferInfo;
-                    unsigned int elementSize = b->stride;
-                    float * old = b->data;
-                    unsigned int * idx = b->indexData;
-                    int i;
-                    for( int x = 0; x < b->numIndices; x++ )
-                    {
-                        i = *idx++ * elementSize;
-                        printf(" { ");
-                        char *comma = "";
-                        for( int e = 0; e < elementSize; e++ )
-                        {
-                            float f = old[i + e];
-                            printf( "%s %+.3f", comma, f );
-                            comma = ",";
-                        }
-                        printf(" },");
-                        if( (x+1) % 3 == 0 )
-                            printf("\n");
-                    }
-                    printf("};\n");
-                }
-#endif
         }
+#endif
+        
     }];
     
     TGLogp(LLMeshImporter, @"#endif // %@_import_included",baseName);

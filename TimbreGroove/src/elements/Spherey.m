@@ -28,20 +28,6 @@ NSString * const kParamDistortionPt = @"DistortionPt";
     return self;
 }
 
-#if 0
--(void)configureLighting
-{
-    if( !self.light )
-        self.light = [Light new]; // defaults are good
-    float subColor = 0;
-    self.light.ambientColor = (GLKVector4){subColor, subColor, 1.0, 1.0};
-    
-    GLKVector3 lDir = self.light.direction;
-    GLKMatrix4 mx = GLKMatrix4MakeTranslation( lDir.x, lDir.y, lDir.z );
-    self.light.direction = GLKMatrix4MultiplyVector3(mx,(GLKVector3){-1, 0, -1});
-}
-#endif
-
 -(void)createShader
 {
     [self addShaderFeature:[[Texture alloc] initWithFileName:@"moon.png"]];

@@ -38,6 +38,4 @@
 }
 
 -(void)unbind:(Shader *)shader {}
--(void)setShader:(Shader *)shader{};
-
 @end

@@ -26,42 +26,29 @@
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  MeshGeometry  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+// These conviently and coincidentally match up
+// to gv_* enum in GenericShader.h
+
 typedef enum _MeshSemanticKey {
     MSKPosition,
     MSKNormal,
     MSKUV,
     MSKColor,
-    MSKBoneIndex,
     MSKBoneWeights,
     
     kNumMeshSemanticKeys
 } MeshSemanticKey;
 
-typedef struct _MeshGeometryIndexBuffer {
-    unsigned int *   indexData;
-    int              numIndices;    
-} MeshGeometryIndexBuffer;
-
-/*
- materials are assigned to index buffers -
- one geometry mesh might have several different
- materials assigned, one per index
-*/
-typedef struct _MeshGeometryBuffer {
-    float * data;
-    int     offset;
-    int     stride;
-    int     numFloats;
-    int     numElements;
-    
-} MeshGeometryBuffer;
-
 @interface MeshGeometry : NSObject {
 @public
-    MeshGeometryBuffer        _buffers[kNumMeshSemanticKeys];
-    unsigned int              _numIndexBuffers;
-    MeshGeometryIndexBuffer * _indexBuffers;
+    NSString *   _name;
+    float *      _buffer;
+    VertexStride _strides[kNumMeshSemanticKeys];
+    unsigned int _numStrides;
+    unsigned int _numVertices;
+    NSString *   _materialName;
 }
+
 @end
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  SceneNode(s) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -110,8 +97,8 @@ typedef enum _MeshSceneNodeType {
     GLKVector3 _scale;
     
     MeshSkinning *  _skin;
-    MeshGeometry *  _geometry;
-    NSArray *       _materials;
+    NSDictionary *  _materials;
+    NSArray *       _geometries;
 }
 @end
 
@@ -203,7 +190,7 @@ typedef enum _MeshSceneNodeType {
     unsigned short *        _vectorIndex;
 }
 
--(void)influence:(MeshGeometryBuffer *)buffer dest:(float *)dest;
+//-(void)influence:(MeshGeometryBuffer *)buffer dest:(float *)dest;
 @end
 
 
