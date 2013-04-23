@@ -31,13 +31,19 @@
         _numNodes = [nodes count];
         _matrices    = malloc( sizeof(GLKMatrix4) * _numNodes);
         _invBindMats = malloc( sizeof(GLKMatrix4) * _numNodes);
-        __block unsigned bji = 0;        
+        __block unsigned bji = 0;
         [_nodes each:^(MeshSceneArmatureNode * joint) {
-            _invBindMats[bji]  = joint->_invBindMatrix;
-            bji++;
+            _invBindMats[bji++]  = joint->_invBindMatrix;
+            //_invBindMats[bji++]  = GLKMatrix4Identity;
         }];
     }
     return self;
+}
+
+-(void)dealloc
+{
+    free(_matrices);
+    free(_invBindMats);
 }
 
 -(void)getShaderFeatureNames:(NSMutableArray *)putHere
@@ -45,7 +51,11 @@
     [putHere addObject:kShaderFeatureBones];
 }
 
--(void)unbind:(Shader *)shader {}
+-(void)unbind:(Shader *)shader
+{
+    int clear = 0;
+    [shader writeToLocation:gv_numJoints type:TG_INT data:&clear];
+}
 
 -(void)bind:(Shader *)shader object:(Painter *)object
 {
@@ -55,6 +65,7 @@
     
     [_nodes each:^(MeshSceneArmatureNode * joint) {
         _matrices[bji++] = [joint matrix];
+ //       _matrices[bji++] = GLKMatrix4Identity;
     }];
     
     [shader writeToLocation:gv_jointMats    type:TG_MATRIX4 data:_matrices    count:_numNodes];

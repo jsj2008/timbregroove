@@ -388,6 +388,24 @@ typedef enum _sfpType {
     glUniform1fv( _locations[indexIntoNames], numFloats, data);
 }
 
+- (void)writeToLocationTranspose:(int)indexIntoNames type:(TGUniformType)type data:(void*)data count:(unsigned int)count
+{
+    GLint location = _locations[indexIntoNames];
+    
+    switch(type)
+    {            
+        case TG_MATRIX3:
+            glUniformMatrix3fv(location, count, GL_TRUE, data);
+            break;
+            
+        case TG_MATRIX4:
+            glUniformMatrix4fv(location, count, GL_TRUE, data);
+            break;
+        default:
+            break;
+    }
+}
+
 - (void)writeToLocation:(int)indexIntoNames type:(TGUniformType)type data:(void*)data
 {
     [self writeToLocation:indexIntoNames type:type data:data count:1];

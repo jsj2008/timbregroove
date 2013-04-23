@@ -189,23 +189,6 @@ static NSString * stringFromMat(GLKMatrix4 m)
         TGLogp(LLMeshImporter, @"};\n");
     }
     
-    static char * varname[] = {
-        "gv_pos",
-        "gv_normal",
-        "gv_uv",
-        "gv_acolor",
-        "gv_boneIndex",
-        "gv_boneWeights"
-    };
-    
-    static GenericVariables indexIntoNamesMap[kNumMeshSemanticKeys] = {
-        gv_pos,         // MSKPosition
-        gv_normal,      // MSKNormal
-        gv_uv,          // MSKUV
-        gv_acolor,      // MSKColor
-        gv_boneWeights, // MSKBoneWeights,
-    };
-    
     [_meshes each:^(MeshSceneMeshNode * mesh ) {
 #if 0
         MeshGeometry_OLD * geometry = mesh->_geometry;

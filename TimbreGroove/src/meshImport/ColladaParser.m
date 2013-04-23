@@ -292,7 +292,9 @@ typedef enum _SkinSemanticKey {
     }
     return self;
 }
+
 @end
+
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  IncomingNodeTree @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -937,6 +939,7 @@ static const char * effectParamTags[] = {
         if( EQSTR(elementName, kTag_bind_shape_matrix) )
         {
             iskin->_bindShapeMatrix = GLKMatrix4MakeWithArrayAndTranspose(_floatArray);
+//            iskin->_bindShapeMatrix = GLKMatrix4MakeWithArray(_floatArray);
             _floatArray = NULL;
             _floatArrayCount = 0;
             return;
@@ -1073,6 +1076,7 @@ static const char * effectParamTags[] = {
             {
                 IncomingNode * inode = [incnt->_nodeStack lastObject];
                 inode->_transform = GLKMatrix4MakeWithArrayAndTranspose(_floatArray);
+//                inode->_transform = GLKMatrix4MakeWithArray(_floatArray);
                 _floatArray = NULL;
                 _floatArrayCount = 0;
                 return;
@@ -1653,6 +1657,15 @@ foundCharacters:(NSString *)string
 
 }
 
+-(void)parser:(NSXMLParser *)parser
+parseErrorOccurred:(NSError *)parseError
+{
+    TGLog(LLShitsOnFire, @"%@ - %@ - %@",
+          parseError,
+          parseError.userInfo);
+    exit(-1);
+}
+
 -(void)turnUp:(IncomingGeometryBuffer *)bufferInfo
 {
     TGLog(LLShitsOnFire, @"Yea, unfortunately this code doesn't deal with anything but 'Y UP' colladas");
@@ -1703,9 +1716,11 @@ foundCharacters:(NSString *)string
 {
     NSMutableArray * geometries = [NSMutableArray new];
     
-    float * flattenedJointWeightIndex = NULL;
+    float * flattenedJointWeights = NULL;
+    float * flattenedJointIndecies = NULL;
     int numInfluencingJoints = 0;
-    
+    bool sourceIsBound = false;
+
     // A mesh in the Collada file can have several <triangle*>
     // tags - each representing a shape, typically with a
     // unique texture/material that are all draw from the
@@ -1721,21 +1736,32 @@ foundCharacters:(NSString *)string
         // actually this is the number of POTENTIALLY influencing joints
         numInfluencingJoints = [skin->_influencingJoints count];
         
+#define JOINT_STRIDE 4
         // we need random access to the weight/joint information to
         // access it via the vertex index in the <triangle><p> we are
         // parsing below. The native format is packed such that non-
         // influencing joints do not appear. We will unpack to fixed
         // length fields (len:=number of possibly influencing joints)
         // and pad with 0 for irrelevant joints
-        size_t sz = sizeof(float) * skin->_numInfluencingJointCounts * numInfluencingJoints;
-        flattenedJointWeightIndex = malloc( sz );
-        memset(flattenedJointWeightIndex,0,sz);
-        float * p = flattenedJointWeightIndex;
+        size_t sz = sizeof(float) * JOINT_STRIDE * skin->_numInfluencingJointCounts;
+        flattenedJointWeights = malloc( sz );
+        memset(flattenedJointWeights,0,sz);
+        flattenedJointIndecies = malloc( sz );
+        
+        float * p  = flattenedJointWeights;
+        float * pi = flattenedJointIndecies;
         unsigned int currPos = 0;
         for( int i = 0; i < skin->_numInfluencingJointCounts; i++ )
         {
             // this is the actual number of joints applied to this vertex
             int numberOfJointsApplied = skin->_influencingJointCounts[i];
+#if DEBUG
+            if( numberOfJointsApplied > JOINT_STRIDE )
+            {
+                TGLog(LLShitsOnFire, @"The maximum number of weight influences is %d. You've got: %d", JOINT_STRIDE, numberOfJointsApplied);
+               // exit(-1);
+            }
+#endif
             unsigned int jointIndex;
             unsigned int weightIndex;
             for( int j = 0; j < numberOfJointsApplied; j++ )
@@ -1745,10 +1771,19 @@ foundCharacters:(NSString *)string
                 
                 currPos += 2;
                 
-                p[jointIndex] = skin->_weights[weightIndex];
+                if( j < JOINT_STRIDE )
+                {
+                    *pi++ = jointIndex;
+                    *p++ = skin->_weights[weightIndex];
+                }
             }
             
-            p += numInfluencingJoints;
+            if( numberOfJointsApplied < JOINT_STRIDE )
+            {
+                unsigned diff = JOINT_STRIDE - numberOfJointsApplied;
+                p += diff;
+                pi += diff;
+            }
         }
         
         
@@ -1790,18 +1825,22 @@ foundCharacters:(NSString *)string
         
         if( skin )
         {
-            // 1 weight per vertext per joint
-            numFloats += numInfluencingJoints * numVertices;
-            /*
+            // JOINT_STRIDE influences + JOINT_STRIDE joint
+            // indices per vertext
+            numFloats += (JOINT_STRIDE + JOINT_STRIDE) * numVertices;
+            
             // yea, it's a litle buried here but it's definitely
             // the most convient place to apply the BindShapeMatrix:
-            IncomingSourceTag * ist = isourceTags[ MSKPosition ];
-            GLKVector3 * vectors = (GLKVector3 *)ist->_bufferInfo.data;
-            for( int v = 0; v < ist->_bufferInfo.numElements; v++ )
+            if( !sourceIsBound )
             {
-                vectors[v] = GLKMatrix4MultiplyVector3(skin->_bindShapeMatrix, vectors[v]);
-            }
-             */
+                IncomingSourceTag * ist = isourceTags[ MSKPosition ];
+                GLKVector3 * vectors = (GLKVector3 *)ist->_bufferInfo.data;
+                for( int v = 0; v < ist->_bufferInfo.numElements; v++ )
+                {
+                    vectors[v] = GLKMatrix4MultiplyVector3(skin->_bindShapeMatrix, vectors[v]);
+                }
+                sourceIsBound = true;
+            }            
         }
         
         float * openGLBuffer = malloc( numFloats * sizeof(float) );
@@ -1827,9 +1866,12 @@ foundCharacters:(NSString *)string
             }
             if( skin )
             {
-                index = primitives[ primitivesOffset[ MSKPosition ] ];
-                float * weights = flattenedJointWeightIndex + (index * numInfluencingJoints);
-                for( int w = 0; w < numInfluencingJoints; w++ )
+                index = primitives[ primitivesOffset[ MSKPosition ] ] * 4;
+                float * jindex  = flattenedJointIndecies + index;
+                float * weights = flattenedJointWeights + index;
+                for( int ji = 0; ji < JOINT_STRIDE; ji++ )
+                    *p++ = *jindex++;
+                for( int w = 0; w < JOINT_STRIDE; w++ )
                     *p++ = *weights++;
             }
             primitives += primitiveStride;
@@ -1860,14 +1902,28 @@ foundCharacters:(NSString *)string
         
         if( skin )
         {
-            VertexStride * vs = &mg->_strides[ strideCount ];
+            VertexStride * vs;
+            vs = &mg->_strides[ strideCount ];
             vs->glType = GL_FLOAT;
             vs->numSize = sizeof(float);
-            vs->numbersPerElement = numInfluencingJoints;
+            vs->numbersPerElement = 4;
+            vs->strideType = -1;
+            vs->indexIntoShaderNames = MSKBoneIndex;
+            vs->location = -1;
+            ++strideCount;
+            vs = &mg->_strides[ strideCount ];
+            vs->glType = GL_FLOAT;
+            vs->numSize = sizeof(float);
+            vs->numbersPerElement = 4;
             vs->strideType = -1;
             vs->indexIntoShaderNames = MSKBoneWeights;
             vs->location = -1;
             ++strideCount;
+            mg->_hasBones = true;
+        }
+        else
+        {
+            mg->_hasBones = false;
         }
         mg->_numStrides = strideCount;
         
@@ -1879,8 +1935,10 @@ foundCharacters:(NSString *)string
             free( ist->_bufferInfo.data );
     }];
 
-    if( flattenedJointWeightIndex )
-        free(flattenedJointWeightIndex);
+    if( flattenedJointWeights )
+        free(flattenedJointWeights);
+    if( flattenedJointIndecies )
+        free(flattenedJointIndecies);
     
     return geometries;
 }
@@ -2078,7 +2136,7 @@ foundCharacters:(NSString *)string
                     for( NSString * jointName in jointNameArray )
                     {
                         MeshSceneArmatureNode * joint = findJointWithName(jointName,nil);
-                        joint->_invBindMatrix = GLKMatrix4Transpose(*mats++);
+                        joint->_invBindMatrix = *mats++; // GLKMatrix4Transpose(*mats++);
                     }
                 }
                 else if( EQSTR(iss->_paramName, kValue_name_WEIGHT) )

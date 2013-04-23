@@ -22,38 +22,36 @@ varying vec4 v_vertex_color;
 #ifdef BONES
 
 uniform int  u_numJoints;
-uniform mat4 u_jointMats[9];
-uniform mat4 u_jointInvMats[9];
+uniform mat4 u_jointMats[12];
+uniform mat4 u_jointInvMats[12];
 
-// ok, so this is not really a mat3, it's a variable array
+// ok, so this is not really a vec4, it's a variable array
 // of floats and limits the number of influencing joints
-// to 9 which about 6 more than you should need
+// to 4 per pixel
 
-attribute mat3 a_boneWeights;
+attribute vec4 a_boneWeights;
+attribute vec4 a_boneIndex;
 
-void doSkinning()
+vec4 doSkinning()
 {
+    if( u_numJoints == 0 )
+        return a_position;
+        
     vec4 pos = vec4(0);
+
+    ivec4 index = ivec4(a_boneIndex);
+    vec4  weights = a_boneWeights;
     
-    for( int i = 0; i < u_numJoints; i++ )
+    for( int j = 0; j < 4; j++ )
     {
-        for( int c = 0; c < 3; c++ )
-        {
-            for( int r = 0; r < 3; r++ )
-            {
-                float weight = a_boneWeights[c][r];
-                
-                pos += u_jointMats[i] * a_position;
-                pos += u_jointInvMats[i] * pos;
-                
-                if( ++i == u_numJoints )
-                    break;
-            }
-            
-            if( i == u_numJoints )
-                break;
-        }
+        float weight = weights[j];
+        if( weight == 0.0 )
+            break;
+        
+        pos += ((u_jointInvMats[index[j]] * vec4(a_position.xyz,1.0)) * u_jointMats[index[j]]) * weight;
     }
+
+    return pos;
 }
 #endif
 
@@ -223,9 +221,11 @@ void main()
 #endif
 
 #ifdef BONES
-    doSkinning();
+    vec4 pos = doSkinning();
+#else
+    vec4 pos = a_position;
 #endif
 
-	gl_Position = u_pvm * a_position;
+	gl_Position = u_pvm * pos;
 }
 

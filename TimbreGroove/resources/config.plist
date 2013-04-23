@@ -84,7 +84,7 @@
 					<key>kTriggerDrag1</key>
 					<string>controllerPos</string>
 					<key>kTriggerPanX</key>
-					<string>kParamLightX</string>
+					<string>kParamCameraRotationY</string>
 				</dict>
 			</array>
 			<key>icon</key>
@@ -446,13 +446,13 @@
 		<key>butterfly</key>
 		<dict>
 			<key>instanceClass</key>
-			<string>MeshImportPainter</string>
+			<string>Sky</string>
 			<key>properties</key>
 			<dict>
 				<key>runAnimations</key>
-				<true/>
+				<false/>
 				<key>cameraZ</key>
-				<integer>-70</integer>
+				<integer>-90</integer>
 				<key>runEmitter</key>
 				<false/>
 				<key>scaleXYZ</key>
@@ -482,13 +482,13 @@
 		<key>box</key>
 		<dict>
 			<key>instanceClass</key>
-			<string>MeshImportPainter</string>
+			<string>Sky</string>
 			<key>properties</key>
 			<dict>
 				<key>cameraZ</key>
-				<real>-5.5</real>
+				<integer>-9</integer>
 				<key>runEmitter</key>
-				<false/>
+				<true/>
 				<key>scaleXYZ</key>
 				<real>1</real>
 				<key>colladaFile</key>
@@ -618,9 +618,9 @@
 		<key>LLMeshImporter</key>
 		<false/>
 		<key>LLGestureStuff</key>
-		<true/>
+		<false/>
 		<key>LLObjLifetime</key>
-		<true/>
+		<false/>
 		<key>LLAudioTweaks</key>
 		<false/>
 		<key>LLJustSayin</key>
@@ -634,7 +634,7 @@
 		<key>LLAudioResource</key>
 		<false/>
 		<key>LLShaderStuff</key>
-		<true/>
+		<false/>
 		<key>LLKindaImportant</key>
 		<false/>
 	</dict>

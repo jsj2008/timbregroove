@@ -35,6 +35,7 @@ typedef enum _MeshSemanticKey {
     MSKUV,
     MSKColor,
     MSKBoneWeights,
+    MSKBoneIndex,
     
     kNumMeshSemanticKeys
 } MeshSemanticKey;
@@ -47,6 +48,7 @@ typedef enum _MeshSemanticKey {
     unsigned int _numStrides;
     unsigned int _numVertices;
     NSString *   _materialName;
+    bool         _hasBones;
 }
 
 @end

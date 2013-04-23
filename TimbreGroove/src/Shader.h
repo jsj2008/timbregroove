@@ -69,8 +69,9 @@
         andLastAttr:(int)lastAttr
          andHeaders:(NSString *)headers;
 
-- (void)  writeToLocation:(int)indexIntoNames type:(TGUniformType)type data:(void*)data;
-- (void)  writeToLocation:(int)indexIntoNames type:(TGUniformType)type data:(void*)data count:(unsigned int)count;
+- (void) writeToLocation:(int)indexIntoNames type:(TGUniformType)type data:(void*)data;
+- (void) writeToLocation:(int)indexIntoNames type:(TGUniformType)type data:(void*)data count:(unsigned int)count;
+- (void) writeToLocationTranspose:(int)indexIntoNames type:(TGUniformType)type data:(void*)data count:(unsigned int)count;
 
 - (void) prepareRender:(Node3d *)object;
 

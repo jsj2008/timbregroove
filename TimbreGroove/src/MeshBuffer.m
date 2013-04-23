@@ -9,7 +9,7 @@
 #import "MeshBuffer.h"
 #import "Shader.h"
 
-#define MAX_STRIDES      4
+#define MAX_STRIDES      8
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
 @interface MeshBuffer()

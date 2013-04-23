@@ -64,8 +64,8 @@
     light.diffuse = (GLKVector4){ 1, 1, 1, 1 };
     GLKVector3 lightPos = (GLKVector3){ -4, 0, 14};
     light.position = lightPos;
-    light.attenuation = (GLKVector3){ 0, 0.2, 0 };
-    light.point = true;
+    light.attenuation = (GLKVector3){ 0, 0, 0 };
+    light.point = false;
     
     [self.lights addLight:light];
     
@@ -80,19 +80,23 @@
 -(void)createBuffer
 {
     [_node->_geometries each:^(MeshGeometry * geometry) {
-        NSArray * mats = nil;
+        NSMutableArray * mats = [NSMutableArray new];
+        
+        if( geometry->_hasBones )
+        {
+            Joints * j = [Joints withArmatureNodes:_node->_skin->_influencingJoints];
+            [mats addObject:j];
+        }
         if( geometry->_materialName )
         {
             MeshMaterial * mm = _node->_materials[ geometry->_materialName ];
             Material * m = [Material withColors:mm->_colors shininess:mm->_shininess doSpecular:mm->_doSpecular];
+            [mats addObject:m];
             if( mm->_textureFileName )
             {
                 Texture * t = [[Texture alloc] initWithFileName:mm->_textureFileName];
-                mats = @[ t, m ];
-            }
-            else
-            {
-                mats = @[ m ];
+                [mats addObject:t];
+                
             }
         }
         
@@ -107,10 +111,6 @@
         [self addShape:mb features:mats];
     }];
     
-    if( _node->_skin )
-    {
-        [self addShaderFeature:[Joints withArmatureNodes:_node->_skin->_influencingJoints]];
-    }
 }
 
 

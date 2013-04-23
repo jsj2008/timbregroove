@@ -180,6 +180,7 @@
 		5787A701171FC89A00861C01 /* ShaderTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 5787A700171FC89900861C01 /* ShaderTimer.m */; };
 		57889C1C17259B2A00B83495 /* Joints.m in Sources */ = {isa = PBXBuildFile; fileRef = 57889C1B17259B2900B83495 /* Joints.m */; };
 		57889C1E1726182A00B83495 /* generic.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 57889C1D1726182A00B83495 /* generic.fsh */; };
+		57889C211726245100B83495 /* Sky.m in Sources */ = {isa = PBXBuildFile; fileRef = 57889C201726245100B83495 /* Sky.m */; };
 		5798B05916BA00F70093F473 /* pause.png in Resources */ = {isa = PBXBuildFile; fileRef = 5798B05716BA00F70093F473 /* pause.png */; };
 		5798B05A16BA00F70093F473 /* play.png in Resources */ = {isa = PBXBuildFile; fileRef = 5798B05816BA00F70093F473 /* play.png */; };
 		579AD1A916C40B670071AA9A /* Config.m in Sources */ = {isa = PBXBuildFile; fileRef = 579AD1A816C40B670071AA9A /* Config.m */; };
@@ -484,6 +485,8 @@
 		57889C1A17259B2900B83495 /* Joints.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Joints.h; sourceTree = "<group>"; };
 		57889C1B17259B2900B83495 /* Joints.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Joints.m; sourceTree = "<group>"; };
 		57889C1D1726182A00B83495 /* generic.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = generic.fsh; sourceTree = "<group>"; };
+		57889C1F1726245100B83495 /* Sky.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sky.h; sourceTree = "<group>"; };
+		57889C201726245100B83495 /* Sky.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Sky.m; sourceTree = "<group>"; };
 		5790068616841F3B0068659F /* Interactive.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Interactive.h; sourceTree = "<group>"; };
 		5798B05716BA00F70093F473 /* pause.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = pause.png; sourceTree = "<group>"; };
 		5798B05816BA00F70093F473 /* play.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = play.png; sourceTree = "<group>"; };
@@ -1101,6 +1104,8 @@
 				5751F2E516D5FACB00144F2B /* Ripple.m */,
 				572AD0DF16EBC1870070AE6A /* FFTScope.m */,
 				571537EE16FCA8CA00DCA5E1 /* Spherey.m */,
+				57889C1F1726245100B83495 /* Sky.h */,
+				57889C201726245100B83495 /* Sky.m */,
 			);
 			name = "scene elements";
 			sourceTree = "<group>";
@@ -1554,6 +1559,7 @@
 				5787A701171FC89A00861C01 /* ShaderTimer.m in Sources */,
 				57CBB3D31721CE0700E45BCC /* PainterCamera.m in Sources */,
 				57889C1C17259B2A00B83495 /* Joints.m in Sources */,
+				57889C211726245100B83495 /* Sky.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
