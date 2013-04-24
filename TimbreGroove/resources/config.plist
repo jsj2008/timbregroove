@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>default_scene</key>
-	<string>box</string>
+	<string>butterfly</string>
 	<key>scenes</key>
 	<dict>
 		<key>butterfly</key>

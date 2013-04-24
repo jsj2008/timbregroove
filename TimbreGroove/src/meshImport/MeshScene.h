@@ -34,8 +34,8 @@ typedef enum _MeshSemanticKey {
     MSKNormal,
     MSKUV,
     MSKColor,
-    MSKBoneWeights,
     MSKBoneIndex,
+    MSKBoneWeights,
     
     kNumMeshSemanticKeys
 } MeshSemanticKey;

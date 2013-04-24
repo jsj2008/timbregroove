@@ -33,8 +33,7 @@
         _invBindMats = malloc( sizeof(GLKMatrix4) * _numNodes);
         __block unsigned bji = 0;
         [_nodes each:^(MeshSceneArmatureNode * joint) {
-            _invBindMats[bji++]  = joint->_invBindMatrix;
-            //_invBindMats[bji++]  = GLKMatrix4Identity;
+            _invBindMats[bji++]  = GLKMatrix4Transpose(joint->_invBindMatrix);
         }];
     }
     return self;
@@ -64,8 +63,7 @@
     __block unsigned bji = 0;
     
     [_nodes each:^(MeshSceneArmatureNode * joint) {
-        _matrices[bji++] = [joint matrix];
- //       _matrices[bji++] = GLKMatrix4Identity;
+        _matrices[bji++] = GLKMatrix4Transpose([joint matrix]);
     }];
     
     [shader writeToLocation:gv_jointMats    type:TG_MATRIX4 data:_matrices    count:_numNodes];

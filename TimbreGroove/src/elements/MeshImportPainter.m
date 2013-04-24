@@ -62,17 +62,17 @@
     Light * light = [Light new];
     light.ambient = (GLKVector4){ 1, 1, 1, 1 };
     light.diffuse = (GLKVector4){ 1, 1, 1, 1 };
-    GLKVector3 lightPos = (GLKVector3){ -4, 0, 14};
+    GLKVector3 lightPos = (GLKVector3){ 0, 0, 24};
     light.position = lightPos;
-    light.attenuation = (GLKVector3){ 0, 0, 0 };
-    light.point = false;
+    light.attenuation = (GLKVector3){ 1, 0, 0 };
+    light.point = true;
     
     [self.lights addLight:light];
     
     [super wireUp];
 //    self.disableStandardParameters = true;
     
-    self.rotation = (GLKVector3){ GLKMathDegreesToRadians(20), GLKMathDegreesToRadians(20), 0 };
+//    self.rotation = (GLKVector3){ GLKMathDegreesToRadians(20), GLKMathDegreesToRadians(20), 0 };
     _node = nil; 
     return self;
 }

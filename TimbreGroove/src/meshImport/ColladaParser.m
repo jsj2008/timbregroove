@@ -1890,35 +1890,35 @@ parseErrorOccurred:(NSError *)parseError
             if( !ist )
                 continue;
             
-            VertexStride * vs = &mg->_strides[ strideCount ];
+            VertexStride * vs = &mg->_strides[ strideCount++ ];
             vs->glType = GL_FLOAT;
             vs->numSize = sizeof(float);
             vs->numbersPerElement = ist->_bufferInfo.stride;
             vs->strideType = -1;
             vs->indexIntoShaderNames = key; // lots of assumptions here
             vs->location = -1;
-            ++strideCount;
         }
         
         if( skin )
         {
             VertexStride * vs;
-            vs = &mg->_strides[ strideCount ];
+            
+            vs = &mg->_strides[ strideCount++ ];
             vs->glType = GL_FLOAT;
             vs->numSize = sizeof(float);
             vs->numbersPerElement = 4;
             vs->strideType = -1;
             vs->indexIntoShaderNames = MSKBoneIndex;
             vs->location = -1;
-            ++strideCount;
-            vs = &mg->_strides[ strideCount ];
+            
+            vs = &mg->_strides[ strideCount++ ];
             vs->glType = GL_FLOAT;
             vs->numSize = sizeof(float);
             vs->numbersPerElement = 4;
             vs->strideType = -1;
             vs->indexIntoShaderNames = MSKBoneWeights;
             vs->location = -1;
-            ++strideCount;
+            
             mg->_hasBones = true;
         }
         else

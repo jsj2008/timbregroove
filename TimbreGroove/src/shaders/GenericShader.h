@@ -14,10 +14,10 @@ typedef enum {
     gv_normal,
     gv_uv,
     gv_acolor,
-    gv_boneWeights,
     gv_boneIndex,
+    gv_boneWeights,
     
-    GV_LAST_ATTR = gv_boneIndex,
+    GV_LAST_ATTR = gv_boneWeights,
     
     gv_pvm,        // projection-view-mat
     gv_mvm,        // model view matrix

@@ -108,7 +108,7 @@ static NSString * stringFromMat(GLKMatrix4 m)
     printf("#pragma mark GEOMETRY \n\n");
 
     static const char * gvs[] = {
-        "gv_pos", "gv_normal", "gv_uv", "gv_acolor", "gv_boneWeights"
+        "gv_pos", "gv_normal", "gv_uv", "gv_acolor", "gv_boneIndex", "gv_boneWeights"
     };
     __block int meshCount = 0;
     [_meshes each:^(MeshSceneMeshNode * msmn) {
@@ -117,14 +117,15 @@ static NSString * stringFromMat(GLKMatrix4 m)
             for( int i = 0; i < mg->_numStrides; i++ )
             {
                 VertexStride * vs = &mg->_strides[ i ];
-                printf( "  { .glType = GL_FLOAT, .numSize = sizeof(float), .numbersPerElement = %d\n",
+                printf( "  /* %s */\n  { .glType = GL_FLOAT, .numSize = sizeof(float), .numbersPerElement = %d\n",
+                       gvs[vs->indexIntoShaderNames],
                        vs->numbersPerElement  );
-                printf( "     .strideType = -1, .indexIntoShaderNames = %d /* %s */}%s\n ",
-                       vs->indexIntoShaderNames, gvs[vs->indexIntoShaderNames],
+                printf( "     .strideType = -1, .indexIntoShaderNames = %d }%s\n ",
+                       vs->indexIntoShaderNames,
                        i == mg->_numStrides - 1 ? "" : ",");
             }
             printf( "  };\n");
-            TGLogp(LLMeshImporter, @"VertexStride  _%@_%@_buffer_%d[] = { ", baseName, mg->_name, meshCount);
+            TGLogp(LLMeshImporter, @"float _%@_%@_buffer_%d[] = { ", baseName, mg->_name, meshCount);
             float * p = mg->_buffer;
             for( int v = 0; v < mg->_numVertices; v++ )
             {

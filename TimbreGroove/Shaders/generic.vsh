@@ -37,7 +37,7 @@ vec4 doSkinning()
     if( u_numJoints == 0 )
         return a_position;
         
-    vec4 pos = vec4(0);
+    vec4 pos = vec4( vec3(0.0), 1.0 );
 
     ivec4 index = ivec4(a_boneIndex);
     vec4  weights = a_boneWeights;
