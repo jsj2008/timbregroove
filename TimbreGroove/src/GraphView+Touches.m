@@ -24,6 +24,8 @@
     Vector3ParamBlock  _triggerDrag1;
     PointParamBlock    _triggerDragPos;
     PointParamBlock    _triggerDblTap;
+    FloatParamBlock    _triggerTweakX;
+    FloatParamBlock    _triggerTweakY;
     
     NSDictionary * _targetedParams;
 }
@@ -42,9 +44,11 @@
         _triggerPanY      = [tm getFloatTrigger:kTriggerPanY];
         _triggerDblTap    = [tm getPointTrigger:kTriggerDblTap];
         
-        // object movers:
+        // object movers/tweakers:
         _triggerDrag1     = [tm getVector3Trigger:kTriggerDrag1];
         _triggerDragPos   = [tm getPointTrigger:kTriggerDragPos];
+        _triggerTweakX    = [tm getFloatTrigger:kTriggerTweakX];
+        _triggerTweakY    = [tm getFloatTrigger:kTriggerTweakY];
     }
     else
     {
@@ -131,7 +135,8 @@
 
     MoveGesture * mg = nil;
     
-    if( _currentTriggers->_triggerDrag1 || _currentTriggers->_triggerDragPos )
+    if( _currentTriggers->_triggerDrag1 || _currentTriggers->_triggerDragPos ||
+        _currentTriggers->_triggerTweakX || _currentTriggers->_triggerTweakY)
     {
         mg = [[MoveGesture alloc] initWithTarget:self action:@selector(moveObject:)];
         [self addGestureRecognizer:mg];
@@ -171,7 +176,7 @@
 
     targetObject.interactive = true;
 
-    if( nativeType == TGC_VECTOR3 )
+    if( nativeType == TGC_VECTOR3 || nativeType == TGC_POINT )
     {
         Vector3ParamBlock orgBlock = [parameterToWrap getParamBlockOfType:TGC_VECTOR3];
         
@@ -182,8 +187,20 @@
             }
         } copy]];
     }
+    else if( nativeType == _C_FLT )
+    {
+        FloatParamBlock orgBlock = [parameterToWrap getParamBlockOfType:_C_FLT];
+        
+        return [Parameter withBlock:[^(float f) {
+            if( _targetedObject == targetObject )
+            {
+                orgBlock(f);
+            }
+        } copy]];
+        
+    }
 
-    TGLog(LLShitsOnFire, @"Only Vector3 parameters can be targeted for specific objects");
+    TGLog(LLShitsOnFire, @"Invalid param type for targeted parameter");
     exit(-1);
     return nil;
 }
@@ -269,6 +286,15 @@
 
 -(void)panning:(UIPanGestureRecognizer *)pgr
 {
+    [self _innerPanning:pgr
+            panXTrigger:_currentTriggers->_triggerPanX
+            panYTrigger:_currentTriggers->_triggerPanY];
+}
+
+-(void)_innerPanning:(UIPanGestureRecognizer *)pgr
+         panXTrigger:(FloatParamBlock)panXTrigger
+         panYTrigger:(FloatParamBlock)panYTrigger
+{
     if( pgr.state == UIGestureRecognizerStateBegan )
     {
         _panLast = [pgr locationInView:self];
@@ -339,17 +365,17 @@
         {
             CGSize sz = self.frame.size;
             
-            if( _xPanning && _currentTriggers->_triggerPanX )
+            if( _xPanning && panXTrigger )
             {
                 float fdiff = (_panPivot.x - pt.x) / sz.width;
                 TGLog(LLGestureStuff, @"Sending X pan: %f (dir:%d pos:{%.1f,%.1f}) ) ",fdiff,_panDir,pt.x,pt.y);
-                _currentTriggers->_triggerPanX(fdiff);
+                panXTrigger(fdiff);
             }
-            else if( _yPanning && _currentTriggers->_triggerPanY )
+            else if( _yPanning && panYTrigger )
             {
                 float fdiff = (_panPivot.y - pt.y) / sz.width;
                 TGLog(LLGestureStuff, @"Sending Y pan: %f (dir:%d pos:{%.1f,%.1f}) ) ",fdiff,_panDir,pt.x,pt.y);
-                _currentTriggers->_triggerPanY(fdiff);
+                panYTrigger(fdiff);
             }
         }
     
@@ -413,6 +439,12 @@
         {
             TGLog(LLGestureStuff, @"Sending native drag pt: {%.4f, %.4f}",pt.x, pt.y);
             _currentTriggers->_triggerDragPos(pt);
+        }
+        if( _currentTriggers->_triggerTweakX || _currentTriggers->_triggerTweakY )
+        {
+            [self _innerPanning:mg
+                    panXTrigger:_currentTriggers->_triggerTweakX
+                    panYTrigger:_currentTriggers->_triggerTweakY ];
         }
     }
     else if( mg.state == UIGestureRecognizerStateEnded )

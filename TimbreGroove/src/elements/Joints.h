@@ -11,4 +11,5 @@
 
 @interface Joints : NSObject<ShaderFeature>
 +(id)withArmatureNodes:(NSArray *)nodes;
+@property (nonatomic) bool dirty;
 @end

@@ -66,8 +66,6 @@ void ensureNameMapDict()
       @"kParamPositionX":  kParamPositionX ,
       @"kParamPositionY":  kParamPositionY ,
       @"kParamPositionZ":  kParamPositionZ ,
-      
-      
       @"kParamRotation":  kParamRotation ,
       @"kParamRotationX":  kParamRotationX ,
       @"kParamRotationY":  kParamRotationY ,
@@ -77,12 +75,19 @@ void ensureNameMapDict()
       @"kParamCameraRotationZ":  kParamCameraRotationZ ,
       @"kParamCameraZ":  kParamCameraZ ,
       @"kParamSceneAnimation": kParamSceneAnimation,
+      @"kParamJointPosition": kParamJointPosition,
       @"kParamCameraReset": kParamCameraReset,
       
       @"kParamLightX": kParamLightX,
       @"kParamLightY": kParamLightY,
-      @"kParamLightZ": kParamLightY,
+      @"kParamLightZ": kParamLightZ,
+      @"kParamLightRotationX": kParamLightRotationX,
+      @"kParamLightRotationY": kParamLightRotationY,
+      @"kParamLightRotationZ": kParamLightRotationZ,      
       @"kParamLightIntensity": kParamLightIntensity,
+      @"kParamLightReset": kParamLightReset,
+      @"kParamLightWidth": kParamLightWidth,
+      @"kParamLightDropoff": kParamLightDropoff,
       
       @"kParamNewElement":  kParamNewElement ,
       
@@ -103,6 +108,8 @@ void ensureNameMapDict()
       @"kTriggerDblTap":  kTriggerDblTap ,
       @"kTriggerPanX":  kTriggerPanX ,
       @"kTriggerPanY":  kTriggerPanY ,
+      @"kTriggerTweakX": kTriggerTweakX,
+      @"kTriggerTweakY": kTriggerTweakY,
       @"kTriggerDragPos":  kTriggerDragPos ,
       @"kTriggerDrag1":  kTriggerDrag1 ,
       @"kTriggerDrag2":  kTriggerDrag2 ,

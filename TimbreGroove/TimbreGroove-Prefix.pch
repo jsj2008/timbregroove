@@ -14,6 +14,7 @@
     #import <GLKit/GLKit.h>
 
 #import "NSString+Tweening.h"
+#import "NSString+ParamTarget.h"
 
 #import "BKGlobals.h"
 #import "NSSet+BlocksKit.h"

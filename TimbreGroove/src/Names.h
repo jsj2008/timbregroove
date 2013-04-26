@@ -108,12 +108,19 @@ extern NSString const * kParamCameraRotationZ;
 extern NSString const * kParamCameraZ;
 extern NSString const * kParamCameraReset;
 
+extern NSString const * kParamJointPosition;
 extern NSString const * kParamSceneAnimation;
 
+extern NSString const * kParamLightRotationX;
+extern NSString const * kParamLightRotationY;
+extern NSString const * kParamLightRotationZ;
 extern NSString const * kParamLightX;
 extern NSString const * kParamLightY;
 extern NSString const * kParamLightZ;
 extern NSString const * kParamLightIntensity;
+extern NSString const * kParamLightReset;
+extern NSString const * kParamLightWidth;
+extern NSString const * kParamLightDropoff;
 
 extern NSString const * kParamNewElement;
 
@@ -139,6 +146,8 @@ extern NSString const * kTriggerDragPos;
 extern NSString const * kTriggerDrag1;
 extern NSString const * kTriggerDrag2;
 extern NSString const * kTriggerDrag3;
+extern NSString const * kTriggerTweakX;
+extern NSString const * kTriggerTweakY;
 extern NSString const * kTriggerDirection;
 extern NSString const * kTriggerRotate;
 extern NSString const * kTriggerPinch;

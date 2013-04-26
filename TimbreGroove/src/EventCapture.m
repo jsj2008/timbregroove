@@ -41,8 +41,6 @@ static Shader * getCaptureShader()
 }
 @end
 
-typedef void (^CaptureRecurseBlock)(Node3d *);
-
 @implementation EventCapture
 
 +(id)getGraphViewTapChildElementOf:(Node3d *)graph inView:(UIView *)view atPt:(CGPoint)pt

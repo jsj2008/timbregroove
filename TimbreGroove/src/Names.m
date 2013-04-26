@@ -65,14 +65,20 @@ NSString const * kParamCameraRotationZ  =   @"zCameraRotation";
 NSString const * kParamCameraZ          =   @"zCamera";
 NSString const * kParamCameraReset      =   @"CameraReset";
 
+NSString const * kParamLightRotationX   =   @"xLightRotation";
+NSString const * kParamLightRotationY   =   @"yLightRotation";
+NSString const * kParamLightRotationZ   =   @"zLightRotation";
 NSString const * kParamLightX           =   @"LightX";
 NSString const * kParamLightY           =   @"LightY";
 NSString const * kParamLightZ           =   @"LightZ";
 NSString const * kParamLightIntensity   =   @"LightIntensity";
-
+NSString const * kParamLightReset       =   @"LightReset";
+NSString const * kParamLightWidth       =   @"LightWidth";
+NSString const * kParamLightDropoff     =   @"LightCutoff";
 
 NSString const * kParamNewElement       =   @"Create";
 NSString const * kParamSceneAnimation   =   @"SceneAnimation";
+NSString const * kParamJointPosition    =   @"JointPosition";
 
 NSString const * kTriggerVPad1       =   @"VirtualPad1";
 NSString const * kTriggerVPad2       =   @"VirtualPad2";
@@ -91,6 +97,8 @@ NSString const * kTriggerTap3        =   @"Tap3";
 NSString const * kTriggerDblTap      =   @"DblTap";
 NSString const * kTriggerPanX        =   @"PanX";
 NSString const * kTriggerPanY        =   @"PanY";
+NSString const * kTriggerTweakX      =   @"ObjectTweakX";
+NSString const * kTriggerTweakY      =   @"ObjectTweakY";
 NSString const * kTriggerDragPos     =   @"DragNative";
 NSString const * kTriggerDrag1       =   @"ObjectDrag#";
 NSString const * kTriggerDrag2       =   @"Drag2";

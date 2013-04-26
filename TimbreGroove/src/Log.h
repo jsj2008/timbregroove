@@ -26,6 +26,7 @@ extern "C" {
         LLShaderStuff = 1 << 8,
         LLGestureStuff = 1 << 9,
         LLMeshImporter = 1 << 10,
+        LLLights = 1 << 11,
     } LogLevel;
     
     LogLevel TGSetLogLevel(LogLevel);

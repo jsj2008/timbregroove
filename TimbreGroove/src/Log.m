@@ -20,7 +20,8 @@ static const char * logStringToBit[] = {
     "LLAudioResource",
     "LLShaderStuff",
     "LLGestureStuff",
-    "LLMeshImporter"
+    "LLMeshImporter",
+    "LLLights"
 };
 
 static LogLevel _currentLL = LLShitsOnFire;

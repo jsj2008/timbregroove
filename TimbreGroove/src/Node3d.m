@@ -222,6 +222,7 @@
         parameters[kParamRotationY] = [Parameter withBlock:^(float f) {
             GLKVector3 r = self.rotation;
             r.y += RAD_TURNS(f * 3);
+            TGLog(LLGestureStuff, @"Got rotation Y. New value: %f", r.y);
             self.rotation = r;
         }];
         parameters[kParamRotationZ] = [Parameter withBlock:^(float f) {

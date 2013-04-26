@@ -10,6 +10,8 @@
 
 @class Node3d;
 
+typedef void (^CaptureRecurseBlock)(Node3d *);
+
 @interface EventCapture : NSObject
 +(id)getGraphViewTapChildElementOf:(Node3d *)root
                             inView:(UIView *)view

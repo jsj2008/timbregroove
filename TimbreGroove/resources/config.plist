@@ -3,40 +3,40 @@
 <plist version="1.0">
 <dict>
 	<key>default_scene</key>
-	<string>butterfly</string>
+	<string>lightTest</string>
 	<key>scenes</key>
 	<dict>
-		<key>butterfly</key>
+		<key>lightTest</key>
 		<dict>
 			<key>connections</key>
 			<array>
 				<dict>
+					<key>kTriggerPanY</key>
+					<string>kParamLightDropoff</string>
+					<key>kTriggerTweakX</key>
+					<string>kParamRotationY</string>
 					<key>kTriggerDblTap</key>
-					<string>kParamCameraReset</string>
+					<string>kParamLightReset</string>
 					<key>kTriggerMainSlider</key>
-					<string>kParamMasterVolume</string>
+					<string>kParamLightIntensity</string>
 					<key>kTriggerTap1</key>
 					<string>RandomVibesNote</string>
-					<key>kTriggerPanY</key>
-					<string>kParamCameraZ</string>
 					<key>kTriggerPlayButton</key>
-					<string>kParamSceneAnimation</string>
-					<key>kTriggerDrag1</key>
-					<string>controllerPos</string>
+					<string>swingLight</string>
 					<key>kTriggerPanX</key>
-					<string>kParamCameraRotationY</string>
+					<string>kParamLightWidth</string>
 				</dict>
 			</array>
 			<key>icon</key>
 			<string>runner.png</string>
 			<key>display</key>
-			<string>butterfly</string>
+			<string>lightTest</string>
 			<key>3d_element</key>
-			<string>butterfly</string>
+			<string>lightTest</string>
 			<key>audio_element</key>
 			<string>jazz</string>
 		</dict>
-		<key>ball</key>
+		<key>legoman</key>
 		<dict>
 			<key>connections</key>
 			<array>
@@ -60,9 +60,9 @@
 			<key>icon</key>
 			<string>runner.png</string>
 			<key>display</key>
-			<string>Ball</string>
+			<string>lego man</string>
 			<key>3d_element</key>
-			<string>ball</string>
+			<string>legoman</string>
 			<key>audio_element</key>
 			<string>jazz</string>
 		</dict>
@@ -443,6 +443,22 @@
 	</dict>
 	<key>3d_elements</key>
 	<dict>
+		<key>lightTest</key>
+		<dict>
+			<key>instanceClass</key>
+			<string>MeshImportPainter</string>
+			<key>properties</key>
+			<dict>
+				<key>cameraZ</key>
+				<integer>-10</integer>
+				<key>runEmitter</key>
+				<false/>
+				<key>scaleXYZ</key>
+				<real>1</real>
+				<key>colladaFile</key>
+				<string>lightTest.dae</string>
+			</dict>
+		</dict>
 		<key>butterfly</key>
 		<dict>
 			<key>instanceClass</key>
@@ -457,58 +473,8 @@
 				<false/>
 				<key>scaleXYZ</key>
 				<real>0.2</real>
-				<key>drawType</key>
-				<string>wireframe</string>
 				<key>colladaFile</key>
 				<string>butterfly.dae</string>
-			</dict>
-		</dict>
-		<key>ball</key>
-		<dict>
-			<key>instanceClass</key>
-			<string>MeshImportPainter</string>
-			<key>properties</key>
-			<dict>
-				<key>runEmitter</key>
-				<false/>
-				<key>scaleXYZ</key>
-				<real>1</real>
-				<key>drawType</key>
-				<string>wireframe</string>
-				<key>colladaFile</key>
-				<string>ballStretch.dae</string>
-			</dict>
-		</dict>
-		<key>box</key>
-		<dict>
-			<key>instanceClass</key>
-			<string>Sky</string>
-			<key>properties</key>
-			<dict>
-				<key>cameraZ</key>
-				<integer>-9</integer>
-				<key>runEmitter</key>
-				<true/>
-				<key>scaleXYZ</key>
-				<real>1</real>
-				<key>colladaFile</key>
-				<string>2boxes.dae</string>
-			</dict>
-		</dict>
-		<key>tex</key>
-		<dict>
-			<key>instanceClass</key>
-			<string>MeshImportPainter</string>
-			<key>properties</key>
-			<dict>
-				<key>runEmitter</key>
-				<true/>
-				<key>scaleXYZ_not</key>
-				<real>0.25</real>
-				<key>drawType</key>
-				<string>wireframe</string>
-				<key>colladaFile</key>
-				<string>tex.dae</string>
 			</dict>
 		</dict>
 		<key>spherey_element</key>
@@ -615,8 +581,10 @@
 	</dict>
 	<key>logging</key>
 	<dict>
+		<key>LLLights</key>
+		<true/>
 		<key>LLMeshImporter</key>
-		<false/>
+		<true/>
 		<key>LLGestureStuff</key>
 		<false/>
 		<key>LLObjLifetime</key>

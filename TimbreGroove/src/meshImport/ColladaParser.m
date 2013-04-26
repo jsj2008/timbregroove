@@ -175,7 +175,7 @@ typedef struct _IncomingGeometryBuffer {
     IncomingGeometryBuffer _bufferInfo;
 
     NSString *  _id;
-    NSString *  _redirectTo;
+    NSMutableDictionary *  _redirectTo;
 }
 @end
 @implementation IncomingSourceTag
@@ -656,7 +656,9 @@ static const char * effectParamTags[] = {
             if( EQSTR(elementName,kTag_input) )
             {
                 IncomingSourceTag * ims = meshData->_tempIncomingSourceTag;
-                ims->_redirectTo = [(NSString *)attributeDict[kAttr_source] substringFromIndex:1];
+                if( !ims->_redirectTo )
+                    ims->_redirectTo = [NSMutableDictionary new];
+                ims->_redirectTo[attributeDict[kAttr_semantic]] = [(NSString *)attributeDict[kAttr_source] substringFromIndex:1];
             }
             
             return;
@@ -710,10 +712,13 @@ static const char * effectParamTags[] = {
     {
         if( CHECK(kColStateInVertices) )
         {
-            IncomingSourceTag * ivd = meshData->_tempIncomingSourceTag;
-            meshData->_sources[ivd->_id] = ivd;
-            meshData->_tempIncomingSourceTag = nil;
-            UNSET(kColStateInVertices);
+            if( EQSTR(elementName, kTag_vertices) )
+            {
+                IncomingSourceTag * ivd = meshData->_tempIncomingSourceTag;
+                meshData->_sources[ivd->_id] = ivd;
+                meshData->_tempIncomingSourceTag = nil;
+                UNSET(kColStateInVertices);
+            }
             return;
         }
         
@@ -1786,7 +1791,6 @@ parseErrorOccurred:(NSError *)parseError
             }
         }
         
-        
         free(skin->_influencingJointCounts);
         skin->_influencingJointCounts = NULL;
         free(skin->_packedWeightIndices);
@@ -1801,17 +1805,37 @@ parseErrorOccurred:(NSError *)parseError
         unsigned int primitivesOffset[kNumMeshSemanticKeys];
         unsigned int numVertices = ipi->_count * 3;
         unsigned int primitiveStride = 0;
-        unsigned int numFloats = 0;
-        
+
         for( int i = 0; i < ipi->_nextInput; i++ )
         {
             // dig out the relevant source tags
             NSString * srcName = ipi->_sourceURL[i];
             IncomingSourceTag * ist = imd->_sources[srcName];
+            MeshSemanticKey key;
             if( ist->_redirectTo )
-                ist = imd->_sources[ist->_redirectTo];
-            MeshSemanticKey key = ipi->_semanticKey[i];
-            isourceTags[ key ] = ist;
+            {
+                for( NSString * semantic in ist->_redirectTo )
+                {
+                    IncomingSourceTag * redirectTag;
+                    if( EQSTR(semantic, kValue_semantic_POSITION) )
+                        key = MSKPosition;
+                    else if( EQSTR(semantic, kValue_semantic_NORMAL) )
+                        key = MSKNormal;
+                    else if( EQSTR(semantic, kValue_semantic_COLOR) )
+                        key = MSKColor;
+                    else if( EQSTR(semantic, kValue_semantic_TEXCOORD) )
+                        key = MSKUV;
+                        
+                    redirectTag = imd->_sources[ ist->_redirectTo[semantic] ];
+                    isourceTags[ key ] = redirectTag;
+                    primitivesOffset[ key ] = ipi->_offsets[i];
+                }
+            }
+            else
+            {
+                key = ipi->_semanticKey[i];
+                isourceTags[ key ] = ist;
+            }
             
             // calculate stride
             primitivesOffset[ key ] = ipi->_offsets[i];
@@ -1819,8 +1843,15 @@ parseErrorOccurred:(NSError *)parseError
             if( thisOffset > primitiveStride )
                 primitiveStride = thisOffset;
             
-            // calculate num floats of target buffer
-            numFloats += numVertices * ist->_bufferInfo.stride;
+        }
+        
+        // calculate num floats of target buffer
+        unsigned int numFloats = 0;
+        for( int i = 0; i < kNumMeshSemanticKeys; i++ )
+        {
+            IncomingSourceTag * ist = isourceTags[i];
+            if( ist )
+                numFloats += numVertices * ist->_bufferInfo.stride;
         }
         
         if( skin )
@@ -1883,6 +1914,8 @@ parseErrorOccurred:(NSError *)parseError
         mg->_numVertices  = numVertices;
         mg->_buffer       = openGLBuffer;
         
+        TGLog(LLMeshImporter, @"Imported mesh shape:  %@ %d vertices", mg->_name, numVertices);
+        
         int strideCount = 0;
         for( int key = 0; key < kNumMeshSemanticKeys; key++ )
         {
@@ -1897,6 +1930,11 @@ parseErrorOccurred:(NSError *)parseError
             vs->strideType = -1;
             vs->indexIntoShaderNames = key; // lots of assumptions here
             vs->location = -1;
+            TGLog(LLMeshImporter, @"Includes %s buffer",
+                  key == MSKPosition ? "pos" :
+                  key == MSKUV       ? "UV"  :
+                  key == MSKNormal   ? "normals" :
+                  "color");
         }
         
         if( skin )
@@ -1918,7 +1956,7 @@ parseErrorOccurred:(NSError *)parseError
             vs->strideType = -1;
             vs->indexIntoShaderNames = MSKBoneWeights;
             vs->location = -1;
-            
+            TGLog(LLMeshImporter, @"Includes bones index/weight buffers");
             mg->_hasBones = true;
         }
         else
@@ -1929,7 +1967,7 @@ parseErrorOccurred:(NSError *)parseError
         
         [geometries addObject:mg];
     }
-    
+        
     [imd->_sources each:^(id key, IncomingSourceTag * ist) {
         if( ist->_bufferInfo.data )
             free( ist->_bufferInfo.data );
@@ -2148,6 +2186,7 @@ parseErrorOccurred:(NSError *)parseError
             for( NSString * jointName in jointNameArray )
             {
                 MeshSceneArmatureNode * joint = findJointWithName(jointName,nil);
+                TGLog(LLMeshImporter, @"Imported joint: %@", jointName);
                 [sceneSkin->_influencingJoints addObject:joint];
             }
             
@@ -2217,6 +2256,16 @@ parseErrorOccurred:(NSError *)parseError
                             TGLog(LLShitsOnFire, @"Could not dig out a texture file name for %@", ie->_textureName);
                             exit(-1);
                         }
+                        else
+                        {
+                            TGLog(LLMeshImporter, @"Imported texture %s for %@", mm->_textureFileName, inode->_id);
+                        }
+                    }
+                    else
+                    {
+                        TGLog(LLMeshImporter, @"Imported material %@ for %@ diffuse: %f, %f, %f",
+                              im->_effect, inode->_id,
+                              mm->_colors.diffuse.r, mm->_colors.diffuse.g, mm->_colors.diffuse.b);
                     }
                     if( !materials )
                         materials = [NSMutableDictionary new];
@@ -2264,6 +2313,7 @@ parseErrorOccurred:(NSError *)parseError
                 if( joint )
                 {
                     sceneAnim->_target = joint;
+                    TGLog(LLShitsOnFire, @"Imported animation for %@/%@", parts[0],parts[1]);
                 }
                 else
                 {

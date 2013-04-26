@@ -118,6 +118,7 @@
 		572EB27F167A9B160062F290 /* config.plist in Resources */ = {isa = PBXBuildFile; fileRef = 572EB27E167A9B160062F290 /* config.plist */; };
 		572EB290167AC0020062F290 /* fountain.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1F416786C630062F290 /* fountain.fsh */; };
 		572EB291167AC0020062F290 /* fountain.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 572EB1F516786C630062F290 /* fountain.vsh */; };
+		573022B01728E990002D3F0F /* legoman.dae in Resources */ = {isa = PBXBuildFile; fileRef = 573022AF1728E990002D3F0F /* legoman.dae */; };
 		5737C4A3169277B700C12F2D /* fluid.png in Resources */ = {isa = PBXBuildFile; fileRef = 5737C4A2169277B700C12F2D /* fluid.png */; };
 		5737C4B41693206D00C12F2D /* imageBaker.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 5737C4AF1693090D00C12F2D /* imageBaker.fsh */; };
 		5737C4B51693206D00C12F2D /* imageBaker.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 5737C4AD169308DF00C12F2D /* imageBaker.vsh */; };
@@ -199,11 +200,13 @@
 		57B2099416CB43D8007BE2A2 /* simpleMel.mid in Resources */ = {isa = PBXBuildFile; fileRef = 57B2099316CB43D8007BE2A2 /* simpleMel.mid */; };
 		57B2737116D0BDCB00E7F064 /* Clavinet (21KB).sf2 in Resources */ = {isa = PBXBuildFile; fileRef = 57B2737016D0BDCB00E7F064 /* Clavinet (21KB).sf2 */; };
 		57B2737416D0C28C00E7F064 /* EQCube.m in Sources */ = {isa = PBXBuildFile; fileRef = 57B2737316D0C28C00E7F064 /* EQCube.m */; };
+		57B5101E172A002300CD805B /* lightTest.dae in Resources */ = {isa = PBXBuildFile; fileRef = 57B5101D172A002300CD805B /* lightTest.dae */; };
 		57BE7FB316CAC9AA001972ED /* CARingBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57BE7FB116CAC9AA001972ED /* CARingBuffer.cpp */; };
 		57BE7FB616CACA0D001972ED /* RingBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57BE7FB416CACA0C001972ED /* RingBuffer.cpp */; };
 		57BF036716C61C2300148359 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57BF036616C61C2300148359 /* CoreAudio.framework */; };
 		57C3BB8516C6B5B000899F4B /* SoundSystem+Diag.m in Sources */ = {isa = PBXBuildFile; fileRef = 57C3BB8416C6B5B000899F4B /* SoundSystem+Diag.m */; };
 		57C7BA8A171686AF000C82E8 /* tex.dae in Resources */ = {isa = PBXBuildFile; fileRef = 57C7BA89171686AF000C82E8 /* tex.dae */; };
+		57C817241728415C00C96AB5 /* NSString+ParamTarget.m in Sources */ = {isa = PBXBuildFile; fileRef = 57C817231728415C00C96AB5 /* NSString+ParamTarget.m */; };
 		57CAF78516891EDB00459353 /* libc++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 57CAF78416891EDA00459353 /* libc++.dylib */; };
 		57CB3B0716BE148A007C093C /* rabbit.png in Resources */ = {isa = PBXBuildFile; fileRef = 57CB3B0516BE148A007C093C /* rabbit.png */; };
 		57CB3B0816BE148A007C093C /* snail.png in Resources */ = {isa = PBXBuildFile; fileRef = 57CB3B0616BE148A007C093C /* snail.png */; };
@@ -394,6 +397,7 @@
 		572EB2271678BF740062F290 /* Camera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Camera.h; sourceTree = "<group>"; };
 		572EB2281678BF740062F290 /* Camera.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = Camera.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		572EB27E167A9B160062F290 /* config.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = config.plist; sourceTree = "<group>"; };
+		573022AF1728E990002D3F0F /* legoman.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = legoman.dae; sourceTree = "<group>"; };
 		573560EE16EDB34C001EEA83 /* EQNames.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = EQNames.h; path = ../EQNames.h; sourceTree = "<group>"; };
 		5737C4A2169277B700C12F2D /* fluid.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fluid.png; sourceTree = "<group>"; };
 		5737C4AD169308DF00C12F2D /* imageBaker.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = imageBaker.vsh; sourceTree = "<group>"; };
@@ -517,6 +521,7 @@
 		57B2099316CB43D8007BE2A2 /* simpleMel.mid */ = {isa = PBXFileReference; lastKnownFileType = audio.midi; path = simpleMel.mid; sourceTree = "<group>"; };
 		57B2737016D0BDCB00E7F064 /* Clavinet (21KB).sf2 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Clavinet (21KB).sf2"; sourceTree = "<group>"; };
 		57B2737316D0C28C00E7F064 /* EQCube.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EQCube.m; sourceTree = "<group>"; };
+		57B5101D172A002300CD805B /* lightTest.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = lightTest.dae; sourceTree = "<group>"; };
 		57BE7FB116CAC9AA001972ED /* CARingBuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CARingBuffer.cpp; sourceTree = "<group>"; };
 		57BE7FB216CAC9AA001972ED /* CARingBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CARingBuffer.h; sourceTree = "<group>"; };
 		57BE7FB416CACA0C001972ED /* RingBuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RingBuffer.cpp; sourceTree = "<group>"; };
@@ -528,6 +533,8 @@
 		57C3BB8316C6B5B000899F4B /* SoundSystem+Diag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SoundSystem+Diag.h"; sourceTree = "<group>"; };
 		57C3BB8416C6B5B000899F4B /* SoundSystem+Diag.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "SoundSystem+Diag.m"; sourceTree = "<group>"; };
 		57C7BA89171686AF000C82E8 /* tex.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = tex.dae; sourceTree = "<group>"; };
+		57C817221728415C00C96AB5 /* NSString+ParamTarget.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSString+ParamTarget.h"; path = "src/NSString+ParamTarget.h"; sourceTree = "<group>"; };
+		57C817231728415C00C96AB5 /* NSString+ParamTarget.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSString+ParamTarget.m"; path = "src/NSString+ParamTarget.m"; sourceTree = "<group>"; };
 		57C9E6A416EDC66C005F44D1 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
 		57CAF78416891EDA00459353 /* libc++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libc++.dylib"; path = "usr/lib/libc++.dylib"; sourceTree = SDKROOT; };
 		57CB3B0516BE148A007C093C /* rabbit.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = rabbit.png; sourceTree = "<group>"; };
@@ -628,6 +635,8 @@
 		5700235516A55460006F0E8E /* models */ = {
 			isa = PBXGroup;
 			children = (
+				57B5101D172A002300CD805B /* lightTest.dae */,
+				573022AF1728E990002D3F0F /* legoman.dae */,
 				5759AD1D172482AF00E1BFBB /* 2boxes.dae */,
 				57E7EB9C170FA83E00D3DC88 /* ballStretch.dae */,
 				57E7EB98170F6B7100D3DC88 /* boxStretch.dae */,
@@ -1057,8 +1066,10 @@
 				570CE40516BDCACC00D67551 /* ScreenViewController.m */,
 				570220D7169B8E7F0028FE33 /* UIView+TGExtension.h */,
 				570220D8169B8E7F0028FE33 /* UIView+TGExtension.m */,
-				573CEEF316E99D8F00B02EE3 /* NSString+Tweening.h */,
 				573CEEF416E99D8F00B02EE3 /* NSString+Tweening.m */,
+				573CEEF316E99D8F00B02EE3 /* NSString+Tweening.h */,
+				57C817221728415C00C96AB5 /* NSString+ParamTarget.h */,
+				57C817231728415C00C96AB5 /* NSString+ParamTarget.m */,
 				571537F116FCEFCD00DCA5E1 /* Reducers.h */,
 				571537F216FCEFCD00DCA5E1 /* Reducers.m */,
 			);
@@ -1453,6 +1464,8 @@
 				57C7BA8A171686AF000C82E8 /* tex.dae in Resources */,
 				5705272F1719F69F00E17825 /* butterfly.dae in Resources */,
 				5759AD1E172482AF00E1BFBB /* 2boxes.dae in Resources */,
+				573022B01728E990002D3F0F /* legoman.dae in Resources */,
+				57B5101E172A002300CD805B /* lightTest.dae in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1560,6 +1573,7 @@
 				57CBB3D31721CE0700E45BCC /* PainterCamera.m in Sources */,
 				57889C1C17259B2A00B83495 /* Joints.m in Sources */,
 				57889C211726245100B83495 /* Sky.m in Sources */,
+				57C817241728415C00C96AB5 /* NSString+ParamTarget.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

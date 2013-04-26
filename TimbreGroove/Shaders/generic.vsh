@@ -32,10 +32,10 @@ uniform mat4 u_jointInvMats[12];
 attribute vec4 a_boneWeights;
 attribute vec4 a_boneIndex;
 
-vec4 doSkinning()
+vec4 doSkinning(mat4 pvm, vec4 inpos)
 {
     if( u_numJoints == 0 )
-        return a_position;
+        return pvm * inpos;
         
     vec4 pos = vec4( vec3(0.0), 1.0 );
 
@@ -48,10 +48,10 @@ vec4 doSkinning()
         if( weight == 0.0 )
             break;
         
-        pos += ((u_jointInvMats[index[j]] * vec4(a_position.xyz,1.0)) * u_jointMats[index[j]]) * weight;
+        pos += ((u_jointInvMats[index[j]] * vec4(inpos.xyz,1.0)) * u_jointMats[index[j]]) * weight;
     }
 
-    return pos;
+    return pos * pvm;
 }
 #endif
 
@@ -221,11 +221,10 @@ void main()
 #endif
 
 #ifdef BONES
-    vec4 pos = doSkinning();
+    gl_Position = doSkinning(u_pvm, a_position);
 #else
-    vec4 pos = a_position;
+	gl_Position = u_pvm * a_position;
 #endif
 
-	gl_Position = u_pvm * pos;
 }
 

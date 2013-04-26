@@ -18,6 +18,9 @@
 #import "Joints.h"
 #import "Cube.h"
 
+#import "Scene.h"
+#import "TriggerMap.h"
+
 @interface JointPainter : Painter {
 @public
     MeshSceneArmatureNode * _node;
@@ -27,14 +30,13 @@
 @end
 
 @interface MeshNodePainter : Painter
+@property (nonatomic) bool dirty;
 @end
 
 @implementation MeshNodePainter {
     MeshSceneMeshNode * _node;
-    MeshBuffer * _drawingBuffer;
-    GLint _bufferDrawType;
-    bool _doWireframe;
-    id<ShaderFeature>  _material;
+    NSMutableArray *    _jointFeatures;
+    FloatParamBlock     _myRotation;
 }
 
 -(id)init
@@ -44,37 +46,51 @@
 }
 
 -(id)initWithNode:(MeshSceneMeshNode *)node
-         drawType:(GLint)bufferDrawType
-        wireframe:(bool)doWireFrame
 {
     self = [super init];
     if( self )
     {
         _node = node;
-        _bufferDrawType = bufferDrawType;
-        _doWireframe = doWireFrame;
     }
     return self;
+}
+
+-(void)setDirty:(bool)dirty
+{
+    [_jointFeatures each:^(Joints * j) { j.dirty = dirty; }];
 }
 
 -(id)wireUp
 {
     Light * light = [Light new];
-    light.ambient = (GLKVector4){ 1, 1, 1, 1 };
-    light.diffuse = (GLKVector4){ 1, 1, 1, 1 };
-    GLKVector3 lightPos = (GLKVector3){ 0, 0, 24};
+ //   light.ambient = (GLKVector4){ 1, 1, 1, 1 };
+ //   light.diffuse = (GLKVector4){ 1, 1, 1, 1 };
+    GLKVector3 lightPos = (GLKVector3){ 0, 0, 16};
     light.position = lightPos;
-    light.attenuation = (GLKVector3){ 1, 0, 0 };
+    light.attenuation = (GLKVector3){ 0, 0.02, 0 };
     light.point = true;
     
     [self.lights addLight:light];
     
     [super wireUp];
-//    self.disableStandardParameters = true;
     
-//    self.rotation = (GLKVector3){ GLKMathDegreesToRadians(20), GLKMathDegreesToRadians(20), 0 };
     _node = nil; 
     return self;
+}
+
+-(void)update:(NSTimeInterval)dt
+{
+    [super update:dt];
+    if( _myRotation )
+        _myRotation(0.5);
+}
+
+-(void)triggersChanged:(Scene *)scene
+{
+    if( scene )
+    {
+        _myRotation = [scene.triggers getFloatTrigger:kParamRotationY];
+    }
 }
 
 -(void)createBuffer
@@ -86,6 +102,9 @@
         {
             Joints * j = [Joints withArmatureNodes:_node->_skin->_influencingJoints];
             [mats addObject:j];
+            if( !_jointFeatures )
+                _jointFeatures = [NSMutableArray new];
+            [_jointFeatures addObject:j];
         }
         if( geometry->_materialName )
         {
@@ -96,7 +115,6 @@
             {
                 Texture * t = [[Texture alloc] initWithFileName:mm->_textureFileName];
                 [mats addObject:t];
-                
             }
         }
         
@@ -113,13 +131,11 @@
     
 }
 
-
 @end
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 @implementation MeshImportPainter {
     MeshScene * _scene;
-    bool _doWireframe;
     NSArray * _nodePainters;
     NSArray * _jointPainters;
     NSArray * _animations;
@@ -129,8 +145,7 @@
 {
     self = [super init];
     if (self) {
-        _bufferDrawType = GL_TRIANGLES;
-        self.disableStandardParameters = true;
+       self.disableStandardParameters = true;
     }
     return self;
 }
@@ -227,7 +242,7 @@
     
     createNodePainter = ^MeshNodePainter *(MeshSceneMeshNode *node, Node3d *parent)
     {
-        MeshNodePainter * painterObj = [[MeshNodePainter alloc] initWithNode:node drawType:_bufferDrawType wireframe:_doWireframe];
+        MeshNodePainter * painterObj = [[MeshNodePainter alloc] initWithNode:node];
         [parent appendChild:[painterObj wireUp]];
         if( node->_children )
             [node->_children each:^(id key, MeshSceneMeshNode *child) {
@@ -251,25 +266,6 @@
     _colladaFile = colladaFile;
 }
 
--(void)setDrawType:(NSString *)drawType
-{
-    if([drawType caseInsensitiveCompare:@"triangles"] == NSOrderedSame)
-        _bufferDrawType = GL_TRIANGLES;
-    else if([drawType caseInsensitiveCompare:@"triangle_strip"] == NSOrderedSame)
-        _bufferDrawType = GL_TRIANGLE_STRIP;
-    else if([drawType caseInsensitiveCompare:@"wireframe"] == NSOrderedSame)
-    {
-        _bufferDrawType = GL_TRIANGLES;
-        _doWireframe = true;
-    }
-    
-}
-
--(void)releaseScene
-{
-    _scene = nil;
-}
-
 -(void)updatePainters
 {
     [_jointPainters each:^(JointPainter *vb) {
@@ -277,13 +273,14 @@
         GLKVector3 vec3 = POSITION_FROM_MAT( node->_world );
         vb.position = vec3;
     }];
- 
-    [self calculateInfluences];
+    [self markNodesDirty];
 }
-    
--(void)calculateInfluences
+
+-(void)markNodesDirty
 {
- //   [_nodePainters each:^(MeshNodePainter *meshPainter) { [meshPainter calculateInfluences]; }];
+    [_nodePainters each:^(MeshNodePainter *mnp) {
+        mnp.dirty = true;
+    }];
 }
 
 -(void)update:(NSTimeInterval)dt
@@ -360,10 +357,11 @@
     Parameter * parameter = [Parameter withBlock:^(TGVector3 vec3) {
         self.position = TG3(vec3);
         [self updateTransformFromPos];
-        [(MeshImportPainter *)_parent calculateInfluences];
+        [(MeshImportPainter *)_parent markNodesDirty];
     }];
     parameter.targetObject = self;
-    NSString * paramName = [NSString stringWithFormat:@"controllerPos#%@",_node->_name];
+
+    NSString * paramName = [kParamJointPosition stringByAppendingParamTarget:_node->_name];
     putHere[paramName] = parameter;
 }
 

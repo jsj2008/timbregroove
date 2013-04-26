@@ -58,15 +58,24 @@
 
 -(void)bind:(Shader *)shader object:(Painter *)object
 {
-    [shader writeToLocation:gv_numJoints type:TG_INT data:&_numNodes];
-    
-    __block unsigned bji = 0;
-    
-    [_nodes each:^(MeshSceneArmatureNode * joint) {
-        _matrices[bji++] = GLKMatrix4Transpose([joint matrix]);
-    }];
-    
-    [shader writeToLocation:gv_jointMats    type:TG_MATRIX4 data:_matrices    count:_numNodes];
-    [shader writeToLocation:gv_jointInvMats type:TG_MATRIX4 data:_invBindMats count:_numNodes];
+    //if( _dirty )
+    {
+        [shader writeToLocation:gv_numJoints type:TG_INT data:&_numNodes];
+        
+        __block unsigned bji = 0;
+        
+        [_nodes each:^(MeshSceneArmatureNode * joint) {
+            _matrices[bji++] = GLKMatrix4Transpose([joint matrix]);
+        }];
+        
+        [shader writeToLocation:gv_jointMats    type:TG_MATRIX4 data:_matrices    count:_numNodes];
+        [shader writeToLocation:gv_jointInvMats type:TG_MATRIX4 data:_invBindMats count:_numNodes];
+        
+        _dirty = false;
+    }
+    //else
+    {
+     //   TGLog(LLShitsOnFire, @"No joint animation");
+    }
 }
 @end
