@@ -1914,7 +1914,7 @@ parseErrorOccurred:(NSError *)parseError
         mg->_numVertices  = numVertices;
         mg->_buffer       = openGLBuffer;
         
-        TGLog(LLMeshImporter, @"Imported mesh shape:  %@ %d vertices", mg->_name, numVertices);
+        TGLog(LLMeshImporter, @"Imported mesh shape:  %@ %d vert mat: %@", mg->_name, numVertices, mg->_materialName);
         
         int strideCount = 0;
         for( int key = 0; key < kNumMeshSemanticKeys; key++ )
@@ -2263,8 +2263,8 @@ parseErrorOccurred:(NSError *)parseError
                     }
                     else
                     {
-                        TGLog(LLMeshImporter, @"Imported material %@ for %@ diffuse: %f, %f, %f",
-                              im->_effect, inode->_id,
+                        TGLog(LLMeshImporter, @"Material %@/%@ for %@ { %f, %f, %f }",
+                              ipi->_materialName, im->_effect, inode->_id,
                               mm->_colors.diffuse.r, mm->_colors.diffuse.g, mm->_colors.diffuse.b);
                     }
                     if( !materials )

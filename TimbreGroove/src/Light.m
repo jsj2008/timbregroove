@@ -14,20 +14,16 @@
 
 #define TLOG_POS { GLKVector4 v4 = [self positionLight]; TGLog(LLLights, @"Light position: { %f, %f, %f } (%f)", v4.x, v4.y, v4.z, v4.w); }
 
-@implementation Light {
-    GLKVector3 _originalPos;
-    bool _gotOriginal;
-}
-
+@implementation Light
 -(id)init
 {
     if( (self = [super init]) )
     {
         _desc.position  = (GLKVector4){0, 0, -5, 0 };
-        _desc.colors.diffuse = (GLKVector4){ 0.5, 0.5, 0.5, 1};
+        _desc.colors.diffuse = (GLKVector4){ 0.1, 0.1, 0.1, 1};
         _desc.colors.ambient = (GLKVector4){ 0.5, 0.5, 0.5, 1};
         _desc.attenuation = (GLKVector3){0, 0, 0};
-        _desc.spotDirection = (GLKVector3){ 0, 0, -1 };
+        _desc.spotDirection = (GLKVector3){ 0, 0, 1 };
     }
     
     return self;
@@ -41,11 +37,6 @@
 -(void)setPosition:(GLKVector3)position
 {
     _desc.position = (GLKVector4){ position.x, position.y, position.z, _desc.position.w };
-    if( !_gotOriginal )
-    {
-        _originalPos = position;
-        _gotOriginal = true;
-    }
     TLOG_POS;
 }
 
@@ -89,6 +80,16 @@
     _desc.colors.diffuse = diffuse;
 }
 
+-(GLKVector3)spotDirection
+{
+    return _desc.spotDirection;
+}
+
+-(void)setSpotDirection:(GLKVector3)spotDirection
+{
+    _desc.spotDirection = spotDirection;
+}
+
 -(GLKVector4)positionLight
 {
     GLKMatrix4 mx = GLKMatrix4Identity;
@@ -117,6 +118,13 @@
     [shader writeToLocation:gv_lights0_position    + offset type:TG_VECTOR4 data:&vec4];
     [shader writeToLocation:gv_lights0_attenuation + offset type:TG_VECTOR3 data:&_desc.attenuation];
     [shader writeToLocation:gv_lights0_colors      + offset type:TG_VECTOR4 data:&_desc.colors count:4];
+    
+    if( _desc.spotCutoffAngle )
+    {
+        [shader writeToLocation:gv_lights0_spotCutoffAngle     + offset type:TG_FLOAT   data:&_desc.spotCutoffAngle];
+        [shader writeToLocation:gv_lights0_spotDirection       + offset type:TG_VECTOR3 data:&_desc.spotDirection];
+        [shader writeToLocation:gv_lights0_spotFalloffExponent + offset type:TG_FLOAT   data:&_desc.spotFalloffExponent];
+    }
 }
 
 -(void)unbind:(Shader *)shader {}
@@ -127,8 +135,12 @@
 -(void)getParameters:(NSMutableDictionary *)parameters
 {
     parameters[kParamLightReset] = [Parameter withBlock:^(CGPoint pt) {
-        self.position = _originalPos;
+        self.position = (GLKVector3){ 0, 0, 8 };
         self.rotation = (GLKVector3){ 0, 0, 0 };
+        self.attenuation = (GLKVector3){ 0, 0.002, 0 };
+        self.spotDirection = (GLKVector3){ 0, 0, -1 };
+        _desc.spotCutoffAngle = 0.0;
+        _desc.spotFalloffExponent = 0.0;
         TLOG_POS;
     }];
     
@@ -170,11 +182,11 @@
     }];
     parameters[ kParamLightWidth ] = [FloatParameter withBlock:^(float value) {
         _desc.spotCutoffAngle  += value * 5.0;
-        TGLog(LLLights, @"Light cutoff: %f", _desc.spotCutoffAngle);
+        TGLog(LLLights, @"Light spot angle: %f", _desc.spotCutoffAngle);
     }];
     parameters[ kParamLightDropoff ] = [FloatParameter withBlock:^(float value) {
         _desc.spotFalloffExponent += value;
-        TGLog(LLLights, @"Light FalloffExponent: %f", _desc.spotFalloffExponent );
+        TGLog(LLLights, @"Light FalloffExponent: %f (%f)", _desc.spotFalloffExponent, value );
     }];
 }
 

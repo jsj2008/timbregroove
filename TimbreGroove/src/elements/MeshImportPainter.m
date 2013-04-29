@@ -62,14 +62,31 @@
 
 -(id)wireUp
 {
-    Light * light = [Light new];
- //   light.ambient = (GLKVector4){ 1, 1, 1, 1 };
- //   light.diffuse = (GLKVector4){ 1, 1, 1, 1 };
-    GLKVector3 lightPos = (GLKVector3){ 0, 0, 16};
-    light.position = lightPos;
-    light.attenuation = (GLKVector3){ 0, 0.02, 0 };
-    light.point = true;
+    ShaderLight desc = { 0 };
+/*
+   // for plane test
+    desc.colors.ambient = (GLKVector4){ 1, 1, 1, 1 };
+    desc.colors.diffuse = (GLKVector4){ 1, 1, 1, 1 };
+    desc.position = (GLKVector4){ -2, 2, 0.2, 2.0 };
+    desc.attenuation = (GLKVector3){ 0, 0.02, 0 };
+    desc.spotCutoffAngle = 15.468750;
+    desc.spotFalloffExponent = 44.0;
+    desc.spotDirection = (GLKVector3){ 0.5, -0.5, -0.1 };
+    desc.spotDirection =  GLKVector3Normalize( desc.spotDirection );
+*/
     
+    desc.colors.ambient = (GLKVector4){ 1, 1, 1, 1 };
+    desc.colors.diffuse = (GLKVector4){ 1, 1, 1, 1 };
+    desc.position = (GLKVector4){ -2, 2, 2,        1.0 };
+    desc.attenuation = (GLKVector3){ 0, 0.02, 0 };
+    desc.spotCutoffAngle = 15.468750;
+    desc.spotFalloffExponent = 44.0;
+    desc.spotDirection = (GLKVector3){ 0.5, -0.5, -0.5 };
+    desc.spotDirection =  GLKVector3Normalize( desc.spotDirection );
+    
+    Light * light = [Light new];
+    light.desc = desc;
+
     [self.lights addLight:light];
     
     [super wireUp];
@@ -82,7 +99,7 @@
 {
     [super update:dt];
     if( _myRotation )
-        _myRotation(0.5);
+        _myRotation(-0.8);
 }
 
 -(void)triggersChanged:(Scene *)scene

@@ -130,7 +130,6 @@
 		5751F2E316D5FA6B00144F2B /* gridtest.png in Resources */ = {isa = PBXBuildFile; fileRef = 5751F2E216D5FA6B00144F2B /* gridtest.png */; };
 		5751F2E616D5FACB00144F2B /* Ripple.m in Sources */ = {isa = PBXBuildFile; fileRef = 5751F2E516D5FACB00144F2B /* Ripple.m */; };
 		5758FDED16D06648003913D1 /* funkRiff1.mid in Resources */ = {isa = PBXBuildFile; fileRef = 5758FDEC16D06648003913D1 /* funkRiff1.mid */; };
-		5759AD1E172482AF00E1BFBB /* 2boxes.dae in Resources */ = {isa = PBXBuildFile; fileRef = 5759AD1D172482AF00E1BFBB /* 2boxes.dae */; };
 		575AA12616ADA61F00635A76 /* Pool.m in Sources */ = {isa = PBXBuildFile; fileRef = 575AA12516ADA61F00635A76 /* Pool.m */; };
 		575AA12916ADAF6900635A76 /* Light.m in Sources */ = {isa = PBXBuildFile; fileRef = 575AA12816ADAF6900635A76 /* Light.m */; };
 		575AA12B16ADBB9500635A76 /* pool.png in Resources */ = {isa = PBXBuildFile; fileRef = 575AA12A16ADBB9500635A76 /* pool.png */; };
@@ -205,7 +204,6 @@
 		57BE7FB616CACA0D001972ED /* RingBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57BE7FB416CACA0C001972ED /* RingBuffer.cpp */; };
 		57BF036716C61C2300148359 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57BF036616C61C2300148359 /* CoreAudio.framework */; };
 		57C3BB8516C6B5B000899F4B /* SoundSystem+Diag.m in Sources */ = {isa = PBXBuildFile; fileRef = 57C3BB8416C6B5B000899F4B /* SoundSystem+Diag.m */; };
-		57C7BA8A171686AF000C82E8 /* tex.dae in Resources */ = {isa = PBXBuildFile; fileRef = 57C7BA89171686AF000C82E8 /* tex.dae */; };
 		57C817241728415C00C96AB5 /* NSString+ParamTarget.m in Sources */ = {isa = PBXBuildFile; fileRef = 57C817231728415C00C96AB5 /* NSString+ParamTarget.m */; };
 		57CAF78516891EDB00459353 /* libc++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 57CAF78416891EDA00459353 /* libc++.dylib */; };
 		57CB3B0716BE148A007C093C /* rabbit.png in Resources */ = {isa = PBXBuildFile; fileRef = 57CB3B0516BE148A007C093C /* rabbit.png */; };
@@ -221,7 +219,6 @@
 		57DF536A16DC1A6000990B8D /* Serenity.m in Sources */ = {isa = PBXBuildFile; fileRef = 57DF536916DC1A6000990B8D /* Serenity.m */; };
 		57DF9C8116B5B9AB00050635 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57DF9C8016B5B9AB00050635 /* AVFoundation.framework */; };
 		57DF9C8416B5BE2500050635 /* SoundSystem.m in Sources */ = {isa = PBXBuildFile; fileRef = 57DF9C8316B5BE2500050635 /* SoundSystem.m */; };
-		57E0CD8D1713236F00F83113 /* walk.dae in Resources */ = {isa = PBXBuildFile; fileRef = 57E0CD8C1713236F00F83113 /* walk.dae */; };
 		57E1954616ABECA50099514B /* PoolShader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 57E1954516ABECA50099514B /* PoolShader.vsh */; };
 		57E1954A16ABEEBD0099514B /* SphereOid.m in Sources */ = {isa = PBXBuildFile; fileRef = 57E1954916ABEEBD0099514B /* SphereOid.m */; };
 		57E27F0416F9166600282F9A /* m.mid in Resources */ = {isa = PBXBuildFile; fileRef = 57E27F0316F9166600282F9A /* m.mid */; };
@@ -417,7 +414,6 @@
 		5751F2E216D5FA6B00144F2B /* gridtest.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = gridtest.png; sourceTree = "<group>"; };
 		5751F2E516D5FACB00144F2B /* Ripple.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Ripple.m; sourceTree = "<group>"; };
 		5758FDEC16D06648003913D1 /* funkRiff1.mid */ = {isa = PBXFileReference; lastKnownFileType = audio.midi; path = funkRiff1.mid; sourceTree = "<group>"; };
-		5759AD1D172482AF00E1BFBB /* 2boxes.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = 2boxes.dae; sourceTree = "<group>"; };
 		575AA12316ADA61500635A76 /* Pool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Pool.h; sourceTree = "<group>"; };
 		575AA12516ADA61F00635A76 /* Pool.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Pool.m; sourceTree = "<group>"; };
 		575AA12716ADAF6900635A76 /* Light.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Light.h; path = ../Light.h; sourceTree = "<group>"; };
@@ -435,7 +431,7 @@
 		5764756B167D5E8C00D5A431 /* GenericShader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = GenericShader.m; path = ../shaders/GenericShader.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		5764756F167D619800D5A431 /* Painter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Painter.h; path = ../Painter.h; sourceTree = "<group>"; };
 		57647570167D619800D5A431 /* Painter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = Painter.m; path = ../Painter.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
-		57647572167D7C3C00D5A431 /* generic.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = generic.vsh; sourceTree = "<group>"; };
+		57647572167D7C3C00D5A431 /* generic.vsh */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = generic.vsh; sourceTree = "<group>"; };
 		57647576167D8AC100D5A431 /* TGTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = TGTypes.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		57677D9B16EAEE8000C3BA58 /* NoteGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoteGenerator.h; sourceTree = "<group>"; };
 		57677D9C16EAEE8100C3BA58 /* NoteGenerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NoteGenerator.m; sourceTree = "<group>"; };
@@ -488,7 +484,7 @@
 		5787A700171FC89900861C01 /* ShaderTimer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ShaderTimer.m; path = TimbreGroove/src/ShaderTimer.m; sourceTree = SOURCE_ROOT; };
 		57889C1A17259B2900B83495 /* Joints.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Joints.h; sourceTree = "<group>"; };
 		57889C1B17259B2900B83495 /* Joints.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Joints.m; sourceTree = "<group>"; };
-		57889C1D1726182A00B83495 /* generic.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = generic.fsh; sourceTree = "<group>"; };
+		57889C1D1726182A00B83495 /* generic.fsh */ = {isa = PBXFileReference; explicitFileType = sourcecode.glsl; fileEncoding = 4; path = generic.fsh; sourceTree = "<group>"; };
 		57889C1F1726245100B83495 /* Sky.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sky.h; sourceTree = "<group>"; };
 		57889C201726245100B83495 /* Sky.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Sky.m; sourceTree = "<group>"; };
 		5790068616841F3B0068659F /* Interactive.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Interactive.h; sourceTree = "<group>"; };
@@ -532,7 +528,6 @@
 		57BF036616C61C2300148359 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		57C3BB8316C6B5B000899F4B /* SoundSystem+Diag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SoundSystem+Diag.h"; sourceTree = "<group>"; };
 		57C3BB8416C6B5B000899F4B /* SoundSystem+Diag.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "SoundSystem+Diag.m"; sourceTree = "<group>"; };
-		57C7BA89171686AF000C82E8 /* tex.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = tex.dae; sourceTree = "<group>"; };
 		57C817221728415C00C96AB5 /* NSString+ParamTarget.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSString+ParamTarget.h"; path = "src/NSString+ParamTarget.h"; sourceTree = "<group>"; };
 		57C817231728415C00C96AB5 /* NSString+ParamTarget.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSString+ParamTarget.m"; path = "src/NSString+ParamTarget.m"; sourceTree = "<group>"; };
 		57C9E6A416EDC66C005F44D1 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
@@ -558,7 +553,6 @@
 		57DF9C8016B5B9AB00050635 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		57DF9C8216B5BE2500050635 /* SoundSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SoundSystem.h; sourceTree = "<group>"; };
 		57DF9C8316B5BE2500050635 /* SoundSystem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SoundSystem.m; sourceTree = "<group>"; };
-		57E0CD8C1713236F00F83113 /* walk.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = walk.dae; sourceTree = "<group>"; };
 		57E1954516ABECA50099514B /* PoolShader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = PoolShader.vsh; sourceTree = "<group>"; };
 		57E1954816ABEEAC0099514B /* SphereOid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SphereOid.h; sourceTree = "<group>"; };
 		57E1954916ABEEBD0099514B /* SphereOid.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SphereOid.m; sourceTree = "<group>"; };
@@ -637,12 +631,9 @@
 			children = (
 				57B5101D172A002300CD805B /* lightTest.dae */,
 				573022AF1728E990002D3F0F /* legoman.dae */,
-				5759AD1D172482AF00E1BFBB /* 2boxes.dae */,
 				57E7EB9C170FA83E00D3DC88 /* ballStretch.dae */,
 				57E7EB98170F6B7100D3DC88 /* boxStretch.dae */,
 				5705272E1719F69F00E17825 /* butterfly.dae */,
-				57C7BA89171686AF000C82E8 /* tex.dae */,
-				57E0CD8C1713236F00F83113 /* walk.dae */,
 			);
 			path = models;
 			sourceTree = "<group>";
@@ -1460,10 +1451,7 @@
 				5714706417069A3000383D04 /* numText.png in Resources */,
 				57E7EB99170F6B7100D3DC88 /* boxStretch.dae in Resources */,
 				57E7EB9D170FA83E00D3DC88 /* ballStretch.dae in Resources */,
-				57E0CD8D1713236F00F83113 /* walk.dae in Resources */,
-				57C7BA8A171686AF000C82E8 /* tex.dae in Resources */,
 				5705272F1719F69F00E17825 /* butterfly.dae in Resources */,
-				5759AD1E172482AF00E1BFBB /* 2boxes.dae in Resources */,
 				573022B01728E990002D3F0F /* legoman.dae in Resources */,
 				57B5101E172A002300CD805B /* lightTest.dae in Resources */,
 			);

@@ -66,10 +66,11 @@ typedef struct _ShaderLight {
 
 @interface Light : NSObject<ShaderFeature>
 @property (nonatomic) GLKVector3 position;
-@property (nonatomic) GLKVector3 rotation; // not sure about this
+@property (nonatomic) GLKVector3 rotation;
 @property (nonatomic) GLKVector3 attenuation;
 @property (nonatomic) GLKVector4 ambient;
 @property (nonatomic) GLKVector4 diffuse;
+@property (nonatomic) GLKVector3 spotDirection; // expects normalized
 @property (nonatomic) ShaderLight desc;
 @property (nonatomic) bool point;
 @property (nonatomic) int lightNumber;

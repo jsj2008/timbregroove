@@ -4,8 +4,8 @@
   <contributor>
    <authoring_tool>SceneKit Collada Exporter v1.0</authoring_tool>
   </contributor>
-  <created>2013-04-22T20:29:41Z</created>
-  <modified>2013-04-22T20:29:41Z</modified>
+  <created>2013-04-28T22:50:11Z</created>
+  <modified>2013-04-28T22:50:11Z</modified>
   <up_axis>Y_UP</up_axis>
  </asset>
  <library_animations>
@@ -207,7 +207,7 @@
     <node id="spine" name="spine" sid="SID_3" type="JOINT">
      <matrix>0.999779 -0.021048 0 1 0.021048 0.999779 0 0 0 0 1 0 0 0 0 1 </matrix>
      <node id="head" name="head" sid="SID_4" type="JOINT">
-      <matrix sid="SID_1">0.99989 3.12667e-05 0.0148544 0.94461 -0.0120699 0.584608 0.811226 -0.110787 -0.00865864 -0.811316 0.584544 -7.60879e-05 0 0 0 1 </matrix>
+      <matrix sid="SID_1">0.99989 3.12667e-05 0.0148544 0.850411 -0.0120699 0.584608 0.811226 -0.299178 -0.00865864 -0.811316 0.584544 -7.60879e-05 0 0 0 1 </matrix>
      </node>
     </node>
    </node>

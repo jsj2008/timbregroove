@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>default_scene</key>
-	<string>lightTest</string>
+	<string>butterfly</string>
 	<key>scenes</key>
 	<dict>
 		<key>lightTest</key>
@@ -11,20 +11,22 @@
 			<key>connections</key>
 			<array>
 				<dict>
-					<key>kTriggerPanY</key>
-					<string>kParamLightDropoff</string>
-					<key>kTriggerTweakX</key>
-					<string>kParamRotationY</string>
-					<key>kTriggerDblTap</key>
-					<string>kParamLightReset</string>
+					<key>kTriggerPanX</key>
+					<string>kParamLightWidth</string>
 					<key>kTriggerMainSlider</key>
 					<string>kParamLightIntensity</string>
+					<key>kTriggerPanY</key>
+					<string>kParamLightDropoff</string>
+					<key>kTriggerDblTap</key>
+					<string>kParamLightReset</string>
+				</dict>
+				<dict>
+					<key>kTriggerTweakX</key>
+					<string>kParamRotationY</string>
 					<key>kTriggerTap1</key>
 					<string>RandomVibesNote</string>
 					<key>kTriggerPlayButton</key>
 					<string>swingLight</string>
-					<key>kTriggerPanX</key>
-					<string>kParamLightWidth</string>
 				</dict>
 			</array>
 			<key>icon</key>
@@ -41,20 +43,22 @@
 			<key>connections</key>
 			<array>
 				<dict>
+					<key>kTriggerPanX</key>
+					<string>kParamLightWidth</string>
+					<key>kTriggerMainSlider</key>
+					<string>kParamLightIntensity</string>
+					<key>kTriggerPanY</key>
+					<string>kParamLightDropoff</string>
 					<key>kTriggerDblTap</key>
-					<string>kParamCameraReset</string>
+					<string>kParamLightReset</string>
+				</dict>
+				<dict>
 					<key>kTriggerMainSlider</key>
 					<string>kParamMasterVolume</string>
 					<key>kTriggerTap1</key>
 					<string>RandomVibesNote</string>
-					<key>kTriggerPanY</key>
-					<string>kParamCameraZ</string>
 					<key>kTriggerPlayButton</key>
 					<string>kParamSceneAnimation</string>
-					<key>kTriggerDrag1</key>
-					<string>controllerPos</string>
-					<key>kTriggerPanX</key>
-					<string>kParamCameraRotationY</string>
 				</dict>
 			</array>
 			<key>icon</key>
@@ -212,29 +216,29 @@
 			<key>audio_element</key>
 			<string>tranquility</string>
 		</dict>
-		<key>tranquility</key>
+		<key>butterfly</key>
 		<dict>
 			<key>icon</key>
 			<string>mood.png</string>
 			<key>display</key>
-			<string>tranquility...</string>
+			<string>butterfly</string>
 			<key>connections</key>
 			<array>
 				<dict>
+					<key>kTriggerPanX</key>
+					<string>kParamLightWidth</string>
 					<key>kTriggerMainSlider</key>
-					<string>kParamMasterVolume</string>
-					<key>kTriggerDynamicPeak</key>
-					<string>ItemRadius</string>
+					<string>kParamLightIntensity</string>
+					<key>kTriggerPanY</key>
+					<string>kParamLightDropoff</string>
 					<key>kTriggerDblTap</key>
-					<string>NewItem</string>
-					<key>kTriggerTap1</key>
-					<string>MoveItem:EaseOutSine:0.6</string>
+					<string>kParamLightReset</string>
 				</dict>
 			</array>
 			<key>3d_element</key>
-			<string>pool</string>
+			<string>butterfly</string>
 			<key>audio_element</key>
-			<string>poolside</string>
+			<string>pool</string>
 		</dict>
 	</dict>
 	<key>audio_elements</key>
@@ -443,6 +447,22 @@
 	</dict>
 	<key>3d_elements</key>
 	<dict>
+		<key>legoman</key>
+		<dict>
+			<key>instanceClass</key>
+			<string>MeshImportPainter</string>
+			<key>properties</key>
+			<dict>
+				<key>cameraZ</key>
+				<integer>-5</integer>
+				<key>runEmitter</key>
+				<false/>
+				<key>scaleXYZ</key>
+				<real>1</real>
+				<key>colladaFile</key>
+				<string>legoman.dae</string>
+			</dict>
+		</dict>
 		<key>lightTest</key>
 		<dict>
 			<key>instanceClass</key>
@@ -450,7 +470,7 @@
 			<key>properties</key>
 			<dict>
 				<key>cameraZ</key>
-				<integer>-10</integer>
+				<integer>-5</integer>
 				<key>runEmitter</key>
 				<false/>
 				<key>scaleXYZ</key>
