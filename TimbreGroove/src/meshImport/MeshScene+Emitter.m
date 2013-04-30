@@ -26,6 +26,7 @@ static NSString * stringFromMat(GLKMatrix4 m)
 
 -(void)emitSkin:(MeshSkinning *)skin
 {
+#if 0
     unsigned int   currPos  = 0;
     int            ji       = 0;
     int            wi;
@@ -51,6 +52,7 @@ static NSString * stringFromMat(GLKMatrix4 m)
             TGLogp(LLMeshImporter, @"  %.4f%c // [%02d][%d] %@", weight, comma, i, n, jointNames[ji]);
         }
     }
+#endif
     TGLogp(LLMeshImporter, @"};\n");
     
 }

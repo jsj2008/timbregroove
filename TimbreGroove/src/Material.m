@@ -53,6 +53,17 @@
 {
     _colors.ambient = ambient;
 }
+
+-(GLKVector4)diffuse
+{
+    return _colors.diffuse;
+}
+
+-(void)setDiffuse:(GLKVector4)diffuse
+{
+    _colors.diffuse = diffuse;
+}
+
 -(void)unbind:(Shader *)shader {}
 @end
 

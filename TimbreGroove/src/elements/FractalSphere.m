@@ -21,19 +21,16 @@
     float     _myRot;
     FBO *     _fbo;
     Material  *_mat;
-    
-    float _pmin;
-    float _pmax;
-    bool _tweening;
+    float     _lightRot;
+    Light     *_light;
 }
-@property (nonatomic) float peakVal;
 @end
 
 @implementation FractalSphere
 
 -(id)wireUp
 {
-    _fbo = [[FBO alloc] initWithWidth:512 height:512];
+    _fbo = [[FBO alloc] initWithWidth:128 height:128];
     _texRenderer = [[Fractal alloc] init];
     _texRenderer.fbo = _fbo;
     _texRenderer.backColor = GLKVector4Make(0.3, 0.3, 0.3, 1);
@@ -41,9 +38,7 @@
     [_texRenderer update:0.01];
     [_texRenderer renderToFBO];
 
-    _pmin = 1000.0;
-    _pmax = -200.0;
-    
+    self.scaleXYZ = 2.0;
     return [super wireUp];
 }
 
@@ -52,16 +47,14 @@
     MaterialColors colors = {
         .ambient  = { 0.8, 0.8, 0.8, 1.0 },
         .diffuse  = { 1.0, 1.0, 1.0, 1.0 },
-        .specular = { 1.0, 1.0, 1.0, 1.0 },
-        .emission = { 0.0, 0.0, 0.0, 0.0 }
     };
     
-    _mat = [Material withColors:colors shininess:1000.0 doSpecular:true];
+    _mat = [Material withColors:colors shininess:0 doSpecular:false];
 
-    [self addShaderFeature:_fbo];
     [self addShaderFeature:_mat];
-    [self.lights addLight:[Light new]];
-    
+    _light = [Light new];
+    [self.lights addLight:_light];
+    [self addShaderFeature:_fbo];
     [super createShader];
 }
 
@@ -71,30 +64,21 @@
 
     // override the default
     putHere[@"Ping!"] = [Parameter withBlock:^(float f) {
-        _myRot += f * 45.0;
+        _myRot += f * 30.0;
         self.rotation = (GLKVector3){ 0, GLKMathDegreesToRadians(_myRot), 0 };
-        _mat.ambient = (GLKVector4){f, f*0.7, f, 1.0};
+        GLKVector4 amb = GLKVector4Normalize((GLKVector4){f, 0, f*0.7, 1.0});
+        amb.w = 1.0;
+        _mat.ambient = amb;
     }];
     
 }
 -(void)update:(NSTimeInterval)dt
 {
-   // self.lightRotation += 0.03;
+    _lightRot += dt * 35.0;
+    _light.rotation = (GLKVector3){ 0, GLKMathDegreesToRadians(_lightRot), 0 };
     [super update:dt];
     [_texRenderer update:dt];
     [_texRenderer renderToFBO];
 }
 
-/*
-    if( self.timer > 1.0/8.0 )
-    {
-        
-        _myRot += 0.4; // (peakVal * 5.0);
-        float rads = GLKMathDegreesToRadians(_myRot);
-        GLKVector3 rot = { GLKMathDegreesToRadians(0), rads, 0};
-        self.rotation = rot;
-        self.timer = 0.0;
-    }
-}
- */
 @end

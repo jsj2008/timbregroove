@@ -3,9 +3,31 @@
 <plist version="1.0">
 <dict>
 	<key>default_scene</key>
-	<string>butterfly</string>
+	<string>fft</string>
 	<key>scenes</key>
 	<dict>
+		<key>moon</key>
+		<dict>
+			<key>connections</key>
+			<array>
+				<dict>
+					<key>kTriggerMainSlider</key>
+					<string>kParamLightIntensity</string>
+					<key>kTriggerAudioFrame</key>
+					<string>kParamAudioFrameCapture</string>
+					<key>kTriggerTap1</key>
+					<string>RandomVibeNote</string>
+				</dict>
+			</array>
+			<key>icon</key>
+			<string>fractalSphere.png</string>
+			<key>display</key>
+			<string>moon</string>
+			<key>3d_element</key>
+			<string>spherey_element</string>
+			<key>audio_element</key>
+			<string>electro</string>
+		</dict>
 		<key>lightTest</key>
 		<dict>
 			<key>connections</key>
@@ -100,36 +122,6 @@
 			<key>audio_element</key>
 			<string>jazz</string>
 		</dict>
-		<key>tex</key>
-		<dict>
-			<key>connections</key>
-			<array>
-				<dict>
-					<key>kTriggerDblTap</key>
-					<string>kParamCameraReset</string>
-					<key>kTriggerMainSlider</key>
-					<string>kParamMasterVolume</string>
-					<key>kTriggerTap1</key>
-					<string>RandomVibesNote</string>
-					<key>kTriggerPanY</key>
-					<string>kParamCameraZ</string>
-					<key>kTriggerPlayButton</key>
-					<string>kParamSceneAnimation</string>
-					<key>kTriggerDrag1</key>
-					<string>controllerPos</string>
-					<key>kTriggerPanX</key>
-					<string>kParamCameraRotationY</string>
-				</dict>
-			</array>
-			<key>icon</key>
-			<string>runner.png</string>
-			<key>display</key>
-			<string>tex</string>
-			<key>3d_element</key>
-			<string>tex</string>
-			<key>audio_element</key>
-			<string>jazz</string>
-		</dict>
 		<key>fractal</key>
 		<dict>
 			<key>connections</key>
@@ -193,52 +185,6 @@
 			<string>oscilloscope</string>
 			<key>audio_element</key>
 			<string>electro</string>
-		</dict>
-		<key>ripple</key>
-		<dict>
-			<key>connections</key>
-			<array>
-				<dict>
-					<key>kTriggerTimer</key>
-					<string>u_time</string>
-				</dict>
-				<dict>
-					<key>kTriggerUpdate</key>
-					<string>kParamRotationZ</string>
-				</dict>
-			</array>
-			<key>icon</key>
-			<string>test.png</string>
-			<key>display</key>
-			<string>ripples</string>
-			<key>3d_element</key>
-			<string>ripple</string>
-			<key>audio_element</key>
-			<string>tranquility</string>
-		</dict>
-		<key>butterfly</key>
-		<dict>
-			<key>icon</key>
-			<string>mood.png</string>
-			<key>display</key>
-			<string>butterfly</string>
-			<key>connections</key>
-			<array>
-				<dict>
-					<key>kTriggerPanX</key>
-					<string>kParamLightWidth</string>
-					<key>kTriggerMainSlider</key>
-					<string>kParamLightIntensity</string>
-					<key>kTriggerPanY</key>
-					<string>kParamLightDropoff</string>
-					<key>kTriggerDblTap</key>
-					<string>kParamLightReset</string>
-				</dict>
-			</array>
-			<key>3d_element</key>
-			<string>butterfly</string>
-			<key>audio_element</key>
-			<string>pool</string>
 		</dict>
 	</dict>
 	<key>audio_elements</key>
@@ -454,7 +400,7 @@
 			<key>properties</key>
 			<dict>
 				<key>cameraZ</key>
-				<integer>-5</integer>
+				<real>-9</real>
 				<key>runEmitter</key>
 				<false/>
 				<key>scaleXYZ</key>
@@ -479,24 +425,6 @@
 				<string>lightTest.dae</string>
 			</dict>
 		</dict>
-		<key>butterfly</key>
-		<dict>
-			<key>instanceClass</key>
-			<string>Sky</string>
-			<key>properties</key>
-			<dict>
-				<key>runAnimations</key>
-				<false/>
-				<key>cameraZ</key>
-				<integer>-90</integer>
-				<key>runEmitter</key>
-				<false/>
-				<key>scaleXYZ</key>
-				<real>0.2</real>
-				<key>colladaFile</key>
-				<string>butterfly.dae</string>
-			</dict>
-		</dict>
 		<key>spherey_element</key>
 		<dict>
 			<key>instanceClass</key>
@@ -507,55 +435,10 @@
 			<key>instanceClass</key>
 			<string>FFTScope</string>
 		</dict>
-		<key>pool</key>
-		<dict>
-			<key>instanceClass</key>
-			<string>PoolScreen</string>
-		</dict>
-		<key>ripple</key>
-		<dict>
-			<key>properties</key>
-			<dict>
-				<key>connections</key>
-				<array>
-					<dict>
-						<key>kTriggerTap1</key>
-						<string>SwellSound</string>
-					</dict>
-					<dict>
-						<key>kTriggerMainSlider</key>
-						<string>kParamMasterVolume</string>
-						<key>kTriggerTap1</key>
-						<string>u_ripplePt:EaseOutSine:2.3</string>
-					</dict>
-				</array>
-			</dict>
-			<key>instanceClass</key>
-			<string>Ripple</string>
-		</dict>
 		<key>oscilloscope</key>
 		<dict>
 			<key>instanceClass</key>
 			<string>Oscilloscope</string>
-		</dict>
-		<key>eqcube</key>
-		<dict>
-			<key>properties</key>
-			<dict>
-				<key>connections</key>
-				<array>
-					<dict>
-						<key>Pinch</key>
-						<string>CurveWidth</string>
-						<key>kTriggerPanX</key>
-						<string>CurveCutoff</string>
-						<key>TapNative</key>
-						<string>Buttons</string>
-					</dict>
-				</array>
-			</dict>
-			<key>instanceClass</key>
-			<string>EQCube</string>
 		</dict>
 		<key>imageBaker</key>
 		<dict>
@@ -570,15 +453,6 @@
 		<dict>
 			<key>instanceClass</key>
 			<string>FractalSphere</string>
-		</dict>
-		<key>fluid</key>
-		<dict>
-			<key>instanceClass</key>
-			<string>Fluid</string>
-			<key>order</key>
-			<integer>10</integer>
-			<key>icon</key>
-			<string>fluid.png</string>
 		</dict>
 		<key>stockdemo</key>
 		<dict>
@@ -602,9 +476,9 @@
 	<key>logging</key>
 	<dict>
 		<key>LLLights</key>
-		<true/>
+		<false/>
 		<key>LLMeshImporter</key>
-		<true/>
+		<false/>
 		<key>LLGestureStuff</key>
 		<false/>
 		<key>LLObjLifetime</key>
@@ -618,7 +492,7 @@
 		<key>LLMidiStuff</key>
 		<false/>
 		<key>LLCaptureOps</key>
-		<false/>
+		<true/>
 		<key>LLAudioResource</key>
 		<false/>
 		<key>LLShaderStuff</key>

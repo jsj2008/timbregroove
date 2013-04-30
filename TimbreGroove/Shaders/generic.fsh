@@ -51,6 +51,7 @@ uniform bool   u_doSpecular;
 vec3 l_ecPosition3;
 vec3 l_normal;
 vec3 l_eye;
+vec4 l_diffuse;
 
 varying vec4 v_vertexPosition;
 varying vec3 v_vertexNormal;
@@ -140,15 +141,15 @@ void doLighting()
             pointLight( u_lights[i], amb, diff, spec );
         
 		l_color.rgb = (u_material[CI_Ambient].rgb + amb.rgb) * u_material[CI_Ambient].rgb +
-        (diff.rgb * u_material[CI_Diffuse].rgb);
+                          (diff.rgb * l_diffuse.rgb);
         
-		l_color.a   = u_material[CI_Diffuse].a;
+		l_color.a   = l_diffuse.a;
 		
 		l_color    = clamp(l_color, 0.0, 1.0);
 		l_specular = vec4( spec.rgb * u_material[CI_Specular].rgb, u_material[CI_Specular].a );
         
 	} else {
-		l_color = u_material[CI_Diffuse];
+		l_color = l_diffuse;
 		l_specular = spec;
 	}
 }
@@ -160,45 +161,18 @@ void doLighting()
 varying float v_time;
 #endif
 
-#ifdef TEXTURE_DISTORT
-uniform float u_rippleSize;
-uniform vec2  u_ripplePt;
-
-vec4 texture_dist()
-{
-    vec2  center     = u_ripplePt;
-    float rippleSize = u_rippleSize;
-    
-    if( rippleSize < 0.1 )
-        rippleSize = 0.2;
-    
-    vec2  pos       = (v_texCoordOut - 0.5) * 2.0; // transpose to object space
-    vec2  position  = (pos - center);
-    float length    = length(position);   // sqroot( x-sqr + y-sqr + z+sqr )
-    vec2  direction = position / length;
-    
-    float t = v_time * 0.1;
-    float ripple     = (length * (rippleSize*2.0)) - (t * rippleSize);
-    vec2 diff = ((direction * cos(ripple))/100.0);
-    /*
-    float max = 0.15;
-    float alpha = ((max - length(diff)) / max);
-    */
-    vec3 coord = texture2D(u_sampler, v_texCoordOut + diff).rgb;
-    float alpha = clamp( sin(coord.x) * cos(coord.y) * 1.2, 0.0, 1.0 );
-    return vec4( coord, alpha );
-}
-#endif
 
 void main()
 {
-    vec4 color = vec4(0);
+    vec4 color = vec4(0.5);
+#ifdef NORMAL
+    l_diffuse = u_material[ CI_Diffuse ];
+#endif
     
 #ifdef TEXTURE
-    #ifdef TEXTURE_DISTORT
-        color = texture_dist();
-    #else
-        color = texture2D(u_sampler, v_texCoordOut);
+    color = texture2D(u_sampler, v_texCoordOut);
+    #ifdef NORMAL
+    l_diffuse = color;
     #endif
 #else
     #ifdef COLOR
@@ -208,8 +182,7 @@ void main()
     
 #ifdef NORMAL
     doLighting();
-    color += l_color;
-    color = vec4(color.rgb + l_specular.rgb, color.a);
+    color = vec4(l_color.rgb + l_specular.rgb, l_color.a);
 #endif
     
     gl_FragColor = color;

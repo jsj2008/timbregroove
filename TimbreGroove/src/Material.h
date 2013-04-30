@@ -16,6 +16,8 @@
 @property (nonatomic) bool doSpecular;
 
 @property (nonatomic) GLKVector4 ambient;
+@property (nonatomic) GLKVector4 diffuse;
+@property (nonatomic) NSString * name;
 
 +(id)withColor:(GLKVector4)color;
 +(id)withColors:(MaterialColors)matcolors shininess:(float)shininess doSpecular:(bool)doSpecular;

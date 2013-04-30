@@ -14,17 +14,27 @@
 #import "Material.h"
 
 
-NSString * const kParamDistortionPt = @"DistortionPt";
-
 @interface Spherey : Sphere
 @end
 
-@implementation Spherey
+@implementation Spherey {
+    float _rotation;
+}
 
 -(id)wireUp
-{
+{    
+    Light * light = [Light new];
+    light.point = true;
+    light.position = (GLKVector3){ -2, 1, 3 };
+    light.spotDirection = (GLKVector3){ 2, -1, -1 };
+    light.diffuse = (GLKVector4){ 0.5, 0.5, 0.5, 1 };
+    light.attenuation = (GLKVector3){ 0, 0.2, 0 };
+    
+    [self.lights addLight:light];
+    
     [super wireUp];
-    self.position = (GLKVector3){-1,0,0};
+    self.position = (GLKVector3){0,0,0};
+    self.scaleXYZ = 1.8;
     return self;
 }
 
@@ -34,4 +44,10 @@ NSString * const kParamDistortionPt = @"DistortionPt";
     [super createShader];
 }
 
+-(void)update:(NSTimeInterval)dt
+{
+    _rotation += dt * 15.0;
+    self.rotation = (GLKVector3){ 0, GLKMathDegreesToRadians(_rotation), 0 };
+    [super update:dt];
+}
 @end

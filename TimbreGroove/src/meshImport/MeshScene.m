@@ -55,6 +55,8 @@
         [_joints each:^(id sender) {
             calcArmatureMarticies(nil,sender);
         }];
+        
+        calcArmatureMarticies = nil;
     }
 }
 
@@ -77,78 +79,8 @@
 -(void)dealloc
 {
     TGLog(LLObjLifetime, @"%@ released", self);
-    
-    if( _influencingJointCounts )
-        free(_influencingJointCounts);
-    if( _packedWeightIndices )
-        free(_packedWeightIndices);
-    if( _vectorIndex )
-        free(_vectorIndex);
 }
 
-#if 0
--(void)influence:(MeshGeometryBuffer *)buffer
-            dest:(float *)dest
-{
-    unsigned int   currPos  = 0;
-    int            ji       = 0;
-    int            wi;
-    float          weight;
-    GLKVector3     vec3;
-    
-    unsigned int   numJoints    = [_influencingJoints count];
-    GLKMatrix4 *   jointMats    = malloc( sizeof(GLKMatrix4) * numJoints * 2);
-    GLKMatrix4 *   jointInvMats = jointMats + numJoints;
-    
-    __block int bji = 0;
-    
-    [_influencingJoints each:^(MeshSceneArmatureNode * joint) {        
-        jointMats[bji]     = [joint matrix];
-        jointInvMats[bji]  = joint->_invBindMatrix;
-        bji++;
-    }];
-    
-    GLKVector3 * vec = (GLKVector3 *)buffer->data;
-    GLKVector3 * p   = (GLKVector3 *)dest;
-    
-    
-    /*
-        outv = each(v)[I=0]{ ((v*bsm)*ibmI*jmiI)*jw }
-     
-        Bind Shap Matrix
-        Inverse Bind-pose Matrix of jointI
-        Joint Matrix (transormationI)
-        Joint Weight 
-     */
-    
-    for( int i = 0; i < _numInfluencingJointCounts; i++ )
-    {
-        int numberOfJointsApplied = _influencingJointCounts[ i ];
-        
-        GLKVector3 outVec3 = (GLKVector3){0,0,0};
-        
-        for( unsigned int n = 0; n < numberOfJointsApplied; n++  )
-        {
-            ji = _packedWeightIndices[ currPos + _jointWOffset ];
-            wi = _packedWeightIndices[ currPos + _weightFOffset];
-            
-            currPos += 2;
-            
-            weight = _weights[ wi ];
-            
-            vec3 = GLKMatrix4MultiplyVector3WithTranslation( jointInvMats[ji], vec[i] );
-            vec3 = GLKMatrix4MultiplyVector3WithTranslation( jointMats[ji],    vec3);
-            vec3 = GLKVector3MultiplyScalar ( vec3,             weight);
-            outVec3 = GLKVector3Add(outVec3, vec3);
-        }
-
-        unsigned int vindex = _vectorIndex ? _vectorIndex[i] : i;
-        p[vindex] = outVec3;
-    }
-    
-    free(jointMats);
-}
-#endif
 @end
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@  MeshAnimation  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -176,7 +108,12 @@
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  SceneNode(s) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+
 @implementation MeshSceneNode 
+- (void)dealloc
+{
+    TGLog(LLObjLifetime, @"Releasing %@",self);
+}
 
 -(void)setTransform:(GLKMatrix4)transform
 {
@@ -213,6 +150,4 @@
 @implementation MeshSceneMeshNode
 @end
 
-@implementation MeshMaterial
-@end
 

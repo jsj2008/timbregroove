@@ -19,10 +19,10 @@
 {
     if( (self = [super init]) )
     {
-        _desc.position  = (GLKVector4){0, 0, -5, 0 };
-        _desc.colors.diffuse = (GLKVector4){ 0.1, 0.1, 0.1, 1};
+        _desc.position  = (GLKVector4){0, 0, 5, 0 };
+        _desc.colors.diffuse = (GLKVector4){ 0.8, 0.8, 0.8, 1};
         _desc.colors.ambient = (GLKVector4){ 0.5, 0.5, 0.5, 1};
-        _desc.attenuation = (GLKVector3){0, 0, 0};
+        _desc.attenuation = (GLKVector3){1, 0, 0};
         _desc.spotDirection = (GLKVector3){ 0, 0, 1 };
     }
     
@@ -87,7 +87,7 @@
 
 -(void)setSpotDirection:(GLKVector3)spotDirection
 {
-    _desc.spotDirection = spotDirection;
+    _desc.spotDirection = GLKVector3Normalize(spotDirection);
 }
 
 -(GLKVector4)positionLight

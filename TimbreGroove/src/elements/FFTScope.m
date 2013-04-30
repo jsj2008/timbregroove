@@ -13,6 +13,7 @@
 #import "Painter.h"
 #import "Material.h"
 #import "Names.h"
+#import "Light.h"
 
 extern void fft(float *in_out, int len);
 
@@ -43,12 +44,6 @@ extern void fft(float *in_out, int len);
                                                  spacing:kFramesForDisplay];
     _lineMesh = mesh;
     [self addBuffer:mesh];
-}
-
--(void)createShader
-{
-    [self addShaderFeature:[Material withColor:(GLKVector4){ 1,1,0,1 }]];
-    [super createShader];
 }
 
 -(void)getParameters:(NSMutableDictionary *)putHere

@@ -62,18 +62,16 @@
 
 -(id)wireUp
 {
+    [self setupLights];
+    [super wireUp];
+    
+    _node = nil; 
+    return self;
+}
+
+-(void)setupLights
+{
     ShaderLight desc = { 0 };
-/*
-   // for plane test
-    desc.colors.ambient = (GLKVector4){ 1, 1, 1, 1 };
-    desc.colors.diffuse = (GLKVector4){ 1, 1, 1, 1 };
-    desc.position = (GLKVector4){ -2, 2, 0.2, 2.0 };
-    desc.attenuation = (GLKVector3){ 0, 0.02, 0 };
-    desc.spotCutoffAngle = 15.468750;
-    desc.spotFalloffExponent = 44.0;
-    desc.spotDirection = (GLKVector3){ 0.5, -0.5, -0.1 };
-    desc.spotDirection =  GLKVector3Normalize( desc.spotDirection );
-*/
     
     desc.colors.ambient = (GLKVector4){ 1, 1, 1, 1 };
     desc.colors.diffuse = (GLKVector4){ 1, 1, 1, 1 };
@@ -86,13 +84,8 @@
     
     Light * light = [Light new];
     light.desc = desc;
-
+    
     [self.lights addLight:light];
-    
-    [super wireUp];
-    
-    _node = nil; 
-    return self;
 }
 
 -(void)update:(NSTimeInterval)dt
@@ -125,14 +118,10 @@
         }
         if( geometry->_materialName )
         {
-            MeshMaterial * mm = _node->_materials[ geometry->_materialName ];
-            Material * m = [Material withColors:mm->_colors shininess:mm->_shininess doSpecular:mm->_doSpecular];
-            [mats addObject:m];
-            if( mm->_textureFileName )
-            {
-                Texture * t = [[Texture alloc] initWithFileName:mm->_textureFileName];
-                [mats addObject:t];
-            }
+            NSArray * importedMats = _node->_materials[ geometry->_materialName ];
+            [importedMats each:^(id mat) {
+                [mats addObject:mat];
+            }];
         }
         
         MeshBuffer * mb = [[MeshBuffer alloc] init];
