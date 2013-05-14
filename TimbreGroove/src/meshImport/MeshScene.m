@@ -43,7 +43,7 @@
 {
     static void (^calcArmatureMarticies)(id,MeshSceneArmatureNode *) = nil;
     
-    if( _joints )
+    if( _allJoints )
     {
         calcArmatureMarticies = ^(id key, MeshSceneArmatureNode * node) {
             if( node->_children )
@@ -52,7 +52,7 @@
                 [node matrix];
         };
         
-        [_joints each:^(id sender) {
+        [_allJoints each:^(id sender) {
             calcArmatureMarticies(nil,sender);
         }];
         
@@ -62,26 +62,6 @@
 
 @end
 
-//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  MeshSkinning @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-@implementation MeshSkinning
-
--(id)init
-{
-    self = [super init];
-    if( self )
-    {
-        _influencingJoints = [NSMutableArray new];
-    }
-    return self;
-}
-
--(void)dealloc
-{
-    TGLog(LLObjLifetime, @"%@ released", self);
-}
-
-@end
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@  MeshAnimation  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 @implementation MeshAnimation

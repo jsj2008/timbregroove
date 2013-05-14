@@ -50,7 +50,7 @@ vec4 doSkinning(mat4 pvm, vec4 inpos)
         pos += ((u_jointInvMats[index[j]] * vec4(inpos.xyz,1.0)) * u_jointMats[index[j]]) * weight;
     }
 
-    return pos * pvm;
+    return pvm * pos;
 }
 #endif
 

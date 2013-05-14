@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>default_scene</key>
-	<string>fft</string>
+	<string>box</string>
 	<key>scenes</key>
 	<dict>
 		<key>moon</key>
@@ -100,17 +100,17 @@
 					<key>kTriggerDblTap</key>
 					<string>kParamCameraReset</string>
 					<key>kTriggerMainSlider</key>
-					<string>kParamMasterVolume</string>
+					<string>kParamPositionZ</string>
 					<key>kTriggerTap1</key>
 					<string>RandomVibesNote</string>
 					<key>kTriggerPanY</key>
-					<string>kParamPositionZ</string>
+					<string>kParamRotationX</string>
 					<key>kTriggerPlayButton</key>
 					<string>kParamSceneAnimation</string>
 					<key>kTriggerDrag1</key>
 					<string>controllerPos</string>
 					<key>kTriggerPanX</key>
-					<string>kParamCameraRotationY</string>
+					<string>kParamRotationY</string>
 				</dict>
 			</array>
 			<key>icon</key>
@@ -393,6 +393,24 @@
 	</dict>
 	<key>3d_elements</key>
 	<dict>
+		<key>box</key>
+		<dict>
+			<key>instanceClass</key>
+			<string>MeshImportPainter</string>
+			<key>properties</key>
+			<dict>
+				<key>runAnimations</key>
+				<true/>
+				<key>cameraZ</key>
+				<real>-2.5</real>
+				<key>runEmitter</key>
+				<true/>
+				<key>scaleXYZ</key>
+				<real>1</real>
+				<key>colladaFile</key>
+				<string>boxStretch.dae</string>
+			</dict>
+		</dict>
 		<key>legoman</key>
 		<dict>
 			<key>instanceClass</key>
@@ -400,7 +418,7 @@
 			<key>properties</key>
 			<dict>
 				<key>cameraZ</key>
-				<real>-9</real>
+				<integer>-5</integer>
 				<key>runEmitter</key>
 				<false/>
 				<key>scaleXYZ</key>
@@ -482,7 +500,7 @@
 		<key>LLGestureStuff</key>
 		<false/>
 		<key>LLObjLifetime</key>
-		<false/>
+		<true/>
 		<key>LLAudioTweaks</key>
 		<false/>
 		<key>LLJustSayin</key>
@@ -492,7 +510,7 @@
 		<key>LLMidiStuff</key>
 		<false/>
 		<key>LLCaptureOps</key>
-		<true/>
+		<false/>
 		<key>LLAudioResource</key>
 		<false/>
 		<key>LLShaderStuff</key>

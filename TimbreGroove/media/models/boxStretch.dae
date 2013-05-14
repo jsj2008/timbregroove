@@ -1,275 +1,462 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
- <asset>
-  <contributor>
-   <authoring_tool>SceneKit Collada Exporter v1.0</authoring_tool>
-  </contributor>
-  <created>2013-04-28T22:50:11Z</created>
-  <modified>2013-04-28T22:50:11Z</modified>
-  <up_axis>Y_UP</up_axis>
- </asset>
- <library_animations>
-  <animation id="keyframedAnimations1">
-   <source id="genericSource2">
-    <float_array id="joint6_matrix_joint63-array" count="48">0.0416666 0.0833333 0.125 0.166667 0.208333 0.25 0.291667 0.333333 0.375 0.416667 0.458333 0.5 0.541667 0.583333 0.625 0.666667 0.708333 0.75 0.791667 0.833333 0.875 0.916667 0.958333 1 1.04167 1.08333 1.125 1.16667 1.20833 1.25 1.29167 1.33333 1.375 1.41667 1.45833 1.5 1.54167 1.58333 1.625 1.66667 1.70833 1.75 1.79167 1.83333 1.875 1.91667 1.95833 2 </float_array>
-    <technique_common>
-     <accessor source="#joint6_matrix_joint63-array" count="48" stride="1">
-      <param name="TIME" type="float"/>
-     </accessor>
-    </technique_common>
-   </source>
-   <source id="genericSource4">
-    <float_array id="joint6_matrix_joint65-array" count="768">1 0 0 0 0 1 0 -1 0 0 1 0.0160249 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.0244325 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.0482823 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.0855154 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.134073 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.191896 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.256925 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.327102 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.400367 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.474662 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.547927 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.618104 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.683134 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.740956 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.789514 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.826747 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.850597 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.859004 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.843073 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.79805 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.728091 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.637352 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.529989 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.410158 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.282015 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.149716 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.0174173 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.110725 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.230557 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.337919 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.428658 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.498618 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.543641 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.559572 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.550533 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.525223 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.486354 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.436639 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.378788 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.315513 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.249527 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.183541 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.120267 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.0624155 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.0127 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.0261685 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.0514784 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.0605175 0 0 0 1 </float_array>
-    <technique_common>
-     <accessor source="#joint6_matrix_joint65-array" count="48" stride="16">
-      <param name="TRANSFORM" type="float4x4"/>
-     </accessor>
-    </technique_common>
-   </source>
-   <source id="genericSource6">
-    <Name_array id="joint6_matrix_joint67-array" count="48">LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR </Name_array>
-    <technique_common>
-     <accessor source="#joint6_matrix_joint67-array" count="48" stride="1">
-      <param name="INTERPOLATION" type="name"/>
-     </accessor>
-    </technique_common>
-   </source>
-   <sampler id="joint6_matrix_joint68">
-    <input semantic="INPUT" source="#genericSource2"/>
-    <input semantic="OUTPUT" source="#genericSource4"/>
-    <input semantic="INTERPOLATION" source="#genericSource6"/>
-   </sampler>
-   <channel source="#joint6_matrix_joint68" target="joint6/SID_1"/>
-  </animation>
-  <animation id="keyframedAnimations9">
-   <source id="genericSource10">
-    <float_array id="joint3_matrix_joint311-array" count="48">0.0416666 0.0833333 0.125 0.166667 0.208333 0.25 0.291667 0.333333 0.375 0.416667 0.458333 0.5 0.541667 0.583333 0.625 0.666667 0.708333 0.75 0.791667 0.833333 0.875 0.916667 0.958333 1 1.04167 1.08333 1.125 1.16667 1.20833 1.25 1.29167 1.33333 1.375 1.41667 1.45833 1.5 1.54167 1.58333 1.625 1.66667 1.70833 1.75 1.79167 1.83333 1.875 1.91667 1.95833 2 </float_array>
-    <technique_common>
-     <accessor source="#joint3_matrix_joint311-array" count="48" stride="1">
-      <param name="TIME" type="float"/>
-     </accessor>
-    </technique_common>
-   </source>
-   <source id="genericSource12">
-    <float_array id="joint3_matrix_joint313-array" count="768">1 0 0 0 0 1 0 -1 0 0 1 -0.0202951 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.0273857 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.0474998 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.0789009 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.119853 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.168619 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.223462 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.282647 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.344436 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.407094 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.468883 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.528068 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.582912 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.631678 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.672629 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.704031 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.724145 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.731235 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.71378 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.66445 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.587798 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.488379 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.370746 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.239451 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 -0.0990505 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.0459045 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.190859 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.33126 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.462555 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.580188 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.679607 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.756259 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.805589 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.823044 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.812541 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.783053 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.737611 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.679248 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.610995 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.535884 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.456947 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.377215 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.29972 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.227494 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.163569 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.110976 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.0727475 0 0 0 1 1 0 0 0 0 1 0 -1 0 0 1 0.0519144 0 0 0 1 </float_array>
-    <technique_common>
-     <accessor source="#joint3_matrix_joint313-array" count="48" stride="16">
-      <param name="TRANSFORM" type="float4x4"/>
-     </accessor>
-    </technique_common>
-   </source>
-   <source id="genericSource14">
-    <Name_array id="joint3_matrix_joint315-array" count="48">LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR </Name_array>
-    <technique_common>
-     <accessor source="#joint3_matrix_joint315-array" count="48" stride="1">
-      <param name="INTERPOLATION" type="name"/>
-     </accessor>
-    </technique_common>
-   </source>
-   <sampler id="joint3_matrix_joint316">
-    <input semantic="INPUT" source="#genericSource10"/>
-    <input semantic="OUTPUT" source="#genericSource12"/>
-    <input semantic="INTERPOLATION" source="#genericSource14"/>
-   </sampler>
-   <channel source="#joint3_matrix_joint316" target="joint3/SID_2"/>
-  </animation>
- </library_animations>
- <library_materials>
-  <material id="lambert1" name="lambert1">
-   <instance_effect url="#lambert1-fx"/>
-  </material>
-  <material id="material17">
-   <instance_effect url="#effect18"/>
-  </material>
- </library_materials>
- <library_effects>
-  <effect id="lambert1-fx">
-   <profile_COMMON>
-    <technique sid="common">
-     <lambert>
-      <ambient>
-       <color>0 0 0 1</color>
-      </ambient>
-      <diffuse>
-       <color>0 0 0.8 1</color>
-      </diffuse>
-      <reflective>
-       <color>0 0 0 1</color>
-      </reflective>
-      <reflectivity>
-       <float>1</float>
-      </reflectivity>
-      <transparent opaque="RGB_ZERO">
-       <color>0 0 0 1</color>
-      </transparent>
-      <transparency>
-       <float>1</float>
-      </transparency>
-      <index_of_refraction>
-       <float>1</float>
-      </index_of_refraction>
-     </lambert>
-    </technique>
-   </profile_COMMON>
-   <extra>
-    <technique profile="SceneKit">
-     <litPerPixel>1</litPerPixel>
-    </technique>
-   </extra>
-  </effect>
-  <effect id="effect18">
-   <profile_COMMON>
-    <technique sid="common">
-     <blinn>
-      <ambient>
-       <color>0.2 0.2 0.2 1</color>
-      </ambient>
-      <diffuse>
-       <color>1 1 1 1</color>
-      </diffuse>
-      <specular>
-       <color>0 0 0 1</color>
-      </specular>
-      <shininess>
-       <float>0.022516</float>
-      </shininess>
-      <reflective>
-       <color>0 0 0 1</color>
-      </reflective>
-      <reflectivity>
-       <float>1</float>
-      </reflectivity>
-      <transparent opaque="A_ONE">
-       <color>1 1 1 1</color>
-      </transparent>
-      <transparency>
-       <float>1</float>
-      </transparency>
-      <index_of_refraction>
-       <float>1</float>
-      </index_of_refraction>
-     </blinn>
-    </technique>
-   </profile_COMMON>
-   <extra>
-    <technique profile="SceneKit">
-     <litPerPixel>1</litPerPixel>
-    </technique>
-   </extra>
-  </effect>
- </library_effects>
- <library_geometries>
-  <geometry id="geometry19">
-   <mesh>
-    <source id="geometrySource20">
-     <float_array id="ID21-array" count="72">-0.5 -0.5 0.5 0.5 -0.5 0.5 -0.5 0.5 0.5 0.5 0.5 0.5 -0.5 0.5 0.5 0.5 0.5 0.5 -0.5 0.5 -0.5 0.5 0.5 -0.5 -0.5 0.5 -0.5 0.5 0.5 -0.5 -0.5 -0.5 -0.5 0.5 -0.5 -0.5 -0.5 -0.5 -0.5 0.5 -0.5 -0.5 -0.5 -0.5 0.5 0.5 -0.5 0.5 0.5 -0.5 0.5 0.5 -0.5 -0.5 0.5 0.5 0.5 0.5 0.5 -0.5 -0.5 -0.5 -0.5 -0.5 -0.5 0.5 -0.5 0.5 -0.5 -0.5 0.5 0.5 </float_array>
-     <technique_common>
-      <accessor source="#ID21-array" count="24" stride="3">
-       <param name="X" type="float"/>
-       <param name="Y" type="float"/>
-       <param name="Z" type="float"/>
-      </accessor>
-     </technique_common>
-    </source>
-    <source id="geometrySource22">
-     <float_array id="ID23-array" count="72">0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 1 0 0 1 0 0 1 0 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 -1 0 0 -1 0 0 -1 0 0 -1 0 1 0 0 1 0 0 1 0 0 1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 </float_array>
-     <technique_common>
-      <accessor source="#ID23-array" count="24" stride="3">
-       <param name="X" type="float"/>
-       <param name="Y" type="float"/>
-       <param name="Z" type="float"/>
-      </accessor>
-     </technique_common>
-    </source>
-    <vertices id="geometrySource20-vertices">
-     <input semantic="POSITION" source="#geometrySource20"/>
-    </vertices>
-    <triangles count="12" material="geometryElement24">
-     <input semantic="VERTEX" offset="0" source="#geometrySource20-vertices"/>
-     <input semantic="NORMAL" offset="0" source="#geometrySource22"/>
-     <p>0 1 2 2 1 3 4 5 6 6 5 7 8 9 10 10 9 11 12 13 14 14 13 15 16 17 18 18 17 19 20 21 22 22 21 23 </p>
-    </triangles>
-   </mesh>
-  </geometry>
- </library_geometries>
- <library_controllers>
-  <controller id="skin25">
-   <skin source="#geometry19">
-    <bind_shape_matrix>1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 </bind_shape_matrix>
-    <source id="ID26">
-     <Name_array id="ID26-array" count="6">SID_3 SID_4 SID_5 SID_6 SID_7 SID_8 </Name_array>
-     <technique_common>
-      <accessor source="#ID26-array" count="6" stride="1">
-       <param name="JOINT" type="name"/>
-      </accessor>
-     </technique_common>
-    </source>
-    <source id="SID_9">
-     <float_array id="SID_9-array" count="96">1 0 0 0.5 0 1 0 -0.5 0 0 1 0.5 0 0 0 1 1 0 0 0.5 0 1 0 -0.5 0 0 1 -0.5 0 0 0 1 1 0 0 0.5 0 1 0 0.5 0 0 1 -0.5 0 0 0 1 1 0 0 -0.5 0 1 0 -0.5 0 0 1 0.5 0 0 0 1 1 0 0 -0.5 0 1 0 -0.5 0 0 1 -0.5 0 0 0 1 1 0 0 -0.5 0 1 0 0.5 0 0 1 -0.5 0 0 0 1 </float_array>
-     <technique_common>
-      <accessor source="#SID_9-array" count="6" stride="16">
-       <param name="TRANSFORM" type="float4x4"/>
-      </accessor>
-     </technique_common>
-    </source>
-    <source id="SID_10">
-     <float_array id="SID_10-array" count="51">0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 1 0.5 0.5 1 0.5 0.5 0.333333 0.333333 0.333333 0.333333 0.333333 0.333333 0.333333 0.333333 0.333333 0.333333 0.333333 0.333333 0.5 0.5 0.5 0.5 0.5 0.5 0.333333 0.333333 0.333333 0.5 0.5 0.5 0.5 0.333333 0.333333 0.333333 0.5 0.5 1 0.5 0.5 </float_array>
-     <technique_common>
-      <accessor source="#SID_10-array" count="51" stride="1">
-       <param name="WEIGHT" type="float"/>
-      </accessor>
-     </technique_common>
-    </source>
-    <joints>
-     <input semantic="JOINT" source="#ID26"/>
-     <input semantic="INV_BIND_MATRIX" source="#SID_9"/>
-    </joints>
-    <vertex_weights count="24">
-     <input semantic="JOINT" source="#ID26" offset="0"/>
-     <input semantic="WEIGHT" source="#SID_10" offset="1"/>
-     <vcount>2 2 2 2 2 2 1 2 1 2 3 3 3 3 2 2 2 3 2 2 3 2 1 2 </vcount>
-     <v>1 0 2 1 4 2 5 3 0 4 1 5 3 6 4 7 0 8 1 9 3 10 4 11 0 12 0 13 3 14 0 15 0 16 3 17 0 18 1 19 2 20 0 21 3 22 4 23 0 24 1 25 2 26 0 27 3 28 4 29 1 30 2 31 4 32 5 33 4 34 5 35 0 36 3 37 4 38 3 39 4 40 0 41 3 42 0 43 1 44 2 45 1 46 2 47 0 48 0 49 1 50 </v>
-    </vertex_weights>
-   </skin>
-  </controller>
- </library_controllers>
- <library_visual_scenes>
-  <visual_scene id="scene27">
-   <node id="grp_scale" name="grp_scale">
-    <node id="grp_joints" name="grp_joints"/>
-    <node id="grp_geo" name="grp_geo"/>
-   </node>
-   <node id="pCube1" name="pCube1">
-    <instance_controller url="#skin25">
-     <skeleton>#joint1</skeleton>
-     <bind_material>
-      <technique_common>
-       <instance_material symbol="geometryElement24" target="#lambert1"/>
-      </technique_common>
-     </bind_material>
-    </instance_controller>
-   </node>
-   <node id="joint1" name="joint1" sid="SID_3" type="JOINT">
-    <matrix>1 0 0 -0.5 0 1 0 0.5 0 0 1 -0.5 0 0 0 1 </matrix>
-    <node id="joint2" name="joint2" sid="SID_4" type="JOINT">
-     <matrix>1 0 0 0 0 1 0 0 0 0 1 1 0 0 0 1 </matrix>
-     <node id="joint3" name="joint3" sid="SID_5" type="JOINT">
-      <matrix sid="SID_2">1 0 0 0 0 1 0 -1 0 0 1 -0.0132045 0 0 0 1 </matrix>
-     </node>
-    </node>
-    <node id="joint4" name="joint4" sid="SID_6" type="JOINT">
-     <matrix>1 0 0 1 0 1 0 0 0 0 1 0 0 0 0 1 </matrix>
-     <node id="joint5" name="joint5" sid="SID_7" type="JOINT">
-      <matrix>1 0 0 0 0 1 0 0 0 0 1 1 0 0 0 1 </matrix>
-      <node id="joint6" name="joint6" sid="SID_8" type="JOINT">
-       <matrix sid="SID_1">1 0 0 0 0 1 0 -1 0 0 1 0.00761741 0 0 0 1 </matrix>
+  <asset>
+    <contributor>
+      <author>victor</author>
+      <authoring_tool>OpenCOLLADA2013 x64</authoring_tool>
+      <comments>
+			ColladaMaya export options: 
+			bakeTransforms=1;relativePaths=1;copyTextures=0;exportTriangles=1;exportCgfxFileReferences=0;
+			isSampling=0;curveConstrainSampling=0;removeStaticCurves=1;exportPolygonMeshes=1;exportLights=1;
+			exportCameras=0;exportJointsAndSkin=1;exportAnimations=1;exportInvisibleNodes=0;exportDefaultCameras=0;
+			exportTexCoords=0;exportNormals=1;exportNormalsPerVertex=1;exportVertexColors=1;exportVertexColorsPerVertex=1;
+			exportTexTangents=0;exportTangents=0;exportReferencedMaterials=1;exportMaterialsOnly=0;
+			exportXRefs=1;dereferenceXRefs=1;exportCameraAsLookat=0;cameraXFov=0;cameraYFov=1;doublePrecision=0
+		</comments>
+      <source_data>file:///Users/victor/Documents/maya/projects/default/scenes/2toneBox.mb</source_data>
+    </contributor>
+    <created>2013-05-14T15:22:06</created>
+    <modified>2013-05-14T15:22:06</modified>
+    <unit name="centimeter" meter="0.01"/>
+    <up_axis>Y_UP</up_axis>
+  </asset>
+  <library_materials>
+    <material id="lambert1" name="lambert1">
+      <instance_effect url="#lambert1-fx"/>
+    </material>
+    <material id="phong2" name="phong2">
+      <instance_effect url="#phong2-fx"/>
+    </material>
+    <material id="phong3" name="phong3">
+      <instance_effect url="#phong3-fx"/>
+    </material>
+    <material id="phong4" name="phong4">
+      <instance_effect url="#phong4-fx"/>
+    </material>
+    <material id="phong5" name="phong5">
+      <instance_effect url="#phong5-fx"/>
+    </material>
+  </library_materials>
+  <library_effects>
+    <effect id="lambert1-fx">
+      <profile_COMMON>
+        <technique sid="common">
+          <lambert>
+            <emission>
+              <color>0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color>0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <color>0 0 0.8 1</color>
+            </diffuse>
+            <transparent opaque="RGB_ZERO">
+              <color>0 0 0 1</color>
+            </transparent>
+            <transparency>
+              <float>1</float>
+            </transparency>
+          </lambert>
+        </technique>
+      </profile_COMMON>
+    </effect>
+    <effect id="phong2-fx">
+      <profile_COMMON>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color>0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color>0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <color>0.8 0.8 0 1</color>
+            </diffuse>
+            <specular>
+              <color>0.5 0.5 0.5 1</color>
+            </specular>
+            <shininess>
+              <float>20</float>
+            </shininess>
+            <reflective>
+              <color>0 0 0 1</color>
+            </reflective>
+            <reflectivity>
+              <float>0.5</float>
+            </reflectivity>
+            <transparent opaque="RGB_ZERO">
+              <color>0 0 0 1</color>
+            </transparent>
+            <transparency>
+              <float>1</float>
+            </transparency>
+          </phong>
+        </technique>
+      </profile_COMMON>
+    </effect>
+    <effect id="phong3-fx">
+      <profile_COMMON>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color>0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color>0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <color>0 0.8 0 1</color>
+            </diffuse>
+            <specular>
+              <color>0.5 0.5 0.5 1</color>
+            </specular>
+            <shininess>
+              <float>20</float>
+            </shininess>
+            <reflective>
+              <color>0 0 0 1</color>
+            </reflective>
+            <reflectivity>
+              <float>0.5</float>
+            </reflectivity>
+            <transparent opaque="RGB_ZERO">
+              <color>0 0 0 1</color>
+            </transparent>
+            <transparency>
+              <float>1</float>
+            </transparency>
+          </phong>
+        </technique>
+      </profile_COMMON>
+    </effect>
+    <effect id="phong4-fx">
+      <profile_COMMON>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color>0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color>0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <color>0 0.8 0.8 1</color>
+            </diffuse>
+            <specular>
+              <color>0.5 0.5 0.5 1</color>
+            </specular>
+            <shininess>
+              <float>20</float>
+            </shininess>
+            <reflective>
+              <color>0 0 0 1</color>
+            </reflective>
+            <reflectivity>
+              <float>0.5</float>
+            </reflectivity>
+            <transparent opaque="RGB_ZERO">
+              <color>0 0 0 1</color>
+            </transparent>
+            <transparency>
+              <float>1</float>
+            </transparency>
+          </phong>
+        </technique>
+      </profile_COMMON>
+    </effect>
+    <effect id="phong5-fx">
+      <profile_COMMON>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color>0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color>0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <color>0.6901961 0.3578 0.1894656 1</color>
+            </diffuse>
+            <specular>
+              <color>0.5 0.5 0.5 1</color>
+            </specular>
+            <shininess>
+              <float>20</float>
+            </shininess>
+            <reflective>
+              <color>0 0 0 1</color>
+            </reflective>
+            <reflectivity>
+              <float>0.5</float>
+            </reflectivity>
+            <transparent opaque="RGB_ZERO">
+              <color>0 0 0 1</color>
+            </transparent>
+            <transparency>
+              <float>1</float>
+            </transparency>
+          </phong>
+        </technique>
+      </profile_COMMON>
+    </effect>
+  </library_effects>
+  <library_controllers>
+    <controller id="pCubeShape1-skin" name="pCubeShape1-skin">
+      <skin source="#pCubeShape1">
+        <bind_shape_matrix>1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</bind_shape_matrix>
+        <source id="pCubeShape1-skin-joints" name="pCubeShape1-skin-joints">
+          <Name_array id="pCubeShape1-skin-joints-array" count="3">jt_center jt_left jt_right</Name_array>
+          <technique_common>
+            <accessor source="#pCubeShape1-skin-joints-array" count="3" stride="1">
+              <param name="JOINT" type="name"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="pCubeShape1-skin-bind_poses" name="pCubeShape1-skin-bind_poses">
+          <float_array id="pCubeShape1-skin-bind_poses-array" count="48">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1 0 0 0.5 0 1 0 0.5 0 0 1 -0.5 0 0 0 1 1 0 0 -0.5 0 1 0 0.5 0 0 1 -0.5 0 0 0 1</float_array>
+          <technique_common>
+            <accessor source="#pCubeShape1-skin-bind_poses-array" count="3" stride="16">
+              <param name="TRANSFORM" type="float4x4"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="pCubeShape1-skin-weights" name="pCubeShape1-skin-weights">
+          <float_array id="pCubeShape1-skin-weights-array" count="23">1 0.5 0.5 0.5 0.5 0.6428571 0.2857143 0.07142853 0.6428571 0.07142853 0.2857143 0.8311688 0.1168831 0.05194801 0.8311688 0.05194801 0.1168831 0.6428571 0.2857143 0.07142853 0.6428571 0.07142853 0.2857143 </float_array>
+          <technique_common>
+            <accessor source="#pCubeShape1-skin-weights-array" count="23" stride="1">
+              <param name="WEIGHT" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <joints>
+          <input semantic="JOINT" source="#pCubeShape1-skin-joints"/>
+          <input semantic="INV_BIND_MATRIX" source="#pCubeShape1-skin-bind_poses"/>
+        </joints>
+        <vertex_weights count="8">
+          <input semantic="JOINT" source="#pCubeShape1-skin-joints" offset="0"/>
+          <input semantic="WEIGHT" source="#pCubeShape1-skin-weights" offset="1"/>
+          <vcount>2 2 3 3 3 3 3 3 </vcount>
+          <v>0 1 1 2 0 3 2 4 0 5 1 6 2 7 0 8 1 9 2 10 0 11 1 12 2 13 0 14 1 15 2 16 0 17 1 18 2 19 0 20 1 21 2 22 </v>
+        </vertex_weights>
+        <extra>
+          <technique profile="OpenCOLLADAMaya">
+            <originalMayaNodeId>pCubeShape1-skin</originalMayaNodeId>
+          </technique>
+        </extra>
+      </skin>
+    </controller>
+  </library_controllers>
+  <library_geometries>
+    <geometry id="pCubeShape1" name="pCubeShape1">
+      <mesh>
+        <source id="pCubeShape1-positions" name="pCubeShape1-positions">
+          <float_array id="pCubeShape1-positions-array" count="24">-0.5 -0.5 0.5 0.5 -0.5 0.5 -0.5 0.5 0.5 0.5 0.5 0.5 -0.5 0.5 -0.5 0.5 0.5 -0.5 -0.5 -0.5 -0.5 0.5 -0.5 -0.5</float_array>
+          <technique_common>
+            <accessor source="#pCubeShape1-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="pCubeShape1-normals" name="pCubeShape1-normals">
+          <float_array id="pCubeShape1-normals-array" count="72">0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 1 0 0 1 0 0 1 0 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 -1 0 0 -1 0 0 -1 0 0 -1 0 1 0 0 1 0 0 1 0 0 1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0</float_array>
+          <technique_common>
+            <accessor source="#pCubeShape1-normals-array" count="24" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="pCubeShape1-vertices" name="pCubeShape1-vertices">
+          <input semantic="POSITION" source="#pCubeShape1-positions"/>
+        </vertices>
+        <triangles material="initialShadingGroup" count="4">
+          <input semantic="VERTEX" source="#pCubeShape1-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#pCubeShape1-normals" offset="1"/>
+          <p>0 0 1 1 2 3 2 3 1 1 3 2 4 8 5 9 6 11 6 11 5 9 7 10</p>
+        </triangles>
+        <triangles material="phong2SG" count="2">
+          <input semantic="VERTEX" source="#pCubeShape1-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#pCubeShape1-normals" offset="1"/>
+          <p>1 16 7 17 3 19 3 19 7 17 5 18</p>
+        </triangles>
+        <triangles material="phong3SG" count="2">
+          <input semantic="VERTEX" source="#pCubeShape1-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#pCubeShape1-normals" offset="1"/>
+          <p>6 20 0 21 4 23 4 23 0 21 2 22</p>
+        </triangles>
+        <triangles material="phong4SG" count="2">
+          <input semantic="VERTEX" source="#pCubeShape1-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#pCubeShape1-normals" offset="1"/>
+          <p>2 4 3 5 4 7 4 7 3 5 5 6</p>
+        </triangles>
+        <triangles material="phong5SG" count="2">
+          <input semantic="VERTEX" source="#pCubeShape1-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#pCubeShape1-normals" offset="1"/>
+          <p>6 12 7 13 0 15 0 15 7 13 1 14</p>
+        </triangles>
+      </mesh>
+      <extra>
+        <technique profile="OpenCOLLADAMaya">
+          <originalMayaNodeId>pCubeShape1</originalMayaNodeId>
+          <double_sided>1</double_sided>
+        </technique>
+      </extra>
+    </geometry>
+  </library_geometries>
+  <library_visual_scenes>
+    <visual_scene id="VisualSceneNode" name="_toneBox">
+      <node id="grp_scale" name="grp_scale" type="NODE">
+        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
+        <node id="grp_joints" name="grp_joints" type="NODE">
+          <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
+          <extra>
+            <technique profile="OpenCOLLADAMaya">
+              <originalMayaNodeId>grp_joints</originalMayaNodeId>
+            </technique>
+          </extra>
+        </node>
+        <node id="grp_geo" name="grp_geo" type="NODE">
+          <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
+          <extra>
+            <technique profile="OpenCOLLADAMaya">
+              <originalMayaNodeId>grp_geo</originalMayaNodeId>
+            </technique>
+          </extra>
+        </node>
+        <extra>
+          <technique profile="OpenCOLLADAMaya">
+            <originalMayaNodeId>grp_scale</originalMayaNodeId>
+          </technique>
+        </extra>
       </node>
-     </node>
-    </node>
-   </node>
-  </visual_scene>
- </library_visual_scenes>
- <scene>
-  <instance_visual_scene url="#scene27"/>
- </scene>
+      <node id="pCube1" name="pCube1" type="NODE">
+        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
+        <instance_controller url="#pCubeShape1-skin">
+          <skeleton>#jt_center</skeleton>
+          <skeleton>#jt_left</skeleton>
+          <skeleton>#jt_right</skeleton>
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="initialShadingGroup" target="#lambert1"/>
+              <instance_material symbol="phong2SG" target="#phong2"/>
+              <instance_material symbol="phong3SG" target="#phong3"/>
+              <instance_material symbol="phong4SG" target="#phong4"/>
+              <instance_material symbol="phong5SG" target="#phong5"/>
+            </technique_common>
+          </bind_material>
+        </instance_controller>
+        <extra>
+          <technique profile="OpenCOLLADAMaya">
+            <originalMayaNodeId>pCube1</originalMayaNodeId>
+          </technique>
+        </extra>
+      </node>
+      <node id="jt_center" name="jt_center" sid="jt_center" type="JOINT">
+        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
+        <node id="jt_left" name="jt_left" sid="jt_left" type="JOINT">
+          <matrix sid="transform">1 0 0 -0.5 0 1 0 -0.5 0 0 1 0.5 0 0 0 1</matrix>
+          <extra>
+            <technique profile="OpenCOLLADAMaya">
+              <originalMayaNodeId>jt_left</originalMayaNodeId>
+            </technique>
+          </extra>
+        </node>
+        <node id="jt_right" name="jt_right" sid="jt_right" type="JOINT">
+          <matrix sid="transform">1 0 0 0.5 0 1 0 -0.5 0 0 1 0.5 0 0 0 1</matrix>
+          <extra>
+            <technique profile="OpenCOLLADAMaya">
+              <originalMayaNodeId>jt_right</originalMayaNodeId>
+            </technique>
+          </extra>
+        </node>
+        <extra>
+          <technique profile="OpenCOLLADAMaya">
+            <originalMayaNodeId>jt_center</originalMayaNodeId>
+          </technique>
+        </extra>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <library_animations>
+    <animation id="jt_left.matrix_jt_left">
+      <source id="jt_left.matrix_jt_left_transform-input" name="jt_left.matrix_jt_left_transform-input">
+        <float_array id="jt_left.matrix_jt_left_transform-input-array" count="24">0.04166662 0.08333331 0.125 0.1666666 0.2083333 0.25 0.2916666 0.3333333 0.375 0.4166666 0.4583333 0.5 0.5416667 0.5833333 0.625 0.6666667 0.7083333 0.75 0.7916667 0.8333333 0.875 0.9166667 0.9583333 1 </float_array>
+        <technique_common>
+          <accessor source="#jt_left.matrix_jt_left_transform-input-array" count="24" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="OpenCOLLADAMaya">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="jt_left.matrix_jt_left_transform-output" name="jt_left.matrix_jt_left_transform-output">
+        <float_array id="jt_left.matrix_jt_left_transform-output-array" count="384">1 0 0 -0.5 0 1 0 -0.5 0 0 1 0.5 0 0 0 1 1 0 0 -0.5 0 1 0 -0.5 0 0 1 0.4778458 0 0 0 1 1 0 0 -0.5 0 1 0 -0.5 0 0 1 0.4207113 0 0 0 1 1 0 0 -0.5 0 1 0 -0.5 0 0 1 0.3425886 0 0 0 1 1 0 0 -0.5 0 1 0 -0.5 0 0 1 0.2574699 0 0 0 1 1 0 0 -0.5 0 1 0 -0.5 0 0 1 0.1793472 0 0 0 1 1 0 0 -0.5 0 1 0 -0.5 0 0 1 0.1222127 0 0 0 1 1 0 0 -0.5 0 1 0 -0.5 0 0 1 0.1000585 0 0 0 1 1 0 0 -0.5 0 1 0 -0.5 0 0 1 0.1232714 0 0 0 1 1 0 0 -0.5 0 1 0 -0.5 0 0 1 0.1844689 0 0 0 1 1 0 0 -0.5 0 1 0 -0.5 0 0 1 0.2709898 0 0 0 1 1 0 0 -0.5 0 1 0 -0.5 0 0 1 0.3701721 0 0 0 1 1 0 0 -0.5 0 1 0 -0.5 0 0 1 0.4693545 0 0 0 1 1 0 0 -0.5 0 1 0 -0.5 0 0 1 0.5558751 0 0 0 1 1 0 0 -0.5 0 1 0 -0.5 0 0 1 0.6170728 0 0 0 1 1 0 0 -0.5 0 1 0 -0.5 0 0 1 0.6402857 0 0 0 1 1 0 0 -0.5 0 1 0 -0.5 0 0 1 0.6342579 0 0 0 1 1 0 0 -0.5 0 1 0 -0.5 0 0 1 0.6183661 0 0 0 1 1 0 0 -0.5 0 1 0 -0.5 0 0 1 0.5958985 0 0 0 1 1 0 0 -0.5 0 1 0 -0.5 0 0 1 0.5701429 0 0 0 1 1 0 0 -0.5 0 1 0 -0.5 0 0 1 0.5443873 0 0 0 1 1 0 0 -0.5 0 1 0 -0.5 0 0 1 0.5219196 0 0 0 1 1 0 0 -0.5 0 1 0 -0.5 0 0 1 0.5060279 0 0 0 1 1 0 0 -0.5 0 1 0 -0.5 0 0 1 0.5 0 0 0 1 </float_array>
+        <technique_common>
+          <accessor source="#jt_left.matrix_jt_left_transform-output-array" count="24" stride="16">
+            <param name="TRANSFORM" type="float4x4"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="jt_left.matrix_jt_left_transform-interpolation" name="jt_left.matrix_jt_left_transform-interpolation">
+        <Name_array id="jt_left.matrix_jt_left_transform-interpolation-array" count="24">LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR </Name_array>
+        <technique_common>
+          <accessor source="#jt_left.matrix_jt_left_transform-interpolation-array" count="24" stride="1">
+            <param name="INTERPOLATION" type="name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="jt_left.matrix_jt_left_transform-sampler">
+        <input semantic="INPUT" source="#jt_left.matrix_jt_left_transform-input"/>
+        <input semantic="OUTPUT" source="#jt_left.matrix_jt_left_transform-output"/>
+        <input semantic="INTERPOLATION" source="#jt_left.matrix_jt_left_transform-interpolation"/>
+      </sampler>
+      <channel source="#jt_left.matrix_jt_left_transform-sampler" target="jt_left/transform"/>
+    </animation>
+    <animation id="jt_right.matrix_jt_right">
+      <source id="jt_right.matrix_jt_right_transform-input" name="jt_right.matrix_jt_right_transform-input">
+        <float_array id="jt_right.matrix_jt_right_transform-input-array" count="24">0.04166662 0.08333331 0.125 0.1666666 0.2083333 0.25 0.2916666 0.3333333 0.375 0.4166666 0.4583333 0.5 0.5416667 0.5833333 0.625 0.6666667 0.7083333 0.75 0.7916667 0.8333333 0.875 0.9166667 0.9583333 1 </float_array>
+        <technique_common>
+          <accessor source="#jt_right.matrix_jt_right_transform-input-array" count="24" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+        <technique profile="OpenCOLLADAMaya">
+          <pre_infinity>CONSTANT</pre_infinity>
+          <post_infinity>CONSTANT</post_infinity>
+        </technique>
+      </source>
+      <source id="jt_right.matrix_jt_right_transform-output" name="jt_right.matrix_jt_right_transform-output">
+        <float_array id="jt_right.matrix_jt_right_transform-output-array" count="384">1 0 0 0.5 0 1 0 -0.5 0 0 1 0.5 0 0 0 1 1 0 0 0.5 0 1 0 -0.5 0 0 1 0.5178704 0 0 0 1 1 0 0 0.5 0 1 0 -0.5 0 0 1 0.5639572 0 0 0 1 1 0 0 0.5 0 1 0 -0.5 0 0 1 0.6269738 0 0 0 1 1 0 0 0.5 0 1 0 -0.5 0 0 1 0.6956337 0 0 0 1 1 0 0 0.5 0 1 0 -0.5 0 0 1 0.7586503 0 0 0 1 1 0 0 0.5 0 1 0 -0.5 0 0 1 0.804737 0 0 0 1 1 0 0 0.5 0 1 0 -0.5 0 0 1 0.8226074 0 0 0 1 1 0 0 0.5 0 1 0 -0.5 0 0 1 0.7947692 0 0 0 1 1 0 0 0.5 0 1 0 -0.5 0 0 1 0.7213777 0 0 0 1 1 0 0 0.5 0 1 0 -0.5 0 0 1 0.6176173 0 0 0 1 1 0 0 0.5 0 1 0 -0.5 0 0 1 0.4986724 0 0 0 1 1 0 0 0.5 0 1 0 -0.5 0 0 1 0.3797274 0 0 0 1 1 0 0 0.5 0 1 0 -0.5 0 0 1 0.2759671 0 0 0 1 1 0 0 0.5 0 1 0 -0.5 0 0 1 0.2025755 0 0 0 1 1 0 0 0.5 0 1 0 -0.5 0 0 1 0.1747373 0 0 0 1 1 0 0 0.5 0 1 0 -0.5 0 0 1 0.1887134 0 0 0 1 1 0 0 0.5 0 1 0 -0.5 0 0 1 0.2255595 0 0 0 1 1 0 0 0.5 0 1 0 -0.5 0 0 1 0.2776525 0 0 0 1 1 0 0 0.5 0 1 0 -0.5 0 0 1 0.3373686 0 0 0 1 1 0 0 0.5 0 1 0 -0.5 0 0 1 0.3970848 0 0 0 1 1 0 0 0.5 0 1 0 -0.5 0 0 1 0.4491777 0 0 0 1 1 0 0 0.5 0 1 0 -0.5 0 0 1 0.4860239 0 0 0 1 1 0 0 0.5 0 1 0 -0.5 0 0 1 0.5 0 0 0 1 </float_array>
+        <technique_common>
+          <accessor source="#jt_right.matrix_jt_right_transform-output-array" count="24" stride="16">
+            <param name="TRANSFORM" type="float4x4"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="jt_right.matrix_jt_right_transform-interpolation" name="jt_right.matrix_jt_right_transform-interpolation">
+        <Name_array id="jt_right.matrix_jt_right_transform-interpolation-array" count="24">LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR </Name_array>
+        <technique_common>
+          <accessor source="#jt_right.matrix_jt_right_transform-interpolation-array" count="24" stride="1">
+            <param name="INTERPOLATION" type="name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="jt_right.matrix_jt_right_transform-sampler">
+        <input semantic="INPUT" source="#jt_right.matrix_jt_right_transform-input"/>
+        <input semantic="OUTPUT" source="#jt_right.matrix_jt_right_transform-output"/>
+        <input semantic="INTERPOLATION" source="#jt_right.matrix_jt_right_transform-interpolation"/>
+      </sampler>
+      <channel source="#jt_right.matrix_jt_right_transform-sampler" target="jt_right/transform"/>
+    </animation>
+  </library_animations>
+  <scene>
+    <instance_visual_scene url="#VisualSceneNode"/>
+  </scene>
 </COLLADA>

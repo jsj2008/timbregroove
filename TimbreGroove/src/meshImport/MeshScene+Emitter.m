@@ -9,64 +9,40 @@
 #import "MeshScene.h"
 #import "Log.h"
 #import "Painter.h"
+#import "Material.h"
 
 typedef struct _StrideTypeMap {
     VertexStrideType t;
     const char * name;
 } StrideTypeMap;
 
-static NSString * stringFromMat(GLKMatrix4 m)
+NSString * stringFromMat(GLKMatrix4 m)
 {
     return [NSString stringWithFormat:@"{ %G, %G, %G, %G,   %G, %G, %G, %G,   %G, %G, %G, %G,   %G, %G, %G, %G }",
             m.m[0], m.m[1], m.m[2],  m.m[3],  m.m[4],  m.m[5],  m.m[6],  m.m[7],
             m.m[8], m.m[9], m.m[10], m.m[11], m.m[12], m.m[13], m.m[14], m.m[15] ];
 }
 
+NSString * stringFromColor(GLKVector4 c)
+{
+    return [NSString stringWithFormat:@"{ %.4f, %4f, %.4f, %.4f }", c.r, c.g, c.b, c.a];
+}
+
 @implementation MeshScene (Emitter)
 
--(void)emitSkin:(MeshSkinning *)skin
-{
-#if 0
-    unsigned int   currPos  = 0;
-    int            ji       = 0;
-    int            wi;
-    float          weight;
-    
-    NSArray * jointNames = [skin->_influencingJoints map:^id(MeshSceneArmatureNode * joint) {
-        return joint->_name;
-    }];
-    
-    TGLogp(LLMeshImporter, @"{ ");
-    
-    for( int i = 0; i < skin->_numInfluencingJointCounts; i++ )
-    {
-        int numberOfJointsApplied = skin->_influencingJointCounts[ i ];
-        
-        for( unsigned int n = 0; n < numberOfJointsApplied; n++  )
-        {
-            ji = skin->_packedWeightIndices[ currPos + skin->_jointWOffset ];
-            wi = skin->_packedWeightIndices[ currPos + skin->_weightFOffset];
-            currPos += 2;
-            weight = skin->_weights[ wi ];
-            char comma = (i+1 == skin->_numInfluencingJointCounts) && (n+1 == numberOfJointsApplied) ? ' ' : ',';
-            TGLogp(LLMeshImporter, @"  %.4f%c // [%02d][%d] %@", weight, comma, i, n, jointNames[ji]);
-        }
-    }
-#endif
-    TGLogp(LLMeshImporter, @"};\n");
-    
-}
 -(void)emit
 {
     NSString * baseName = self.fileName;
 
-    TGLogp(LLMeshImporter, @"// Imported COLLADA: %@",baseName);
+    TGLogp(LLMeshImporter, @"//\n// Imported COLLADA: %@//\n",baseName);
     TGLogp(LLMeshImporter, @"#ifndef  %@_import_included",baseName);
     TGLogp(LLMeshImporter, @"#define  %@_import_included\n",baseName);
 
-    printf("#ifndef  joint_import_struct_defined\n");
-    printf("#define  joint_import_struct_defined\n");
-    printf("typedef struct _Joint {\n  const char *name;\n  GLKVector3 startingPos;\n  GLKMatrix4 transform;\n  GLKMatrix4 invBind;\n  GLKMatrix4 world;\n} Joint;\n");
+    printf("#ifndef  _import_structs_defined\n");
+    printf("#define  _import_structs_defined\n");
+    printf("typedef struct _Joint {\n  const char *name;\n  const char *parent;\n  GLKVector3 startingPos;\n  GLKMatrix4 transform;\n  GLKMatrix4 invBind;\n  GLKMatrix4 world;\n} Joint;\n\n");
+    printf("typedef struct _MaterialDesc {\n  GLKVector4 ambient, diffuse, specular, emission;\n  float shininess;\n  bool doSpecular;\n  const char *textureFileName;\n} MaterialDesc;\n\n");
+    printf("typedef struct _Animation {\n GLKMatrix* transforms;\n float *keyFrames;\n Joint *target;\n unsigned int numFrames;\n} Animation;\n\n");
     printf("#endif\n\n");
     
     NSMutableArray * allJointNames = [NSMutableArray new];
@@ -80,6 +56,7 @@ static NSString * stringFromMat(GLKMatrix4 m)
         GLKVector3 vec3 = POSITION_FROM_MAT(node->_world);
         TGLogp(LLMeshImporter, @"Joint %@_%@_joint = {", baseName, node->_name);
         TGLogp(LLMeshImporter, @"  \"%@\",", node->_name);
+        TGLogp(LLMeshImporter, @"  \"%@\",", node->_parent ? node->_parent->_name : @"" );
         TGLogp(LLMeshImporter, @"  %@,", NSStringFromGLKVector3(vec3));
 
         TGLogp(LLMeshImporter, @"  %@,", stringFromMat(node->_transform));
@@ -94,27 +71,62 @@ static NSString * stringFromMat(GLKMatrix4 m)
     
     printf("#pragma mark BONES\n\n");
     
-    [_joints each:^(id sender) { dumpBones(nil,sender); }];
+    [_allJoints each:^(id sender) { dumpBones(nil,sender); }];
     
     dumpBones = nil;
-    
-    NSUInteger totalNames = [allJointNames count];
-    TGLogp(LLMeshImporter, @"Joint * %@_joints[%d] = {", baseName, totalNames);
-    int nCount = 0;
-    for( NSString * name in allJointNames )
-    {
-        TGLogp(LLMeshImporter, @"  &%@_%@_joint%s", baseName,name,++nCount == totalNames ? "" : ",");
-    }
-    TGLogp(LLMeshImporter, @"};\n");
+
 
     printf("#pragma mark GEOMETRY \n\n");
 
     static const char * gvs[] = {
         "gv_pos", "gv_normal", "gv_uv", "gv_acolor", "gv_boneIndex", "gv_boneWeights"
     };
+    __block int nCount = 0;
     __block int meshCount = 0;
-    [_meshes each:^(MeshSceneMeshNode * msmn) {
-        [msmn->_geometries each:^(MeshGeometry *mg) {
+    [_meshes each:^(MeshSceneMeshNode * meshNode) {
+        if( meshNode->_influencingJoints )
+        {
+            NSUInteger inflJointCount = [meshNode->_influencingJoints count];
+            nCount = 0;
+            TGLogp(LLMeshImporter, @"Joint * %@_%@_influencingJoints[%d] = { ", baseName, meshNode->_name, inflJointCount);
+            [meshNode->_influencingJoints each:^(MeshSceneArmatureNode *jnode) {
+                TGLogp(LLMeshImporter, @"  &%@_%@_joint%s", baseName,jnode->_name,++nCount == inflJointCount ? "" : ",");                
+            }];
+            TGLogp(LLMeshImporter, @"};\n");
+        }
+
+        if( meshNode->_materials )
+        {
+            [meshNode->_materials each:^(NSString * name, NSArray * mats) {
+                TGLogp(LLMeshImporter, @"MaterialDesc %@_%@_%@_materials[] = { ", baseName, meshNode->_name, name);
+                int matCount = [mats count];
+                __block int matCounter = 0;
+                [mats each:^(NSObject * obj) {
+                    if( [obj isKindOfClass:[Material class]] )
+                    {
+                        Material * mat = (Material *)obj;
+                        MaterialColors mc = mat.colors;
+                        TGLogp(LLMeshImporter,
+                               @"   { .ambient = %@, .diffuse = %@,\n    .specular = %@, .emisssion = %@ },\n    .shininess = %f, .doSpecular = %s }%s",
+                               stringFromColor(mc.ambient),  stringFromColor(mc.diffuse),
+                               stringFromColor(mc.specular), stringFromColor(mc.emission),
+                               mat.shininess, mat.doSpecular ? "true" : "false", ++matCounter == matCount ? "" : "," );
+                    }
+                    else if( [obj isKindOfClass:[Texture class]] )
+                    {
+                        Texture * tex = (Texture *)obj;
+                        TGLogp(LLMeshImporter, @" { .textureFileName = \"%s\" }%s", tex.fileName, ++matCounter == matCount ? "" : ",");
+                    }
+                }];
+                TGLogp(LLMeshImporter, @"};\n");
+            }];
+        }
+        else
+        {
+            //TGLogp(LLMeshImporter, @"MaterialDesc %@_%@_%@_materials[] = {};\n", baseName, msmn->_name, name);
+        }
+        
+        [meshNode->_geometries each:^(MeshGeometry *mg) {
             TGLogp(LLMeshImporter, @"VertexStride  _%@_%@_strides_%d[] = { ", baseName, mg->_name, meshCount);
             for( int i = 0; i < mg->_numStrides; i++ )
             {
@@ -146,31 +158,16 @@ static NSString * stringFromMat(GLKMatrix4 m)
     }];
     
 
-    return;
-    
-    
-    printf("#pragma mark SKIN\n\n");
-
-    [_meshes each:^(MeshSceneMeshNode * mesh) {
-        MeshSkinning * skin = mesh->_skin;
-        if( skin )
-        {
-            TGLogp(LLMeshImporter, @"GLKMatrix4 %@_%@_bindShapeMatrix = %@;\n",
-                   baseName, mesh->_name, stringFromMat(skin->_bindShapeMatrix));
-            TGLogp(LLMeshImporter, @"float %@_weights[] = ",baseName);
-            [self emitSkin:skin];
-        }
-    }];
-    
     if( _animations )
     {
         printf("#pragma mark ANIMATION\n\n");
         
         int count = 0;
+        int acount = 0;
         for( MeshAnimation * animation in _animations )
         {
-            TGLogp(LLMeshImporter,@"GLKMatrix4 %@_%@_animationFrames[] = { ", baseName, animation->_target->_name);
-            
+            NSString * name = animation->_target->_name;
+            TGLogp(LLMeshImporter,@"GLKMatrix4 %@_%@_animationFrames[] = { ", baseName, name);
             for( int i = 0; i < animation->_numFrames; i++ )
             {
                 TGLogp(LLMeshImporter,@"%@%s // Frame[%d] at %fsec",
@@ -178,11 +175,21 @@ static NSString * stringFromMat(GLKMatrix4 m)
                        i + 1 < animation->_numFrames ? "," : "",
                        i, animation->_keyFrames[i] );
             }
-            TGLogp(LLMeshImporter,@"\n}; // end %@_%@_animationFrames\n", baseName, animation->_target->_name);
+            TGLogp(LLMeshImporter,@"\n}; // end %@_%@_animationFrames\n", baseName, name);
             ++count;
+            
+            TGLogp(LLMeshImporter,@"GLKMatrix4 %@_%@_animationKeyFrames[] = { ", baseName, name);
+            for( int i = 0; i < animation->_numFrames; i++ )
+            {
+                TGLogp(LLMeshImporter,@"%f%s // Frame[%d]",
+                       animation->_keyFrames[i],
+                       i + 1 < animation->_numFrames ? "," : "",
+                       i  );
+            }
+            TGLogp(LLMeshImporter,@"\n}; // end %@_%@_animationKeyFrames\n", baseName, animation->_target->_name);
+            
         };
         
-        int acount = 0;
         TGLogp(LLMeshImporter, @"GLKMatrix4 * %@_animation[] = { \n", baseName);
         for( MeshAnimation * animation in _animations )
         {
@@ -190,88 +197,25 @@ static NSString * stringFromMat(GLKMatrix4 m)
             TGLogp(LLMeshImporter,@"   %@_%@_animationFrames%s", baseName, animation->_target->_name, acount == count ? "" : ",");
         }
         TGLogp(LLMeshImporter, @"};\n");
+        
+        for( MeshAnimation * animation in _animations )
+        {
+            NSString * tn = animation->_target->_name;
+            TGLogp(LLMeshImporter, @"Animation %@_%@_animation = {\n  .transforms = %@_%@_animationFrames,\n  .keyFrames = %@_%@_animationKeyFrames,\n  .numFrames = %d,\n  .target = &%@_%@_joint\n};\n",
+                   baseName, tn, baseName, tn, baseName, tn, animation->_numFrames, baseName, tn );
+        }
+        
+        acount = 0;
+        TGLogp(LLMeshImporter, @"Animation * %@_animation[%d] = { \n", baseName, count);
+        for( MeshAnimation * animation in _animations )
+        {
+            TGLogp(LLMeshImporter,@"   &%@_%@_animation%s", baseName, animation->_target->_name, ++acount == count ? "" : ",");
+        }
+        TGLogp(LLMeshImporter, @"};\n");
     }
     
-    [_meshes each:^(MeshSceneMeshNode * mesh ) {
-#if 0
-        MeshGeometry_OLD * geometry = mesh->_geometry;
-        NSString * meshName = mesh->_name;
-        
-        TGLogp(LLMeshImporter,@"#pragma mark GEOMETRY %@\n\n",meshName);
-        
-        for( int b = 0; b < kNumMeshSemanticKeys; b ++ )
-        {
-            MeshGeometryBuffer * bufferInfo = geometry->_buffers + b;
-            if( !bufferInfo->data )
-                continue;
-            
-            TGLogp(LLMeshImporter, @"GLKVector%d %@_%@_%s[%d] = {",
-                   bufferInfo->stride,
-                   baseName,
-                   meshName,
-                   varname[indexIntoNamesMap[b]],
-                   bufferInfo->numFloats/bufferInfo->stride);
-            
-            float *p = bufferInfo->data;
-            int count = bufferInfo->numFloats;
-            for( int i = 0; i < count;  )
-            {
-                for( int r = 0; r < 3 && i < count; r++  )
-                {
-                    printf("{");
-                    char * comma = "";
-                    for( int s = 0; s < bufferInfo->stride; s++ )
-                    { printf( "%s %+.3f ",comma, p[i++]); comma = ","; }
-                    if( i + 1 < count )
-                        printf("}, ");
-                    else
-                        printf("}");
-                }
-                printf("\n");
-            }
-            printf("};\n");
-        }
-        
-        for( int ii = 0; ii < geometry->_numIndexBuffers; ii++ )
-        {
-            MeshGeometryIndexBuffer * bufferInfo = geometry->_indexBuffers + ii;
-            if( bufferInfo->indexData )
-            {
-                TGLogp(LLMeshImporter, @"unsigned int %@_%@_%s_index_%d[%d] = {",
-                       baseName,
-                       meshName,
-                       varname[indexIntoNamesMap[MSKPosition]],
-                       ii,
-                       bufferInfo->numIndices );
-                
-                unsigned int *p = bufferInfo->indexData;
-                int count = bufferInfo->numIndices;
-                int i;
-                for( i = 0; i < count;  )
-                {
-                    for( int r = 0; r < 3 && i < count; r++  )
-                    {
-                        printf(" ");
-                        char * comma = "";
-                        for( int s = 0; s < 3; s++ )
-                        {
-                            printf( "%s %d",comma,p[i++]);
-                            comma = ",";
-                        }
-                        if( i + 1 < count )
-                            printf(", ");
-                    }
-                    printf("\n");
-                }
-                printf("};\n");
-            }
-            
-        }
-#endif
-        
-    }];
     
-    TGLogp(LLMeshImporter, @"#endif // %@_import_included",baseName);
+    TGLogp(LLMeshImporter, @"\n#endif // %@_import_included\n\n",baseName);
     
 }
 @end

@@ -73,14 +73,15 @@
 {
     ShaderLight desc = { 0 };
     
-    desc.colors.ambient = (GLKVector4){ 1, 1, 1, 1 };
-    desc.colors.diffuse = (GLKVector4){ 1, 1, 1, 1 };
-    desc.position = (GLKVector4){ -2, 2, 2,        1.0 };
-    desc.attenuation = (GLKVector3){ 0, 0.02, 0 };
+    desc.colors.ambient  = (GLKVector4){ 1, 1, 1, 1 };
+    desc.colors.diffuse  = (GLKVector4){ 1, 1, 1, 1 };
+    desc.position        = (GLKVector4){ -2, 2, 2,        1.0 };
+    desc.attenuation     = (GLKVector3){ 0, 0.02, 0 };
+    
     desc.spotCutoffAngle = 15.468750;
+    desc.spotDirection   = (GLKVector3){ 0.5, -0.5, -0.5 };
+    desc.spotDirection   =  GLKVector3Normalize( desc.spotDirection );
     desc.spotFalloffExponent = 44.0;
-    desc.spotDirection = (GLKVector3){ 0.5, -0.5, -0.5 };
-    desc.spotDirection =  GLKVector3Normalize( desc.spotDirection );
     
     Light * light = [Light new];
     light.desc = desc;
@@ -99,28 +100,33 @@
 {
     if( scene )
     {
-        _myRotation = [scene.triggers getFloatTrigger:kParamRotationY];
+        _myRotation = nil; // [scene.triggers getFloatTrigger:kParamRotationY];
+    }
+    else
+    {
+        _myRotation = nil;
     }
 }
 
 -(void)createBuffer
 {
     [_node->_geometries each:^(MeshGeometry * geometry) {
-        NSMutableArray * mats = [NSMutableArray new];
-        
+        NSMutableArray * shaderFeatures = [NSMutableArray new];
+
         if( geometry->_hasBones )
         {
-            Joints * j = [Joints withArmatureNodes:_node->_skin->_influencingJoints];
-            [mats addObject:j];
+            Joints * j = [Joints withArmatureNodes:_node->_influencingJoints];
+            [shaderFeatures addObject:j];
             if( !_jointFeatures )
                 _jointFeatures = [NSMutableArray new];
             [_jointFeatures addObject:j];
         }
+
         if( geometry->_materialName )
         {
             NSArray * importedMats = _node->_materials[ geometry->_materialName ];
             [importedMats each:^(id mat) {
-                [mats addObject:mat];
+                [shaderFeatures addObject:mat];
             }];
         }
         
@@ -132,7 +138,7 @@
           indexData:NULL
          numIndices:0];
         
-        [self addShape:mb features:mats];
+        [self addShape:mb features:shaderFeatures];
     }];
     
 }
@@ -163,8 +169,18 @@
 
     _animations = _scene->_animations;
     
+    /*
+    for( MeshAnimation * animation in _animations )
+    {
+        for( int i = 0; i < animation->_numFrames; i++ )
+        {
+            animation->_keyFrames[i] *= 30.0;
+        }
+    }
+     */
+    
     [super wireUp];
- //   [self buildJointPainters];
+//    [self buildJointPainters];
     [self buildNodePainters];
     if( _runEmitter )
     {
@@ -197,7 +213,7 @@
 
 -(void)buildJointPainters
 {
-    if( !_scene->_joints )
+    if( !_scene->_allJoints )
         return;
         
     static GLKVector4 colors[] = {
@@ -234,8 +250,8 @@
     else
     {
         [_scene->_meshes each:^(MeshSceneMeshNode * node) {
-            if( node->_skin )
-                [node->_skin->_influencingJoints each:createJointPainter];
+            if( node->_influencingJoints )
+                [node->_influencingJoints each:createJointPainter];
         }];
     }
     
@@ -263,6 +279,8 @@
         MeshNodePainter * painterObj = createNodePainter(node,self);
         [painterObjects addObject:painterObj];
     }];
+    
+    createNodePainter = nil;
     
     _nodePainters = [NSArray arrayWithArray:painterObjects];
 }
@@ -297,14 +315,16 @@
     {
         __block bool dirty = false;
         
-        [_animations each:^(MeshAnimation * animation) {
+        for ( MeshAnimation * animation in _animations )
+        {
             animation->_clock += dt;
+            
             if( animation->_clock >= animation->_keyFrames[animation->_nextFrame] )
             {
                 MeshSceneNode * node = animation->_target;
                 
                 node->_transform = animation->_transforms[animation->_nextFrame];
-
+                
                 ++animation->_nextFrame;
                 if( animation->_nextFrame == animation->_numFrames )
                 {
@@ -313,10 +333,13 @@
                 }
                 dirty = true;
             }
-        }];
+        };
         
         if( dirty )
+        {
             [self updatePainters];
+        }
+        
     }
 }
 

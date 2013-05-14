@@ -39,6 +39,13 @@ static float * parseFloats(NSString * str, int * numFloats, ColladaParserImpl * 
     return buffer;
 }
 
+static float * copyFloats(float *original, int numFloats)
+{
+    float * p = malloc(sizeof(float)*numFloats);
+    memcpy(p,original,sizeof(float)*numFloats);
+    return p;
+}
+
 static unsigned short * parseUShorts(NSString * str, int * numUShorts, ColladaParserImpl * pool)
 {
     str = [str stringByTrimmingCharactersInSet:
@@ -264,11 +271,11 @@ static const char * effectParamTags[] = {
     ColladaTagState _state;
     
     NSMutableString * _floatString;
-    float * _floatArray;
+    float * _tempFloatArray;
     int _floatArrayCount;
     
     NSMutableString * _ushortString;
-    unsigned short * _ushortArray;
+    unsigned short * _tempUShortArray;
     int _ushortArrayCount;
     
     NSMutableString * _stringArrayString;
@@ -284,7 +291,7 @@ static const char * effectParamTags[] = {
     self = [super init];
     if( self )
     {
-        _animations = [NSMutableDictionary new];
+        _animDict = [NSMutableDictionary new];
         _geometries = [NSMutableDictionary new];
         _skins      = [NSMutableDictionary new];
         _nodes      = [NSMutableDictionary new];
@@ -310,18 +317,27 @@ static const char * effectParamTags[] = {
     
     if( attributeDict )
     {
-        if( EQSTR(elementName,kTag_float_array) )
+        if( EQSTR(elementName, kTag_source) )
         {
-            _floatArrayCount = scanInt(attributeDict[kAttr_count]);
-            SET(kColStateFloatArray);
+            SET(kColStateInSource);
             return;
         }
         
-        if( EQSTR(elementName,kTag_param) )
+        if( CHECK(kColStateInSource) )
         {
-            ia->_paramName = attributeDict[kAttr_name];
-            ia->_paramType = attributeDict[kAttr_type];
-            return;
+            if( EQSTR(elementName,kTag_float_array) )
+            {
+                _floatArrayCount = scanInt(attributeDict[kAttr_count]);
+                SET(kColStateFloatArray);
+                return;
+            }
+            
+            if( EQSTR(elementName,kTag_param) )
+            {
+                ia->_paramName = attributeDict[kAttr_name];
+                ia->_paramType = attributeDict[kAttr_type];
+                return;
+            }
         }
         
         if( EQSTR(elementName,kTag_channel) )
@@ -335,10 +351,10 @@ static const char * effectParamTags[] = {
         {
             if( EQSTR(ia->_paramName,kValue_name_TIME) )
             {
-                ia->_animation->_keyFrames = _floatArray;
+                ia->_animation->_keyFrames = copyFloats(_tempFloatArray, _floatArrayCount);
                 ia->_animation->_numFrames = _floatArrayCount;
                 
-                _floatArray = NULL;
+                _tempFloatArray = NULL;
                 _floatArrayCount = 0;
             }
             else if( EQSTR(ia->_paramName,kValue_name_TRANSFORM) )
@@ -346,14 +362,16 @@ static const char * effectParamTags[] = {
                 if( EQSTR(ia->_paramType,kValue_type_float4x4) )
                 {
                     unsigned int numMatrices = _floatArrayCount / 16;
-                    GLKMatrix4 * mats = (GLKMatrix4 *)_floatArray;
+                    GLKMatrix4 * mats = (GLKMatrix4 *)copyFloats(_tempFloatArray, _floatArrayCount);
                     for( unsigned int i = 0; i < numMatrices; i++ )
                         mats[i] = GLKMatrix4Transpose(mats[i]);
                     ia->_animation->_transforms = mats;
                 }
-                _floatArray = NULL;
+                _tempFloatArray = NULL;
                 _floatArrayCount = 0;
             }
+            
+            UNSET(kColStateInSource);
         }
         
     }
@@ -362,7 +380,7 @@ static const char * effectParamTags[] = {
 -(void)assembleAnimation
 {
     IncomingAnimation * ia = _incoming;
-    _animations[ia->_channelTarget] = ia->_animation;
+    _animDict[ia->_channelTarget] = ia->_animation;
     _incoming = nil;
     UNSET(kColStateInAnimation);
 }
@@ -500,19 +518,19 @@ static const char * effectParamTags[] = {
             if( EQSTR(elementName, kTag_p) )
             {
                 IncomingPolygonIndex * polyIndexTag = [meshData->_polygonTags lastObject];
-                polyIndexTag->_primitives = _ushortArray;
+                polyIndexTag->_primitives = _tempUShortArray;
                 polyIndexTag->_numPrimitives = _ushortArrayCount;
                 _ushortArrayCount = 0;
-                _ushortArray = NULL;
+                _tempUShortArray = NULL;
                 return;
             }
             
             if( EQSTR(elementName, kTag_vcount) )
             {
                 IncomingPolygonIndex * itt = [meshData->_polygonTags lastObject];
-                itt->_vectorCounts = _ushortArray;
+                itt->_vectorCounts = _tempUShortArray;
                 _ushortArrayCount = 0;
-                _ushortArray = NULL;
+                _tempUShortArray = NULL;
                 return;
             }
             
@@ -529,8 +547,8 @@ static const char * effectParamTags[] = {
             {
                 IncomingSourceTag * ivd = meshData->_tempIncomingSourceTag;
                 ivd->_bufferInfo.numFloats = _floatArrayCount;
-                ivd->_bufferInfo.data = _floatArray;
-                _floatArray = NULL;
+                ivd->_bufferInfo.data = _tempFloatArray;
+                _tempFloatArray = NULL;
                 _floatArrayCount = 0;
                 
                 meshData->_tempIncomingSourceTag = nil;
@@ -675,11 +693,11 @@ static const char * effectParamTags[] = {
                     _stringArrayString = nil;
                     UNSET(kColStateStringArray);
                 }
-                if( _floatArray )
+                if( _tempFloatArray )
                 {
-                    iss->_data = _floatArray;
+                    iss->_data = _tempFloatArray;
                     iss->_numFloats = _floatArrayCount;
-                    _floatArray = NULL;
+                    _tempFloatArray = NULL;
                     _floatArrayCount = 0;
                 }
                 UNSET(kColStateInSource);
@@ -691,18 +709,18 @@ static const char * effectParamTags[] = {
         {
             if( EQSTR(elementName, kTag_vcount) )
             {
-                iskin->_weights->_vcounts = _ushortArray;
+                iskin->_weights->_vcounts = _tempUShortArray;
                 iskin->_weights->_numVcounts = _ushortArrayCount;
-                _ushortArray = NULL;
+                _tempUShortArray = NULL;
                 _ushortArrayCount = 0;
                 return;
             }
             
             if( EQSTR(elementName, kTag_v) )
             {
-                iskin->_weights->_weights = _ushortArray;
+                iskin->_weights->_weights = _tempUShortArray;
                 iskin->_weights->_numWeights = _ushortArrayCount;
-                _ushortArray = NULL;
+                _tempUShortArray = NULL;
                 _ushortArrayCount = 0;
                 return;
             }
@@ -716,9 +734,9 @@ static const char * effectParamTags[] = {
         
         if( EQSTR(elementName, kTag_bind_shape_matrix) )
         {
-            iskin->_bindShapeMatrix = GLKMatrix4MakeWithArrayAndTranspose(_floatArray);
+            iskin->_bindShapeMatrix = GLKMatrix4MakeWithArrayAndTranspose(_tempFloatArray);
 //            iskin->_bindShapeMatrix = GLKMatrix4MakeWithArray(_floatArray);
-            _floatArray = NULL;
+            _tempFloatArray = NULL;
             _floatArrayCount = 0;
             return;
         }
@@ -853,9 +871,9 @@ static const char * effectParamTags[] = {
             if( EQSTR(elementName, kTag_matrix) )
             {
                 IncomingNode * inode = [incnt->_nodeStack lastObject];
-                inode->_transform = GLKMatrix4MakeWithArrayAndTranspose(_floatArray);
+                inode->_transform = GLKMatrix4MakeWithArrayAndTranspose(_tempFloatArray);
 //                inode->_transform = GLKMatrix4MakeWithArray(_floatArray);
-                _floatArray = NULL;
+                _tempFloatArray = NULL;
                 _floatArrayCount = 0;
                 return;
             }
@@ -864,8 +882,8 @@ static const char * effectParamTags[] = {
             {
                 IncomingNode * inode = [incnt->_nodeStack lastObject];
                 inode->_coordSpec |= NCSLocation;
-                inode->_location = *(GLKVector3 *)_floatArray;
-                _floatArray = NULL;
+                inode->_location = *(GLKVector3 *)_tempFloatArray;
+                _tempFloatArray = NULL;
                 _floatArrayCount = 0;
                 return;
             }
@@ -874,8 +892,8 @@ static const char * effectParamTags[] = {
             {
                 IncomingNode * inode = [incnt->_nodeStack lastObject];
                 inode->_coordSpec |= NCSScale;
-                inode->_scale = *(GLKVector3 *)_floatArray;
-                _floatArray = NULL;
+                inode->_scale = *(GLKVector3 *)_tempFloatArray;
+                _tempFloatArray = NULL;
                 _floatArrayCount = 0;
                 return;
             }
@@ -884,14 +902,14 @@ static const char * effectParamTags[] = {
             {
                 IncomingNode * inode = [incnt->_nodeStack lastObject];
                 if( inode->_incomingSpec == NCSRotationX )
-                    inode->_rotationX = *(GLKVector3 *)_floatArray;
+                    inode->_rotationX = *(GLKVector3 *)_tempFloatArray;
                 else if( inode->_incomingSpec == NCSRotationY )
-                    inode->_rotationY = *(GLKVector3 *)_floatArray;
+                    inode->_rotationY = *(GLKVector3 *)_tempFloatArray;
                 else
-                    inode->_rotationZ = *(GLKVector3 *)_floatArray;
+                    inode->_rotationZ = *(GLKVector3 *)_tempFloatArray;
                 inode->_coordSpec |= inode->_incomingSpec;
                 inode->_incomingSpec = 0;
-                _floatArray = NULL;
+                _tempFloatArray = NULL;
                 _floatArrayCount = 0;
                 return;
             }
@@ -1064,7 +1082,7 @@ static const char * effectParamTags[] = {
             
             if( EQSTR(elementName, kTag_color) )
             {
-                GLKVector4 color = *(GLKVector4 *)_floatArray;
+                GLKVector4 color = *(GLKVector4 *)_tempFloatArray;
                 switch (ie->_incomingDataTag) {
                     case et_ambient:
                         ie->_colors.ambient = color;
@@ -1082,7 +1100,7 @@ static const char * effectParamTags[] = {
                         break;
                 }
                 ie->_incomingDataTag = et_NONE;
-                _floatArray = NULL;
+                _tempFloatArray = NULL;
                 _floatArrayCount = 0;
                 return;
             }
@@ -1325,7 +1343,7 @@ foundCharacters:(NSString *)string
     
     if( CHECK(kColStateFloatArray) )
     {
-        _floatArray = parseFloats(_floatString, &_floatArrayCount, self);
+        _tempFloatArray = parseFloats(_floatString, &_floatArrayCount, self);
         _floatString = nil;
         UNSET(kColStateFloatArray);
         
@@ -1335,7 +1353,7 @@ foundCharacters:(NSString *)string
     
     if( CHECK(kColStateIntArray) )
     {
-        _ushortArray = parseUShorts(_ushortString, &_ushortArrayCount, self);
+        _tempUShortArray = parseUShorts(_ushortString, &_ushortArrayCount, self);
         _ushortString = nil;
         UNSET(kColStateIntArray);
         // return;

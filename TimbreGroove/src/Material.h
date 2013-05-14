@@ -29,6 +29,7 @@
 @property (nonatomic) GLint uLocation;    // frag. shader sampler uniform location
 @property (nonatomic) bool repeat;
 @property (nonatomic,readonly) CGSize orgSize; // size of original image used
+@property (nonatomic,readonly) NSString * fileName;
 
 -(id)initWithFileName:(NSString *)fileName;
 -(id)initWithGlTextureId:(GLuint)glTextureId;

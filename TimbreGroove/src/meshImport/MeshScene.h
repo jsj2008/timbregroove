@@ -11,8 +11,6 @@
 #import "TGTypes.h"
 #import "GenericShader.h"
 
-@class MeshSkinning;
-
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  MeshGeometry  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 @interface MeshGeometry : NSObject {
@@ -73,9 +71,9 @@ typedef enum _MeshSceneNodeType {
     GLKVector3 _rotationZ;
     GLKVector3 _scale;
     
-    MeshSkinning *  _skin;
-    NSDictionary *  _materials;
-    NSArray *       _geometries;
+    NSMutableArray *  _influencingJoints;
+    NSDictionary *    _materials;
+    NSArray *         _geometries;
 }
 @end
 
@@ -102,40 +100,12 @@ typedef enum _MeshSceneNodeType {
 @public
     NSArray  * _animations;
     NSArray  * _meshes;
-    NSArray  * _joints;
+    NSArray  * _allJoints;
 }
 @property (nonatomic,strong) NSString * fileName;
 -(void)calcMatricies;
 -(void)calcAnimationMatricies;
 @end
-
-//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  MeshSkinning @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-@interface MeshSkinning : NSObject {
-@public
-    GLKMatrix4       _bindShapeMatrix;
-
-    // flat array of MeshNodeArmatureNodes that
-    // directly influence vertices by means of
-    // their transofrom mats
-    NSMutableArray * _influencingJoints;
-
-#if 0
-
-    float *          _weights;
-    int              _numWeights;
-    unsigned short * _influencingJointCounts;
-    int              _numInfluencingJointCounts;
-    unsigned short * _packedWeightIndices;
-    int              _numPackedWeightIndicies;
-
-    unsigned short *        _vectorIndex;
-#endif
-    MeshSceneArmatureNode * _bone;
-}
-
-@end
-
 
 @interface MeshScene (Emitter)
 -(void)emit;

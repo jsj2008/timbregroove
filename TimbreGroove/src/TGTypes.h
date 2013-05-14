@@ -85,4 +85,7 @@ typedef struct _MaterialColors {
     GLKVector4 ambient, diffuse, specular, emission;
 } MaterialColors;
 
+NSString * stringFromMat(GLKMatrix4 m);
+NSString * stringFromColor(GLKVector4 c);
+
 #endif

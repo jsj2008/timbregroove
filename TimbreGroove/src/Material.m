@@ -73,6 +73,12 @@
     GLuint               _glTexture;
     GLenum               _target;
     GLKTextureInfoOrigin _origin;
+    NSString * _fileName;
+}
+
+-(NSString *)fileName
+{
+    return _fileName;
 }
 
 -(id)initWithFileName:(NSString *)fileName
@@ -158,6 +164,7 @@
 
 -(bool)loadFromFile:(NSString *)fileName
 {
+    _fileName = fileName;
     NSString * path = [[NSBundle mainBundle] pathForResource:[fileName stringByDeletingPathExtension] ofType:[fileName pathExtension]];
     UIImage * image = [UIImage imageWithContentsOfFile:path];
     bool ok = [self loadFromImage:image];

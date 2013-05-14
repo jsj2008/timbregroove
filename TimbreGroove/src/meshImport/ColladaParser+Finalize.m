@@ -27,7 +27,7 @@ extern NSString * const kValue_name_WEIGHT;
 @implementation ColladaParserImpl (Finalize)
 
 -(NSArray *)buildOpenGlBuffer:(IncomingMeshData *)imd
-                         skin:(MeshSkinning *)skin
+            influencingJoints:(NSArray *)influencingJoints
                  incomingSkin:(IncomingSkin *)iskin
 {
     NSMutableArray * geometries = [NSMutableArray new];
@@ -47,10 +47,10 @@ extern NSString * const kValue_name_WEIGHT;
     
     // The skinning information is shared between all shapes
     // so we massage it before digging into the <triangle>s
-    if( skin )
+    if( influencingJoints )
     {
         // actually this is the number of POTENTIALLY influencing joints
-        numInfluencingJoints = [skin->_influencingJoints count];
+        numInfluencingJoints = [influencingJoints count];
         
 #define JOINT_STRIDE 4
         
@@ -188,7 +188,7 @@ extern NSString * const kValue_name_WEIGHT;
                 numFloats += numVertices * ist->_bufferInfo.stride;
         }
         
-        if( skin )
+        if( iskin )
         {
             // JOINT_STRIDE influences + JOINT_STRIDE joint
             // indices per vertext
@@ -202,7 +202,7 @@ extern NSString * const kValue_name_WEIGHT;
                 GLKVector3 * vectors = (GLKVector3 *)ist->_bufferInfo.data;
                 for( int v = 0; v < ist->_bufferInfo.numElements; v++ )
                 {
-                    vectors[v] = GLKMatrix4MultiplyVector3(skin->_bindShapeMatrix, vectors[v]);
+                    vectors[v] = GLKMatrix4MultiplyVector3(iskin->_bindShapeMatrix, vectors[v]);
                 }
                 sourceIsBound = true;
             }
@@ -229,7 +229,7 @@ extern NSString * const kValue_name_WEIGHT;
                 for( int stride = 0; stride < elementStride; stride++ )
                     *p++ = *source++;
             }
-            if( skin )
+            if( iskin )
             {
                 index = primitives[ primitivesOffset[ gv_pos ] ] * 4;
                 float * jindex  = flattenedJointIndecies + index;
@@ -271,7 +271,7 @@ extern NSString * const kValue_name_WEIGHT;
                   "color");
         }
         
-        if( skin )
+        if( iskin )
         {
             VertexStride * vs;
             
@@ -409,13 +409,13 @@ extern NSString * const kValue_name_WEIGHT;
         return nil;
     }] allValues];
     
-    scene->_joints = [[jointNodes mapReduce:^id(id key, MeshSceneNode *node) {
+    scene->_allJoints = [[jointNodes mapReduce:^id(id key, MeshSceneNode *node) {
         if( node->_type == MSNT_Armature && !node->_parent )
             return node;
         return nil;
     }] allValues];
     
-    if( scene->_joints )
+    if( scene->_allJoints )
         [scene calcMatricies];
     
     // Pass 4. Hook up geometries and skins
@@ -469,15 +469,13 @@ extern NSString * const kValue_name_WEIGHT;
             
             IncomingMeshData * meshData      = _geometries[inode->_geometryName];
             
-            runtimeNode->_geometries = [self buildOpenGlBuffer:meshData skin:nil incomingSkin:nil];
+            runtimeNode->_geometries = [self buildOpenGlBuffer:meshData influencingJoints:nil incomingSkin:nil];
         }
         else if( inode->_msnType == MSNT_SkinnedMesh )
         {
-            MeshSkinning * sceneSkin = [MeshSkinning new];
             IncomingSkin * iskin = _skins[ inode->_skinName];
+            NSMutableArray * influencingJoints = [NSMutableArray new];
             
-            sceneSkin->_bindShapeMatrix             = iskin->_bindShapeMatrix;
-
             NSArray * jointNameArray;
             for( IncomingSkinSource * iss in iskin->_incomingSources )
             {
@@ -505,17 +503,18 @@ extern NSString * const kValue_name_WEIGHT;
                     iskin->_weightSource = iss;
                 }
             }
+            
             for( NSString * jointName in jointNameArray )
             {
                 MeshSceneArmatureNode * joint = findJointWithName(jointName,nil);
                 TGLog(LLMeshImporter, @"Imported joint: %@", jointName);
-                [sceneSkin->_influencingJoints addObject:joint];
+                [influencingJoints addObject:joint];
             }
             
             MeshSceneMeshNode * runtimeNode = meshNodes[inode->_id];
-            runtimeNode->_skin = sceneSkin;
+            runtimeNode->_influencingJoints = influencingJoints;
             runtimeNode->_geometries = [self buildOpenGlBuffer:_geometries[iskin->_meshSource]
-                                                          skin:sceneSkin
+                                             influencingJoints:influencingJoints
                                                   incomingSkin:iskin];
         }
         
@@ -613,15 +612,15 @@ extern NSString * const kValue_name_WEIGHT;
     
     [_nodes each:passFive];
     
-    if( [_animations count] )
+    if( [_animDict count] )
     {
         NSMutableArray * sceneAnimations = [NSMutableArray new];
         
-        for( NSString * namePath in _animations )
+        for( NSString * namePath in _animDict )
         {
             NSArray * parts = [namePath componentsSeparatedByString:@"/"];
             
-            MeshAnimation * sceneAnim = _animations[namePath];
+            MeshAnimation * sceneAnim = _animDict[namePath];
             
 #ifdef CULL_NULL_ANIMATIONS
             GLKMatrix4 * firstMat = &sceneAnim->_transforms[0];

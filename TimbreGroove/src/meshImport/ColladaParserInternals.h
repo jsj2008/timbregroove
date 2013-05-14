@@ -282,7 +282,7 @@ typedef enum _ColladaTagState
 
 
 @interface ColladaParserImpl : NSObject<NSXMLParserDelegate>  {
-    NSMutableDictionary * _animations;
+    NSMutableDictionary * _animDict;
     NSMutableDictionary * _geometries;
     NSMutableDictionary * _skins;
     NSMutableDictionary * _nodes;

@@ -58,7 +58,9 @@
 
 -(void)bind:(Shader *)shader object:(Painter *)object
 {
-    //if( _dirty )
+    _dirty = true;
+    
+    if( _dirty )
     {
         [shader writeToLocation:gv_numJoints type:TG_INT data:&_numNodes];
         
@@ -73,9 +75,9 @@
         
         _dirty = false;
     }
-    //else
+    else
     {
-     //   TGLog(LLShitsOnFire, @"No joint animation");
+       // TGLog(LLShitsOnFire, @"No joint animation");
     }
 }
 @end
