@@ -108,7 +108,7 @@
 					<key>kTriggerPlayButton</key>
 					<string>kParamSceneAnimation</string>
 					<key>kTriggerDrag1</key>
-					<string>controllerPos</string>
+					<string>kParamJointPosition</string>
 					<key>kTriggerPanX</key>
 					<string>kParamRotationY</string>
 				</dict>
@@ -400,7 +400,7 @@
 			<key>properties</key>
 			<dict>
 				<key>runAnimations</key>
-				<true/>
+				<false/>
 				<key>cameraZ</key>
 				<real>-2.5</real>
 				<key>runEmitter</key>

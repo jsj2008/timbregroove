@@ -29,12 +29,12 @@ static const char * capVarNames[] = { "a_position", "u_pvm", "u_color" };
 
 static Shader * getCaptureShader()
 {
-    return [Shader shaderFromPoolWithVertex:"capture"
-                                andFragment:"capture"
-                                andVarNames:capVarNames
-                                andNumNames:3
-                                andLastAttr:cv_LAST_ATTR
-                                 andHeaders:nil];
+    return [Shader shaderWithVertex:"capture"
+                        andFragment:"capture"
+                        andVarNames:capVarNames
+                        andNumNames:3
+                        andLastAttr:cv_LAST_ATTR
+                         andHeaders:nil];
 }
 
 @interface EventCapture() {
