@@ -26,7 +26,7 @@ static const char * logStringToBit[] = {
 
 static LogLevel _currentLL = LLShitsOnFire;
 
-void TGLog(LogLevel loglevel,NSString *format, ...)
+void TGLog_CLASSIC(LogLevel loglevel,NSString *format, ...)
 {
     if( (loglevel == LLShitsOnFire) || ((loglevel & _currentLL) != 0)  )
     {

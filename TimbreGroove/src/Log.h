@@ -32,8 +32,9 @@ extern "C" {
     LogLevel TGSetLogLevel(LogLevel);
     LogLevel TGGetLogLevel();
 #ifdef __OBJC__
-    void TGLog(LogLevel,NSString *format, ...);
+    void TGLog_CLASSIC(LogLevel,NSString *format, ...);
     void TGLogp(LogLevel,NSString * format, ...); // use printf
+#define TGLog TGLogp
     
     LogLevel TGLogStringsToBits(NSDictionary *);
     

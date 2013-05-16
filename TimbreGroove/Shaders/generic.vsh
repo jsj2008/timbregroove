@@ -35,8 +35,8 @@ vec4 doSkinning(mat4 pvm, vec4 inpos)
 {
     if( u_numJoints == 0 )
         return pvm * inpos;
-        
-    vec4 pos = vec4( vec3(0.0), 1.0 );
+    
+    vec4 pos = inpos; // vec4( vec3(0.0), 1.0 );
 
     ivec4 index = ivec4(a_boneIndex);
     vec4  weights = a_boneWeights;
@@ -46,8 +46,8 @@ vec4 doSkinning(mat4 pvm, vec4 inpos)
         float weight = weights[j];
         if( weight == 0.0 )
             break;
-        
-        pos += ((u_jointInvMats[index[j]] * vec4(inpos.xyz,1.0)) * u_jointMats[index[j]]) * weight;
+
+        pos += (((u_jointInvMats[index[j]] * vec4(inpos.xyz,1.0)) * u_jointMats[index[j]]) * weight);
     }
 
     return pvm * pos;
@@ -61,10 +61,6 @@ varying vec4 v_vertexPosition;
 varying vec3 v_vertexNormal;
 #endif
 
-#ifdef TIME
-uniform float u_time;
-varying float v_time;
-#endif
 
 void main()
 {
@@ -81,10 +77,6 @@ void main()
     v_vertexNormal = a_normal;
 #endif
     
-#ifdef TIME
-    v_time = u_time;
-#endif
-
 #ifdef BONES
     gl_Position = doSkinning(u_pvm, a_position);
 #else

@@ -158,7 +158,7 @@ void doLighting()
 #endif
 
 #ifdef TIME
-varying float v_time;
+uniform float u_time;
 #endif
 
 

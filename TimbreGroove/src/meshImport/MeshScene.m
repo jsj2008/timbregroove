@@ -92,7 +92,7 @@
 @implementation MeshSceneNode 
 - (void)dealloc
 {
-    TGLog(LLObjLifetime, @"Releasing %@",self);
+    TGLog(LLObjLifetime, @"%@ released",self);
 }
 
 -(void)setTransform:(GLKMatrix4)transform

@@ -30,7 +30,7 @@
 @end
 
 @interface MeshNodePainter : Painter
-@property (nonatomic) bool dirty;
+@property (nonatomic) bool disabled;
 @end
 
 @implementation MeshNodePainter {
@@ -55,9 +55,9 @@
     return self;
 }
 
--(void)setDirty:(bool)dirty
+-(void)setDisabled:(bool)disabled
 {
-    [_jointFeatures each:^(Joints * j) { j.dirty = dirty; }];
+    [_jointFeatures each:^(Joints * j) { j.disabled = disabled; }];
 }
 
 -(id)wireUp
@@ -169,16 +169,6 @@
 
     _animations = _scene->_animations;
     
-    /*
-    for( MeshAnimation * animation in _animations )
-    {
-        for( int i = 0; i < animation->_numFrames; i++ )
-        {
-            animation->_keyFrames[i] *= 30.0;
-        }
-    }
-     */
-    
     [super wireUp];
 //    [self buildJointPainters];
     [self buildNodePainters];
@@ -208,6 +198,7 @@
     
     putHere[kParamSceneAnimation] = [Parameter withBlock:^(int play) {
         _runAnimations = play;
+        [self disableAnimation:!play];
     }];
 }
 
@@ -297,13 +288,12 @@
         GLKVector3 vec3 = POSITION_FROM_MAT( node->_world );
         vb.position = vec3;
     }];
-    [self markNodesDirty];
 }
 
--(void)markNodesDirty
+-(void)disableAnimation:(bool)value
 {
     [_nodePainters each:^(MeshNodePainter *mnp) {
-        mnp.dirty = true;
+        mnp.disabled = value;
     }];
 }
 
@@ -313,8 +303,6 @@
     
     if ( _runAnimations && _animations )
     {
-        __block bool dirty = false;
-        
         for ( MeshAnimation * animation in _animations )
         {
             animation->_clock += dt;
@@ -331,14 +319,8 @@
                     animation->_clock = 0;
                     animation->_nextFrame = 0;
                 }
-                dirty = true;
             }
         };
-        
-        if( dirty )
-        {
-            [self updatePainters];
-        }
         
     }
 }
@@ -386,7 +368,7 @@
     Parameter * parameter = [Parameter withBlock:^(TGVector3 vec3) {
         self.position = TG3(vec3);
         [self updateTransformFromPos];
-        [(MeshImportPainter *)_parent markNodesDirty];
+        [(MeshImportPainter *)_parent updatePainters];
     }];
     parameter.targetObject = self;
 

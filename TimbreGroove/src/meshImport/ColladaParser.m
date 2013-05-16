@@ -105,7 +105,7 @@ static int scanInt(NSString * str)
 
 - (void)dealloc
 {
-    TGLog(LLObjLifetime, @"Releasing %@",self);
+    TGLog(LLObjLifetime, @"%@ released",self);
 }
 @end
 
@@ -114,7 +114,7 @@ static int scanInt(NSString * str)
 @implementation IncomingSourceTag
 - (void)dealloc
 {
-    TGLog(LLObjLifetime, @"Releasing %@",self);
+    TGLog(LLObjLifetime, @"%@ released",self);
 }
 @end
 
@@ -133,7 +133,7 @@ static int scanInt(NSString * str)
 
 - (void)dealloc
 {
-    TGLog(LLObjLifetime, @"Releasing %@",self);
+    TGLog(LLObjLifetime, @"%@ released",self);
 }
 @end
 
@@ -142,7 +142,7 @@ static int scanInt(NSString * str)
 @implementation IncomingSkinSource
 - (void)dealloc
 {
-    TGLog(LLObjLifetime, @"Releasing %@",self);
+    TGLog(LLObjLifetime, @"%@ released",self);
 }
 @end
 
@@ -160,7 +160,7 @@ static int scanInt(NSString * str)
 }
 - (void)dealloc
 {
-    TGLog(LLObjLifetime, @"Releasing %@",self);
+    TGLog(LLObjLifetime, @"%@ released",self);
 }
 
 @end
@@ -179,7 +179,7 @@ static int scanInt(NSString * str)
 }
 - (void)dealloc
 {
-    TGLog(LLObjLifetime, @"Releasing %@",self);
+    TGLog(LLObjLifetime, @"%@ released",self);
 }
 
 @end
@@ -196,7 +196,7 @@ static int scanInt(NSString * str)
 }
 - (void)dealloc
 {
-    TGLog(LLObjLifetime, @"Releasing %@",self);
+    TGLog(LLObjLifetime, @"%@ released",self);
 }
 
 @end
@@ -239,7 +239,7 @@ static const char * effectParamTags[] = {
 @implementation IncomingMaterial
 - (void)dealloc
 {
-    TGLog(LLObjLifetime, @"Releasing %@",self);
+    TGLog(LLObjLifetime, @"%@ released",self);
 }
 @end
 
