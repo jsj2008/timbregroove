@@ -70,16 +70,18 @@ typedef struct _IncomingGeometryBuffer {
 
 @interface IncomingSkinSource : NSObject {
 @public
-    NSString * _id;
-    int        _count;
-    NSString * _source;
-    int        _accCount;
-    int        _stride;
-    NSArray *  _nameArray;
-    float *    _data;
-    int        _numFloats;
-    NSString * _paramName;
-    NSString * _paramType;
+    NSString *   _id;
+    int          _count;
+    NSString *   _source;
+    int          _accCount;
+    int          _stride;
+    NSArray *    _nameArray;
+    GLKMatrix4 * _matrices;
+    int          _numMatrices;
+    float *      _weights; // <source>...<param name="WEIGHT" type="float"/>
+    int          _numWeights;
+    NSString *   _paramName;
+    NSString *   _paramType;
 }
 @end
 
@@ -90,7 +92,7 @@ typedef enum _SkinSemanticKey {
     kNumSkinSemanticKeys
 } SkinSemanticKey;
 
-@interface IncomingWeights : NSObject {
+@interface IncomingWeights : NSObject { // <vertex_weights>....
 @public
     int               _count;
     SkinSemanticKey   _semanticKey[kNumSkinSemanticKeys]; // N.B. these are NOT ordered

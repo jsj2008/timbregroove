@@ -142,6 +142,11 @@ static int scanInt(NSString * str)
 @implementation IncomingSkinSource
 - (void)dealloc
 {
+    if( _matrices )
+        free(_matrices);
+    if( _weights )
+        free(_weights);
+    
     TGLog(LLObjLifetime, @"%@ released",self);
 }
 @end
@@ -695,8 +700,18 @@ static const char * effectParamTags[] = {
                 }
                 if( _tempFloatArray )
                 {
-                    iss->_data = _tempFloatArray;
-                    iss->_numFloats = _floatArrayCount;
+                    if( EQSTR( iss->_paramType, kValue_type_float4x4 ) )
+                    {
+                        iss->_numMatrices = _floatArrayCount / 16;
+                        iss->_matrices = malloc(sizeof(GLKMatrix4)*iss->_numMatrices);
+                        for( int i = 0; i < iss->_numMatrices; i++ )
+                            iss->_matrices[i] = GLKMatrix4Transpose(((GLKMatrix4*)_tempFloatArray)[i]);
+                    }
+                    else
+                    {
+                        iss->_numWeights = _floatArrayCount;
+                        iss->_weights = copyFloats(_tempFloatArray, _floatArrayCount);
+                    }
                     _tempFloatArray = NULL;
                     _floatArrayCount = 0;
                 }
@@ -735,7 +750,6 @@ static const char * effectParamTags[] = {
         if( EQSTR(elementName, kTag_bind_shape_matrix) )
         {
             iskin->_bindShapeMatrix = GLKMatrix4MakeWithArrayAndTranspose(_tempFloatArray);
-//            iskin->_bindShapeMatrix = GLKMatrix4MakeWithArray(_floatArray);
             _tempFloatArray = NULL;
             _floatArrayCount = 0;
             return;

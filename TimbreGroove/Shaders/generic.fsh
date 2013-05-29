@@ -184,6 +184,5 @@ void main()
     doLighting();
     color = vec4(l_color.rgb + l_specular.rgb, l_color.a);
 #endif
-    //color = vec4(1);
     gl_FragColor = color;
 }

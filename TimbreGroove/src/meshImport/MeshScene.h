@@ -46,7 +46,7 @@ typedef enum _MeshSceneNodeType {
     GLKMatrix4            _transform;
     GLKMatrix4             _world;
     NSMutableDictionary * _children;
-    
+    bool                  _animated;
     __weak MeshSceneNode* _parent;
 }
 @property (nonatomic) GLKMatrix4 transform;

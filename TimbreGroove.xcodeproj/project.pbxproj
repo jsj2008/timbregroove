@@ -83,6 +83,7 @@
 		5716775F16A685A800F78B25 /* AssetLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 5716775E16A685A800F78B25 /* AssetLoader.m */; };
 		57188E2316EBFC40002DA307 /* fft.c in Sources */ = {isa = PBXBuildFile; fileRef = 57188E2216EBFC3F002DA307 /* fft.c */; };
 		571A42FE167C315700CD7E8F /* Graph.m in Sources */ = {isa = PBXBuildFile; fileRef = 571A42FD167C315600CD7E8F /* Graph.m */; };
+		571A9237174D7D50007D0DAF /* aotk.dae in Resources */ = {isa = PBXBuildFile; fileRef = 571A9236174D7D50007D0DAF /* aotk.dae */; };
 		571B4C2816D0561100C1F88F /* rhodes_small.sf2 in Resources */ = {isa = PBXBuildFile; fileRef = 571B4C2716D0561100C1F88F /* rhodes_small.sf2 */; };
 		571ECFC2167BEA5E00727A30 /* aotk-ass-outline-512.tif in Resources */ = {isa = PBXBuildFile; fileRef = 571ECFC1167BEA5E00727A30 /* aotk-ass-outline-512.tif */; };
 		571ECFC4167BEC3B00727A30 /* aotk-ass-bare-512.tif in Resources */ = {isa = PBXBuildFile; fileRef = 571ECFC3167BEC3B00727A30 /* aotk-ass-bare-512.tif */; };
@@ -327,6 +328,7 @@
 		57188E2216EBFC3F002DA307 /* fft.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; path = fft.c; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.c; };
 		571A42FC167C315600CD7E8F /* Graph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Graph.h; sourceTree = "<group>"; };
 		571A42FD167C315600CD7E8F /* Graph.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = Graph.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		571A9236174D7D50007D0DAF /* aotk.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = aotk.dae; sourceTree = "<group>"; };
 		571B4C2716D0561100C1F88F /* rhodes_small.sf2 */ = {isa = PBXFileReference; lastKnownFileType = file; path = rhodes_small.sf2; sourceTree = "<group>"; };
 		571ECFC1167BEA5E00727A30 /* aotk-ass-outline-512.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = "aotk-ass-outline-512.tif"; sourceTree = "<group>"; };
 		571ECFC3167BEC3B00727A30 /* aotk-ass-bare-512.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = "aotk-ass-bare-512.tif"; sourceTree = "<group>"; };
@@ -588,6 +590,7 @@
 		5700235516A55460006F0E8E /* models */ = {
 			isa = PBXGroup;
 			children = (
+				571A9236174D7D50007D0DAF /* aotk.dae */,
 				57B5101D172A002300CD805B /* lightTest.dae */,
 				573022AF1728E990002D3F0F /* legoman.dae */,
 				57E7EB9C170FA83E00D3DC88 /* ballStretch.dae */,
@@ -1361,6 +1364,7 @@
 				57E7EB9D170FA83E00D3DC88 /* ballStretch.dae in Resources */,
 				573022B01728E990002D3F0F /* legoman.dae in Resources */,
 				57B5101E172A002300CD805B /* lightTest.dae in Resources */,
+				571A9237174D7D50007D0DAF /* aotk.dae in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

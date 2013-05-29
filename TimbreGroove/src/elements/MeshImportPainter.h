@@ -16,5 +16,6 @@
 @property (nonatomic) bool  runAnimations;
 @property (nonatomic) float cameraZ;
 @property (nonatomic) bool  autoRotate;
+@property (nonatomic) bool  showJoints;
 @end
 

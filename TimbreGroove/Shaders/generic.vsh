@@ -21,8 +21,8 @@ varying vec4 v_vertex_color;
 #ifdef BONES
 
 uniform int  u_numJoints;
-uniform mat4 u_jointMats[12];
-uniform mat4 u_jointInvMats[12];
+uniform mat4 u_jointMats[120];
+uniform mat4 u_jointInvMats[120];
 
 // ok, so this is not really a vec4, it's a variable array
 // of floats and limits the number of influencing joints
@@ -36,20 +36,19 @@ vec4 doSkinning(mat4 pvm, vec4 inpos)
     if( u_numJoints == 0 )
         return pvm * inpos;
     
-    vec4 pos = inpos;
+    vec4 pos = vec4( 0.0, 0.0, 0.0, 0.0 );
 
     ivec4 index = ivec4(a_boneIndex);
     vec4  weights = a_boneWeights;
-    
+
     for( int j = 0; j < 4; j++ )
     {
         float weight = weights[j];
         if( weight == 0.0 )
             break;
 
-        pos += (((u_jointInvMats[index[j]] * vec4(inpos.xyz,1.0)) * u_jointMats[index[j]]) * weight);
+        pos += ( u_jointMats[index[j]] * ( u_jointInvMats[index[j]] * vec4(inpos.xyz,1.0))) * weight;
     }
-
     return pvm * pos;
 }
 #endif

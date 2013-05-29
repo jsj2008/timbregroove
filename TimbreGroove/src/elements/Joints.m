@@ -31,11 +31,15 @@
         _numNodes = [nodes count];
         _matrices    = malloc( sizeof(GLKMatrix4) * _numNodes);
         _invBindMats = malloc( sizeof(GLKMatrix4) * _numNodes);
-        __block unsigned bji = 0;
-        [_nodes each:^(MeshSceneArmatureNode * joint) {
-            _invBindMats[bji]  = GLKMatrix4Transpose(joint->_invBindMatrix);
-            ++bji;
-        }];
+        unsigned bji = 0;
+        for( MeshSceneArmatureNode * joint in _nodes ) {
+            _invBindMats[bji++] = joint->_invBindMatrix;
+        };
+        
+        for( int i = 0; i < bji; i++ )
+        {
+            TGLogp(LLShitsOnFire, @"%d: %@", i, stringFromMat(_invBindMats[i]));
+        }
     }
     return self;
 }
@@ -60,18 +64,18 @@
 -(void)bind:(Shader *)shader object:(Painter *)object
 {
     if( _disabled )
+    {
+        int zero = 0;
+        [shader writeToLocation:gv_numJoints type:TG_INT data:&zero];
         return;
+    }
     
-    [shader writeToLocation:gv_numJoints type:TG_INT data:&_numNodes];
+    unsigned bji = 0;
+    for( MeshSceneArmatureNode * joint in _nodes ) {
+        _matrices[bji++] = [joint matrix];
+    };
     
-    __block unsigned bji = 0;
-    
-    [_nodes each:^(MeshSceneArmatureNode * joint) {
-        _matrices[bji] = GLKMatrix4Transpose([joint matrix]);
-        ++bji;
-    }];
-    
-    
+    [shader writeToLocation:gv_numJoints    type:TG_INT data:&_numNodes];
     [shader writeToLocation:gv_jointMats    type:TG_MATRIX4 data:_matrices    count:_numNodes];
     [shader writeToLocation:gv_jointInvMats type:TG_MATRIX4 data:_invBindMats count:_numNodes];
 }

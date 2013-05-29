@@ -73,9 +73,9 @@
 {
     ShaderLight desc = { 0 };
     
-    desc.colors.ambient  = (GLKVector4){ 1, 1, 1, 1 };
-    desc.colors.diffuse  = (GLKVector4){ 1, 1, 1, 1 };
-    desc.position        = (GLKVector4){ -2, 2, 2,        1.0 };
+    desc.colors.ambient  = (GLKVector4){ 0.4, 0.4, 0.4, 1.0 };
+    desc.colors.diffuse  = (GLKVector4){ 0.4, 0.4, 0.4, 1.0 };
+    desc.position        = (GLKVector4){ 0, 0, 10,        0.0 };
     desc.attenuation     = (GLKVector3){ 0, 0.02, 0 };
     
     desc.spotCutoffAngle = 15.468750;
@@ -110,9 +110,10 @@
 
 -(void)createBuffer
 {
-    [_node->_geometries each:^(MeshGeometry * geometry) {
+    for( MeshGeometry * geometry in  _node->_geometries )
+    {
         NSMutableArray * shaderFeatures = [NSMutableArray new];
-
+        
         if( geometry->_hasBones )
         {
             Joints * j = [Joints withArmatureNodes:_node->_influencingJoints];
@@ -121,7 +122,7 @@
                 _jointFeatures = [NSMutableArray new];
             [_jointFeatures addObject:j];
         }
-
+        
         if( geometry->_materialName )
         {
             NSArray * importedMats = _node->_materials[ geometry->_materialName ];
@@ -137,9 +138,10 @@
         numVertices:geometry->_numVertices
           indexData:NULL
          numIndices:0];
+        //mb.drawType = GL_POINTS;
         
         [self addShape:mb features:shaderFeatures];
-    }];
+    }
     
 }
 
@@ -170,7 +172,8 @@
     _animations = _scene->_animations;
     
     [super wireUp];
-//    [self buildJointPainters];
+    if( _showJoints )
+       [self buildJointPainters];
     [self buildNodePainters];
     if( _runEmitter )
     {
@@ -186,6 +189,9 @@
         pos.z = _cameraZ;
         self.camera.position = pos;
     }
+    
+    if( _animations )
+        [self disableAnimation:!_runAnimations];
     
     _scene = nil; // no need to hang on
     
@@ -225,14 +231,14 @@
         vb->_node = node;
         GLKVector3 vec3 = POSITION_FROM_MAT(node->_world);
         vb.position = vec3;
-        [vb updateTransformFromPos];
+      //  [vb updateTransformFromPos];
         vb.color = colors[nextColor];
         nextColor = ++nextColor % (sizeof(colors)/sizeof(colors[0]));
         [self appendChild:[vb wireUp]];
         [painterObjects addObject:vb];
     };
     
-    if( _animations )
+    if( 0 && _animations )
     {
         [_animations each:^(MeshAnimation * animation) {
             createJointPainter((MeshSceneArmatureNode *)animation->_target);
@@ -266,10 +272,11 @@
     
     NSMutableArray * painterObjects = [NSMutableArray new];
     
-    [_scene->_meshes each:^(MeshSceneMeshNode *node) {
+    for( MeshSceneMeshNode *node in  _scene->_meshes )
+    {
         MeshNodePainter * painterObj = createNodePainter(node,self);
         [painterObjects addObject:painterObj];
-    }];
+    }
     
     createNodePainter = nil;
     
@@ -320,8 +327,7 @@
                     animation->_nextFrame = 0;
                 }
             }
-        };
-        
+        }
     }
 }
 
@@ -361,6 +367,14 @@
     _node->_transform = GLKMatrix4Translate(_node->_invBindMatrix, vec3.x, vec3.y, vec3.z );
 }
 
+-(void)update:(NSTimeInterval)dt
+{
+    GLKVector3 vec3 = POSITION_FROM_MAT(_node->_world);
+    self.position = vec3;
+    [super update:dt];
+}
+
+/*
 -(void)getParameters:(NSMutableDictionary *)putHere
 {
     [super getParameters:putHere];
@@ -375,5 +389,5 @@
     NSString * paramName = [kParamJointPosition stringByAppendingParamTarget:_node->_name];
     putHere[paramName] = parameter;
 }
-
+*/
 @end

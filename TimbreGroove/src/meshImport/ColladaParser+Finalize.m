@@ -33,7 +33,7 @@ extern NSString * const kValue_name_WEIGHT;
     NSMutableArray * geometries = [NSMutableArray new];
     
     float * flattenedJointWeights = NULL;
-    float * flattenedJointIndecies = NULL;
+    unsigned short * flattenedJointIndecies = NULL;
     int numInfluencingJoints = 0;
     bool sourceIsBound = false;
     
@@ -66,7 +66,7 @@ extern NSString * const kValue_name_WEIGHT;
                 weightFOffset = iskin->_weights->_offsets[i];
         }
         
-        float *          weights     = iskin->_weightSource->_data;
+        float *          weights     = iskin->_weightSource->_weights;
         //int            numWeights  = iskin->_weightSource->_count;
         
         unsigned short * influencingJointCounts     = iskin->_weights->_vcounts;
@@ -80,12 +80,14 @@ extern NSString * const kValue_name_WEIGHT;
         // influencing joints do not appear. We will unpack to fixed
         // length fields (len:=number of possibly influencing joints)
         // and pad with 0 for irrelevant joints
-        size_t sz = sizeof(float) * JOINT_STRIDE * numInfluencingJointCounts;
-        flattenedJointWeights = malloc( sz );
-        memset(flattenedJointWeights,0,sz);
-        flattenedJointIndecies = malloc( sz );
+        size_t szf = sizeof(float) * JOINT_STRIDE * numInfluencingJointCounts;
+        flattenedJointWeights = malloc( szf );
+        memset(flattenedJointWeights,0,szf);
+        size_t szi = sizeof(unsigned short) * JOINT_STRIDE * numInfluencingJointCounts;
+        flattenedJointIndecies = malloc( szi );
+        memset(flattenedJointIndecies, 0, szi );
         float * p  = flattenedJointWeights;
-        float * pi = flattenedJointIndecies;
+        unsigned short * pi = flattenedJointIndecies;
         unsigned int currPos = 0;
         
         for( int i = 0; i < numInfluencingJointCounts; i++ )
@@ -232,7 +234,7 @@ extern NSString * const kValue_name_WEIGHT;
             if( iskin )
             {
                 index = primitives[ primitivesOffset[ gv_pos ] ] * 4;
-                float * jindex  = flattenedJointIndecies + index;
+                unsigned short * jindex  = flattenedJointIndecies + index;
                 float * weights = flattenedJointWeights + index;
                 for( int ji = 0; ji < JOINT_STRIDE; ji++ )
                     *p++ = *jindex++;
@@ -490,12 +492,12 @@ extern NSString * const kValue_name_WEIGHT;
             {
                 if( EQSTR(iss->_paramName, kValue_name_TRANSFORM) )
                 {
-                    GLKMatrix4 * mats = (GLKMatrix4 *)(iss->_data);
+                    GLKMatrix4 * mats = iss->_matrices;
                     
                     for( NSString * jointName in jointNameArray )
                     {
                         MeshSceneArmatureNode * joint = findJointWithName(jointName,nil);
-                        joint->_invBindMatrix = *mats++; // GLKMatrix4Transpose(*mats++);
+                        joint->_invBindMatrix = *mats++;
                     }
                 }
                 else if( EQSTR(iss->_paramName, kValue_name_WEIGHT) )
