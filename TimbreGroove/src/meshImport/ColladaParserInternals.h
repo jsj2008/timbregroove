@@ -63,6 +63,8 @@ typedef struct _IncomingGeometryBuffer {
     NSMutableArray *       _polygonTags;    // index data here
     
     IncomingSourceTag *   _tempIncomingSourceTag;
+    
+    bool _honorUVs;
 }
 @end
 

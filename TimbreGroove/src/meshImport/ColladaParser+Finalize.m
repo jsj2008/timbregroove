@@ -26,10 +26,67 @@ extern NSString * const kValue_name_WEIGHT;
 
 @implementation ColladaParserImpl (Finalize)
 
+-(void)removeIndexForSemantic:(IncomingMeshData *)imd
+                          key:(MeshSemanticKey)key
+{
+    for( IncomingPolygonIndex * ipi in imd->_polygonTags)
+    {
+        int keyIndex = -1;
+        int totalStride = 0;
+        
+        for( int i = 0; i < ipi->_nextInput; i++ )
+        {
+            if( ipi->_semanticKey[i] == key )
+            {
+                keyIndex = i;
+            }
+            ++totalStride;
+        }
+        
+        if( keyIndex == -1 )
+            continue;
+        
+        int keyOffset = ipi->_offsets[keyIndex];
+        
+        unsigned int numShortsToRemove = ipi->_count * 3;
+        unsigned int newCount = ipi->_numPrimitives - numShortsToRemove;
+        unsigned short int * newPrimitives = [self malloc:sizeof(unsigned short int) * newCount];
+        unsigned short int * target = newPrimitives;
+        unsigned short int * src = ipi->_primitives;
+        for( int n = 0; n < ipi->_count; n++ )
+        {
+            for( int t = 0; t < 3; t++ )
+            {
+                for( int s = 0; s < totalStride; s++ )
+                {
+                    if( s != keyOffset )
+                        *target++ = *src;
+                    ++src;
+                }
+            }
+        }
+
+        ipi->_primitives = newPrimitives;
+        ipi->_numPrimitives = newCount;
+        
+        for( int q = keyIndex; q < ipi->_nextInput-1; q++ )
+        {
+            ipi->_semanticKey[q] = ipi->_semanticKey[q+1];
+        }
+        --ipi->_nextInput;
+        [ipi->_sourceURL removeObjectAtIndex:keyIndex];
+    }
+}
+
 -(NSArray *)buildOpenGlBuffer:(IncomingMeshData *)imd
             influencingJoints:(NSArray *)influencingJoints
                  incomingSkin:(IncomingSkin *)iskin
 {
+    
+    if( !imd->_honorUVs )
+       [self removeIndexForSemantic:imd key:gv_uv];
+    
+    
     NSMutableArray * geometries = [NSMutableArray new];
     
     float * flattenedJointWeights = NULL;

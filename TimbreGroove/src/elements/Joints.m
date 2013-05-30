@@ -34,12 +34,7 @@
         unsigned bji = 0;
         for( MeshSceneArmatureNode * joint in _nodes ) {
             _invBindMats[bji++] = joint->_invBindMatrix;
-        };
-        
-        for( int i = 0; i < bji; i++ )
-        {
-            TGLogp(LLShitsOnFire, @"%d: %@", i, stringFromMat(_invBindMats[i]));
-        }
+        };        
     }
     return self;
 }

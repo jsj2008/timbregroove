@@ -454,7 +454,7 @@
 				<key>cameraZ</key>
 				<integer>-4</integer>
 				<key>runEmitter</key>
-				<false/>
+				<true/>
 				<key>scaleXYZ</key>
 				<real>1</real>
 				<key>colladaFile</key>
@@ -546,7 +546,7 @@
 		<key>LLLights</key>
 		<false/>
 		<key>LLMeshImporter</key>
-		<false/>
+		<true/>
 		<key>LLGestureStuff</key>
 		<false/>
 		<key>LLObjLifetime</key>

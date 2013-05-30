@@ -23,12 +23,25 @@
 
 #define EQMAT4(a,b) ( memcmp(a.m,b.m,sizeof(a.m)) == 0 )
 
+static NSArray * cleanAndSeparateString( NSString * str )
+{
+    NSError *error = NULL;    
+    NSRegularExpression * regex = [[NSRegularExpression alloc] initWithPattern:@"[^\\S]+"
+                                                                       options:NSRegularExpressionAllowCommentsAndWhitespace
+                                                                         error:&error];
+
+    str = [str stringByTrimmingCharactersInSet:
+           [NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    str = [regex stringByReplacingMatchesInString:str options:0 range:(NSRange){0,[str length]} withTemplate:@" "];
+
+    NSArray * arr =  [str componentsSeparatedByString:@" "];
+    
+    return  arr;
+}
 
 static float * parseFloats(NSString * str, int * numFloats, ColladaParserImpl * pool)
 {
-    str = [str stringByTrimmingCharactersInSet:
-           [NSCharacterSet whitespaceCharacterSet]];
-    NSArray * burp = [str componentsSeparatedByString:@" "];
+    NSArray * burp = cleanAndSeparateString(str);
     unsigned long count = [burp count];
     float * p = [pool malloc:sizeof(float)*count];
 //   TGLog(LLShitsOnFire, @"malloc: %p",p);
@@ -48,9 +61,7 @@ static float * copyFloats(float *original, int numFloats)
 
 static unsigned short * parseUShorts(NSString * str, int * numUShorts, ColladaParserImpl * pool)
 {
-    str = [str stringByTrimmingCharactersInSet:
-           [NSCharacterSet whitespaceCharacterSet]];
-    NSArray * burp = [str componentsSeparatedByString:@" "];
+    NSArray * burp = cleanAndSeparateString(str);
     unsigned long count = [burp count];
     unsigned short * p = [pool malloc:sizeof(unsigned short)*count];
     *numUShorts = (int)count;
@@ -62,13 +73,14 @@ static unsigned short * parseUShorts(NSString * str, int * numUShorts, ColladaPa
 
 static NSArray * parseStringArray( NSString * str )
 {
-    str = [str stringByTrimmingCharactersInSet:
-           [NSCharacterSet whitespaceCharacterSet]];
-    return [str componentsSeparatedByString:@" "];
+    return cleanAndSeparateString(str);
 }
 
 static int scanInt(NSString * str)
 {
+    if( !str )
+        return -1;
+    
     NSScanner * scanner = [[NSScanner alloc] initWithString:str];
     int i;
     [scanner scanInt:&i];
@@ -362,9 +374,11 @@ static const char * effectParamTags[] = {
                 _tempFloatArray = NULL;
                 _floatArrayCount = 0;
             }
-            else if( EQSTR(ia->_paramName,kValue_name_TRANSFORM) )
+            if( EQSTR(ia->_paramType,kValue_type_float4x4) )
             {
-                if( EQSTR(ia->_paramType,kValue_type_float4x4) )
+                if( !ia->_paramName )
+                    ia->_paramName = kValue_name_TRANSFORM;
+
                 {
                     unsigned int numMatrices = _floatArrayCount / 16;
                     GLKMatrix4 * mats = (GLKMatrix4 *)copyFloats(_tempFloatArray, _floatArrayCount);
@@ -697,11 +711,17 @@ static const char * effectParamTags[] = {
                     iss->_nameArray = parseStringArray(_stringArrayString);
                     _stringArrayString = nil;
                     UNSET(kColStateStringArray);
+                    
+                    if( !iss->_paramName )
+                        iss->_paramName = kValue_name_JOINT;
                 }
                 if( _tempFloatArray )
                 {
                     if( EQSTR( iss->_paramType, kValue_type_float4x4 ) )
                     {
+                        if( !iss->_paramName )
+                            iss->_paramName = kValue_name_TRANSFORM;
+                        
                         iss->_numMatrices = _floatArrayCount / 16;
                         iss->_matrices = malloc(sizeof(GLKMatrix4)*iss->_numMatrices);
                         for( int i = 0; i < iss->_numMatrices; i++ )
@@ -709,6 +729,9 @@ static const char * effectParamTags[] = {
                     }
                     else
                     {
+                        if( !iss->_paramName )
+                            iss->_paramName = kValue_name_WEIGHT;
+                        
                         iss->_numWeights = _floatArrayCount;
                         iss->_weights = copyFloats(_tempFloatArray, _floatArrayCount);
                     }
