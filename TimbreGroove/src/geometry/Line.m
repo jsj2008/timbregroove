@@ -29,9 +29,7 @@
         _width = 2.0;
         _height = 2.0;
         self.drawType = GL_LINE_STRIP;
-        [self createWithIndicesIntoNames:indicesIntoNames
-                                   doUVs:false
-                               doNormals:false];
+        [self createWithIndicesIntoNames:indicesIntoNames];
     }
     return self;
 }

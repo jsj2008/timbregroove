@@ -62,31 +62,10 @@
 
 -(id)wireUp
 {
-    [self setupLights];
     [super wireUp];
     
     _node = nil; 
     return self;
-}
-
--(void)setupLights
-{
-    ShaderLight desc = { 0 };
-    
-    desc.colors.ambient  = (GLKVector4){ 0.4, 0.4, 0.4, 1.0 };
-    desc.colors.diffuse  = (GLKVector4){ 0.4, 0.4, 0.4, 1.0 };
-    desc.position        = (GLKVector4){ 0, 0, 10,        0.0 };
-    desc.attenuation     = (GLKVector3){ 0, 0.02, 0 };
-    
-    desc.spotCutoffAngle = 15.468750;
-    desc.spotDirection   = (GLKVector3){ 0.5, -0.5, -0.5 };
-    desc.spotDirection   =  GLKVector3Normalize( desc.spotDirection );
-    desc.spotFalloffExponent = 44.0;
-    
-    Light * light = [Light new];
-    light.desc = desc;
-    
-    [self.lights addLight:light];
 }
 
 -(void)update:(NSTimeInterval)dt
@@ -159,7 +138,8 @@
 {
     self = [super init];
     if (self) {
-       self.disableStandardParameters = true;
+        self.disableStandardParameters = true;
+        [self makeLights];
     }
     return self;
 }
@@ -168,13 +148,18 @@
 -(id)wireUp
 {
     _scene = [ColladaParser parse:_colladaFile];
-
     _animations = _scene->_animations;
-    
-    [super wireUp];
-    if( _showJoints )
-       [self buildJointPainters];
     [self buildNodePainters];
+    if( _showJoints )
+        [self buildJointPainters];
+    [super wireUp];
+    [_nodePainters each:^(MeshNodePainter *nodePainter) {
+        [nodePainter wireUp];
+    }];
+    [_jointPainters each:^(JointPainter *jointPainter) {
+        [jointPainter wireUp];
+    }];
+    
     if( _runEmitter )
     {
         LogLevel logl = TGGetLogLevel();
@@ -262,7 +247,7 @@
     createNodePainter = ^MeshNodePainter *(MeshSceneMeshNode *node, Node3d *parent)
     {
         MeshNodePainter * painterObj = [[MeshNodePainter alloc] initWithNode:node];
-        [parent appendChild:[painterObj wireUp]];
+        [parent appendChild:painterObj];
         if( node->_children )
             [node->_children each:^(id key, MeshSceneMeshNode *child) {
                 createNodePainter(child,painterObj);
@@ -330,6 +315,14 @@
         }
     }
 }
+-(void)makeLights
+{
+    Light * light = [Light new];
+    Lights * lights = [Lights new];
+    [lights addLight:light];
+    self.lights = lights;
+}
+
 
 @end
 
@@ -348,9 +341,7 @@
 -(void)createBuffer
 {
     MeshBuffer * mb = [Cube cubeWithWidth:0.25
-                      andIndicesIntoNames:@[@(gv_pos)]
-                                 andDoUVs:false
-                             andDoNormals:false];
+                      andIndicesIntoNames:@[@(gv_pos)]];
     
     [self addBuffer:mb];
 }

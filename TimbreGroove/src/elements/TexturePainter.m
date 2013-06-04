@@ -36,9 +36,7 @@
 
 -(void)createBuffer
 {
-    gp = [GridPlane gridWithIndicesIntoNames:@[@(gv_pos),@(gv_uv)]
-                                                andDoUVs:true
-                                            andDoNormals:false];
+    gp = [GridPlane gridWithIndicesIntoNames:@[@(gv_pos),@(gv_uv)]];
     [self addBuffer:gp];
 }
 

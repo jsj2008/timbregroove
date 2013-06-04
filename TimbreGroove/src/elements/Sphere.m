@@ -13,9 +13,7 @@
 
 -(void)createBuffer
 {
-    SphereOid * sp = [SphereOid sphereWithdIndicesIntoNames:@[@(gv_pos),   @(gv_uv),  @(gv_normal)]
-                                                   andDoUVs:true
-                                               andDoNormals:true];
+    SphereOid * sp = [SphereOid sphereWithdIndicesIntoNames:@[@(gv_pos),   @(gv_uv),  @(gv_normal)]];
     [self addBuffer:sp];
 }
 @end

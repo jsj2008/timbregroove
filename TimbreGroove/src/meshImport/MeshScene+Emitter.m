@@ -38,6 +38,14 @@ NSString * stringFromColor(GLKVector4 c)
     TGLogp(LLMeshImporter, @"#ifndef  %@_import_geo_included",baseName);
     TGLogp(LLMeshImporter, @"#define  %@_import_geo_included\n",baseName);
 
+
+    NSRegularExpression * regex = [[NSRegularExpression alloc] initWithPattern:@"[^a-zA-Z0-9]" options:0 error:nil];
+    
+    NSString * (^cleanName)(NSString *) = ^NSString *(NSString * name)
+    {
+        return [regex stringByReplacingMatchesInString:name options:0 range:(NSRange){0,[name length]} withTemplate:@"_"];
+        
+    };
     
     printf("#pragma mark GEOMETRY \n\n");
 
@@ -54,7 +62,8 @@ NSString * stringFromColor(GLKVector4 c)
 
         [meshNode->_geometries each:^(MeshGeometry *mg) {
             
-            NSString * typeName = [NSString stringWithFormat:@"%@_%@_strides_%d", baseName, mg->_name, meshCount];
+            NSString * meshName = cleanName(mg->_name);
+            NSString * typeName = [NSString stringWithFormat:@"%@_%@_strides_%d", baseName, meshName, meshCount];
             
             
             TGLogp(LLMeshImporter, @"typedef struct _%@ { ", typeName);
@@ -66,7 +75,7 @@ NSString * stringFromColor(GLKVector4 c)
             TGLogp(LLMeshImporter, @"} %@;\n", typeName);
 
             
-            TGLogp(LLMeshImporter, @"%@ _%@_%@_buffer_%d[] = { ",typeName, baseName, mg->_name, meshCount);
+            TGLogp(LLMeshImporter, @"%@ _%@_%@_buffer_%d[] = { ",typeName, baseName, meshName, meshCount);
             float * p = mg->_buffer;
             for( int v = 0; v < mg->_numVertices; v++ )
             {
@@ -75,10 +84,15 @@ NSString * stringFromColor(GLKVector4 c)
                 {
                     VertexStride * vs = &mg->_strides[ i ];
                     for( int s = 0; s < vs->numbersPerElement; s++ )
-                        printf( "%G, ", *p++ );
+                    {
+                        if( s )
+                            printf( ", " );
+                        printf( "%G", *p++ );                        
+                    }
                     printf("  ");
                 }
-                printf("},\n");
+                const char comma = v == mg->_numVertices - 1 ? ' ' : ',';
+                printf("}%c\n",comma);
             }
             printf( "  };\n");
             ++meshCount;
@@ -104,10 +118,12 @@ NSString * stringFromColor(GLKVector4 c)
     meshCount = 0;
     [_meshes each:^(MeshSceneMeshNode * meshNode) {
         
+        NSString * meshName = cleanName(meshNode->_name);
+        
         if( meshNode->_materials )
         {
             [meshNode->_materials each:^(NSString * name, NSArray * mats) {
-                TGLogp(LLMeshImporter, @"MaterialDesc %@_%@_%@_materials[] = { ", baseName, meshNode->_name, name);
+                TGLogp(LLMeshImporter, @"MaterialDesc %@_%@_%@_materials[] = { ", baseName, meshName, name);
                 int matCount = [mats count];
                 __block int matCounter = 0;
                 [mats each:^(NSObject * obj) {
@@ -142,12 +158,13 @@ NSString * stringFromColor(GLKVector4 c)
     
     dumpBones = ^(id key, MeshSceneArmatureNode * node) {
         
-        [allJointNames addObject:node->_name];
+        NSString * name = cleanName(node->_name);
+        [allJointNames addObject:name];
         
         GLKVector3 vec3 = POSITION_FROM_MAT(node->_world);
-        TGLogp(LLMeshImporter, @"Joint %@_%@_joint = {", baseName, node->_name);
-        TGLogp(LLMeshImporter, @"  \"%@\",", node->_name);
-        TGLogp(LLMeshImporter, @"  \"%@\",", node->_parent ? node->_parent->_name : @"" );
+        TGLogp(LLMeshImporter, @"Joint %@_%@_joint = {", baseName, name);
+        TGLogp(LLMeshImporter, @"  \"%@\",", name);
+        TGLogp(LLMeshImporter, @"  \"%@\",", node->_parent ? cleanName(node->_parent->_name) : @"" );
         TGLogp(LLMeshImporter, @"  %@,", NSStringFromGLKVector3(vec3));
         
         TGLogp(LLMeshImporter, @"  %@,", stringFromMat(node->_transform));
@@ -169,11 +186,13 @@ NSString * stringFromColor(GLKVector4 c)
     
     nCount = 0;
     [_meshes each:^(MeshSceneMeshNode * meshNode) {
+
         if( meshNode->_influencingJoints )
         {
+            NSString * meshName = cleanName(meshNode->_name);
             NSUInteger inflJointCount = [meshNode->_influencingJoints count];
             nCount = 0;
-            TGLogp(LLMeshImporter, @"Joint * %@_%@_influencingJoints[%d] = { ", baseName, meshNode->_name, inflJointCount);
+            TGLogp(LLMeshImporter, @"Joint * %@_%@_influencingJoints[%d] = { ", baseName, meshName, inflJointCount);
             [meshNode->_influencingJoints each:^(MeshSceneArmatureNode *jnode) {
                 TGLogp(LLMeshImporter, @"  &%@_%@_joint%s  // %d", baseName,jnode->_name,++nCount == inflJointCount ? "" : ",", nCount);
             }];
@@ -189,7 +208,7 @@ NSString * stringFromColor(GLKVector4 c)
         int acount = 0;
         for( MeshAnimation * animation in _animations )
         {
-            NSString * name = animation->_target->_name;
+            NSString * name = cleanName(animation->_target->_name);
             TGLogp(LLMeshImporter,@"GLKMatrix4 %@_%@_animationFrames[] = { ", baseName, name);
             for( int i = 0; i < animation->_numFrames; i++ )
             {
@@ -209,21 +228,22 @@ NSString * stringFromColor(GLKVector4 c)
                        i + 1 < animation->_numFrames ? "," : "",
                        i  );
             }
-            TGLogp(LLMeshImporter,@"\n}; // end %@_%@_animationKeyFrames\n", baseName, animation->_target->_name);
+            TGLogp(LLMeshImporter,@"\n}; // end %@_%@_animationKeyFrames\n", baseName, name);
             
         };
         
         TGLogp(LLMeshImporter, @"GLKMatrix4 * %@_animation[] = { \n", baseName);
         for( MeshAnimation * animation in _animations )
         {
+            NSString * name = cleanName(animation->_target->_name);
             ++acount;
-            TGLogp(LLMeshImporter,@"   %@_%@_animationFrames%s", baseName, animation->_target->_name, acount == count ? "" : ",");
+            TGLogp(LLMeshImporter,@"   %@_%@_animationFrames%s", baseName, name, acount == count ? "" : ",");
         }
         TGLogp(LLMeshImporter, @"};\n");
         
         for( MeshAnimation * animation in _animations )
         {
-            NSString * tn = animation->_target->_name;
+            NSString * tn = cleanName(animation->_target->_name);
             TGLogp(LLMeshImporter, @"Animation %@_%@_animation = {\n  .transforms = %@_%@_animationFrames,\n  .keyFrames = %@_%@_animationKeyFrames,\n  .numFrames = %d,\n  .target = &%@_%@_joint\n};\n",
                    baseName, tn, baseName, tn, baseName, tn, animation->_numFrames, baseName, tn );
         }
@@ -232,13 +252,17 @@ NSString * stringFromColor(GLKVector4 c)
         TGLogp(LLMeshImporter, @"Animation * %@_animations[%d] = { \n", baseName, count);
         for( MeshAnimation * animation in _animations )
         {
-            TGLogp(LLMeshImporter,@"   &%@_%@_animation%s", baseName, animation->_target->_name, ++acount == count ? "" : ",");
+            NSString * tn = cleanName(animation->_target->_name);
+            TGLogp(LLMeshImporter,@"   &%@_%@_animation%s", baseName, tn, ++acount == count ? "" : ",");
         }
         TGLogp(LLMeshImporter, @"};\n");
     }
     
     
     TGLogp(LLMeshImporter, @"\n#endif // %@_import_included\n\n",baseName);
+    
+    cleanName = nil;
+    regex = nil;
     
 }
 @end

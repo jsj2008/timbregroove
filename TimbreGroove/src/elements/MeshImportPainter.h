@@ -8,7 +8,7 @@
 
 #import "Painter.h"
 
-@interface MeshImportPainter : Node3d
+@interface MeshImportPainter : Painter // Node3d
 // startup options read from config.plist
 @property (nonatomic,strong) NSString * colladaFile;
 

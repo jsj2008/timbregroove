@@ -7,74 +7,77 @@
 //
 
 #import "Geometry.h"
+#import "GenericShader.h"
 
 @implementation Geometry
 
 -(void)createWithIndicesIntoNames:(NSArray *)indicesIntoNames
-                            doUVs:(bool)UVs
-                        doNormals:(bool)normals
 {
-    _UVs = UVs;
-    _normals = normals;
-    [self createBufferDataByType:[self getStrideTypes] indicesIntoNames:indicesIntoNames];
+    _UVs = [indicesIntoNames containsObject:@(gv_uv)];
+    _normals = [indicesIntoNames containsObject:@(gv_normal)];
+    [self createBufferDataByStride:[self getStrideSizes] indicesIntoNames:indicesIntoNames];
 }
 
--(NSArray *)getStrideTypes
+-(NSArray *)getStrideSizes
 {
-    const VertexStrideType st = st_float3;
 
+    NSArray * ret = nil;
+    
     if( _UVs )
     {
         if( _normals )
-            return @[@(st),@(st_float2),@(st_float3)];
+            ret = @[@(3),@(2),@(3)];
         else
-            return @[@(st),@(st_float2)];
+            ret = @[@(3),@(2)];
     }
     else
     {
         if( _normals )
-            return @[@(st),@(st_float3)];
+            ret = @[@(3),@(3)];
+        else
+            ret = @[@(3)];
     }
-    return @[@(st)];
+    
+    return ret;
 }
 
--(void)createBufferDataByType:(NSArray *)strideTypes
+-(void)createBufferDataByStride:(NSArray *)strideSizes
              indicesIntoNames:(NSArray *)indicesIntoNames
 {
     GeometryStats stats;
     [self getStats:&stats];
     
-    VertexStride * strides;
+    VertexStride *   strides;
     unsigned int     numStrides;
     void *           vertexData;
     unsigned int     numVertices;
     unsigned int *   indexData = NULL;
     unsigned int     numIndices;
     
-    numStrides = [strideTypes count];
+    numStrides = [strideSizes count];
     
     strides = malloc(sizeof(VertexStride)*numStrides);
     
     for( int i = 0; i < numStrides; i++ )
     {
         VertexStride * stride = strides + i;
-        VertexStrideType type = [strideTypes[i] intValue];
-        switch (type) {
-            case st_float1:
+        int size = [strideSizes[i] intValue];
+        switch (size) {
+            case 1:
                 StrideInit1f(stride);
                 break;
-            case st_float2:
+            case 2:
                 StrideInit2f(stride);
                 break;
-            case st_float3:
+            case 3:
                 StrideInit3f(stride);
                 break;
-            case st_float4:
+            case 4:
                 StrideInit4f(stride);
                 break;
 #if DEBUG
             default:
-                TGLog(LLShitsOnFire, @"Unknown StrideType");
+                TGLog(LLShitsOnFire, @"Unknown stride size");
                 exit(1);
                 break;
 #endif

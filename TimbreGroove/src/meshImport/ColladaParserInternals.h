@@ -76,7 +76,7 @@ typedef struct _IncomingGeometryBuffer {
     int          _count;
     NSString *   _source;
     int          _accCount;
-    int          _stride;
+//  int          _strideAttr;
     NSArray *    _nameArray;
     GLKMatrix4 * _matrices;
     int          _numMatrices;
@@ -248,6 +248,8 @@ typedef enum EffectParamTags {
     NSString * _channelTarget;
     NSString * _paramType;
     NSString * _paramName;
+    NSString * _id;
+    NSString * _name;
 }
 @end
 

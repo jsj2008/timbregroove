@@ -171,6 +171,7 @@
 		57A58EB116AE020C00C9FA53 /* poolLines.png in Resources */ = {isa = PBXBuildFile; fileRef = 57A58EB016AE020C00C9FA53 /* poolLines.png */; };
 		57A66EED167B1D1C00B9EA75 /* Material.m in Sources */ = {isa = PBXBuildFile; fileRef = 57A66EEC167B1D1C00B9EA75 /* Material.m */; };
 		57A66EEF167B293E00B9EA75 /* aotk_tex_64.png in Resources */ = {isa = PBXBuildFile; fileRef = 57A66EEE167B293E00B9EA75 /* aotk_tex_64.png */; };
+		57A66F42175868C700F8AD51 /* butterfly.dae in Resources */ = {isa = PBXBuildFile; fileRef = 57A66F41175868C700F8AD51 /* butterfly.dae */; };
 		57AA0AC316D1269600BCA4A0 /* uv.png in Resources */ = {isa = PBXBuildFile; fileRef = 57AA0AC216D1269600BCA4A0 /* uv.png */; };
 		57AA0AC516D12B9100BCA4A0 /* uvWrap.png in Resources */ = {isa = PBXBuildFile; fileRef = 57AA0AC416D12B9100BCA4A0 /* uvWrap.png */; };
 		57AE3BDD16D83B0A007ADC17 /* stars.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 57AE3BDC16D83B0A007ADC17 /* stars.jpg */; };
@@ -179,6 +180,7 @@
 		57B2099216CB3886007BE2A2 /* ChildOfGodSolo.mid in Resources */ = {isa = PBXBuildFile; fileRef = 57B2099116CB3886007BE2A2 /* ChildOfGodSolo.mid */; };
 		57B2099416CB43D8007BE2A2 /* simpleMel.mid in Resources */ = {isa = PBXBuildFile; fileRef = 57B2099316CB43D8007BE2A2 /* simpleMel.mid */; };
 		57B2737116D0BDCB00E7F064 /* Clavinet (21KB).sf2 in Resources */ = {isa = PBXBuildFile; fileRef = 57B2737016D0BDCB00E7F064 /* Clavinet (21KB).sf2 */; };
+		57B38A3F1758EBC8008468FF /* Butterfly.m in Sources */ = {isa = PBXBuildFile; fileRef = 57B38A3E1758EBC8008468FF /* Butterfly.m */; };
 		57B5101E172A002300CD805B /* lightTest.dae in Resources */ = {isa = PBXBuildFile; fileRef = 57B5101D172A002300CD805B /* lightTest.dae */; };
 		57BE7FB316CAC9AA001972ED /* CARingBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57BE7FB116CAC9AA001972ED /* CARingBuffer.cpp */; };
 		57BE7FB616CACA0D001972ED /* RingBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57BE7FB416CACA0C001972ED /* RingBuffer.cpp */; };
@@ -461,6 +463,7 @@
 		57A66EEB167B1D1B00B9EA75 /* Material.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Material.h; path = ../Material.h; sourceTree = "<group>"; };
 		57A66EEC167B1D1C00B9EA75 /* Material.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Material.m; path = ../Material.m; sourceTree = "<group>"; };
 		57A66EEE167B293E00B9EA75 /* aotk_tex_64.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = aotk_tex_64.png; sourceTree = "<group>"; };
+		57A66F41175868C700F8AD51 /* butterfly.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = butterfly.dae; sourceTree = "<group>"; };
 		57AA0AC216D1269600BCA4A0 /* uv.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = uv.png; sourceTree = "<group>"; };
 		57AA0AC416D12B9100BCA4A0 /* uvWrap.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = uvWrap.png; sourceTree = "<group>"; };
 		57ABE51916C9FF3100A412E1 /* AUComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AUComponent.h; path = System/Library/Frameworks/AudioUnit.framework/Headers/AUComponent.h; sourceTree = SDKROOT; };
@@ -476,6 +479,7 @@
 		57B2099116CB3886007BE2A2 /* ChildOfGodSolo.mid */ = {isa = PBXFileReference; lastKnownFileType = audio.midi; path = ChildOfGodSolo.mid; sourceTree = "<group>"; };
 		57B2099316CB43D8007BE2A2 /* simpleMel.mid */ = {isa = PBXFileReference; lastKnownFileType = audio.midi; path = simpleMel.mid; sourceTree = "<group>"; };
 		57B2737016D0BDCB00E7F064 /* Clavinet (21KB).sf2 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Clavinet (21KB).sf2"; sourceTree = "<group>"; };
+		57B38A3E1758EBC8008468FF /* Butterfly.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Butterfly.m; sourceTree = "<group>"; };
 		57B5101D172A002300CD805B /* lightTest.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = lightTest.dae; sourceTree = "<group>"; };
 		57BE7FB116CAC9AA001972ED /* CARingBuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CARingBuffer.cpp; sourceTree = "<group>"; };
 		57BE7FB216CAC9AA001972ED /* CARingBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CARingBuffer.h; sourceTree = "<group>"; };
@@ -590,6 +594,7 @@
 		5700235516A55460006F0E8E /* models */ = {
 			isa = PBXGroup;
 			children = (
+				57A66F41175868C700F8AD51 /* butterfly.dae */,
 				571A9236174D7D50007D0DAF /* aotk.dae */,
 				57B5101D172A002300CD805B /* lightTest.dae */,
 				573022AF1728E990002D3F0F /* legoman.dae */,
@@ -1033,6 +1038,7 @@
 				57B2098C16CAFABF007BE2A2 /* Oscilloscope.m */,
 				572AD0DF16EBC1870070AE6A /* FFTScope.m */,
 				571537EE16FCA8CA00DCA5E1 /* Spherey.m */,
+				57B38A3E1758EBC8008468FF /* Butterfly.m */,
 			);
 			name = "scene elements";
 			sourceTree = "<group>";
@@ -1365,6 +1371,7 @@
 				573022B01728E990002D3F0F /* legoman.dae in Resources */,
 				57B5101E172A002300CD805B /* lightTest.dae in Resources */,
 				571A9237174D7D50007D0DAF /* aotk.dae in Resources */,
+				57A66F42175868C700F8AD51 /* butterfly.dae in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1468,6 +1475,7 @@
 				57889C1C17259B2A00B83495 /* Joints.m in Sources */,
 				57C817241728415C00C96AB5 /* NSString+ParamTarget.m in Sources */,
 				57D3AD9A172F1B0E000DB9E1 /* ColladaParser+Finalize.m in Sources */,
+				57B38A3F1758EBC8008468FF /* Butterfly.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

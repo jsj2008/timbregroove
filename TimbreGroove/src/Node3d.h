@@ -16,6 +16,7 @@
 @class GraphView;
 @class Scene;
 
+
 @interface Node3d : Node {
 @protected
     Shader * _shader;

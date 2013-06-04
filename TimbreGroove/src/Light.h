@@ -9,10 +9,8 @@
 #import "ShaderFeature.h"
 
 @class Light;
-@class Painter;
 
 @interface Lights : NSObject<ShaderFeature>
--(id)initWithObject:(Painter *)object;
 -(void)addLight:(Light *)light;
 @end
 

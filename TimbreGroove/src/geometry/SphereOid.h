@@ -10,15 +10,11 @@
 
 @interface SphereOid : Geometry
 
-+(id) sphereWithdIndicesIntoNames:(NSArray *)indicesIntoNames
-                         andDoUVs:(bool)UVs
-                     andDoNormals:(bool)normals;
++(id) sphereWithdIndicesIntoNames:(NSArray *)indicesIntoNames;
 
 +(id) sphereWithRadius:(float)radius
               andLongs:(unsigned int)longs
                andLats:(unsigned int)lats
-   andIndicesIntoNames:(NSArray *)indicesIntoNames
-              andDoUVs:(bool)UVs
-          andDoNormals:(bool)normals;
+   andIndicesIntoNames:(NSArray *)indicesIntoNames;
 
 @end

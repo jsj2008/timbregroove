@@ -20,23 +20,17 @@
 @implementation SphereOid
 
 +(id) sphereWithdIndicesIntoNames:(NSArray *)indicesIntoNames
-                         andDoUVs:(bool)UVs
-                     andDoNormals:(bool)normals
 {
     return [SphereOid sphereWithRadius:1
                               andLongs:DEFAULT_SPHERE_CHUNK
                                andLats:DEFAULT_SPHERE_CHUNK
-                   andIndicesIntoNames:indicesIntoNames
-                              andDoUVs:UVs
-                          andDoNormals:normals];
+                   andIndicesIntoNames:indicesIntoNames];
 }
 
 +(id) sphereWithRadius:(float)radius
               andLongs:(unsigned int)longs
                andLats:(unsigned int)lats
    andIndicesIntoNames:(NSArray *)indicesIntoNames
-              andDoUVs:(bool)UVs
-          andDoNormals:(bool)normals
 {
     SphereOid * sp = [SphereOid new];
     if( sp )
@@ -44,7 +38,7 @@
         sp->_lats = lats;
         sp->_longs = longs;
         sp->_radius = radius;
-        [sp createWithIndicesIntoNames:indicesIntoNames doUVs:UVs doNormals:normals];
+        [sp createWithIndicesIntoNames:indicesIntoNames];
     }
   //  sp.drawType = GL_POINTS;
     return sp;

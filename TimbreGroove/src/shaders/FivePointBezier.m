@@ -108,7 +108,7 @@ static const char * _sbp_var_names[] = {
     self = [super init];
     if( self )
     {
-        [self createBufferDataByType:@[@(st_float1)] indicesIntoNames:@[@(spb_t_spacing)]];
+        [self createBufferDataByStride:@[@(1)] indicesIntoNames:@[@(spb_t_spacing)]];
         self.drawType = GL_LINE_STRIP;
     }
     return self;

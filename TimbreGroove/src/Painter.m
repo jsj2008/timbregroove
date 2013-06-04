@@ -34,20 +34,10 @@ NSString const * kShaderFeatureDistortTexture  = @"#define TEXTURE_DISTORT\n";
     NSMutableArray * _buffers;
     NSMutableArray * _shaderFeatures;
     NSMutableArray * _shapes;
-    bool _wiredUp;
-    bool _cameredUp;
+    Lights * _lights;
 }
 
--(id)init
-{
-    self = [super init];
-    if( self )
-    {
-        _lights = [[Lights alloc] initWithObject:self];
-        [self addShaderFeature:_lights];
-    }
-    return self;
-}
+
 -(void)clean
 {
     [super clean];
@@ -56,13 +46,11 @@ NSString const * kShaderFeatureDistortTexture  = @"#define TEXTURE_DISTORT\n";
 
 -(id)wireUp
 {
-    if( !_wiredUp )
-    {
-        [super wireUp];
-        [self createBuffer];
-        [self createShader]; // generic assumes materials & buffer exists
-        _wiredUp = true;
-    }
+    [super wireUp];
+    [self createBuffer];
+    [self setupLights];
+    [self addShaderFeature:(PainterCamera *)self.camera];
+    [self createShader]; // generic assumes materials & buffer exists
     return self;
 }
 
@@ -182,16 +170,41 @@ NSString const * kShaderFeatureDistortTexture  = @"#define TEXTURE_DISTORT\n";
     [self setShaderOnFeatures:shaderFeatures shader:[self hasShader]];
 }
 
+-(Lights *)lights
+{
+    Painter * e = self;
+    
+    while( e && e->_lights == nil )
+        e = (Painter *)e.parent;
+    
+    return e ? e->_lights : nil;
+}
+
+-(void)setLights:(Lights *)lights
+{
+    Lights * oldLights = self.lights;
+    if( oldLights )
+        [self removeShaderFeature:oldLights];
+    
+    _lights = lights;
+    
+    [self addShaderFeature:lights];
+}
+
+-(void)setupLights
+{
+    if( !_lights )
+    {
+        Lights * lights = self.lights;
+        if( lights )
+            [self addShaderFeature:lights];
+    }
+}
+
 -(void)render:(NSUInteger)w h:(NSUInteger)h
 {
-    if( !_wiredUp )
-        [self wireUp];
-    
-    if( !_cameredUp )
-    {
-        [self addShaderFeature:(PainterCamera *)self.camera];
-        _cameredUp = true;
-    }
+    if( !_buffers && !_shapes )
+        return; // this can happen on container nodes
     
     Shader * shader = self.shader;
     
@@ -200,38 +213,41 @@ NSString const * kShaderFeatureDistortTexture  = @"#define TEXTURE_DISTORT\n";
     [shader prepareRender:self];
     
     if( _shaderFeatures )
-        [_shaderFeatures each:^(id<ShaderFeature> feature) { [feature bind:shader object:self]; }];
+        for( id<ShaderFeature> feature in _shaderFeatures )
+            [feature bind:shader object:self];
 
     if( _buffers )
     {
-        [_buffers each:^(MeshBuffer * b) {
+        for(MeshBuffer * b in _buffers )
+        {
             [b bind];
             if( b.drawable )
                 [b draw];
-        }];
-        [_buffers each:^(MeshBuffer * b) {
+        }
+        for(MeshBuffer * b in _buffers )
             [b unbind];
-        }];
     }
     
     if( _shapes )
         [self renderShapes:shader];
 
     if( _shaderFeatures )
-        [_shaderFeatures each:^(id<ShaderFeature> feature) { [feature unbind:shader]; }];
+        for( id<ShaderFeature> feature in _shaderFeatures )
+            [feature unbind:shader];
 
 }
 
 -(void)renderShapes:(Shader *)shader
 {
-    [_shapes each:^(PainterShape * shape) {
-        if( shape->features )
-            [shape->features each:^(id<ShaderFeature> feature) { [feature bind:shader object:self]; }];
+    for(PainterShape * shape in _shapes )
+    {
+        for(id<ShaderFeature> feature in shape->features)
+            [feature bind:shader object:self];
         [shape->buffer bind];
         [shape->buffer draw];
-        if( shape->features )
-            [shape->features each:^(id<ShaderFeature> feature) { [feature unbind:shader]; }];
-    }];
+        for(id<ShaderFeature> feature in shape->features)
+            [feature unbind:shader];
+    };
     
 }
 -(void)renderToCaptureAtBufferLocation:(GLint)location
@@ -250,9 +266,10 @@ NSString const * kShaderFeatureDistortTexture  = @"#define TEXTURE_DISTORT\n";
 {
     [super getParameters:putHere];
     
-    [[self getAllFeatures] each:^(id<ShaderFeature> feature) {
+    for( id<ShaderFeature> feature in [self getAllFeatures] )
+    {
         if( [feature respondsToSelector:@selector(getParameters:)] )
             [feature getParameters:putHere];
-    }];
+    }
 }
 @end

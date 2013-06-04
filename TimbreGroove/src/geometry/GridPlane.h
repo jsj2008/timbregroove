@@ -10,15 +10,11 @@
 
 @interface GridPlane : Geometry
 
-+(id) gridWithIndicesIntoNames:(NSArray *)indicesIntoNames
-                      andDoUVs:(bool)UVs
-                  andDoNormals:(bool)normals;
++(id) gridWithIndicesIntoNames:(NSArray *)indicesIntoNames;
 
 +(id) gridWithWidth:(float)width
            andGrids:(unsigned int)gridSize
-andIndicesIntoNames:(NSArray *)indicesIntoNames
-           andDoUVs:(bool)UVs
-       andDoNormals:(bool)normals;
+andIndicesIntoNames:(NSArray *)indicesIntoNames;
 
 @property (nonatomic, readonly) float width;
 @end

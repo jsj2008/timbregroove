@@ -2,40 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>default_scene</key>
-	<string>aotk</string>
-	<key>scenes</key>
+	<key>unused_scenes</key>
 	<dict>
-		<key>aotk</key>
-		<dict>
-			<key>connections</key>
-			<array>
-				<dict>
-					<key>kTriggerDblTap</key>
-					<string>kParamCameraReset</string>
-					<key>kTriggerMainSlider</key>
-					<string>kParamPositionZ</string>
-					<key>kTriggerTap1</key>
-					<string>RandomVibesNote</string>
-					<key>kTriggerPanY</key>
-					<string>kParamPositionZ</string>
-					<key>kTriggerPlayButton</key>
-					<string>kParamSceneAnimation</string>
-					<key>kTriggerDrag1</key>
-					<string>kParamJointPosition</string>
-					<key>kTriggerPanX</key>
-					<string>kParamRotationY</string>
-				</dict>
-			</array>
-			<key>icon</key>
-			<string>runner.png</string>
-			<key>display</key>
-			<string>ass</string>
-			<key>3d_element</key>
-			<string>aotk</string>
-			<key>audio_element</key>
-			<string>jazz</string>
-		</dict>
 		<key>moon</key>
 		<dict>
 			<key>connections</key>
@@ -119,6 +87,71 @@
 			<string>lego man</string>
 			<key>3d_element</key>
 			<string>legoman</string>
+			<key>audio_element</key>
+			<string>jazz</string>
+		</dict>
+	</dict>
+	<key>default_scene</key>
+	<string>butterfly</string>
+	<key>scenes</key>
+	<dict>
+		<key>aotk</key>
+		<dict>
+			<key>connections</key>
+			<array>
+				<dict>
+					<key>kTriggerDblTap</key>
+					<string>kParamCameraReset</string>
+					<key>kTriggerMainSlider</key>
+					<string>kParamPositionZ</string>
+					<key>kTriggerTap1</key>
+					<string>RandomVibesNote</string>
+					<key>kTriggerPanY</key>
+					<string>kParamPositionZ</string>
+					<key>kTriggerPlayButton</key>
+					<string>kParamSceneAnimation</string>
+					<key>kTriggerDrag1</key>
+					<string>kParamJointPosition</string>
+					<key>kTriggerPanX</key>
+					<string>kParamRotationY</string>
+				</dict>
+			</array>
+			<key>icon</key>
+			<string>runner.png</string>
+			<key>display</key>
+			<string>ass</string>
+			<key>3d_element</key>
+			<string>aotk</string>
+			<key>audio_element</key>
+			<string>jazz</string>
+		</dict>
+		<key>butterfly</key>
+		<dict>
+			<key>connections</key>
+			<array>
+				<dict>
+					<key>kTriggerDblTap</key>
+					<string>kParamCameraReset</string>
+					<key>kTriggerMainSlider</key>
+					<string>kParamPositionZ</string>
+					<key>kTriggerTap1</key>
+					<string>RandomVibesNote</string>
+					<key>kTriggerPanY</key>
+					<string>kParamLightZ</string>
+					<key>kTriggerPlayButton</key>
+					<string>kParamSceneAnimation</string>
+					<key>kTriggerDrag1</key>
+					<string>kParamJointPosition</string>
+					<key>kTriggerPanX</key>
+					<string>kParamRotationY</string>
+				</dict>
+			</array>
+			<key>icon</key>
+			<string>runner.png</string>
+			<key>display</key>
+			<string>butterfly</string>
+			<key>3d_element</key>
+			<string>butterfly</string>
 			<key>audio_element</key>
 			<string>jazz</string>
 		</dict>
@@ -423,6 +456,26 @@
 	</dict>
 	<key>3d_elements</key>
 	<dict>
+		<key>butterfly</key>
+		<dict>
+			<key>instanceClass</key>
+			<string>Butterfly</string>
+			<key>properties</key>
+			<dict>
+				<key>showJoints</key>
+				<false/>
+				<key>runAnimations</key>
+				<true/>
+				<key>cameraZ</key>
+				<integer>-55</integer>
+				<key>runEmitter</key>
+				<false/>
+				<key>scaleXYZ</key>
+				<real>1</real>
+				<key>colladaFile</key>
+				<string>butterfly.dae</string>
+			</dict>
+		</dict>
 		<key>aotk</key>
 		<dict>
 			<key>instanceClass</key>
@@ -430,11 +483,11 @@
 			<key>properties</key>
 			<dict>
 				<key>showJoints</key>
-				<true/>
+				<false/>
 				<key>runAnimations</key>
 				<false/>
 				<key>cameraZ</key>
-				<integer>-20</integer>
+				<integer>-22</integer>
 				<key>runEmitter</key>
 				<false/>
 				<key>scaleXYZ</key>
@@ -544,11 +597,11 @@
 	<key>logging</key>
 	<dict>
 		<key>LLLights</key>
-		<false/>
-		<key>LLMeshImporter</key>
 		<true/>
-		<key>LLGestureStuff</key>
+		<key>LLMeshImporter</key>
 		<false/>
+		<key>LLGestureStuff</key>
+		<true/>
 		<key>LLObjLifetime</key>
 		<false/>
 		<key>LLAudioTweaks</key>

@@ -17,25 +17,22 @@
 @implementation GridPlane
 
 +(id) gridWithIndicesIntoNames:(NSArray *)indicesIntoNames
-                      andDoUVs:(bool)UVs
-                  andDoNormals:(bool)normals
 {
-    return [GridPlane gridWithWidth:2.0 andGrids:1 andIndicesIntoNames:indicesIntoNames
-                           andDoUVs:UVs andDoNormals:normals];
+    return [GridPlane gridWithWidth:2.0
+                           andGrids:1
+                andIndicesIntoNames:indicesIntoNames];
 }
 
 +(id) gridWithWidth:(float)width
            andGrids:(unsigned int)gridSize
 andIndicesIntoNames:(NSArray *)indicesIntoNames
-           andDoUVs:(bool)UVs
-       andDoNormals:(bool)normals
 {
     GridPlane * gp = [[GridPlane alloc] init];
     if( gp )
     {
         gp->_gridSize = gridSize;
         gp->_width = width;
-        [gp createWithIndicesIntoNames:indicesIntoNames doUVs:UVs doNormals:normals];
+        [gp createWithIndicesIntoNames:indicesIntoNames];
     }
     return gp;
 }

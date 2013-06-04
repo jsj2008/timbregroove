@@ -19,19 +19,17 @@
 @implementation Torus
 
 +(id) torusWithIndicesIntoNames:(NSArray *)indicesIntoNames
-                        andDoUVs:(bool)UVs
-                    andDoNormals:(bool)normals
 {
-    return [Torus torusWithRadius:1.0 andTubeRadius:0.5f andGridStop:20
-              andIndicesIntoNames:indicesIntoNames andDoUVs:UVs andDoNormals:normals];
+    return [Torus torusWithRadius:1.0
+                    andTubeRadius:0.5f
+                      andGridStop:20
+              andIndicesIntoNames:indicesIntoNames];
 }
 
 +(id) torusWithRadius:(float)radius
         andTubeRadius:(float)tubeRadius
           andGridStop:(unsigned int)gridStop
   andIndicesIntoNames:(NSArray *)indicesIntoNames
-             andDoUVs:(bool)UVs
-         andDoNormals:(bool)normals
 {
     Torus * torus = [Torus new];
     if( torus )
@@ -39,7 +37,7 @@
         torus->_nt = torus->_ns = gridStop;
         torus->_radius = radius;
         torus->_tubeRadius = tubeRadius;
-        [torus createWithIndicesIntoNames:indicesIntoNames doUVs:UVs doNormals:normals];
+        [torus createWithIndicesIntoNames:indicesIntoNames];
     }
     
     return torus;

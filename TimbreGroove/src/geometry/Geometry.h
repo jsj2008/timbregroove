@@ -20,13 +20,13 @@ typedef struct GeomtryStats
 @property (nonatomic) bool normals;
 
 // for shaders with standard attributes: position, texture, normals
--(void)createWithIndicesIntoNames:(NSArray *)indicesIntoNames
-                            doUVs:(bool)UVs
-                        doNormals:(bool)normals;
+-(void)createWithIndicesIntoNames:(NSArray *)indicesIntoNames;
 
 // for shaders with non-standard attributes:
--(void)createBufferDataByType:(NSArray *)strideTypes
+
+-(void)createBufferDataByStride:(NSArray *)strideSizes
              indicesIntoNames:(NSArray *)indicesIntoNames;
+
 
 // for derived classes
 -(void)getStats:(GeometryStats *)stats;

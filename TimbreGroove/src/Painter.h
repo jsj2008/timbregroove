@@ -23,9 +23,27 @@ extern NSString const * kShaderFeatureBones;
 @class MeshBuffer;
 @class Lights;
 
+/*
+ init sequence:
+ 
+   -(id)init
+         position, scale, rotation
+         create child hierarchy
+         add camera
+         add lights
+         add shader features
+ 
+   -(id)wireUp
+          {{is this really needed/used??}}
+ 
+   -(void)getParameter
+ 
+ */
+
 @interface Painter : Node3d
 
 @property (nonatomic,strong) Lights * lights;
+-(void)setupLights; // default is to call -inheritLights
 
 // derivations write these
 -(void)createBuffer;

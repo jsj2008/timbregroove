@@ -17,19 +17,14 @@
 @implementation Cube
 
 +(id) cubeWithIndicesIntoNames:(NSArray *)indicesIntoNames
-                      andDoUVs:(bool)UVs
-                  andDoNormals:(bool)normals
                       wrapType:(CubeTextureWrap)wrapType
 {
     return [Cube cubeWithWidth:2.0  andIndicesIntoNames:indicesIntoNames
-                      andDoUVs:UVs andDoNormals:normals
                       wrapType:wrapType];
 }
 
 +(id) cubeWithWidth:(float)width
 andIndicesIntoNames:(NSArray *)indicesIntoNames
-           andDoUVs:(bool)UVs
-       andDoNormals:(bool)normals
            wrapType:(CubeTextureWrap)wrapType
 {
     Cube * gp = [[Cube alloc] init];
@@ -37,27 +32,21 @@ andIndicesIntoNames:(NSArray *)indicesIntoNames
     {
         gp->_wrapType = wrapType;
         gp->_width = width;
-        [gp createWithIndicesIntoNames:indicesIntoNames doUVs:UVs doNormals:normals];
+        [gp createWithIndicesIntoNames:indicesIntoNames];
     }
     return gp;
 }
 
 +(id) cubeWithIndicesIntoNames:(NSArray *)indicesIntoNames
-                      andDoUVs:(bool)UVs
-                  andDoNormals:(bool)normals
 {
     return [Cube cubeWithWidth:2.0  andIndicesIntoNames:indicesIntoNames
-                           andDoUVs:UVs andDoNormals:normals
             wrapType:kCubeWrapRepeat];
 }
 
 +(id) cubeWithWidth:(float)width
 andIndicesIntoNames:(NSArray *)indicesIntoNames
-           andDoUVs:(bool)UVs
-       andDoNormals:(bool)normals
 {
     return [Cube cubeWithWidth:width  andIndicesIntoNames:indicesIntoNames
-                      andDoUVs:UVs andDoNormals:normals
                       wrapType:kCubeWrapRepeat];
 }
 

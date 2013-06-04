@@ -307,7 +307,7 @@ extern NSString * const kValue_name_WEIGHT;
         mg->_numVertices  = numVertices;
         mg->_buffer       = openGLBuffer;
         
-        TGLog(LLMeshImporter, @"Imported mesh shape:  %@ %d vert mat: %@", mg->_name, numVertices, mg->_materialName);
+        TGLog(LLMeshImporter, @"Imported mesh shape:%@ verts:%d mat:%@", mg->_name, numVertices, mg->_materialName);
         
         int strideCount = 0;
         for( int key = 0; key < kNumMeshSemanticKeys; key++ )

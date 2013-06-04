@@ -101,7 +101,6 @@ typedef enum shaderType {
 {
     MeshBuffer * buffer;
     NSArray * indicesIntoNames;
-    bool UVs = false;
     
     if( _shaderType == fire )
     {
@@ -114,34 +113,25 @@ typedef enum shaderType {
     else if( _shaderType == pool )
     {
         indicesIntoNames = @[@(pool_position),@(pool_uv),@(pool_normal)];
-        UVs = true;
     }
     
     if( [_geometryName isEqualToString:@"GridPlane"] )
     {
         buffer = [GridPlane gridWithWidth:2
                                  andGrids:10
-                      andIndicesIntoNames:indicesIntoNames
-                                 andDoUVs:UVs
-                             andDoNormals:true];
+                      andIndicesIntoNames:indicesIntoNames];
     }
     else if( [_geometryName isEqualToString:@"Torus"] )
     {
-        buffer = [Torus torusWithIndicesIntoNames:indicesIntoNames
-                                         andDoUVs:UVs
-                                     andDoNormals:true];
+        buffer = [Torus torusWithIndicesIntoNames:indicesIntoNames];
     }
     else if( [_geometryName isEqualToString:@"Cube"] )
     {
-        buffer = [Cube cubeWithIndicesIntoNames:indicesIntoNames
-                                         andDoUVs:UVs
-                                     andDoNormals:true];        
+        buffer = [Cube cubeWithIndicesIntoNames:indicesIntoNames];
     }
     else
     {
-        buffer = [SphereOid sphereWithdIndicesIntoNames:indicesIntoNames
-                                               andDoUVs:UVs
-                                           andDoNormals:true];
+        buffer = [SphereOid sphereWithdIndicesIntoNames:indicesIntoNames];
     }
     
     [self addBuffer:buffer];    

@@ -17,26 +17,18 @@ typedef enum CubeTextureWrap
 
 @interface Cube : Geometry
 
-+(id) cubeWithIndicesIntoNames:(NSArray *)indicesIntoNames
-                      andDoUVs:(bool)UVs
-                  andDoNormals:(bool)normals;
++(id) cubeWithIndicesIntoNames:(NSArray *)indicesIntoNames;
 
 
 +(id) cubeWithWidth:(float)width
-andIndicesIntoNames:(NSArray *)indicesIntoNames
-           andDoUVs:(bool)UVs
-       andDoNormals:(bool)normals;
+andIndicesIntoNames:(NSArray *)indicesIntoNames;
 
 +(id) cubeWithIndicesIntoNames:(NSArray *)indicesIntoNames
-                      andDoUVs:(bool)UVs
-                  andDoNormals:(bool)normals
                       wrapType:(CubeTextureWrap)wrapType;
 
 
 +(id) cubeWithWidth:(float)width
 andIndicesIntoNames:(NSArray *)indicesIntoNames
-           andDoUVs:(bool)UVs
-       andDoNormals:(bool)normals
            wrapType:(CubeTextureWrap)wrapType;
 
 @end

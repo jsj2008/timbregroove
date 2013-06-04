@@ -44,7 +44,6 @@ static float * parseFloats(NSString * str, int * numFloats, ColladaParserImpl * 
     NSArray * burp = cleanAndSeparateString(str);
     unsigned long count = [burp count];
     float * p = [pool malloc:sizeof(float)*count];
-//   TGLog(LLShitsOnFire, @"malloc: %p",p);
     *numFloats = (int)count;
     float * buffer = p;
     for( NSString * f in burp )
@@ -399,7 +398,8 @@ static const char * effectParamTags[] = {
 -(void)assembleAnimation
 {
     IncomingAnimation * ia = _incoming;
-    _animDict[ia->_channelTarget] = ia->_animation;
+    if( ia->_channelTarget )
+        _animDict[ia->_channelTarget] = ia->_animation;
     _incoming = nil;
     UNSET(kColStateInAnimation);
 }
@@ -610,7 +610,7 @@ static const char * effectParamTags[] = {
             {
                 IncomingSkinSource * iss = [iskin->_incomingSources lastObject];
                 iss->_accCount = scanInt(attributeDict[kAttr_count]);
-                iss->_stride = scanInt(attributeDict[kAttr_stride]);
+//              iss->_strideAttr = scanInt(attributeDict[kAttr_stride]);
                 return;
             }
             
@@ -1274,7 +1274,10 @@ static const char * effectParamTags[] = {
     
     if( EQSTR(elementName,kTag_animation) )
     {
-        _incoming = [IncomingAnimation new];
+        IncomingAnimation * ia = [IncomingAnimation new];
+        ia->_id = attributeDict[kAttr_id];
+        ia->_name = attributeDict[kAttr_name];
+        _incoming = ia;
         SET(kColStateInAnimation);
         return;
     }

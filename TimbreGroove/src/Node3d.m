@@ -17,10 +17,6 @@
 #import "State.h"
 #import "Names.h"
 
-@interface Node3d () {
-}
-@end
-
 @implementation Node3d
 
 #pragma mark -
@@ -245,36 +241,6 @@
             GLKVector3 p = self.position;
             p.z += POS_MASSAGE(f);
             self.position = p;
-        }];
-        parameters[kParamCameraRotationX] = [Parameter withBlock:^(float f) {
-            Camera * camera = self.camera;
-            GLKVector3 r = camera.rotation;
-            r.x += RAD_TURNS(f * 3);
-            camera.rotation = r;
-        }];
-        parameters[kParamCameraRotationY] = [Parameter withBlock:^(float f) {
-            Camera * camera = self.camera;
-            GLKVector3 r = camera.rotation;
-            r.y += RAD_TURNS(f * 3);
-            camera.rotation = r;
-        }];
-        parameters[kParamCameraRotationZ] = [Parameter withBlock:^(float f) {
-            Camera * camera = self.camera;
-            GLKVector3 r = camera.rotation;
-            r.z += RAD_TURNS(f * 3);
-            camera.rotation = r;
-        }];
-        parameters[kParamCameraZ] = [Parameter withBlock:^(float f) {
-            Camera * camera = self.camera;
-            GLKVector3 r = camera.position;
-            r.z += f * 3.0;
-            camera.position = r;
-        }];
-        
-        parameters[kParamCameraReset] = [Parameter withBlock:^(CGPoint pt) {
-            Camera * camera = self.camera;
-            camera.position = (GLKVector3){ 0, 0, CAMERA_DEFAULT_Z };
-            camera.rotation = (GLKVector3){ 0, 0, 0 };
         }];
     }
 }

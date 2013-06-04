@@ -15,6 +15,7 @@
 #define TLOG_POS { GLKVector4 v4 = [self positionLight]; TGLog(LLLights, @"Light position: { %f, %f, %f } (%f)", v4.x, v4.y, v4.z, v4.w); }
 
 @implementation Light
+
 -(id)init
 {
     if( (self = [super init]) )
@@ -193,31 +194,46 @@
 @end
 
 @implementation Lights {
-    __weak Painter * _object;
-    int _numLights;
-}
-
--(id)initWithObject:(Painter *)object
-{
-    self = [super init];
-    if( self )
-    {
-        _object = object;
-    }
-    return self;
+    NSMutableArray * _lights;
+    bool _gaveParams;
 }
 
 -(void)addLight:(Light *)light
 {
-    ++_numLights;
-    [_object addShaderFeature:light];
+    if( !_lights )
+        _lights = [NSMutableArray new];
+    [_lights addObject:light];
 }
 
 -(void)bind:(Shader *)shader object:(id)object
 {
-    [shader writeToLocation:gv_lightsEnabled type:TG_INT data:&_numLights];
+    for( Light * light in _lights )
+        [light bind:shader object:object];
+    
+    GLKMatrix4 mvm = ((Node3d *)object).modelView;
+    [shader writeToLocation:gv_mvm type:TG_MATRIX4 data:mvm.m];
+    
+    int numLights = [_lights count];
+    [shader writeToLocation:gv_lightsEnabled type:TG_INT data:&numLights];
 }
 
 -(void)unbind:(Shader *)shader {}
+
+-(void)getShaderFeatureNames:(NSMutableArray *)putHere
+{
+    [putHere addObject:kShaderFeatureNormal];
+}
+
+-(void)getParameters:(NSMutableDictionary *)parameters
+{
+    if( _gaveParams )
+        return;
+    
+    for( Light * light in _lights )
+        [light getParameters:parameters];
+    
+    _gaveParams = true;
+}
+
 
 @end

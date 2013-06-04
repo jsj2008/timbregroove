@@ -10,15 +10,11 @@
 
 @interface Torus : Geometry
 
-+(id) torusWithIndicesIntoNames:(NSArray *)indicesIntoNames
-                         andDoUVs:(bool)UVs
-                     andDoNormals:(bool)normals;
++(id) torusWithIndicesIntoNames:(NSArray *)indicesIntoNames;
 
 +(id) torusWithRadius:(float)radius
         andTubeRadius:(float)tubeRadius
           andGridStop:(unsigned int)gridStop
-  andIndicesIntoNames:(NSArray *)indicesIntoNames
-             andDoUVs:(bool)UVs
-         andDoNormals:(bool)normals;
+  andIndicesIntoNames:(NSArray *)indicesIntoNames;
 
 @end

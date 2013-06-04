@@ -29,9 +29,7 @@
 
 -(void)createBuffer
 {
-    GridPlane * gp = [GridPlane gridWithIndicesIntoNames:@[@(gv_pos)]
-                                                andDoUVs:false
-                                            andDoNormals:false];
+    GridPlane * gp = [GridPlane gridWithIndicesIntoNames:@[@(gv_pos)]];
     [self addBuffer:gp];
     _buffer = gp;
 }
