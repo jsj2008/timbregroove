@@ -104,6 +104,7 @@ void pointLight(const in Light light,
 	nDotVP = max(0.0, dot(VP, l_normal));
 	
  	ambient += light.colors[CI_Ambient] * attenuation;
+    
 	if (nDotVP > 0.0) {
 		diffuse += light.colors[CI_Diffuse] * (nDotVP * attenuation);
         

@@ -58,8 +58,6 @@ andIndicesIntoNames:(NSArray *)indicesIntoNames
 
 -(void)getBufferData:(void *)vertextData
            indexData:(unsigned *)indexData
-             withUVs:(bool)withUVs
-         withNormals:(bool)withNormals
 {
     static GLfloat vWrapVerts[] =
     {
@@ -201,6 +199,9 @@ andIndicesIntoNames:(NSArray *)indicesIntoNames
     float *pNormals = normals,
           *pos = (float*)vertextData,
           w = _width / 2.0;
+    
+    bool withUVs = self.UVs;
+    bool withNormals = self.normals;
     
     for( int i = 0; i < 24; i++ )
     {

@@ -13,32 +13,34 @@
 
 -(void)createWithIndicesIntoNames:(NSArray *)indicesIntoNames
 {
-    _UVs = [indicesIntoNames containsObject:@(gv_uv)];
-    _normals = [indicesIntoNames containsObject:@(gv_normal)];
-    [self createBufferDataByStride:[self getStrideSizes] indicesIntoNames:indicesIntoNames];
+    [self createBufferDataByStride:[self getStrideSizes:indicesIntoNames]
+                  indicesIntoNames:indicesIntoNames];
 }
 
--(NSArray *)getStrideSizes
+-(NSArray *)getStrideSizes:(NSArray *)indeciesIntoNames
 {
-
-    NSArray * ret = nil;
-    
-    if( _UVs )
-    {
-        if( _normals )
-            ret = @[@(3),@(2),@(3)];
-        else
-            ret = @[@(3),@(2)];
-    }
-    else
-    {
-        if( _normals )
-            ret = @[@(3),@(3)];
-        else
-            ret = @[@(3)];
-    }
-    
-    return ret;
+    return [indeciesIntoNames map:^id(NSNumber *num) {
+        GenericVariables var = [num intValue];
+        switch (var) {
+            case gv_pos:
+                _verticies = true;
+                return @(3);
+                break;
+            case gv_normal:
+                _normals = true;
+                return @(3);
+                break;
+            case gv_uv:
+                _UVs = true;
+                return @(2);
+            case gv_acolor:
+                _acolors = true;
+                return @(4);
+            default:
+                break;
+        }
+        return @(-1);
+    }];
 }
 
 -(void)createBufferDataByStride:(NSArray *)strideSizes
@@ -93,9 +95,7 @@
         indexData = malloc( sizeof(unsigned int) * numIndices );
     
     [self getBufferData:vertexData
-              indexData:indexData
-                withUVs:_UVs
-            withNormals:_normals];
+              indexData:indexData];
     
     [self setData:vertexData
           strides:strides
@@ -103,7 +103,34 @@
       numVertices:numVertices
         indexData:indexData
        numIndices:numIndices];
-        
+    
+    if( (TGGetLogLevel() & LLGeometry) != 0 )
+    {
+        printf("Geometry: \n");
+        float * p = vertexData;
+        for( int v = 0; v < numVertices; v++ )
+        {
+            VertexStride * stride = strides;
+            for( int q = 0; q < numStrides; q++, stride++ )
+            {
+                printf("{ ");
+                for( int x = 0; x < stride->numbersPerElement; x++ )
+                {
+                    if( x )
+                        printf( ", ");
+                    printf("%G",*p++);
+                }
+                printf("} ");
+            }
+            printf("\n");
+        }
+        printf("Triangle indecies:\n");
+        for( int i = 0; i < numIndices; i++ )
+        {
+            printf("%d ", indexData[i]);
+        }
+    }
+    
     free(strides);
     free(vertexData);
     if( indexData )
@@ -114,7 +141,7 @@
 -(void)resetVertices
 {
     void * vertexData = malloc(self.bufferSize);
-    [self getBufferData:vertexData indexData:NULL withUVs:_UVs withNormals:_normals];
+    [self getBufferData:vertexData indexData:NULL];
     [self setData:vertexData];
     free(vertexData);
 }
@@ -125,8 +152,6 @@
 }
 -(void)getBufferData:(void *)vertextData
            indexData:(unsigned *)indexData
-             withUVs:(bool)withUVs
-         withNormals:(bool)withNormals
 {
     
 }

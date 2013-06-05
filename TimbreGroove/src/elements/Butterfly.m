@@ -11,79 +11,48 @@
 #import "GenericShader.h"
 #import "Material.h"
 #import "Light.h"
+#import "Material.h"
 
-@interface ButterflyBackground : Painter {
-    float _rot;
-}
-@end
-@implementation ButterflyBackground
 
-- (id)init
-{
-    self = [super init];
-    if (self) {
-        self.position = (GLKVector3){ 0, 0, -15 };
-        self.scale = (GLKVector3){ 20.0, 40.0, 0.0 };
-    }
-    return self;
-}
-
--(void)update:(NSTimeInterval)dt
-{
-    self.rotation = (GLKVector3){ 0, GLKMathDegreesToRadians(30.0*_timer), 0 };
-    [super update:dt];
-}
-
--(void)createBuffer
-{
-    MeshBuffer * mb;
-    
-#define BOTTOM_SQ_COLOR (GLKVector4){ 0.0, 0.0, 1.0, 1.0 }
-#define TOP_SQ_COLOR    (GLKVector4){ 0.8, 0.8, 1.0, 1.0 }
-    
-    static GLKVector4 colors[4] = {
-        BOTTOM_SQ_COLOR,
-        TOP_SQ_COLOR,
-        BOTTOM_SQ_COLOR,
-        TOP_SQ_COLOR
-    };
-    
-    ColorBuffer * cb = [ColorBuffer new];
-    [cb setDataWithRGBAs:(float *)colors numColors:4 indexIntoNames:gv_acolor];
-    [self addBuffer:cb];
-    
-    mb = [GridPlane gridWithIndicesIntoNames:@[@(gv_pos),@(gv_normal)]];
-//    mb = [GridPlane gridWithIndicesIntoNames:@[@(gv_pos)]];
-    [self addBuffer:mb];
-    
-}
-
-@end
-
-@interface Butterfly : Painter // MeshImportPainter
+@interface Butterfly : MeshImportPainter
 @end
 
 @implementation Butterfly
+-(void)createBuffer
+{
+    MeshBuffer * mb;
+    mb = [GridPlane gridWithIndicesIntoNames:@[@(gv_pos),@(gv_normal)]];
+    [self addBuffer:mb];
+}
 
 - (id)init
 {
     self = [super init];
     if (self) {
         [self makeLights];
-        [self appendChild:[ButterflyBackground new]];
+        [self setMaterials];
+        self.position = (GLKVector3){ 0, 0, -20.0 };
+        self.scale = (GLKVector3){ 20, 40, 0 };
     }
     return self;
 }
 
 
--(void)render:(NSUInteger)w h:(NSUInteger)h
+-(void)setMaterials
 {
-    [super render:w h:h];
+    Material * material = [Material new];
+    material.diffuse = (GLKVector4) { 0.5, 0.5, 1.0, 1 };
+    material.ambient = (GLKVector4) {0,1,0,1};
+    material.specular = (GLKVector4) { 1,1,1,1 };
+    material.doSpecular = true;
+    material.shininess = 1024;
+    [self addShaderFeature:material];
 }
 
 -(void)makeLights
 {
     Light * light = [Light new];
+    light.ambient = (GLKVector4){ 1, 0, 0, 1 };
     Lights * lights = [Lights new];
     [lights addLight:light];
     self.lights = lights;

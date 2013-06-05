@@ -28,34 +28,43 @@
 
 @implementation FractalSphere
 
--(id)wireUp
+-(id)init
 {
-    _fbo = [[FBO alloc] initWithWidth:128 height:128];
-    _texRenderer = [[Fractal alloc] init];
-    _texRenderer.fbo = _fbo;
-    _texRenderer.backColor = GLKVector4Make(0.3, 0.3, 0.3, 1);
-    [_texRenderer wireUp];
-    [_texRenderer update:0.01];
-    [_texRenderer renderToFBO];
+    self = [super init];
+    if( self )
+    {
+        _fbo = [[FBO alloc] initWithWidth:128 height:128];
+        _texRenderer = [[Fractal alloc] init];
+        _texRenderer.fbo = _fbo;
+        _texRenderer.backColor = GLKVector4Make(0.3, 0.3, 0.3, 1);
+        [_texRenderer update:0.01];
+        [_texRenderer renderToFBO];
+        
+        self.scaleXYZ = 2.0;
 
-    self.scaleXYZ = 2.0;
-    return [super wireUp];
+        MaterialColors colors = {
+            .ambient  = { 0.8, 0.8, 0.8, 1.0 },
+            .diffuse  = { 1.0, 1.0, 1.0, 1.0 },
+        };
+        
+        _mat = [Material withColors:colors shininess:0 doSpecular:false];
+        
+        [self addShaderFeature:_mat];
+
+        _light = [Light new];
+        self.lights = [[Lights alloc] initWithLight:_light];
+        [self addShaderFeature:_fbo];
+        
+    }
+    
+    return self;
 }
 
--(void)createShader
+-(id)wireUp
 {
-    MaterialColors colors = {
-        .ambient  = { 0.8, 0.8, 0.8, 1.0 },
-        .diffuse  = { 1.0, 1.0, 1.0, 1.0 },
-    };
-    
-    _mat = [Material withColors:colors shininess:0 doSpecular:false];
-
-    [self addShaderFeature:_mat];
-    _light = [Light new];
-    [self.lights addLight:_light];
-    [self addShaderFeature:_fbo];
-    [super createShader];
+    [super wireUp];
+    [_texRenderer wireUp];
+    return self;
 }
 
 -(void)getParameters:(NSMutableDictionary *)putHere
@@ -66,7 +75,7 @@
     putHere[@"Ping!"] = [Parameter withBlock:^(float f) {
         _myRot += f * 30.0;
         self.rotation = (GLKVector3){ 0, GLKMathDegreesToRadians(_myRot), 0 };
-        GLKVector4 amb = GLKVector4Normalize((GLKVector4){f, 0, f*0.7, 1.0});
+        GLKVector4 amb = GLKVector4Normalize((GLKVector4){0, f, f*0.7, 1.0});
         amb.w = 1.0;
         _mat.ambient = amb;
     }];

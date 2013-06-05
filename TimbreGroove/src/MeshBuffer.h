@@ -55,8 +55,8 @@ static inline VertexStride * StrideInit1f(VertexStride * s)
 @property (nonatomic) GLuint      drawType;
 @property (nonatomic) GLenum      usage;
 @property (nonatomic) bool        drawable;
-@property (nonatomic) GLuint      glVBuffer;
-@property (nonatomic) GLuint      glIBuffer;
+@property (nonatomic) GLuint      vertextBufferId;
+@property (nonatomic) GLuint      indexBufferId;
 
 +(GLsizei)calcDataSize: (VertexStride *)strides
           countStrides: (unsigned int)countStrides

@@ -32,8 +32,8 @@
     {
         _drawType = GL_TRIANGLES;
         _usage = GL_STATIC_DRAW;
-        _glIBuffer = -1;
-        _glVBuffer = -1;
+        _indexBufferId = -1;
+        _vertextBufferId = -1;
         _drawable = true;
     }
     
@@ -42,7 +42,7 @@
 
 -(void)draw
 {
-    if( _glIBuffer == -1 )
+    if( _indexBufferId == -1 )
         glDrawArrays(_drawType, 0, _numVertices);
     else
         glDrawElements(_drawType,_numIndices,GL_UNSIGNED_INT,(void*)0);
@@ -91,7 +91,7 @@
 
 -(void)setData: (float *)data
 {
-    glBindBuffer(GL_ARRAY_BUFFER, _glVBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertextBufferId);
     glBufferData(GL_ARRAY_BUFFER, _bufferSize, data, _usage);
 }
 
@@ -120,9 +120,9 @@
 
     GLsizei bufferSize = _bufferSize = strideSize * numVertices;
     
-    glGenBuffers(1, &_glVBuffer);
-    TGLog(LLGLResource, @"created vertex buffer: %@ (%d) sz:%d numVrtx:%d",self, _glVBuffer,bufferSize,numVertices);
-    glBindBuffer(GL_ARRAY_BUFFER, _glVBuffer);
+    glGenBuffers(1, &_vertextBufferId);
+    TGLog(LLGLResource, @"created vertex buffer: %@ (%d) sz:%d numVrtx:%d",self, _vertextBufferId,bufferSize,numVertices);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertextBufferId);
     glBufferData(GL_ARRAY_BUFFER, bufferSize, data, _usage);
     
     _strideSize = strideSize;
@@ -139,9 +139,9 @@
 -(void)setIndexData:(unsigned int *)data numIndices:(unsigned int)numIndices
 {
     _numIndices = numIndices;
-    glGenBuffers(1, &_glIBuffer);
-    TGLog(LLGLResource, @"created index buffer: %d numIndx:%d",_glIBuffer,numIndices);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glIBuffer);
+    glGenBuffers(1, &_indexBufferId);
+    TGLog(LLGLResource, @"created index buffer: %d numIndx:%d",_indexBufferId,numIndices);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBufferId);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof(unsigned int), data, _usage);
 }
 
@@ -168,19 +168,19 @@
 
 -(void)bind
 {
-    if( _glVBuffer != -1 )
+    if( _vertextBufferId != -1 )
     {
-        glBindBuffer(GL_ARRAY_BUFFER, _glVBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, _vertextBufferId);
         [self setupBindings];
     }
-    if( _glIBuffer != -1 )
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glIBuffer);
+    if( _indexBufferId != -1 )
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBufferId);
 }
 
 -(void)unbind
 {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    if( _glIBuffer != -1 )
+    if( _indexBufferId != -1 )
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     for( int i = 0; i < _numStrides; i++ )
     {
@@ -193,7 +193,7 @@
 -(bool)bindToTempLocation:(GLuint)location
 {
     VertexStride * stride = _strides; // WAHOO!! assume the first stride is position!!!    
-    glBindBuffer(GL_ARRAY_BUFFER, _glVBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertextBufferId);
     glEnableVertexAttribArray(location);
     glVertexAttribPointer( location,
                           stride->numbersPerElement,
@@ -201,18 +201,18 @@
                           GL_FALSE,
                           _strideSize,
                           BUFFER_OFFSET(0));
-    if( _glIBuffer != -1 )
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _glIBuffer);
+    if( _indexBufferId != -1 )
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBufferId);
     return true;
 }
 
 -(void)dealloc
 {
-    if( glIsBuffer(_glVBuffer))
-        glDeleteBuffers(1, &_glVBuffer);
-    if( glIsBuffer(_glIBuffer))
-        glDeleteBuffers(1, &_glIBuffer);
-    TGLog(LLGLResource | LLObjLifetime, @"%@ Deleted buffers index (%d) and vertex (%d)",self,_glIBuffer,_glVBuffer);
+    if( glIsBuffer(_vertextBufferId))
+        glDeleteBuffers(1, &_vertextBufferId);
+    if( glIsBuffer(_indexBufferId))
+        glDeleteBuffers(1, &_indexBufferId);
+    TGLog(LLGLResource | LLObjLifetime, @"%@ Deleted buffers index (%d) and vertex (%d)",self,_indexBufferId,_vertextBufferId);
 }
 @end
 

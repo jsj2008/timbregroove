@@ -42,11 +42,11 @@
 
 -(void)getBufferData:(void *)vertextData
            indexData:(unsigned *)indexData
-             withUVs:(bool)withUVs
-         withNormals:(bool)withNormals
 {
     unsigned int i;
     GLfloat x;
+    //bool withUVs = self.UVs;
+    bool withNormals = self.normals;
     
     float * pos = (float *)vertextData;
     float gridSize = _width / _spacing;

@@ -166,10 +166,10 @@
 					<string>kParamPositionZ</string>
 					<key>kTriggerTap1</key>
 					<string>RandomVibesNote</string>
-					<key>kTriggerPanY</key>
-					<string>kParamRotationX</string>
 					<key>kTriggerPlayButton</key>
 					<string>kParamSceneAnimation</string>
+					<key>kTriggerPanY</key>
+					<string>kParamLightZ</string>
 					<key>kTriggerDrag1</key>
 					<string>kParamJointPosition</string>
 					<key>kTriggerPanX</key>
@@ -470,8 +470,6 @@
 				<integer>-55</integer>
 				<key>runEmitter</key>
 				<false/>
-				<key>scaleXYZ</key>
-				<real>1</real>
 				<key>colladaFile</key>
 				<string>butterfly.dae</string>
 			</dict>
@@ -596,12 +594,14 @@
 	</dict>
 	<key>logging</key>
 	<dict>
+		<key>LLGeometry</key>
+		<false/>
 		<key>LLLights</key>
 		<true/>
 		<key>LLMeshImporter</key>
-		<false/>
-		<key>LLGestureStuff</key>
 		<true/>
+		<key>LLGestureStuff</key>
+		<false/>
 		<key>LLObjLifetime</key>
 		<false/>
 		<key>LLAudioTweaks</key>

@@ -64,6 +64,16 @@
     _colors.diffuse = diffuse;
 }
 
+-(GLKVector4)specular
+{
+    return _colors.specular;
+}
+
+-(void)setSpecular:(GLKVector4)specular
+{
+    _colors.specular = specular;
+}
+
 -(void)unbind:(Shader *)shader {}
 @end
 

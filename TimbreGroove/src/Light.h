@@ -11,7 +11,9 @@
 @class Light;
 
 @interface Lights : NSObject<ShaderFeature>
+-(id)initWithLight:(Light *)light;
 -(void)addLight:(Light *)light;
+-(void)dump:(LogLevel)loglevel;
 @end
 
 /*

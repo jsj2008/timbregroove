@@ -122,8 +122,6 @@ static const char * _sbp_var_names[] = {
 
 -(void)getBufferData:(void *)vertextData
            indexData:(unsigned *)indexData
-             withUVs:(bool)withUVs
-         withNormals:(bool)withNormals
 {
     float * pos = vertextData;
     for( int i = 0; i < BEZ_SEGMENTS; i++ )

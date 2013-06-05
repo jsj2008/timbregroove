@@ -52,10 +52,10 @@
 
 -(void)getBufferData:(void *)vertextData
            indexData:(unsigned *)indexData
-             withUVs:(bool)wUV
-         withNormals:(bool)wNormals
 {
     float * data = vertextData;
+    bool wUV = self.UVs;
+    bool wNormals = self.normals;
     
 	for (int latNumber = 0; latNumber <= _lats; ++latNumber) {
 

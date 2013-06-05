@@ -21,7 +21,8 @@ static const char * logStringToBit[] = {
     "LLShaderStuff",
     "LLGestureStuff",
     "LLMeshImporter",
-    "LLLights"
+    "LLLights",
+    "LLGeometry"
 };
 
 static LogLevel _currentLL = LLShitsOnFire;

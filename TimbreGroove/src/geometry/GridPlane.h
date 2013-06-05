@@ -12,6 +12,10 @@
 
 +(id) gridWithIndicesIntoNames:(NSArray *)indicesIntoNames;
 
++(id) gridWithIndicesIntoNames:(NSArray *)indicesIntoNames
+                     andColors:(GLKVector4 *)color
+                     numColors:(int)numColors;
+
 +(id) gridWithWidth:(float)width
            andGrids:(unsigned int)gridSize
 andIndicesIntoNames:(NSArray *)indicesIntoNames;

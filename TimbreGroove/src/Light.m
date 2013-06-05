@@ -12,7 +12,9 @@
 #import "Parameter.h"
 #import "Names.h"
 
-#define TLOG_POS { GLKVector4 v4 = [self positionLight]; TGLog(LLLights, @"Light position: { %f, %f, %f } (%f)", v4.x, v4.y, v4.z, v4.w); }
+#define TLOG_POS_(logmode) { GLKVector4 v4 = [self positionLight]; TGLog(LLLights, @"Light position: { %f, %f, %f } (%f)", v4.x, v4.y, v4.z, v4.w); }
+
+#define TLOG_POS TLOG_POS_(LLLights)
 
 @implementation Light
 
@@ -21,7 +23,7 @@
     if( (self = [super init]) )
     {
         _desc.position  = (GLKVector4){0, 0, 5, 0 };
-        _desc.colors.diffuse = (GLKVector4){ 0.8, 0.8, 0.8, 1};
+        _desc.colors.diffuse = (GLKVector4){ 0.5, 0.5, 0.5, 1};
         _desc.colors.ambient = (GLKVector4){ 0.5, 0.5, 0.5, 1};
         _desc.attenuation = (GLKVector3){1, 0, 0};
         _desc.spotDirection = (GLKVector3){ 0, 0, 1 };
@@ -191,11 +193,25 @@
     }];
 }
 
+-(void)dump:(LogLevel)loglevel
+{
+    TLOG_POS_(loglevel);
+}
 @end
 
 @implementation Lights {
     NSMutableArray * _lights;
     bool _gaveParams;
+}
+
+-(id)initWithLight:(Light *)light
+{
+    self = [super init];
+    if( self )
+    {
+        [self addLight:light];
+    }
+    return self;
 }
 
 -(void)addLight:(Light *)light
@@ -235,5 +251,10 @@
     _gaveParams = true;
 }
 
+-(void)dump:(LogLevel)loglevel
+{
+    for( Light * light in _lights )
+        [light dump:loglevel];
+}
 
 @end

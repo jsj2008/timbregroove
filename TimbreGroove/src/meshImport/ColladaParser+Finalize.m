@@ -650,9 +650,13 @@ extern NSString * const kValue_name_WEIGHT;
                     }
                     else
                     {
-                        TGLog(LLMeshImporter, @"Material %@/%@ for %@ { %f, %f, %f }",
-                              ipi->_materialName, im->_effect, inode->_id,
-                              mm.diffuse.r, mm.diffuse.g, mm.diffuse.b);
+                        MaterialColors mc = mm.colors;
+                        TGLog(LLMeshImporter, @"Material %@/%@ for %@ ",
+                              ipi->_materialName, im->_effect, inode->_id);
+                        TGLogp(LLMeshImporter,
+                               @"   { .ambient = %@, .diffuse = %@,\n    .specular = %@, .emission = %@ }",
+                               stringFromColor(mc.ambient),  stringFromColor(mc.diffuse),
+                               stringFromColor(mc.specular), stringFromColor(mc.emission));
                     }
                     if( !materials )
                         materials = [NSMutableDictionary new];

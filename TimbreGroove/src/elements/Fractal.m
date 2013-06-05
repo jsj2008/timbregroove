@@ -14,11 +14,11 @@
     GLKVector2 _complexConstant;
     float      _viewportSize;
     float      _blend;
-    GLint      _posLocation;
-    GLint      _complexConstantLocation;
-    GLint      _viewportSizeLocation;
-    GLint      _blendLocation;
-    GLint      _backColorLocation;
+    GLint      _u_posLocation;
+    GLint      _u_complexConstantLocation;
+    GLint      _u_viewportSizeLocation;
+    GLint      _u_blendLocation;
+    GLint      _u_backColorLocation;
     MeshBuffer * _buffer;
     double  _tracker;
     ShaderWrapper * _shader;
@@ -26,6 +26,13 @@
 
 @end
 @implementation Fractal
+
+-(id)wireUp
+{
+    [self createBuffer];
+    [self createShader];
+    return self;
+}
 
 -(void)createBuffer
 {
@@ -40,11 +47,11 @@
     [_shader loadAndCompile:"fractal" andFragment:"fractal" andHeaders:nil];
 
     GLuint program = _shader.program;
-    _complexConstantLocation = glGetUniformLocation(program, "u_complexConstant");
-    _viewportSizeLocation    = glGetUniformLocation(program, "u_viewportSize");
-    _blendLocation           = glGetUniformLocation(program, "u_blend");
-    _backColorLocation       = glGetUniformLocation(program, "u_backColor");
-    _posLocation             = glGetAttribLocation(program, "a_position");
+    _u_complexConstantLocation = glGetUniformLocation(program, "u_complexConstant");
+    _u_viewportSizeLocation    = glGetUniformLocation(program, "u_viewportSize");
+    _u_blendLocation           = glGetUniformLocation(program, "u_blend");
+    _u_backColorLocation       = glGetUniformLocation(program, "u_backColor");
+    _u_posLocation             = glGetAttribLocation(program,  "a_position");
     
     GLKVector4 bc = { 0.0, 0.0, 0.45, 1 };
     _backColor = bc;
@@ -63,11 +70,11 @@
 -(void)render:(NSUInteger)w h:(NSUInteger)h
 {
     [_shader use];
-    glUniform2fv(_complexConstantLocation, 1, _complexConstant.v);
-    glUniform1f( _blendLocation, _blend);
-    glUniform2f(_viewportSizeLocation, (GLfloat)w, (GLfloat)h);
-    glUniform4fv(_backColorLocation, 1, _backColor.v);
-    [_buffer bindToTempLocation:_posLocation];
+    glUniform2fv(_u_complexConstantLocation, 1, _complexConstant.v);
+    glUniform1f( _u_blendLocation, _blend);
+    glUniform2f(_u_viewportSizeLocation, (GLfloat)w, (GLfloat)h);
+    glUniform4fv(_u_backColorLocation, 1, _backColor.v);
+    [_buffer bindToTempLocation:_u_posLocation];
     [_buffer draw];
     [_buffer unbind];
 }

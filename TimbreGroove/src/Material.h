@@ -17,6 +17,7 @@
 
 @property (nonatomic) GLKVector4 ambient;
 @property (nonatomic) GLKVector4 diffuse;
+@property (nonatomic) GLKVector4 specular;
 @property (nonatomic) NSString * name;
 
 +(id)withColor:(GLKVector4)color;

@@ -21,12 +21,8 @@
 #import "Scene.h"
 #import "TriggerMap.h"
 
-@interface JointPainter : Painter {
-@public
-    MeshSceneArmatureNode * _node;
-}
-@property (nonatomic) GLKVector4 color;
--(void)updateTransformFromPos;
+@interface MeshImportPainter (Dump)
+-(void)dumpMetrics;
 @end
 
 @interface MeshNodePainter : Painter
@@ -36,7 +32,6 @@
 @implementation MeshNodePainter {
     MeshSceneMeshNode * _node;
     NSMutableArray *    _jointFeatures;
-    FloatParamBlock     _myRotation;
 }
 
 -(id)init
@@ -68,27 +63,9 @@
     return self;
 }
 
--(void)update:(NSTimeInterval)dt
-{
-    [super update:dt];
-    if( _myRotation )
-        _myRotation(-0.8);
-}
-
--(void)triggersChanged:(Scene *)scene
-{
-    if( scene )
-    {
-        _myRotation = nil; // [scene.triggers getFloatTrigger:kParamRotationY];
-    }
-    else
-    {
-        _myRotation = nil;
-    }
-}
-
 -(void)createBuffer
 {
+    int count = [_node->_geometries count];
     for( MeshGeometry * geometry in  _node->_geometries )
     {
         NSMutableArray * shaderFeatures = [NSMutableArray new];
@@ -105,9 +82,8 @@
         if( geometry->_materialName )
         {
             NSArray * importedMats = _node->_materials[ geometry->_materialName ];
-            [importedMats each:^(id mat) {
-                [shaderFeatures addObject:mat];
-            }];
+            for( Material * material in importedMats)
+                [shaderFeatures addObject:material];
         }
         
         MeshBuffer * mb = [[MeshBuffer alloc] init];
@@ -119,7 +95,17 @@
          numIndices:0];
         //mb.drawType = GL_POINTS;
         
-        [self addShape:mb features:shaderFeatures];
+        if( count > 1 )
+        {
+            [self addShape:mb features:shaderFeatures];
+        }
+        else
+        {
+            [self addBuffer:mb];
+            [shaderFeatures each:^(id sf) {
+                [self addShaderFeature:sf];
+            }];
+        }
     }
     
 }
@@ -130,7 +116,6 @@
 @implementation MeshImportPainter {
     MeshScene * _scene;
     NSArray * _nodePainters;
-    NSArray * _jointPainters;
     NSArray * _animations;
 }
 
@@ -150,16 +135,7 @@
     _scene = [ColladaParser parse:_colladaFile];
     _animations = _scene->_animations;
     [self buildNodePainters];
-    if( _showJoints )
-        [self buildJointPainters];
     [super wireUp];
-    [_nodePainters each:^(MeshNodePainter *nodePainter) {
-        [nodePainter wireUp];
-    }];
-    [_jointPainters each:^(JointPainter *jointPainter) {
-        [jointPainter wireUp];
-    }];
-    
     if( _runEmitter )
     {
         LogLevel logl = TGGetLogLevel();
@@ -178,6 +154,9 @@
     if( _animations )
         [self disableAnimation:!_runAnimations];
     
+    if( (TGGetLogLevel() & LLMeshImporter) != 0 )
+        [self dumpMetrics];
+    
     _scene = nil; // no need to hang on
     
     return self;
@@ -193,52 +172,6 @@
     }];
 }
 
--(void)buildJointPainters
-{
-    if( !_scene->_allJoints )
-        return;
-        
-    static GLKVector4 colors[] = {
-        { 1, 0,   0, 0.5 },
-        { 0, 1,   0, 0.5 },
-        { 0, 0.5, 1, 0.5 },
-        { 1, 0,   1, 0.5 }
-    };
-    
-    __block int nextColor = 0;
-    
-    static void (^createJointPainter)(MeshSceneArmatureNode *) = nil;
-    
-    NSMutableArray * painterObjects = [NSMutableArray new];
-    
-    createJointPainter = ^(MeshSceneArmatureNode * node) {
-        JointPainter * vb = [[JointPainter alloc] init];
-        vb->_node = node;
-        GLKVector3 vec3 = POSITION_FROM_MAT(node->_world);
-        vb.position = vec3;
-      //  [vb updateTransformFromPos];
-        vb.color = colors[nextColor];
-        nextColor = ++nextColor % (sizeof(colors)/sizeof(colors[0]));
-        [self appendChild:[vb wireUp]];
-        [painterObjects addObject:vb];
-    };
-    
-    if( 0 && _animations )
-    {
-        [_animations each:^(MeshAnimation * animation) {
-            createJointPainter((MeshSceneArmatureNode *)animation->_target);
-        }];
-    }
-    else
-    {
-        [_scene->_meshes each:^(MeshSceneMeshNode * node) {
-            if( node->_influencingJoints )
-                [node->_influencingJoints each:createJointPainter];
-        }];
-    }
-    
-    _jointPainters = [NSArray arrayWithArray:painterObjects];
-}
 
 -(void)buildNodePainters
 {
@@ -273,14 +206,6 @@
     _colladaFile = colladaFile;
 }
 
--(void)updatePainters
-{
-    [_jointPainters each:^(JointPainter *vb) {
-        MeshSceneArmatureNode * node = vb->_node;
-        GLKVector3 vec3 = POSITION_FROM_MAT( node->_world );
-        vb.position = vec3;
-    }];
-}
 
 -(void)disableAnimation:(bool)value
 {
@@ -329,56 +254,48 @@
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
-@implementation JointPainter
-
--(id)wireUp
+@implementation MeshImportPainter (Dump)
+-(void)dumpMetrics
 {
-    [super wireUp];
-    self.disableStandardParameters = true;
-    return self;
-}
-
--(void)createBuffer
-{
-    MeshBuffer * mb = [Cube cubeWithWidth:0.25
-                      andIndicesIntoNames:@[@(gv_pos)]];
+    float minX = 0, maxX = 0, minY = 0, maxY = 0, minZ = 0, maxZ = 0;
+    for( MeshSceneMeshNode * meshNode in _scene->_meshes )
+    {
+        for( MeshGeometry * geomoetry in meshNode->_geometries )
+        {
+            float * p = geomoetry->_buffer;
+            unsigned int stride = 0;
+            for( int s = 0; s < geomoetry->_numStrides; s++ )
+            {
+                stride += geomoetry->_strides[s].numbersPerElement;
+            }
+            for( int i = 0; i < geomoetry->_numVertices; i++ )
+            {
+                GLKVector3 * verts = (GLKVector3 *)p;
+                if( verts->x < minX ) minX = verts->x;
+                if( verts->x > maxX ) maxX = verts->x;
+                if( verts->y < minY ) minY = verts->y;
+                if( verts->y > maxY ) maxY = verts->y;
+                if( verts->z < minZ ) minZ = verts->z;
+                if( verts->z > maxZ ) maxZ = verts->z;
+                p += stride;
+            }
+        }
+    }
     
-    [self addBuffer:mb];
-}
-
--(void)createShader
-{
-    [self addShaderFeature:[Material withColor:_color]];
-    [super createShader];
-}
-
--(void)updateTransformFromPos
-{
-    GLKVector3 vec3 = self.position;
-    _node->_transform = GLKMatrix4Translate(_node->_invBindMatrix, vec3.x, vec3.y, vec3.z );
-}
-
--(void)update:(NSTimeInterval)dt
-{
-    GLKVector3 vec3 = POSITION_FROM_MAT(_node->_world);
-    self.position = vec3;
-    [super update:dt];
-}
-
-/*
--(void)getParameters:(NSMutableDictionary *)putHere
-{
-    [super getParameters:putHere];
+    float centerX = (maxX + minX) / 2.0;
+    float centerY = (maxY + minY) / 2.0;
+    float centerZ = (maxZ + minZ) / 2.0;
     
-    Parameter * parameter = [Parameter withBlock:^(TGVector3 vec3) {
-        self.position = TG3(vec3);
-        [self updateTransformFromPos];
-        [(MeshImportPainter *)_parent updatePainters];
-    }];
-    parameter.targetObject = self;
-
-    NSString * paramName = [kParamJointPosition stringByAppendingParamTarget:_node->_name];
-    putHere[paramName] = parameter;
+    TGLogp(LLMeshImporter, @"Scene dim: {%G,%G,%G} - {%G,%G,%G} ceneter: {%G,%G,%G}",
+           minX, minY, minZ,
+           maxX, maxY, maxZ,
+           centerX, centerY, centerZ);
+    
+    Lights * lights = self.lights;
+    if( lights )
+        [lights dump:LLMeshImporter];
+    GLKVector3 cpos = self.camera.position;
+    TGLogp(LLMeshImporter, @"Camera: (%G, %G, %G}", cpos.x, cpos.y, cpos.z );
 }
-*/
 @end
+

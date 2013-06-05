@@ -18,6 +18,8 @@ typedef struct GeomtryStats
 
 @property (nonatomic) bool UVs;
 @property (nonatomic) bool normals;
+@property (nonatomic) bool verticies;
+@property (nonatomic) bool acolors;
 
 // for shaders with standard attributes: position, texture, normals
 -(void)createWithIndicesIntoNames:(NSArray *)indicesIntoNames;
@@ -27,13 +29,10 @@ typedef struct GeomtryStats
 -(void)createBufferDataByStride:(NSArray *)strideSizes
              indicesIntoNames:(NSArray *)indicesIntoNames;
 
-
 // for derived classes
 -(void)getStats:(GeometryStats *)stats;
 -(void)getBufferData:(void *)vertextData
-           indexData:(unsigned *)indexData
-             withUVs:(bool)withUVs
-         withNormals:(bool)withNormals;
+           indexData:(unsigned *)indexData;
 
 // for derived classes that use dynamic draw
 -(void)resetVertices;

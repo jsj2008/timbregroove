@@ -51,10 +51,10 @@
 
 -(void)getBufferData:(void *)vertextData
            indexData:(unsigned *)indexData
-             withUVs:(bool)wUV
-         withNormals:(bool)wNormals
 {
     float * pos = (float *)vertextData;
+    bool wUVs = self.UVs;
+    bool wNormals = self.normals;
     
 	for (int s = 0; s <= _ns; s++) {
 		float theta = s * 2 * M_PI / _ns;
@@ -74,7 +74,7 @@
 			*pos++ = y;
 			*pos++ = z;
 
-            if( wUV )
+            if( wUVs )
             {
                 float u = 1.0 * s / _ns;
                 float v = 1.0 - (1.0 * t / _nt);

@@ -112,10 +112,27 @@ typedef void (^RecurseBlock)(Node3d *);
     if( userData )
         [node setValuesForKeysWithDictionary:userData];
     self.camera = [[PainterCamera alloc] init];
-    [node wireUpWithViewSize:viewSize];
+    [self wireUpWithViewSize:viewSize];
     if( modal )
         self.modal = node;
     return node;
+}
+
+-(id)wireUpWithViewSize:(CGSize)viewSize
+{
+    static RecurseBlock wireUpBlock;
+    
+    wireUpBlock = ^(Node3d *n)
+    {
+        if( n != self )
+            [n wireUpWithViewSize:viewSize];
+        if( n->_kids )
+            [n->_kids each:wireUpBlock];
+    };
+    
+    wireUpBlock(self);
+    wireUpBlock = nil;
+    return self;
 }
 
 -(void)setModal:(Node3d *)modal
