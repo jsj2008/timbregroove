@@ -45,6 +45,18 @@
     free(_invBindMats);
 }
 
+-(MeshSceneArmatureNode *)jointWithName:(NSString *)name
+{
+    for( MeshSceneArmatureNode * joint in _nodes )
+    {
+        if( [joint->_name isEqualToString:name] )
+        {
+            return joint;
+        }
+    }
+    return nil;
+}
+
 -(void)getShaderFeatureNames:(NSMutableArray *)putHere
 {
     [putHere addObject:kShaderFeatureBones];

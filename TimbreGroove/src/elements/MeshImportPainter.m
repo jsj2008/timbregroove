@@ -30,7 +30,9 @@
 @end
 
 @implementation MeshNodePainter {
+@public
     MeshSceneMeshNode * _node;
+    NSString *          _name;
     NSMutableArray *    _jointFeatures;
 }
 
@@ -46,6 +48,7 @@
     if( self )
     {
         _node = node;
+        _name = node->_name;
     }
     return self;
 }
@@ -129,7 +132,6 @@
     return self;
 }
 
-
 -(id)wireUp
 {
     _scene = [ColladaParser parse:_colladaFile];
@@ -206,12 +208,36 @@
     _colladaFile = colladaFile;
 }
 
-
 -(void)disableAnimation:(bool)value
 {
     [_nodePainters each:^(MeshNodePainter *mnp) {
         mnp.disabled = value;
     }];
+}
+
+-(MeshSceneArmatureNode *)findJointWithName:(NSString *)name
+{
+    for( MeshNodePainter * nodePainter in _nodePainters )
+    {
+        for( Joints * joints in nodePainter->_jointFeatures )
+        {
+            MeshSceneArmatureNode * joint = [joints jointWithName:name];
+            if( joint )
+                return joint;
+        }
+    }
+    
+    return nil;
+}
+
+-(Node3d *)findMeshPainterWithName:(NSString *)name
+{
+    for( MeshNodePainter * nodePainter in _nodePainters )
+    {
+        if( [nodePainter->_name isEqualToString:name] )
+            return nodePainter;
+    }
+    return nil;
 }
 
 -(void)update:(NSTimeInterval)dt
@@ -240,6 +266,7 @@
         }
     }
 }
+
 -(void)makeLights
 {
     Light * light = [Light new];

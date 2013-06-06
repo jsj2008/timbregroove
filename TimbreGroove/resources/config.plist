@@ -160,20 +160,16 @@
 			<key>connections</key>
 			<array>
 				<dict>
-					<key>kTriggerDblTap</key>
-					<string>kParamCameraReset</string>
-					<key>kTriggerMainSlider</key>
-					<string>kParamPositionZ</string>
+					<key>kTriggerTap1</key>
+					<string>Squish</string>
+				</dict>
+				<dict>
 					<key>kTriggerTap1</key>
 					<string>RandomVibesNote</string>
-					<key>kTriggerPlayButton</key>
-					<string>kParamSceneAnimation</string>
 					<key>kTriggerPanY</key>
 					<string>kParamLightZ</string>
-					<key>kTriggerDrag1</key>
-					<string>kParamJointPosition</string>
 					<key>kTriggerPanX</key>
-					<string>kParamRotationY</string>
+					<string>kParamRotationZ</string>
 				</dict>
 			</array>
 			<key>icon</key>
@@ -497,15 +493,15 @@
 		<key>box</key>
 		<dict>
 			<key>instanceClass</key>
-			<string>MeshImportPainter</string>
+			<string>SquishBox</string>
 			<key>properties</key>
 			<dict>
 				<key>runAnimations</key>
 				<false/>
 				<key>cameraZ</key>
-				<integer>-4</integer>
+				<integer>-8</integer>
 				<key>runEmitter</key>
-				<true/>
+				<false/>
 				<key>scaleXYZ</key>
 				<real>1</real>
 				<key>colladaFile</key>

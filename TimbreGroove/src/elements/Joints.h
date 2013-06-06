@@ -9,7 +9,10 @@
 #import <Foundation/Foundation.h>
 #import "ShaderFeature.h"
 
+@class MeshSceneArmatureNode;
+
 @interface Joints : NSObject<ShaderFeature>
 +(id)withArmatureNodes:(NSArray *)nodes;
+-(MeshSceneArmatureNode *)jointWithName:(NSString *)name;
 @property (nonatomic) bool disabled;
 @end
