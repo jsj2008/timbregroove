@@ -92,7 +92,7 @@
 		</dict>
 	</dict>
 	<key>default_scene</key>
-	<string>butterfly</string>
+	<string>box</string>
 	<key>scenes</key>
 	<dict>
 		<key>aotk</key>
