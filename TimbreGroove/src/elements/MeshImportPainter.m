@@ -119,7 +119,6 @@
 @implementation MeshImportPainter {
     MeshScene * _scene;
     NSArray * _nodePainters;
-    NSArray * _animations;
 }
 
 - (id)init

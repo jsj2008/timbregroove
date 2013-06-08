@@ -75,11 +75,135 @@
 }
 @end
 
+typedef struct _KeyFrame {
+    GLKVector3    targetPos;
+    GLKVector3    targetRot;
+    float         duration;
+    TweenFunction function;
+} KeyFrame;
+
+@interface AnimationBaker : NSObject {
+    MeshSceneArmatureNode * _joint;
+    KeyFrame *              _keyFrames;
+    unsigned int            _numKeyFrames;
+
+    GLKVector3              _initPos;
+    GLKVector3              _initRot;
+
+}
+
+-(MeshAnimation *)bake;
+@end
+
+@implementation AnimationBaker
+
+-(id)initWithStuff:(MeshSceneArmatureNode *)joint
+            frames:(KeyFrame *)frames
+         numFrames:(unsigned int)numFrames
+           initPos:(GLKVector3)initPos
+           initRot:(GLKVector3)initRot
+{
+    self = [super init];
+    if( self )
+    {
+        _joint = joint;
+        _keyFrames = frames;
+        _numKeyFrames = numFrames;
+        _initPos = initPos;
+        _initRot = initRot;
+    }
+    return self;
+}
+
+#define FRAME_LEN ( 1.0 / 24.0 )
+
+-(MeshAnimation *)bake
+{
+    float totalTime = 0;
+    
+    for( int i = 0; i < _numKeyFrames; i++ )
+    {
+        totalTime += (_keyFrames + i)->duration;
+    }
+    
+    unsigned int totalKeyFrames = (unsigned int) floorf(totalTime / FRAME_LEN );
+    GLKMatrix4 * transforms = malloc( sizeof(GLKMatrix4) * totalKeyFrames);
+    float * keyFrameTimes = malloc( sizeof(float) * totalKeyFrames );
+    
+    unsigned int currentFrame = 0;
+    
+    for( int i = 0; i < _numKeyFrames; i++ )
+    {
+        KeyFrame * keyFrame = _keyFrames + i;
+        unsigned int numFrames = (unsigned int) floorf( keyFrame->duration / FRAME_LEN ) + 1;
+        GLKVector3 tpos = keyFrame->targetPos;
+        GLKVector3 trot = keyFrame->targetRot;
+        float currentTime = 0;
+        GLKVector3 pos = _initPos;
+        GLKVector3 rot = _initRot;
+        for( int i = 0; i < numFrames; i++, currentFrame++ )
+        {
+            currentTime += FRAME_LEN;
+            if( currentTime > keyFrame->duration )
+                currentTime = keyFrame->duration;
+            float delta = tweenFunc(keyFrame->function, currentTime / keyFrame->duration);
+            GLKVector3 newPos;
+            newPos.x = pos.x + ( (tpos.x - pos.x) * delta);
+            newPos.y = pos.y + ( (tpos.y - pos.y) * delta);
+            newPos.z = pos.z + ( (tpos.z - pos.z) * delta);
+            GLKVector3 newRot = _initRot;
+            newRot.z = rot.z + ( (trot.z - rot.z) * delta);
+            GLKMatrix4 transform = GLKMatrix4MakeTranslation(newPos.x, newPos.y, newPos.z );
+            if( trot.x )
+            {
+                newRot.x = rot.x + ( (trot.x - rot.x) * delta);
+                transform = GLKMatrix4Rotate(transform, GLKMathDegreesToRadians(newRot.x), 1, 0, 0);
+            }
+            if( trot.y )
+            {
+                newRot.y = rot.y + ( (trot.y - rot.y) * delta);
+                transform = GLKMatrix4Rotate(transform, GLKMathDegreesToRadians(newRot.y), 0, 1, 0);
+            }
+            if( trot.z )
+            {
+                newRot.z = rot.z + ( (trot.z - rot.z) * delta);
+                transform = GLKMatrix4Rotate(transform, GLKMathDegreesToRadians(newRot.z), 0, 0, 1);
+            }
+            *(transforms + currentFrame) = transform;
+            *(keyFrameTimes + currentFrame) = currentTime;
+        }
+    }
+    
+    MeshAnimation * animation = [[MeshAnimation alloc] init];
+    animation->_keyFrames  = keyFrameTimes;
+    animation->_numFrames  = totalKeyFrames;
+    animation->_transforms = transforms;
+    animation->_target     = _joint;
+    
+    return animation;
+}
+
+@end
+
+KeyFrame boxAnimation[] = {
+    {
+        { 0, 0, 2.0 },
+        { 0, 0, 0 },
+        1.2,
+        kTweenEaseInThrow
+    },
+    {
+        { 0, 0, 0.75 },
+        { 0, 0, 0 },
+        3.2,
+        kTweenEaseOutBounce
+    }
+};
+
 @interface SquishBox : MeshImportPainter
 @end
 
 @implementation SquishBox {
-    SquishBoxAnimation * _squish;
     bool _seenIt;
 }
 
@@ -91,13 +215,29 @@
         Node3d * meshPainter = [self findMeshPainterWithName:@"BoxMesh"];
         meshPainter.rotation = (GLKVector3){ GLKMathDegreesToRadians(-90), 0, GLKMathDegreesToRadians(-50) };
         
-        _squish  = [[SquishBoxAnimation alloc] initWithJoint:[self findJointWithName:@"jt_control"]];
+        
+        MeshSceneArmatureNode * joint = [self findJointWithName:@"jt_front"];
+        AnimationBaker * baker = [[AnimationBaker alloc] initWithStuff:joint
+                                                                frames:boxAnimation
+                                                             numFrames:2
+                                                               initPos:(GLKVector3){ 0, 0, 0.75 }
+                                                               initRot:(GLKVector3){ 0, 0, 0 }];
+        
+        
+        MeshAnimation * animation = [baker bake];
+        NSMutableArray * arr;
+        _animations = nil;
+        if( _animations )
+            arr = [NSMutableArray arrayWithArray:_animations];
+        else
+            arr = [NSMutableArray new];
+
+        [arr addObject:animation];
+        _animations = arr;
         
         _seenIt = true;
     }
     
-    if( _squish.inAnimation )
-        _timer = [_squish update:_timer];
 }
 
 
@@ -106,11 +246,6 @@
     [super getParameters:putHere];
     
     putHere[@"Squish"] = [Parameter withBlock:^(CGPoint pt) {
-        if( !_squish.inAnimation )
-        {
-            _squish.inAnimation = true;
-            _timer = 0;
-        }
     }];
 }
 

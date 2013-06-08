@@ -10,7 +10,10 @@
 
 @class MeshSceneArmatureNode;
 
-@interface MeshImportPainter : Painter // Node3d
+@interface MeshImportPainter : Painter { // Node3d
+@protected
+    NSArray * _animations;
+}
 // startup options read from config.plist
 @property (nonatomic,strong) NSString * colladaFile;
 
