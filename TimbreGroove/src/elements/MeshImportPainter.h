@@ -10,17 +10,15 @@
 
 @class MeshSceneArmatureNode;
 
-@interface MeshImportPainter : Painter { // Node3d
-@protected
-    NSArray * _animations;
-}
+@interface MeshImportPainter : Painter
 // startup options read from config.plist
 @property (nonatomic,strong) NSString * colladaFile;
-
 @property (nonatomic) bool  runEmitter;
-@property (nonatomic) bool  runAnimations;
 @property (nonatomic) float cameraZ;
-@property (nonatomic) bool  autoRotate;
+
+-(void)queueAnimation:(NSString *)name;
+-(void)addAnimation:(NSString *)name
+         animations: (NSArray *)animations;
 
 -(MeshSceneArmatureNode *)findJointWithName:(NSString *)name;
 -(Node3d *)findMeshPainterWithName:(NSString *)name;

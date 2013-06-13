@@ -62,18 +62,6 @@
 
 @end
 
-//@@@@@@@@@@@@@@@@@@@@@@@@@@@@  MeshAnimation  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-@implementation MeshAnimation
-
--(void)dealloc
-{
-    free(_keyFrames);
-    free(_transforms);
-    TGLog(LLObjLifetime, @"%@ released", self);
-}
-
-@end
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  MeshGeometry  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 @implementation MeshGeometry

@@ -21,6 +21,8 @@
 #import "Scene.h"
 #import "TriggerMap.h"
 
+static NSString * const kImportedAnimation = @"_imported";
+
 @interface MeshImportPainter (Dump)
 -(void)dumpMetrics;
 @end
@@ -119,6 +121,9 @@
 @implementation MeshImportPainter {
     MeshScene * _scene;
     NSArray * _nodePainters;
+
+    NSMutableArray *      _playingAnimations;
+    NSMutableDictionary * _animationClips;
 }
 
 - (id)init
@@ -126,6 +131,7 @@
     self = [super init];
     if (self) {
         self.disableStandardParameters = true;
+        _animationClips = [NSMutableDictionary new];
         [self makeLights];
     }
     return self;
@@ -134,7 +140,10 @@
 -(id)wireUp
 {
     _scene = [ColladaParser parse:_colladaFile];
-    _animations = _scene->_animations;
+    
+    if( _scene->_animations )
+        _animationClips[kImportedAnimation] = _scene->_animations;
+    
     [self buildNodePainters];
     [super wireUp];
     if( _runEmitter )
@@ -152,9 +161,6 @@
         self.camera.position = pos;
     }
     
-    if( _animations )
-        [self disableAnimation:!_runAnimations];
-    
     if( (TGGetLogLevel() & LLMeshImporter) != 0 )
         [self dumpMetrics];
     
@@ -162,17 +168,6 @@
     
     return self;
 }
-
--(void)getParameters:(NSMutableDictionary *)putHere
-{
-    [super getParameters:putHere];
-    
-    putHere[kParamSceneAnimation] = [Parameter withBlock:^(int play) {
-        _runAnimations = play;
-        [self disableAnimation:!play];
-    }];
-}
-
 
 -(void)buildNodePainters
 {
@@ -207,13 +202,6 @@
     _colladaFile = colladaFile;
 }
 
--(void)disableAnimation:(bool)value
-{
-    [_nodePainters each:^(MeshNodePainter *mnp) {
-        mnp.disabled = value;
-    }];
-}
-
 -(MeshSceneArmatureNode *)findJointWithName:(NSString *)name
 {
     for( MeshNodePainter * nodePainter in _nodePainters )
@@ -242,28 +230,45 @@
 -(void)update:(NSTimeInterval)dt
 {
     [super update:dt];
+    if ( _playingAnimations )
+        [self runAnimations:dt];
+}
+
+-(void)runAnimations:(NSTimeInterval)dt
+{
+    NSMutableIndexSet * deleteSet = nil;
+    NSUInteger index = 0;
+    bool gotDone = false;
     
-    if ( _runAnimations && _animations )
+    for ( MeshAnimation * animation in _playingAnimations )
     {
-        for ( MeshAnimation * animation in _animations )
+        bool done = [animation update:dt];
+        if( done )
         {
-            animation->_clock += dt;
-            
-            if( animation->_clock >= animation->_keyFrames[animation->_nextFrame] )
-            {
-                MeshSceneNode * node = animation->_target;
-                
-                node->_transform = animation->_transforms[animation->_nextFrame];
-                
-                ++animation->_nextFrame;
-                if( animation->_nextFrame == animation->_numFrames )
-                {
-                    animation->_clock = 0;
-                    animation->_nextFrame = 0;
-                }
-            }
+            if( !deleteSet )
+                deleteSet = [[NSMutableIndexSet alloc] init];
+            [deleteSet addIndex:index];
+            gotDone = true;
         }
+        ++index;
     }
+    if( gotDone )
+    {
+        [_playingAnimations removeObjectsAtIndexes:deleteSet];
+        if( ![_playingAnimations count] )
+            _playingAnimations = nil;
+    }
+}
+
+-(void)queueAnimation:(NSString *)name
+{
+    _playingAnimations = [NSMutableArray arrayWithArray:_animationClips[name]];
+}
+
+-(void)addAnimation:(NSString *)name
+         animations: (NSArray *)animations
+{
+    _animationClips[name] = animations;
 }
 
 -(void)makeLights
@@ -273,7 +278,6 @@
     [lights addLight:light];
     self.lights = lights;
 }
-
 
 @end
 

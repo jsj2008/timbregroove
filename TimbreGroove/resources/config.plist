@@ -167,7 +167,7 @@
 					<key>kTriggerTap1</key>
 					<string>RandomVibesNote</string>
 					<key>kTriggerPanY</key>
-					<string>kParamLightZ</string>
+					<string>kParamCameraRotationX</string>
 					<key>kTriggerPanX</key>
 					<string>kParamRotationZ</string>
 				</dict>

@@ -79,20 +79,7 @@ typedef enum _MeshSceneNodeType {
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@  MeshAnimation  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-@interface MeshAnimation : NSObject {
-@public
-    float *         _keyFrames;
-    int             _numFrames;
-    GLKMatrix4 *    _transforms;
-    
-    NSTimeInterval  _clock;
-    unsigned int    _nextFrame;
-    
-    // block?
-    MeshSceneNode * _target;
-    NSString *      _property;
-}
-@end
+#import "MeshSceneAnimation.h"
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  Mesh  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 

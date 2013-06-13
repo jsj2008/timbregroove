@@ -187,6 +187,7 @@
 		57BE7FB616CACA0D001972ED /* RingBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57BE7FB416CACA0C001972ED /* RingBuffer.cpp */; };
 		57BF036716C61C2300148359 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57BF036616C61C2300148359 /* CoreAudio.framework */; };
 		57C3BB8516C6B5B000899F4B /* SoundSystem+Diag.m in Sources */ = {isa = PBXBuildFile; fileRef = 57C3BB8416C6B5B000899F4B /* SoundSystem+Diag.m */; };
+		57C6F130176A40AB00E398D0 /* MeshSceneAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = 57C6F12F176A40AB00E398D0 /* MeshSceneAnimation.m */; };
 		57C817241728415C00C96AB5 /* NSString+ParamTarget.m in Sources */ = {isa = PBXBuildFile; fileRef = 57C817231728415C00C96AB5 /* NSString+ParamTarget.m */; };
 		57CAF78516891EDB00459353 /* libc++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 57CAF78416891EDA00459353 /* libc++.dylib */; };
 		57CB3B0716BE148A007C093C /* rabbit.png in Resources */ = {isa = PBXBuildFile; fileRef = 57CB3B0516BE148A007C093C /* rabbit.png */; };
@@ -493,6 +494,8 @@
 		57BF036616C61C2300148359 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		57C3BB8316C6B5B000899F4B /* SoundSystem+Diag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SoundSystem+Diag.h"; sourceTree = "<group>"; };
 		57C3BB8416C6B5B000899F4B /* SoundSystem+Diag.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "SoundSystem+Diag.m"; sourceTree = "<group>"; };
+		57C6F12E176A40AB00E398D0 /* MeshSceneAnimation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MeshSceneAnimation.h; sourceTree = "<group>"; };
+		57C6F12F176A40AB00E398D0 /* MeshSceneAnimation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MeshSceneAnimation.m; sourceTree = "<group>"; };
 		57C817221728415C00C96AB5 /* NSString+ParamTarget.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSString+ParamTarget.h"; path = "src/NSString+ParamTarget.h"; sourceTree = "<group>"; };
 		57C817231728415C00C96AB5 /* NSString+ParamTarget.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSString+ParamTarget.m"; path = "src/NSString+ParamTarget.m"; sourceTree = "<group>"; };
 		57C9E6A416EDC66C005F44D1 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
@@ -744,6 +747,8 @@
 				571470551706771F00383D04 /* MeshScene.h */,
 				571470561706771F00383D04 /* MeshScene.m */,
 				577E7ED4170E1A1F009E9916 /* MeshScene+Emitter.m */,
+				57C6F12E176A40AB00E398D0 /* MeshSceneAnimation.h */,
+				57C6F12F176A40AB00E398D0 /* MeshSceneAnimation.m */,
 			);
 			path = meshImport;
 			sourceTree = "<group>";
@@ -1480,6 +1485,7 @@
 				57D3AD9A172F1B0E000DB9E1 /* ColladaParser+Finalize.m in Sources */,
 				57B38A3F1758EBC8008468FF /* Butterfly.m in Sources */,
 				578A581717610BA0005B09EF /* SquishBox.m in Sources */,
+				57C6F130176A40AB00E398D0 /* MeshSceneAnimation.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
