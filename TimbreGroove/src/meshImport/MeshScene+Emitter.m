@@ -11,11 +11,6 @@
 #import "Painter.h"
 #import "Material.h"
 
-typedef struct _StrideTypeMap {
-    VertexStrideType t;
-    const char * name;
-} StrideTypeMap;
-
 NSString * stringFromMat(GLKMatrix4 m)
 {
     return [NSString stringWithFormat:@"{ %G, %G, %G, %G,   %G, %G, %G, %G,   %G, %G, %G, %G,   %G, %G, %G, %G }",

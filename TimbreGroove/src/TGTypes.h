@@ -13,6 +13,8 @@
 
 #define R0_1()      (((float)(arc4random_uniform(0x1000000) % 255))/255.0)
 #define R0_n(n)     (int)(arc4random_uniform(n))
+#define NUM_ELEM(x) (sizeof(x)/sizeof(x[0]))
+
 
 #define GL_ERROR_C { GLenum __e = glGetError(); if(__e) { TGLog(LLShitsOnFire, @"glError(%d/%04X) %s:%d",__e,__e,__FILE__,__LINE__); }}
 
@@ -50,18 +52,10 @@ typedef enum {
 #define TG_POINT        TG_VECTOR2
 #define TG_COLOR        TG_VECTOR4
 
-typedef enum VertexStrideType {
-    st_float1 = 900,
-    st_float2 = 1000,
-    st_float3,
-    st_float4
-} VertexStrideType;
-
 typedef struct VertexStride {
     unsigned int glType; // e.g. GL_FLOAT
     unsigned int numSize; // e.g. sizeof(float)
     unsigned int numbersPerElement;
-    VertexStrideType strideType;
     int          indexIntoShaderNames;
     GLuint       location;
 } VertexStride;

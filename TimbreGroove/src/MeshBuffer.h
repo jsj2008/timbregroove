@@ -17,7 +17,6 @@ static inline VertexStride * StrideInit2f(VertexStride * s)
     s->numbersPerElement = 2;
     s->location = -1;
     s->indexIntoShaderNames = -1;
-    s->strideType = st_float2;
     return s;
 }
 
@@ -25,7 +24,6 @@ static inline VertexStride * StrideInit3f(VertexStride * s)
 {
     StrideInit2f(s);
     s->numbersPerElement = 3;
-    s->strideType = st_float3;
     return s;
 }
 
@@ -33,7 +31,6 @@ static inline VertexStride * StrideInit4f(VertexStride * s)
 {
     StrideInit2f(s);
     s->numbersPerElement = 4;
-    s->strideType = st_float4;
     return s;
 }
 
@@ -41,7 +38,6 @@ static inline VertexStride * StrideInit1f(VertexStride * s)
 {
     StrideInit2f(s);
     s->numbersPerElement = 1;
-    s->strideType = st_float1;
     return s;
 }
 

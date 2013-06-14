@@ -1,5 +1,4 @@
 //
-//  GenericImport.h
 //  TimbreGroove
 //
 //  Created by victor on 3/29/13.
@@ -7,23 +6,21 @@
 //
 
 #import "Painter.h"
+#import "MeshSceneAnimation.h"
+
+#ifndef SKIP_MESH_IMPORT_DECLS
+extern NSString * const kImportedAnimation;
+#endif
 
 @class MeshSceneArmatureNode;
 
-@interface MeshImportPainter : Painter
+@interface MeshImportPainter : Painter<JointDictionary>
+
+@property (nonatomic,strong) AnimationDictionary * animations;
+
 // startup options read from config.plist
 @property (nonatomic,strong) NSString * colladaFile;
 @property (nonatomic) bool  runEmitter;
 @property (nonatomic) float cameraZ;
-
--(void)queueAnimation:(NSString *)name;
--(void)addAnimation:(NSString *)name
-         animations: (NSArray *)animations;
--(void)scrubAnimation:(NSString *)name
-         scrubPercent:(float)scrubPercent; // 0.0 - 0.1
--(void)resetAnimation:(NSString *)name;
-
--(MeshSceneArmatureNode *)findJointWithName:(NSString *)name;
--(Node3d *)findMeshPainterWithName:(NSString *)name;
 @end
 

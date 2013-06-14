@@ -6,6 +6,8 @@
 //  Copyright (c) 2013 Ass Over Tea Kettle. All rights reserved.
 //
 
+#define SKIP_MESH_IMPORT_DECLS
+
 #import "MeshImportPainter.h"
 #import "MeshScene.h"
 #import "PainterCamera.h"
@@ -21,7 +23,7 @@
 #import "Scene.h"
 #import "TriggerMap.h"
 
-static NSString * const kImportedAnimation = @"_imported";
+NSString * const kImportedAnimation = @"_imported";
 
 @interface MeshImportPainter (Dump)
 -(void)dumpMetrics;
@@ -121,9 +123,6 @@ static NSString * const kImportedAnimation = @"_imported";
 @implementation MeshImportPainter {
     MeshScene * _scene;
     NSArray * _nodePainters;
-
-    NSMutableArray *      _playingAnimations;
-    NSMutableDictionary * _animationClips;
 }
 
 - (id)init
@@ -131,7 +130,7 @@ static NSString * const kImportedAnimation = @"_imported";
     self = [super init];
     if (self) {
         self.disableStandardParameters = true;
-        _animationClips = [NSMutableDictionary new];
+        _animations = [[AnimationDictionary alloc] init];
         [self makeLights];
     }
     return self;
@@ -142,7 +141,7 @@ static NSString * const kImportedAnimation = @"_imported";
     _scene = [ColladaParser parse:_colladaFile];
     
     if( _scene->_animations )
-        _animationClips[kImportedAnimation] = _scene->_animations;
+        [_animations addClip:[Animation withAnimations:_scene->_animations name:kImportedAnimation]];
     
     [self buildNodePainters];
     [super wireUp];
@@ -217,75 +216,10 @@ static NSString * const kImportedAnimation = @"_imported";
     return nil;
 }
 
--(Node3d *)findMeshPainterWithName:(NSString *)name
-{
-    for( MeshNodePainter * nodePainter in _nodePainters )
-    {
-        if( [nodePainter->_name isEqualToString:name] )
-            return nodePainter;
-    }
-    return nil;
-}
-
 -(void)update:(NSTimeInterval)dt
 {
     [super update:dt];
-    if ( _playingAnimations )
-        [self runAnimations:dt];
-}
-
--(void)runAnimations:(NSTimeInterval)dt
-{
-    NSMutableIndexSet * deleteSet = nil;
-    NSUInteger index = 0;
-    bool gotDone = false;
-    
-    for ( MeshAnimation * animation in _playingAnimations )
-    {
-        bool done = [animation update:dt];
-        if( done )
-        {
-            if( !deleteSet )
-                deleteSet = [[NSMutableIndexSet alloc] init];
-            [deleteSet addIndex:index];
-            gotDone = true;
-        }
-        ++index;
-    }
-    if( gotDone )
-    {
-        [_playingAnimations removeObjectsAtIndexes:deleteSet];
-        if( ![_playingAnimations count] )
-            _playingAnimations = nil;
-    }
-}
-
--(void)queueAnimation:(NSString *)name
-{
-    _playingAnimations = [NSMutableArray arrayWithArray:_animationClips[name]];
-    for( MeshAnimation * animation in _playingAnimations )
-        [animation reset];
-}
-
--(void)addAnimation:(NSString *)name
-         animations: (NSArray *)animations
-{
-    _animationClips[name] = animations;
-}
-
--(void)scrubAnimation:(NSString *)name
-         scrubPercent:(float)scrubPercent
-{
-    NSArray * arr = _animationClips[name];
-    for( MeshAnimation * animation in arr )
-        [animation scrub:scrubPercent];
-}
-
--(void)resetAnimation:(NSString *)name
-{
-    NSArray * arr = _animationClips[name];
-    for( MeshAnimation * animation in arr )
-        [animation reset];
+    [_animations update:dt];
 }
 
 -(void)makeLights

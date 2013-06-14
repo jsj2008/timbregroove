@@ -13,19 +13,17 @@
 #import "Light.h"
 #import "Names.h"
 
-#define NUM_ELEM(x) (sizeof(x)/sizeof(x[0]))
-
 AnimationPathKeyFrame boxBouncePath[] = {
     {
         { 0, 1.75, 0 },
         { 0, 0, 0 },
-        TIME_TO_FRAME(0.5),
+        (0.5),
         kTweenEaseOutSine // kTweenEaseInThrow
     },
     {
         { 0, 0, 0 },
         { 0, 0, 0 },
-        TIME_TO_FRAME(1.3),
+        (1.3),
         kTweenEaseOutBounce
     }
 };
@@ -46,25 +44,25 @@ AnimationPathKeyFrame boxFlipPath[] = {
     {
         { 0, 0, 0 },
         { 90, 0, 0 },
-        TIME_TO_FRAME(0.2),
+        (0.2),
         kTweenLinear// kTweenEaseInThrow
     },
     {
         { 0, 1.0, 0 },
         { 180, 0, 0 },
-        TIME_TO_FRAME(0.1),
+        (0.1),
         kTweenLinear // kTweenEaseInThrow
     },
     {
         { 0, 1.0, 0 },
         { 270, 0, 0 },
-        TIME_TO_FRAME(0.1),
+        (0.1),
         kTweenEaseInSine
     },
     {
         { 0, 0, 0 },
         { 360, 0, 0 },
-        TIME_TO_FRAME(0.5),
+        (0.5),
         kTweenEaseOutSine
     }
 };
@@ -87,19 +85,15 @@ AnimationClip boxFlipClip = {
 
 @implementation SquishBox {
     bool _seenIt;
-    bool _isScrubbing;
+    Animation * _scrubber;
 }
 
 -(void)update:(NSTimeInterval)dt
 {
     if( !_seenIt )
     {
-        AnimationBaker * baker = [AnimationBaker bakerWithClip:&boxBounceClip];
-        NSArray * animations = [baker bake:self];
-        [self addAnimation:@(boxBounceClip.name) animations:animations];
-        baker = [AnimationBaker bakerWithClip:&boxFlipClip];
-        animations = [baker bake:self];
-        [self addAnimation:@(boxFlipClip.name) animations:animations];
+        [self.animations addClip:[Animation withClip:&boxBounceClip jointDict:self fps:ANIMATION_FRAME_PER_SECOND]];
+        [self.animations addClip:[Animation withClip:&boxFlipClip   jointDict:self fps:ANIMATION_FRAME_PER_SECOND]];
         _seenIt = true;
     }
     [super update:dt];
@@ -111,23 +105,23 @@ AnimationClip boxFlipClip = {
     [super getParameters:putHere];
     
     putHere[@"Squish"] = [Parameter withBlock:^(CGPoint pt) {
+        NSString * name = nil;
         if( pt.y > 0 )
-            [self queueAnimation:@(boxBounceClip.name)];
+            name = @(boxBounceClip.name);
         else
-            [self queueAnimation:@(boxFlipClip.name)];
+            name = @(boxFlipClip.name);
+        [self.animations queueClip:name];
     }];
     
     putHere[@"Scrub"] = [Parameter withBlock:^(float amt) {
-        _isScrubbing = true;
-        [self scrubAnimation:@(boxFlipClip.name) scrubPercent:amt];
+        if( !_scrubber )
+            _scrubber = [Animation withClip:&boxFlipClip jointDict:self fps:110];
+        [_scrubber scrub:amt];
     }];
     
     putHere[@"ScrubDone"] = [Parameter withBlock:^(int type) {
-        if( _isScrubbing )
-        {
-            [self resetAnimation:@(boxFlipClip.name)];
-            _isScrubbing = false;
-        }
+        if( _scrubber )
+            [_scrubber reset];
     }];
 }
 

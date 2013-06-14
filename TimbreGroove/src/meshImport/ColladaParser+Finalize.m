@@ -320,7 +320,6 @@ extern NSString * const kValue_name_WEIGHT;
             vs->glType = GL_FLOAT;
             vs->numSize = sizeof(float);
             vs->numbersPerElement = ist->_bufferInfo.stride;
-            vs->strideType = -1;
             vs->indexIntoShaderNames = key;
             vs->location = -1;
             TGLog(LLMeshImporter, @"Includes %s buffer",
@@ -338,7 +337,6 @@ extern NSString * const kValue_name_WEIGHT;
             vs->glType = GL_FLOAT;
             vs->numSize = sizeof(float);
             vs->numbersPerElement = 4;
-            vs->strideType = -1;
             vs->indexIntoShaderNames = gv_boneIndex;
             vs->location = -1;
             
@@ -346,7 +344,6 @@ extern NSString * const kValue_name_WEIGHT;
             vs->glType = GL_FLOAT;
             vs->numSize = sizeof(float);
             vs->numbersPerElement = 4;
-            vs->strideType = -1;
             vs->indexIntoShaderNames = gv_boneWeights;
             vs->location = -1;
             TGLog(LLMeshImporter, @"Includes bones index/weight buffers");
