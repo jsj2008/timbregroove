@@ -19,6 +19,9 @@
 -(void)queueAnimation:(NSString *)name;
 -(void)addAnimation:(NSString *)name
          animations: (NSArray *)animations;
+-(void)scrubAnimation:(NSString *)name
+         scrubPercent:(float)scrubPercent; // 0.0 - 0.1
+-(void)resetAnimation:(NSString *)name;
 
 -(MeshSceneArmatureNode *)findJointWithName:(NSString *)name;
 -(Node3d *)findMeshPainterWithName:(NSString *)name;

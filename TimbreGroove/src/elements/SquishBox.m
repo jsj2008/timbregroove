@@ -11,9 +11,11 @@
 #import "Tween.h"
 #import "Camera.h"
 #import "Light.h"
+#import "Names.h"
 
+#define NUM_ELEM(x) (sizeof(x)/sizeof(x[0]))
 
-AnimationPathKeyFrame boxPath[] = {
+AnimationPathKeyFrame boxBouncePath[] = {
     {
         { 0, 1.75, 0 },
         { 0, 0, 0 },
@@ -28,32 +30,76 @@ AnimationPathKeyFrame boxPath[] = {
     }
 };
 
-AnimationPath boxAnimation = {
+AnimationPath boxBounceAnimation = {
     "jt_front",
-    boxPath,
-    2
+    boxBouncePath,
+    NUM_ELEM(boxBouncePath)
 };
 
-AnimationClip boxClip = {
+AnimationClip boxBounceClip = {
     "boxBounce",
-    &boxAnimation,
+    &boxBounceAnimation,
     1
 };
+
+AnimationPathKeyFrame boxFlipPath[] = {
+    {
+        { 0, 0, 0 },
+        { 90, 0, 0 },
+        TIME_TO_FRAME(0.2),
+        kTweenLinear// kTweenEaseInThrow
+    },
+    {
+        { 0, 1.0, 0 },
+        { 180, 0, 0 },
+        TIME_TO_FRAME(0.1),
+        kTweenLinear // kTweenEaseInThrow
+    },
+    {
+        { 0, 1.0, 0 },
+        { 270, 0, 0 },
+        TIME_TO_FRAME(0.1),
+        kTweenEaseInSine
+    },
+    {
+        { 0, 0, 0 },
+        { 360, 0, 0 },
+        TIME_TO_FRAME(0.5),
+        kTweenEaseOutSine
+    }
+};
+
+AnimationPath boxFlipAnimation = {
+    "jt_fixed",
+    boxFlipPath,
+    NUM_ELEM(boxFlipPath)
+};
+
+AnimationClip boxFlipClip = {
+    "boxFlip",
+    &boxFlipAnimation,
+    1
+};
+
 
 @interface SquishBox : MeshImportPainter
 @end
 
 @implementation SquishBox {
     bool _seenIt;
+    bool _isScrubbing;
 }
 
 -(void)update:(NSTimeInterval)dt
 {
     if( !_seenIt )
     {
-        AnimationBaker * baker = [AnimationBaker bakerWithClip:&boxClip];
+        AnimationBaker * baker = [AnimationBaker bakerWithClip:&boxBounceClip];
         NSArray * animations = [baker bake:self];
-        [self addAnimation:@(boxClip.name) animations:animations];
+        [self addAnimation:@(boxBounceClip.name) animations:animations];
+        baker = [AnimationBaker bakerWithClip:&boxFlipClip];
+        animations = [baker bake:self];
+        [self addAnimation:@(boxFlipClip.name) animations:animations];
         _seenIt = true;
     }
     [super update:dt];
@@ -65,7 +111,23 @@ AnimationClip boxClip = {
     [super getParameters:putHere];
     
     putHere[@"Squish"] = [Parameter withBlock:^(CGPoint pt) {
-        [self queueAnimation:@(boxClip.name)];
+        if( pt.y > 0 )
+            [self queueAnimation:@(boxBounceClip.name)];
+        else
+            [self queueAnimation:@(boxFlipClip.name)];
+    }];
+    
+    putHere[@"Scrub"] = [Parameter withBlock:^(float amt) {
+        _isScrubbing = true;
+        [self scrubAnimation:@(boxFlipClip.name) scrubPercent:amt];
+    }];
+    
+    putHere[@"ScrubDone"] = [Parameter withBlock:^(int type) {
+        if( _isScrubbing )
+        {
+            [self resetAnimation:@(boxFlipClip.name)];
+            _isScrubbing = false;
+        }
     }];
 }
 

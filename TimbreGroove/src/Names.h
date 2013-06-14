@@ -140,8 +140,13 @@ extern NSString const * kTriggerTap1;
 extern NSString const * kTriggerTap2;
 extern NSString const * kTriggerTap3;
 extern NSString const * kTriggerDblTap;
+
 extern NSString const * kTriggerPanX;
 extern NSString const * kTriggerPanY;
+extern NSString const * kTriggerPanX2; // 2 finger
+extern NSString const * kTriggerPanY2;
+extern NSString const * kTriggerPanDone;
+
 extern NSString const * kTriggerDragPos;
 extern NSString const * kTriggerDrag1;
 extern NSString const * kTriggerDrag2;

@@ -164,11 +164,13 @@
 					<string>Squish</string>
 				</dict>
 				<dict>
-					<key>kTriggerTap1</key>
-					<string>RandomVibesNote</string>
-					<key>kTriggerPanY</key>
-					<string>kParamCameraRotationX</string>
+					<key>kTriggerPanDone</key>
+					<string>ScrubDone</string>
 					<key>kTriggerPanX</key>
+					<string>Scrub</string>
+					<key>kTriggerPanY2</key>
+					<string>kParamCameraRotationX</string>
+					<key>kTriggerPanX2</key>
 					<string>kParamRotationZ</string>
 				</dict>
 			</array>
@@ -597,7 +599,7 @@
 		<key>LLMeshImporter</key>
 		<true/>
 		<key>LLGestureStuff</key>
-		<false/>
+		<true/>
 		<key>LLObjLifetime</key>
 		<false/>
 		<key>LLAudioTweaks</key>

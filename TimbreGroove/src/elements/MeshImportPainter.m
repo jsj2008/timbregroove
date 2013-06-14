@@ -263,12 +263,29 @@ static NSString * const kImportedAnimation = @"_imported";
 -(void)queueAnimation:(NSString *)name
 {
     _playingAnimations = [NSMutableArray arrayWithArray:_animationClips[name]];
+    for( MeshAnimation * animation in _playingAnimations )
+        [animation reset];
 }
 
 -(void)addAnimation:(NSString *)name
          animations: (NSArray *)animations
 {
     _animationClips[name] = animations;
+}
+
+-(void)scrubAnimation:(NSString *)name
+         scrubPercent:(float)scrubPercent
+{
+    NSArray * arr = _animationClips[name];
+    for( MeshAnimation * animation in arr )
+        [animation scrub:scrubPercent];
+}
+
+-(void)resetAnimation:(NSString *)name
+{
+    NSArray * arr = _animationClips[name];
+    for( MeshAnimation * animation in arr )
+        [animation reset];
 }
 
 -(void)makeLights

@@ -19,8 +19,13 @@
     FloatParamBlock    _triggerPinch;
     PointParamBlock    _triggerTapPos;
     PointParamBlock    _triggerTap1;
+    
     FloatParamBlock    _triggerPanX;
     FloatParamBlock    _triggerPanY;
+    FloatParamBlock    _triggerPanX2Fing;
+    FloatParamBlock    _triggerPanY2Fing;
+    IntParamBlock      _triggerPanDone;
+    
     Vector3ParamBlock  _triggerDrag1;
     PointParamBlock    _triggerDragPos;
     PointParamBlock    _triggerDblTap;
@@ -40,8 +45,13 @@
         _triggerPinch     = [tm getFloatTrigger:kTriggerPinch];
         _triggerTapPos    = [tm getPointTrigger:kTriggerTapPos];
         _triggerTap1      = [tm getPointTrigger:kTriggerTap1];
+        
         _triggerPanX      = [tm getFloatTrigger:kTriggerPanX];
         _triggerPanY      = [tm getFloatTrigger:kTriggerPanY];
+        _triggerPanX2Fing = [tm getFloatTrigger:kTriggerPanX2];
+        _triggerPanY2Fing = [tm getFloatTrigger:kTriggerPanY2];
+        _triggerPanDone   = [tm getIntTrigger:kTriggerPanDone];
+        
         _triggerDblTap    = [tm getPointTrigger:kTriggerDblTap];
         
         // object movers/tweakers:
@@ -58,6 +68,9 @@
         _triggerTap1      = nil;
         _triggerPanX      = nil;
         _triggerPanY      = nil;
+        _triggerPanX2Fing = nil;
+        _triggerPanY2Fing = nil;
+        _triggerPanDone   = nil;
         _triggerDrag1     = nil;
         _triggerDragPos   = nil;
         _triggerDblTap    = nil;
@@ -146,11 +159,20 @@
     {
         UIPanGestureRecognizer * pgr;
         pgr = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panning:)];
+        pgr.maximumNumberOfTouches = 1;
         if( mg )
            [pgr requireGestureRecognizerToFail:mg];
         [self addGestureRecognizer:pgr];
     }
-    
+
+    if( _currentTriggers->_triggerPanX2Fing || _currentTriggers->_triggerPanY2Fing )
+    {
+        UIPanGestureRecognizer * pgr;
+        pgr = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panning2:)];
+        pgr.minimumNumberOfTouches = 2;
+        [self addGestureRecognizer:pgr];
+    }
+
     if( _currentTriggers->_triggerDirection )
     {
         UISwipeGestureRecognizerDirection dirs[4] = {
@@ -288,7 +310,14 @@
 {
     [self _innerPanning:pgr
             panXTrigger:_currentTriggers->_triggerPanX
-            panYTrigger:_currentTriggers->_triggerPanY];
+            panYTrigger:_currentTriggers->_triggerPanY];    
+}
+
+-(void)panning2:(UIPanGestureRecognizer *)pgr
+{
+    [self _innerPanning:pgr
+            panXTrigger:_currentTriggers->_triggerPanX2Fing
+            panYTrigger:_currentTriggers->_triggerPanY2Fing];
 }
 
 -(void)_innerPanning:(UIPanGestureRecognizer *)pgr
@@ -387,6 +416,8 @@
         TGLog(LLGestureStuff, @"Panning over");
         _xPanning = _yPanning = 0;
         _panDir = 0;
+        if( _currentTriggers->_triggerPanDone )
+            _currentTriggers->_triggerPanDone(1);
     }
 }
 

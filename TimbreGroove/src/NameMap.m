@@ -106,8 +106,13 @@ void ensureNameMapDict()
       @"kTriggerTap2":  kTriggerTap2 ,
       @"kTriggerTap3":  kTriggerTap3 ,
       @"kTriggerDblTap":  kTriggerDblTap ,
+      
       @"kTriggerPanX":  kTriggerPanX ,
       @"kTriggerPanY":  kTriggerPanY ,
+      @"kTriggerPanX2":  kTriggerPanX2 ,
+      @"kTriggerPanY2":  kTriggerPanY2 ,
+      @"kTriggerPanDone": kTriggerPanDone,
+      
       @"kTriggerTweakX": kTriggerTweakX,
       @"kTriggerTweakY": kTriggerTweakY,
       @"kTriggerDragPos":  kTriggerDragPos ,

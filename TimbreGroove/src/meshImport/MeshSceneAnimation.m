@@ -12,7 +12,8 @@
 
 @implementation MeshAnimation {
     NSTimeInterval  _clock;
-    unsigned int    _nextFrame;
+    int    _nextFrame;
+    unsigned int    _scrubFrame;
 }
 
 -(void)dealloc
@@ -33,14 +34,34 @@
         ++_nextFrame;
         if( _nextFrame == _numFrames )
         {
-            _clock = 0;
-            _nextFrame = 0;
             if( !_loop )
                 return true;
+            [self reset];
         }
     }
  
     return false;
+}
+
+-(void)scrub:(float)percent
+{
+    unsigned int frameDelta = (unsigned int)( _numFrames * percent );
+    _nextFrame = _scrubFrame + frameDelta;
+    if( _nextFrame >= _numFrames )
+        _nextFrame %= _numFrames;
+    else if( _nextFrame < 0 )
+        _nextFrame += _numFrames;
+    TGLog( LLGestureStuff, @"Scrubbing: %d+%d = %d out of %d",
+          _scrubFrame, frameDelta, _nextFrame, _numFrames );
+    _target->_transform = _transforms[_nextFrame];
+}
+
+-(void)reset
+{
+    _scrubFrame = _nextFrame;
+    _clock = 0;
+    _nextFrame = 0;
+    TGLog( LLGestureStuff, @"Animation reset: scrub frame: %d", _scrubFrame );
 }
 @end
 

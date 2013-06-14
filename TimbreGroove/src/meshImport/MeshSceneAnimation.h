@@ -24,6 +24,8 @@
 }
 @property (nonatomic) bool loop;
 -(bool)update:(NSTimeInterval)dt;
+-(void)scrub:(float)percent;
+-(void)reset;
 @end
 
 #define ANIMATION_FRAME_PER_SECOND 24.0
