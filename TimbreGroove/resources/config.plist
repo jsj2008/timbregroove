@@ -171,7 +171,7 @@
 					<key>kTriggerPanY2</key>
 					<string>kParamCameraRotationX</string>
 					<key>kTriggerPanX2</key>
-					<string>kParamRotationZ</string>
+					<string>kParamLightZ</string>
 				</dict>
 			</array>
 			<key>icon</key>

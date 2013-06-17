@@ -83,6 +83,16 @@
     _desc.colors.diffuse = diffuse;
 }
 
+-(GLKVector4)specular
+{
+    return _desc.colors.specular;
+}
+
+-(void)setSpecular:(GLKVector4)specular
+{
+    _desc.colors.specular = specular;
+}
+
 -(GLKVector3)spotDirection
 {
     return _desc.spotDirection;
@@ -137,6 +147,9 @@
 
 -(void)getParameters:(NSMutableDictionary *)parameters
 {
+    if( !_enableParameters )
+        return;
+    
     parameters[kParamLightReset] = [Parameter withBlock:^(CGPoint pt) {
         self.position = (GLKVector3){ 0, 0, 8 };
         self.rotation = (GLKVector3){ 0, 0, 0 };
@@ -218,6 +231,7 @@
 {
     if( !_lights )
         _lights = [NSMutableArray new];
+    light.lightNumber = [_lights count];
     [_lights addObject:light];
 }
 

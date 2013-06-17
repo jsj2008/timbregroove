@@ -70,8 +70,10 @@ typedef struct _ShaderLight {
 @property (nonatomic) GLKVector3 attenuation;
 @property (nonatomic) GLKVector4 ambient;
 @property (nonatomic) GLKVector4 diffuse;
+@property (nonatomic) GLKVector4 specular;
 @property (nonatomic) GLKVector3 spotDirection; // expects normalized
 @property (nonatomic) ShaderLight desc;
 @property (nonatomic) bool point;
 @property (nonatomic) int lightNumber;
+@property (nonatomic) bool enableParameters;
 @end

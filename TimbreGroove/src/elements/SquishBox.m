@@ -42,19 +42,19 @@ AnimationClip boxBounceClip = {
 
 AnimationPathKeyFrame boxFlipPath[] = {
     {
-        { 0, 0, 0 },
+        { 0, 0, -1.0 },
         { 90, 0, 0 },
         (0.2),
         kTweenLinear// kTweenEaseInThrow
     },
     {
-        { 0, 1.0, 0 },
+        { 0, 1.0, -1.5 },
         { 180, 0, 0 },
         (0.1),
         kTweenLinear // kTweenEaseInThrow
     },
     {
-        { 0, 1.0, 0 },
+        { 0, 1.0, -1.0 },
         { 270, 0, 0 },
         (0.1),
         kTweenEaseInSine
@@ -132,23 +132,27 @@ AnimationClip boxFlipClip = {
     Light * light;
     GLKVector3 pos;
     
+#if 1
     light = [Light new];
     pos = light.position;
-    pos.y = 4.5;
+    pos.y = 2.5;
     pos.x = 4.0;
-    pos.z = 0;
+    pos.z = 2;
     light.position = pos;
     light.point = true;
-    light.attenuation = (GLKVector3){ 0.1, 0, 0 };
+    light.attenuation = (GLKVector3){ 0.18, 0, 0 };
     [lights addLight:light];
-
+#endif
+    
+#if 1
     light = [Light new];
     pos = light.position;
-    pos.y = 1.5;
-    pos.z = 3.3;
+    pos.y = -1.5;
+    pos.z = -13.0;
     light.position = pos;
     [lights addLight:light];
-
+#endif
+    
     self.lights = lights;
 }
 
