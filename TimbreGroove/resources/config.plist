@@ -160,10 +160,16 @@
 			<key>connections</key>
 			<array>
 				<dict>
+					<key>kTriggerPanDone</key>
+					<string>NoteDone</string>
+					<key>kTriggerPanX</key>
+					<string>NoteSweep</string>
 					<key>kTriggerTap1</key>
 					<string>Squish</string>
 				</dict>
 				<dict>
+					<key>kTriggerTap1</key>
+					<string>TapNote</string>
 					<key>kTriggerPanDone</key>
 					<string>ScrubDone</string>
 					<key>kTriggerPanX</key>
@@ -181,7 +187,7 @@
 			<key>3d_element</key>
 			<string>box</string>
 			<key>audio_element</key>
-			<string>jazz</string>
+			<string>synth_01</string>
 		</dict>
 		<key>fractal</key>
 		<dict>
@@ -250,6 +256,22 @@
 	</dict>
 	<key>audio_elements</key>
 	<dict>
+		<key>synth_01</key>
+		<dict>
+			<key>connections</key>
+			<array>
+				<dict>
+					<key>kTriggerTap1</key>
+					<string>TapNote</string>
+				</dict>
+			</array>
+			<key>instanceClass</key>
+			<string>Synth_01</string>
+			<key>generators</key>
+			<array>
+				<string>saw</string>
+			</array>
+		</dict>
 		<key>synthOfGod</key>
 		<dict>
 			<key>properties</key>
@@ -278,7 +300,7 @@
 				</dict>
 			</array>
 			<key>instanceClass</key>
-			<string>Synth</string>
+			<string>RandomPentSynth</string>
 			<key>generators</key>
 			<array>
 				<string>sine</string>
@@ -595,21 +617,21 @@
 		<key>LLGeometry</key>
 		<false/>
 		<key>LLLights</key>
-		<true/>
+		<false/>
 		<key>LLMeshImporter</key>
-		<true/>
+		<false/>
 		<key>LLGestureStuff</key>
-		<true/>
+		<false/>
 		<key>LLObjLifetime</key>
 		<false/>
 		<key>LLAudioTweaks</key>
-		<false/>
+		<true/>
 		<key>LLJustSayin</key>
 		<false/>
 		<key>LLGLResource</key>
 		<false/>
 		<key>LLMidiStuff</key>
-		<false/>
+		<true/>
 		<key>LLCaptureOps</key>
 		<false/>
 		<key>LLAudioResource</key>

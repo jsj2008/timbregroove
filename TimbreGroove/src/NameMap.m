@@ -30,6 +30,8 @@ void ensureNameMapDict()
       @"kParamMasterVolume":  kParamMasterVolume ,
       @"kParamTempo":  kParamTempo ,
       @"kParamMIDINote":  kParamMIDINote ,
+      @"kParamMIDINoteON":  kParamMIDINoteON ,
+      @"kParamMIDINoteOFF":  kParamMIDINoteOFF ,
       @"kParamRandomNote":  kParamRandomNote ,
       @"kParamPitch":  kParamPitch ,
       

@@ -338,6 +338,25 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
     } copy] afterDelay:noteMsg->duration];
 }
 
+-(void)setNoteOnOff:(MIDINoteMessage *)noteMsg
+        destination:(id<MidiCapableProtocol>)instrument
+                 on:(bool)on
+{
+    __block MIDIPacketList packetList;
+    packetList.numPackets = 1;
+    packetList.packet[ 0]. length = 3;
+    packetList.packet[ 0]. data[ 0] = on ? 0x90 : 0x80;
+    packetList.packet[ 0]. data[ 1] = noteMsg->note & 0x7F;
+    packetList.packet[ 0]. data[ 2] = noteMsg->velocity & 0x7F;
+    packetList.packet[ 0]. timeStamp = 0;
+    
+    MIDIEndpointRef endPoint = [instrument endPoint];
+    MIDIPortRef     outPort  = [instrument outPort];
+    instrument = nil;
+    
+    CheckError( MIDISend(outPort, endPoint, &packetList), on ? "Couldn't send note ON" : "Couldn't send note OFF");
+}
+
 -(void)update:(NSTimeInterval)dt
 {
     

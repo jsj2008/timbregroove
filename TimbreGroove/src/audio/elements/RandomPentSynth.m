@@ -12,7 +12,7 @@
 #import "Names.h"
 #import "NoteGenerator.h"
 
-@interface Synth : Audio {
+@interface RandomPentSynth : Audio {
     PointerParamBlock _midiNote;
     int _oscChannel;
     int _currentChannel;
@@ -22,7 +22,7 @@
 
 @end
 
-@implementation Synth
+@implementation RandomPentSynth
 
 
 -(void)loadAudioFromConfig:(ConfigAudioProfile *)config

@@ -205,31 +205,46 @@ OSStatus renderCallback(
 
 -(void)getParameters:(NSMutableDictionary *)putHere
 {
-    FloatParamBlock(^closure)(NSString const * name) =
+    FloatParamBlock(^NOOP_closure)(NSString const *) =
     ^FloatParamBlock(NSString const * name){
         return ^(float f) {
             [self handleParamChange:name value:f ];
         };
     };
     
+    PointerParamBlock(^handleMidiMsg)(bool, bool) =
+    ^PointerParamBlock(bool useDuration, bool onOff) {
+        return ^(void * pmsg) {
+            MIDINoteMessage * msg = pmsg;
+            NSArray * instruments = msg->channel < kNumSamplers ? _samplers : _toneGenerators;
+            id<MidiCapableProtocol> instrument = instruments[msg->channel % kNumSamplers];
+            if( useDuration )
+                [_midi sendNote:msg destination:instrument];
+            else
+                [_midi setNoteOnOff:msg destination:instrument on:onOff];
+        };
+    };
+    
     [putHere addEntriesFromDictionary:
      @{
-              kParamTempo: [Parameter withBlock:[closure(kParamTempo) copy]],
-              kParamPitch: [Parameter withBlock:[closure(kParamPitch) copy]],
-       kParamInstrumentP1: [Parameter withBlock:[closure(kParamInstrumentP1) copy]],
-       kParamInstrumentP2: [Parameter withBlock:[closure(kParamInstrumentP2) copy]],
-       kParamInstrumentP3: [Parameter withBlock:[closure(kParamInstrumentP3) copy]],
-       kParamInstrumentP4: [Parameter withBlock:[closure(kParamInstrumentP4) copy]],
-       kParamInstrumentP5: [Parameter withBlock:[closure(kParamInstrumentP5) copy]],
-       kParamInstrumentP6: [Parameter withBlock:[closure(kParamInstrumentP6) copy]],
-       kParamInstrumentP7: [Parameter withBlock:[closure(kParamInstrumentP7) copy]],
-       kParamInstrumentP8: [Parameter withBlock:[closure(kParamInstrumentP8) copy]],
-           kParamMIDINote: [Parameter withBlock:[^(MIDINoteMessage *msg) {
-        NSArray * instruments = msg->channel < kNumSamplers ? _samplers : _toneGenerators;
-        id<MidiCapableProtocol> instrument = instruments[msg->channel % kNumSamplers];
-        [_midi sendNote:msg destination:instrument];
-    } copy]]
+              kParamTempo: [Parameter withBlock:[NOOP_closure(kParamTempo) copy]],
+              kParamPitch: [Parameter withBlock:[NOOP_closure(kParamPitch) copy]],
+       kParamInstrumentP1: [Parameter withBlock:[NOOP_closure(kParamInstrumentP1) copy]],
+       kParamInstrumentP2: [Parameter withBlock:[NOOP_closure(kParamInstrumentP2) copy]],
+       kParamInstrumentP3: [Parameter withBlock:[NOOP_closure(kParamInstrumentP3) copy]],
+       kParamInstrumentP4: [Parameter withBlock:[NOOP_closure(kParamInstrumentP4) copy]],
+       kParamInstrumentP5: [Parameter withBlock:[NOOP_closure(kParamInstrumentP5) copy]],
+       kParamInstrumentP6: [Parameter withBlock:[NOOP_closure(kParamInstrumentP6) copy]],
+       kParamInstrumentP7: [Parameter withBlock:[NOOP_closure(kParamInstrumentP7) copy]],
+       kParamInstrumentP8: [Parameter withBlock:[NOOP_closure(kParamInstrumentP8) copy]],
+           kParamMIDINote: [Parameter withBlock:[handleMidiMsg(true,false) copy]],
+         kParamMIDINoteON: [Parameter withBlock:[handleMidiMsg(false,true) copy]],
+        kParamMIDINoteOFF: [Parameter withBlock:[handleMidiMsg(false,false) copy]],
+
      }];
+    
+    NOOP_closure = nil;
+    handleMidiMsg = nil;
 }
 
 -(void)triggersChanged:(Scene *)scene

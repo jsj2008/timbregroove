@@ -50,6 +50,9 @@ typedef OSStatus (^MIDISendBlock)(UInt32,UInt32,UInt32,UInt32);
 -(void)releaseDestination:(id<MidiCapableProtocol>)instrument;
 -(void)sendNote:(MIDINoteMessage *)noteMsg
     destination:(id<MidiCapableProtocol>)instrument;
+-(void)setNoteOnOff:(MIDINoteMessage *)noteMsg
+        destination:(id<MidiCapableProtocol>)instrument
+                 on:(bool)on;
 
 -(void)update:(NSTimeInterval)dt;
 
