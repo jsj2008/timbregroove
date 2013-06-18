@@ -634,7 +634,7 @@
 		<key>LLObjLifetime</key>
 		<false/>
 		<key>LLAudioTweaks</key>
-		<true/>
+		<false/>
 		<key>LLJustSayin</key>
 		<false/>
 		<key>LLGLResource</key>

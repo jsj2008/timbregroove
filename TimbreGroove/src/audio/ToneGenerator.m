@@ -17,7 +17,7 @@
 @end
 @implementation ToneGeneratorProxy
 
-+(id)toneGeneratorWithChannel:(int)channel andUI:(AudioUnit)au
++(id)toneGeneratorWithChannel:(int)channel andMixerAU:(AudioUnit)au
 {
     return [[ToneGeneratorProxy alloc] initWithChannel:channel andAU:au];
 }

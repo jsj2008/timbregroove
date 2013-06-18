@@ -25,7 +25,7 @@
 
 @interface ToneGeneratorProxy : NSObject<MidiCapableProtocol,ChannelProtocol>
 
-+(id)toneGeneratorWithChannel:(int)channel andUI:(AudioUnit)au;
++(id)toneGeneratorWithChannel:(int)channel andMixerAU:(AudioUnit)au;
 
 -(id<ToneGeneratorProtocol>)loadGenerator:(ConfigToneGenerator *)generatorConfig
                                                          midi:(Midi *)midi;

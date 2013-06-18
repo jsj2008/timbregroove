@@ -11,6 +11,7 @@
 #import <CoreMIDI/CoreMIDI.h>
 #import "TGTypes.h"
 
+#define LOAD_INSTRUMENT_PER_SCENE 1
 
 @class Scene;
 
@@ -59,6 +60,6 @@ enum MidiNotes {
 -(void)update:(NSTimeInterval)dt;
 -(void)getParameters:(NSMutableDictionary *)putHere;
 -(void)triggersChanged:(Scene *)scene;
-- (OSStatus) configUnit:(AudioUnit)unit;
-
+-(OSStatus)configUnit:(AudioUnit)unit;
+-(OSStatus)refreshGraph;
 @end

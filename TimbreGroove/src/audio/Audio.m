@@ -43,6 +43,9 @@
     if( userData )
         [audio setValuesForKeysWithDictionary:userData];
     [audio loadAudioFromConfig:config];
+#ifdef LOAD_INSTRUMENT_PER_SCENE
+    [audio->_soundSystem refreshGraph];
+#endif
     return audio;
 }
 
