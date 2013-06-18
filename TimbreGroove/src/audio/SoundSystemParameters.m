@@ -92,7 +92,8 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
                 _kEQLowCutoff,
                 {
                     kAUNBandEQParam_Frequency,
-                    { kLowestFreq, kNyquistFixupNeeded }
+                    //{ kLowestFreq, kNyquistFixupNeeded }
+                    { 200, 1800 }
                 }
             },
             {

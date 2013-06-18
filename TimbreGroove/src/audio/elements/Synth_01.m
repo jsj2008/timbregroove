@@ -16,11 +16,13 @@
     PointerParamBlock _midiNote;
     PointerParamBlock _midiNoteON;
     PointerParamBlock _midiNoteOFF;
-    IntParamBlock _eqSwitch;
-    FloatParamBlock _eqCutOff;
+    IntParamBlock     _eqSwitch;
+    FloatParamBlock   _eqCutOff;
     
     int _oscChannel;
+    int _noiseChannel;
     MIDINoteMessage _mnm;
+    MIDINoteMessage _noise;
     bool _notePlaying;
 }
 
@@ -32,12 +34,18 @@
 -(void)loadAudioFromConfig:(ConfigAudioProfile *)config
 {
     [super loadAudioFromConfig:config];
-    self.channelVolumes = @[  @(0.1) ];
+    self.channelVolumes = @[  @(0.01), @(0.6) ];
 }
 -(void)start
 {
     [super start];
     _oscChannel = [self generatorChannelFromVirtual:0];
+    _noiseChannel = [self generatorChannelFromVirtual:1];
+    
+    _noise.channel = _noiseChannel;
+    _noise.note = 52;
+    _noise.velocity = 127;
+    
     _mnm.channel = _oscChannel;
     _mnm.velocity = 127;
     _mnm.note = 52;
@@ -49,9 +57,14 @@
     
     parameters[@"TapNote"] = [Parameter withBlock:^(CGPoint pt) {
         if( _notePlaying )
+        {
             _midiNoteOFF(&_mnm);
+            _midiNoteOFF(&_noise);
+        }
         _mnm.duration = 0.4;
         _midiNote(&_mnm);
+        _noise.duration = 0.4;
+        _midiNote(&_noise);
     }];
     
     parameters[@"NoteSweep"] = [Parameter withBlock:^(float f) {
@@ -59,13 +72,17 @@
         {
             _notePlaying = true;
             _midiNoteON(&_mnm);
+            _midiNoteON(&_noise);
         }
-        _eqCutOff(f*-0.2);
+        _eqCutOff(-f);
     }];
     
     parameters[@"NoteDone"] = [Parameter withBlock:^(int type) {
         if( _notePlaying )
+        {
             _midiNoteOFF(&_mnm);
+            _midiNoteOFF(&_noise);
+        }
         _notePlaying = false;
     }];
 }

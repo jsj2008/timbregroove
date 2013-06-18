@@ -10,6 +10,10 @@
 #import "ToneGenerator.h"
 #import "SoundSystem.h"
 
+@interface Oscillator : NSObject <ToneGeneratorProtocol>
+@property (nonatomic,strong) NSString * waveType;
+@end
+
 typedef enum _OscWaveType {
     OWT_Sine = 1,
     OWT_Square = 2,
@@ -23,6 +27,7 @@ typedef struct _OscillatorRef
     int cmd;
 	double startingFrameCount;
 } OscillatorRef;
+
 
 typedef Float32 FrameType;
 
@@ -92,15 +97,12 @@ OSStatus OscillatorRenderProc(void *inRefCon,
 	return noErr;
 }
 
-@interface Oscillator : NSObject <ToneGeneratorProtocol> {
+
+@implementation Oscillator {
     __weak ToneGeneratorProxy * _proxy;
     __weak Midi * _midi;
     OscillatorRef _oref;
 }
-@property (nonatomic,strong) NSString * waveType;
-@end
-
-@implementation Oscillator
 
 -(void)dealloc
 {
@@ -180,4 +182,8 @@ OSStatus OscillatorRenderProc(void *inRefCon,
     
 }
 
+-(AURenderCallback) getCallback
+{
+    return OscillatorRenderProc;
+}
 @end

@@ -269,7 +269,8 @@
 			<string>Synth_01</string>
 			<key>generators</key>
 			<array>
-				<string>saw</string>
+				<string>square</string>
+				<string>noise</string>
 			</array>
 		</dict>
 		<key>synthOfGod</key>
@@ -353,6 +354,11 @@
 	</dict>
 	<key>generators</key>
 	<dict>
+		<key>noise</key>
+		<dict>
+			<key>instanceClass</key>
+			<string>Noise</string>
+		</dict>
 		<key>saw</key>
 		<dict>
 			<key>instanceClass</key>
