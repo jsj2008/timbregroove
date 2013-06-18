@@ -118,7 +118,6 @@ OSStatus renderCallback(
     
     AudioUnit        _ioUnit;
     AUNode           _mixerNode;
-    AudioStreamBasicDescription _stdASBD;
     
     void *              _captureBuffer;
     PointerParamBlock   _bufferTrigger;
@@ -158,7 +157,6 @@ OSStatus renderCallback(
         _instruments = [NSMutableArray new];
 #endif
         [self setupAVSession];
-        [self setupStdASBD]; // assumes _graphSampleRate
         [self setupAUGraph];
         [self startGraph];
 #ifdef DO_GRAPH_DUMP
@@ -188,21 +186,6 @@ OSStatus renderCallback(
     }
     _cbContext.fetchCount = 0;
 }
-
--(void)setupStdASBD
-{
-    size_t bytesPerSample = sizeof (AudioUnitSampleType);
-    
-    _stdASBD.mFormatID          = kAudioFormatLinearPCM;
-    _stdASBD.mFormatFlags       = kAudioFormatFlagsAudioUnitCanonical; // signed int
-    _stdASBD.mBytesPerPacket    = bytesPerSample;
-    _stdASBD.mFramesPerPacket   = 1;
-    _stdASBD.mBytesPerFrame     = bytesPerSample;
-    _stdASBD.mChannelsPerFrame  = 2;                    // 2 indicates stereo
-    _stdASBD.mBitsPerChannel    = 8 * bytesPerSample;
-    _stdASBD.mSampleRate        = _graphSampleRate;
-}
-
 
 +(SoundSystem *)sharedInstance
 {
