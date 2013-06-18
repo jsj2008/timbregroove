@@ -106,7 +106,9 @@
     {
         if( _midiSequence )
             [_midiSequence resume];
-        
+#ifdef LOAD_INSTRUMENT_PER_SCENE
+        [_soundSystem reattachInstruments:_instruments toneGenerators:_generators];
+#endif
     }
     else
     {
@@ -130,6 +132,9 @@
 {
     if( _midiSequence )
         [_midiSequence pause];
+#ifdef LOAD_INSTRUMENT_PER_SCENE
+    [_soundSystem dettachInstruments:_instruments toneGenerators:_generators];
+#endif
     
     CheckError(AUGraphStop(_soundSystem.processGraph),"Unable to stop audio processing graph.");
 }

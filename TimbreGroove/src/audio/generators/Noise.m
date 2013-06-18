@@ -72,18 +72,25 @@ OSStatus NoiseRenderProc(void *inRefCon,
 @implementation Noise {
     __weak ToneGeneratorProxy * _proxy;
     NoiseRef _nref;
+    bool _released;
 }
 
 -(void)dealloc
 {
-    [self releaseRenderProc];
+    [self detach];
     TGLog(LLObjLifetime, @"%@ released",self);
+}
+
+-(void)detach
+{
+    [self releaseRenderProc];
 }
 
 -(MIDISendBlock)renderProcForToneGenerator:(ToneGeneratorProxy *)generatorProxy
 {
     _proxy = generatorProxy;
-
+    _released = false;
+    
     initNoise(&_nref.gen);
     
 	AURenderCallbackStruct input;
@@ -125,6 +132,9 @@ OSStatus NoiseRenderProc(void *inRefCon,
 
 -(void)releaseRenderProc
 {
+    if( _released )
+        return;
+    
 	AURenderCallbackStruct input;
 	input.inputProc = NULL;
 	input.inputProcRefCon = NULL;
@@ -135,6 +145,8 @@ OSStatus NoiseRenderProc(void *inRefCon,
 									&input,
 									sizeof(input)),
 			   "Remove render callback failed");
+    
+    _released = true;
 }
 
 -(void)getParameters:(NSMutableDictionary *)parameters

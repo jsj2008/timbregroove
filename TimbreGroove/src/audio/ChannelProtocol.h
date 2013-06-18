@@ -12,5 +12,5 @@
 
 -(int)channel;
 -(void)setChannel:(int)channel;
-
+-(void)detach;
 @end

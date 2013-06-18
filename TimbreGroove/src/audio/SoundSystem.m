@@ -20,7 +20,7 @@
 #import "Scene.h"
 #import "ToneGenerator.h"
 
-#define DO_GRAPH_DUMP 1
+//#define DO_GRAPH_DUMP 1
 
 static const unsigned int kNumSamplers = 8;
 static const unsigned int kNumToneGenerators = 8;
@@ -346,13 +346,59 @@ OSStatus renderCallback(
     return YES;
 }
 
+#ifdef LOAD_INSTRUMENT_PER_SCENE
+-(void)dettachInstruments:(NSArray *)instruments
+           toneGenerators:(NSArray *)toneGenerators
+{
+    OSStatus result;
+    
+    for( Sampler * sampler in instruments )
+    {
+        [sampler detach];
+        result = AUGraphRemoveNode(_processGraph, sampler.sampler);
+        CheckError(result, "Error removing node from Graph");
+    }
+    
+    for( ToneGeneratorProxy * tgp in toneGenerators )
+    {
+        [tgp detach];
+    }
+    
+    [self setMixerBusCount:0];
+    _numBusses = 0;
+    _nextChannel = 0;
+    [self refreshGraph];
+}
+
+-(void)reattachInstruments:(NSArray *)instruments
+            toneGenerators:(NSArray *)toneGenerators
+{
+    int channel = 0;
+    for( Sampler * sampler in instruments )
+    {
+        [self setMixerBusCount:channel+1];
+        [self plugInstrumentIntoBus:sampler atChannel:channel];
+        ++channel;
+    }
+    for( ToneGeneratorProxy * tgp in toneGenerators )
+    {
+        [self setMixerBusCount:channel+1];
+        [tgp attach:channel];
+        ++channel;
+    }
+    _nextChannel = channel;
+    _numBusses = channel;
+    [self refreshGraph];
+}
+#endif
+
 -(Sampler *)loadInstrumentFromConfig:(ConfigInstrument *)config
 {
 #ifdef LOAD_INSTRUMENT_PER_SCENE
     [self setMixerBusCount:++_numBusses];
     Sampler * sampler = [Sampler samplerWithAUGraph:_processGraph];
     [_instruments addObject:sampler];
-    [sampler setNodeIntoGraph];
+    [sampler instantiateAU];
     [self configUnit:sampler.sampler];
     CheckError( AudioUnitInitialize(sampler.sampler), "Could not initialize sampler");
     [sampler loadSound:config midi:_midi];

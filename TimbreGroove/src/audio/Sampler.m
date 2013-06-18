@@ -78,6 +78,12 @@
     [_midi makeDestination:self];
 }
 
+-(void)detach
+{
+    [self unloadSound];
+    AudioUnitUninitialize(_sampler);
+}
+
 -(void)unloadSound
 {
     if( _midi )
@@ -108,7 +114,7 @@
     CheckError(result,"Unable to add the Sampler unit to the audio processing graph.");
 }
 
--(void)setNodeIntoGraph
+-(void)instantiateAU
 {
     OSStatus result = AUGraphNodeInfo (_graph, _graphNode, 0, &_sampler);
     CheckError(result,"Unable to obtain a reference to the Sampler unit.");

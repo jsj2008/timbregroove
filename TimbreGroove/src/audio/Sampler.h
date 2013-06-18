@@ -20,7 +20,7 @@
 -(void)loadSound:(ConfigInstrument *)config midi:(Midi *)midi;
 -(void)unloadSound;
 
--(void)setNodeIntoGraph;
+-(void)instantiateAU;
 
 @property (nonatomic,readonly) int lowestPlayable;
 @property (nonatomic,readonly) int highestPlayable;

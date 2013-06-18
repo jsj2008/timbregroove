@@ -100,12 +100,6 @@ OSStatus OscillatorRenderProc(void *inRefCon,
         int zero = *(int *)&fzero;
         memset(left,  zero, ioData->mBuffers[0].mDataByteSize);
         memset(right, zero, ioData->mBuffers[0].mDataByteSize);
-        /*
-        for (frame = 0; frame < inNumberFrames; ++frame)
-        {
-            left[frame] = right[frame] = (FrameType)0;
-        } 
-        */
     }
 	return noErr;
 }
@@ -115,16 +109,24 @@ OSStatus OscillatorRenderProc(void *inRefCon,
     __weak ToneGeneratorProxy * _proxy;
     __weak Midi * _midi;
     OscillatorRef _oref;
+    bool _released;
 }
 
 -(void)dealloc
 {
-    [self releaseRenderProc];
+    [self detach];
     TGLog(LLObjLifetime, @"%@ released",self);
+}
+
+-(void)detach
+{
+    [self releaseRenderProc];
 }
 
 -(MIDISendBlock)renderProcForToneGenerator:(ToneGeneratorProxy *)generatorProxy
 {
+    _released = false;
+    
     _proxy = generatorProxy;
     
     // These are set in config.plist
@@ -176,6 +178,9 @@ OSStatus OscillatorRenderProc(void *inRefCon,
 
 -(void)releaseRenderProc
 {
+    if( _released )
+        return;
+    
 	AURenderCallbackStruct input;
 	input.inputProc = NULL;
 	input.inputProcRefCon = NULL;
@@ -186,6 +191,7 @@ OSStatus OscillatorRenderProc(void *inRefCon,
 									&input,
 									sizeof(input)),
 			   "Remove render callback failed");
+    _released = true;
 }
 
 -(void)getParameters:(NSMutableDictionary *)parameters

@@ -20,7 +20,7 @@
 -(MIDISendBlock)renderProcForToneGenerator:(ToneGeneratorProxy *)generator;
 -(void)getParameters:(NSMutableDictionary *)parameters;
 -(void)triggersChanged:(Scene *)scene;
-
+-(void)detach;
 @end
 
 @interface ToneGeneratorProxy : NSObject<MidiCapableProtocol,ChannelProtocol>
@@ -29,6 +29,7 @@
 
 -(id<ToneGeneratorProtocol>)loadGenerator:(ConfigToneGenerator *)generatorConfig
                                                          midi:(Midi *)midi;
+-(void)attach:(int)atChannel;
 -(void)unloadGenerator;
 
 @property (nonatomic,strong) id<ToneGeneratorProtocol> generator;

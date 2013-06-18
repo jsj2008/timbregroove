@@ -51,6 +51,12 @@ enum MidiNotes {
 
 -(Sampler *)loadInstrumentFromConfig:(ConfigInstrument *)config;
 -(ToneGeneratorProxy *)loadToneGeneratorFromConfig:(ConfigToneGenerator *)config;
+#ifdef LOAD_INSTRUMENT_PER_SCENE
+-(void)dettachInstruments:(NSArray *)instruments
+           toneGenerators:(NSArray *)toneGenerators;
+-(void)reattachInstruments:(NSArray *)instruments
+            toneGenerators:(NSArray *)toneGenerators;
+#endif
 
 @property (nonatomic,readonly) AudioUnit mixerUnit;
 @property (nonatomic,readonly) AudioUnit masterEQUnit;

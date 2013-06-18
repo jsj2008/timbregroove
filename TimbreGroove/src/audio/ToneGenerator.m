@@ -33,12 +33,12 @@
     return self;
 }
 
-#ifdef DEBUG
 -(void)dealloc
 {
+    [self detach];
     TGLog(LLAudioResource, @"%@ released",self);
 }
-#endif
+
 
 -(MIDISendBlock)callback
 {
@@ -54,14 +54,28 @@
     NSDictionary * userData = config.customProperties;
     if( userData )
         [(NSObject *)_generator setValuesForKeysWithDictionary:userData];
-    _tgCallback = [_generator renderProcForToneGenerator:self];
-    [midi makeDestination:self];
+    [self attach:_channel];
     return _generator;
 }
+
+-(void)attach:(int)atChannel
+{
+    _channel = atChannel;
+    _tgCallback = [_generator renderProcForToneGenerator:self];
+    [_midi makeDestination:self];
+}
+
+-(void)detach
+{
+    if( _generator )
+        [_generator detach];
+    _tgCallback = nil;
+    [_midi releaseDestination:self];
+}
+
 -(void)unloadGenerator
 {
+    [self detach];
     _tgCallback = nil;
-    _generator = nil;
-    [_midi releaseDestination:self];
 }
 @end
