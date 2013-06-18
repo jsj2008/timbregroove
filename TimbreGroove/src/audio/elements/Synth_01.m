@@ -34,21 +34,23 @@
 -(void)loadAudioFromConfig:(ConfigAudioProfile *)config
 {
     [super loadAudioFromConfig:config];
-    self.channelVolumes = @[  @(0.01), @(0.6) ];
+    self.channelVolumes = @[  @(0.1) ];
 }
+
 -(void)start
 {
     [super start];
     _oscChannel = [self generatorChannelFromVirtual:0];
-    _noiseChannel = [self generatorChannelFromVirtual:1];
-    
-    _noise.channel = _noiseChannel;
-    _noise.note = 52;
-    _noise.velocity = 127;
-    
     _mnm.channel = _oscChannel;
     _mnm.velocity = 127;
     _mnm.note = 52;
+/*
+ _noiseChannel = [self generatorChannelFromVirtual:1];
+ 
+ _noise.channel = _noiseChannel;
+ _noise.note = 52;
+ _noise.velocity = 127;
+*/
 }
 
 -(void)getParameters:(NSMutableDictionary *)parameters
@@ -59,12 +61,14 @@
         if( _notePlaying )
         {
             _midiNoteOFF(&_mnm);
-            _midiNoteOFF(&_noise);
+//            _midiNoteOFF(&_noise);
         }
         _mnm.duration = 0.4;
         _midiNote(&_mnm);
+        /*
         _noise.duration = 0.4;
         _midiNote(&_noise);
+         */
     }];
     
     parameters[@"NoteSweep"] = [Parameter withBlock:^(float f) {
@@ -72,7 +76,7 @@
         {
             _notePlaying = true;
             _midiNoteON(&_mnm);
-            _midiNoteON(&_noise);
+           // _midiNoteON(&_noise);
         }
         _eqCutOff(-f);
     }];
@@ -81,7 +85,7 @@
         if( _notePlaying )
         {
             _midiNoteOFF(&_mnm);
-            _midiNoteOFF(&_noise);
+           // _midiNoteOFF(&_noise);
         }
         _notePlaying = false;
     }];

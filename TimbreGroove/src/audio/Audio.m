@@ -60,12 +60,10 @@
 
 -(void)dealloc
 {
-    [_instruments each:^(Sampler * sampler) {
+    for( Sampler * sampler in _instruments )
         [sampler unloadSound];
-    }];
-    [_generators each:^(ToneGeneratorProxy * tgp) {
+    for( ToneGeneratorProxy * tgp in _generators )
         [tgp unloadGenerator];
-    }];
     TGLog(LLObjLifetime, @"%@ released",self);
 }
 

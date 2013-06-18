@@ -160,6 +160,10 @@
 			<key>connections</key>
 			<array>
 				<dict>
+					<key>kTriggerPanX</key>
+					<string>OscNoiseFactor</string>
+				</dict>
+				<dict>
 					<key>kTriggerPanDone</key>
 					<string>NoteDone</string>
 					<key>kTriggerPanX</key>
@@ -270,7 +274,6 @@
 			<key>generators</key>
 			<array>
 				<string>square</string>
-				<string>noise</string>
 			</array>
 		</dict>
 		<key>synthOfGod</key>

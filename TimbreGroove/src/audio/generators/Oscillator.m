@@ -9,6 +9,8 @@
 #import <AVFoundation/AVFoundation.h>
 #import "ToneGenerator.h"
 #import "SoundSystem.h"
+#import "NoiseGen.h"
+#import "Parameter.h"
 
 @interface Oscillator : NSObject <ToneGeneratorProtocol>
 @property (nonatomic,strong) NSString * waveType;
@@ -26,6 +28,9 @@ typedef struct _OscillatorRef
     float frequency;
     int cmd;
 	double startingFrameCount;
+    unsigned int noiseFactor;
+    unsigned int noiseCount;
+    NoiseGen ng;
 } OscillatorRef;
 
 
@@ -57,17 +62,25 @@ OSStatus OscillatorRenderProc(void *inRefCon,
         {
             float f;
             
-            if( bSine )
-                f = (float)(sin (2.0 * M_PI * (j / cycleLength)));
-            else if( bSquare )
-                f = j < cycleLength/2.0 ? -1.0 : 1.0;
-            else // saw
-                f = (float)( ((j / cycleLength) * 2.0) - 1.0 );
-            
-            if( bRampUp )
-                f *= (float)frame / (float)inNumberFrames;
-            else if( bRampDown )
-                f *= 1.0 - ((float)frame / (float)inNumberFrames);
+            if( (ref->noiseFactor > 0) && (--ref->noiseCount == 0) )
+            {
+                ref->noiseCount = ref->noiseFactor;
+                f = nextNoiseValue(&ref->ng);
+            }
+            else
+            {
+                if( bSine )
+                    f = (float)(sin (2.0 * M_PI * (j / cycleLength)));
+                else if( bSquare )
+                    f = j < cycleLength/2.0 ? -1.0 : 1.0;
+                else // saw
+                    f = (float)( ((j / cycleLength) * 2.0) - 1.0 );
+                
+                if( bRampUp )
+                    f *= (float)frame / (float)inNumberFrames;
+                else if( bRampDown )
+                    f *= 1.0 - ((float)frame / (float)inNumberFrames);
+            }
             
             left[frame] = right[frame] = f;
             
@@ -122,6 +135,8 @@ OSStatus OscillatorRenderProc(void *inRefCon,
     else if( [_waveType isEqualToString:@"Saw"] )
         _oref.waveType = OWT_Saw;
     
+    initNoise(&_oref.ng);
+    
 	AURenderCallbackStruct input;
 	input.inputProc = OscillatorRenderProc;
 	input.inputProcRefCon = &_oref;
@@ -175,8 +190,12 @@ OSStatus OscillatorRenderProc(void *inRefCon,
 
 -(void)getParameters:(NSMutableDictionary *)parameters
 {
-    
+    parameters[@"OscNoiseFactor"] = [Parameter withBlock:^(int value) {
+        _oref.noiseFactor = (value * value) * 100;
+        TGLog(LLMidiStuff, @"Noise factor: %d",_oref.noiseFactor);
+    }];
 }
+
 -(void)triggersChanged:(Scene *)scene
 {
     
