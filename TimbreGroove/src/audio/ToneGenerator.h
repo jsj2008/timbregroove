@@ -25,12 +25,10 @@
 
 @interface ToneGeneratorProxy : NSObject<MidiCapableProtocol,ChannelProtocol>
 
-+(id)toneGeneratorWithChannel:(int)channel andMixerAU:(AudioUnit)au;
++(id)toneGeneratorWithMixerAU:(AudioUnit)au;
 
 -(id<ToneGeneratorProtocol>)loadGenerator:(ConfigToneGenerator *)generatorConfig
-                                                         midi:(Midi *)midi;
--(void)attach:(int)atChannel;
--(void)unloadGenerator;
+                                     midi:(Midi *)midi;
 
 @property (nonatomic,strong) id<ToneGeneratorProtocol> generator;
 @property (nonatomic) AudioUnit au;

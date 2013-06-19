@@ -38,15 +38,12 @@
     return self;
 }
 
+#if DEBUG
 -(void)dealloc
 {
-    [self unloadSound];
-    
-    // "Calling this function deallocates the audio unit’s resources."
-    // AND CRASHES THE APP
-    //  AudioUnitUninitialize(_sampler);
     TGLog(LLObjLifetime, @"%@ released",self);
 }
+#endif
 
 -(void)loadSound:(ConfigInstrument *)config midi:(Midi *)midi
 {
@@ -74,29 +71,22 @@
     _highestPlayable = config.high;
     
     TGLog(LLAudioResource, @"Loaded sound of type %@",ext);
-    
+}
+
+-(void)didAttachToGraph:(int)atChannel
+{
+    _channel = atChannel;
+    AudioUnitInitialize(_sampler);
     [_midi makeDestination:self];
 }
 
--(void)detach
+-(void)didDetachFromGraph
 {
-    [self unloadSound];
+    [_midi releaseDestination:self];
     AudioUnitUninitialize(_sampler);
-}
-
--(void)unloadSound
-{
-    if( _midi )
-    {
-        [_midi releaseDestination:self];
-    }
-    else
-    {
-        TGLog(LLAudioResource, @"Unloading sound (without Midi resource)");
-    }
-    _midi = nil;
+#ifdef LOAD_INSTRUMENT_PER_SCENE
     _available = true;
-    
+#endif
 }
 
 -(void)makeSampler

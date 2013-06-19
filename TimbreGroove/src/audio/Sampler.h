@@ -18,7 +18,6 @@
 +(id)samplerWithAUGraph:(AUGraph)graph;
 
 -(void)loadSound:(ConfigInstrument *)config midi:(Midi *)midi;
--(void)unloadSound;
 
 -(void)instantiateAU;
 
@@ -30,6 +29,8 @@
 @property (nonatomic) MIDIPortRef     outPort;
 @property (nonatomic) MIDIEndpointRef endPoint;
 @property (nonatomic) int channel;
+#ifdef LOAD_INSTRUMENT_PER_SCENE
 @property (nonatomic,readonly) bool available;
+#endif
 @end
 

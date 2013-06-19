@@ -61,14 +61,12 @@
     return self;
 }
 
+#if DEBUG
 -(void)dealloc
 {
-    for( Sampler * sampler in _instruments )
-        [sampler unloadSound];
-    for( ToneGeneratorProxy * tgp in _generators )
-        [tgp unloadGenerator];
     TGLog(LLObjLifetime, @"%@ released",self);
 }
+#endif
 
 -(void)loadAudioFromConfig:(ConfigAudioProfile *)config
 {

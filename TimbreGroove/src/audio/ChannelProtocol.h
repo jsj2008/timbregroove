@@ -12,5 +12,6 @@
 
 -(int)channel;
 -(void)setChannel:(int)channel;
--(void)detach;
+-(void)didAttachToGraph:(int)atChannel;
+-(void)didDetachFromGraph;
 @end

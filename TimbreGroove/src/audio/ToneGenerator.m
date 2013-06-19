@@ -11,34 +11,33 @@
 
 @interface ToneGeneratorProxy () {
     id _tgCallback;
-    __weak Midi * _midi;
+    Midi * _midi;
 }
 
 @end
 @implementation ToneGeneratorProxy
 
-+(id)toneGeneratorWithChannel:(int)channel andMixerAU:(AudioUnit)au
++(id)toneGeneratorWithMixerAU:(AudioUnit)au
 {
-    return [[ToneGeneratorProxy alloc] initWithChannel:channel andAU:au];
+    return [[ToneGeneratorProxy alloc] initWithMixerAU:au];
 }
 
--(id)initWithChannel:(int)channel andAU:(AudioUnit)au
+-(id)initWithMixerAU:(AudioUnit)au
 {
     self = [super init];
     if( self )
     {
         _au = au;
-        _channel = channel;
     }
     return self;
 }
 
+#if DEBUG
 -(void)dealloc
 {
-    [self detach];
     TGLog(LLAudioResource, @"%@ released",self);
 }
-
+#endif
 
 -(MIDISendBlock)callback
 {
@@ -54,18 +53,17 @@
     NSDictionary * userData = config.customProperties;
     if( userData )
         [(NSObject *)_generator setValuesForKeysWithDictionary:userData];
-    [self attach:_channel];
     return _generator;
 }
 
--(void)attach:(int)atChannel
+-(void)didAttachToGraph:(int)atChannel
 {
     _channel = atChannel;
     _tgCallback = [_generator renderProcForToneGenerator:self];
     [_midi makeDestination:self];
 }
 
--(void)detach
+-(void)didDetachFromGraph
 {
     if( _generator )
         [_generator detach];
@@ -73,9 +71,4 @@
     [_midi releaseDestination:self];
 }
 
--(void)unloadGenerator
-{
-    [self detach];
-    _tgCallback = nil;
-}
 @end

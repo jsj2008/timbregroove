@@ -109,13 +109,16 @@
         [_currentScene pause];
     
     _currentScene = currentScene;
-    [_currentScene activate];
-    [self performSelector:@selector(performTransition:)
-               withObject:currentScene
-               afterDelay:0.12];
-    
-    _mainSliderTrigger = [currentScene.triggers getFloatTrigger:kTriggerMainSlider];
-    _playTrigger       = [currentScene.triggers getIntTrigger:kTriggerPlayButton];
+    if( currentScene )
+    {
+        [_currentScene activate];
+        [self performSelector:@selector(performTransition:)
+                   withObject:currentScene
+                   afterDelay:0.12];
+        
+        _mainSliderTrigger = [currentScene.triggers getFloatTrigger:kTriggerMainSlider];
+        _playTrigger       = [currentScene.triggers getIntTrigger:kTriggerPlayButton];
+    }
 }
 
 -(void)viewDidLayoutSubviews
@@ -153,6 +156,7 @@
 
 - (void)createAScene:(ConfigScene *)config
 {
+    self.currentScene = nil; // yes, I agree. Not ideal.
     Scene * scene = [Scene sceneWithConfig:config];
     [_scenes addObject:scene];
     self.currentScene = scene;

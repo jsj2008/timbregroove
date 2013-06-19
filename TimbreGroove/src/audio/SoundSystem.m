@@ -350,44 +350,45 @@ OSStatus renderCallback(
 -(void)dettachInstruments:(NSArray *)instruments
            toneGenerators:(NSArray *)toneGenerators
 {
-    OSStatus result;
-    
     for( Sampler * sampler in instruments )
     {
-        [sampler detach];
-        result = AUGraphRemoveNode(_processGraph, sampler.sampler);
-        CheckError(result, "Error removing node from Graph");
+        [self unplugInstrumentFromBus:sampler];
+        [sampler didDetachFromGraph];
     }
     
     for( ToneGeneratorProxy * tgp in toneGenerators )
     {
-        [tgp detach];
+        [tgp didDetachFromGraph];
     }
     
     [self setMixerBusCount:0];
     _numBusses = 0;
     _nextChannel = 0;
+    [_instruments removeAllObjects];
     [self refreshGraph];
 }
 
 -(void)reattachInstruments:(NSArray *)instruments
             toneGenerators:(NSArray *)toneGenerators
 {
-    int channel = 0;
+    int bus = 0;
     for( Sampler * sampler in instruments )
     {
-        [self setMixerBusCount:channel+1];
-        [self plugInstrumentIntoBus:sampler atChannel:channel];
-        ++channel;
+        [_instruments addObject:sampler];
+        [self setMixerBusCount:bus+1];
+        [sampler didAttachToGraph:sampler.channel];
+        [self plugInstrumentIntoBus:sampler atChannel:sampler.channel];
+        ++bus;
     }
     for( ToneGeneratorProxy * tgp in toneGenerators )
     {
-        [self setMixerBusCount:channel+1];
-        [tgp attach:channel];
-        ++channel;
+        [_instruments addObject:tgp];
+        [self setMixerBusCount:bus+1];
+        [tgp didAttachToGraph:tgp.channel];
+        ++bus;
     }
-    _nextChannel = channel;
-    _numBusses = channel;
+    _nextChannel = bus;
+    _numBusses = bus;
     [self refreshGraph];
 }
 #endif
@@ -402,7 +403,9 @@ OSStatus renderCallback(
     [self configUnit:sampler.sampler];
     CheckError( AudioUnitInitialize(sampler.sampler), "Could not initialize sampler");
     [sampler loadSound:config midi:_midi];
-    [self plugInstrumentIntoBus:sampler atChannel:_nextChannel++];
+    int channel = _nextChannel++;
+    [sampler didAttachToGraph:channel];
+    [self plugInstrumentIntoBus:sampler atChannel:channel];
     return sampler;
 #else
     for( Sampler * sampler in _samplers )
@@ -422,7 +425,7 @@ OSStatus renderCallback(
 #ifdef LOAD_INSTRUMENT_PER_SCENE    
     [self setMixerBusCount:++_numBusses];
     int channel = _nextChannel++;
-    ToneGeneratorProxy * tgProxy = [ToneGeneratorProxy toneGeneratorWithChannel:channel andMixerAU:_mixerUnit];
+    ToneGeneratorProxy * tgProxy = [ToneGeneratorProxy toneGeneratorWithMixerAU:_mixerUnit];
     [_instruments addObject:tgProxy];
     unsigned long asbdSize = sizeof(_fasbd);
     CheckError(AudioUnitSetProperty(_mixerUnit,
@@ -433,6 +436,7 @@ OSStatus renderCallback(
                                     asbdSize), "ugh tg fmt fail");
     
     tgProxy.generator = [tgProxy loadGenerator:config midi:_midi];
+    [tgProxy didAttachToGraph:channel];
     
     return tgProxy;
     
@@ -449,12 +453,23 @@ OSStatus renderCallback(
 #endif
 }
 
+-(void)unplugInstrumentFromBus:(Sampler *)instrument
+{
+    OSStatus result;
+
+    result = AUGraphDisconnectNodeInput(_processGraph,
+                                        _mixerNode,
+                                        instrument.channel);
+    
+    CheckError(result,"Unable to disconnect the nodes in the audio processing graph.");
+}
+
 -(void)plugInstrumentIntoBus:(Sampler *)instrument atChannel:(int)channel
 {
     OSStatus result;
 
     instrument.channel = channel;
-    
+
     result = AUGraphConnectNodeInput (_processGraph,
                                       instrument.graphNode,
                                       0,
@@ -650,17 +665,12 @@ OSStatus renderCallback(
 
 -(OSStatus)refreshGraph
 {
-    Boolean outIsUpdated = FALSE;
-    OSStatus result = AUGraphUpdate(_processGraph, &outIsUpdated);
-    CheckError( result, "Update failed" );
-    if( !outIsUpdated )
-    {
-        TGLog( LLShitsOnFire, @"**** GRAPH UPDATE FAILED **** ");
-    }
+    CheckError(AUGraphUpdate(_processGraph, NULL), "AUGraphUpdate failed" ); // NULL for synchronous
+
 #ifdef DO_GRAPH_DUMP
     [self dumpGraph:_processGraph];
 #endif
-    return result;
+    return noErr;
 }
 
 @end
