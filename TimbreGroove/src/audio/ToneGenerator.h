@@ -8,33 +8,31 @@
 
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
-#import "Midi.h"
-#import "ChannelProtocol.h"
+#import "SoundSource.h"
 
 @class Scene;
-@class ToneGeneratorProxy;
 @class ConfigToneGenerator;
+@class Midi;
 
-@protocol ToneGeneratorProtocol <NSObject>
+@interface ToneGenerator : NSObject<SoundSource>
 
--(MIDISendBlock)renderProcForToneGenerator:(ToneGeneratorProxy *)generator;
--(void)getParameters:(NSMutableDictionary *)parameters;
--(void)triggersChanged:(Scene *)scene;
--(void)detach;
-@end
++(id)toneGeneratorWithMixerAU:(AudioUnit)au
+                       config:(ConfigToneGenerator *)generatorConfig
+                         midi:(Midi *)midi;
 
-@interface ToneGeneratorProxy : NSObject<MidiCapableProtocol,ChannelProtocol>
 
-+(id)toneGeneratorWithMixerAU:(AudioUnit)au;
-
--(id<ToneGeneratorProtocol>)loadGenerator:(ConfigToneGenerator *)generatorConfig
-                                     midi:(Midi *)midi;
-
-@property (nonatomic,strong) id<ToneGeneratorProtocol> generator;
-@property (nonatomic) AudioUnit au;
-@property (nonatomic) int channel;
+@property (nonatomic,strong) Midi *   midi;
+@property (nonatomic) AudioUnit       mixerAU;
+@property (nonatomic) int             channel;
 @property (nonatomic) MIDIPortRef     outPort;
 @property (nonatomic) MIDIEndpointRef endPoint;
+
+@property (nonatomic,strong) NSString * name;
+
+// derived classes
+-(MIDISendBlock)midiRenderProc;
+-(void)getParameters:(NSMutableDictionary *)parameters;
+-(void)triggersChanged:(Scene *)scene;
 
 @end
 

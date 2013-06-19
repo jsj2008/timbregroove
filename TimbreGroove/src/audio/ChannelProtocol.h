@@ -8,10 +8,14 @@
 
 #import <Foundation/Foundation.h>
 
+@class SoundSystem;
+
 @protocol ChannelProtocol <NSObject>
 
 -(int)channel;
 -(void)setChannel:(int)channel;
--(void)didAttachToGraph:(int)atChannel;
--(void)didDetachFromGraph;
+-(NSString *)name;
+-(void)setName:(NSString *)name;
+-(void)didAttachToGraph:(SoundSystem *)ss;
+-(void)didDetachFromGraph:(SoundSystem *)ss;
 @end

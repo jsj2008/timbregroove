@@ -644,7 +644,7 @@
 		<key>LLCaptureOps</key>
 		<false/>
 		<key>LLAudioResource</key>
-		<false/>
+		<true/>
 		<key>LLShaderStuff</key>
 		<false/>
 		<key>LLKindaImportant</key>

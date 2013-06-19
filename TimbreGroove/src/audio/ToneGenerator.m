@@ -9,28 +9,29 @@
 #import "ToneGenerator.h"
 #import "Config.h"
 
-@interface ToneGeneratorProxy () {
-    id _tgCallback;
-    Midi * _midi;
+@implementation ToneGenerator {
+    // the callback block is passed to iOS
+    // midi engine as (bridge void *) so
+    // we need to hold onto the callback
+    // block to maintain a ref count of 1
+    id _callback;
 }
-
-@end
-@implementation ToneGeneratorProxy
 
 +(id)toneGeneratorWithMixerAU:(AudioUnit)au
+                       config:(ConfigToneGenerator *)config
+                         midi:(Midi *)midi
 {
-    return [[ToneGeneratorProxy alloc] initWithMixerAU:au];
+    Class klass = NSClassFromString(config.instanceClass);
+    ToneGenerator * generator = [[klass alloc] init];
+    generator.midi = midi;
+    generator.mixerAU = au;
+    NSDictionary * userData = config.customProperties;
+    if( userData )
+        [generator setValuesForKeysWithDictionary:userData];
+    
+    return generator;
 }
 
--(id)initWithMixerAU:(AudioUnit)au
-{
-    self = [super init];
-    if( self )
-    {
-        _au = au;
-    }
-    return self;
-}
 
 #if DEBUG
 -(void)dealloc
@@ -39,36 +40,41 @@
 }
 #endif
 
--(MIDISendBlock)callback
+-(void)didAttachToGraph:(SoundSystem *)ss
 {
-    return _tgCallback;
-}
-
--(id<ToneGeneratorProtocol>)loadGenerator:(ConfigToneGenerator *)config
-                                     midi:(Midi *)midi;
-{
-    _midi = midi;
-    Class klass = NSClassFromString(config.instanceClass);
-    _generator = [[klass alloc] init];
-    NSDictionary * userData = config.customProperties;
-    if( userData )
-        [(NSObject *)_generator setValuesForKeysWithDictionary:userData];
-    return _generator;
-}
-
--(void)didAttachToGraph:(int)atChannel
-{
-    _channel = atChannel;
-    _tgCallback = [_generator renderProcForToneGenerator:self];
     [_midi makeDestination:self];
 }
 
--(void)didDetachFromGraph
+-(void)didDetachFromGraph:(SoundSystem *)ss
 {
-    if( _generator )
-        [_generator detach];
-    _tgCallback = nil;
+    [self detach];
     [_midi releaseDestination:self];
+}
+
+-(MIDISendBlock)callback
+{
+    if( !_callback )
+        _callback = [self midiRenderProc];
+    return _callback;
+}
+
+-(MIDISendBlock)midiRenderProc
+{
+    return nil;
+}
+
+-(void)detach
+{
+    
+}
+
+-(void)getParameters:(NSMutableDictionary *)parameters
+{
+    
+}
+-(void)triggersChanged:(Scene *)scene
+{
+    
 }
 
 @end

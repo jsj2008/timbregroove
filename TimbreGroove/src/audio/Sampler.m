@@ -16,7 +16,7 @@
      Midi * _midi;
     id _myBlock;
 }
-
+@property (nonatomic,strong) NSString * name;
 @end
 @implementation Sampler
 
@@ -31,7 +31,6 @@
     if( (self = [super init]) )
     {
         _graph = graph;
-        _available = true;
         [self makeSampler];
     }
     
@@ -47,7 +46,6 @@
 
 -(void)loadSound:(ConfigInstrument *)config midi:(Midi *)midi
 {
-    _available = false;
     _midi = midi;
     
     bool isSoundfont = config.isSoundFont;
@@ -73,20 +71,18 @@
     TGLog(LLAudioResource, @"Loaded sound of type %@",ext);
 }
 
--(void)didAttachToGraph:(int)atChannel
+-(void)didAttachToGraph:(SoundSystem *)ss
 {
-    _channel = atChannel;
     AudioUnitInitialize(_sampler);
     [_midi makeDestination:self];
+    [ss plugInstrumentIntoBus:self];
 }
 
--(void)didDetachFromGraph
+-(void)didDetachFromGraph:(SoundSystem *)ss
 {
+    [ss unplugInstrumentFromBus:self];
     [_midi releaseDestination:self];
     AudioUnitUninitialize(_sampler);
-#ifdef LOAD_INSTRUMENT_PER_SCENE
-    _available = true;
-#endif
 }
 
 -(void)makeSampler

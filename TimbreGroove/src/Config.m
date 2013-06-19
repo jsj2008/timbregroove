@@ -119,10 +119,14 @@ static Config * __sharedConfig;
     return [[ConfigScene alloc] initWithD:[scenes valueForKey:name]];
 }
 -(ConfigInstrument *)getInstrument:(NSString *)name {
-    return [[ConfigInstrument alloc] initWithD:[_plistConfig[kConfigInstruments] valueForKey:name]];
+    ConfigInstrument * config = [[ConfigInstrument alloc] initWithD:[_plistConfig[kConfigInstruments] valueForKey:name]];
+    config.name = name;
+    return config;
 }
 -(ConfigToneGenerator *)getToneGenerator:(NSString *)name {
-    return [[ConfigToneGenerator alloc] initWithD:[_plistConfig[kConfigToneGenerators] valueForKey:name]];
+    ConfigToneGenerator * config = [[ConfigToneGenerator alloc] initWithD:[_plistConfig[kConfigToneGenerators] valueForKey:name]];
+    config.name = name;
+    return config;
 }
 -(ConfigAudioProfile *)getAudioProfile:(NSString *)name {
     return [[ConfigAudioProfile alloc] initWithD:[_plistConfig[kConfigAudioProfiles] valueForKey:name]];

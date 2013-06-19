@@ -11,7 +11,7 @@
 #import "SoundSystem.h"
 #import "NoiseGen.h"
 
-@interface Noise : NSObject <ToneGeneratorProtocol>
+@interface Noise : ToneGenerator
 
 @end
 
@@ -70,7 +70,6 @@ OSStatus NoiseRenderProc(void *inRefCon,
 
 
 @implementation Noise {
-    __weak ToneGeneratorProxy * _proxy;
     NoiseRef _nref;
     bool _released;
 }
@@ -81,14 +80,8 @@ OSStatus NoiseRenderProc(void *inRefCon,
     TGLog(LLObjLifetime, @"%@ released",self);
 }
 
--(void)detach
+-(MIDISendBlock)midiRenderProc
 {
-    [self releaseRenderProc];
-}
-
--(MIDISendBlock)renderProcForToneGenerator:(ToneGeneratorProxy *)generatorProxy
-{
-    _proxy = generatorProxy;
     _released = false;
     
     initNoise(&_nref.gen);
@@ -96,10 +89,10 @@ OSStatus NoiseRenderProc(void *inRefCon,
 	AURenderCallbackStruct input;
 	input.inputProc = NoiseRenderProc;
 	input.inputProcRefCon = &_nref;
-	CheckError(AudioUnitSetProperty(_proxy.au,
+	CheckError(AudioUnitSetProperty(self.mixerAU,
 									kAudioUnitProperty_SetRenderCallback,
 									kAudioUnitScope_Input,
-									_proxy.channel,
+									self.channel,
 									&input,
 									sizeof(input)),
 			   "Set render callback failed");
@@ -130,7 +123,7 @@ OSStatus NoiseRenderProc(void *inRefCon,
     
 }
 
--(void)releaseRenderProc
+-(void)detach
 {
     if( _released )
         return;
@@ -138,10 +131,10 @@ OSStatus NoiseRenderProc(void *inRefCon,
 	AURenderCallbackStruct input;
 	input.inputProc = NULL;
 	input.inputProcRefCon = NULL;
-	CheckError(AudioUnitSetProperty(_proxy.au,
+	CheckError(AudioUnitSetProperty(self.mixerAU,
 									kAudioUnitProperty_SetRenderCallback,
 									kAudioUnitScope_Input,
-									_proxy.channel,
+									self.channel,
 									&input,
 									sizeof(input)),
 			   "Remove render callback failed");
@@ -149,17 +142,4 @@ OSStatus NoiseRenderProc(void *inRefCon,
     _released = true;
 }
 
--(void)getParameters:(NSMutableDictionary *)parameters
-{
-    
-}
--(void)triggersChanged:(Scene *)scene
-{
-    
-}
-
--(AURenderCallback) getCallback
-{
-    return NoiseRenderProc;
-}
 @end

@@ -19,6 +19,7 @@
 @interface ConfigToneGenerator : ConfigBase
 @property (nonatomic,readonly) NSString * instanceClass;
 @property (nonatomic,readonly) NSDictionary * customProperties;
+@property (nonatomic) NSString * name;
 @end
 
 @interface ConfigGraphicElement : ConfigBase
@@ -34,6 +35,7 @@
 @property (nonatomic,readonly) NSString * preset;
 @property (nonatomic,readonly) int low;
 @property (nonatomic,readonly) int high;
+@property (nonatomic) NSString * name;
 @end
 
 @interface ConfigAudioProfile : ConfigBase

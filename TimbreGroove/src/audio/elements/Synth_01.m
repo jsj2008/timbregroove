@@ -40,7 +40,7 @@
 -(void)start
 {
     [super start];
-    _oscChannel = [self generatorChannelFromVirtual:0];
+    _oscChannel = 0; // TODO: *cough*
     _mnm.channel = _oscChannel;
     _mnm.velocity = 127;
     _mnm.note = 52;

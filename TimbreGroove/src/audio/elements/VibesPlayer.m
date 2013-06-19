@@ -34,7 +34,7 @@
 {
     [super start];
     
-    _vibesChannel = [self realChannelFromVirtual:VIBES_VIRTUAL_CHANNEL];
+    _vibesChannel = [self channelFromName:@"vibes"];
     _vibesScale = [[NoteGenerator alloc] initWithScale:kScaleBluesPen isRandom:true andRange:(NoteRange){34,80}];
 }
 

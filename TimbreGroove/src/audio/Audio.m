@@ -43,9 +43,7 @@
     if( userData )
         [audio setValuesForKeysWithDictionary:userData];
     [audio loadAudioFromConfig:config];
-#ifdef LOAD_INSTRUMENT_PER_SCENE
     [audio->_soundSystem refreshGraph];
-#endif
     return audio;
 }
 
@@ -70,24 +68,32 @@
 
 -(void)loadAudioFromConfig:(ConfigAudioProfile *)config
 {
-    _instruments = [config.instruments map:^id(id instrumentConfig) {
-        return [_soundSystem loadInstrumentFromConfig:instrumentConfig];
-    }];
-    _generators = [config.generators map:^id(id generatorConfig) {
-        return [_soundSystem loadToneGeneratorFromConfig:generatorConfig];
-    }];
+    NSMutableArray * soundSources = [NSMutableArray new];
+    for( ConfigInstrument * iconfig in config.instruments )
+        [soundSources addObject:[_soundSystem loadInstrumentFromConfig:iconfig]];
+    for( ConfigToneGenerator * tgconfig in config.generators )
+        [soundSources addObject:[_soundSystem loadToneGeneratorFromConfig:tgconfig]];
+    _soundSources = soundSources;
     _myTriggerMap = config.connections;
     _midiFileName = config.midiFile;
 }
 
--(UInt32)realChannelFromVirtual:(UInt32)virtualChannel
+-(UInt32)channelFromName:(NSString *)name
 {
-    return ((Sampler *)_instruments[virtualChannel]).channel;
+    id<SoundSource> source = [self soundSourceFromName:name];
+    if( source )
+        return [source channel];
+    return (UInt32)-1;
 }
 
--(UInt32)generatorChannelFromVirtual:(UInt32)virtualChannel
+-(id<SoundSource>)soundSourceFromName:(NSString *)name
 {
-    return ((ToneGeneratorProxy *)_generators[virtualChannel]).channel;
+    for( id<SoundSource> source in _soundSources )
+    {
+        if( [[source name] isEqualToString:name] )
+            return source;
+    }
+    return nil;
 }
 
 -(void)start
@@ -104,9 +110,7 @@
     {
         if( _midiSequence )
             [_midiSequence resume];
-#ifdef LOAD_INSTRUMENT_PER_SCENE
-        [_soundSystem reattachInstruments:_instruments toneGenerators:_generators];
-#endif
+        [_soundSystem reattachInstruments:_soundSources];
     }
     else
     {
@@ -115,7 +119,7 @@
 
     if( _channelVolumes )
     {
-        NSArray * arr = _instruments ? _instruments : _generators;
+        NSArray * arr = _soundSources;
         [_channelVolumes enumerateObjectsUsingBlock:^(NSNumber * value, NSUInteger idx, BOOL *stop) {
             _channelSelector( [ (id<ChannelProtocol>)arr[idx] channel] );
             _channelVolume( [value floatValue] );
@@ -130,10 +134,7 @@
 {
     if( _midiSequence )
         [_midiSequence pause];
-#ifdef LOAD_INSTRUMENT_PER_SCENE
-    [_soundSystem dettachInstruments:_instruments toneGenerators:_generators];
-#endif
-    
+    [_soundSystem dettachInstruments:_soundSources];
     CheckError(AUGraphStop(_soundSystem.processGraph),"Unable to stop audio processing graph.");
 }
 
@@ -185,7 +186,7 @@
 {
     if( _midiFileName && !_midiSequence )
     {
-        id<MidiCapableProtocol>  instrument = _instruments ? _instruments[0] : _generators[0];
+        id<MidiCapableProtocol>  instrument = _soundSources[0];
         _midiSequence = [_midi setupMidiFile:_midiFileName withInstrument:instrument ss:_soundSystem];
     }
 }

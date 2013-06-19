@@ -8,12 +8,11 @@
 
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
-#import "Midi.h"
-#import "ChannelProtocol.h"
+#import "SoundSource.h"
 
 @class ConfigInstrument;
 
-@interface Sampler : NSObject <MidiCapableProtocol,ChannelProtocol>
+@interface Sampler : NSObject <SoundSource>
 
 +(id)samplerWithAUGraph:(AUGraph)graph;
 
@@ -29,8 +28,5 @@
 @property (nonatomic) MIDIPortRef     outPort;
 @property (nonatomic) MIDIEndpointRef endPoint;
 @property (nonatomic) int channel;
-#ifdef LOAD_INSTRUMENT_PER_SCENE
-@property (nonatomic,readonly) bool available;
-#endif
 @end
 

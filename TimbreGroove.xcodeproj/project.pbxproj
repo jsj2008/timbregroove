@@ -381,6 +381,7 @@
 		572EB2281678BF740062F290 /* Camera.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = Camera.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		572EB27E167A9B160062F290 /* config.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = config.plist; sourceTree = "<group>"; };
 		573022AF1728E990002D3F0F /* legoman.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = legoman.dae; sourceTree = "<group>"; };
+		5735460F17720D9200391499 /* SoundSource.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SoundSource.h; sourceTree = "<group>"; };
 		573560EE16EDB34C001EEA83 /* EQNames.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = EQNames.h; path = ../EQNames.h; sourceTree = "<group>"; };
 		5737C4A2169277B700C12F2D /* fluid.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fluid.png; sourceTree = "<group>"; };
 		5737C4AD169308DF00C12F2D /* imageBaker.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = imageBaker.vsh; sourceTree = "<group>"; };
@@ -624,6 +625,7 @@
 				5751F2DC16D569A700144F2B /* Audio.h */,
 				5751F2DD16D569A700144F2B /* Audio.m */,
 				57E27F0716F9769500282F9A /* ChannelProtocol.h */,
+				5735460F17720D9200391499 /* SoundSource.h */,
 				57DF9C8216B5BE2500050635 /* SoundSystem.h */,
 				57DF9C8316B5BE2500050635 /* SoundSystem.m */,
 				57C3BB8316C6B5B000899F4B /* SoundSystem+Diag.h */,

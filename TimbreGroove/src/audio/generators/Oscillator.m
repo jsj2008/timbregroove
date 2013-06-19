@@ -12,7 +12,7 @@
 #import "NoiseGen.h"
 #import "Parameter.h"
 
-@interface Oscillator : NSObject <ToneGeneratorProtocol>
+@interface Oscillator : ToneGenerator
 @property (nonatomic,strong) NSString * waveType;
 @end
 
@@ -106,8 +106,6 @@ OSStatus OscillatorRenderProc(void *inRefCon,
 
 
 @implementation Oscillator {
-    __weak ToneGeneratorProxy * _proxy;
-    __weak Midi * _midi;
     OscillatorRef _oref;
     bool _released;
 }
@@ -118,17 +116,9 @@ OSStatus OscillatorRenderProc(void *inRefCon,
     TGLog(LLObjLifetime, @"%@ released",self);
 }
 
--(void)detach
+-(void)setWaveType:(NSString *)waveType
 {
-    [self releaseRenderProc];
-}
-
--(MIDISendBlock)renderProcForToneGenerator:(ToneGeneratorProxy *)generatorProxy
-{
-    _released = false;
-    
-    _proxy = generatorProxy;
-    
+    _waveType = waveType;
     // These are set in config.plist
     if( [_waveType isEqualToString:@"Sine"] )
         _oref.waveType = OWT_Sine;
@@ -136,20 +126,10 @@ OSStatus OscillatorRenderProc(void *inRefCon,
         _oref.waveType = OWT_Square;
     else if( [_waveType isEqualToString:@"Saw"] )
         _oref.waveType = OWT_Saw;
-    
-    initNoise(&_oref.ng);
-    
-	AURenderCallbackStruct input;
-	input.inputProc = OscillatorRenderProc;
-	input.inputProcRefCon = &_oref;
-	CheckError(AudioUnitSetProperty(_proxy.au,
-									kAudioUnitProperty_SetRenderCallback,
-									kAudioUnitScope_Input,
-									_proxy.channel,
-									&input,
-									sizeof(input)),
-			   "Set render callback failed");
+}
 
+-(MIDISendBlock)midiRenderProc
+{
     return ^ OSStatus( UInt32 inStatus, UInt32 inData1, UInt32 inData2, UInt32 inOffsetSampleFrame) {
         Byte midiCommand = inStatus >> 4;
         
@@ -168,7 +148,7 @@ OSStatus OscillatorRenderProc(void *inRefCon,
         }
         else
         {
-            TGLog(LLMidiStuff, @"What MIDI: %d",midiCommand);
+            TGLog(LLMidiStuff, @"What? MIDI: %d",midiCommand);
             
         }
         return noErr;
@@ -176,7 +156,27 @@ OSStatus OscillatorRenderProc(void *inRefCon,
     
 }
 
--(void)releaseRenderProc
+-(void)didAttachToGraph:(SoundSystem *)ss
+{
+    [super didAttachToGraph:ss];
+    
+    _released = false;
+    
+    initNoise(&_oref.ng);
+    
+	AURenderCallbackStruct input;
+	input.inputProc = OscillatorRenderProc;
+	input.inputProcRefCon = &_oref;
+	CheckError(AudioUnitSetProperty(self.mixerAU,
+									kAudioUnitProperty_SetRenderCallback,
+									kAudioUnitScope_Input,
+									self.channel,
+									&input,
+									sizeof(input)),
+			   "Set render callback failed");
+}
+
+-(void)detach
 {
     if( _released )
         return;
@@ -184,10 +184,10 @@ OSStatus OscillatorRenderProc(void *inRefCon,
 	AURenderCallbackStruct input;
 	input.inputProc = NULL;
 	input.inputProcRefCon = NULL;
-	CheckError(AudioUnitSetProperty(_proxy.au,
+	CheckError(AudioUnitSetProperty(self.mixerAU,
 									kAudioUnitProperty_SetRenderCallback,
 									kAudioUnitScope_Input,
-									_proxy.channel,
+									self.channel,
 									&input,
 									sizeof(input)),
 			   "Remove render callback failed");
@@ -196,19 +196,12 @@ OSStatus OscillatorRenderProc(void *inRefCon,
 
 -(void)getParameters:(NSMutableDictionary *)parameters
 {
+    [super getParameters:parameters];
+    
     parameters[@"OscNoiseFactor"] = [Parameter withBlock:^(int value) {
         _oref.noiseFactor = (value * value) * 100;
         TGLog(LLMidiStuff, @"Noise factor: %d",_oref.noiseFactor);
     }];
 }
 
--(void)triggersChanged:(Scene *)scene
-{
-    
-}
-
--(AURenderCallback) getCallback
-{
-    return OscillatorRenderProc;
-}
 @end

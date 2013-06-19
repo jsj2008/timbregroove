@@ -33,7 +33,7 @@
 -(void)start
 {
     [super start];
-    _oscChannel = [self generatorChannelFromVirtual:0];
+    _oscChannel = 0; // TODO: erm, wha, huh
     _notes = [[NoteGenerator alloc] initWithScale:kScalePentatonic isRandom:true andRange:(NoteRange){55,81}];
 }
 

@@ -37,9 +37,8 @@
 {
     [super start];
     
-    _ambienceChannel = [self realChannelFromVirtual:AMBIENCE_VIRTUAL_CHANNEL];
-    
-    Sampler * congas = _instruments[CONGAS_VIRTUAL_CHANNEL];
+    _ambienceChannel = [self channelFromName:@"ambience"];
+    Sampler * congas = [self soundSourceFromName:@"congas"];
     _congasChannel = congas.channel;
     NoteRange congasRange = (NoteRange){ congas.lowestPlayable, congas.highestPlayable };
     _congasScale = [[NoteGenerator alloc] initWithScale:kScaleSemitones isRandom:false andRange:congasRange];

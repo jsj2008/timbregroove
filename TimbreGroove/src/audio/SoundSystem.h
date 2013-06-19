@@ -11,8 +11,6 @@
 #import <CoreMIDI/CoreMIDI.h>
 #import "TGTypes.h"
 
-#define LOAD_INSTRUMENT_PER_SCENE 1
-
 @class Scene;
 
 #ifndef SKIP_MIXER_DECLS
@@ -29,7 +27,7 @@ void _CheckError( OSStatus error, const char *operation);
 @class ConfigInstrument;
 @class Sampler;
 @class ConfigToneGenerator;
-@class ToneGeneratorProxy;
+@class ToneGenerator;
 @class SoundSystemParameters;
 @class Midi;
 
@@ -50,13 +48,12 @@ enum MidiNotes {
 +(SoundSystem *)sharedInstance;
 
 -(Sampler *)loadInstrumentFromConfig:(ConfigInstrument *)config;
--(ToneGeneratorProxy *)loadToneGeneratorFromConfig:(ConfigToneGenerator *)config;
-#ifdef LOAD_INSTRUMENT_PER_SCENE
--(void)dettachInstruments:(NSArray *)instruments
-           toneGenerators:(NSArray *)toneGenerators;
--(void)reattachInstruments:(NSArray *)instruments
-            toneGenerators:(NSArray *)toneGenerators;
-#endif
+-(ToneGenerator *)loadToneGeneratorFromConfig:(ConfigToneGenerator *)config;
+
+-(void)dettachInstruments:(NSArray *)soundSources;
+-(void)reattachInstruments:(NSArray *)soundSources;
+-(void)plugInstrumentIntoBus:(Sampler *)instrument;
+-(void)unplugInstrumentFromBus:(Sampler *)instrument;
 
 @property (nonatomic,readonly) AudioUnit mixerUnit;
 @property (nonatomic,readonly) AudioUnit masterEQUnit;
