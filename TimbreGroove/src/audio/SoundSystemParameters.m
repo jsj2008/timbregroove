@@ -70,7 +70,7 @@ static AudioParameterDefinition _g_mixerOutVolume =
 {
     kMultiChannelMixerParam_Volume,
     { 0.0, 1.0 },
-    0.5,
+    1.0,
     kAudioUnitScope_Output
 };
 
@@ -184,55 +184,20 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
 
 @interface SoundSystemParameters() {
     EQBandInfo               _bandInfos[kNUM_EQ_BANDS];
+    AudioUnitParameterValue  _eqEnablers[kNUM_EQ_BANDS];
+    
     AudioParameterDefinition _mixerOutVolume;
     AudioParameterDefinition _mixerInVolume;
     AudioUnit                _mixerUnit;
     AudioUnit                _masterEQUnit;
     FloatParamBlock          _peakTrigger;
     FloatParamBlock          _holdLevelTrigger;
+    
+    NSMutableDictionary * _pmap;
 }
 
 @end
 @implementation SoundSystemParameters
-
--(void)getParameters:(NSMutableDictionary *)pmap
-{
-    pmap[kParamMasterVolume]  = [AudioParameter with01AU:_mixerUnit def:&_mixerOutVolume ss:self];
-    pmap[kParamChannelVolume] = [AudioParameter with01AU:_mixerUnit def:&_mixerInVolume  ss:self];
-    
-    pmap[kParamChannel] = [Parameter withBlock:^(int channel) { self.selectedChannel = channel; }];
-
-    for( int i = 0; i < kNUM_EQ_BANDS; i++ )
-    {
-        for( int k = 0; k < kPK_NUM_EQ_KNOBS; k++ )
-        {
-            EQAudioParameterDefinition * epd = &_bandInfos[i].defs[k];
-            
-            if( epd->name )
-            {
-                epd->def.band = i;
-                pmap[@(epd->name)] = [AudioParameter withNeg11AU:_masterEQUnit
-                                                             def:&epd->def
-                                                              ss:self];
-            }
-        }
-    }
-    
-    NSArray * na = @[ kParamEQLowPassEnable, kParamEQParametricEnable, kParamEQHiPassEnable ];
-    [na enumerateObjectsUsingBlock:^(NSString * name, NSUInteger idx, BOOL *stop) {
-        pmap[name] = [Parameter withBlock:[^(int enable) {
-            OSStatus result;
-            result = AudioUnitSetParameter (_masterEQUnit,
-                                            kAUNBandEQParam_BypassBand + idx,
-                                            kAudioUnitScope_Global,
-                                            0,
-                                            enable ? 0.0 : 1.0, // this is Bypass
-                                            0);
-            
-            CheckError(result,"Unable to set eq bypass");
-        } copy]];
-    }];
-}
 
 -(id)initWithSoundSystem:(SoundSystem *)ss
 {
@@ -259,7 +224,7 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
             {
                 if( _bandInfos[i].defs[n].def.range.max == kNyquistFixupNeeded )
                 {
-                    // 0.81 for -3db roll off - WAG
+                    // (0.81 for -3db roll off) - (random WAG)
                     _bandInfos[i].defs[n].def.range.max = (graphSampleRate / 2.0) * 0.81;
                 }
                 _bandInfos[i].defs[n].def.valueCap = _bandInfos[i].defs[n].def.defaultValue;
@@ -283,48 +248,97 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
         apd->valueCap = param->_value;
 
 #if 1
-        TGLog(LLAudioTweaks, @"audio tweak[%p] param: %ld scope:%ld bus:%ld band:%d -> %.4f (%.2f/%.2f)",(void *)au,
-              apd->aupid,(long)apd->scope,(long)bus,apd->band,f,apd->range.min,apd->range.max);
+        TGLog(LLAudioTweaks, @"audio tweak[%p] param: %ld scope:%ld bus:%ld band:%d in:%.4f _val:%.4f (%.2f/%.2f)",(void *)au,
+              apd->aupid,(long)apd->scope,(long)bus,apd->band,f,param->_value,apd->range.min,apd->range.max);
 #endif
     } copy];
 }
 
--(float)getCurrentEQValue:(EQParamKnob)knob band:(int)band
+-(void)restorePresets
 {
-    return _bandInfos[band].defs[knob].def.valueCap;
+    void (^setParam)(AudioParameterDefinition *,NSString const *) =
+    ^void (AudioParameterDefinition *newp, NSString const *name) {
+            AudioParameter *param = _pmap[name];
+            FloatParamBlock block = [param getParamBlockOfType:_C_FLT];
+            block(newp->valueCap);            
+    };
+    
+    for (int i = 0; i < kNUM_EQ_BANDS; i++ )
+        for (int n = 0; n < kPK_NUM_EQ_KNOBS; n++ )
+            if( _bandInfos[i].defs[n].name )
+                setParam(&_bandInfos[i].defs[n].def,@(_bandInfos[i].defs[n].name));
+    
+    setParam( &_mixerInVolume,  kParamChannelVolume);
+    setParam( &_mixerOutVolume, kParamMasterVolume);
+    
+    NSArray * na = [self eqEnableNames];
+    [na enumerateObjectsUsingBlock:^(NSString * name, NSUInteger idx, BOOL *stop) {
+        Parameter * param = _pmap[name];
+        IntParamBlock block = [param getParamBlockOfType:_C_INT];
+        block( _eqEnablers[idx] );
+    }];
+}
+     
+
+-(NSArray *)eqEnableNames
+{
+    return @[ kParamEQLowPassEnable, kParamEQParametricEnable, kParamEQHiPassEnable ];
 }
 
--(int)whichEQBandisEnabled
+-(NSMutableDictionary *)getParameterMap
 {
+    if( _pmap )
+        return _pmap;
+    
+    _pmap = [NSMutableDictionary new];
+    
+    _pmap[kParamMasterVolume]  = [AudioParameter with01AU:_mixerUnit def:&_mixerOutVolume ss:self];
+    _pmap[kParamChannelVolume] = [AudioParameter with01AU:_mixerUnit def:&_mixerInVolume  ss:self];
+    
+    _pmap[kParamChannel] = [Parameter withBlock:^(int channel) { self.selectedChannel = channel; }];
+    
     for( int i = 0; i < kNUM_EQ_BANDS; i++ )
     {
-        OSStatus result;
-        AudioUnitParameterValue isBypass;
-        result = AudioUnitGetParameter (_masterEQUnit,
-                                        kAUNBandEQParam_BypassBand + i,
-                                        kAudioUnitScope_Global,
-                                        0,
-                                        &isBypass);
-        
-        CheckError(result,"Unable to get eq bypass");
-        if( !isBypass )
-            return i;
+        for( int k = 0; k < kPK_NUM_EQ_KNOBS; k++ )
+        {
+            EQAudioParameterDefinition * epd = &_bandInfos[i].defs[k];
+            
+            if( epd->name )
+            {
+                epd->def.band = i;
+                _pmap[@(epd->name)] = [AudioParameter withNeg11AU:_masterEQUnit
+                                                              def:&epd->def
+                                                               ss:self];
+            }
+        }
     }
     
-    return -1;
+    NSArray * na = [self eqEnableNames];
+    [na enumerateObjectsUsingBlock:^(NSString * name, NSUInteger idx, BOOL *stop) {
+        _pmap[name] = [Parameter withBlock:[^(int enable) {
+            OSStatus result;
+            result = AudioUnitSetParameter (_masterEQUnit,
+                                            kAUNBandEQParam_BypassBand + idx,
+                                            kAudioUnitScope_Global,
+                                            0,
+                                            enable ? kEQBypassOFF : kEQBypassON,
+                                            0);
+            
+            CheckError(result,"Unable to set eq bypass");
+            
+            _eqEnablers[idx] = enable;
+            
+            TGLog( LLAudioTweaks, @"EQ[%] enabled: %d", idx, enable);
+            
+        } copy]];
+    }];
     
+    return _pmap;
 }
-- (void) enableMetering:(bool)enable
+
+-(void)getParameters:(NSMutableDictionary *)parameters
 {
-    // turn on metering
-    UInt32 meteringMode = enable ? 1 : 0;
-    OSStatus err = AudioUnitSetProperty(_mixerUnit,
-                                        kAudioUnitProperty_MeteringMode,
-                                        kAudioUnitScope_Output,
-                                        0,
-                                        &meteringMode,
-                                        sizeof(meteringMode) );
-    CheckError(err, "Error tweaking metering mode");
+    [parameters addEntriesFromDictionary:[self getParameterMap]];
 }
 
 -(void)triggersChanged:(Scene *)scene
@@ -343,8 +357,20 @@ static EQBandInfo _g_bandInfos[kNUM_EQ_BANDS] =
     }
     
     [self enableMetering:_peakTrigger || _holdLevelTrigger ];
-    
 }
+
+- (void) enableMetering:(bool)enable
+{
+    AudioUnitParameterValue meteringMode = enable ? 1 : 0;
+    OSStatus err = AudioUnitSetProperty(_mixerUnit,
+                                        kAudioUnitProperty_MeteringMode,
+                                        kAudioUnitScope_Output,
+                                        0,
+                                        &meteringMode,
+                                        sizeof(meteringMode) );
+    CheckError(err, "Error tweaking metering mode");
+}
+
 
 -(void)update:(NSTimeInterval)dt
 {

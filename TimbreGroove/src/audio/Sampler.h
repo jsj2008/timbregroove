@@ -11,19 +11,18 @@
 #import "SoundSource.h"
 
 @class ConfigInstrument;
+@class SoundSystem;
 
 @interface Sampler : NSObject <SoundSource>
 
-+(id)samplerWithAUGraph:(AUGraph)graph;
++(id)samplerWithSoundSystem:(SoundSystem *)ss;
 
 -(void)loadSound:(ConfigInstrument *)config midi:(Midi *)midi;
-
--(void)instantiateAU;
 
 @property (nonatomic,readonly) int lowestPlayable;
 @property (nonatomic,readonly) int highestPlayable;
 @property (nonatomic,readonly) AudioUnit sampler;
-@property (nonatomic,readonly) AUNode    graphNode;
+@property (nonatomic,readonly) AUNode    graphNode; // the AUGraph sees this 
 @property (nonatomic) bool configured;
 @property (nonatomic) MIDIPortRef     outPort;
 @property (nonatomic) MIDIEndpointRef endPoint;

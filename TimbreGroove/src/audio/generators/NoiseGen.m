@@ -30,11 +30,9 @@ float nextNoiseValue(NoiseGen * ng)
     sum = 0;
     for (int i = 0; i < 5; i++)
     {
-        // If bit changed get new random number for corresponding
-        // white_value
         if (diff & (1 << i))
             ng->white_values[i] = R0_n(10000) % (ng->range/5);
         sum += ng->white_values[i];
     }
-    return (((float)sum / (float)ng->range) * 2.0) - 1.0;
+    return (float)sum / ((float)ng->range * 0.5) - 1.0;
 }

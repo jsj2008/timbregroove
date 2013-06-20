@@ -92,7 +92,7 @@
 		</dict>
 	</dict>
 	<key>default_scene</key>
-	<string>fractal</string>
+	<string>box</string>
 	<key>scenes</key>
 	<dict>
 		<key>aotk</key>
@@ -160,10 +160,6 @@
 			<key>connections</key>
 			<array>
 				<dict>
-					<key>kTriggerPanX</key>
-					<string>OscNoiseFactor</string>
-				</dict>
-				<dict>
 					<key>kTriggerPanDone</key>
 					<string>NoteDone</string>
 					<key>kTriggerPanX</key>
@@ -172,6 +168,8 @@
 					<string>Squish</string>
 				</dict>
 				<dict>
+					<key>kTriggerMainSlider</key>
+					<string>kParamMasterVolume</string>
 					<key>kTriggerTap1</key>
 					<string>TapNote</string>
 					<key>kTriggerPanDone</key>
@@ -262,18 +260,20 @@
 	<dict>
 		<key>synth_01</key>
 		<dict>
-			<key>connections</key>
+			<key>instruments</key>
 			<array>
-				<dict>
-					<key>kTriggerTap1</key>
-					<string>TapNote</string>
-				</dict>
+				<string>kelvin</string>
 			</array>
+			<key>properties</key>
+			<dict>
+				<key>noiseFactor</key>
+				<string>0.075</string>
+			</dict>
 			<key>instanceClass</key>
 			<string>Synth_01</string>
 			<key>generators</key>
 			<array>
-				<string>square</string>
+				<string>saw</string>
 			</array>
 		</dict>
 		<key>synthOfGod</key>
@@ -395,6 +395,17 @@
 	</dict>
 	<key>instruments</key>
 	<dict>
+		<key>kelvin</key>
+		<dict>
+			<key>isSoundfont</key>
+			<false/>
+			<key>preset</key>
+			<string>Kelvin</string>
+			<key>lo</key>
+			<integer>0</integer>
+			<key>hi</key>
+			<string>127</string>
+		</dict>
 		<key>clav</key>
 		<dict>
 			<key>isSoundfont</key>
@@ -634,7 +645,7 @@
 		<key>LLObjLifetime</key>
 		<false/>
 		<key>LLAudioTweaks</key>
-		<false/>
+		<true/>
 		<key>LLJustSayin</key>
 		<false/>
 		<key>LLGLResource</key>

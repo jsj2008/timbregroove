@@ -21,12 +21,12 @@
     SoundSystemParameters * _parameters;
     
     NSString * _eqName;
-    NSArray * _myTriggerMap;
+    NSArray *  _myTriggerMap;
     
     Midi *     _midi;
     MidiFile * _midiSequence;
     NSString * _midiFileName;
-    bool _started;
+    bool       _started;
     
 }
 
@@ -111,6 +111,7 @@
         if( _midiSequence )
             [_midiSequence resume];
         [_soundSystem reattachInstruments:_soundSources];
+        [_parameters restorePresets];
     }
     else
     {
@@ -126,6 +127,7 @@
         }];
     }
     
+    TGLog( LLAudioResource, @"Audio graph waking up");
     CheckError(AUGraphStart(_soundSystem.processGraph),"Unable to start audio processing graph.");
     
 }
@@ -135,6 +137,7 @@
     if( _midiSequence )
         [_midiSequence pause];
     [_soundSystem dettachInstruments:_soundSources];
+    TGLog( LLAudioResource, @"Audio graph going to sleep");
     CheckError(AUGraphStop(_soundSystem.processGraph),"Unable to stop audio processing graph.");
 }
 

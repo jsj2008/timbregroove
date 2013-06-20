@@ -13,11 +13,6 @@
 
 @class Scene;
 
-#ifndef SKIP_MIXER_DECLS
-extern const AudioUnitParameterValue kEQBypassON;
-extern const AudioUnitParameterValue kEQBypassOFF;
-#endif
-
 #define  kFramesForDisplay 512
 
 #define CheckError(error,str) { if (error != noErr) { _CheckError(error,str); } }
@@ -31,6 +26,10 @@ void _CheckError( OSStatus error, const char *operation);
 @class SoundSystemParameters;
 @class Midi;
 
+// AU Lab reports one octive below
+// these. So:
+// AULab C4 == kC5
+//
 enum MidiNotes {
     kC0 = 0,
     kC1 = 12,
@@ -54,6 +53,8 @@ enum MidiNotes {
 -(void)reattachInstruments:(NSArray *)soundSources;
 -(void)plugInstrumentIntoBus:(Sampler *)instrument;
 -(void)unplugInstrumentFromBus:(Sampler *)instrument;
+-(OSStatus)configUnit:(AudioUnit)unit;
+-(OSStatus)refreshGraph;
 
 @property (nonatomic,readonly) AudioUnit mixerUnit;
 @property (nonatomic,readonly) AudioUnit masterEQUnit;
@@ -63,6 +64,4 @@ enum MidiNotes {
 -(void)update:(NSTimeInterval)dt;
 -(void)getParameters:(NSMutableDictionary *)putHere;
 -(void)triggersChanged:(Scene *)scene;
--(OSStatus)configUnit:(AudioUnit)unit;
--(OSStatus)refreshGraph;
 @end

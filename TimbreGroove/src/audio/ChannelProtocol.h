@@ -18,4 +18,5 @@
 -(void)setName:(NSString *)name;
 -(void)didAttachToGraph:(SoundSystem *)ss;
 -(void)didDetachFromGraph:(SoundSystem *)ss;
+-(void)getParameters:(NSMutableDictionary *)parameters;
 @end

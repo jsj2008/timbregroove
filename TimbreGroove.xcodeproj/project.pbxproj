@@ -71,6 +71,8 @@
 		570F416216ABBA0E000FCA7B /* GridPlane.m in Sources */ = {isa = PBXBuildFile; fileRef = 570F416116ABBA0E000FCA7B /* GridPlane.m */; };
 		570F416516ABDFFD000FCA7B /* Cloud.m in Sources */ = {isa = PBXBuildFile; fileRef = 570F416416ABDFFD000FCA7B /* Cloud.m */; };
 		5712FB4416B1B8B1004D62AE /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5712FB4316B1B8B1004D62AE /* Accelerate.framework */; };
+		5713CFC717727A3B00597269 /* Kelvin.aupreset in Resources */ = {isa = PBXBuildFile; fileRef = 5713CFC517727A3B00597269 /* Kelvin.aupreset */; };
+		5713CFCA1772817200597269 /* Sounds in Resources */ = {isa = PBXBuildFile; fileRef = 5713CFC91772817200597269 /* Sounds */; };
 		571470571706771F00383D04 /* ColladaParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 571470541706771F00383D04 /* ColladaParser.m */; };
 		571470581706771F00383D04 /* MeshScene.m in Sources */ = {isa = PBXBuildFile; fileRef = 571470561706771F00383D04 /* MeshScene.m */; };
 		5714705E17067D3100383D04 /* MeshImportPainter.m in Sources */ = {isa = PBXBuildFile; fileRef = 5714705D17067D3100383D04 /* MeshImportPainter.m */; };
@@ -315,6 +317,8 @@
 		570F416316ABDFF2000FCA7B /* Cloud.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Cloud.h; sourceTree = "<group>"; };
 		570F416416ABDFFD000FCA7B /* Cloud.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Cloud.m; sourceTree = "<group>"; };
 		5712FB4316B1B8B1004D62AE /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
+		5713CFC517727A3B00597269 /* Kelvin.aupreset */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = Kelvin.aupreset; sourceTree = "<group>"; };
+		5713CFC91772817200597269 /* Sounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Sounds; sourceTree = "<group>"; };
 		571470521706771F00383D04 /* ColladaNames.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColladaNames.h; sourceTree = "<group>"; };
 		571470531706771F00383D04 /* ColladaParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColladaParser.h; sourceTree = "<group>"; };
 		571470541706771F00383D04 /* ColladaParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ColladaParser.m; sourceTree = "<group>"; };
@@ -776,29 +780,29 @@
 		5722A1E816DEE51C007136B9 /* app */ = {
 			isa = PBXGroup;
 			children = (
-				57647576167D8AC100D5A431 /* TGTypes.h */,
-				5751F2DF16D5933B00144F2B /* Scene.h */,
-				5751F2E016D5933C00144F2B /* Scene.m */,
-				57E8E2B816C1BF7600CD39BC /* Global.h */,
-				57E8E2B916C1BF7600CD39BC /* Global.m */,
+				5781CAA716E55B54007C8EC2 /* Block.h */,
+				5781CAA516E55B46007C8EC2 /* Block.m */,
 				579AD1A716C40B670071AA9A /* Config.h */,
 				579AD1A816C40B670071AA9A /* Config.m */,
 				5751F2DB16D54C7E00144F2B /* ConfigNames.h */,
+				57E8E2B816C1BF7600CD39BC /* Global.h */,
+				57E8E2B916C1BF7600CD39BC /* Global.m */,
+				577F0EE317009D560008A703 /* Log.h */,
+				577F0EE417009D7F0008A703 /* Log.m */,
+				571FD90516F02C07007DB564 /* MathStuff.h */,
+				571FD90316F02B69007DB564 /* MathStuff.c */,
 				57D0EBDA16D4BA5200DBF457 /* Names.h */,
 				57D0EBDB16D4BA5300DBF457 /* Names.m */,
 				577F0EE61700BD970008A703 /* NameMap.m */,
-				57D0EBD716D4B1C300DBF457 /* TriggerMap.h */,
-				57D0EBD816D4B1C400DBF457 /* TriggerMap.m */,
 				572098DF16DA9FA30075E584 /* Parameter.h */,
 				572098E016DA9FA40075E584 /* Parameter.m */,
-				5781CAA716E55B54007C8EC2 /* Block.h */,
-				5781CAA516E55B46007C8EC2 /* Block.m */,
+				5751F2DF16D5933B00144F2B /* Scene.h */,
+				5751F2E016D5933C00144F2B /* Scene.m */,
+				57647576167D8AC100D5A431 /* TGTypes.h */,
+				57D0EBD716D4B1C300DBF457 /* TriggerMap.h */,
+				57D0EBD816D4B1C400DBF457 /* TriggerMap.m */,
 				5705DEDA16E5DA7E00A80445 /* Tween.h */,
 				5705DED816E5DA5200A80445 /* Tween.c */,
-				571FD90516F02C07007DB564 /* MathStuff.h */,
-				571FD90316F02B69007DB564 /* MathStuff.c */,
-				577F0EE317009D560008A703 /* Log.h */,
-				577F0EE417009D7F0008A703 /* Log.m */,
 			);
 			name = app;
 			sourceTree = "<group>";
@@ -1063,6 +1067,7 @@
 		57A10E961685E08300B80314 /* audio */ = {
 			isa = PBXGroup;
 			children = (
+				5713CFC517727A3B00597269 /* Kelvin.aupreset */,
 				57E27F0316F9166600282F9A /* m.mid */,
 				57B2737016D0BDCB00E7F064 /* Clavinet (21KB).sf2 */,
 				5758FDEC16D06648003913D1 /* funkRiff1.mid */,
@@ -1170,6 +1175,7 @@
 		57E8750116782894008243B2 /* TimbreGroove */ = {
 			isa = PBXGroup;
 			children = (
+				5713CFC91772817200597269 /* Sounds */,
 				572EB1F816786C630062F290 /* src */,
 				571ECF97167BE2CE00727A30 /* contrib */,
 				572EB1F316786C630062F290 /* shaders */,
@@ -1393,6 +1399,8 @@
 				57B5101E172A002300CD805B /* lightTest.dae in Resources */,
 				571A9237174D7D50007D0DAF /* aotk.dae in Resources */,
 				57A66F42175868C700F8AD51 /* butterfly.dae in Resources */,
+				5713CFC717727A3B00597269 /* Kelvin.aupreset in Resources */,
+				5713CFCA1772817200597269 /* Sounds in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -384,16 +384,16 @@ TweenCallback TweenReverseLooper = ^TweenDoneIndicator(TriggerTween *tt) {
     {
         NSString * name = [paramName stringByAppendingString:@"#"];
         NSRange range = (NSRange){ 0, [name length] };
-        NSArray * matching = [_sortedParamNames objectsAtIndexes:[_sortedParamNames indexesOfObjectsPassingTest:^BOOL(NSString * paramName,
-                                                                                                                      NSUInteger idx,
-                                                                                                                      BOOL *stop) {
+        NSIndexSet * sorted = [_sortedParamNames indexesOfObjectsPassingTest:^BOOL(NSString * paramName,
+                                                                                   NSUInteger idx,
+                                                                                   BOOL *stop) {
             NSComparisonResult result = [paramName compare:name
                                                    options:NSLiteralSearch
                                                      range:range];
             *stop = result == NSOrderedDescending;
             return result == NSOrderedSame;
-        }]];
-        
+        }];
+        NSArray * matching = [_sortedParamNames objectsAtIndexes:sorted];
         if( [matching count] )
         {
             if( !newNames )

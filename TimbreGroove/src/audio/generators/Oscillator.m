@@ -43,7 +43,6 @@ OSStatus OscillatorRenderProc(void *inRefCon,
                               UInt32 inNumberFrames,
                               AudioBufferList * ioData)
 {
-    
 	OscillatorRef *ref = (OscillatorRef*)inRefCon;
 	
     FrameType *left  = (FrameType*)ioData->mBuffers[0].mData;
@@ -164,9 +163,7 @@ OSStatus OscillatorRenderProc(void *inRefCon,
     
     initNoise(&_oref.ng);
     
-	AURenderCallbackStruct input;
-	input.inputProc = OscillatorRenderProc;
-	input.inputProcRefCon = &_oref;
+	AURenderCallbackStruct input = { OscillatorRenderProc, &_oref };
 	CheckError(AudioUnitSetProperty(self.mixerAU,
 									kAudioUnitProperty_SetRenderCallback,
 									kAudioUnitScope_Input,
@@ -181,9 +178,7 @@ OSStatus OscillatorRenderProc(void *inRefCon,
     if( _released )
         return;
     
-	AURenderCallbackStruct input;
-	input.inputProc = NULL;
-	input.inputProcRefCon = NULL;
+	AURenderCallbackStruct input = { NULL, NULL };
 	CheckError(AudioUnitSetProperty(self.mixerAU,
 									kAudioUnitProperty_SetRenderCallback,
 									kAudioUnitScope_Input,
@@ -198,9 +193,10 @@ OSStatus OscillatorRenderProc(void *inRefCon,
 {
     [super getParameters:parameters];
     
-    parameters[@"OscNoiseFactor"] = [Parameter withBlock:^(int value) {
-        _oref.noiseFactor = (value * value) * 100;
-        TGLog(LLMidiStuff, @"Noise factor: %d",_oref.noiseFactor);
+    parameters[@"OscNoiseFactor"] = [Parameter withBlock:^(float value) {
+        _oref.noiseFactor = (((unsigned int)((value * value) * 1000)) % 10);
+        _oref.noiseCount = _oref.noiseFactor;
+        TGLog(LLMidiStuff, @"Noise factor: %d (from: %f)",_oref.noiseFactor,value);
     }];
 }
 

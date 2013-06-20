@@ -18,14 +18,14 @@
     PointerParamBlock _midiNoteOFF;
     IntParamBlock     _eqSwitch;
     FloatParamBlock   _eqCutOff;
+    FloatParamBlock   _noiseParam;
     
-    int _oscChannel;
-    int _noiseChannel;
-    MIDINoteMessage _mnm;
-    MIDINoteMessage _noise;
+    MIDINoteMessage _sawMsg;
+    MIDINoteMessage _kelvinMsg;
     bool _notePlaying;
 }
 
+@property (nonatomic) float noiseFactor;
 @end
 
 @implementation Synth_01
@@ -34,23 +34,37 @@
 -(void)loadAudioFromConfig:(ConfigAudioProfile *)config
 {
     [super loadAudioFromConfig:config];
-    self.channelVolumes = @[  @(0.1) ];
+    self.channelVolumes = @[  @(0.9), @(0.9) ];
 }
 
 -(void)start
 {
     [super start];
-    _oscChannel = 0; // TODO: *cough*
-    _mnm.channel = _oscChannel;
-    _mnm.velocity = 127;
-    _mnm.note = 52;
-/*
- _noiseChannel = [self generatorChannelFromVirtual:1];
- 
- _noise.channel = _noiseChannel;
- _noise.note = 52;
- _noise.velocity = 127;
-*/
+    _sawMsg.channel = [self channelFromName:@"saw"];
+    _sawMsg.velocity = 127;
+    _sawMsg.note = 52;
+
+    _kelvinMsg.channel = [self channelFromName:@"kelvin"];
+    _kelvinMsg.velocity = 127;
+    _kelvinMsg.note = kC5;
+    
+    if( _noiseFactor )
+        _noiseParam(_noiseFactor);
+    _noiseParam = nil;
+}
+
+-(void)activate
+{
+    [super activate];
+    [NSObject performBlock:^{
+        _midiNoteON(&_kelvinMsg);
+    } afterDelay:0.9];
+}
+
+-(void)pause
+{
+    _midiNoteOFF(&_kelvinMsg);
+    [super pause];
 }
 
 -(void)getParameters:(NSMutableDictionary *)parameters
@@ -60,23 +74,17 @@
     parameters[@"TapNote"] = [Parameter withBlock:^(CGPoint pt) {
         if( _notePlaying )
         {
-            _midiNoteOFF(&_mnm);
-//            _midiNoteOFF(&_noise);
+            _midiNoteOFF(&_sawMsg);
         }
-        _mnm.duration = 0.4;
-        _midiNote(&_mnm);
-        /*
-        _noise.duration = 0.4;
-        _midiNote(&_noise);
-         */
+        _sawMsg.duration = 0.4;
+        _midiNote(&_sawMsg);        
     }];
     
     parameters[@"NoteSweep"] = [Parameter withBlock:^(float f) {
         if( !_notePlaying )
         {
             _notePlaying = true;
-            _midiNoteON(&_mnm);
-           // _midiNoteON(&_noise);
+            _midiNoteON(&_sawMsg);
         }
         _eqCutOff(-f);
     }];
@@ -84,8 +92,7 @@
     parameters[@"NoteDone"] = [Parameter withBlock:^(int type) {
         if( _notePlaying )
         {
-            _midiNoteOFF(&_mnm);
-           // _midiNoteOFF(&_noise);
+            _midiNoteOFF(&_sawMsg);
         }
         _notePlaying = false;
     }];
@@ -103,10 +110,11 @@
         _midiNote    = [tm getPointerTrigger:kParamMIDINote];
         _midiNoteON  = [tm getPointerTrigger:kParamMIDINoteON];
         _midiNoteOFF = [tm getPointerTrigger:kParamMIDINoteOFF];
-        _eqCutOff = [tm getFloatTrigger:kParamEQLowCutoff];
+        _eqCutOff    = [tm getFloatTrigger:kParamEQLowCutoff];
         _eqSwitch    = [tm getIntTrigger:kParamEQLowPassEnable];
         _eqSwitch(1);
-        
+        _noiseParam  = [tm getFloatTrigger:@"OscNoiseFactor"];
+
     }
     else
     {
@@ -117,6 +125,8 @@
         _midiNote    = nil;
         _midiNoteON  = nil;
         _midiNoteOFF = nil;
+        
+        _noiseParam  = nil;
     }
 }
 

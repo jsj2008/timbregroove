@@ -49,7 +49,7 @@ void MyMIDINotifyProc (const MIDINotification  *message, void *refCon)
         "IOError"
     };
     
-    NSMutableString * ms = [NSMutableString stringWithFormat:@"MIDI %p: %s: ", refCon, _midiMsgs[message->messageID]];
+    NSMutableString * ms = [NSMutableString stringWithFormat:@"MIDI ntfy %p: %s: ", refCon, _midiMsgs[message->messageID]];
     
     if (message->messageID == kMIDIMsgObjectAdded || message->messageID == kMIDIMsgObjectRemoved ) {
         MIDIObjectAddRemoveNotification * arn = (MIDIObjectAddRemoveNotification *)message;
@@ -97,7 +97,10 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
     
     MIDIPacket *packet = (MIDIPacket *)pktlist->packet;
     for (int i=0; i < pktlist->numPackets; i++) {
-        TGLog(LLMidiStuff, @"Midi packet: %d of %d : len:%d ts:%lu", i+1, pktlist->numPackets, packet->length, packet->timeStamp);
+        
+        TGLog(LLMidiStuff, @"MIDI pckt: %d of %d : len:%d ts:%lu", i+1,
+              pktlist->numPackets, packet->length, packet->timeStamp);
+        
         Byte midiStatus = packet->data[0];
         Byte midiCommand = midiStatus >> 4;
         
@@ -109,17 +112,17 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
             if(!velocity)
                 midiStatus &= ~0x10;
             
-            OSStatus result = block(midiStatus,note,velocity,0);
-            CheckError(result, "Error sending note");
+            CheckError( block(midiStatus,note,velocity,0), "Error sending note" );
             
 #ifdef SHOW_NOTES
-                int noteNumber = ((int) note);
-                TGLog(LLMidiStuff, @"%p Status: %04X %s: %i vel:%d", refCon, midiStatus, _noteNames[noteNumber %12], noteNumber, velocity);
+            int noteNumber = ((int) note);
+            TGLog(LLMidiStuff, @"MIDI nmsg (%p) Status: %04X %s: %i vel:%d", refCon, midiStatus,
+                  _noteNames[noteNumber %12], noteNumber, velocity);
 #endif
         }
         else
         {
-            TGLog(LLMidiStuff, @"Midi status: %04X",midiStatus);
+            TGLog(LLMidiStuff, @"MIDI stts %04X",midiStatus);
         }
         packet = MIDIPacketNext(packet);
     }
@@ -266,7 +269,7 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
                                   &_midiClient);
         
         CheckError(result,"MIDIClientCreate failed");
-        TGLog(LLAudioResource, @"Created midi client %d for %@",_midiClient,self);
+        TGLog(LLMidiStuff, @"Created midi client %d for %@",_midiClient,self);
     }
     return self;
 }
@@ -301,7 +304,7 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
     
     CheckError(result,"MIDIDestinationCreate failed");
     
-    TGLog(LLAudioResource, @"Created midi endPoint dest. %p (outport %p) for %@",(void *)virtualEndpoint,(void *)outPort,instrument);
+    TGLog(LLMidiStuff, @"Created midi endPoint dest. %p (outport %p) for %@",(void *)virtualEndpoint,(void *)outPort,instrument);
     
     [instrument setEndPoint:virtualEndpoint];
     [instrument setOutPort:outPort];
@@ -313,7 +316,7 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
     CheckError( MIDIPortDispose([instrument outPort]), "Could not dispose port");
     [instrument setEndPoint:(MIDIEndpointRef)0];
     [instrument setOutPort:(MIDIPortRef)0];
-    TGLog(LLAudioResource, @"Released destination/port for %@",instrument);
+    TGLog(LLMidiStuff, @"Released destination/port for %@",instrument);
 }
 
 -(void)sendNote:(MIDINoteMessage *)noteMsg destination:(id<MidiCapableProtocol>)instrument

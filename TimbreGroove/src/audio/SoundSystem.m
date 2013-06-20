@@ -127,8 +127,6 @@ OSStatus renderCallback(
 
     UInt32 _ioFramesPerSlice;
     
-    unsigned int _nextChannel;
-
     AudioStreamBasicDescription _fasbd;
     AudioStreamBasicDescription _iasbd;
 }
@@ -188,22 +186,15 @@ OSStatus renderCallback(
     return __sharedSoundSystem;
 }
 
--(void)handleParamChange:(NSString const *)paramName value:(float)value
+-(void)changeTempo:(float)f
 {
     
 }
 
--(void)getParameters:(NSMutableDictionary *)putHere
+-(void)getParameters:(NSMutableDictionary *)parameters
 {
-    FloatParamBlock(^NOOP_closure)(NSString const *) =
-    ^FloatParamBlock(NSString const * name){
-        return ^(float f) {
-            [self handleParamChange:name value:f ];
-        };
-    };
-    
     PointerParamBlock(^handleMidiMsg)(bool, bool) =
-    ^PointerParamBlock(bool useDuration, bool onOff) {
+    ^PointerParamBlock(bool honorDuration, bool onOff) {
         return ^(void * pmsg) {
             MIDINoteMessage * msg = pmsg;
 
@@ -214,35 +205,25 @@ OSStatus renderCallback(
                     break;
             }
 
-            if( useDuration )
+            if( honorDuration )
                 [_midi sendNote:msg destination:instrument];
             else
                 [_midi setNoteOnOff:msg destination:instrument on:onOff];
         };
     };
     
-    [putHere addEntriesFromDictionary:
+    [parameters addEntriesFromDictionary:
      @{
-              kParamTempo: [Parameter withBlock:[NOOP_closure(kParamTempo) copy]],
-     /*
-              kParamPitch: [Parameter withBlock:[NOOP_closure(kParamPitch) copy]],
-       kParamInstrumentP1: [Parameter withBlock:[NOOP_closure(kParamInstrumentP1) copy]],
-       kParamInstrumentP2: [Parameter withBlock:[NOOP_closure(kParamInstrumentP2) copy]],
-       kParamInstrumentP3: [Parameter withBlock:[NOOP_closure(kParamInstrumentP3) copy]],
-       kParamInstrumentP4: [Parameter withBlock:[NOOP_closure(kParamInstrumentP4) copy]],
-       kParamInstrumentP5: [Parameter withBlock:[NOOP_closure(kParamInstrumentP5) copy]],
-       kParamInstrumentP6: [Parameter withBlock:[NOOP_closure(kParamInstrumentP6) copy]],
-       kParamInstrumentP7: [Parameter withBlock:[NOOP_closure(kParamInstrumentP7) copy]],
-       kParamInstrumentP8: [Parameter withBlock:[NOOP_closure(kParamInstrumentP8) copy]],
-      */
-           kParamMIDINote: [Parameter withBlock:[handleMidiMsg(true,false) copy]],
-         kParamMIDINoteON: [Parameter withBlock:[handleMidiMsg(false,true) copy]],
-        kParamMIDINoteOFF: [Parameter withBlock:[handleMidiMsg(false,false) copy]],
-
+             kParamTempo: [Parameter withBlock:^(float f) { [self changeTempo:f]; }],
+          kParamMIDINote: [Parameter withBlock:[handleMidiMsg(true,false) copy]],
+        kParamMIDINoteON: [Parameter withBlock:[handleMidiMsg(false,true) copy]],
+       kParamMIDINoteOFF: [Parameter withBlock:[handleMidiMsg(false,false) copy]],
      }];
     
-    NOOP_closure = nil;
     handleMidiMsg = nil;
+    
+    for( id<SoundSource> source in _instruments )
+        [source getParameters:parameters];
 }
 
 -(void)triggersChanged:(Scene *)scene
@@ -345,18 +326,19 @@ OSStatus renderCallback(
 
 -(void)dettachInstruments:(NSArray *)soundSources
 {
+    TGLog( LLAudioResource, @"Removing %d sound sources", [_instruments count]);
     for( id<SoundSource> source in soundSources )
         [source didDetachFromGraph:self];
     [self setMixerBusCount:0];
-    _nextChannel = 0;
     [_instruments removeAllObjects];
     [self refreshGraph];
 }
 
 -(void)reattachInstruments:(NSArray *)soundSources
 {
-    _nextChannel = [soundSources count];
-    [self setMixerBusCount:_nextChannel];
+    TGLog( LLAudioResource, @"Reattaching %d souncd sources", [soundSources count]);
+    
+    [self setMixerBusCount:[soundSources count]];
     
     for( id<SoundSource> source in soundSources )
     {
@@ -369,23 +351,22 @@ OSStatus renderCallback(
 
 -(Sampler *)loadInstrumentFromConfig:(ConfigInstrument *)config
 {
-    int channel = _nextChannel++;
-    [self setMixerBusCount:channel];
-    Sampler * sampler = [Sampler samplerWithAUGraph:_processGraph];
+    int channel = [_instruments count];
+    [self setMixerBusCount:channel+1];
+    Sampler * sampler = [Sampler samplerWithSoundSystem:self];
     sampler.channel = channel;
     sampler.name = config.name;
-    [sampler instantiateAU];
-    [self configUnit:sampler.sampler];
     [sampler loadSound:config midi:_midi];
     [sampler didAttachToGraph:self];
     [_instruments addObject:sampler];
+    TGLog(LLAudioResource, @"Added instrument %@", sampler.name);
     return sampler;
 }
 
 -(ToneGenerator *)loadToneGeneratorFromConfig:(ConfigToneGenerator *)config
 {
-    int channel = _nextChannel++;
-    [self setMixerBusCount:channel];
+    int channel = [_instruments count];
+    [self setMixerBusCount:channel+1];
     ToneGenerator * generator = [ToneGenerator toneGeneratorWithMixerAU:_mixerUnit config:config midi:_midi];
     generator.channel = channel;
     generator.name = config.name;
@@ -393,7 +374,7 @@ OSStatus renderCallback(
     [generator didAttachToGraph:self];
 
     [_instruments addObject:generator];
-    
+    TGLog(LLAudioResource, @"Added tone generator %@", generator.name);
     return generator;
 }
 
@@ -405,7 +386,11 @@ OSStatus renderCallback(
                                         _mixerNode,
                                         instrument.channel);
     
-    CheckError(result,"Unable to disconnect the nodes in the audio processing graph.");
+    CheckError(result, "Unable to disconnect the node from the audio processing graph.");
+    
+    result = AUGraphRemoveNode(_processGraph, instrument.graphNode);
+    
+    CheckError(result, "Unable to remove node from the audio processing graph.");
 }
 
 -(void)plugInstrumentIntoBus:(Sampler *)instrument
@@ -590,6 +575,7 @@ OSStatus renderCallback(
 {
     CheckError(AUGraphUpdate(_processGraph, NULL), "AUGraphUpdate failed" ); // NULL for synchronous
 
+    TGLog( LLAudioResource, @"Audio graph refreshed");
 #ifdef DO_GRAPH_DUMP
     [self dumpGraph:_processGraph];
 #endif

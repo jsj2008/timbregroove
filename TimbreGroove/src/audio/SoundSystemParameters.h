@@ -37,7 +37,6 @@ enum EQParamKnobAliases {
 
 +(void)configureEQ:(AudioUnit)masterEQUnit;
 
--(float)getCurrentEQValue:(EQParamKnob)knob band:(int)band;
--(int)whichEQBandisEnabled;
+-(void)restorePresets;
 
 @end
