@@ -21,6 +21,7 @@
     unsigned int   _numStrides;
     unsigned int   _strideSize;
     GLsizei        _bufferSize;
+    GLuint         _tempVBA;
 }
 @end;
 
@@ -34,6 +35,8 @@
         _usage = GL_STATIC_DRAW;
         _indexBufferId = -1;
         _vertextBufferId = -1;
+        _vbaId = -1;
+        _tempVBA = -1;
         _drawable = true;
     }
     
@@ -133,7 +136,6 @@
     if( indexData )
        [self setIndexData:indexData numIndices:numIndices];
     
-  //  glBindVertexArrayOES(0);
 }
 
 -(void)setIndexData:(unsigned int *)data numIndices:(unsigned int)numIndices
@@ -166,8 +168,11 @@
    // glEnableVertexAttribArray(0);
 }
 
--(void)bind
+-(void)bindToVBA
 {
+    glGenVertexArraysOES(1,&_vbaId);
+    glBindVertexArrayOES(_vbaId);
+    
     if( _vertextBufferId != -1 )
     {
         glBindBuffer(GL_ARRAY_BUFFER, _vertextBufferId);
@@ -175,9 +180,11 @@
     }
     if( _indexBufferId != -1 )
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBufferId);
+    
+    glBindVertexArrayOES(0);
 }
 
--(void)unbind
+-(void)unbindFromVBA
 {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     if( _indexBufferId != -1 )
@@ -187,6 +194,19 @@
         VertexStride * stride = _strides + i;
         glDisableVertexAttribArray(stride->location);
     }
+}
+
+-(void)bind
+{
+    if( _vbaId == -1 )
+        [self bindToVBA];
+    
+    glBindVertexArrayOES(_vbaId);
+}
+
+-(void)unbind
+{
+    glBindVertexArrayOES(0);
 }
 
 // TODO: this probably belongs somewhere else
@@ -206,13 +226,31 @@
     return true;
 }
 
+-(void)bindToTempLocationVBA:(GLuint)location
+{
+    if( _tempVBA == -1 )
+    {
+        glGenVertexArraysOES(1,&_tempVBA);
+        glBindVertexArrayOES(_tempVBA);
+        [self bindToTempLocation:location];
+        glBindVertexArrayOES(0);
+    }
+    glBindVertexArrayOES(_tempVBA);
+}
+
 -(void)dealloc
 {
     if( glIsBuffer(_vertextBufferId))
         glDeleteBuffers(1, &_vertextBufferId);
     if( glIsBuffer(_indexBufferId))
         glDeleteBuffers(1, &_indexBufferId);
-    TGLog(LLGLResource | LLObjLifetime, @"%@ Deleted buffers index (%d) and vertex (%d)",self,_indexBufferId,_vertextBufferId);
+    if( glIsBuffer(_vbaId) )
+        glDeleteVertexArraysOES(1, &_vbaId);
+    if( glIsBuffer(_tempVBA) )
+        glDeleteVertexArraysOES(1, &_tempVBA);
+    
+    TGLog(LLGLResource | LLObjLifetime, @"%@ Deleted buffers index (%d) vertex (%d) vba (%d)",self,
+          _indexBufferId,_vertextBufferId,_vbaId);
 }
 @end
 

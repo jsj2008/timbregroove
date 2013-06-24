@@ -56,10 +56,11 @@ vec4 l_diffuse;
 varying vec4 v_vertexPosition;
 varying vec3 v_vertexNormal;
 
-void pointLight(const in Light light,
-				inout vec4 ambient,
-				inout vec4 diffuse,
-				inout vec4 specular)
+vec4 l_amb;
+vec4 l_diff;
+vec4 l_spec;
+
+void pointLight(const in Light light)
 {
 	float nDotVP;
 	float eDotRV;
@@ -103,10 +104,10 @@ void pointLight(const in Light light,
 	// angle between normal and light-vertex vector
 	nDotVP = max(0.0, dot(VP, l_normal));
 	
- 	ambient += light.colors[CI_Ambient] * attenuation;
+ 	l_amb += light.colors[CI_Ambient] * attenuation;
     
 	if (nDotVP > 0.0) {
-		diffuse += light.colors[CI_Diffuse] * (nDotVP * attenuation);
+		l_diff += light.colors[CI_Diffuse] * (nDotVP * attenuation);
         
 		if (u_doSpecular) {
 			// reflected vector
@@ -117,16 +118,24 @@ void pointLight(const in Light light,
 			eDotRV = pow(eDotRV, 16.0);
             
 			pf = pow(eDotRV, u_shininess);
-			specular += light.colors[CI_Specular] * (pf * attenuation);
+			l_spec += light.colors[CI_Specular] * (pf * attenuation);
 		}
 	}
+    
+    l_color.rgb = (u_material[CI_Ambient].rgb + l_amb.rgb) * u_material[CI_Ambient].rgb
+                     + (l_diff.rgb * l_diffuse.rgb);
+    
+    l_color.a   = l_diffuse.a;
+    
+    l_color    = clamp(l_color, 0.0, 1.0);
+    l_specular = vec4( l_spec.rgb * u_material[CI_Specular].rgb, u_material[CI_Specular].a );
 }
 
 void doLighting()
 {
-	vec4 amb = vec4(0.0);
-	vec4 diff = vec4(0.0);
-	vec4 spec = vec4(0.0);
+	l_amb = vec4(0.0);
+	l_diff = vec4(0.0);
+	l_spec = vec4(0.0);
     
 	if( u_lightsEnabled > 0 )
     {
@@ -138,20 +147,14 @@ void doLighting()
 		l_eye          = -normalize(l_ecPosition3);
 		l_normal       = normalize( normalMat * v_vertexNormal );
         
-        for( int i = 0; i < u_lightsEnabled; i++ )
-            pointLight( u_lights[i], amb, diff, spec );
+        pointLight( u_lights[0] );
         
-		l_color.rgb = (u_material[CI_Ambient].rgb + amb.rgb) * u_material[CI_Ambient].rgb +
-                          (diff.rgb * l_diffuse.rgb);
-        
-		l_color.a   = l_diffuse.a;
-		
-		l_color    = clamp(l_color, 0.0, 1.0);
-		l_specular = vec4( spec.rgb * u_material[CI_Specular].rgb, u_material[CI_Specular].a );
+        if( u_lightsEnabled > 1 )
+            pointLight( u_lights[1] );
         
 	} else {
 		l_color = l_diffuse;
-		l_specular = spec;
+		l_specular = l_spec;
 	}
 }
 
@@ -165,7 +168,7 @@ uniform float u_time;
 
 void main()
 {
-    vec4 color = vec4(0.5);
+    vec4 color = vec4(0.5,1.0,1.0,1.0);
 #ifdef NORMAL
     l_diffuse = u_material[ CI_Diffuse ];
 #endif

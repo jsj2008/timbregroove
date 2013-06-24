@@ -53,6 +53,7 @@ static inline VertexStride * StrideInit1f(VertexStride * s)
 @property (nonatomic) bool        drawable;
 @property (nonatomic) GLuint      vertextBufferId;
 @property (nonatomic) GLuint      indexBufferId;
+@property (nonatomic) GLuint      vbaId;
 
 +(GLsizei)calcDataSize: (VertexStride *)strides
           countStrides: (unsigned int)countStrides
@@ -82,6 +83,7 @@ static inline VertexStride * StrideInit1f(VertexStride * s)
 
 // TODO: this probably belongs somewhere else
 -(bool)bindToTempLocation:(GLuint)location;
+-(void)bindToTempLocationVBA:(GLuint)location;
 
 @end
 

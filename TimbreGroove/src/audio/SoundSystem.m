@@ -145,7 +145,6 @@ OSStatus renderCallback(
         _midi = [[Midi alloc] init];
         _cbContext.rbo = 0;
         _instruments = [NSMutableArray new];
-
         [self setupAVSession];
         [self setupAUGraph];
         [self startGraph];

@@ -34,7 +34,10 @@ NSString * stringFromColor(GLKVector4 c)
     TGLogp(LLMeshImporter, @"#define  %@_import_geo_included\n",baseName);
 
 
-    NSRegularExpression * regex = [[NSRegularExpression alloc] initWithPattern:@"[^a-zA-Z0-9]" options:0 error:nil];
+    static NSRegularExpression * regex;
+    
+    if( !regex )
+        regex = [[NSRegularExpression alloc] initWithPattern:@"[^a-zA-Z0-9]" options:0 error:nil];
     
     NSString * (^cleanName)(NSString *) = ^NSString *(NSString * name)
     {

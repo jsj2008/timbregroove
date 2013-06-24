@@ -153,7 +153,7 @@ AnimationClip boxFlipClip = {
     [lights addLight:light];
 #endif
     
-    self.lights = lights;
+   self.lights = lights;
 }
 
 

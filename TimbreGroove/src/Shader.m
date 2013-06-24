@@ -18,6 +18,7 @@ static NSHashTable * __shaders;
 
 - (void)use
 {
+#define CACHE_PROGRAM 1
 #ifdef CACHE_PROGRAM
     // TODO: does this work?
     static GLuint __lastProg = (GLuint)-1;

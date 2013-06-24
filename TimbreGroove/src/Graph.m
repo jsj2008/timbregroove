@@ -239,7 +239,7 @@ typedef void (^RecurseBlock)(Node3d *);
         _currentTriggers->_updateTrigger(dt);
 
     if( _currentTriggers->_tickTrigger )
-        _currentTriggers->_updateTrigger(dt / 1000.0);
+        _currentTriggers->_tickTrigger(dt / 1000.0);
     
     static RecurseBlock updateBlock;
     

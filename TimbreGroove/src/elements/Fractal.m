@@ -74,7 +74,7 @@
     glUniform1f( _u_blendLocation, _blend);
     glUniform2f(_u_viewportSizeLocation, (GLfloat)w, (GLfloat)h);
     glUniform4fv(_u_backColorLocation, 1, _backColor.v);
-    [_buffer bindToTempLocation:_u_posLocation];
+    [_buffer bindToTempLocationVBA:_u_posLocation];
     [_buffer draw];
     [_buffer unbind];
 }

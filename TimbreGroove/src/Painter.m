@@ -218,6 +218,8 @@ NSString const * kShaderFeatureDistortTexture  = @"#define TEXTURE_DISTORT\n";
 
     if( _buffers )
     {
+        glCullFace(GL_BACK);
+        
         for(MeshBuffer * b in _buffers )
         {
             [b bind];

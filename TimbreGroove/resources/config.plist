@@ -189,7 +189,7 @@
 			<key>3d_element</key>
 			<string>box</string>
 			<key>audio_element</key>
-			<string>synth_01</string>
+			<string>Audio</string>
 		</dict>
 		<key>fractal</key>
 		<dict>

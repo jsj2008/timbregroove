@@ -26,9 +26,12 @@
 static NSArray * cleanAndSeparateString( NSString * str )
 {
     NSError *error = NULL;    
-    NSRegularExpression * regex = [[NSRegularExpression alloc] initWithPattern:@"[^\\S]+"
-                                                                       options:NSRegularExpressionAllowCommentsAndWhitespace
-                                                                         error:&error];
+    static NSRegularExpression * regex;
+    
+    if( !regex )
+        regex = [[NSRegularExpression alloc] initWithPattern:@"[^\\S]+"
+                                                     options:NSRegularExpressionAllowCommentsAndWhitespace
+                                                       error:&error];
 
     str = [str stringByTrimmingCharactersInSet:
            [NSCharacterSet whitespaceAndNewlineCharacterSet]];

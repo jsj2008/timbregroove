@@ -69,13 +69,15 @@
 -(void)loadAudioFromConfig:(ConfigAudioProfile *)config
 {
     NSMutableArray * soundSources = [NSMutableArray new];
+#ifndef TG_DISABLE_AUIO
     for( ConfigInstrument * iconfig in config.instruments )
         [soundSources addObject:[_soundSystem loadInstrumentFromConfig:iconfig]];
     for( ConfigToneGenerator * tgconfig in config.generators )
         [soundSources addObject:[_soundSystem loadToneGeneratorFromConfig:tgconfig]];
-    _soundSources = soundSources;
     _myTriggerMap = config.connections;
     _midiFileName = config.midiFile;
+#endif
+    _soundSources = soundSources;
 }
 
 -(UInt32)channelFromName:(NSString *)name
