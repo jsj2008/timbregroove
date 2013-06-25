@@ -257,6 +257,7 @@ typedef enum EffectParamTags {
 @end
 
 @interface IncomingAnimationSource : NSObject {
+@public
     float *          _floats;
     unsigned int     _count;
     NSMutableArray * _names;

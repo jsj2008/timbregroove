@@ -373,12 +373,35 @@ static const char * effectParamTags[] = {
             return;
         }
         
+        if( EQSTR(elementName, kTag_sampler) )
+        {
+            SET(kColStateSampler);
+            return;
+        }
+        
+        if( CHECK(kColStateSampler) )
+        {
+            if( EQSTR(elementName, kTag_input) )
+            {
+                if( !ia->_samplerDict )
+                    ia->_samplerDict = [NSMutableDictionary new];
+                ia->_samplerDict[ attributeDict[ kAttr_semantic ] ] = attributeDict[ kAttr_source ];
+            }
+            return;
+        }
+        
         if( CHECK(kColStateInSource) )
         {
             if( EQSTR(elementName,kTag_float_array) )
             {
                 _floatArrayCount = scanInt(attributeDict[kAttr_count]);
                 SET(kColStateFloatArray);
+                return;
+            }
+            
+            if( EQSTR(elementName, kTag_Name_array) )
+            {
+                SET(kColStateStringArray);
                 return;
             }
             
@@ -397,36 +420,52 @@ static const char * effectParamTags[] = {
     }
     else
     {
+        if( CHECK(kColStateSampler) )
+        {
+            UNSET(kColStateSampler);
+            return;
+        }
+        
         if( EQSTR(elementName,kTag_source) )
         {
-            if( EQSTR(ia->_paramName,kValue_name_TIME) )
-            {
-                ia->_animation->_keyFrames = copyFloats(_tempFloatArray, _floatArrayCount);
-                ia->_animation->_numFrames = _floatArrayCount;
-                
-                _tempFloatArray = NULL;
-                _floatArrayCount = 0;
-            }
-            if( EQSTR(ia->_paramType,kValue_type_float4x4) )
-            {
-                if( !ia->_paramName )
-                    ia->_paramName = kValue_name_TRANSFORM;
-                
-                {
-                    unsigned int numMatrices = _floatArrayCount / 16;
-                    GLKMatrix4 * mats = (GLKMatrix4 *)copyFloats(_tempFloatArray, _floatArrayCount);
-                    for( unsigned int i = 0; i < numMatrices; i++ )
-                        mats[i] = GLKMatrix4Transpose(mats[i]);
-                    ia->_animation->_transforms = mats;
-                }
-                _tempFloatArray = NULL;
-                _floatArrayCount = 0;
-            }
-            
-            UNSET(kColStateInSource);
         }
         
     }
+}
+
+-(void)assembleAnimation
+{
+    IncomingAnimation * ia = _incoming;
+    if( ia->_channelTarget )
+        _animDict[ia->_channelTarget] = ia->_animation;
+    if( EQSTR(ia->_paramName,kValue_name_TIME) )
+    {
+        ia->_animation->_keyFrames = copyFloats(_tempFloatArray, _floatArrayCount);
+        ia->_animation->_numFrames = _floatArrayCount;
+        
+        _tempFloatArray = NULL;
+        _floatArrayCount = 0;
+    }
+    if( EQSTR(ia->_paramType,kValue_type_float4x4) )
+    {
+        if( !ia->_paramName )
+            ia->_paramName = kValue_name_TRANSFORM;
+        
+        {
+            unsigned int numMatrices = _floatArrayCount / 16;
+            GLKMatrix4 * mats = (GLKMatrix4 *)copyFloats(_tempFloatArray, _floatArrayCount);
+            for( unsigned int i = 0; i < numMatrices; i++ )
+                mats[i] = GLKMatrix4Transpose(mats[i]);
+            ia->_animation->_transforms = mats;
+        }
+        _tempFloatArray = NULL;
+        _floatArrayCount = 0;
+    }
+    
+    UNSET(kColStateInSource);
+    _incoming = nil;
+    _incoming2 = nil;
+    UNSET(kColStateInAnimation);
 }
 
 -(void)handleAnimation2:(NSString *)elementName
@@ -498,7 +537,7 @@ static const char * effectParamTags[] = {
     }
 }
 
--(void)assembleAnimation
+-(void)assembleAnimation2
 {
     IncomingAnimation * ia = _incoming;
     if( ia->_channelTarget )
