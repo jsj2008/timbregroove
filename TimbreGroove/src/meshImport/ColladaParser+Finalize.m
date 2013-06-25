@@ -563,7 +563,7 @@ extern NSString * const kValue_name_WEIGHT;
             for( NSString * jointName in jointNameArray )
             {
                 MeshSceneArmatureNode * joint = findJointWithName(jointName,nil);
-                TGLog(LLMeshImporter, @"Imported joint: %@", jointName);
+                TGLog(LLMeshImporter, @"Imported joint: %@ (%@)", jointName, joint->_name);
                 [influencingJoints addObject:joint];
             }
             

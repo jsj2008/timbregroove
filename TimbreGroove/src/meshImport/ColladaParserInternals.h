@@ -250,9 +250,19 @@ typedef enum EffectParamTags {
     NSString * _paramName;
     NSString * _id;
     NSString * _name;
+    
+    NSMutableDictionary * _sourceDict;
+    NSMutableDictionary * _samplerDict;    
 }
 @end
 
+@interface IncomingAnimationSource : NSObject {
+    float *          _floats;
+    unsigned int     _count;
+    NSMutableArray * _names;
+}
+
+@end
 
 typedef enum _ColladaTagState
 {
@@ -269,6 +279,7 @@ typedef enum _ColladaTagState
     kColStateSkin             = 1 << 12,
     kColStateVisualScene      = 1 << 13,
     kColStateImageLibrary     = 1 << 14,
+    kColStateSampler          = 1 << 15,
     
     kColStateImage            = 1 << 17,
     kColStateInSource         = 1 << 18,

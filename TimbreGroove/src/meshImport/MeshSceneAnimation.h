@@ -12,13 +12,31 @@
 @class MeshSceneArmatureNode;
 @class MeshImportPainter;
 
+typedef struct _AnimationBezierSpec
+{
+    float * input; // timing
+    float * output; // target value
+    float * out_tangent; // control point 0
+    float * in_tangent; //  control point 1 (at index+1)
+} AnimationBezierSpec;
+
+typedef enum _AnimationType {
+    AT_baked,
+    AT_bezier
+} AnimationType;
+
 @interface MeshAnimation : NSObject {
 @public
+    AnimationType   _type;
     float *         _keyFrames;
     int             _numFrames;
     GLKMatrix4 *    _transforms;
     
-    // block?
+    AnimationBezierSpec _specX;
+    AnimationBezierSpec _specY;
+    AnimationBezierSpec _specZ;
+    float * _bezBuffer;
+    
     MeshSceneNode * _target;
     NSString *      _property;
 }
@@ -53,7 +71,6 @@ typedef struct _AnimationClip {
     NSUInteger numPaths;
 } AnimationClip;
 
-
 @interface Animation : NSObject
 +(id)withClip:(AnimationClip *)clip
     jointDict:(id<JointDictionary>)jointDict
@@ -65,6 +82,7 @@ typedef struct _AnimationClip {
 -(void)scrub:(float)scrubPercent; // -0.1 <-> 0.1
 -(void)reset;
 @end
+
 
 @interface AnimationDictionary : NSObject
 -(void)addClip:(Animation *)animation;

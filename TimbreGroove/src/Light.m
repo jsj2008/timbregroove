@@ -12,7 +12,7 @@
 #import "Parameter.h"
 #import "Names.h"
 
-#define TLOG_POS_(logmode) { GLKVector4 v4 = [self positionLight]; TGLog(LLLights, @"Light position: { %f, %f, %f } (%f)", v4.x, v4.y, v4.z, v4.w); }
+#define TLOG_POS_(logmode) { GLKVector4 v4 = [self positionLight]; TGLog(LLLights, @"Light[%d] position: { %f, %f, %f } (%.2f)", _lightNumber, v4.x, v4.y, v4.z, v4.w); }
 
 #define TLOG_POS TLOG_POS_(LLLights)
 
@@ -121,10 +121,6 @@
 
 -(void)bind:(Shader *)shader object:(Painter *)object
 {
-    GLKMatrix4 mv = object.modelView;
-    GLKMatrix3 normalMat = GLKMatrix3InvertAndTranspose(GLKMatrix4GetMatrix3(mv), NULL);
-    [shader writeToLocation:gv_normalMat type:TG_MATRIX3 data:normalMat.m];
-    
     int offset = LIGHT_STRUCT_NUM_ELEMENTS * _lightNumber;
     
     GLKVector4 vec4 = [self positionLight];
@@ -143,7 +139,7 @@
 -(void)unbind:(Shader *)shader {}
 
 #define RAD_TURNS(f) (f * (M_PI / 180))
-#define POS_MASSAGE(f) (f * 0.6)
+#define POS_MASSAGE(f) (f * 1.2)
 
 -(void)getParameters:(NSMutableDictionary *)parameters
 {
@@ -237,14 +233,20 @@
 
 -(void)bind:(Shader *)shader object:(id)object
 {
+    int numLights = [_lights count];
+    [shader writeToLocation:gv_lightsEnabled type:TG_INT data:&numLights];
+    
+    if( !numLights )
+        return;
+    
     for( Light * light in _lights )
         [light bind:shader object:object];
     
     GLKMatrix4 mvm = ((Node3d *)object).modelView;
-    [shader writeToLocation:gv_mvm type:TG_MATRIX4 data:mvm.m];
+    GLKMatrix3 normalMat = GLKMatrix3InvertAndTranspose(GLKMatrix4GetMatrix3(mvm), NULL);
+    [shader writeToLocation:gv_normalMat type:TG_MATRIX3 data:normalMat.m];    
+    [shader writeToLocation:gv_mvm       type:TG_MATRIX4 data:mvm.m];
     
-    int numLights = [_lights count];
-    [shader writeToLocation:gv_lightsEnabled type:TG_INT data:&numLights];
 }
 
 -(void)unbind:(Shader *)shader {}

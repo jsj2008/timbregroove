@@ -104,6 +104,14 @@ static int scanInt(NSString * str)
 
 @end
 
+@implementation IncomingAnimationSource
+-(void)dealloc
+{
+    if( _floats )
+        free(_floats);
+}
+@end
+
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  IncomingTriangleTag @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 @implementation IncomingPolygonIndex
@@ -207,12 +215,24 @@ static int scanInt(NSString * str)
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  IncomingNodeTree @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 @implementation IncomingNode
+
+-(id)init
+{
+    self = [super init];
+    if( self )
+    {
+        _transform = GLKMatrix4Identity;
+    }
+    return self;
+}
+
 -(void)addChild:(IncomingNode *)child
 {
     if( !_children )
         _children = [NSMutableDictionary new];
     _children[child->_id] = child;
 }
+
 - (void)dealloc
 {
     TGLog(LLObjLifetime, @"%@ released",self);
@@ -284,6 +304,7 @@ static const char * effectParamTags[] = {
 @implementation ColladaParserImpl {
     
     id              _incoming;
+    id              _incoming2;
     
     char            _up;
     
@@ -331,6 +352,85 @@ static const char * effectParamTags[] = {
 
 -(void)handleAnimation:(NSString *)elementName
             attributes:(NSDictionary *)attributeDict
+{
+    IncomingAnimation * ia = _incoming;
+    IncomingAnimationSource * ias = _incoming2;
+    
+    if( attributeDict )
+    {
+        if( EQSTR(elementName, kTag_source) )
+        {
+            ias = [IncomingAnimationSource new];
+            NSString * id = attributeDict[kAttr_id];
+            if( id )
+            {
+                if( !ia->_sourceDict )
+                    ia->_sourceDict = [NSMutableDictionary new];
+                ia->_sourceDict[id] = ias;
+            }
+                
+            SET(kColStateInSource);
+            return;
+        }
+        
+        if( CHECK(kColStateInSource) )
+        {
+            if( EQSTR(elementName,kTag_float_array) )
+            {
+                _floatArrayCount = scanInt(attributeDict[kAttr_count]);
+                SET(kColStateFloatArray);
+                return;
+            }
+            
+            if( EQSTR(elementName,kTag_param) )
+            {
+                ia->_paramName = attributeDict[kAttr_name];
+                ia->_paramType = attributeDict[kAttr_type];
+                return;
+            }
+        }
+        
+        if( EQSTR(elementName,kTag_channel) )
+        {
+            ia->_channelTarget = attributeDict[kAttr_target];
+        }
+    }
+    else
+    {
+        if( EQSTR(elementName,kTag_source) )
+        {
+            if( EQSTR(ia->_paramName,kValue_name_TIME) )
+            {
+                ia->_animation->_keyFrames = copyFloats(_tempFloatArray, _floatArrayCount);
+                ia->_animation->_numFrames = _floatArrayCount;
+                
+                _tempFloatArray = NULL;
+                _floatArrayCount = 0;
+            }
+            if( EQSTR(ia->_paramType,kValue_type_float4x4) )
+            {
+                if( !ia->_paramName )
+                    ia->_paramName = kValue_name_TRANSFORM;
+                
+                {
+                    unsigned int numMatrices = _floatArrayCount / 16;
+                    GLKMatrix4 * mats = (GLKMatrix4 *)copyFloats(_tempFloatArray, _floatArrayCount);
+                    for( unsigned int i = 0; i < numMatrices; i++ )
+                        mats[i] = GLKMatrix4Transpose(mats[i]);
+                    ia->_animation->_transforms = mats;
+                }
+                _tempFloatArray = NULL;
+                _floatArrayCount = 0;
+            }
+            
+            UNSET(kColStateInSource);
+        }
+        
+    }
+}
+
+-(void)handleAnimation2:(NSString *)elementName
+             attributes:(NSDictionary *)attributeDict
 {
     IncomingAnimation * ia = _incoming;
     
@@ -1567,13 +1667,16 @@ parseErrorOccurred:(NSError *)parseError
     NSXMLParser * parser = [[NSXMLParser alloc] initWithData:data];
     
     [parser setDelegate:cParser];
-    bool success = [parser parse]; 
+    bool success = [parser parse];
+    TGLog( LLMeshImporter, @"Mesh parsing done" );
     if( success )
     {
         MeshScene * scene = [cParser finalAssembly];
         scene.fileName = fileBaseName;
+        TGLog( LLMeshImporter, @"Mesh import assembly done");
         return scene;
     }
+    TGLog( LLMeshImporter, @"Mesh import failed");
     return nil;
 }
 

@@ -77,7 +77,8 @@
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  SceneNode(s) @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
-@implementation MeshSceneNode 
+@implementation MeshSceneNode
+
 - (void)dealloc
 {
     TGLog(LLObjLifetime, @"%@ released",self);

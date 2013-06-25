@@ -177,9 +177,9 @@
 					<key>kTriggerPanX</key>
 					<string>Scrub</string>
 					<key>kTriggerPanY2</key>
-					<string>kParamCameraRotationX</string>
+					<string>kParamRotationY</string>
 					<key>kTriggerPanX2</key>
-					<string>kParamLightZ</string>
+					<string>kParamLightX</string>
 				</dict>
 			</array>
 			<key>icon</key>
@@ -637,7 +637,7 @@
 		<key>LLGeometry</key>
 		<false/>
 		<key>LLLights</key>
-		<false/>
+		<true/>
 		<key>LLMeshImporter</key>
 		<false/>
 		<key>LLGestureStuff</key>
@@ -645,17 +645,17 @@
 		<key>LLObjLifetime</key>
 		<false/>
 		<key>LLAudioTweaks</key>
-		<true/>
+		<false/>
 		<key>LLJustSayin</key>
 		<false/>
 		<key>LLGLResource</key>
 		<false/>
 		<key>LLMidiStuff</key>
-		<true/>
+		<false/>
 		<key>LLCaptureOps</key>
 		<false/>
 		<key>LLAudioResource</key>
-		<true/>
+		<false/>
 		<key>LLShaderStuff</key>
 		<false/>
 		<key>LLKindaImportant</key>
